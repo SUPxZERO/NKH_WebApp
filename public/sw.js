@@ -1,0 +1,249 @@
+// Service Worker for NKH Restaurant Management System
+// Provides offline functionality and caching for PWA capabilities
+
+const CACHE_NAME = 'nkh-restaurant-v1';
+const STATIC_CACHE = 'nkh-static-v1';
+const DYNAMIC_CACHE = 'nkh-dynamic-v1';
+
+// Assets to cache immediately
+const STATIC_ASSETS = [
+  '/',
+  '/build/assets/app.css',
+  '/build/assets/app.js',
+  '/favicon.ico',
+  // Add other static assets as needed
+];
+
+// API endpoints to cache
+const API_CACHE_PATTERNS = [
+  /\/api\/menu/,
+  /\/api\/categories/,
+  /\/api\/customer\/profile/,
+];
+
+// Install event - cache static assets
+self.addEventListener('install', (event) => {
+  console.log('[SW] Installing service worker');
+  
+  event.waitUntil(
+    caches.open(STATIC_CACHE)
+      .then((cache) => {
+        console.log('[SW] Caching static assets');
+        return cache.addAll(STATIC_ASSETS);
+      })
+      .then(() => {
+        return self.skipWaiting();
+      })
+  );
+});
+
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating service worker');
+  
+  event.waitUntil(
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+              console.log('[SW] Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        return self.clients.claim();
+      })
+  );
+});
+
+// Fetch event - serve from cache, fallback to network
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Handle API requests
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(handleApiRequest(request));
+    return;
+  }
+
+  // Handle static assets
+  if (isStaticAsset(request)) {
+    event.respondWith(handleStaticAsset(request));
+    return;
+  }
+
+  // Handle navigation requests (SPA routing)
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigation(request));
+    return;
+  }
+
+  // Default: network first, cache fallback
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE)
+            .then((cache) => cache.put(request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(request);
+      })
+  );
+});
+
+// Handle API requests - cache-first for read-only endpoints
+async function handleApiRequest(request) {
+  const url = new URL(request.url);
+  const shouldCache = API_CACHE_PATTERNS.some(pattern => pattern.test(url.pathname));
+
+  if (shouldCache) {
+    // Cache-first strategy for menu, categories, etc.
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      // Serve from cache, update in background
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            caches.open(DYNAMIC_CACHE)
+              .then((cache) => cache.put(request, response.clone()));
+          }
+        })
+        .catch(() => {});
+      
+      return cachedResponse;
+    }
+  }
+
+  // Network-first for other API requests
+  try {
+    const response = await fetch(request);
+    if (response.ok && shouldCache) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Return offline fallback for API requests
+    return new Response(
+      JSON.stringify({ 
+        error: 'Offline', 
+        message: 'You are currently offline. Some features may not be available.' 
+      }),
+      {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+}
+
+// Handle static assets - cache-first
+async function handleStaticAsset(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    return new Response('Asset not available offline', { status: 503 });
+  }
+}
+
+// Handle navigation requests - serve app shell
+async function handleNavigation(request) {
+  try {
+    const response = await fetch(request);
+    return response;
+  } catch (error) {
+    // Serve cached app shell for offline navigation
+    const cachedResponse = await caches.match('/');
+    return cachedResponse || new Response('Offline', { status: 503 });
+  }
+}
+
+// Check if request is for a static asset
+function isStaticAsset(request) {
+  const url = new URL(request.url);
+  return url.pathname.startsWith('/build/') || 
+         url.pathname.includes('.css') || 
+         url.pathname.includes('.js') ||
+         url.pathname.includes('.ico') ||
+         url.pathname.includes('.png') ||
+         url.pathname.includes('.jpg') ||
+         url.pathname.includes('.svg');
+}
+
+// Background sync for failed requests
+self.addEventListener('sync', (event) => {
+  console.log('[SW] Background sync:', event.tag);
+  
+  if (event.tag === 'order-sync') {
+    event.waitUntil(syncFailedOrders());
+  }
+});
+
+// Sync failed orders when back online
+async function syncFailedOrders() {
+  try {
+    // Get failed orders from IndexedDB or localStorage
+    // Retry sending them to the server
+    console.log('[SW] Syncing failed orders...');
+  } catch (error) {
+    console.error('[SW] Failed to sync orders:', error);
+  }
+}
+
+// Push notifications
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  const data = event.data.json();
+  const options = {
+    body: data.body,
+    icon: '/favicon.ico',
+    badge: '/favicon.ico',
+    data: data.data,
+    actions: data.actions || []
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Notification click handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const data = event.notification.data;
+  if (data && data.url) {
+    event.waitUntil(
+      clients.openWindow(data.url)
+    );
+  }
+});

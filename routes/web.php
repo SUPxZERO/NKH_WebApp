@@ -10,10 +10,12 @@ Route::redirect('/', '/');
 
 // Customer routes
 Route::get('/', fn () => Inertia::render('app/routes/customer/Home'))->name('customer.home');
+Route::get('/dashboard', fn () => Inertia::render('app/routes/customer/Dashboard'))->middleware('auth')->name('customer.dashboard');
 Route::get('/menu', fn () => Inertia::render('app/routes/customer/Menu'))->name('customer.menu');
 Route::get('/cart', fn () => Inertia::render('app/routes/customer/Cart'))->name('customer.cart');
 Route::get('/checkout', fn () => Inertia::render('app/routes/customer/Checkout'))->name('customer.checkout');
 Route::get('/orders/{order}', fn () => Inertia::render('app/routes/customer/OrderDetail'))->name('customer.order.detail');
+Route::get('/track/{orderId}', fn () => Inertia::render('app/routes/customer/OrderTracking'))->name('customer.order.track');
 
 // Auth routes (if you're not using the default auth scaffolding)
 Route::get('/login', fn () => Inertia::render('app/routes/auth/SignIn'))->name('login');
