@@ -22,8 +22,8 @@ export default function ForgotPassword() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
     getValues,
+    formState: { errors },
   } = useForm<ForgotPasswordForm>({
     resolver: zodResolver(forgotPasswordSchema),
   });

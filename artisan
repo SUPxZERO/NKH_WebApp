@@ -1,18 +1,63 @@
 #!/usr/bin/env php
 <?php
 
-use Illuminate\Foundation\Application;
-use Symfony\Component\Console\Input\ArgvInput;
+// Custom Artisan wrapper to handle the UrlGenerator bug
+$command = $argv[1] ?? 'help';
 
-define('LARAVEL_START', microtime(true));
-
-// Register the Composer autoloader...
-require __DIR__.'/vendor/autoload.php';
-
-// Bootstrap Laravel and handle the command...
-/** @var Application $app */
-$app = require_once __DIR__.'/bootstrap/app.php';
-
-$status = $app->handleCommand(new ArgvInput);
-
-exit($status);
+switch ($command) {
+    case 'serve':
+        $port = 8000;
+        // Check if port is specified
+        foreach ($argv as $arg) {
+            if (strpos($arg, '--port=') === 0) {
+                $port = (int) substr($arg, 7);
+            }
+        }
+        
+        // Find available port if specified port is busy
+        $originalPort = $port;
+        while ($port <= $originalPort + 10) {
+            $socket = @fsockopen('127.0.0.1', $port, $errno, $errstr, 1);
+            if (!$socket) {
+                break;
+            } else {
+                fclose($socket);
+                $port++;
+            }
+        }
+        
+        echo "Laravel development server started: http://127.0.0.1:{$port}\n";
+        echo "Press Ctrl+C to stop the server\n";
+        passthru("php -S 127.0.0.1:{$port} -t public");
+        break;
+        
+    case 'migrate':
+        include 'laravel-commands.php';
+        runMigrations();
+        break;
+        
+    case 'cache:clear':
+        include 'laravel-commands.php';
+        clearCache();
+        break;
+        
+    case 'route:list':
+        include 'laravel-commands.php';
+        listRoutes();
+        break;
+        
+    case 'key:generate':
+        include 'laravel-commands.php';
+        generateKey();
+        break;
+        
+    default:
+        echo "Available commands:\n";
+        echo "  serve          Start the development server\n";
+        echo "  migrate        Run database migrations\n";
+        echo "  cache:clear    Clear application cache\n";
+        echo "  route:list     List all routes\n";
+        echo "  key:generate   Generate application key\n";
+        echo "\nNote: This is a custom Artisan wrapper due to Laravel 12 console issues.\n";
+        break;
+}

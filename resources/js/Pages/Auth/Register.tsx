@@ -50,7 +50,21 @@ const adminSchema = z.object({
 type CustomerForm = z.infer<typeof customerSchema>;
 type EmployeeForm = z.infer<typeof employeeSchema>;
 type AdminForm = z.infer<typeof adminSchema>;
-type RegisterForm = CustomerForm | EmployeeForm | AdminForm;
+
+// Combined form type with all possible fields
+type RegisterForm = {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  role: 'customer' | 'employee' | 'admin';
+  terms: boolean;
+  phone: string;
+  employee_id?: string;
+  department?: string;
+  admin_code?: string;
+  restaurant_location?: string;
+};
 
 const roleConfig = {
   customer: {

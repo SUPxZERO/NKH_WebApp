@@ -34,6 +34,7 @@ export default function ResetPassword() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -74,7 +75,8 @@ export default function ResetPassword() {
     return strength;
   };
 
-  const passwordStrength = getPasswordStrength(register('password').value || '');
+  const passwordValue = watch('password') || '';
+  const passwordStrength = getPasswordStrength(passwordValue);
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
   const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
 
@@ -151,7 +153,7 @@ export default function ResetPassword() {
               />
               
               {/* Password Strength Indicator */}
-              {register('password').value && (
+              {passwordValue && (
                 <div className="mt-2">
                   <div className="flex gap-1 mb-1">
                     {[...Array(5)].map((_, i) => (
