@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { MenuItem } from '@/app/types/domain';
-import { RestaurantButton } from '@/components/ui/RestaurantButton';
+import { RestaurantButton } from '@/Components/ui/RestaurantButton';
 import { animationVariants } from '@/design-system/animations';
 
 export type FoodCardVariant = 'grid' | 'list' | 'featured' | 'special' | 'compact';
