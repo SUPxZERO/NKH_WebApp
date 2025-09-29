@@ -49,6 +49,9 @@ export function EnhancedButton({
   onDrag,
   onDragStart,
   onDragEnd,
+  onAnimationStart,
+  onAnimationEnd,
+  onTransitionEnd,
   ...props
 }: EnhancedButtonProps) {
   
@@ -98,7 +101,7 @@ export function EnhancedButton({
       )}
       disabled={disabled || loading}
       onClick={handleClick}
-      {...props}
+      {...(props as any)}
     >
       {/* Animated background for gradient buttons */}
       {(variant === 'gradient' || variant === 'neon') && (
