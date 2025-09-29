@@ -96,8 +96,9 @@ export interface Order {
   employee_id?: number | null;
   order_number: string;
   type: 'dine_in' | 'takeaway' | 'delivery';
+  mode?: 'delivery' | 'pickup' | 'dine-in';
   order_type?: string | null;
-  status: 'pending' | 'received' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'received' | 'preparing' | 'ready' | 'completed' | 'cancelled' | 'delivered';
   payment_status: 'unpaid' | 'paid' | 'refunded';
   subtotal: number;
   tax_total: number;
