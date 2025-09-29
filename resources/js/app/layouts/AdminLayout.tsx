@@ -13,9 +13,11 @@ type Props = { children: React.ReactNode };
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Categories', href: '/admin/categories', icon: ShoppingBag },
+  { name: 'Menu Items', href: '/admin/menu-items', icon: ChefHat },
   { name: 'Sub Categories', href: '/admin/sub-categories', icon: ShoppingBag },
   { name: 'Employees', href: '/admin/employees', icon: Users },
   { name: 'Customers', href: '/admin/customers', icon: Users },
+  { name: 'Orders', href: '/admin/orders', icon: FileText },
   { name: 'Expenses', href: '/admin/expenses', icon: FileText },
   { name: 'Floors', href: '/admin/floors', icon: MapPin },
   { name: 'Tables', href: '/admin/tables', icon: MapPin },

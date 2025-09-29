@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\CustomerRequestController;
+use App\Http\Controllers\Api\PositionController;
+use App\Http\Controllers\Api\LocationController;
 
 // Public endpoints
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,6 +34,10 @@ Route::get('/time-slots', [OnlineOrderController::class, 'timeSlots']);
 // New public menu route
 Route::get('/menu', [MenuItemController::class, 'index']);
 
+// Public reference data
+Route::get('/positions', [PositionController::class, 'index']);
+Route::get('/locations', [LocationController::class, 'index']);
+
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -42,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->middleware('role:admin,manager')->group(function () {
         // Categories
         Route::apiResource('categories', CategoryController::class);
+        // Menu Items
+        Route::apiResource('menu-items', MenuItemController::class);
         // SubCategories
         Route::apiResource('sub-categories', SubCategoryController::class);
         // Employees

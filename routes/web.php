@@ -42,14 +42,21 @@ Route::get('/register', fn () => Inertia::render('Auth/Register'))->name('regist
 Route::prefix('admin')->group(function () {
     Route::get('dashboard', fn () => Inertia::render('admin/Dashboard'))->name('admin.dashboard');
     Route::get('categories', fn () => Inertia::render('admin/Categories'))->name('admin.categories');
+    Route::get('menu-items', fn () => Inertia::render('admin/MenuItems'))->name('admin.menu-items');
     Route::get('sub-categories', fn () => Inertia::render('admin/SubCategories'))->name('admin.sub-categories');
     Route::get('employees', fn () => Inertia::render('admin/Employees'))->name('admin.employees');
     Route::get('customers', fn () => Inertia::render('admin/Customers'))->name('admin.customers');
+    Route::get('orders', fn () => Inertia::render('admin/Orders'))->name('admin.orders');
     Route::get('expenses', fn () => Inertia::render('admin/Expenses'))->name('admin.expenses');
     Route::get('floors', fn () => Inertia::render('admin/Floors'))->name('admin.floors');
     Route::get('tables', fn () => Inertia::render('admin/Tables'))->name('admin.tables');
     Route::get('invoices', fn () => Inertia::render('admin/Invoices'))->name('admin.invoices');
     Route::get('reservations', fn () => Inertia::render('admin/Reservations'))->name('admin.reservations');
+    Route::get('inventory', fn () => Inertia::render('admin/Inventory'))->name('admin.inventory');
+    Route::get('loyalty-points', fn () => Inertia::render('admin/LoyaltyPoints'))->name('admin.loyalty-points');
+    Route::get('promotions', fn () => Inertia::render('admin/Promotions'))->name('admin.promotions');
+    Route::get('notifications', fn () => Inertia::render('admin/Notifications'))->name('admin.notifications');
+    Route::get('audit-logs', fn () => Inertia::render('admin/AuditLogs'))->name('admin.audit-logs');
     Route::get('settings', fn () => Inertia::render('admin/Settings'))->name('admin.settings');
     Route::get('customer-requests', fn () => Inertia::render('admin/CustomerRequests'))->name('admin.customer-requests');
 });
