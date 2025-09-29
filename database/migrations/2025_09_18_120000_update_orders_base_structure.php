@@ -69,6 +69,8 @@ return new class extends Migration
             $driver = $connection->getDriverName();
 
             $shouldCreate = true;
+
+            // MySQL: check information_schema for an existing index that covers the two columns.
             if ($driver === 'mysql') {
                 $dbName = $connection->getDatabaseName();
                 // Check for an index whose ordered columns match 'location_id,order_number'
@@ -85,6 +87,44 @@ return new class extends Migration
                     if ($exists2 && $exists2->cnt > 0) {
                         $shouldCreate = false;
                     }
+                }
+            }
+
+            // SQLite: inspect PRAGMA index_list and PRAGMA index_info to detect an existing index
+            if ($driver === 'sqlite') {
+                try {
+                    $indexes = DB::select("PRAGMA index_list('orders')");
+                    foreach ($indexes as $idx) {
+                        // index name might be in 'name' or '"name"' depending on driver; normalize
+                        $indexName = is_object($idx) ? ($idx->name ?? $idx->Name ?? null) : null;
+                        if (! $indexName) {
+                            // Some drivers return associative arrays
+                            $indexArr = (array) $idx;
+                            $indexName = $indexArr['name'] ?? $indexArr['Name'] ?? null;
+                        }
+
+                        if (! $indexName) {
+                            continue;
+                        }
+
+                        // If the index has the Laravel default name, avoid creating it
+                        if ($indexName === 'orders_location_id_order_number_unique') {
+                            $shouldCreate = false;
+                            break;
+                        }
+
+                        // Otherwise inspect the indexed columns for a match
+                        $cols = DB::select("PRAGMA index_info('".$indexName."')");
+                        $colNames = array_map(function ($c) { return is_object($c) ? ($c->name ?? $c->Name ?? null) : ($c['name'] ?? $c['Name'] ?? null); }, $cols);
+                        $colNames = array_values(array_filter($colNames));
+
+                        if ($colNames === ['location_id', 'order_number'] || $colNames === ['order_number','location_id']) {
+                            $shouldCreate = false;
+                            break;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    // If any PRAGMA inspection fails for some reason, fall back to attempting creation.
                 }
             }
 
