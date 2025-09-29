@@ -25,8 +25,8 @@ import {
 } from 'lucide-react';
 import { Link, usePage } from '@inertiajs/react';
 import { cn } from '@/app/utils/cn';
-import { RestaurantButton } from '@/components/ui/RestaurantButton';
-import { RestaurantCard } from '@/components/ui/RestaurantCard';
+import { RestaurantButton } from '@/Components/ui/RestaurantButton';
+import { RestaurantCard } from '@/Components/ui/RestaurantCard';
 import { animationVariants } from '@/design-system/animations';
 
 export type UserRole = 'admin' | 'manager' | 'chef' | 'waiter' | 'customer';
