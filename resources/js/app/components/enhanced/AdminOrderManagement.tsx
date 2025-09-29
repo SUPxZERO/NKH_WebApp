@@ -24,11 +24,6 @@ import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 
 interface OrderWithDetails extends Order {
-  customer: {
-    name: string;
-    phone: string;
-    email: string;
-  };
   delivery_address?: {
     street: string;
     city: string;
@@ -94,8 +89,8 @@ export function AdminOrderManagement() {
   const filteredOrders = orders.filter(order => {
     const matchesSearch = !searchTerm || 
       order.id.toString().includes(searchTerm) ||
-      order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer.phone.includes(searchTerm);
+      order.customer?.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.user?.phone?.includes(searchTerm);
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     
@@ -191,12 +186,12 @@ export function AdminOrderManagement() {
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm">{order.customer.name}</span>
+                      <span className="text-sm">{order.customer?.user?.name}</span>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <Phone className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm">{order.customer.phone}</span>
+                      <span className="text-sm">{order.customer?.user?.phone}</span>
                     </div>
                     
                     {order.mode === 'delivery' && order.delivery_address && (
@@ -316,11 +311,11 @@ export function AdminOrderManagement() {
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-gray-400" />
-                    <span>{selectedOrder.customer.name}</span>
+                    <span>{selectedOrder.customer?.user?.name}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-gray-400" />
-                    <span>{selectedOrder.customer.phone}</span>
+                    <span>{selectedOrder.customer?.user?.phone}</span>
                   </div>
                   {selectedOrder.delivery_address && (
                     <div className="flex items-start gap-3">

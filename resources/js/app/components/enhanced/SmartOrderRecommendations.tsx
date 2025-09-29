@@ -17,13 +17,17 @@ import { apiGet } from '@/app/libs/apiClient';
 import { MenuItem, ApiResponse } from '@/app/types/domain';
 import { useCartStore } from '@/app/store/cart';
 
+interface MockMenuItem extends MenuItem {
+  orders_count?: number;
+}
+
 interface RecommendationCategory {
   id: string;
   title: string;
   description: string;
   icon: React.ReactNode;
   color: string;
-  items: MenuItem[];
+  items: MockMenuItem[];
 }
 
 interface SmartRecommendationsProps {
@@ -63,9 +67,9 @@ export function SmartOrderRecommendations({
       icon: <TrendingUp className="w-5 h-5" />,
       color: 'from-orange-500 to-red-500',
       items: [
-        { id: 1, name: 'Margherita Pizza', price: 18.99, image: null, prep_time: 15, rating: 4.8, orders_count: 127 },
-        { id: 2, name: 'Caesar Salad', price: 12.99, image: null, prep_time: 8, rating: 4.6, orders_count: 89 },
-        { id: 3, name: 'Chicken Wings', price: 14.99, image: null, prep_time: 12, rating: 4.7, orders_count: 156 }
+        { id: 1, category_id: 1, name: 'Margherita Pizza', price: 18.99, image_url: null, prep_time: 15, rating: 4.8, orders_count: 127, active: true },
+        { id: 2, category_id: 2, name: 'Caesar Salad', price: 12.99, image_url: null, prep_time: 8, rating: 4.6, orders_count: 89, active: true },
+        { id: 3, category_id: 3, name: 'Chicken Wings', price: 14.99, image_url: null, prep_time: 12, rating: 4.7, orders_count: 156, active: true }
       ]
     },
     {
@@ -75,8 +79,8 @@ export function SmartOrderRecommendations({
       icon: <Sparkles className="w-5 h-5" />,
       color: 'from-fuchsia-500 to-pink-500',
       items: [
-        { id: 4, name: 'Pepperoni Pizza', price: 20.99, image: null, prep_time: 15, rating: 4.9, orders_count: 203 },
-        { id: 5, name: 'Garlic Bread', price: 8.99, image: null, prep_time: 5, rating: 4.5, orders_count: 67 }
+        { id: 4, category_id: 1, name: 'Pepperoni Pizza', price: 20.99, image_url: null, prep_time: 15, rating: 4.9, orders_count: 203, active: true },
+        { id: 5, category_id: 4, name: 'Garlic Bread', price: 8.99, image_url: null, prep_time: 5, rating: 4.5, orders_count: 67, active: true }
       ]
     },
     {
@@ -86,8 +90,8 @@ export function SmartOrderRecommendations({
       icon: <Zap className="w-5 h-5" />,
       color: 'from-emerald-500 to-teal-500',
       items: [
-        { id: 6, name: 'French Fries', price: 6.99, image: null, prep_time: 5, rating: 4.4, orders_count: 234 },
-        { id: 7, name: 'Soft Drink', price: 3.99, image: null, prep_time: 1, rating: 4.2, orders_count: 445 }
+        { id: 6, category_id: 5, name: 'French Fries', price: 6.99, image_url: null, prep_time: 5, rating: 4.4, orders_count: 234, active: true },
+        { id: 7, category_id: 6, name: 'Soft Drink', price: 3.99, image_url: null, prep_time: 1, rating: 4.2, orders_count: 445, active: true }
       ]
     },
     {
@@ -97,23 +101,20 @@ export function SmartOrderRecommendations({
       icon: <Users className="w-5 h-5" />,
       color: 'from-blue-500 to-purple-500',
       items: [
-        { id: 8, name: 'Family Pizza Combo', price: 45.99, image: null, prep_time: 20, rating: 4.8, orders_count: 78 },
-        { id: 9, name: 'Appetizer Platter', price: 28.99, image: null, prep_time: 15, rating: 4.6, orders_count: 92 }
+        { id: 8, category_id: 1, name: 'Family Pizza Combo', price: 45.99, image_url: null, prep_time: 20, rating: 4.8, orders_count: 78, active: true },
+        { id: 9, category_id: 7, name: 'Appetizer Platter', price: 28.99, image_url: null, prep_time: 15, rating: 4.6, orders_count: 92, active: true }
       ]
     }
   ];
-
   const categories = recommendations.length > 0 ? recommendations : mockRecommendations;
   const activeData = categories.find(cat => cat.id === activeCategory) || categories[0];
 
   const handleAddToCart = (item: MenuItem) => {
     addItem({
-      id: item.id,
+      menu_item_id: item.id,
       name: item.name,
-      price: item.price,
-      quantity: 1,
-      image: item.image,
-      category: 'Recommended'
+      unit_price: item.price,
+      quantity: 1
     });
     onItemSelect(item);
   };
@@ -200,9 +201,9 @@ export function SmartOrderRecommendations({
                       <CardContent className="p-0">
                         {/* Item Image */}
                         <div className="relative h-32 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
-                          {item.image ? (
+                          {item.image_url ? (
                             <img
-                              src={item.image}
+                              src={item.image_url}
                               alt={item.name}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />

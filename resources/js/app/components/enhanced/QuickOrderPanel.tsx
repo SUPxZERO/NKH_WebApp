@@ -26,18 +26,16 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
   const addToCart = (item: MenuItem) => {
     const quantity = quantities[item.id] || 1;
     addItem({
-      id: item.id,
+      menu_item_id: item.id,
       name: item.name,
-      price: item.price,
-      quantity,
-      image: item.image,
-      category: item.category?.name || 'Food'
+      unit_price: item.price,
+      quantity
     });
     setQuantities(prev => ({ ...prev, [item.id]: 0 }));
   };
 
   const getCartQuantity = (itemId: number) => {
-    return items.find(item => item.id === itemId)?.quantity || 0;
+    return items.find(item => item.menu_item_id === itemId)?.quantity || 0;
   };
 
   return (
@@ -74,9 +72,9 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
                       <CardContent className="p-0">
                         {/* Item Image */}
                         <div className="relative h-32 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
-                          {item.image ? (
+                          {item.image_url ? (
                             <img
-                              src={item.image}
+                              src={item.image_url}
                               alt={item.name}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />

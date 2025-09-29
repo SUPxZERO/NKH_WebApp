@@ -46,6 +46,9 @@ export function EnhancedButton({
   children,
   onClick,
   disabled,
+  onDrag,
+  onDragStart,
+  onDragEnd,
   ...props
 }: EnhancedButtonProps) {
   

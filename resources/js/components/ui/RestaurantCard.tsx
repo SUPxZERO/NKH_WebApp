@@ -125,30 +125,26 @@ const styleVariants: Record<CardVariant, string> = {
 // 🎭 Animation Variants
 const cardAnimations = {
   default: {
-    whileHover: { y: -2 },
-    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+    whileHover: { y: -2 }
   },
   floating: {
     whileHover: { 
       y: -8,
       boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)'
-    },
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+    }
   },
   premium: {
     whileHover: { 
       y: -4,
       scale: 1.02,
       boxShadow: '0 30px 60px rgba(245, 158, 11, 0.3)'
-    },
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+    }
   },
   appetite: {
     whileHover: { 
       scale: 1.02,
       boxShadow: '0 20px 40px rgba(245, 158, 11, 0.2)'
-    },
-    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+    }
   }
 };
 

@@ -5,9 +5,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Redirect home to customer dashboard
-Route::redirect('/', '/');
-
 // Customer routes
 Route::get('/', fn () => Inertia::render('app/routes/customer/Home'))->name('customer.home');
 Route::get('/dashboard', fn () => Inertia::render('app/routes/customer/Dashboard'))->middleware('auth')->name('customer.dashboard');

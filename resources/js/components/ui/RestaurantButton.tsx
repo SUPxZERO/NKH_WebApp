@@ -162,8 +162,7 @@ const styleVariants: Record<ButtonVariant, string> = {
 const buttonAnimations = {
   default: {
     whileHover: { scale: 1.02 },
-    whileTap: { scale: 0.98 },
-    transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
+    whileTap: { scale: 0.98 }
   },
   appetite: {
     whileHover: { 
@@ -171,8 +170,7 @@ const buttonAnimations = {
       boxShadow: '0 20px 40px rgba(245, 158, 11, 0.3)',
       filter: 'saturate(1.2) brightness(1.05)'
     },
-    whileTap: { scale: 0.95 },
-    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+    whileTap: { scale: 0.95 }
   },
   premium: {
     whileHover: { 
@@ -180,8 +178,7 @@ const buttonAnimations = {
       boxShadow: '0 25px 50px rgba(245, 158, 11, 0.4)',
       y: -2
     },
-    whileTap: { scale: 0.97 },
-    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+    whileTap: { scale: 0.97 }
   }
 };
 
@@ -275,7 +272,7 @@ export const RestaurantButton = React.forwardRef<HTMLButtonElement, RestaurantBu
             'flex-1 truncate',
             loading && 'opacity-70'
           )}>
-            {children}
+            {children as React.ReactNode}
           </span>
         )}
 

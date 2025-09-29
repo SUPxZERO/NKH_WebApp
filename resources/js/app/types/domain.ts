@@ -107,6 +107,8 @@ export interface Order {
   total: number;
   currency: string;
   placed_at: string; // ISO
+  created_at: string; // ISO
+  updated_at: string; // ISO
   scheduled_at?: string | null; // ISO
   closed_at?: string | null; // ISO
   notes?: string | null;

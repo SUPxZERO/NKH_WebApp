@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { MenuItem } from '@/app/types/domain';
-import { RestaurantButton } from '@/Components/ui/RestaurantButton';
+import { RestaurantButton } from '@/components/ui/RestaurantButton';
 import { animationVariants } from '@/design-system/animations';
 
 export type FoodCardVariant = 'grid' | 'list' | 'featured' | 'special' | 'compact';
@@ -202,7 +202,7 @@ export function FoodCard({
                 ? 'bg-red-500/90 text-white' 
                 : 'bg-white/90 text-neutral-600 hover:bg-red-50 hover:text-red-500'
             )}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               onToggleFavorite?.(item);
             }}
@@ -235,7 +235,7 @@ export function FoodCard({
                 size="sm"
                 variant="primary"
                 appetiteMode
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onAddToCart?.(item, 1);
                 }}
@@ -327,7 +327,7 @@ export function FoodCard({
                 <RestaurantButton
                   size="sm"
                   variant="secondary"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     if (quantity === 1) {
                       onRemoveFromCart?.(item);
@@ -347,7 +347,7 @@ export function FoodCard({
                 <RestaurantButton
                   size="sm"
                   variant="primary"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     onAddToCart?.(item, 1);
                   }}
@@ -361,7 +361,7 @@ export function FoodCard({
                 size="sm"
                 variant="primary"
                 appetiteMode
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onAddToCart?.(item, 1);
                 }}
@@ -377,7 +377,7 @@ export function FoodCard({
         {(showNutrition || showIngredients) && (
           <motion.button
             className="mt-3 flex items-center gap-2 text-xs text-primary-600 hover:text-primary-700 transition-colors"
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               setShowDetails(!showDetails);
             }}
