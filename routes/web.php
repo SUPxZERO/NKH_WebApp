@@ -14,7 +14,7 @@ Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('cu
 Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
 Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
 
-// Auth routes (if you're not using the default auth scaffolding)
+// Auth routes are handled in auth.php
 Route::get('/login', fn () => Inertia::render('Auth/SignIn'))->name('login');
 Route::get('/register', fn () => Inertia::render('Auth/Register'))->name('register');
 
