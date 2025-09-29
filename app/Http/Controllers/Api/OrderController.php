@@ -222,6 +222,101 @@ class OrderController extends Controller
         return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
     }
 
+    // GET /api/admin/orders (Admin oversight)
+    public function index(Request $request)
+    {
+        $query = Order::with(['items.menuItem', 'table', 'customer.user', 'employee.user']);
+        
+        // Filter by location
+        if ($request->has('location_id')) {
+            $query->where('location_id', $request->location_id);
+        }
+        
+        // Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Filter by type
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
+        
+        // Filter by date range
+        if ($request->has('start_date')) {
+            $query->whereDate('placed_at', '>=', $request->start_date);
+        }
+        
+        if ($request->has('end_date')) {
+            $query->whereDate('placed_at', '<=', $request->end_date);
+        }
+        
+        $orders = $query->orderBy('placed_at', 'desc')
+                       ->paginate($request->get('per_page', 15));
+        
+        return OrderResource::collection($orders);
+    }
+
+    // POST /api/orders/{order}/submit (Submit to kitchen)
+    public function submitToKitchen(Order $order): OrderResource
+    {
+        if ($order->status !== 'received') {
+            abort(409, 'Order is not in received status.');
+        }
+        
+        if ($order->items->isEmpty()) {
+            abort(422, 'Cannot submit order with no items.');
+        }
+        
+        $order->update([
+            'status' => 'preparing',
+            'kitchen_submitted_at' => now(),
+        ]);
+        
+        // Update all order items to preparing status
+        $order->items()->update(['kitchen_status' => 'preparing']);
+        
+        return new OrderResource($order->fresh(['items.menuItem', 'table']));
+    }
+
+    // PATCH /api/admin/orders/{order}/approve (Admin approval for online orders)
+    public function approve(Order $order): OrderResource
+    {
+        if (!in_array($order->type, ['takeaway', 'delivery'])) {
+            abort(422, 'Only online orders require approval.');
+        }
+        
+        if ($order->status !== 'pending') {
+            abort(409, 'Order is not pending approval.');
+        }
+        
+        $order->update([
+            'status' => 'received',
+            'approved_at' => now(),
+        ]);
+        
+        return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));
+    }
+
+    // PATCH /api/admin/orders/{order}/reject (Admin rejection for online orders)
+    public function reject(Order $order): OrderResource
+    {
+        if (!in_array($order->type, ['takeaway', 'delivery'])) {
+            abort(422, 'Only online orders can be rejected.');
+        }
+        
+        if ($order->status !== 'pending') {
+            abort(409, 'Order is not pending approval.');
+        }
+        
+        $order->update([
+            'status' => 'cancelled',
+            'rejected_at' => now(),
+        ]);
+        
+        return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));
+    }
+
     private function recalculateTotals(Order $order): void
     {
         $subtotal = $order->items->sum(function ($i) {

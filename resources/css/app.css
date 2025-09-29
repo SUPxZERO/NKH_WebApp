@@ -2,9 +2,366 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Typography utilities migrated from former frontend */
-.h1 { @apply text-2xl font-semibold text-gray-900 dark:text-white; }
-.h2 { @apply text-xl font-semibold text-gray-800 dark:text-gray-100; }
-.body-large { @apply text-base text-gray-700 dark:text-gray-300; }
-.body { @apply text-sm text-gray-600 dark:text-gray-400; }
-.caption { @apply text-xs text-gray-500 dark:text-gray-500; }
+/* 🍽️ Restaurant Design System - Global Styles */
+
+/* 📝 Enhanced Typography System */
+@layer base {
+  /* Import restaurant-focused fonts */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Dancing+Script:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+  
+  /* Root variables for consistent theming */
+  :root {
+    /* Restaurant Color Palette */
+    --color-primary-50: #fefdf8;
+    --color-primary-500: #f59e0b;
+    --color-primary-900: #78350f;
+    
+    --color-secondary-50: #f8f4f0;
+    --color-secondary-500: #8b5a2b;
+    --color-secondary-900: #47240c;
+    
+    /* Appetite-inducing gradients */
+    --gradient-appetite: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%);
+    --gradient-premium: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --gradient-warm: linear-gradient(135deg, #fef7e6 0%, #fdecc4 100%);
+    
+    /* Shadows */
+    --shadow-appetite: 0 12px 40px rgba(245, 158, 11, 0.2);
+    --shadow-premium: 0 20px 60px rgba(139, 90, 43, 0.25);
+    --shadow-glow: 0 0 24px rgba(245, 158, 11, 0.3);
+  }
+
+  /* Dark mode variables */
+  .dark {
+    --color-primary-50: #78350f;
+    --color-primary-500: #f59e0b;
+    --color-primary-900: #fefdf8;
+  }
+
+  /* Base styles */
+  html {
+    scroll-behavior: smooth;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  body {
+    @apply font-body antialiased;
+    @apply bg-background-light dark:bg-background-dark;
+    @apply text-neutral-900 dark:text-neutral-100;
+    @apply selection:bg-primary-500/20 selection:text-primary-900;
+  }
+
+  /* Enhanced focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary-400 ring-offset-2 ring-offset-white dark:ring-offset-neutral-900;
+  }
+}
+
+/* 🎨 Component Layer - Restaurant-specific utilities */
+@layer components {
+  /* Typography Classes */
+  .text-display {
+    @apply font-display font-bold text-neutral-900 dark:text-neutral-100;
+  }
+  
+  .text-accent {
+    @apply font-accent text-primary-600 dark:text-primary-400;
+  }
+
+  .h1 { 
+    @apply text-4xl md:text-5xl font-display font-bold text-neutral-900 dark:text-neutral-100 leading-tight;
+  }
+  
+  .h2 { 
+    @apply text-3xl md:text-4xl font-display font-semibold text-neutral-900 dark:text-neutral-100 leading-tight;
+  }
+  
+  .h3 { 
+    @apply text-2xl md:text-3xl font-display font-semibold text-neutral-900 dark:text-neutral-100;
+  }
+  
+  .h4 { 
+    @apply text-xl md:text-2xl font-display font-medium text-neutral-900 dark:text-neutral-100;
+  }
+
+  .body-large { 
+    @apply text-lg font-body text-neutral-700 dark:text-neutral-300 leading-relaxed;
+  }
+  
+  .body { 
+    @apply text-base font-body text-neutral-600 dark:text-neutral-400 leading-normal;
+  }
+  
+  .caption { 
+    @apply text-sm font-body text-neutral-500 dark:text-neutral-500;
+  }
+
+  /* 🍽️ Food-specific Components */
+  .food-card {
+    @apply relative overflow-hidden rounded-3xl;
+    @apply bg-white/90 dark:bg-neutral-800/90 backdrop-blur-xl;
+    @apply border border-primary-100 dark:border-primary-800/30;
+    @apply shadow-soft hover:shadow-appetite;
+    @apply transition-all duration-500 ease-out;
+    @apply group cursor-pointer;
+  }
+
+  .food-card:hover {
+    @apply -translate-y-1 shadow-glow;
+  }
+
+  .food-image {
+    @apply relative overflow-hidden;
+    @apply before:absolute before:inset-0 before:bg-appetite-glow before:pointer-events-none;
+  }
+
+  .food-image img {
+    @apply transition-transform duration-700;
+    @apply group-hover:scale-110 group-hover:saturate-125;
+    filter: saturate(1.1) contrast(1.05);
+  }
+
+  .food-image:hover img {
+    filter: saturate(1.3) contrast(1.1);
+  }
+
+  /* 🎨 Glass Effects */
+  .glass-food {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-food::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(245, 158, 11, 0.5),
+      transparent
+    );
+  }
+
+  /* 🎭 Interactive Elements */
+  .appetite-button {
+    @apply relative overflow-hidden;
+    @apply before:absolute before:top-1/2 before:left-1/2;
+    @apply before:w-0 before:h-0 before:-translate-x-1/2 before:-translate-y-1/2;
+    @apply before:bg-radial-gradient before:from-primary-500/30 before:to-transparent;
+    @apply before:transition-all before:duration-700 before:ease-out;
+    @apply hover:before:w-80 hover:before:h-80;
+    @apply active:scale-98;
+  }
+
+  /* 🌊 Scroll Animations */
+  .scroll-fade-in {
+    @apply opacity-0 translate-y-8;
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .scroll-fade-in-delay {
+    @apply opacity-0 translate-y-8;
+    animation: fadeInUp 0.6s ease-out 0.2s forwards;
+  }
+
+  /* 🎯 Status Indicators */
+  .status-preparing {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+    @apply dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800/30;
+  }
+
+  .status-ready {
+    @apply bg-green-100 text-green-800 border-green-200;
+    @apply dark:bg-green-900/20 dark:text-green-400 dark:border-green-800/30;
+  }
+
+  .status-delivered {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+    @apply dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30;
+  }
+
+  /* 🏷️ Badge Styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-chef {
+    @apply bg-secondary-100 text-secondary-800 border border-secondary-200;
+    @apply dark:bg-secondary-900/20 dark:text-secondary-400 dark:border-secondary-800/30;
+  }
+
+  .badge-popular {
+    @apply bg-orange-100 text-orange-800 border border-orange-200;
+    @apply dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/30;
+  }
+
+  .badge-new {
+    @apply bg-emerald-100 text-emerald-800 border border-emerald-200;
+    @apply dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30;
+  }
+
+  /* 📱 Mobile Optimizations */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 🎭 Utilities Layer - Custom animations and effects */
+@layer utilities {
+  /* 🎪 Custom Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(2rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes appetiteGlow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes pulse-appetite {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    50% {
+      transform: scale(1.02);
+      box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+  }
+
+  /* 🎨 Gradient Text */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-appetite {
+    @apply bg-gradient-to-r from-primary-500 via-orange-500 to-red-500 bg-clip-text text-transparent;
+  }
+
+  /* 🌈 Background Patterns */
+  .bg-pattern-dots {
+    background-image: radial-gradient(circle, rgba(245, 158, 11, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .bg-pattern-grid {
+    background-image: 
+      linear-gradient(rgba(245, 158, 11, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245, 158, 11, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* 🎯 Utility Classes */
+  .aspect-food {
+    aspect-ratio: 4 / 3;
+  }
+
+  .aspect-card {
+    aspect-ratio: 3 / 4;
+  }
+
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* 🔄 Loading States */
+  .skeleton {
+    @apply animate-pulse bg-neutral-200 dark:bg-neutral-700 rounded;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 w-full;
+  }
+
+  .skeleton-title {
+    @apply skeleton h-6 w-3/4;
+  }
+
+  .skeleton-avatar {
+    @apply skeleton h-10 w-10 rounded-full;
+  }
+
+  /* 📱 Responsive Utilities */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* 🎨 Print Styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    .print-only {
+      display: block !important;
+    }
+  }
+}
