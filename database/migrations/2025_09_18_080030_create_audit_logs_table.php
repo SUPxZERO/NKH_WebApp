@@ -24,7 +24,6 @@ return new class extends Migration
             $table->json('metadata')->nullable();
             $table->timestamps();
     
-            $table->index(['auditable_type', 'auditable_id']);
             $table->index('created_at');
         });
     }

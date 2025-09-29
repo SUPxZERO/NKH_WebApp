@@ -3,32 +3,37 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            if (!Schema::hasColumn('orders', 'location_id')) {
-                $table->foreignId('location_id')->after('id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
+            if (!Schema::hasColumn('orders', 'preparation_status')) {
+                $table->enum('preparation_status', ['pending', 'preparing', 'ready', 'served'])
+                    ->default('pending')
+                    ->after('type')
+                    ->index();
             }
-            if (!Schema::hasColumn('orders', 'table_id')) {
-                $table->foreignId('table_id')->nullable()->after('location_id')->constrained('tables')->nullOnDelete()->cascadeOnUpdate();
+
+            if (!Schema::hasColumn('orders', 'priority')) {
+                $table->integer('priority')->default(0)->after('preparation_status');
             }
-            if (!Schema::hasColumn('orders', 'customer_id')) {
-                $table->unsignedBigInteger('customer_id')->nullable()->after('table_id');
-                $table->index('customer_id');
+
+            if (!Schema::hasColumn('orders', 'notes')) {
+                $table->text('notes')->nullable()->after('priority');
             }
-            if (!Schema::hasColumn('orders', 'employee_id')) {
-                $table->foreignId('employee_id')->nullable()->after('customer_id')->constrained()->nullOnDelete()->cascadeOnUpdate();
-            }
-            if (!Schema::hasColumn('orders', 'order_number')) {
-                $table->string('order_number', 50)->after('employee_id');
-            }
-            if (!Schema::hasColumn('orders', 'type')) {
-                $table->enum('type', ['dine_in','takeaway','delivery'])->default('dine_in')->after('order_number')->index();
-            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropColumn(['preparation_status', 'priority', 'notes']);
+        });
+    }
+};
+            
             if (!Schema::hasColumn('orders', 'status')) {
                 $table->enum('status', ['open','completed','cancelled'])->default('open')->after('type')->index();
             }

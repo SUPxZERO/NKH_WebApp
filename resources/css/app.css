@@ -116,9 +116,14 @@
   }
 
   .food-image img {
-    @apply transition-transform duration-700;
-    @apply group-hover:scale-110 group-hover:saturate-125;
+    transition: all 700ms;
+    transform: scale(1);
     filter: saturate(1.1) contrast(1.05);
+  }
+
+  .food-card:hover .food-image img {
+    transform: scale(1.1);
+    filter: saturate(1.25) contrast(1.05);
   }
 
   .food-image:hover img {

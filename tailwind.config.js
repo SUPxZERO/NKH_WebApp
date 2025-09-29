@@ -5,6 +5,31 @@ import animate from 'tailwindcss-animate';
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: 'class',
+    theme: {
+        extend: {
+            saturate: {
+                125: '1.25',
+            },
+        },
+    },
+    plugins: [
+        require('@tailwindcss/forms'),
+        require('tailwindcss-animate'),
+        function({ addUtilities, theme, variants }) {
+            const saturateUtilities = {};
+            Object.entries(theme('saturate')).forEach(([key, value]) => {
+                saturateUtilities[`.saturate-${key}`] = {
+                    '--tw-saturate': value,
+                    filter: 'var(--tw-saturate)',
+                };
+            });
+            addUtilities(saturateUtilities, ['responsive', 'hover', 'group-hover']);
+        },
+    ],
+    safelist: [
+        'group-hover:saturate-125',
+        'group-hover:scale-110'
+    ],
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',

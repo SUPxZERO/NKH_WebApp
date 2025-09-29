@@ -20,6 +20,9 @@ return new class extends Migration
             $table->foreignId('employee_id')->nullable()->constrained()->nullOnDelete()->cascadeOnUpdate();
             $table->string('order_number', 50);
             $table->enum('type', ['dine_in','takeaway','delivery'])->default('dine_in')->index();
+            
+            // Add the unique index separately to prevent duplicate key issues
+            $table->unique(['location_id', 'order_number'], 'orders_location_order_unique');
             $table->enum('status', ['open','completed','cancelled'])->default('open')->index();
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('tax_total', 12, 2)->default(0);
