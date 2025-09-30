@@ -19,7 +19,7 @@ interface CartState {
   setTimeSlot: (slot?: TimeSlot | null) => void;
   setNotes: (notes?: string) => void;
 
-  addItem: (item: Omit<OrderItem, 'unit_price' | 'name'> & { unit_price: number; name: string }) => void;
+  addItem: (item: Omit<OrderItem, 'unit_price' | 'name'> & { unit_price: number; name?: string }) => void;
   updateQty: (menu_item_id: number, quantity: number) => void;
   removeItem: (menu_item_id: number) => void;
   clear: () => void;

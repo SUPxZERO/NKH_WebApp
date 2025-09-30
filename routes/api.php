@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\TableController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OnlineOrderController;
 use App\Http\Controllers\Api\CustomerController;
-use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FloorController;
@@ -46,12 +45,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin/Manager management endpoints
     Route::prefix('admin')->middleware('role:admin,manager')->group(function () {
-        // Categories
+        // Categories (with hierarchy support)
         Route::apiResource('categories', CategoryController::class);
+        Route::get('categories/hierarchy', [CategoryController::class, 'hierarchy']);
+        Route::get('category-stats', [CategoryController::class, 'stats']);
+        Route::put('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus']);
         // Menu Items
         Route::apiResource('menu-items', MenuItemController::class);
-        // SubCategories
-        Route::apiResource('sub-categories', SubCategoryController::class);
         // Employees
         Route::apiResource('employees', EmployeeController::class);
         // Customers

@@ -137,7 +137,7 @@ export default function Dashboard() {
                           <div className="font-medium">Order #{order.id}</div>
                           <div className="text-sm text-gray-500 flex items-center gap-2">
                             <Clock className="w-3 h-3" />
-                            {new Date(order.placed_at).toLocaleDateString()}
+                            {order.placed_at ? new Date(order.placed_at).toLocaleDateString() : 'N/A'}
                           </div>
                         </div>
                         <div className="text-right">

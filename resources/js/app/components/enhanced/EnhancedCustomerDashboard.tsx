@@ -296,7 +296,7 @@ export function EnhancedCustomerDashboard() {
                               <span className="text-sm font-bold">#{order.id}</span>
                             </div>
                             <div>
-                              <div className="font-medium">{order.items.length} items</div>
+                              <div className="font-medium">{order.items?.length || 0} items</div>
                               <div className="text-sm text-gray-400">
                                 {new Date(order.created_at).toLocaleDateString()}
                               </div>

@@ -20,17 +20,21 @@ use Illuminate\Support\Str;
 
 class OnlineOrderController extends Controller
 {
-    // GET /api/time-slots?date=YYYY-MM-DD&type=delivery
+    // GET /api/time-slots?date=YYYY-MM-DD&mode=delivery
     public function timeSlots(Request $request)
     {
         $validated = $request->validate([
-            'date' => ['required','date_format:Y-m-d'],
-            'type' => ['required','in:pickup,delivery'],
+            'date' => ['nullable','date_format:Y-m-d'],
+            'mode' => ['required','in:pickup,delivery'],
         ]);
 
+        // Default to today if no date provided
+        $date = $validated['date'] ?? now()->format('Y-m-d');
+        $type = $validated['mode'];
+
         $query = OrderTimeSlot::query()
-            ->where('slot_date', $validated['date'])
-            ->where('slot_type', $validated['type'])
+            ->where('slot_date', $date)
+            ->where('slot_type', $type)
             ->whereColumn('current_orders', '<', 'max_orders')
             ->orderBy('slot_start_time');
 

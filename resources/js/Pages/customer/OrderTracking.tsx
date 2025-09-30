@@ -164,7 +164,7 @@ export default function OrderTracking() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {order.items.map((item, index) => (
+                  {order.items?.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div>
                         <div className="font-medium">{item.name}</div>

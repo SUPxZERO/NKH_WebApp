@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/app/utils/cn';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -30,6 +30,8 @@ const variants: Record<ButtonVariant, string> = {
     'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-[0_8px_20px_-6px_rgba(239,68,68,0.5)] hover:brightness-110 active:brightness-90 focus:ring-red-400',
   ghost:
     'bg-transparent text-current hover:bg-black/5 dark:hover:bg-white/5 focus:ring-gray-300',
+  outline:
+    'bg-transparent border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus:ring-gray-300',
 };
 
 export function Button({

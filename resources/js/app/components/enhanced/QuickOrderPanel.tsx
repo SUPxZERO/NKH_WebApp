@@ -27,7 +27,7 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
     const quantity = quantities[item.id] || 1;
     addItem({
       menu_item_id: item.id,
-      name: item.name,
+      name: item.name || item.slug,
       unit_price: item.price,
       quantity
     });
@@ -82,7 +82,7 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
                             <div className="w-full h-full flex items-center justify-center">
                               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-500 flex items-center justify-center">
                                 <span className="text-2xl font-bold text-white">
-                                  {item.name.charAt(0)}
+                                  {(item.name || item.slug).charAt(0).toUpperCase()}
                                 </span>
                               </div>
                             </div>

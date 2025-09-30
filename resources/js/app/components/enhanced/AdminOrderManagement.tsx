@@ -23,7 +23,7 @@ import { Order, ApiResponse } from '@/app/types/domain';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 
-interface OrderWithDetails extends Order {
+interface OrderWithDetails extends Omit<Order, 'delivery_address'> {
   delivery_address?: {
     street: string;
     city: string;
@@ -208,7 +208,7 @@ export function AdminOrderManagement() {
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
                       <span>Items:</span>
-                      <span>{order.items.length} items</span>
+                      <span>{order.items?.length || 0} items</span>
                     </div>
                     
                     <div className="flex justify-between text-sm">
@@ -365,7 +365,7 @@ export function AdminOrderManagement() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {selectedOrder.items.map((item, index) => (
+                  {selectedOrder.items?.map((item, index) => (
                     <div key={index} className="flex justify-between items-center p-3 rounded-xl bg-white/5">
                       <div>
                         <div className="font-medium">{item.name}</div>

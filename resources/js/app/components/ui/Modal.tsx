@@ -4,7 +4,8 @@ import { X } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
 export interface ModalProps {
-  open: boolean;
+  open?: boolean;
+  isOpen?: boolean; // Backward compatibility
   onClose: () => void;
   title?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -20,18 +21,20 @@ const sizeMap = {
   full: 'max-w-[96vw] h-[92vh]'
 };
 
-export function Modal({ open, onClose, title, size = 'md', hideClose, children, className }: PropsWithChildren<ModalProps>) {
+export function Modal({ open, isOpen, onClose, title, size = 'md', hideClose, children, className }: PropsWithChildren<ModalProps>) {
+  const isModalOpen = open ?? isOpen ?? false;
+  
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && open) onClose();
+      if (e.key === 'Escape' && isModalOpen) onClose();
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [isModalOpen, onClose]);
 
   return (
     <AnimatePresence>
-      {open && (
+      {isModalOpen && (
         <motion.div
           className="fixed inset-0 z-[60] flex items-center justify-center p-4"
           initial={{ opacity: 0 }}

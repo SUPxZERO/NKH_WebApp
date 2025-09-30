@@ -17,7 +17,7 @@ import {
   XCircle,
   Clock,
   MapPin,
-  User,
+  User as UserIcon,
   Tag
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
@@ -390,7 +390,7 @@ export default function Expenses() {
 
                       {expense.vendor_name && (
                         <div className="flex items-center text-sm text-gray-300">
-                          <User className="w-4 h-4 mr-2 text-gray-400" />
+                          <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
                           {expense.vendor_name}
                         </div>
                       )}

@@ -252,7 +252,7 @@ export default function Orders() {
                       
                       <div className="flex items-center text-sm text-gray-300">
                         <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                        Total: ${parseFloat(order.total).toFixed(2)}
+                        Total: ${Number(order.total).toFixed(2)}
                       </div>
 
                       {order.table && (
@@ -411,7 +411,7 @@ export default function Orders() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Total:</span>
-                    <span className="text-white font-semibold">${parseFloat(selectedOrder.total).toFixed(2)}</span>
+                    <span className="text-white font-semibold">${Number(selectedOrder.total).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Payment Status:</span>

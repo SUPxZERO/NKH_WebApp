@@ -2,11 +2,31 @@
 
 export interface Category {
   id: number;
+  location_id?: number | null;
+  parent_id?: number | null;
   name: string;
   slug: string;
-  parent_id?: number | null;
-  image_url?: string | null;
-  active: boolean;
+  description?: string | null;
+  image?: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
+  // Relations
+  parent?: Category;
+  children?: Category[];
+  menu_items?: MenuItem[];
+  location?: Location;
+  translations?: CategoryTranslation[];
+}
+
+export interface CategoryTranslation {
+  id: number;
+  category_id: number;
+  locale: string;
+  name: string;
+  description?: string | null;
 }
 
 export interface MenuItemOptionChoice {
@@ -37,12 +57,26 @@ export interface MenuItem {
   category_id?: number | null;
   sku?: string | null;
   slug: string;
+  name?: string; // For display purposes, can be derived from translations
+  description?: string | null;
   price: number;
   cost?: number | null;
+  original_price?: number | null; // For showing discounts
   image_path?: string | null;
+  image_url?: string | null; // Alias for image_path for compatibility
   is_popular: boolean;
   is_active: boolean;
   display_order: number;
+  rating?: number | null; // Average rating
+  prep_time?: number | null; // Preparation time in minutes
+  ingredients?: string[]; // List of ingredients
+  dietary_restrictions?: string[]; // e.g., ["vegetarian", "gluten-free"]
+  nutrition?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
   created_at: string;
   updated_at: string;
   deleted_at?: string | null;
@@ -58,6 +92,7 @@ export interface CustomerAddress {
   label: string; // e.g. "Home", "Office"
   address_line_1: string;
   address_line_2?: string | null;
+  line1: string; // Alias for address_line_1 for compatibility
   city: string;
   province: string;
   postal_code: string;
@@ -85,7 +120,7 @@ export interface OrderItemCustomization {
 
 export interface OrderItem {
   menu_item_id: number;
-  name: string;
+  name?: string; // Optional since it can be derived from menu item
   unit_price: number;
   quantity: number;
   notes?: string;
@@ -100,9 +135,10 @@ export interface Order {
   employee_id?: number | null;
   order_number: string;
   type: 'dine_in' | 'takeaway' | 'delivery';
+  mode: 'dine-in' | 'pickup' | 'delivery'; // Alias for type for frontend compatibility
   preparation_status: 'pending' | 'preparing' | 'ready' | 'served';
   priority: number;
-  status: 'pending' | 'received' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'received' | 'preparing' | 'ready' | 'completed' | 'cancelled' | 'delivered';
   subtotal: number;
   tax_total: number;
   discount_total: number;
@@ -116,6 +152,7 @@ export interface Order {
   updated_at: string;
   order_type: 'dine-in' | 'pickup' | 'delivery';
   customer_address_id?: number | null;
+  delivery_address?: string | null; // For display purposes
   payment_status: 'unpaid' | 'paid' | 'refunded';
   scheduled_at?: string | null;
   kitchen_submitted_at?: string | null;
@@ -192,6 +229,7 @@ export interface DiningTable {
   id: number;
   floor_id: number;
   code: string;
+  number: string; // Alias for code for compatibility
   capacity: number;
   status: 'available' | 'reserved' | 'occupied' | 'unavailable';
   created_at: string;
@@ -223,6 +261,7 @@ export interface Location {
 export interface Position {
   id: number;
   name: string;
+  title: string; // Alias for name for compatibility
   description?: string | null;
 }
 
