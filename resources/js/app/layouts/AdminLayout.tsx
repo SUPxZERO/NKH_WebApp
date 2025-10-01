@@ -12,9 +12,9 @@ type Props = { children: React.ReactNode };
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Customer Requests', href: '/admin/customer-requests', icon: FileText },
   { name: 'Categories', href: '/admin/categories', icon: ShoppingBag },
   { name: 'Menu Items', href: '/admin/menu-items', icon: ChefHat },
-  { name: 'Sub Categories', href: '/admin/sub-categories', icon: ShoppingBag },
   { name: 'Employees', href: '/admin/employees', icon: Users },
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Orders', href: '/admin/orders', icon: FileText },
@@ -24,7 +24,6 @@ const navigation = [
   { name: 'Invoices', href: '/admin/invoices', icon: FileText },
   { name: 'Reservations', href: '/admin/reservations', icon: Calendar },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
-  { name: 'Customer Requests', href: '/admin/customer-requests', icon: FileText },
 ];
 
 export default function AdminLayout({ children }: Props) {
