@@ -56,7 +56,7 @@ class CategorySeeder extends Seeder
                 'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
             ]);
 
-            // Sub-categories for Appetizers
+            // Menu Items for Appetizers
             Category::create([
                 'location_id' => $location->id,
                 'parent_id' => $appetizers->id,
@@ -81,7 +81,7 @@ class CategorySeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            // Sub-categories for Main Dishes
+            // Menu Items for Main Dishes
             Category::create([
                 'location_id' => $location->id,
                 'parent_id' => $mainDishes->id,
@@ -114,7 +114,7 @@ class CategorySeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            // Sub-categories for Soups & Salads
+            // Menu Items for Soups & Salads
             Category::create([
                 'location_id' => $location->id,
                 'parent_id' => $soups->id,
@@ -131,7 +131,7 @@ class CategorySeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            // Sub-categories for Desserts
+            // Menu Items for Desserts
             Category::create([
                 'location_id' => $location->id,
                 'parent_id' => $desserts->id,
@@ -156,7 +156,7 @@ class CategorySeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            // Sub-categories for Beverages
+            // Menu Items for Beverages
             Category::create([
                 'location_id' => $location->id,
                 'parent_id' => $beverages->id,

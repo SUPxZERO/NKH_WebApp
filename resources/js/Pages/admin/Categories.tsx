@@ -29,6 +29,8 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Category } from '@/app/types/domain';
 
+// Import should already include the component's type definition
+
 export default function Categories() {
   const [search, setSearch] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
@@ -55,7 +57,7 @@ export default function Categories() {
   });
 
   // Fetch categories with hierarchy
-  const { data: categories, isLoading } = useQuery({
+  const { data: categoryList, isLoading } = useQuery({
     queryKey: ['admin/categories-hierarchy', search, statusFilter],
     queryFn: () => {
       let url = `/api/admin/categories/hierarchy?search=${search}`;
@@ -169,7 +171,7 @@ export default function Categories() {
       slug: category.slug,
       description: category.description || '',
       image: null,
-      parent_id: category.parent_id,
+      parent_id: category.parent_id || null,
       display_order: category.display_order,
       is_active: category.is_active
     });
@@ -185,7 +187,7 @@ export default function Categories() {
 
   const handleDelete = async (category: Category) => {
     if (category.children && category.children.length > 0) {
-      toastError('Cannot delete category with sub-categories. Please delete sub-categories first.');
+      toastError('Cannot delete category with menu items. Please delete menu items first.');
       return;
     }
     
@@ -318,7 +320,7 @@ export default function Categories() {
                     variant="secondary"
                     onClick={() => handleCreate(category)}
                     className="border-white/20 hover:bg-white/10"
-                    title="Add Sub-Category"
+                    title="Add Menu Items"
                   >
                     <FolderPlus className="w-3 h-3" />
                   </Button>
@@ -390,8 +392,8 @@ export default function Categories() {
 
   const totalCategories = categoryStats?.total || 0;
   const activeCategories = categoryStats?.active || 0;
-  const mainCategories = categoryStats?.main_categories || 0;
-  const subCategories = categoryStats?.sub_categories || 0;
+  const categories = categoryStats?.categories || 0;
+  const menuItems = categoryStats?.menu_items || 0;
 
   return (
     <AdminLayout>
@@ -421,12 +423,12 @@ export default function Categories() {
                 <div className="text-xl font-bold text-green-400">{activeCategories}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Main</div>
-                <div className="text-xl font-bold text-blue-400">{mainCategories}</div>
+                <div className="text-sm text-gray-400">Categories</div>
+                <div className="text-xl font-bold text-blue-400">{categories}</div>
               </div>
               <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Sub</div>
-                <div className="text-xl font-bold text-purple-400">{subCategories}</div>
+                <div className="text-sm text-gray-400">Menu Items</div>
+                <div className="text-xl font-bold text-purple-400">{menuItems}</div>
               </div>
             </div>
 
@@ -481,7 +483,7 @@ export default function Categories() {
 
           <Button
             variant="secondary"
-            onClick={() => setExpandedCategories(new Set(categories?.data?.map((c: Category) => c.id) || []))}
+            onClick={() => setExpandedCategories(new Set(categoryList?.data?.map((c: Category) => c.id) || []))}
             className="border-white/20 hover:bg-white/10"
           >
             Expand All
@@ -505,8 +507,8 @@ export default function Categories() {
                 </div>
               ))}
             </div>
-          ) : categories?.data?.length > 0 ? (
-            renderCategoryTree(categories.data)
+          ) : categoryList?.data?.length > 0 ? (
+            renderCategoryTree(categoryList.data)
           ) : (
             <Card className="bg-white/5 border-white/10 backdrop-blur-md">
               <CardContent className="p-12 text-center">
@@ -534,7 +536,7 @@ export default function Categories() {
           setOpenEdit(false);
           resetForm();
         }}
-        title={editingCategory ? 'Edit Category' : parentCategory ? `Add Sub-Category to "${parentCategory.name}"` : 'Create Main Category'}
+        title={editingCategory ? 'Edit Category' : parentCategory ? `Add Menu Items to "${parentCategory.name}"` : 'Create Category'}
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -586,8 +588,8 @@ export default function Categories() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Category Image</label>
             <ImageUploader
-              onImageSelect={(file) => setFormData({ ...formData, image: file })}
-              currentImage={editingCategory?.image}
+              onFileSelect={(file: File) => setFormData({ ...formData, image: file })}
+              currentImage={editingCategory?.image || null}
               className="bg-white/5 border-white/10"
             />
           </div>
@@ -682,7 +684,7 @@ export default function Categories() {
               <div>
                 <span className="text-gray-400">Type:</span>
                 <span className="text-white ml-2">
-                  {selectedCategory.parent_id ? 'Sub-Category' : 'Main Category'}
+                  {selectedCategory.parent_id ? 'Menu Item' : 'Category'}
                 </span>
               </div>
               <div>
@@ -696,7 +698,7 @@ export default function Categories() {
                 </span>
               </div>
               <div>
-                <span className="text-gray-400">Sub-Categories:</span>
+                <span className="text-gray-400">Child Menu Items:</span>
                 <span className="text-white ml-2">
                   {selectedCategory.children?.length || 0}
                 </span>
@@ -714,7 +716,7 @@ export default function Categories() {
 
             {selectedCategory.children && selectedCategory.children.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Sub-Categories</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">Menu Items</h3>
                 <div className="space-y-2">
                   {selectedCategory.children.map((child) => (
                     <div key={child.id} className="bg-white/5 p-3 rounded-lg flex justify-between items-center">

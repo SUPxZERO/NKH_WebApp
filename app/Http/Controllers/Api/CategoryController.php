@@ -57,14 +57,14 @@ class CategoryController extends Controller
     {
         $total = Category::count();
         $active = Category::where('is_active', true)->count();
-        $mainCategories = Category::whereNull('parent_id')->count();
-        $subCategories = Category::whereNotNull('parent_id')->count();
+        $categories = Category::whereNull('parent_id')->count();
+        $menuItems = Category::whereNotNull('parent_id')->count();
 
         return response()->json([
             'total' => $total,
             'active' => $active,
-            'main_categories' => $mainCategories,
-            'sub_categories' => $subCategories
+            'categories' => $categories,
+            'menu_items' => $menuItems
         ]);
     }
 
@@ -132,7 +132,7 @@ class CategoryController extends Controller
         // Check if category has children
         if ($category->children()->exists()) {
             return response()->json([
-                'message' => 'Cannot delete category with sub-categories. Please delete sub-categories first.'
+                'message' => 'Cannot delete category with menu items. Please delete menu items first.'
             ], 422);
         }
 

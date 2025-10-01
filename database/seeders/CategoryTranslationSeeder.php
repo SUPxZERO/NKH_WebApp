@@ -33,7 +33,7 @@ class CategoryTranslationSeeder extends Seeder
                 'km' => ['name' => 'ភេសជ្ជៈ', 'description' => 'ភេសជ្ជៈធ្វើឱ្យស្រស់សម្រាប់រសជាតិគ្រប់យ៉ាង'],
             ],
             
-            // Sub-categories
+            // Menu Items
             'hot-appetizers' => [
                 'en' => ['name' => 'Hot Appetizers', 'description' => 'Warm and savory starters'],
                 'km' => ['name' => 'ម្ហូបបំប៉នក្តៅ', 'description' => 'ម្ហូបបំប៉នក្តៅៗឆ្ងាញ់'],
