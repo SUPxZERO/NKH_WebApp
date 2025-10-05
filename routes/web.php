@@ -15,8 +15,8 @@ Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))-
 Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
 
 // Auth routes are handled in auth.php
-Route::get('/login', fn () => Inertia::render('Auth/SignIn'))->name('login');
-Route::get('/register', fn () => Inertia::render('Auth/Register'))->name('register');
+// Route::get('/login', fn () => Inertia::render('Auth/SignIn'))->name('login');
+// Route::get('/register', fn () => Inertia::render('Auth/Register'))->name('register');
 
 // Employee routes
 // Route::prefix('employee')->middleware(['auth', 'role:employee'])->group(function () {
@@ -27,7 +27,7 @@ Route::get('/register', fn () => Inertia::render('Auth/Register'))->name('regist
 // Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 //     Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
 //     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
-//     Route::get(uri: 'menu-items', fn () => Inertia::render('Admin/MenuItems'))->name('admin.menu-items');
+//     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
 //     Route::get('employees', fn () => Inertia::render('Admin/Employees'))->name('admin.employees');
 //     Route::get('customers', fn () => Inertia::render('Admin/Customers'))->name('admin.customers');
 //     Route::get('expenses', fn () => Inertia::render('Admin/Expenses'))->name('admin.expenses');

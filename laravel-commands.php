@@ -6,6 +6,31 @@
 
 require_once 'vendor/autoload.php';
 
+function clearConfig() {
+    $files = glob('bootstrap/cache/config*.php');
+    foreach ($files as $file) {
+        if (is_file($file)) unlink($file);
+    }
+    echo "✅ Config cache cleared\n";
+}
+
+function clearRoutes() {
+    $files = glob('bootstrap/cache/routes*.php');
+    foreach ($files as $file) {
+        if (is_file($file)) unlink($file);
+    }
+    echo "✅ Route cache cleared\n";
+}
+
+function clearViews() {
+    $files = glob('storage/framework/views/*.php');
+    foreach ($files as $file) {
+        if (is_file($file)) unlink($file);
+    }
+    echo "✅ View cache cleared\n";
+}
+
+
 function showHelp() {
     echo "🛠️  NKH Laravel Commands (Artisan Alternative)\n\n";
     echo "Available commands:\n";

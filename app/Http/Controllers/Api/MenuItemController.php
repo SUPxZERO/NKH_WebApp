@@ -24,8 +24,8 @@ class MenuItemController extends Controller
         if ($request->filled('category')) {
             $query->where('category_id', $request->integer('category'));
         }
-
-        return MenuItemResource::collection($query->paginate());
+        
+        return MenuItemResource::collection($query->paginate(30));
     }
 
     // POST /api/menu-items (role:admin,manager)

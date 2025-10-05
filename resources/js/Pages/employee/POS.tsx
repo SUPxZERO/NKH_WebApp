@@ -78,7 +78,7 @@ export default function POS() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className='sticky top-4'>
               <CardHeader>
                 <div className="font-semibold">Current Order</div>
               </CardHeader>
