@@ -10,6 +10,8 @@ class MenuItem extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $with = ['translations'];
+
     protected $fillable = [
         'location_id',
         'category_id',
@@ -22,6 +24,19 @@ class MenuItem extends Model
         'is_active',
         'display_order',
     ];
+    
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::addGlobalScope('active', function ($query) {
+            $query->where('is_active', true);
+        });
+        
+        static::addGlobalScope('ordered', function ($query) {
+            $query->orderBy('display_order', 'asc');
+        });
+    }
 
     protected $casts = [
         'price' => 'decimal:2',

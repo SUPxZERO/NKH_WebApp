@@ -49,10 +49,14 @@ Route::group([], function () {
         // TODO: Re-enable auth middleware after development
         // ->middleware('role:admin,manager')
         ->group(function () {
-        // Categories (with hierarchy support)
-        Route::apiResource('categories', CategoryController::class);
-        Route::get('categories/hierarchy', [CategoryController::class, 'hierarchy']);
-        Route::get('category-stats', [CategoryController::class, 'stats']);
+            // Categories (with hierarchy support)
+            Route::get('/categories/hierarchy', [CategoryController::class, 'hierarchy']);
+            Route::get('/category-stats', [CategoryController::class, 'stats']);
+            Route::get('/categories', [CategoryController::class, 'index']);
+            Route::post('/categories', [CategoryController::class, 'store']);
+            Route::get('/categories/{category}', [CategoryController::class, 'show']);
+            Route::put('/categories/{category}', [CategoryController::class, 'update']);
+            Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
         Route::put('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus']);
         // Menu Items
         Route::apiResource('menu-items', MenuItemController::class);

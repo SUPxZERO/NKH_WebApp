@@ -18,6 +18,29 @@ class Category extends Model
         'is_active',
     ];
 
+    protected $with = ['translations'];
+    
+    
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+    
+    public function scopeParents($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->translations->where('locale', app()->getLocale())->first()?->name ?? '';
+    }
+
+    public function getDescriptionAttribute()
+    {
+        return $this->translations->where('locale', app()->getLocale())->first()?->description ?? '';
+    }
+
     protected $casts = [
         'is_active' => 'boolean',
     ];
@@ -37,17 +60,11 @@ class Category extends Model
         return $this->hasMany(MenuItem::class);
     }
 
-    /**
-     * Get the parent category of this category
-     */
     public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
-    /**
-     * Get the child categories of this category
-     */
     public function children()
     {
         return $this->hasMany(Category::class, 'parent_id');

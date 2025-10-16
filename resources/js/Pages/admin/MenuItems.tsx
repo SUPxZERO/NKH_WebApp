@@ -41,18 +41,18 @@ export default function MenuItems() {
   // Fetch menu items
   const { data: menuItems, isLoading } = useQuery({
     queryKey: ['menu-items', page, search],
-    queryFn: () => apiGet(`/api/menu-items?page=${page}&per_page=${perPage}&search=${search}`)
+    queryFn: () => apiGet(`/menu-items?page=${page}&per_page=${perPage}&search=${search}`)
   });
 
   // Fetch categories for dropdown
   const { data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => apiGet('/api/categories')
+    queryFn: () => apiGet('/categories')
   });
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: FormData) => apiPost('/api/menu-items', data),
+    mutationFn: (data: FormData) => apiPost('/menu-items', data),
     onSuccess: () => {
       toastSuccess('Menu item created successfully!');
       setOpenCreate(false);
@@ -67,7 +67,7 @@ export default function MenuItems() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: FormData }) => 
-      apiPost(`/api/menu-items/${id}?_method=PUT`, data),
+      apiPost(`/menu-items/${id}?_method=PUT`, data),
     onSuccess: () => {
       toastSuccess('Menu item updated successfully!');
       setOpenEdit(false);
@@ -81,7 +81,7 @@ export default function MenuItems() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiDelete(`/api/menu-items/${id}`),
+    mutationFn: (id: number) => apiDelete(`/menu-items/${id}`),
     onSuccess: () => {
       toastSuccess('Menu item deleted successfully!');
       qc.invalidateQueries({ queryKey: ['menu-items'] });
@@ -376,7 +376,7 @@ export default function MenuItems() {
                 <option value="">Select Category</option>
                 {categories?.data?.map((category: Category) => (
                   <option key={category.id} value={category.id} className="bg-gray-800">
-                    {category.translations?.[0]?.name}
+                    {category.name || category.translations?.[0]?.name || 'Unnamed Category'}
                   </option>
                 ))}
               </select>

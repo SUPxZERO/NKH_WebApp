@@ -57,10 +57,10 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
 
   return (
     <Modal open={open} onClose={onClose} title={mode === 'delivery' ? 'Delivery Order' : 'Pickup Order'} size="full">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8rem)] overflow-hidden">
+        <div className="lg:col-span-8 space-y-6 overflow-y-auto pr-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="sticky top-0 z-10 ">
               <div className="flex items-center justify-between">
                 <div className="text-lg font-semibold">Menu</div>
                 <div className="flex gap-2">
@@ -68,8 +68,8 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex gap-3 overflow-x-auto pb-2">
+            <CardContent className="max-h-[calc(100vh-16rem)] overflow-y-auto">
+              <div className="flex gap-3 overflow-x-auto pb-2 ">
                 {catsLoading ? (
                   <Skeleton className="h-9 w-24" />
                 ) : (

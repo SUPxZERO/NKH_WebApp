@@ -509,7 +509,7 @@ export default function Categories() {
             </div>
           ) : categoryList?.data?.length > 0 ? (
             renderCategoryTree(categoryList.data)
-          ) : (
+          )  : (
             <Card className="bg-white/5 border-white/10 backdrop-blur-md">
               <CardContent className="p-12 text-center">
                 <Folder className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -588,8 +588,7 @@ export default function Categories() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Category Image</label>
             <ImageUploader
-              onFileSelect={(file: File) => setFormData({ ...formData, image: file })}
-              currentImage={editingCategory?.image || null}
+              onChange={(file: File | null) => setFormData({ ...formData, image: file })}
               className="bg-white/5 border-white/10"
             />
           </div>
