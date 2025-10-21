@@ -25,8 +25,14 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
-Route::get('/menu-items', [MenuItemController::class, 'index']);
-Route::get('/menu-items/{menuItem}', [MenuItemController::class, 'show']);
+// Menu Items CRUD routes
+Route::controller(MenuItemController::class)->group(function () {
+    Route::get('/menu-items', 'index');
+    Route::post('/menu-items', 'store');
+    Route::get('/menu-items/{menuItem}', 'show');
+    Route::match(['put', 'patch'], '/menu-items/{menuItem}', 'update');
+    Route::delete('/menu-items/{menuItem}', 'destroy');
+});
 
 Route::get('/time-slots', [OnlineOrderController::class, 'timeSlots']);
 

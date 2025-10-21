@@ -14,18 +14,37 @@ use Illuminate\Http\Request;
 class MenuItemController extends Controller
 {
     // GET /api/menu-items (public)
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $query = MenuItem::query()
-            ->with(['translations'])
-            ->where('is_active', true)
-            ->orderBy('display_order');
+            ->withoutGlobalScope('active')
+            ->with([
+                'translations',
+                'category.translations'
+            ]);
 
         if ($request->filled('category')) {
             $query->where('category_id', $request->integer('category'));
         }
+
+        if ($request->boolean('active_only', true)) {
+            $query->where('is_active', true);
+        }
         
-        return MenuItemResource::collection($query->paginate(30));
+        $query->orderBy('display_order');
+        
+        $menuItems = $query->paginate(30);
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => MenuItemResource::collection($menuItems),
+            'meta' => [
+                'current_page' => $menuItems->currentPage(),
+                'last_page' => $menuItems->lastPage(),
+                'total' => $menuItems->total(),
+                'per_page' => $menuItems->perPage()
+            ]
+        ]);
     }
 
     // POST /api/menu-items (role:admin,manager)

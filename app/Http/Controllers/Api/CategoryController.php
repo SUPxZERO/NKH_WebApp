@@ -16,28 +16,26 @@ class CategoryController extends Controller
     // GET /api/categories (public)
     public function index(): JsonResponse
     {
-        $categories = Category::with('translations')->get()
-            ->map(function ($category) {
-                // Get translation in current locale, fall back to first available
-                $translation = $category->translations
-                    ->where('locale', app()->getLocale())
-                    ->first() ?? $category->translations->first();
+        $categories = Category::withoutGlobalScope('active')
+            ->with([
+                'translations',
+                'children',
+                'menuItems' => function($query) {
+                    $query->withoutGlobalScope('active');
+                }
+            ])
+            ->withCount([
+                'menuItems' => function($query) {
+                    $query->withoutGlobalScope('active');
+                }
+            ])
+            ->orderBy('display_order')
+            ->get();
 
-                return [
-                    'id' => $category->id,
-                    'name' => $translation ? $translation->name : '',
-                    'slug' => $category->slug,
-                    'description' => $translation ? $translation->description : '',
-                    'is_active' => (bool) $category->is_active,
-                    'parent_id' => $category->parent_id,
-                    'display_order' => (int) $category->display_order,
-                ];
-            });
-        
         return response()->json([
             'status' => 'success',
             'message' => 'Categories retrieved successfully',
-            'data' => $categories
+            'data' => CategoryResource::collection($categories)
         ]);
     }
 
@@ -45,8 +43,20 @@ class CategoryController extends Controller
     public function hierarchy(Request $request): JsonResponse
     {
         $query = Category::query()
-            ->with(['translations', 'children', 'parent'])
-            ->withCount('menuItems');
+            ->with([
+                'translations', 
+                'children.translations',
+                'children.menuItems',
+                'parent',
+                'menuItems' => function($query) {
+                    $query->withoutGlobalScope('active');
+                }
+            ])
+            ->withCount([
+                'menuItems' => function($query) {
+                    $query->withoutGlobalScope('active');
+                }
+            ]);
 
         if ($request->filled('search')) {
             $search = $request->get('search');
@@ -76,17 +86,15 @@ class CategoryController extends Controller
     // GET /api/admin/category-stats (admin)
     public function stats(): JsonResponse
     {
-        // Get counts without the 'active' global scope
-        $total = Category::withoutGlobalScope('active')->count();
-        $active = Category::count(); // This will use the active scope
-        $parentCategories = Category::parents()->count();
-        $subCategories = Category::whereNotNull('parent_id')->count();
+        // Get counts including soft-deleted items
+        $total = Category::withTrashed()->count();
+        $active = Category::withTrashed()->where('is_active', true)->count();
+        $parentCategories = Category::withTrashed()->parents()->count();
+        $subCategories = Category::withTrashed()->whereNotNull('parent_id')->count();
         
-        // Count all active menu items
-        $menuItemsCount = \App\Models\MenuItem::where('is_active', true)
-            ->whereHas('category', function($query) {
-                $query->where('is_active', true);
-            })
+        // Count all menu items including inactive ones
+        $menuItemsCount = \App\Models\MenuItem::withoutGlobalScope('active')
+            ->withTrashed()
             ->count();
 
         return response()->json([
@@ -121,7 +129,13 @@ class CategoryController extends Controller
         $category->load([
             'translations',
             'children.translations',
+            'menuItems' => function($query) {
+                $query->withoutGlobalScope('active');
+            },
             'menuItems.translations',
+            'children.menuItems' => function($query) {
+                $query->withoutGlobalScope('active');
+            },
             'children.menuItems.translations'
         ]);
         

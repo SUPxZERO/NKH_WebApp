@@ -20,7 +20,6 @@ class Category extends Model
 
     protected $with = ['translations'];
     
-    
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -29,6 +28,14 @@ class Category extends Model
     public function scopeParents($query)
     {
         return $query->whereNull('parent_id');
+    }
+    
+    protected static function boot()
+    {
+        parent::boot();
+        static::addGlobalScope('ordered', function ($query) {
+            $query->orderBy('display_order', 'asc');
+        });
     }
 
     public function getNameAttribute()
