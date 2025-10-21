@@ -14,17 +14,31 @@ use Illuminate\Http\JsonResponse;
 class CategoryController extends Controller
 {
     // GET /api/categories (public)
-    public function index(): AnonymousResourceCollection
+    public function index(): JsonResponse
     {
-        \Log::info('Fetching categories');
+        $categories = Category::with('translations')->get()
+            ->map(function ($category) {
+                // Get translation in current locale, fall back to first available
+                $translation = $category->translations
+                    ->where('locale', app()->getLocale())
+                    ->first() ?? $category->translations->first();
+
+                return [
+                    'id' => $category->id,
+                    'name' => $translation ? $translation->name : '',
+                    'slug' => $category->slug,
+                    'description' => $translation ? $translation->description : '',
+                    'is_active' => (bool) $category->is_active,
+                    'parent_id' => $category->parent_id,
+                    'display_order' => (int) $category->display_order,
+                ];
+            });
         
-        $categories = Category::query()
-            ->with(['translations'])
-            ->get();
-            
-        \Log::info('Categories found: ' . $categories->count());
-        
-        return CategoryResource::collection($categories);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Categories retrieved successfully',
+            'data' => $categories
+        ]);
     }
 
     // GET /api/admin/categories/hierarchy (admin)

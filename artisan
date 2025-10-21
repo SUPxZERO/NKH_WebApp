@@ -1,73 +1,52 @@
 #!/usr/bin/env php
 <?php
 
-// Custom Artisan wrapper to handle the UrlGenerator bug
-$command = $argv[1] ?? 'help';
+define('LARAVEL_START', microtime(true));
 
-switch ($command) {
-    case 'serve':
-        $port = 8000;
-        // Check if port is specified
-        foreach ($argv as $arg) {
-            if (strpos($arg, '--port=') === 0) {
-                $port = (int) substr($arg, 7);
-            }
-        }
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
 
-        // Find available port if specified port is busy
-        $originalPort = $port;
-        while ($port <= $originalPort + 10) {
-            $socket = @fsockopen('127.0.0.1', $port, $errno, $errstr, 1);
-            if (!$socket) {
-                break;
-            } else {
-                fclose($socket);
-                $port++;
-            }
-        }
+require __DIR__.'/vendor/autoload.php';
 
-        echo "Laravel development server started: http://127.0.0.1:{$port}\n";
-        echo "Press Ctrl+C to stop the server\n";
-        passthru("php -S 127.0.0.1:{$port} -t public");
-        break;
+$app = require_once __DIR__.'/bootstrap/app.php';
 
-    case 'migrate':
-        include 'laravel-commands.php';
-        runMigrations();
-        break;
+/*
+|--------------------------------------------------------------------------
+| Run The Artisan Application
+|--------------------------------------------------------------------------
+|
+| When we run the console application, the current CLI command will be
+| executed in this console and the response sent back to a terminal
+| or another output device for the developers. Here goes nothing!
+|
+*/
 
-    case 'cache:clear':
-        include 'laravel-commands.php';
-        clearCache();
-        break;
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 
-    case 'route:list':
-        include 'laravel-commands.php';
-        listRoutes();
-        break;
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
 
-    case 'key:generate':
-        include 'laravel-commands.php';
-        generateKey();
-        break;
+/*
+|--------------------------------------------------------------------------
+| Shutdown The Application
+|--------------------------------------------------------------------------
+|
+| Once Artisan has finished running, we will fire off the shutdown events
+| so that any final work may be done by the application before we shut
+| down the process. This is the last thing to happen to the request.
+|
+*/
 
-    case 'clear:all':
-        include 'laravel-commands.php';
-        clearCache();     // already exists
-        clearConfig();    // you need to make this
-        clearRoutes();    // you need to make this
-        clearViews();     // you need to make this
-        echo "✅ Cleared cache, config, routes, and views.\n";
-        break;
+$kernel->terminate($input, $status);
 
-
-    default:
-        echo "Available commands:\n";
-        echo "  serve          Start the development server\n";
-        echo "  migrate        Run database migrations\n";
-        echo "  cache:clear    Clear application cache\n";
-        echo "  route:list     List all routes\n";
-        echo "  key:generate   Generate application key\n";
-        echo "\nNote: This is a custom Artisan wrapper due to Laravel 12 console issues.\n";
-        break;
-}
+exit($status);

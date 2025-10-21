@@ -222,7 +222,7 @@ export default function MenuItems() {
                       {item.image_path ? (
                         <img
                           src={`/storage/${item.image_path}`}
-                          alt={item.translations?.[0]?.name}
+                          alt={item.name}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -251,10 +251,10 @@ export default function MenuItems() {
                     {/* Content */}
                     <div className="space-y-2">
                       <h3 className="font-semibold text-white text-lg">
-                        {item.translations?.[0]?.name || 'Untitled'}
+                        {item.name || 'Untitled'}
                       </h3>
                       <p className="text-gray-400 text-sm line-clamp-2">
-                        {item.translations?.[0]?.description || 'No description'}
+                        {item.description || 'No description'}
                       </p>
                       <div className="flex justify-between items-center">
                         <span className="text-green-400 font-bold text-lg">
