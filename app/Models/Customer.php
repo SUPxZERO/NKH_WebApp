@@ -12,8 +12,14 @@ class Customer extends Model
     protected $fillable = [
         'user_id',
         'preferred_location_id',
+        'customer_code',
         'birth_date',
         'gender',
+        'loyalty_points',
+        'total_spent',
+        'preferred_language',
+        'dietary_preferences',
+        'marketing_consent',
         'preferences',
         'points_balance',
         'notes',
@@ -23,6 +29,10 @@ class Customer extends Model
         'birth_date' => 'date',
         'preferences' => 'array',
         'points_balance' => 'integer',
+        'loyalty_points' => 'integer',
+        'total_spent' => 'decimal:2',
+        'marketing_consent' => 'boolean',
+        'dietary_preferences' => 'array',
     ];
 
     public function user()

@@ -145,11 +145,17 @@ class MenuItemTranslationSeeder extends Seeder
             ],
         ];
 
+        // Clear existing translations first
+        MenuItemTranslation::query()->delete();
+        
         $menuItems = MenuItem::all();
         
         foreach ($menuItems as $menuItem) {
-            if (isset($translations[$menuItem->slug])) {
-                foreach ($translations[$menuItem->slug] as $locale => $translation) {
+            // Extract base slug by removing location prefix
+            $baseSlug = preg_replace('/^l\d+-/', '', $menuItem->slug);
+            
+            if (isset($translations[$baseSlug])) {
+                foreach ($translations[$baseSlug] as $locale => $translation) {
                     MenuItemTranslation::create([
                         'menu_item_id' => $menuItem->id,
                         'locale' => $locale,

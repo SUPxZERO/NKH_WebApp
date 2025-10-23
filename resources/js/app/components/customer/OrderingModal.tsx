@@ -92,7 +92,7 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                   filteredMenu.map((m) => (
                     <div key={m.id} className="rounded-2xl overflow-hidden border border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-xl">
                       {m.image_url ? (
-                        <img src={m.image_url} alt={m.name} className="h-28 w-full object-cover" />
+                        <img src={m.image_path} alt={m.name} className="h-28 w-full object-cover" />
                       ) : (
                         <div className="h-28 bg-gradient-to-br from-fuchsia-600/30 to-rose-500/30" />
                       )}

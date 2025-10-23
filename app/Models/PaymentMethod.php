@@ -12,12 +12,17 @@ class PaymentMethod extends Model
     protected $fillable = [
         'name',
         'code',
+        'type',
         'display_order',
         'is_active',
+        'processing_fee',
+        'description'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'processing_fee' => 'decimal:2',
+        'display_order' => 'integer'
     ];
 
     public function payments()

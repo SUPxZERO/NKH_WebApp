@@ -16,6 +16,7 @@ class Category extends Model
         'slug',
         'display_order',
         'is_active',
+        'image',
     ];
 
     protected $with = ['translations'];

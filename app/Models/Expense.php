@@ -9,6 +9,10 @@ class Expense extends Model
 {
     use HasFactory;
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    
     protected $fillable = [
         'location_id',
         'expense_category_id',
@@ -22,6 +26,11 @@ class Expense extends Model
         'attachment_path',
         'status',
     ];
+    
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
+    }
 
     protected $casts = [
         'expense_date' => 'date',

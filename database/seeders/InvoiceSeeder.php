@@ -46,29 +46,38 @@ class InvoiceSeeder extends Seeder
 
     private function getAmountPaid(float $totalAmount): float
     {
-        $paymentScenarios = [
-            'full' => $totalAmount,           // 60% fully paid
-            'partial' => $totalAmount * 0.5,  // 20% partially paid
-            'none' => 0.00,                   // 20% unpaid
-        ];
+        $status = $this->getInvoiceStatus();
         
-        $scenario = $this->getPaymentScenario();
-        return round($paymentScenarios[$scenario], 2);
+        switch ($status) {
+            case 'paid':
+                return $totalAmount;
+            case 'issued':
+                return 0.00;
+            case 'draft':
+                return 0.00;
+            case 'cancelled':
+                return 0.00;
+            default:
+                return 0.00;
+        }
     }
 
     private function getAmountDue(float $totalAmount): float
     {
-        $amountPaid = $this->getAmountPaid($totalAmount);
-        return round($totalAmount - $amountPaid, 2);
-    }
-
-    private function getPaymentScenario(): string
-    {
-        $random = rand(1, 100);
+        $status = $this->getInvoiceStatus();
         
-        if ($random <= 60) return 'full';
-        if ($random <= 80) return 'partial';
-        return 'none';
+        switch ($status) {
+            case 'paid':
+                return 0.00;
+            case 'issued':
+                return $totalAmount;
+            case 'draft':
+                return $totalAmount;
+            case 'cancelled':
+                return 0.00;
+            default:
+                return 0.00;
+        }
     }
 
     private function getInvoiceStatus(): string
@@ -76,24 +85,24 @@ class InvoiceSeeder extends Seeder
         $random = rand(1, 100);
         
         if ($random <= 60) return 'paid';
-        if ($random <= 80) return 'partial';
-        if ($random <= 95) return 'pending';
-        return 'overdue';
+        if ($random <= 80) return 'issued';
+        if ($random <= 95) return 'draft';
+        return 'cancelled';
     }
 
     private function getPaidDate($invoiceDate): ?string
     {
         $status = $this->getInvoiceStatus();
         
-        if ($status === 'paid') {
-            return $invoiceDate->copy()->addDays(rand(0, 7))->format('Y-m-d H:i:s');
+        switch ($status) {
+            case 'paid':
+                return $invoiceDate->copy()->addMinutes(rand(10, 60))->format('Y-m-d H:i:s');
+            case 'issued':
+            case 'draft':
+            case 'cancelled':
+            default:
+                return null;
         }
-        
-        if ($status === 'partial') {
-            return rand(0, 1) ? $invoiceDate->copy()->addDays(rand(0, 5))->format('Y-m-d H:i:s') : null;
-        }
-        
-        return null;
     }
 
     private function getInvoiceNotes(): ?string

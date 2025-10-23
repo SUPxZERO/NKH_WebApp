@@ -18,7 +18,7 @@ class OrderSeeder extends Seeder
         $locations = Location::all();
         
         $orderStatuses = ['pending', 'received', 'preparing', 'ready', 'completed', 'cancelled'];
-        $orderTypes = ['dine_in', 'pickup', 'delivery'];
+        $orderTypes = ['dine-in', 'pickup', 'delivery'];
         
         // Generate orders for the last 3 months
         $startDate = Carbon::now()->subMonths(3);
@@ -31,7 +31,7 @@ class OrderSeeder extends Seeder
             
             // Get table for dine-in orders
             $table = null;
-            if ($orderType === 'dine_in') {
+            if ($orderType === 'dine-in') {
                 $locationTables = $tables->where('floor.location_id', $location->id);
                 $table = $locationTables->isNotEmpty() ? $locationTables->random() : null;
             }
@@ -39,17 +39,22 @@ class OrderSeeder extends Seeder
             $orderDate = $this->randomDateBetween($startDate, $endDate);
             $status = $this->getOrderStatus($orderDate);
             
-            Order::create([
+            $subtotal = $this->generateSubtotal();
+            $tax = $this->calculateTax($subtotal);
+            $discount = $this->generateDiscount();
+            $total = $this->calculateTotal($subtotal, $tax, $discount);
+            
+            $order = Order::create([
                 'location_id' => $location->id,
                 'customer_id' => $customer->id,
                 'table_id' => $table?->id,
                 'order_number' => $this->generateOrderNumber($location->code, $orderDate),
                 'order_type' => $orderType,
                 'status' => $status,
-                'subtotal' => $this->generateSubtotal(),
-                'tax_amount' => $this->calculateTax($this->generateSubtotal()),
-                'discount_amount' => $this->generateDiscount(),
-                'total_amount' => $this->calculateTotal(),
+                'subtotal' => $subtotal,
+                'tax_amount' => $tax,
+                'discount_amount' => $discount,
+                'total_amount' => $total,
                 'special_instructions' => $this->getSpecialInstructions(),
                 'estimated_ready_time' => $this->getEstimatedReadyTime($orderDate, $orderType),
                 'ordered_at' => $orderDate,
@@ -79,7 +84,7 @@ class OrderSeeder extends Seeder
 
     private function generateOrderNumber(string $locationCode, Carbon $date): string
     {
-        return $locationCode . '-' . $date->format('Ymd') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+        return $locationCode . '-' . $date->format('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) . '-' . substr(md5(microtime()), 0, 3);
     }
 
     private function generateSubtotal(): float
@@ -97,12 +102,8 @@ class OrderSeeder extends Seeder
         return rand(0, 100) < 20 ? round(rand(200, 1000) / 100, 2) : 0.00; // 20% chance of discount
     }
 
-    private function calculateTotal(): float
+    private function calculateTotal(float $subtotal, float $tax, float $discount): float
     {
-        $subtotal = $this->generateSubtotal();
-        $tax = $this->calculateTax($subtotal);
-        $discount = $this->generateDiscount();
-        
         return round($subtotal + $tax - $discount, 2);
     }
 

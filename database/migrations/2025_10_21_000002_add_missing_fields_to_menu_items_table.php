@@ -10,14 +10,8 @@ return new class extends Migration
     {
         Schema::table('menu_items', function (Blueprint $table) {
             // Add missing fields if they don't exist
-            if (!Schema::hasColumn('menu_items', 'name')) {
-                $table->string('name')->nullable()->after('category_id');
-            }
-            if (!Schema::hasColumn('menu_items', 'description')) {
-                $table->text('description')->nullable()->after('name');
-            }
             if (!Schema::hasColumn('menu_items', 'sku')) {
-                $table->string('sku')->nullable()->after('description');
+                $table->string('sku')->nullable()->after('category_id');
             }
             if (!Schema::hasColumn('menu_items', 'display_order')) {
                 $table->integer('display_order')->default(0)->after('is_active');

@@ -6,17 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::table('menu_items', function (Blueprint $table) {
-            $table->string('name')->nullable()->after('category_id');
+        Schema::table('order_items', function (Blueprint $table) {
+            //
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::table('menu_items', function (Blueprint $table) {
-            $table->dropColumn('name');
+        Schema::table('order_items', function (Blueprint $table) {
+            //
         });
     }
 };

@@ -221,7 +221,7 @@ export default function MenuItems() {
                     <div className="relative h-48 mb-4 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20">
                       {item.image_path ? (
                         <img
-                          src={`/storage/${item.image_path}`}
+                          src={`${item.image_path}`}
                           alt={item.name}
                           className="w-full h-full object-cover"
                         />

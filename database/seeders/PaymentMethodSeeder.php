@@ -12,6 +12,7 @@ class PaymentMethodSeeder extends Seeder
         $paymentMethods = [
             [
                 'name' => 'Cash',
+                'code' => 'CASH',
                 'type' => 'cash',
                 'is_active' => true,
                 'processing_fee' => 0.00,
@@ -19,6 +20,7 @@ class PaymentMethodSeeder extends Seeder
             ],
             [
                 'name' => 'Credit Card',
+                'code' => 'CREDIT',
                 'type' => 'card',
                 'is_active' => true,
                 'processing_fee' => 2.50,
@@ -26,6 +28,7 @@ class PaymentMethodSeeder extends Seeder
             ],
             [
                 'name' => 'Debit Card',
+                'code' => 'DEBIT',
                 'type' => 'card',
                 'is_active' => true,
                 'processing_fee' => 1.50,
@@ -33,6 +36,7 @@ class PaymentMethodSeeder extends Seeder
             ],
             [
                 'name' => 'Mobile Payment',
+                'code' => 'MOBILE',
                 'type' => 'digital',
                 'is_active' => true,
                 'processing_fee' => 1.00,
@@ -40,6 +44,7 @@ class PaymentMethodSeeder extends Seeder
             ],
             [
                 'name' => 'Bank Transfer',
+                'code' => 'TRANSFER',
                 'type' => 'transfer',
                 'is_active' => true,
                 'processing_fee' => 0.50,
@@ -47,6 +52,7 @@ class PaymentMethodSeeder extends Seeder
             ],
             [
                 'name' => 'Gift Card',
+                'code' => 'GIFT',
                 'type' => 'voucher',
                 'is_active' => true,
                 'processing_fee' => 0.00,

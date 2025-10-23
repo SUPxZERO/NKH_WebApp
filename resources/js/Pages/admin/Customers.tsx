@@ -2,7 +2,7 @@ import React from 'react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
-import { Customer, Location, ApiResponse } from '@/app/types/domain';
+import { Customer, Location, ApiResponse, PaginatedResponse } from '@/app/types/domain';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
@@ -37,20 +37,20 @@ export default function Customers() {
   const [perPage, setPerPage] = React.useState(15);
 
   // Fetch customers
-  const { data: customers, isLoading } = useQuery({
+  const { data: customers, isLoading } = useQuery<PaginatedResponse<Customer>>({
     queryKey: ['admin/customers', page, search],
-    queryFn: () => apiGet(`/api/admin/customers?page=${page}&per_page=${perPage}&search=${search}`)
-  }) as { data: any, isLoading: boolean };
+    queryFn: () => apiGet(`/admin/customers?page=${page}&per_page=${perPage}&search=${search}`)
+  });
 
   // Fetch locations for dropdown
-  const { data: locations } = useQuery({
+  const { data: locations } = useQuery<ApiResponse<Location[]>>({
     queryKey: ['locations'],
-    queryFn: () => apiGet('/api/locations')
-  }) as { data: any };
+    queryFn: () => apiGet('/locations')
+  });
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: any) => apiPost('/api/admin/customers', data),
+    mutationFn: (data: any) => apiPost('/admin/customers', data),
     onSuccess: () => {
       toastSuccess('Customer created successfully!');
       setOpenCreate(false);
@@ -65,7 +65,7 @@ export default function Customers() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiPut(`/api/admin/customers/${id}`, data),
+      apiPut(`/admin/customers/${id}`, data),
     onSuccess: () => {
       toastSuccess('Customer updated successfully!');
       setOpenEdit(false);
@@ -79,7 +79,7 @@ export default function Customers() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiDelete(`/api/admin/customers/${id}`),
+    mutationFn: (id: number) => apiDelete(`/admin/customers/${id}`),
     onSuccess: () => {
       toastSuccess('Customer deactivated successfully!');
       qc.invalidateQueries({ queryKey: ['admin/customers'] });

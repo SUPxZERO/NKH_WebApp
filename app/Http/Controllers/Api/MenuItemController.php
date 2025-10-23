@@ -7,46 +7,68 @@ use App\Http\Requests\Api\MenuItem\StoreMenuItemRequest;
 use App\Http\Requests\Api\MenuItem\UpdateMenuItemRequest;
 use App\Http\Resources\MenuItemResource;
 use App\Models\MenuItem;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class MenuItemController extends Controller
 {
-    // GET /api/menu-items (public)
     public function index(Request $request): JsonResponse
     {
-        $query = MenuItem::query()
-            ->withoutGlobalScope('active')
-            ->with([
-                'translations',
-                'category.translations'
+        try {
+            $query = MenuItem::query()
+                ->withoutGlobalScope('active')
+                ->with(['translations', 'category.translations']);
+
+            // Filter by category if provided
+            if ($request->filled('category')) {
+                $query->where('category_id', $request->integer('category'));
+            }
+
+            // Filter active/inactive items
+            if ($request->boolean('active_only', true)) {
+                $query->where('is_active', true);
+            }
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->input('search');
+                $query->where(function($q) use ($searchTerm) {
+                    $q->whereHas('translations', function ($trans) use ($searchTerm) {
+                        $trans->where('name', 'like', "%{$searchTerm}%")
+                             ->orWhere('description', 'like', "%{$searchTerm}%");
+                    })->orWhere('sku', 'like', "%{$searchTerm}%");
+                });
+            }
+
+            // Sort by display order
+            $query->orderBy('display_order');
+
+            // Get pagination parameters with validation
+            $perPage = min(max((int) $request->input('per_page', 12), 1), 100);
+            
+            $menuItems = $query->paginate($perPage);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => MenuItemResource::collection($menuItems),
+                'meta' => [
+                    'current_page' => $menuItems->currentPage(),
+                    'last_page' => $menuItems->lastPage(),
+                    'total' => $menuItems->total(),
+                    'per_page' => $menuItems->perPage()
+                ]
             ]);
-
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->integer('category'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch menu items',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
-
-        if ($request->boolean('active_only', true)) {
-            $query->where('is_active', true);
-        }
-        
-        $query->orderBy('display_order');
-        
-        $menuItems = $query->paginate(30);
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => MenuItemResource::collection($menuItems),
-            'meta' => [
-                'current_page' => $menuItems->currentPage(),
-                'last_page' => $menuItems->lastPage(),
-                'total' => $menuItems->total(),
-                'per_page' => $menuItems->perPage()
-            ]
-        ]);
     }
-
+        
     // POST /api/menu-items (role:admin,manager)
     public function store(StoreMenuItemRequest $request): MenuItemResource
     {

@@ -40,11 +40,14 @@ class ReservationSeeder extends Seeder
             $reservationDate = $this->randomDateBetween($startDate, $endDate);
             $reservationTime = $this->getReservationTime();
             
+            $reservationNumber = $this->generateReservationNumber($location->code, $reservationDate);
             Reservation::create([
                 'location_id' => $location->id,
                 'customer_id' => $customer->id,
                 'table_id' => $table->id,
-                'reservation_number' => $this->generateReservationNumber($location->code, $reservationDate),
+                'code' => substr(md5($reservationNumber), 0, 20),
+                'reservation_number' => $reservationNumber,
+                'reserved_for' => $customer->full_name ?? $customer->name ?? "{$customer->first_name} {$customer->last_name}",
                 'party_size' => rand(2, min(8, $table->capacity)),
                 'reservation_date' => $reservationDate->format('Y-m-d'),
                 'reservation_time' => $reservationTime,
@@ -73,11 +76,14 @@ class ReservationSeeder extends Seeder
             $reservationDate = $this->randomDateBetween($startDate, $endDate);
             $reservationTime = $this->getReservationTime();
             
+            $reservationNumber = $this->generateReservationNumber($location->code, $reservationDate);
             Reservation::create([
                 'location_id' => $location->id,
                 'customer_id' => $customer->id,
                 'table_id' => $table->id,
-                'reservation_number' => $this->generateReservationNumber($location->code, $reservationDate),
+                'code' => substr(md5($reservationNumber), 0, 20),
+                'reservation_number' => $reservationNumber,
+                'reserved_for' => $customer->full_name ?? $customer->name ?? "{$customer->first_name} {$customer->last_name}",
                 'party_size' => rand(2, min(8, $table->capacity)),
                 'reservation_date' => $reservationDate->format('Y-m-d'),
                 'reservation_time' => $reservationTime,

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\CustomerRequestController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\DashboardController;
 
 // Public endpoints
 Route::post('/register', [AuthController::class, 'register']);
@@ -89,6 +90,10 @@ Route::group([], function () {
         Route::get('customer-requests', [CustomerRequestController::class, 'index']);
         Route::get('customer-requests/{customerRequest}', [CustomerRequestController::class, 'show']);
         Route::patch('customer-requests/{customerRequest}', [CustomerRequestController::class, 'update']);
+
+        // Dashboard
+        Route::get('dashboard/stats', [DashboardController::class, 'stats']);
+        Route::post('dashboard/refresh', [DashboardController::class, 'refresh']);
 
         // Order oversight and approvals
         Route::get('orders', [OrderController::class, 'index']); // Assuming an index method for admin

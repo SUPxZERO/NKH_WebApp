@@ -12,20 +12,17 @@ class Payment extends Model
     protected $fillable = [
         'invoice_id',
         'payment_method_id',
-        'location_id',
-        'created_by',
         'amount',
-        'currency',
-        'reference',
         'transaction_id',
+        'reference_number',
         'status',
-        'paid_at',
-        'notes',
+        'processed_at',
+        'notes'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'paid_at' => 'datetime',
+        'processed_at' => 'datetime'
     ];
 
     public function invoice()

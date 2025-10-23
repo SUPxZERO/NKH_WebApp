@@ -21,9 +21,12 @@ class MenuItem extends Model
         'price',
         'cost',
         'image_path',
+        'image',
         'is_popular',
         'is_active',
         'display_order',
+        'prep_time',
+        'calories',
     ];
     
     protected static function boot()

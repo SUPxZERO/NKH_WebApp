@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reservations', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->integer('prep_time')->nullable()->after('cost');
+            $table->integer('calories')->nullable()->after('prep_time');
         });
     }
 
@@ -22,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reservations');
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->dropColumn(['prep_time', 'calories']);
+        });
     }
 };

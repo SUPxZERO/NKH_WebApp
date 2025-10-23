@@ -45,25 +45,6 @@ class DatabaseSeeder extends Seeder
             
             // Phase 5: Advanced Features
             ReservationSeeder::class,
-            ExpenseCategorySeeder::class,
-            ExpenseSeeder::class,
-            LoyaltyPointSeeder::class,
-            PromotionSeeder::class,
-            
-            // Phase 6: System & Audit
-            FeedbackSeeder::class,
-            AuditLogSeeder::class,
-            AttendanceSeeder::class,
-            LeaveRequestSeeder::class,
-            InventoryTransactionSeeder::class,
-            
-            // Legacy seeders (if needed)
-            DefaultLocationSeeder::class,
-            RolesAndPermissionsSeeder::class,
-            PaymentMethodsSeeder::class,
-            OperatingHoursSeeder::class,
-            OrderTimeSlotsSeeder::class,
-            CustomerAddressesSeeder::class,
         ]);
 
         // Re-enable foreign key checks

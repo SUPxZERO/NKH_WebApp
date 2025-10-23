@@ -2,7 +2,7 @@ import React from 'react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
-import { Employee, Position, Location, ApiResponse } from '@/app/types/domain';
+import { Employee, Position, Location, ApiResponse, PaginatedResponse } from '@/app/types/domain';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Input } from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
@@ -40,26 +40,26 @@ export default function Employees() {
   const [perPage, setPerPage] = React.useState(15);
 
   // Fetch employees
-  const { data: employees, isLoading } = useQuery({
+  const { data: employees, isLoading } = useQuery<PaginatedResponse<Employee>>({
     queryKey: ['admin/employees', page, search],
-    queryFn: () => apiGet(`/api/admin/employees?page=${page}&per_page=${perPage}&search=${search}`)
+    queryFn: () => apiGet(`/admin/employees?page=${page}&per_page=${perPage}&search=${search}`)
   });
 
   // Fetch positions for dropdown
-  const { data: positions } = useQuery({
+  const { data: positions } = useQuery<ApiResponse<Position[]>>({
     queryKey: ['positions'],
-    queryFn: () => apiGet('/api/positions')
+    queryFn: () => apiGet('/positions')
   });
 
   // Fetch locations for dropdown
-  const { data: locations } = useQuery({
+  const { data: locations } = useQuery<ApiResponse<Location[]>>({
     queryKey: ['locations'],
-    queryFn: () => apiGet('/api/locations')
+    queryFn: () => apiGet('/locations')
   });
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: any) => apiPost('/api/admin/employees', data),
+    mutationFn: (data: any) => apiPost('/admin/employees', data),
     onSuccess: () => {
       toastSuccess('Employee created successfully!');
       setOpenCreate(false);
@@ -74,7 +74,7 @@ export default function Employees() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiPut(`/api/admin/employees/${id}`, data),
+      apiPut(`/admin/employees/${id}`, data),
     onSuccess: () => {
       toastSuccess('Employee updated successfully!');
       setOpenEdit(false);
@@ -88,7 +88,7 @@ export default function Employees() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiDelete(`/api/admin/employees/${id}`),
+    mutationFn: (id: number) => apiDelete(`/admin/employees/${id}`),
     onSuccess: () => {
       toastSuccess('Employee deactivated successfully!');
       qc.invalidateQueries({ queryKey: ['admin/employees'] });

@@ -25,6 +25,7 @@ class User extends Authenticatable
         'phone',
         'default_location_id',
         'is_active',
+        'role',
     ];
 
     /**
