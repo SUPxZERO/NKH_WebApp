@@ -46,7 +46,7 @@ class MenuItemController extends Controller
             $query->orderBy('display_order');
 
             // Get pagination parameters with validation
-            $perPage = min(max((int) $request->input('per_page', 12), 1), 100);
+            $perPage = min(max((int) $request->input('per_page', default: 24), 1), 100);
             
             $menuItems = $query->paginate($perPage);
 

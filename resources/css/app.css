@@ -48,7 +48,11 @@
     @apply font-body antialiased;
     @apply bg-background-light dark:bg-background-dark;
     @apply text-neutral-900 dark:text-neutral-100;
-    @apply selection:bg-primary-500/20 selection:text-primary-900;
+  }
+
+  ::selection {
+    background-color: rgb(249 115 22 / 0.2);
+    color: rgb(124 45 18);
   }
 
   /* Enhanced focus styles */

@@ -12,6 +12,12 @@ export default {
             },
         },
     },
+    variants: {
+        extend: {
+            backgroundColor: ['selection'],
+            textColor: ['selection'],
+        },
+    },
     plugins: [
         require('@tailwindcss/forms'),
         require('tailwindcss-animate'),
@@ -51,34 +57,38 @@ export default {
 
             // 🌈 Revolutionary Restaurant Color Palette
             colors: {
-                // Primary Brand Colors - Golden Amber Theme
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
+                ring: "hsl(var(--ring))",
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
                 primary: {
-                    50: '#fefdf8',
-                    100: '#fef7e6',
-                    200: '#fdecc4',
-                    300: '#fbdb8f',
-                    400: '#f8c555',
-                    500: '#f59e0b',
-                    600: '#d97706',
-                    700: '#b45309',
-                    800: '#92400e',
-                    900: '#78350f',
-                    DEFAULT: '#f59e0b',
+                    '50': '#fff7ed',
+                    '100': '#ffedd5',
+                    '200': '#fed7aa',
+                    '300': '#fdba74',
+                    '400': '#fb923c',
+                    '500': '#f97316',
+                    '600': '#ea580c',
+                    '700': '#c2410c',
+                    '800': '#9a3412',
+                    '900': '#7c2d12',
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
                 },
-
-                // Secondary Colors - Rich Food Tones
                 secondary: {
-                    50: '#f8f4f0',
-                    100: '#e8ddd4',
-                    200: '#d4c4b0',
-                    300: '#b8a082',
-                    400: '#9c7c54',
-                    500: '#8b5a2b',
-                    600: '#7a4a1f',
-                    700: '#693c17',
-                    800: '#582f11',
-                    900: '#47240c',
-                    DEFAULT: '#8b5a2b',
+                    '50': '#f8fafc',
+                    '100': '#f1f5f9',
+                    '200': '#e2e8f0',
+                    '300': '#cbd5e1',
+                    '400': '#94a3b8',
+                    '500': '#64748b',
+                    '600': '#475569',
+                    '700': '#334155',
+                    '800': '#1e293b',
+                    '900': '#0f172a',
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
                 },
 
                 // Accent Colors - Fresh Ingredients
