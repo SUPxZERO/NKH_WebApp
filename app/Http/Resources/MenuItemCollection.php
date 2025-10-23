@@ -45,6 +45,10 @@ class MenuItemCollection extends ResourceCollection
                     'created_at' => $menuItem->created_at,
                     'updated_at' => $menuItem->updated_at,
                 ];
-        });
+            }),
+            'meta' => [
+                'total' => $this->collection->count(),
+            ],
+        ];
     }
 }
