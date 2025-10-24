@@ -23,6 +23,9 @@ return new class extends Migration
             $table->string('country', 100)->nullable();
             $table->string('phone', 30)->nullable();
             $table->boolean('is_active')->default(true)->index();
+            $table->boolean('accepts_online_orders')->default(false);
+            $table->boolean('accepts_pickup')->default(false);
+            $table->boolean('accepts_delivery')->default(false);
             $table->timestamps();
         });
     }
