@@ -13,7 +13,20 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('location_id')->nullable()->constrained()->cascadeOnUpdate()->nullOnDelete();
+            $table->string('code', 50)->unique();
+            $table->string('name', 150);
+            $table->string('contact_name', 100)->nullable();
+            $table->string('contact_phone', 30)->nullable();
+            $table->string('email')->nullable();
+            $table->string('address')->nullable();
+            $table->string('type', 50)->index();
+            $table->string('payment_terms', 50)->nullable();
+            $table->text('notes')->nullable();
+            $table->string('tax_id', 50)->nullable();
+            $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

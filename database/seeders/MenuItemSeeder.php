@@ -45,7 +45,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 180,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $hotAppetizers?->id,
@@ -56,7 +56,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 250,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $hotAppetizers?->id,
@@ -67,7 +67,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 220,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
                 ],
 
                 // Cold Appetizers
@@ -80,7 +80,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 120,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $coldAppetizers?->id,
@@ -91,7 +91,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 280,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop',
                 ],
 
                 // Sharing Platters
@@ -104,7 +104,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 850,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items',
                 ],
 
                 // Grilled Specialties
@@ -117,7 +117,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 420,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items',
                 ],
                 [
                     'category_id' => $grilledSpecialties?->id,
@@ -128,7 +128,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 580,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items',
                 ],
                 [
                     'category_id' => $grilledSpecialties?->id,
@@ -139,7 +139,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 380,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1527477396000-e27163b481c2?w=400&h=300&fit=crop',
                 ],
 
                 // Pasta & Noodles
@@ -152,7 +152,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 450,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $pastaNoodles?->id,
@@ -163,7 +163,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 520,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1559314809-0f31657def5e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1559314809-0f31657def5e?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $pastaNoodles?->id,
@@ -174,7 +174,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 680,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1621996346565-e3dbc353d2e5?w=400&h=300&fit=crop',
                 ],
 
                 // Seafood
@@ -187,7 +187,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 380,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items',
                 ],
                 [
                     'category_id' => $seafood?->id,
@@ -198,7 +198,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 320,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items',
                 ],
                 [
                     'category_id' => $seafood?->id,
@@ -209,7 +209,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 420,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
                 ],
 
                 // Vegetarian
@@ -222,7 +222,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 150,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $vegetarian?->id,
@@ -233,7 +233,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 280,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
                 ],
 
                 // Traditional Soups
@@ -246,7 +246,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 320,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1547592180-85f173990554?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $traditionalSoups?->id,
@@ -257,7 +257,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 380,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1547592180-85f173990554?w=400&h=300&fit=crop',
                 ],
 
                 // Fresh Salads
@@ -270,7 +270,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 180,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1540189549336-e6e99c3679fe?w=400&h=300&fit=crop',
                 ],
 
                 // Traditional Desserts
@@ -283,7 +283,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 320,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $traditionalDesserts?->id,
@@ -294,7 +294,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 280,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
                 ],
 
                 // Ice Cream
@@ -307,7 +307,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 220,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $iceCream?->id,
@@ -318,7 +318,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 240,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
                 ],
 
                 // Cakes & Pastries
@@ -331,7 +331,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 420,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop',
                 ],
 
                 // Hot Beverages
@@ -344,7 +344,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 120,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $hotBeverages?->id,
@@ -355,7 +355,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 5,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
 
                 // Cold Beverages
@@ -368,7 +368,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 150,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $coldBeverages?->id,
@@ -379,7 +379,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 140,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
 
                 // Fresh Juices
@@ -392,7 +392,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 110,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $freshJuices?->id,
@@ -403,7 +403,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 90,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
 
                 // Alcoholic Beverages
@@ -416,7 +416,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 150,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
                 [
                     'category_id' => $alcoholicBeverages?->id,
@@ -427,7 +427,7 @@ class MenuItemSeeder extends Seeder
                     'calories' => 125,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
+                    'image_path' => '\images\menu-items/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop',
                 ],
             ];
 

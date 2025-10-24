@@ -105,7 +105,7 @@ export default function AuditLogs() {
     return <Activity className="w-4 h-4" />;
   };
 
-  const formatUserAgent = (userAgent: string | null) => {
+  const formatUserAgent = (userAgent: string | null | undefined) => {
     if (!userAgent) return 'Unknown';
     
     // Simple user agent parsing

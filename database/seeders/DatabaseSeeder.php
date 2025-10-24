@@ -27,14 +27,15 @@ class DatabaseSeeder extends Seeder
             
             // Phase 2: Restaurant Configuration
             CategorySeeder::class,
-            CategoryTranslationSeeder::class,
-            MenuItemSeeder::class,
-            MenuItemTranslationSeeder::class,
-            RecipeSeeder::class,
             
             // Phase 3: Inventory Management
             IngredientSeeder::class,
             SupplierSeeder::class,
+            
+            // Phase 4: Menu Management
+            MenuItemSeeder::class,
+            MenuItemTranslationSeeder::class,
+            RecipeSeeder::class,
             
             // Phase 4: Restaurant Operations 
             FloorSeeder::class,
@@ -52,7 +53,7 @@ class DatabaseSeeder extends Seeder
             
             // Phase 6: Advanced Operations
             ReservationSeeder::class,
-            StockMovementSeeder::class,
+            InventoryTransactionSeeder::class,
         ]);
 
         // Re-enable foreign key checks

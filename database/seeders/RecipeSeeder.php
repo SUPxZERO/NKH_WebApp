@@ -55,8 +55,10 @@ class RecipeSeeder extends Seeder
                 }
             }
 
-            // Attach ingredients to recipe
-            $recipe->ingredients()->attach($recipeIngredients);
+            // Create recipe ingredients
+            foreach ($recipeIngredients as $ingredient) {
+                $recipe->ingredients()->create($ingredient);
+            }
         });
     }
 

@@ -3,19 +3,21 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\StockMovement;
+use App\Models\InventoryTransaction;
 use App\Models\Ingredient;
 use App\Models\Location;
 use App\Models\User;
 use Carbon\Carbon;
 
-class StockMovementSeeder extends Seeder
+class InventoryTransactionSeeder extends Seeder
 {
     public function run(): void
     {
         $ingredients = Ingredient::all();
         $locations = Location::all();
-        $users = User::where('role', 'inventory_manager')->get();
+        $users = User::whereHas('roles', function($query) {
+            $query->where('slug', 'manager');
+        })->get();
         
         // Generate stock movements for the last 30 days
         $startDate = Carbon::now()->subDays(30);
@@ -35,7 +37,7 @@ class StockMovementSeeder extends Seeder
                     ->setHour(rand(6, 22))
                     ->setMinute(array_rand([0, 15, 30, 45]));
                 
-                StockMovement::create([
+                InventoryTransaction::create([
                     'ingredient_id' => $ingredient->id,
                     'location_id' => $location->id,
                     'user_id' => $user->id,
@@ -45,6 +47,7 @@ class StockMovementSeeder extends Seeder
                     'reference_type' => $this->getReferenceType(),
                     'reference_id' => rand(1, 100),
                     'notes' => $this->getNotes(),
+                    'transacted_at' => $movementTime,
                     'created_at' => $movementTime,
                     'updated_at' => $movementTime,
                 ]);

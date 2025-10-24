@@ -39,13 +39,23 @@ export default function MenuItems() {
   const [perPage, setPerPage] = React.useState(12);
 
   // Fetch menu items
-  const { data: menuItems, isLoading } = useQuery({
+  const { data: menuItems, isLoading } = useQuery<{
+    data: MenuItem[];
+    meta: {
+      current_page: number;
+      last_page: number;
+      per_page: number;
+      total: number;
+    };
+  }>({
     queryKey: ['menu-items', page, search],
     queryFn: () => apiGet(`/menu-items?page=${page}&per_page=${perPage}&search=${search}`)
   });
 
   // Fetch categories for dropdown
-  const { data: categories } = useQuery({
+  const { data: categories } = useQuery<{
+    data: Category[];
+  }>({
     queryKey: ['categories'],
     queryFn: () => apiGet('/categories')
   });
@@ -417,8 +427,8 @@ export default function MenuItems() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Image</label>
             <ImageUploader
-              onFileSelect={setImage}
-              currentImage={editingItem?.image_path ? `/storage/${editingItem.image_path}` : undefined}
+              onChange={(file) => setImage(file)}
+              value={editingItem?.image_path ? `/storage/${editingItem.image_path}` : null}
             />
           </div>
 
