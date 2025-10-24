@@ -24,38 +24,18 @@ Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'
 // });
 
 // Admin routes
-// Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-//     Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
-//     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
-//     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
-//     Route::get('employees', fn () => Inertia::render('Admin/Employees'))->name('admin.employees');
-//     Route::get('customers', fn () => Inertia::render('Admin/Customers'))->name('admin.customers');
-//     Route::get('expenses', fn () => Inertia::render('Admin/Expenses'))->name('admin.expenses');
-//     Route::get('floors', fn () => Inertia::render('Admin/Floors'))->name('admin.floors');
-//     Route::get('tables', fn () => Inertia::render('Admin/Tables'))->name('admin.tables');
-//     Route::get('invoices', fn () => Inertia::render('Admin/Invoices'))->name('admin.invoices');
-//     Route::get('reservations', fn () => Inertia::render('Admin/Reservations'))->name('admin.reservations');
-//     Route::get('settings', fn () => Inertia::render('Admin/Settings'))->name('admin.settings');
-//     Route::get('customer-requests', fn () => Inertia::render('Admin/CustomerRequests'))->name('admin.customer-requests');
-// });
-
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')
+        ->group(function () {
     Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
-    Route::get('menu-items', fn () => Inertia::render('Admin/MenuItems'))->name('admin.menu-items');
+    Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
     Route::get('employees', fn () => Inertia::render('Admin/Employees'))->name('admin.employees');
     Route::get('customers', fn () => Inertia::render('Admin/Customers'))->name('admin.customers');
-    Route::get('orders', fn () => Inertia::render('Admin/Orders'))->name('admin.orders');
     Route::get('expenses', fn () => Inertia::render('Admin/Expenses'))->name('admin.expenses');
     Route::get('floors', fn () => Inertia::render('Admin/Floors'))->name('admin.floors');
     Route::get('tables', fn () => Inertia::render('Admin/Tables'))->name('admin.tables');
     Route::get('invoices', fn () => Inertia::render('Admin/Invoices'))->name('admin.invoices');
-    Route::get('reservations', fn () => Inertia::render('admin/Reservations'))->name('admin.reservations');
-    Route::get('inventory', fn () => Inertia::render('Admin/Inventory'))->name('admin.inventory');
-    Route::get('loyalty-points', fn () => Inertia::render('Admin/LoyaltyPoints'))->name('admin.loyalty-points');
-    Route::get('promotions', fn () => Inertia::render('Admin/Promotions'))->name('admin.promotions');
-    Route::get('notifications', fn () => Inertia::render('Admin/Notifications'))->name('admin.notifications');
-    Route::get('audit-logs', fn () => Inertia::render('Admin/AuditLogs'))->name('admin.audit-logs');
+    Route::get('reservations', fn () => Inertia::render('Admin/Reservations'))->name('admin.reservations');
     Route::get('settings', fn () => Inertia::render('Admin/Settings'))->name('admin.settings');
     Route::get('customer-requests', fn () => Inertia::render('Admin/CustomerRequests'))->name('admin.customer-requests');
 });

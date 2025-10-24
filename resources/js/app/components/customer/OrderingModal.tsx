@@ -29,7 +29,15 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
 
   const cart = useCartStore();
 
-  const filteredMenu = useMemo(() => menu || [], [menu]);
+  const filteredMenu = useMemo(() => {
+    if (!menu) return [];
+    
+    // Show all items if no category is selected
+    if (!categoryId) return menu;
+    
+    // Filter items by selected category
+    return menu.filter(item => item.category_id === categoryId);
+  }, [menu, categoryId]); // Add categoryId to dependencies array
 
   function addItem(item: MenuItem) {
     const orderItem: OrderItem = {
@@ -74,14 +82,24 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                   <Skeleton className="h-9 w-24" />
                 ) : (
                   <>
-                    <Button variant={categoryId ? 'ghost' : 'secondary'} size="sm" onClick={() => setCategoryId(undefined)}>
+                    <Button
+                      variant={categoryId ? 'ghost' : 'secondary'}
+                      size="sm"
+                      onClick={() => setCategoryId(undefined)}
+                    >
                       All
                     </Button>
                     {categories?.map((c) => (
-                      <Button key={c.id} variant={categoryId === c.id ? 'primary' : 'ghost'} size="sm" onClick={() => setCategoryId(c.id)}>
+                      <Button
+                        key={c.id}
+                        variant={categoryId === c.id ? 'primary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setCategoryId(c.id)}
+                      >
                         {c.name}
                       </Button>
                     ))}
+
                   </>
                 )}
               </div>
@@ -92,7 +110,8 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                   filteredMenu.map((m) => (
                     <div key={m.id} className="rounded-2xl overflow-hidden border border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-xl">
                       {m.image_url ? (
-                        <img src={m.image_path} alt={m.name} className="h-28 w-full object-cover" />
+                        <img src={m.image_path ?? ""} alt={m.name} className="h-28 w-full object-cover" />
+
                       ) : (
                         <div className="h-28 bg-gradient-to-br from-fuchsia-600/30 to-rose-500/30" />
                       )}
