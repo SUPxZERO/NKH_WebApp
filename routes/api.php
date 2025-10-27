@@ -92,13 +92,14 @@ Route::group([], function () {
         Route::patch('customer-requests/{customerRequest}', [CustomerRequestController::class, 'update']);
 
         // Dashboard
-        Route::get('dashboard/stats', [DashboardController::class, 'stats']);
-        Route::post('dashboard/refresh', [DashboardController::class, 'refresh']);
+        Route::get('dashboard/analytics', [DashboardController::class, 'analytics']);
+        Route::get('dashboard/orders/stats', [DashboardController::class, 'orderStats']);
+        Route::get('dashboard/revenue/{period}', [DashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
 
         // Order oversight and approvals
         Route::get('orders', [OrderController::class, 'index']); // Assuming an index method for admin
-        Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
-        Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
+        Route::patch('orders/{order}/approve', [OrderController::class, 'approve'])->middleware('role:admin,manager');
+        Route::patch('orders/{order}/reject', [OrderController::class, 'reject'])->middleware('role:admin,manager');
     });
 
 

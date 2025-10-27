@@ -25,7 +25,7 @@ export default function OrderTracking() {
   useOrderUpdates();
 
   const getStatusStep = (status: string) => {
-    const steps = ['pending', 'preparing', 'ready', 'delivered'];
+    const steps = ['pending', 'received', 'preparing', 'ready', 'completed', 'delivered'];
     return steps.indexOf(status);
   };
 
@@ -34,18 +34,22 @@ export default function OrderTracking() {
     
     switch (status) {
       case 'pending': return <Clock className={iconClass} />;
+      case 'received': return <CheckCircle className={iconClass} />;
       case 'preparing': return <ChefHat className={iconClass} />;
       case 'ready': return <Package className={iconClass} />;
+      case 'completed': return <CheckCircle className={iconClass} />;
       case 'delivered': return <Truck className={iconClass} />;
       default: return <Clock className={iconClass} />;
     }
   };
 
   const statusSteps = [
-    { key: 'pending', label: 'Order Received', description: 'Your order has been confirmed' },
+    { key: 'pending', label: 'Order Pending', description: 'Your order is waiting for approval' },
+    { key: 'received', label: 'Order Approved', description: 'Your order has been confirmed' },
     { key: 'preparing', label: 'Preparing', description: 'Our chefs are working on your order' },
     { key: 'ready', label: 'Ready', description: order?.mode === 'delivery' ? 'Out for delivery' : 'Ready for pickup' },
-    { key: 'delivered', label: order?.mode === 'delivery' ? 'Delivered' : 'Completed', description: 'Enjoy your meal!' }
+    { key: 'completed', label: 'Completed', description: 'Order has been completed' },
+    { key: 'delivered', label: order?.mode === 'delivery' ? 'Delivered' : 'Picked up', description: 'Enjoy your meal!' }
   ];
 
   const currentStep = order ? getStatusStep(order.status) : 0;

@@ -33,13 +33,7 @@ return new class extends Migration
                 if (!Schema::hasColumn('orders', 'kitchen_submitted_at')) {
                     $table->timestamp('kitchen_submitted_at')->nullable()->after('scheduled_at');
                 }
-                if (!Schema::hasColumn('orders', 'approved_at')) {
-                    $table->timestamp('approved_at')->nullable()->after('kitchen_submitted_at');
-                }
-                if (!Schema::hasColumn('orders', 'rejected_at')) {
-                    $table->timestamp('rejected_at')->nullable()->after('approved_at');
-                }
-            });
+                            });
         }
     }
 
@@ -58,9 +52,7 @@ return new class extends Migration
                     'scheduled_at',
                     'customer_address_id',
                     'kitchen_submitted_at',
-                    'approved_at',
-                    'rejected_at'
-                ]);
+                                    ]);
             });
         }
     }

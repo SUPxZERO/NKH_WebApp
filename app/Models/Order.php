@@ -4,10 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\OrderStatus;
 
 class Order extends Model
 {
     use HasFactory;
+
+    const APPROVAL_STATUS_PENDING = 'pending';
+    const APPROVAL_STATUS_APPROVED = 'approved';
+    const APPROVAL_STATUS_REJECTED = 'rejected';
+
+    protected $appends = [
+        'is_customer_request',
+    ];
 
     protected $fillable = [
         'location_id',
@@ -29,7 +38,12 @@ class Order extends Model
         'completed_at',
         'special_instructions',
         'customer_address_id',
-        'estimated_ready_time'
+        'estimated_ready_time',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejection_reason',
+        'is_auto_approved'
     ];
 
     protected $casts = [
@@ -42,6 +56,7 @@ class Order extends Model
         'scheduled_at' => 'datetime',
         'completed_at' => 'datetime',
         'estimated_ready_time' => 'datetime',
+        'is_auto_approved' => 'boolean',
     ];
 
     public function location()
@@ -82,5 +97,15 @@ class Order extends Model
     public function customerAddress()
     {
         return $this->belongsTo(CustomerAddress::class, 'customer_address_id');
+    }
+
+    public function getIsCustomerRequestAttribute(): bool
+    {
+        return in_array($this->order_type, ['delivery', 'pickup']) && !$this->is_auto_approved;
+    }
+
+    public function customerRequest()
+    {
+        return $this->hasOne(CustomerRequest::class);
     }
 }

@@ -36,6 +36,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->dropUnique(['location_id', 'slug']);
+            $table->dropUnique(['location_id', 'sku']);
+        });
         Schema::dropIfExists('menu_items');
     }
 };

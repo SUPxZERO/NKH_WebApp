@@ -45,7 +45,9 @@ class OnlineOrderController extends Controller
     public function addressesIndex(Request $request)
     {
         $customer = $request->user()->customer;
-        abort_unless($customer, 404);
+        if (!$customer) {
+            abort(404);
+        }
 
         return CustomerAddressResource::collection($customer->addresses()->latest()->paginate());
     }
@@ -54,7 +56,9 @@ class OnlineOrderController extends Controller
     public function addressesStore(StoreAddressRequest $request)
     {
         $customer = $request->user()->customer;
-        abort_unless($customer, 404);
+        if (!$customer) {
+            abort(404);
+        }
 
         $payload = $request->validated();
         // Support 'notes' alias per API contract -> map to delivery_instructions
@@ -69,13 +73,13 @@ class OnlineOrderController extends Controller
     // POST /api/online-orders (auth:sanctum, role:customer)
     public function store(StoreOnlineOrderRequest $request)
     {
-        $user = $request->user();
-        $customer = $user->customer;
-        abort_unless($customer, 422, 'Customer profile not found.');
-
         $data = $request->validated();
+        $customer = $request->user()->customer;
+        if (!$customer) {
+            abort(422, 'Customer profile not found.');
+        }
 
-        $order = DB::transaction(function () use ($data, $customer) {
+        return DB::transaction(function () use ($data, $customer) {
             // Lock slot row to prevent race conditions
             $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
 
@@ -109,7 +113,7 @@ class OnlineOrderController extends Controller
                 'order_number' => $orderNumber,
                 'type' => $type,
                 'order_type' => $data['order_type'],
-                'status' => 'received',
+                'status' => 'pending', // All customer orders start as pending
                 'payment_status' => 'unpaid',
                 'currency' => 'USD',
                 'placed_at' => now(),

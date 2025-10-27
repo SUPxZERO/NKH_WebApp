@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import { useForm } from 'react-hook-form';
+const { useState } = React;
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, router } from '@inertiajs/react';

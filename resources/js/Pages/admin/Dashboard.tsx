@@ -1,11 +1,58 @@
 import React from 'react';
+import { Head } from '@inertiajs/react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Skeleton } from '@/app/components/ui/Loading';
-import { useDashboardAnalytics, useOrderStats, useRevenue } from '@/app/hooks/useAdmin';
 import { TrendingUp, Users, Timer, CheckCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import RevenueLine from '@/app/components/charts/RevenueLine';
-import { useOrderUpdates, useAdminNotifications } from '@/app/hooks/useRealtime';
+
+interface Employee {
+  id: number;
+  name: string;
+  ordersHandled: number;
+  rating: number;
+}
+
+interface Analytics {
+  employees: Employee[];
+}
+
+interface OrderStats {
+  pending: number;
+  preparing: number;
+  ready: number;
+  delivered: number;
+  cancelled: number;
+}
+
+interface RevenuePoint {
+  label: string;
+  value: number;
+}
+
+// Custom hooks for data fetching
+const useDashboardAnalytics = () => {
+  return useQuery<Analytics>({
+    queryKey: ['admin.dashboard.analytics'],
+    queryFn: () => axios.get('/api/admin/dashboard/analytics').then(res => res.data.data),
+  });
+};
+
+const useOrderStats = () => {
+  return useQuery<OrderStats>({
+    queryKey: ['admin.dashboard.orderStats'],
+    queryFn: () => axios.get('/api/admin/dashboard/orders/stats').then(res => res.data.data),
+  });
+};
+
+const useRevenue = (period: 'daily' | 'weekly' | 'monthly') => {
+  return useQuery<RevenuePoint[]>({
+    queryKey: ['admin.dashboard.revenue', period],
+    queryFn: () => axios.get(`/api/admin/dashboard/revenue/${period}`).then(res => res.data.data),
+  });
+};
 
 export default function Dashboard() {
   const { data: analytics, isLoading } = useDashboardAnalytics();
@@ -13,8 +60,7 @@ export default function Dashboard() {
   const { data: revenue, isLoading: revenueLoading } = useRevenue('daily');
 
   // Real-time updates
-  useOrderUpdates();
-  useAdminNotifications();
+  // Real-time updates can be added later using WebSocket or polling
 
   return (
     <AdminLayout>
@@ -33,7 +79,7 @@ export default function Dashboard() {
                 <Skeleton className="h-8 w-32" />
               ) : (
                 <div className="text-3xl font-extrabold">
-                  ${Number(revenue?.reduce((s, p) => s + p.value, 0) || 0).toFixed(2)}
+                  ${Number(revenue?.reduce((sum: number, point: RevenuePoint) => sum + point.value, 0) || 0).toFixed(2)}
                 </div>
               )}
             </CardContent>

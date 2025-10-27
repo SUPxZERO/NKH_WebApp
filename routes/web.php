@@ -25,8 +25,13 @@ Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'
 
 // Admin routes
 Route::prefix('admin')
+        // ->middleware(['auth', 'role:admin'])
         ->group(function () {
-    Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
+    Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard', [
+        'analyticsEndpoint' => '/api/admin/dashboard/analytics',
+        'orderStatsEndpoint' => '/api/admin/dashboard/orders/stats',
+        'revenueEndpoint' => '/api/admin/dashboard/revenue',
+    ]))->name('admin.dashboard');
     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
     Route::get('menu-items', fn () => Inertia::render('Admin/MenuItems'))->name('admin.menu-items');
     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');

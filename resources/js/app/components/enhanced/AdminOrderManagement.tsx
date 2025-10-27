@@ -66,25 +66,28 @@ export function AdminOrderManagement() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'text-orange-400 bg-orange-500/20';
-      case 'confirmed': return 'text-blue-400 bg-blue-500/20';
+      case 'pending': return 'text-yellow-400 bg-yellow-500/20';
+      case 'received': return 'text-blue-400 bg-blue-500/20';
       case 'preparing': return 'text-purple-400 bg-purple-500/20';
       case 'ready': return 'text-emerald-400 bg-emerald-500/20';
-      case 'delivered': return 'text-green-400 bg-green-500/20';
+      case 'completed': return 'text-green-400 bg-green-500/20';
+      case 'delivered': return 'text-indigo-400 bg-indigo-500/20';
       case 'cancelled': return 'text-rose-400 bg-rose-500/20';
       default: return 'text-gray-400 bg-gray-500/20';
     }
   };
 
-  const getNextStatus = (currentStatus: string) => {
-    const statusFlow = {
-      'pending': 'confirmed',
-      'confirmed': 'preparing',
+  const getNextStatus = (currentStatus: string, orderType: string) => {
+    const transitions: Record<string, string | undefined> = {
+      'pending': orderType === 'dine-in' ? 'received' : undefined, // Only POS orders auto-approve
+      'received': 'preparing',
       'preparing': 'ready',
-      'ready': 'delivered'
+      'ready': orderType === 'delivery' ? 'delivered' : 'completed',
+      'completed': undefined,
+      'delivered': undefined,
+      'cancelled': undefined
     };
-    return statusFlow[currentStatus as keyof typeof statusFlow];
-  };
+    return transitions[currentStatus];
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = !searchTerm || 
@@ -234,22 +237,22 @@ export function AdminOrderManagement() {
                       View
                     </EnhancedButton>
                     
-                    {getNextStatus(order.status) && (
+                    {getNextStatus(order.status, order.order_type) && (
                       <EnhancedButton
                         variant="gradient"
                         size="sm"
                         className="flex-1"
                         onClick={() => updateOrderMutation.mutate({
                           orderId: order.id,
-                          status: getNextStatus(order.status)!
+                          status: getNextStatus(order.status, order.order_type) as string
                         })}
                         loading={updateOrderMutation.isPending}
                         leftIcon={<CheckCircle className="w-4 h-4" />}
                         haptic
                         soundEffect="success"
                       >
-                        {getNextStatus(order.status)?.charAt(0).toUpperCase() + 
-                         getNextStatus(order.status)?.slice(1)}
+                        {(getNextStatus(order.status, order.order_type) as string)?.charAt(0).toUpperCase() + 
+                         (getNextStatus(order.status, order.order_type) as string)?.slice(1)}
                       </EnhancedButton>
                     )}
                     

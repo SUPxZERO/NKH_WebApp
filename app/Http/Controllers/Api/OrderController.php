@@ -17,6 +17,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -35,6 +36,8 @@ class OrderController extends Controller
         }
 
         $order = DB::transaction(function () use ($employee, $table, $data) {
+            $isEmployeeOrder = !empty($employee->id);
+
             $order = Order::create([
                 'location_id' => $employee->location_id,
                 'table_id' => $table->id,
@@ -42,11 +45,13 @@ class OrderController extends Controller
                 'order_number' => $this->generateOrderNumber($employee->location_id, 'DIN'),
                 'type' => 'dine_in',
                 'order_type' => 'dine-in',
-                // Use 'received' to align with orders.status enum
-                'status' => 'received',
+                'status' => $isEmployeeOrder ? 'received' : 'pending',
+                'approval_status' => $isEmployeeOrder ? 'approved' : 'pending',
+                'is_auto_approved' => $isEmployeeOrder,
                 'payment_status' => 'unpaid',
                 'currency' => 'USD',
                 'placed_at' => now(),
+                'approved_at' => $isEmployeeOrder ? now() : null,
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -280,40 +285,37 @@ class OrderController extends Controller
     }
 
     // PATCH /api/admin/orders/{order}/approve (Admin approval for online orders)
-    public function approve(Order $order): OrderResource
+    public function approve(Request $request, Order $order): OrderResource
     {
-        if (!in_array($order->type, ['takeaway', 'delivery'])) {
-            abort(422, 'Only online orders require approval.');
-        }
-        
-        if ($order->status !== 'pending') {
+        if ($order->approval_status !== 'pending') {
             abort(409, 'Order is not pending approval.');
         }
-        
+
         $order->update([
             'status' => 'received',
+            'approval_status' => 'approved',
+            'approved_by' => $request->user()->id,
             'approved_at' => now(),
         ]);
-        
+
         return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));
     }
 
     // PATCH /api/admin/orders/{order}/reject (Admin rejection for online orders)
-    public function reject(Order $order): OrderResource
+    public function reject(Request $request, Order $order): OrderResource
     {
-        if (!in_array($order->type, ['takeaway', 'delivery'])) {
-            abort(422, 'Only online orders can be rejected.');
-        }
-        
-        if ($order->status !== 'pending') {
+        if ($order->approval_status !== 'pending') {
             abort(409, 'Order is not pending approval.');
         }
-        
+
+        $request->validate(['rejection_reason' => 'required|string|max:255']);
+
         $order->update([
             'status' => 'cancelled',
-            'rejected_at' => now(),
+            'approval_status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
         ]);
-        
+
         return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));
     }
 
