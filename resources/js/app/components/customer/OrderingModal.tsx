@@ -18,11 +18,11 @@ interface OrderingModalProps {
 }
 
 export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
-  const [categoryId, setCategoryId] = useState<number | undefined>();
+  const [categoryId, setCategoryId] = React.useState<number | undefined>();
   const [search, setSearch] = useState<string>('');
 
   const { data: categories, isLoading: catsLoading } = useCategories();
-  const { data: menu, isLoading: menuLoading } = useMenuItems({ category_id: categoryId, search });
+  const { data: menu, isLoading: menuLoading } = useMenuItems({ category_id: categoryId });
 
   const { data: addresses, isLoading: addrLoading } = useCustomerAddresses();
   const { data: slots, isLoading: slotsLoading } = useTimeSlots(mode);
@@ -32,12 +32,23 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
   const filteredMenu = useMemo(() => {
     if (!menu) return [];
     
-    // Show all items if no category is selected
-    if (!categoryId) return menu;
+    let filtered = menu;
     
-    // Filter items by selected category
-    return menu.filter(item => item.category_id === categoryId);
-  }, [menu, categoryId]); // Add categoryId to dependencies array
+    // Filter by category if selected
+    if (categoryId) {
+      filtered = filtered.filter(item => item.category_id === categoryId);
+    }
+    
+    // Filter by search term if present
+    if (search.trim()) {
+      const searchLower = search.toLowerCase().trim();
+      filtered = filtered.filter(item => 
+        item.name?.toLowerCase().includes(searchLower) ?? false
+      );
+    }
+    
+    return filtered;
+  }, [menu, categoryId, search]); // Add search to dependencies
 
   function addItem(item: MenuItem) {
     const orderItem: OrderItem = {

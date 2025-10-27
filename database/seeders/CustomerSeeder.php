@@ -11,7 +11,10 @@ class CustomerSeeder extends Seeder
 {
     public function run(): void
     {
-        $customerUsers = User::where('role', 'customer')->get();
+        // Get users with customer role
+        $customerUsers = User::whereHas('roles', function($query) {
+            $query->where('name', 'customer');
+        })->get();
         $locations = Location::all();
         
         foreach ($customerUsers as $user) {

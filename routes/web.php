@@ -28,6 +28,7 @@ Route::prefix('admin')
         ->group(function () {
     Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
+    Route::get('menu-items', fn () => Inertia::render('Admin/MenuItems'))->name('admin.menu-items');
     Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
     Route::get('employees', fn () => Inertia::render('Admin/Employees'))->name('admin.employees');
     Route::get('customers', fn () => Inertia::render('Admin/Customers'))->name('admin.customers');

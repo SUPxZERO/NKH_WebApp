@@ -37,6 +37,11 @@ class RoleSeeder extends Seeder
                 'description' => 'Kitchen management access',
             ],
             [
+                'name' => 'Employee',
+                'slug' => 'employee',
+                'description' => 'General employee access',
+            ],
+            [
                 'name' => 'Customer',
                 'slug' => 'customer',
                 'description' => 'Regular customer access',

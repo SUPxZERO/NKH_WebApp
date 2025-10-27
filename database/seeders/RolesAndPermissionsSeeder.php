@@ -13,7 +13,6 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         $roles = [
-            ['name' => 'Super Admin', 'slug' => 'super-admin'],
             ['name' => 'Admin', 'slug' => 'admin'],
             ['name' => 'Manager', 'slug' => 'manager'],
             ['name' => 'Chef', 'slug' => 'chef'],
@@ -76,7 +75,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Role -> Permissions mapping
         $map = [
-            'super-admin' => array_keys($permModels),
             'admin' => [
                 'users.manage','roles.manage','permissions.manage',
                 'locations.manage','settings.manage',

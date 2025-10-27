@@ -62,31 +62,35 @@ class UserSeeder extends Seeder
 
         // Create employees
         $employees = [
-            [
-                'name' => 'Ratha Meng',
-                'email' => 'ratha.meng@nkhrestaurant.com',
-                'phone' => '+855-12-567-890',
-                'password' => Hash::make('employee123'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-                'default_location_id' => 1,
-            ],
-            [
-                'name' => 'Bopha Keo',
-                'email' => 'bopha.keo@nkhrestaurant.com',
-                'phone' => '+855-12-567-891',
-                'password' => Hash::make('employee123'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-                'default_location_id' => 2,
-            ],
+            ['name' => 'Ratha Meng', 'email' => 'ratha.meng@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Maria Santos', 'email' => 'maria.santos@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Bopha Keo', 'email' => 'bopha.keo@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Sovannak Pich', 'email' => 'sovannak.pich@nkhrestaurant.com', 'location' => 3],
+            ['name' => 'Sokha Rath', 'email' => 'sokha.rath@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Dara Chea', 'email' => 'dara.chea@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Sreypov Noun', 'email' => 'sreypov.noun@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Kimheng Ly', 'email' => 'kimheng.ly@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Pheaktra Ouk', 'email' => 'pheaktra.ouk@nkhrestaurant.com', 'location' => 3],
+            ['name' => 'Veasna Chhay', 'email' => 'veasna.chhay@nkhrestaurant.com', 'location' => 4],
+            ['name' => 'Bunthoeun Sao', 'email' => 'bunthoeun.sao@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Chenda Ros', 'email' => 'chenda.ros@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Sopheak Mao', 'email' => 'sopheak.mao@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Rachana Heng', 'email' => 'rachana.heng@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Sreyleak Kong', 'email' => 'sreyleak.kong@nkhrestaurant.com', 'location' => 3],
+            ['name' => 'Pisey Nhem', 'email' => 'pisey.nhem@nkhrestaurant.com', 'location' => 4],
         ];
 
         foreach ($employees as $employeeData) {
-            $employee = User::create($employeeData);
-            if ($chefRole) {
-                $employee->roles()->attach($chefRole->id);
-            }
+            $employee = User::create([
+                'name' => $employeeData['name'],
+                'email' => $employeeData['email'],
+                'phone' => '+855-' . rand(10, 99) . '-' . rand(100, 999) . '-' . rand(100, 999),
+                'password' => Hash::make('employee123'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'default_location_id' => $employeeData['location'],
+            ]);
+            $employee->roles()->attach(Role::where('slug', 'employee')->first()->id);
         }
 
         // Create customers using factory

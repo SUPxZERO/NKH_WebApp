@@ -48,6 +48,7 @@ class CustomerAddressesSeeder extends Seeder
         $customer = Customer::firstOrCreate(
             ['user_id' => $user->id],
             [
+                'customer_code' => 'CUST-' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
                 'preferred_location_id' => $location->id,
                 'gender' => 'other',
                 'points_balance' => 0,

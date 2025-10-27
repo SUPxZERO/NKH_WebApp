@@ -20,10 +20,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // Phase 1: Core System Setup
             RoleSeeder::class,
+            RolesAndPermissionsSeeder::class,
             UnitSeeder::class,
             LocationSeeder::class,
             PositionSeeder::class,
             UserSeeder::class,
+            CustomerAddressesSeeder::class,
             
             // Phase 2: Restaurant Configuration
             CategorySeeder::class,

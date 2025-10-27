@@ -28,12 +28,12 @@ class LeaveRequestSeeder extends Seeder
                 
                 LeaveRequest::create([
                     'employee_id' => $employee->id,
-                    'request_type' => $this->getRequestType(),
+                    'location_id' => $employee->location_id,
+                    'type' => $this->getRequestType(),
                     'start_date' => $requestStartDate,
                     'end_date' => $requestStartDate->copy()->addDays($duration),
                     'status' => $this->getRequestStatus($requestStartDate),
                     'reason' => $this->getReason(),
-                    'notes' => $this->getNotes(),
                     'created_at' => $requestStartDate->copy()->subDays(rand(7, 14)),
                     'updated_at' => $requestStartDate->copy()->subDays(rand(1, 7)),
                 ]);
@@ -43,29 +43,20 @@ class LeaveRequestSeeder extends Seeder
 
     private function getRequestType(): string
     {
-        return array_rand([
-            'vacation' => true,
-            'sick_leave' => true,
-            'personal_leave' => true,
-            'bereavement' => true,
-            'unpaid_leave' => true
-        ]);
+        $types = ['annual', 'sick', 'unpaid', 'other'];
+        return $types[array_rand($types)];
     }
 
     private function getRequestStatus(Carbon $startDate): string
     {
         if ($startDate->isPast()) {
-            return array_rand([
-                'approved' => true, 
-                'completed' => true,
-                'cancelled' => true
-            ]);
+            $statuses = ['approved', 'rejected', 'cancelled'];
+            return $statuses[array_rand($statuses)];
         }
         
         return array_rand([
-            'pending' => true,
-            'pending' => true,
-            'approved' => true
+            'pending' => 3, // Higher weight for pending
+            'approved' => 1
         ]);
     }
 
