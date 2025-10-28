@@ -104,7 +104,9 @@ Route::group([], function () {
 
 
     // In-store operations for staff (Employee)
-    Route::prefix('employee')->middleware('role:admin,manager,waiter')->group(function () {
+    Route::prefix('employee')
+    // ->middleware('role:admin,manager,waiter')
+    ->group(function () {
         // POS menu
         Route::get('menu', [MenuItemController::class, 'index']);
         // POS Orders (dine-in, auto-approved)
@@ -117,16 +119,28 @@ Route::group([], function () {
     });
 
     // Customer self-service
-    Route::middleware('role:customer')->group(function () {
-        Route::get('/customer/profile', [CustomerController::class, 'profile']);
-        Route::get('/customer/orders', [CustomerController::class, 'orders']);
-        Route::get('/customer/orders/{order}', [OnlineOrderController::class, 'show']); // Customer can view their own order
-        Route::get('/customer/loyalty-points', [CustomerController::class, 'loyaltyPoints']);
+    // Route::
+    //     middleware('role:customer')
+    //     ->group(function () {
+    //     Route::get('/customer/profile', [CustomerController::class, 'profile']);
+    //     Route::get('/customer/orders', [CustomerController::class, 'orders']);
+    //     Route::get('/customer/orders/{order}', [OnlineOrderController::class, 'show']); // Customer can view their own order
+    //     Route::get('/customer/loyalty-points', [CustomerController::class, 'loyaltyPoints']);
 
-        Route::get('/customer/addresses', [OnlineOrderController::class, 'addressesIndex']);
-        Route::post('/customer/addresses', [OnlineOrderController::class, 'addressesStore']);
+    //     Route::get('/customer/addresses', [OnlineOrderController::class, 'addressesIndex']);
+    //     Route::post('/customer/addresses', [OnlineOrderController::class, 'addressesStore']);
 
-        // Customer online orders (pickup/delivery, requires approval)
-        Route::post('/online-orders', [OnlineOrderController::class, 'store']);
-    });
+    //     // Customer online orders (pickup/delivery, requires approval)
+    //     Route::post('/online-orders', [OnlineOrderController::class, 'store']);
+    // });
+    Route::get('/customer/profile', [CustomerController::class, 'profile']);
+    Route::get('/customer/orders', [CustomerController::class, 'orders']);
+    Route::get('/customer/orders/{order}', [OnlineOrderController::class, 'show']); // Customer can view their own order
+    Route::get('/customer/loyalty-points', [CustomerController::class, 'loyaltyPoints']);
+
+    Route::get('/customer/addresses', [OnlineOrderController::class, 'addressesIndex']);
+    Route::post('/customer/addresses', [OnlineOrderController::class, 'addressesStore']);
+
+    // Customer online orders (pickup/delivery, requires approval)
+    Route::post('/online-orders', [OnlineOrderController::class, 'store']);
 });
