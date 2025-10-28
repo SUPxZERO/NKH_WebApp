@@ -29,27 +29,27 @@ Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'
 Route::prefix('admin')
         // ->middleware(['auth', 'role:admin'])
         ->group(function () {
-    Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard', [
+    Route::get('dashboard', fn () => Inertia::render('admin/Dashboard', [
         'analyticsEndpoint' => '/api/admin/dashboard/analytics',
         'orderStatsEndpoint' => '/api/admin/dashboard/orders/stats',
         'revenueEndpoint' => '/api/admin/dashboard/revenue',
     ]))->name('admin.dashboard');
-    Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
-    Route::get('menu-items', fn () => Inertia::render('Admin/MenuItems'))->name('admin.menu-items');
-    Route::get('categories', fn () => Inertia::render('Admin/Categories'))->name('admin.categories');
-    Route::get('employees', fn () => Inertia::render('Admin/Employees'))->name('admin.employees');
-    Route::get('customers', fn () => Inertia::render('Admin/Customers'))->name('admin.customers');
-    Route::get('expenses', fn () => Inertia::render('Admin/Expenses'))->name('admin.expenses');
-    Route::get('floors', fn () => Inertia::render('Admin/Floors'))->name('admin.floors');
-    Route::get('tables', fn () => Inertia::render('Admin/Tables'))->name('admin.tables');
-    Route::get('invoices', fn () => Inertia::render('Admin/Invoices'))->name('admin.invoices');
-    Route::get('reservations', fn () => Inertia::render('Admin/Reservations'))->name('admin.reservations');
-    Route::get('settings', fn () => Inertia::render('Admin/Settings'))->name('admin.settings');
-    Route::get('customer-requests', fn () => Inertia::render('Admin/CustomerRequests'))->name('admin.customer-requests');
+    Route::get('categories', fn () => Inertia::render('admin/Categories'))->name('admin.categories');
+    Route::get('menu-items', fn () => Inertia::render('admin/MenuItems'))->name('admin.menu-items');
+    Route::get('categories', fn () => Inertia::render('admin/Categories'))->name('admin.categories');
+    Route::get('employees', fn () => Inertia::render('admin/Employees'))->name('admin.employees');
+    Route::get('customers', fn () => Inertia::render('admin/Customers'))->name('admin.customers');
+    Route::get('expenses', fn () => Inertia::render('admin/Expenses'))->name('admin.expenses');
+    Route::get('floors', fn () => Inertia::render('admin/Floors'))->name('admin.floors');
+    Route::get('tables', fn () => Inertia::render('admin/Tables'))->name('admin.tables');
+    Route::get('invoices', fn () => Inertia::render('admin/Invoices'))->name('admin.invoices');
+    Route::get('reservations', fn () => Inertia::render('admin/Reservations'))->name('admin.reservations');
+    Route::get('settings', fn () => Inertia::render('admin/Settings'))->name('admin.settings');
+    Route::get('customer-requests', fn () => Inertia::render('admin/CustomerRequests'))->name('admin.customer-requests');
 });
 
 Route::prefix('employee')->group(function () {
-    Route::get('pos', fn () => Inertia::render('Employee/POS'))->name('employee.pos');
+    Route::get('pos', fn () => Inertia::render('employee/POS'))->name('employee.pos');
 });
 
 // Test time slots seeder

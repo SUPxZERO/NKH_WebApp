@@ -11,7 +11,9 @@ const STATIC_ASSETS = [
   '/build/assets/app.css',
   '/build/assets/app.js',
   '/favicon.ico',
-  // Add other static assets as needed
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/manifest.json'
 ];
 
 // API endpoints to cache
