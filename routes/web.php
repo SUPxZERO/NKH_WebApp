@@ -45,7 +45,7 @@ Route::prefix('admin')
     Route::get('invoices', fn () => Inertia::render('admin/Invoices'))->name('admin.invoices');
     Route::get('reservations', fn () => Inertia::render('admin/Reservations'))->name('admin.reservations');
     Route::get('settings', fn () => Inertia::render('admin/Settings'))->name('admin.settings');
-    Route::get('customer-requests', fn () => Inertia::render('admin/CustomerRequests'))->name('admin.customer-requests');
+    Route::get('customer-requests', [\App\Http\Controllers\Api\CustomerRequestController::class, 'index'])->name('admin.customer-requests');
 });
 
 Route::prefix('employee')->group(function () {

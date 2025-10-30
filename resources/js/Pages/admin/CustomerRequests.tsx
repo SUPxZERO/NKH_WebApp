@@ -16,7 +16,7 @@ interface Order {
       email: string;
     };
   };
-  total_amount: number;
+  total_amount: number | string;
   status: string;
   approval_status: string;
   order_type: string;
@@ -90,17 +90,17 @@ export default function CustomerRequests({ orders: initialOrders = [] }: { order
           <tbody>
             {orders.filter(o => o.approval_status === 'pending').map(order => (
               <tr key={order.id}>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{order.order_number}</td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-900">{order.order_number}</td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <div>
                     <div className="text-gray-900">{order.customer.user.name}</div>
                     <div className="text-gray-600 text-xs">{order.customer.user.email}</div>
                   </div>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm capitalize">
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm capitalize text-gray-900">
                   {order.order_type}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">${order.total_amount.toFixed(2)}</td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-900">${(typeof order.total_amount === 'string' ? parseFloat(order.total_amount) : order.total_amount).toFixed(2)}</td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                     order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
