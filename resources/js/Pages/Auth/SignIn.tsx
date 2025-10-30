@@ -1,10 +1,10 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-const { useState } = React;
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Eye, EyeOff, Mail, Lock, User, Shield, Coffee } from 'lucide-react';
+import { PageProps } from '@/types';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { cn } from '@/app/utils/cn';
@@ -48,6 +48,9 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { props } = usePage<PageProps<{ csrf_token: string }>>();
+  const csrfToken = props.csrf_token;
+
   const {
     register,
     handleSubmit,
@@ -68,16 +71,9 @@ export default function SignIn() {
   const onSubmit = async (data: SignInForm) => {
     setIsLoading(true);
     try {
-      router.post('/login', data, {
+      router.post(route('login'), { ...data, _token: csrfToken }, {
         onSuccess: () => {
-          toast.success(`Welcome back! Redirecting to ${data.role} dashboard...`);
-          // Redirect based on role
-          const redirectPaths = {
-            admin: '/admin/dashboard',
-            employee: '/employee/pos',
-            customer: '/dashboard',
-          };
-          router.visit(redirectPaths[data.role]);
+          toast.success('Welcome back!');
         },
         onError: (errors) => {
           toast.error(errors.email || errors.password || 'Invalid credentials');

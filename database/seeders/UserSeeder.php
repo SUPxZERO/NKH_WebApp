@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
         // Create admin user
         $admin = User::create([
             'name' => 'System Administrator',
-            'email' => 'admin@nkhrestaurant.com',
+            'email' => 'demo@admin.com',
             'phone' => '+855-12-345-678',
             'password' => Hash::make('admin123'),
             'email_verified_at' => now(),
@@ -62,7 +62,7 @@ class UserSeeder extends Seeder
 
         // Create employees
         $employees = [
-            ['name' => 'Ratha Meng', 'email' => 'ratha.meng@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Ratha Meng', 'email' => 'demo@employee.com', 'location' => 1],
             ['name' => 'Maria Santos', 'email' => 'maria.santos@nkhrestaurant.com', 'location' => 2],
             ['name' => 'Bopha Keo', 'email' => 'bopha.keo@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Sovannak Pich', 'email' => 'sovannak.pich@nkhrestaurant.com', 'location' => 3],
@@ -85,7 +85,7 @@ class UserSeeder extends Seeder
                 'name' => $employeeData['name'],
                 'email' => $employeeData['email'],
                 'phone' => '+855-' . rand(10, 99) . '-' . rand(100, 999) . '-' . rand(100, 999),
-                'password' => Hash::make('employee123'),
+                'password' => Hash::make('demo123'),
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'default_location_id' => $employeeData['location'],

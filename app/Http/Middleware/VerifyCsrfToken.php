@@ -12,8 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        // TODO: Remove this after development
-        // Temporarily disable CSRF for all routes
-        '*'
+        // Exclude API routes that don't need CSRF (handled by Sanctum)
+        'api/*',
     ];
 }

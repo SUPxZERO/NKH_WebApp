@@ -98,8 +98,10 @@ Route::group([], function () {
 
         // Order oversight and approvals
         Route::get('orders', [OrderController::class, 'index']); // Assuming an index method for admin
-        Route::patch('orders/{order}/approve', [OrderController::class, 'approve'])->middleware('role:admin,manager');
-        Route::patch('orders/{order}/reject', [OrderController::class, 'reject'])->middleware('role:admin,manager');
+        Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
+        // ->middleware('role:admin,manager');
+        Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
+        // ->middleware('role:admin,manager');
     });
 
 

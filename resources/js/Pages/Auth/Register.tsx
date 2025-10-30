@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Eye, EyeOff, Mail, Lock, User, Shield, Coffee, Phone, MapPin, Building } from 'lucide-react';
+import { PageProps } from '@/types';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { cn } from '@/app/utils/cn';
@@ -107,6 +108,9 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
+  const { props } = usePage<PageProps<{ csrf_token: string }>>();
+  const csrfToken = props.csrf_token;
+
   const {
     register,
     handleSubmit,
@@ -125,7 +129,6 @@ export default function Register() {
   const selectedRole = watch('role');
   const currentRoleConfig = roleConfig[selectedRole];
 
-  // Update form validation schema when role changes
   React.useEffect(() => {
     reset({
       role: selectedRole,
@@ -136,10 +139,9 @@ export default function Register() {
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
     try {
-      router.post('/register', data, {
+      router.post(route('register'), { ...data, _token: csrfToken }, {
         onSuccess: () => {
-          toast.success(`Account created successfully! Please check your email to verify your account.`);
-          router.visit('/login');
+          toast.success('Account created successfully!');
         },
         onError: (errors) => {
           const firstError = Object.values(errors)[0] as string;
