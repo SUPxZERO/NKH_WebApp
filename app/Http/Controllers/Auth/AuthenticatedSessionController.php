@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Str;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -35,17 +36,41 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        if ($user) {
-            $redirects = [
-                'admin' => route('admin.dashboard', absolute: false),
-                'employee' => route('employee.pos', absolute: false),
-                'customer' => route('customer.dashboard', absolute: false),
-            ];
+        // Determine role from explicit attribute or from roles relationship helpers.
+        $isAdmin = $user && (data_get($user, 'role') === 'admin' || method_exists($user, 'hasRole') && $user->hasRole('admin'));
+        $isEmployee = $user && (data_get($user, 'role') === 'employee' || method_exists($user, 'hasRole') && $user->hasRole('employee'));
 
-            return redirect()->intended($redirects[$user->role] ?? route('customer.dashboard', absolute: false));
+        // Preferred role-based targets
+        $adminTarget = route('admin.dashboard', absolute: false);
+        $employeeTarget = route('employee.pos', absolute: false);
+        $customerTarget = route('customer.dashboard', absolute: false);
+
+        // Check if there is an intended URL from the session.
+        $intended = session('url.intended');
+
+        if ($isAdmin) {
+            // If intended points to admin area, honor it. Otherwise send to admin dashboard.
+            if ($intended && \Illuminate\Support\Str::startsWith($intended, '/admin')) {
+                return redirect()->to($intended);
+            }
+
+            return redirect()->to($adminTarget);
         }
 
-        return redirect()->intended(route('customer.dashboard', absolute: false));
+        if ($isEmployee) {
+            if ($intended && \Illuminate\Support\Str::startsWith($intended, '/employee')) {
+                return redirect()->to($intended);
+            }
+
+            return redirect()->to($employeeTarget);
+        }
+
+        // Default to customer dashboard. Honor intended only if it is not an admin/employee path.
+        if ($intended && ! \Illuminate\Support\Str::startsWith($intended, ['/admin', '/employee'])) {
+            return redirect()->to($intended);
+        }
+
+        return redirect()->to($customerTarget);
     }
 
     /**

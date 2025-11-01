@@ -46,16 +46,17 @@ Route::get('/locations', [LocationController::class, 'index']);
 
 
 // Authenticated routes
-// TODO: Re-enable auth middleware after development
-Route::group([], function () {
+// NOTE: authentication is required for these routes. Enable Sanctum guard so
+// $request->user() is available for controllers that rely on the authenticated user.
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Admin/Manager management endpoints
     Route::prefix('admin')
-        // TODO: Re-enable auth middleware after development
-        // ->middleware('role:admin,manager')
-        ->group(function () {
+    // Apply role-based restriction to admin endpoints (requires auth:sanctum on outer group)
+    ->middleware(['role:admin,manager'])
+    ->group(function () {
             // Categories (with hierarchy support)
             Route::get('/categories/hierarchy', [CategoryController::class, 'hierarchy']);
             Route::get('/category-stats', [CategoryController::class, 'stats']);

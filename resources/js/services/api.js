@@ -4,9 +4,16 @@ const api = axios.create({
     baseURL: '/api',
     headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
     }
 });
+
+// Send cookies (Laravel session / Sanctum) for same-origin requests
+api.defaults.withCredentials = true;
+// Ensure axios looks for Laravel's XSRF cookie and sends the header automatically
+api.defaults.xsrfCookieName = 'XSRF-TOKEN';
+api.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
 
 // Add request interceptor for auth token
 api.interceptors.request.use((config) => {
@@ -76,7 +83,7 @@ export const ordersApi = {
     update: (id, data) => api.put(`/admin/orders/${id}`, data),
     delete: (id) => api.delete(`/admin/orders/${id}`),
     approve: (id) => api.patch(`/admin/orders/${id}/approve`),
-    reject: (id) => api.patch(`/admin/orders/${id}/reject`),
+    reject: (id, data = {}) => api.patch(`/admin/orders/${id}/reject`, data),
 };
 
 export const expensesApi = {

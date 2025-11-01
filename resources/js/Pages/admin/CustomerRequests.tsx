@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { router } from '@inertiajs/react';
+import { ordersApi } from '../../services/api';
 import Modal from '@/Components/Modal';
 import TextArea from '@/Components/TextArea';
 import DangerButton from '@/Components/DangerButton';
@@ -39,7 +40,9 @@ export default function CustomerRequests({ orders: initialOrders = [] }: { order
   const handleApprove = async (orderId: number) => {
     try {
       setProcessing(true);
-      await router.patch(`/api/admin/orders/${orderId}/approve`, {});
+      await ordersApi.approve(orderId);
+      // reload the page data via inertia so UI updates
+      router.reload({ only: ['orders'] });
     } catch (error) {
       console.error('Error approving order:', error);
       alert('Failed to approve order. Please try again.');
@@ -53,12 +56,11 @@ export default function CustomerRequests({ orders: initialOrders = [] }: { order
 
     try {
       setProcessing(true);
-      await router.patch(`/api/admin/orders/${selectedOrder.id}/reject`, {
-        rejection_reason: rejectionReason
-      });
+      await ordersApi.reject(selectedOrder.id, { rejection_reason: rejectionReason });
       setShowRejectionModal(false);
       setRejectionReason('');
       setSelectedOrder(null);
+      router.reload({ only: ['orders'] });
     } catch (error) {
       console.error('Error rejecting order:', error);
       alert('Failed to reject order. Please try again.');

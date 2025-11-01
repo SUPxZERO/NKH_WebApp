@@ -28,6 +28,11 @@ class OrderController extends Controller
     {
         $data = $request->validated();
 
+        // Ensure request is authenticated before accessing user()->id
+        if (!$request->user()) {
+            abort(401, 'Unauthenticated.');
+        }
+
         $employee = Employee::where('user_id', $request->user()->id)->firstOrFail();
         $table = DiningTable::findOrFail($data['table_id']);
 
@@ -289,6 +294,11 @@ class OrderController extends Controller
     {
         if ($order->approval_status !== 'pending') {
             abort(409, 'Order is not pending approval.');
+        }
+
+        // Ensure an authenticated user is present before attempting to access ->id
+        if (!$request->user()) {
+            abort(401, 'Unauthenticated.');
         }
 
         $order->update([

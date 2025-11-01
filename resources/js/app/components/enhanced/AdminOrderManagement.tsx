@@ -77,7 +77,7 @@ export function AdminOrderManagement() {
     }
   };
 
-  const getNextStatus = (currentStatus: string, orderType: string) => {
+  const getNextStatus = (currentStatus: string, orderType: string = 'delivery') => {
     const transitions: Record<string, string | undefined> = {
       'pending': orderType === 'dine-in' ? 'received' : undefined, // Only POS orders auto-approve
       'received': 'preparing',
@@ -88,6 +88,7 @@ export function AdminOrderManagement() {
       'cancelled': undefined
     };
     return transitions[currentStatus];
+  };
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = !searchTerm || 
@@ -180,9 +181,9 @@ export function AdminOrderManagement() {
                       </p>
                     </div>
                     
-                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                      {typeof order.status === 'string' ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : order.status}
+                    </span>
                   </div>
 
                   {/* Customer Info */}
@@ -242,17 +243,24 @@ export function AdminOrderManagement() {
                         variant="gradient"
                         size="sm"
                         className="flex-1"
-                        onClick={() => updateOrderMutation.mutate({
-                          orderId: order.id,
-                          status: getNextStatus(order.status, order.order_type) as string
-                        })}
+                        onClick={() => {
+                          const nextStatus = getNextStatus(order.status, order.order_type);
+                          if (nextStatus) {
+                            updateOrderMutation.mutate({
+                              orderId: order.id,
+                              status: nextStatus
+                            });
+                          }
+                        }}
                         loading={updateOrderMutation.isPending}
                         leftIcon={<CheckCircle className="w-4 h-4" />}
                         haptic
                         soundEffect="success"
                       >
-                        {(getNextStatus(order.status, order.order_type) as string)?.charAt(0).toUpperCase() + 
-                         (getNextStatus(order.status, order.order_type) as string)?.slice(1)}
+                        {(() => {
+                          const nextStatus = getNextStatus(order.status, order.order_type);
+                          return nextStatus ? nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1) : '';
+                        })()}
                       </EnhancedButton>
                     )}
                     
@@ -346,7 +354,7 @@ export function AdminOrderManagement() {
                   <div className="flex justify-between">
                     <span>Status:</span>
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(selectedOrder.status)}`}>
-                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                      {typeof selectedOrder.status === 'string' ? selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1) : selectedOrder.status}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -393,25 +401,27 @@ export function AdminOrderManagement() {
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              {getNextStatus(selectedOrder.status) && (
-                <EnhancedButton
-                  variant="gradient"
-                  onClick={() => {
-                    updateOrderMutation.mutate({
-                      orderId: selectedOrder.id,
-                      status: getNextStatus(selectedOrder.status)!
-                    });
-                    setSelectedOrder(null);
-                  }}
-                  loading={updateOrderMutation.isPending}
-                  leftIcon={<CheckCircle className="w-4 h-4" />}
-                  haptic
-                  soundEffect="success"
-                >
-                  Mark as {getNextStatus(selectedOrder.status)?.charAt(0).toUpperCase() + 
-                           getNextStatus(selectedOrder.status)?.slice(1)}
-                </EnhancedButton>
-              )}
+              {(() => {
+                const nextStatus = selectedOrder.order_type ? getNextStatus(selectedOrder.status, selectedOrder.order_type) : null;
+                return nextStatus ? (
+                  <EnhancedButton
+                    variant="gradient"
+                    onClick={() => {
+                      updateOrderMutation.mutate({
+                        orderId: selectedOrder.id,
+                        status: nextStatus
+                      });
+                      setSelectedOrder(null);
+                    }}
+                    loading={updateOrderMutation.isPending}
+                    leftIcon={<CheckCircle className="w-4 h-4" />}
+                    haptic
+                    soundEffect="success"
+                  >
+                    Mark as {nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}
+                  </EnhancedButton>
+                ) : null;
+              })()}
               
               {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered' && (
                 <EnhancedButton
