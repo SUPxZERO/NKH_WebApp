@@ -50,7 +50,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($isAdmin) {
             // If intended points to admin area, honor it. Otherwise send to admin dashboard.
-            if ($intended && \Illuminate\Support\Str::startsWith($intended, '/admin')) {
+            if ($intended && Str::startsWith($intended, '/admin')) {
                 return redirect()->to($intended);
             }
 
@@ -58,7 +58,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($isEmployee) {
-            if ($intended && \Illuminate\Support\Str::startsWith($intended, '/employee')) {
+            if ($intended && Str::startsWith($intended, '/employee')) {
                 return redirect()->to($intended);
             }
 
@@ -66,7 +66,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Default to customer dashboard. Honor intended only if it is not an admin/employee path.
-        if ($intended && ! \Illuminate\Support\Str::startsWith($intended, ['/admin', '/employee'])) {
+        if ($intended && ! Str::startsWith($intended, ['/admin', '/employee'])) {
             return redirect()->to($intended);
         }
 
