@@ -1,13 +1,3 @@
-// Debug session/cookie info route for troubleshooting
-use Illuminate\Support\Facades\Auth;
-Route::get('/debug-session', function () {
-    return [
-        'config' => config('session'),
-        'cookie' => request()->cookie(config('session.cookie')),
-        'session_id' => session()->getId(),
-        'user_id' => Auth::id(),
-    ];
-});
 <?php
 
 use App\Http\Controllers\ProfileController;
@@ -15,6 +5,7 @@ use App\Models\Customer;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 // Public route
 Route::get('/', fn () => Inertia::render('Customer/Home'))->name('customer.home');
@@ -79,14 +70,15 @@ Route::
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Route::get('/debug-session', function () {
-//     return [
-//         'config' => config('session'),
-//         'cookie' => request()->cookie(config('session.cookie')),
-//         'session_id' => session()->getId(),
-//         'user_id' => Auth::id()
-//     ];
-// });
+
+Route::get('/debug-session', function () {
+    return response()->json([
+        'config' => config('session'),
+        'cookie' => request()->cookie(config('session.cookie')),
+        'session_id' => session()->getId(),
+        'user_id' => Auth::id(),
+    ]);
+});
 
 // Route::get('/session-test', function () {
 //     if (!session()->has('test_key')) {
