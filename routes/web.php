@@ -1,33 +1,46 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Models\Customer;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Customer routes
+// Public route
 Route::get('/', fn () => Inertia::render('Customer/Home'))->name('customer.home');
-Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))
-    // ->middleware('auth')
-    ->name('customer.dashboard');
+
+// Customer protected routes
+// Route::
+//     middleware(['auth', 'role:Customer'])->
+//     group(function () {
+//     Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
+//     Route::get('/menu', fn () => Inertia::render('Customer/Menu'))->name('customer.menu');
+//     Route::get('/cart', fn () => Inertia::render('Customer/Cart'))->name('customer.cart');
+//     Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('customer.checkout');
+//     Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
+//     Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
+// });
+
+Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
 Route::get('/menu', fn () => Inertia::render('Customer/Menu'))->name('customer.menu');
 Route::get('/cart', fn () => Inertia::render('Customer/Cart'))->name('customer.cart');
 Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('customer.checkout');
 Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
 Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
 
+
 // Auth routes are handled in auth.php
-// Route::get('/login', fn () => Inertia::render('Auth/SignIn'))->name('login');
-// Route::get('/register', fn () => Inertia::render('Auth/Register'))->name('register');
+Route::get('/login', fn () => Inertia::render('Auth/SignIn'))->name('login');
+Route::get('/register', fn () => Inertia::render('Auth/Register'))->name('register');
 
 // Employee routes
-// Route::prefix('employee')->middleware(['auth', 'role:employee'])->group(function () {
-//     Route::get('pos', fn () => Inertia::render('Employee/POS'))->name('employee.pos');
-// });
+Route::prefix('employee')->middleware(['auth', 'role:employee'])->group(function () {
+    Route::get('pos', fn () => Inertia::render('Employee/POS'))->name('employee.pos');
+});
 
 // Admin routes
 Route::prefix('admin')
-        // ->middleware(['auth', 'role:admin'])
+        ->middleware(['auth', 'role:admin'])
         ->group(function () {
     Route::get('dashboard', fn () => Inertia::render('admin/Dashboard', [
         'analyticsEndpoint' => '/api/admin/dashboard/analytics',
@@ -47,21 +60,13 @@ Route::prefix('admin')
     Route::get('settings', fn () => Inertia::render('admin/Settings'))->name('admin.settings');
     Route::get('customer-requests', [\App\Http\Controllers\Api\CustomerRequestController::class, 'index'])->name('admin.customer-requests');
 });
-
-Route::prefix('employee')->group(function () {
-    Route::get('pos', fn () => Inertia::render('employee/POS'))->name('employee.pos');
-});
-
 // Test time slots seeder
-// Route::
-//     middleware(middleware: 'auth')->
-//     group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
-Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::
+    middleware('auth')->
+    group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 require __DIR__.'/auth.php';
