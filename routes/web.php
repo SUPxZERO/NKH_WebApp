@@ -1,3 +1,13 @@
+// Debug session/cookie info route for troubleshooting
+use Illuminate\Support\Facades\Auth;
+Route::get('/debug-session', function () {
+    return [
+        'config' => config('session'),
+        'cookie' => request()->cookie(config('session.cookie')),
+        'session_id' => session()->getId(),
+        'user_id' => Auth::id(),
+    ];
+});
 <?php
 
 use App\Http\Controllers\ProfileController;
@@ -68,5 +78,22 @@ Route::
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Route::get('/debug-session', function () {
+//     return [
+//         'config' => config('session'),
+//         'cookie' => request()->cookie(config('session.cookie')),
+//         'session_id' => session()->getId(),
+//         'user_id' => Auth::id()
+//     ];
+// });
+
+// Route::get('/session-test', function () {
+//     if (!session()->has('test_key')) {
+//         session(['test_key' => time()]);
+//         return 'Session created: ' . session('test_key');
+//     }
+//     return 'Existing session: ' . session('test_key');
+// });
 
 require __DIR__.'/auth.php';
