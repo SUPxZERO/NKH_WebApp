@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             'name' => 'System Administrator',
             'email' => 'demo@admin.com',
             'phone' => '+855-12-345-678',
-            'password' => Hash::make('admin123'),
+            'password' => Hash::make('demo123'),
             'email_verified_at' => now(),
             'is_active' => true,
             'default_location_id' => 1,
