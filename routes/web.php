@@ -7,27 +7,28 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
+
 // Public route
 Route::get('/', fn () => Inertia::render('Customer/Home'))->name('customer.home');
 
 // Customer protected routes
-// Route::
-//     middleware(['auth', 'role:Customer'])->
-//     group(function () {
-//     Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
-//     Route::get('/menu', fn () => Inertia::render('Customer/Menu'))->name('customer.menu');
-//     Route::get('/cart', fn () => Inertia::render('Customer/Cart'))->name('customer.cart');
-//     Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('customer.checkout');
-//     Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
-//     Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
-// });
+Route::
+    middleware(['auth', 'role:Customer'])->
+    group(function () {
+    Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
+    Route::get('/menu', fn () => Inertia::render('Customer/Menu'))->name('customer.menu');
+    Route::get('/cart', fn () => Inertia::render('Customer/Cart'))->name('customer.cart');
+    Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('customer.checkout');
+    Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
+    Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
+});
 
-Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
-Route::get('/menu', fn () => Inertia::render('Customer/Menu'))->name('customer.menu');
-Route::get('/cart', fn () => Inertia::render('Customer/Cart'))->name('customer.cart');
-Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('customer.checkout');
-Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
-Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
+// Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
+// Route::get('/menu', fn () => Inertia::render('Customer/Menu'))->name('customer.menu');
+// Route::get('/cart', fn () => Inertia::render('Customer/Cart'))->name('customer.cart');
+// Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('customer.checkout');
+// Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
+// Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
 
 
 // Auth routes are handled in auth.php
@@ -71,21 +72,15 @@ Route::
 });
 
 
-Route::get('/debug-session', function () {
-    return response()->json([
-        'config' => config('session'),
-        'cookie' => request()->cookie(config('session.cookie')),
-        'session_id' => session()->getId(),
-        'user_id' => Auth::id(),
-    ]);
-});
-
-// Route::get('/session-test', function () {
-//     if (!session()->has('test_key')) {
-//         session(['test_key' => time()]);
-//         return 'Session created: ' . session('test_key');
-//     }
-//     return 'Existing session: ' . session('test_key');
-// });
+   Route::get('/debug-session', function () {
+        return response()->json([
+            'config' => config('session'),
+            'cookie' => request()->cookie(config('session.cookie')),
+            'session_id' => session()->getId(),
+            'user_id' => Auth::id(),
+            'cookies' => request()->cookies->all(),
+            'headers' => request()->headers->all(),
+        ]);
+    });
 
 require __DIR__.'/auth.php';

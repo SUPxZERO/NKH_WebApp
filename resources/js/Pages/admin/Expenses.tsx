@@ -212,7 +212,7 @@ export default function Expenses() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      case 'draft': return 'bg-gray-500/20 text-gray-400 border-gray-500/30 ';
       case 'approved': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       case 'paid': return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'voided': return 'bg-red-500/20 text-red-400 border-red-500/30';
@@ -287,13 +287,13 @@ export default function Expenses() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
+            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white "
           >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="approved">Approved</option>
-            <option value="paid">Paid</option>
-            <option value="voided">Voided</option>
+            <option value="all" className="text-gray-400">All Status</option>
+            <option value="draft" className="text-gray-400">Draft</option>
+            <option value="approved" className="text-gray-400">Approved</option>
+            <option value="paid" className="text-gray-400">Paid</option>
+            <option value="voided" className="text-gray-400">Voided</option>
           </select>
 
           <select

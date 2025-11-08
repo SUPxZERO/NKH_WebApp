@@ -9,9 +9,9 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
  * a simple convenience so we don't have to attach every token manually.
  */
 
-const token = document.head.querySelector('meta[name="csrf-token"]');
+const token = document.head.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
 
-if (token) {
+if (token && token.content) {
   window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 } else {
   console.warn('CSRF token not found in meta tag');

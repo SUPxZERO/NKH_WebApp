@@ -27,16 +27,30 @@ const API_CACHE_PATTERNS = [
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker');
   
-  event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        console.log('[SW] Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => {
-        return self.skipWaiting();
-      })
-  );
+  // Use a resilient caching strategy: fetch assets individually and only cache those
+  // that return a successful response. This prevents `cache.addAll` from rejecting
+  // the install step if any single asset is missing (common in dev environments).
+  event.waitUntil((async () => {
+    const cache = await caches.open(STATIC_CACHE);
+    console.log('[SW] Caching static assets (resilient)');
+
+    for (const asset of STATIC_ASSETS) {
+      try {
+        // Try to fetch the asset from network first. Use no-store to avoid Vite dev cache issues.
+        const res = await fetch(asset, { cache: 'no-store' });
+        if (!res || !res.ok) {
+          console.warn('[SW] Asset fetch failed, skipping:', asset, res && res.status);
+          continue;
+        }
+        await cache.put(asset, res.clone());
+        console.log('[SW] Cached:', asset);
+      } catch (err) {
+        console.warn('[SW] Error caching asset, skipping:', asset, err);
+      }
+    }
+
+    await self.skipWaiting();
+  })());
 });
 
 // Activate event - clean up old caches

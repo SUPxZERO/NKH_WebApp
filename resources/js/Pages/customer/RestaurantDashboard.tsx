@@ -26,10 +26,10 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/libs/apiClient';
 import { Order, MenuItem, ApiResponse } from '@/app/types/domain';
-import RestaurantLayout from '@/layouts/RestaurantLayout';
-import { RestaurantCard, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/RestaurantCard';
-import { RestaurantButton } from '@/components/ui/RestaurantButton';
-import FoodCard from '@/components/food/FoodCard';
+import RestaurantLayout from '@/Layouts/RestaurantLayout';
+import { RestaurantCard, CardHeader, CardContent, CardTitle, CardDescription } from '@/Components/ui/RestaurantCard';
+import { RestaurantButton } from '@/Components/ui/RestaurantButton';
+import FoodCard from '@/Components/food/FoodCard';
 import { animationVariants, createStaggerAnimation } from '@/design-system/animations';
 import { cn } from '@/app/utils/cn';
 
