@@ -10,13 +10,19 @@ const api = axios.create({
   withCredentials: true, // Important for Laravel Sanctum
 });
 
+// Ensure axios knows the Laravel XSRF cookie/header names
+api.defaults.xsrfCookieName = 'XSRF-TOKEN';
+api.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
+
 // Request interceptor to add CSRF token
 api.interceptors.request.use(
   async (config) => {
-    // Get CSRF token for non-GET requests
+    // Get CSRF token for non-GET requests. Use a plain axios call with
+    // withCredentials to avoid re-entering this instance's interceptor
+    // (which would cause recursion).
     if (config.method !== 'get') {
       try {
-        await axios.get('/sanctum/csrf-cookie');
+        await axios.get('/sanctum/csrf-cookie', { withCredentials: true });
       } catch (error) {
         console.warn('Failed to get CSRF cookie:', error);
       }

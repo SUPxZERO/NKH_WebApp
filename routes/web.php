@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', fn() => Inertia::render('Customer/Home'))->name('customer.home');
 
 // Customer protected routes
-Route::middleware(['auth', 'role:Customer'])->group(function () {
+// Note: role middleware expects role slugs (lowercase). Use 'customer' not 'Customer'.
+Route::middleware(['auth', 'role:customer'])->group(function () {
         Route::get('/dashboard', fn() => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
         Route::get('/menu', fn() => Inertia::render('Customer/Menu'))->name('customer.menu');
         Route::get('/cart', fn() => Inertia::render('Customer/Cart'))->name('customer.cart');

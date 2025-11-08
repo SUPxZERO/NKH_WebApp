@@ -49,8 +49,8 @@ Route::get('/locations', [LocationController::class, 'index']);
 // NOTE: authentication is required for these routes. Enable Sanctum guard so
 // $request->user() is available for controllers that rely on the authenticated user.
 Route::group([
-    'middle  ware' => 
-    ['auth:sanctum']], function () {
+    'middleware' => ['auth:sanctum'],
+], function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 

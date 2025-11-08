@@ -16,9 +16,10 @@ return [
     // Avoid resolving the Url generator (app('url')) while loading configuration
     // because the UrlGenerator depends on the request instance which may not
     // yet be available during bootstrap. Use APP_URL instead when present.
+    // Add common dev ports (5173 for Vite) so the SPA is treated as stateful
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+        'localhost,localhost:3000,localhost:5173,127.0.0.1,127.0.0.1:3000,127.0.0.1:5173,127.0.0.1:8000,::1',
         env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
     ))),
 

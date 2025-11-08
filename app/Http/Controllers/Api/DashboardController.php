@@ -14,6 +14,9 @@ use App\Models\CustomerRequest;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
@@ -34,6 +37,51 @@ class DashboardController extends Controller
                 'trace' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }
+    }
+
+    /**
+     * Revenue endpoint used by the admin dashboard.
+     * Added temporary debug logging to help trace authentication/session issues.
+     */
+    public function revenue(Request $request, string $period): JsonResponse
+    {
+        // Debug logging
+        Log::info('Dashboard::revenue called', [
+            'auth_check' => Auth::check(),
+            'auth_id' => Auth::id(),
+            'session_id' => session()->getId(),
+            'session_all' => session()->all(),
+            'cookies' => $request->cookies->all(),
+            'headers' => $request->headers->all(),
+        ]);
+
+        if (!Auth::check()) {
+            return response()->json([
+                'message' => 'Unauthenticated (debug).',
+                'auth_check' => false,
+                'session_id' => session()->getId(),
+            ], 401);
+        }
+
+        // Very small revenue calculation per period (daily/weekly/monthly)
+        $query = Order::query();
+        $now = Carbon::now();
+        if ($period === 'daily') {
+            $from = $now->startOfDay();
+        } elseif ($period === 'weekly') {
+            $from = $now->startOfWeek();
+        } else {
+            $from = $now->startOfMonth();
+        }
+
+        $revenue = $query->where('created_at', '>=', $from)->sum('total');
+
+        return response()->json([
+            'period' => $period,
+            'from' => $from->toDateTimeString(),
+            'revenue' => $revenue,
+            'user_id' => Auth::id(),
+        ]);
     }
 
     public function refresh(): JsonResponse
