@@ -32,7 +32,6 @@ class CategoryResource extends JsonResource
             'description' => $translation ? $translation->description : null,
             'display_order' => (int) $this->display_order,
             'is_active' => (bool) $this->is_active,
-            'parent_id' => $this->parent_id,
             'children' => CategoryResource::collection($this->whenLoaded('children')),
             'menu_items' => MenuItemResource::collection($menuItems),
             'menu_items_count' => $this->whenLoaded('menuItems', function() {

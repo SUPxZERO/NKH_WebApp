@@ -32,6 +32,7 @@ class CategoryController extends Controller
             ->orderBy('display_order')
             ->get();
 
+
         return response()->json([
             'status' => 'success',
             'message' => 'Categories retrieved successfully',
@@ -47,7 +48,6 @@ class CategoryController extends Controller
                 'translations', 
                 'children.translations',
                 'children.menuItems',
-                'parent',
                 'menuItems' => function($query) {
                     $query->withoutGlobalScope('active');
                 }
@@ -74,6 +74,7 @@ class CategoryController extends Controller
         $rootCategories = $query->whereNull('parent_id')
             ->orderBy('display_order')
             ->get();
+
 
         // Transform using CategoryResource
         $data = CategoryResource::collection($rootCategories);

@@ -39,7 +39,6 @@ export default function Categories() {
   const [openView, setOpenView] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const [editingCategory, setEditingCategory] = React.useState<Category | null>(null);
-  const [parentCategory, setParentCategory] = React.useState<Category | null>(null);
   const [expandedCategories, setExpandedCategories] = React.useState<Set<number>>(new Set());
   const [error, setError] = React.useState('');
 
@@ -51,8 +50,7 @@ export default function Categories() {
     slug: '',
     description: '',
     image: null as File | null,
-    parent_id: null as number | null,
-    display_order: 0,
+\    display_order: 0,
     is_active: true
   });
 
@@ -140,12 +138,10 @@ export default function Categories() {
       slug: '',
       description: '',
       image: null,
-      parent_id: null,
       display_order: 0,
       is_active: true
     });
     setEditingCategory(null);
-    setParentCategory(null);
     setError('');
   };
 
@@ -156,27 +152,16 @@ export default function Categories() {
       .replace(/(^-|-$)/g, '');
   };
 
-  const handleCreate = (parent?: Category) => {
-    resetForm();
-    if (parent) {
-      setParentCategory(parent);
-      setFormData(prev => ({ ...prev, parent_id: parent.id }));
-    }
-    setOpenCreate(true);
-  };
-
   const handleEdit = (category: Category) => {
     setFormData({
       name: category.name,
       slug: category.slug,
       description: category.description || '',
       image: null,
-      parent_id: category.parent_id || null,
       display_order: category.display_order,
       is_active: category.is_active
     });
     setEditingCategory(category);
-    setParentCategory(category.parent || null);
     setOpenEdit(true);
   };
 
@@ -211,9 +196,7 @@ export default function Categories() {
     data.append('display_order', formData.display_order.toString());
     data.append('is_active', formData.is_active ? '1' : '0');
     
-    if (formData.parent_id) {
-      data.append('parent_id', formData.parent_id.toString());
-    }
+
     
     if (formData.image) {
       data.append('image', formData.image);

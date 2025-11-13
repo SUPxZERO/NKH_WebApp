@@ -26,9 +26,6 @@ class EmployeeSeeder extends Seeder
         $this->command->info('Creating or updating locations...');
         $locationData = [
             ['code' => 'NKH-DT', 'name' => 'NKH Downtown', 'address' => '123 Downtown St, Phnom Penh'],
-            ['code' => 'NKH-SR', 'name' => 'NKH Siem Reap', 'address' => '456 Temple Road, Siem Reap'],
-            ['code' => 'NKH-BB', 'name' => 'NKH Battambang', 'address' => '789 River St, Battambang'],
-            ['code' => 'NKH-KP', 'name' => 'NKH Kampot', 'address' => '321 Seafront Rd, Kampot'],
         ];
 
         $locations = collect();
@@ -70,33 +67,33 @@ class EmployeeSeeder extends Seeder
         $employeeAssignments = [
             // Head Chefs
             ['name' => 'Ratha Meng', 'email' => 'ratha.meng@nkhrestaurant.com', 'position' => 'Head Chef', 'location' => 'NKH-DT', 'salary' => 2200.00, 'salary_type' => 'monthly'],
-            ['name' => 'Maria Santos', 'email' => 'maria.santos@nkhrestaurant.com', 'position' => 'Head Chef', 'location' => 'NKH-SR', 'salary' => 2200.00, 'salary_type' => 'monthly'],
+            ['name' => 'Maria Santos', 'email' => 'maria.santos@nkhrestaurant.com', 'position' => 'Head Chef', 'location' => 'NKH-DT', 'salary' => 2200.00, 'salary_type' => 'monthly'],
             
             // Sous Chefs
             ['name' => 'Bopha Keo', 'email' => 'bopha.keo@nkhrestaurant.com', 'position' => 'Sous Chef', 'location' => 'NKH-DT', 'salary' => 1600.00, 'salary_type' => 'monthly'],
-            ['name' => 'Sovannak Pich', 'email' => 'sovannak.pich@nkhrestaurant.com', 'position' => 'Sous Chef', 'location' => 'NKH-BB', 'salary' => 1600.00, 'salary_type' => 'monthly'],
+            ['name' => 'Sovannak Pich', 'email' => 'sovannak.pich@nkhrestaurant.com', 'position' => 'Sous Chef', 'location' => 'NKH-DT', 'salary' => 1600.00, 'salary_type' => 'monthly'],
             
             // Head Waiters
             ['name' => 'Sokha Rath', 'email' => 'sokha.rath@nkhrestaurant.com', 'position' => 'Head Waiter', 'location' => 'NKH-DT', 'salary' => 1400.00, 'salary_type' => 'monthly'],
-            ['name' => 'Dara Chea', 'email' => 'dara.chea@nkhrestaurant.com', 'position' => 'Head Waiter', 'location' => 'NKH-SR', 'salary' => 1400.00, 'salary_type' => 'monthly'],
+            ['name' => 'Dara Chea', 'email' => 'dara.chea@nkhrestaurant.com', 'position' => 'Head Waiter', 'location' => 'NKH-DT', 'salary' => 1400.00, 'salary_type' => 'monthly'],
             
             // Waiters
             ['name' => 'Sreypov Noun', 'email' => 'sreypov.noun@nkhrestaurant.com', 'position' => 'Waiter', 'location' => 'NKH-DT', 'salary' => 8.50, 'salary_type' => 'hourly'],
-            ['name' => 'Kimheng Ly', 'email' => 'kimheng.ly@nkhrestaurant.com', 'position' => 'Waiter', 'location' => 'NKH-SR', 'salary' => 8.50, 'salary_type' => 'hourly'],
-            ['name' => 'Pheaktra Ouk', 'email' => 'pheaktra.ouk@nkhrestaurant.com', 'position' => 'Waiter', 'location' => 'NKH-BB', 'salary' => 8.50, 'salary_type' => 'hourly'],
-            ['name' => 'Veasna Chhay', 'email' => 'veasna.chhay@nkhrestaurant.com', 'position' => 'Waiter', 'location' => 'NKH-KP', 'salary' => 8.50, 'salary_type' => 'hourly'],
+            ['name' => 'Kimheng Ly', 'email' => 'kimheng.ly@nkhrestaurant.com', 'position' => 'Waiter', 'location' => 'NKH-DT', 'salary' => 8.50, 'salary_type' => 'hourly'],
+            ['name' => 'Pheaktra Ouk', 'email' => 'pheaktra.ouk@nkhrestaurant.com', 'position' => 'Waiter', 'location' => 'NKH-DT', 'salary' => 8.50, 'salary_type' => 'hourly'],
+            ['name' => 'Veasna Chhay', 'email' => 'veasna.chhay@nkhrestaurant.com', 'position' => 'Waiter', 'location' => 'NKH-DT', 'salary' => 8.50, 'salary_type' => 'hourly'],
             
             // Line Cooks
             ['name' => 'Bunthoeun Sao', 'email' => 'bunthoeun.sao@nkhrestaurant.com', 'position' => 'Line Cook', 'location' => 'NKH-DT', 'salary' => 12.00, 'salary_type' => 'hourly'],
-            ['name' => 'Chenda Ros', 'email' => 'chenda.ros@nkhrestaurant.com', 'position' => 'Line Cook', 'location' => 'NKH-SR', 'salary' => 12.00, 'salary_type' => 'hourly'],
+            ['name' => 'Chenda Ros', 'email' => 'chenda.ros@nkhrestaurant.com', 'position' => 'Line Cook', 'location' => 'NKH-DT', 'salary' => 12.00, 'salary_type' => 'hourly'],
             
             // Bartenders
             ['name' => 'Sopheak Mao', 'email' => 'sopheak.mao@nkhrestaurant.com', 'position' => 'Bartender', 'location' => 'NKH-DT', 'salary' => 10.00, 'salary_type' => 'hourly'],
-            ['name' => 'Rachana Heng', 'email' => 'rachana.heng@nkhrestaurant.com', 'position' => 'Bartender', 'location' => 'NKH-SR', 'salary' => 10.00, 'salary_type' => 'hourly'],
+            ['name' => 'Rachana Heng', 'email' => 'rachana.heng@nkhrestaurant.com', 'position' => 'Bartender', 'location' => 'NKH-DT', 'salary' => 10.00, 'salary_type' => 'hourly'],
             
             // Cashiers
-            ['name' => 'Sreyleak Kong', 'email' => 'sreyleak.kong@nkhrestaurant.com', 'position' => 'Cashier', 'location' => 'NKH-BB', 'salary' => 9.00, 'salary_type' => 'hourly'],
-            ['name' => 'Pisey Nhem', 'email' => 'pisey.nhem@nkhrestaurant.com', 'position' => 'Cashier', 'location' => 'NKH-KP', 'salary' => 9.00, 'salary_type' => 'hourly'],
+            ['name' => 'Sreyleak Kong', 'email' => 'sreyleak.kong@nkhrestaurant.com', 'position' => 'Cashier', 'location' => 'NKH-DT', 'salary' => 9.00, 'salary_type' => 'hourly'],
+            ['name' => 'Pisey Nhem', 'email' => 'pisey.nhem@nkhrestaurant.com', 'position' => 'Cashier', 'location' => 'NKH-DT', 'salary' => 9.00, 'salary_type' => 'hourly'],
         ];
 
         $this->command->info('Creating employees and their user accounts...');

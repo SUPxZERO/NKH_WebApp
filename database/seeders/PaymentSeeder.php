@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Payment;
 use App\Models\Invoice;
 use App\Models\PaymentMethod;
+use Illuminate\Support\Str;
 
 class PaymentSeeder extends Seeder
 {
@@ -82,7 +83,16 @@ class PaymentSeeder extends Seeder
 
     private function generateReferenceNumber(): string
     {
-        return 'REF-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $attempts = 0;
+        $maxAttempts = 10;
+
+        do {
+            $ref = 'REF-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT) . '-' . strtoupper(Str::random(3));
+            $exists = Payment::where('reference_number', $ref)->exists();
+            $attempts++;
+        } while ($exists && $attempts < $maxAttempts);
+
+        return $ref;
     }
 
     private function getPaymentStatus(): string

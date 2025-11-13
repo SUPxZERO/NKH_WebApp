@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\DiningTable;
 use App\Models\Location;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class ReservationSeeder extends Seeder
 {
@@ -36,16 +37,55 @@ class ReservationSeeder extends Seeder
             
             if ($locationTables->isEmpty()) continue;
             
-            $table = $locationTables->random();
-            $reservationDate = $this->randomDateBetween($startDate, $endDate);
-            $reservationTime = $this->getReservationTime();
-            
+            // Try to find a unique slot (avoid unique constraint violation)
+            $attempts = 0;
+            $maxAttempts = 10;
+            $slotFound = false;
+
+            do {
+                $table = $locationTables->random();
+                $reservationDate = $this->randomDateBetween($startDate, $endDate);
+                $reservationTime = $this->getReservationTime();
+
+                $exists = Reservation::where('location_id', $location->id)
+                    ->where('table_id', $table->id)
+                    ->where('reservation_date', $reservationDate->format('Y-m-d'))
+                    ->where('reservation_time', $reservationTime)
+                    ->exists();
+
+                if (! $exists) {
+                    $slotFound = true;
+                    break;
+                }
+
+                $attempts++;
+            } while ($attempts < $maxAttempts);
+
+            if (! $slotFound) {
+                // Couldn't find an available slot for this attempt, skip
+                continue;
+            }
+
             $reservationNumber = $this->generateReservationNumber($location->code, $reservationDate);
+
+            // Ensure reservation code is unique (avoid unique constraint on code)
+            $codeAttempts = 0;
+            do {
+                $code = substr(md5($reservationNumber . Str::random(8) . microtime(true)), 0, 20);
+                $codeExists = Reservation::where('code', $code)->exists();
+                $codeAttempts++;
+            } while ($codeExists && $codeAttempts < 5);
+
+            if ($codeExists) {
+                // If we still couldn't generate a unique code, skip this reservation
+                continue;
+            }
+
             Reservation::create([
                 'location_id' => $location->id,
                 'customer_id' => $customer->id,
                 'table_id' => $table->id,
-                'code' => substr(md5($reservationNumber), 0, 20),
+                'code' => $code,
                 'reservation_number' => $reservationNumber,
                 'reserved_for' => $customer->full_name ?? $customer->name ?? "{$customer->first_name} {$customer->last_name}",
                 'party_size' => rand(2, min(8, $table->capacity)),
@@ -72,16 +112,55 @@ class ReservationSeeder extends Seeder
             
             if ($locationTables->isEmpty()) continue;
             
-            $table = $locationTables->random();
-            $reservationDate = $this->randomDateBetween($startDate, $endDate);
-            $reservationTime = $this->getReservationTime();
-            
+            // Try to find a unique slot (avoid unique constraint violation)
+            $attempts = 0;
+            $maxAttempts = 10;
+            $slotFound = false;
+
+            do {
+                $table = $locationTables->random();
+                $reservationDate = $this->randomDateBetween($startDate, $endDate);
+                $reservationTime = $this->getReservationTime();
+
+                $exists = Reservation::where('location_id', $location->id)
+                    ->where('table_id', $table->id)
+                    ->where('reservation_date', $reservationDate->format('Y-m-d'))
+                    ->where('reservation_time', $reservationTime)
+                    ->exists();
+
+                if (! $exists) {
+                    $slotFound = true;
+                    break;
+                }
+
+                $attempts++;
+            } while ($attempts < $maxAttempts);
+
+            if (! $slotFound) {
+                // Couldn't find an available slot for this attempt, skip
+                continue;
+            }
+
             $reservationNumber = $this->generateReservationNumber($location->code, $reservationDate);
+
+            // Ensure reservation code is unique (avoid unique constraint on code)
+            $codeAttempts = 0;
+            do {
+                $code = substr(md5($reservationNumber . Str::random(8) . microtime(true)), 0, 20);
+                $codeExists = Reservation::where('code', $code)->exists();
+                $codeAttempts++;
+            } while ($codeExists && $codeAttempts < 5);
+
+            if ($codeExists) {
+                // If we still couldn't generate a unique code, skip this reservation
+                continue;
+            }
+
             Reservation::create([
                 'location_id' => $location->id,
                 'customer_id' => $customer->id,
                 'table_id' => $table->id,
-                'code' => substr(md5($reservationNumber), 0, 20),
+                'code' => $code,
                 'reservation_number' => $reservationNumber,
                 'reserved_for' => $customer->full_name ?? $customer->name ?? "{$customer->first_name} {$customer->last_name}",
                 'party_size' => rand(2, min(8, $table->capacity)),
@@ -114,7 +193,16 @@ class ReservationSeeder extends Seeder
 
     private function generateReservationNumber(string $locationCode, Carbon $date): string
     {
-        return 'RES-' . $locationCode . '-' . $date->format('Ymd') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+        $attempts = 0;
+        $maxAttempts = 10;
+
+        do {
+            $number = 'RES-' . $locationCode . '-' . $date->format('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $exists = Reservation::where('reservation_number', $number)->exists();
+            $attempts++;
+        } while ($exists && $attempts < $maxAttempts);
+
+        return $number;
     }
 
     private function getPastReservationStatus(): string

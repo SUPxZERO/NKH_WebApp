@@ -12,7 +12,6 @@ class Category extends Model
 
     protected $fillable = [
         'location_id',
-        'parent_id',
         'slug',
         'display_order',
         'is_active',
@@ -66,15 +65,5 @@ class Category extends Model
     public function menuItems()
     {
         return $this->hasMany(MenuItem::class);
-    }
-
-    public function parent()
-    {
-        return $this->belongsTo(Category::class, 'parent_id');
-    }
-
-    public function children()
-    {
-        return $this->hasMany(Category::class, 'parent_id');
     }
 }

@@ -14,24 +14,43 @@ class UserSeeder extends Seeder
         // Get roles
         $adminRole = Role::where('slug', 'admin')->first();
         $managerRole = Role::where('slug', 'manager')->first();
-        $chefRole = Role::where('slug', 'chef')->first();
+        $employeeRole = Role::where('slug', 'employee')->first();
         $customerRole = Role::where('slug', 'customer')->first();
 
-        // Create admin user
-        $admin = User::create([
-            'name' => 'System Administrator',
-            'email' => 'demo@admin.com',
-            'phone' => '+855-12-345-678',
-            'password' => Hash::make('demo123'),
-            'email_verified_at' => now(),
-            'is_active' => true,
-            'default_location_id' => 1,
-        ]);
-        if ($adminRole) {
-            $admin->roles()->attach($adminRole->id);
+        // ---------------------------
+        // Admins
+        // ---------------------------
+        $admins = [
+            [
+                'name' => 'System Administrator',
+                'email' => 'demo@admin.com',
+                'phone' => '+855-12-345-678',
+                'password' => Hash::make('demo123'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'default_location_id' => 1,
+            ],
+            [
+                'name' => 'Secondary Admin',
+                'email' => 'admin2@nkhrestaurant.com',
+                'phone' => '+855-12-987-654',
+                'password' => Hash::make('admin123'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'default_location_id' => 2,
+            ],
+        ];
+
+        foreach ($admins as $adminData) {
+            $admin = User::create($adminData);
+            if ($adminRole) {
+                $admin->roles()->attach($adminRole->id);
+            }
         }
 
-        // Create managers
+        // ---------------------------
+        // Managers
+        // ---------------------------
         $managers = [
             [
                 'name' => 'Sophea Chen',
@@ -60,7 +79,9 @@ class UserSeeder extends Seeder
             }
         }
 
-        // Create employees
+        // ---------------------------
+        // Employees
+        // ---------------------------
         $employees = [
             ['name' => 'Ratha Meng', 'email' => 'demo@employee.com', 'location' => 1],
             ['name' => 'Maria Santos', 'email' => 'maria.santos@nkhrestaurant.com', 'location' => 2],
@@ -90,19 +111,38 @@ class UserSeeder extends Seeder
                 'is_active' => true,
                 'default_location_id' => $employeeData['location'],
             ]);
-            $employee->roles()->attach(Role::where('slug', 'employee')->first()->id);
+            if ($employeeRole) {
+                $employee->roles()->attach($employeeRole->id);
+            }
         }
 
-        // Create customers using factory
-        $customers = User::factory(20)->create([
-            'password' => Hash::make('customer123'),
-            'email_verified_at' => now(),
-            'is_active' => true,
-            'default_location_id' => 1,
-        ]);
+        // ---------------------------
+        // Customers
+        // ---------------------------
+        $customers = [
+            ['name' => 'Chantha Lim', 'email' => 'demo@customer.com', 'location' => 1],
+            ['name' => 'David Kim', 'email' => 'david.kim@yahoo.com', 'location' => 2],
+            ['name' => 'Sophea Chhun', 'email' => 'sophea.chhun@hotmail.com', 'location' => 1],
+            ['name' => 'Linda Martinez', 'email' => 'linda.martinez@gmail.com', 'location' => 3],
+            ['name' => 'Narong Sok', 'email' => 'narong.sok@gmail.com', 'location' => 2],
+            ['name' => 'Sokny Phan', 'email' => 'sokny.phan@gmail.com', 'location' => 1],
+            ['name' => 'Sothy Chan', 'email' => 'sothy.chan@gmail.com', 'location' => 3],
+            ['name' => 'Nita Heng', 'email' => 'nita.heng@gmail.com', 'location' => 4],
+            ['name' => 'Alex Johnson', 'email' => 'alex.johnson@gmail.com', 'location' => 2],
+            ['name' => 'Vanna Oum', 'email' => 'vanna.oum@gmail.com', 'location' => 1],
+        ];
 
-        if ($customerRole) {
-            foreach ($customers as $customer) {
+        foreach ($customers as $customerData) {
+            $customer = User::create([
+                'name' => $customerData['name'],
+                'email' => $customerData['email'],
+                'phone' => '+855-' . rand(10, 99) . '-' . rand(100, 999) . '-' . rand(100, 999),
+                'password' => Hash::make('demo123'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'default_location_id' => $customerData['location'],
+            ]);
+            if ($customerRole) {
                 $customer->roles()->attach($customerRole->id);
             }
         }

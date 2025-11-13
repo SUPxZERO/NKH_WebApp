@@ -4,6 +4,8 @@ export interface Category {
   id: number;
   location_id?: number | null;
   parent_id?: number | null;
+  parent?: Category | null;
+  children?: Category[];
   name: string;
   slug: string;
   description?: string | null;
@@ -14,8 +16,6 @@ export interface Category {
   updated_at: string;
   deleted_at?: string | null;
   // Relations
-  parent?: Category;
-  children?: Category[];
   menu_items?: MenuItem[];
   location?: Location;
   translations?: CategoryTranslation[];
