@@ -4,7 +4,8 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 // - Uses /sanctum/csrf-cookie for CSRF protection on state-changing requests
 // - Retries once on 419 (CSRF token mismatch) after refreshing the cookie
 
-const API_BASE_URL = '/api';
+const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL as string) || '';
+const API_BASE_URL = BACKEND_BASE ? `${BACKEND_BASE.replace(/\/$/, '')}/api` : '/api';
 
 function createClient(): AxiosInstance {
   const instance = axios.create({
@@ -23,7 +24,8 @@ function createClient(): AxiosInstance {
   async function ensureCsrfCookie() {
     if (!isRefreshing) {
       isRefreshing = true;
-      refreshPromise = axios.get('/sanctum/csrf-cookie', { withCredentials: true });
+      const target = BACKEND_BASE?.replace(/\/$/, '') || '';
+      refreshPromise = axios.get(`${target}/sanctum/csrf-cookie`, { withCredentials: true });
       try {
         await refreshPromise;
       } finally {

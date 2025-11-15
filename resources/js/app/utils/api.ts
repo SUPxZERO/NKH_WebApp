@@ -1,8 +1,12 @@
 import axios from 'axios';
 
+// Use Vite-provided environment variable for backend API base URL.
+// Set `VITE_API_BASE_URL` in your `.env` to e.g. `http://127.0.0.1:8000` during development.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || '/';
+
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: '/',
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -10,16 +14,32 @@ const api = axios.create({
   withCredentials: true, // Important for Laravel Sanctum
 });
 
+// Flag to track if CSRF cookie has been initialized
+let csrfCookieInitialized = false;
+
+// Initialize CSRF cookie on app start
+const initializeCsrfCookie = async () => {
+  if (!csrfCookieInitialized) {
+    try {
+      // Call the backend directly so the CSRF cookie is set for the API domain.
+      const target = API_BASE?.replace(/\/$/, '') || '';
+      await axios.get(`${target}/sanctum/csrf-cookie`, { withCredentials: true });
+      csrfCookieInitialized = true;
+    } catch (error) {
+      console.warn('Failed to initialize CSRF cookie:', error);
+    }
+  }
+};
+
+// Call on module load to initialize session
+initializeCsrfCookie();
+
 // Request interceptor to add CSRF token
 api.interceptors.request.use(
   async (config) => {
-    // Get CSRF token for non-GET requests
-    if (config.method !== 'get') {
-      try {
-        await axios.get('/sanctum/csrf-cookie');
-      } catch (error) {
-        console.warn('Failed to get CSRF cookie:', error);
-      }
+    // Ensure CSRF cookie is initialized before making any request
+    if (!csrfCookieInitialized) {
+      await initializeCsrfCookie();
     }
     return config;
   },

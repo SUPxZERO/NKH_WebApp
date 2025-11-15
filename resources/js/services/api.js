@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL) || '';
+const API_BASE = BACKEND_BASE ? `${BACKEND_BASE.replace(/\/$/, '')}/api` : '/api';
+
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: API_BASE,
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -43,7 +46,6 @@ export const dashboardApi = {
 
 export const categoriesApi = {
     getAll: (params) => api.get('/admin/categories', { params }),
-    getHierarchy: () => api.get('/admin/categories/hierarchy'),
     getStats: () => api.get('/admin/category-stats'),
     get: (id) => api.get(`/admin/categories/${id}`),
     create: (data) => api.post('/admin/categories', data),

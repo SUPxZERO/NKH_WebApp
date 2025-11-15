@@ -40,49 +40,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    // GET /api/admin/categories/hierarchy (admin)
-    public function hierarchy(Request $request): JsonResponse
-    {
-        $query = Category::query()
-            ->with([
-                'translations', 
-                'children.translations',
-                'children.menuItems',
-                'menuItems' => function($query) {
-                    $query->withoutGlobalScope('active');
-                }
-            ])
-            ->withCount([
-                'menuItems' => function($query) {
-                    $query->withoutGlobalScope('active');
-                }
-            ]);
-
-        if ($request->filled('search')) {
-            $search = $request->get('search');
-            $query->whereHas('translations', function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->boolean('is_active'));
-        }
-
-        // Get root categories first
-        $rootCategories = $query->whereNull('parent_id')
-            ->orderBy('display_order')
-            ->get();
-
-
-        // Transform using CategoryResource
-        $data = CategoryResource::collection($rootCategories);
-
-        return response()->json([
-            'data' => $data
-        ]);
-    }
+    
 
     // GET /api/admin/category-stats (admin)
     public function stats(): JsonResponse
