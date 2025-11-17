@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { TrendingUp, Users, Timer, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { apiGet } from '@/app/utils/api';
 import RevenueLine from '@/app/components/charts/RevenueLine';
 
 interface Employee {
@@ -36,21 +36,30 @@ interface RevenuePoint {
 const useDashboardAnalytics = () => {
   return useQuery<Analytics>({
     queryKey: ['admin.dashboard.analytics'],
-    queryFn: () => axios.get('/api/admin/dashboard/analytics').then(res => res.data.data),
+    queryFn: async () => {
+      const data = await apiGet('/api/admin/dashboard/analytics');
+      return data;
+    },
   });
 };
 
 const useOrderStats = () => {
   return useQuery<OrderStats>({
     queryKey: ['admin.dashboard.orderStats'],
-    queryFn: () => axios.get('/api/admin/dashboard/orders/stats').then(res => res.data.data),
+    queryFn: async () => {
+      const data = await apiGet('/api/admin/dashboard/orders/stats');
+      return data;
+    },
   });
 };
 
 const useRevenue = (period: 'daily' | 'weekly' | 'monthly') => {
   return useQuery<RevenuePoint[]>({
     queryKey: ['admin.dashboard.revenue', period],
-    queryFn: () => axios.get(`/api/admin/dashboard/revenue/${period}`).then(res => res.data.data),
+    queryFn: async () => {
+      const data = await apiGet(`/api/admin/dashboard/revenue/${period}`);
+      return data;
+    },
   });
 };
 

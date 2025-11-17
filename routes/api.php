@@ -60,6 +60,7 @@ Route::group([
     ->middleware(['role:admin,manager'])
     ->group(function () {
             Route::get('/category-stats', [CategoryController::class, 'stats']);
+            Route::get('/categories/hierarchy', [CategoryController::class, 'hierarchy']);
             Route::get('/categories', [CategoryController::class, 'index']);
             Route::post('/categories', [CategoryController::class, 'store']);
             Route::get('/categories/{category}', [CategoryController::class, 'show']);
@@ -100,15 +101,15 @@ Route::group([
         // Order oversight and approvals
         Route::get('orders', [OrderController::class, 'index']); // Assuming an index method for admin
         Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
-        // ->middleware('role:admin,manager');
+        // ->middleware('auth','role:admin,manager');
         Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
-        // ->middleware('role:admin,manager');
+        // ->middleware('auth','role:admin,manager');
     });
 
 
     // In-store operations for staff (Employee)
     Route::prefix('employee')
-    // ->middleware('role:admin,manager,waiter')
+    ->middleware('role:admin,manager,waiter')
     ->group(function () {
         // POS menu
         Route::get('menu', [MenuItemController::class, 'index']);

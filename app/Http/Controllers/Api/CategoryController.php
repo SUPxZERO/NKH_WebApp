@@ -42,6 +42,40 @@ class CategoryController extends Controller
 
     
 
+    // GET /api/admin/categories/hierarchy (admin)
+    public function hierarchy(Request $request): JsonResponse
+    {
+        $search = $request->get('search', '');
+        
+        $query = Category::withoutGlobalScope('active')
+            ->with([
+                'translations',
+                'children',
+                'menuItems' => function($query) {
+                    $query->withoutGlobalScope('active');
+                }
+            ])
+            ->withCount([
+                'menuItems' => function($query) {
+                    $query->withoutGlobalScope('active');
+                }
+            ])
+            ->whereNull('parent_id') // Only root categories
+            ->orderBy('display_order');
+        
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+        
+        $categories = $query->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Category hierarchy retrieved successfully',
+            'data' => CategoryResource::collection($categories)
+        ]);
+    }
+
     // GET /api/admin/category-stats (admin)
     public function stats(): JsonResponse
     {

@@ -26,13 +26,16 @@ class RedirectIfAuthenticated
                 // Determine where to redirect based on user role
                 $isAdmin = $user && (data_get($user, 'role') === 'admin' || method_exists($user, 'hasRole') && $user->hasRole('admin'));
                 $isEmployee = $user && (data_get($user, 'role') === 'employee' || method_exists($user, 'hasRole') && $user->hasRole('employee'));
+                $isCustomer = $user && (data_get($user, 'role') === 'customer' || method_exists($user, 'hasRole') && $user->hasRole('customer'));
 
                 if ($isAdmin) {
                     return redirect()->route('admin.dashboard');
                 } elseif ($isEmployee) {
                     return redirect()->route('employee.pos');
-                } else {
+                } elseif ($isCustomer) {
                     return redirect()->route('customer.dashboard');
+                }else{
+                    return redirect()->route('login');
                 }
             }
         }
