@@ -87,7 +87,6 @@ self.addEventListener('fetch', (event) => {
 
   // Handle API requests
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(handleApiRequest(request));
     return;
   }
 
@@ -124,13 +123,15 @@ self.addEventListener('fetch', (event) => {
 async function handleApiRequest(request) {
   const url = new URL(request.url);
   const shouldCache = API_CACHE_PATTERNS.some(pattern => pattern.test(url.pathname));
+  // Always include credentials for API requests so session cookies are sent
+  const req = new Request(request, { credentials: 'include', cache: 'no-store' });
 
   if (shouldCache) {
     // Cache-first strategy for menu, categories, etc.
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       // Serve from cache, update in background
-      fetch(request)
+      fetch(req)
         .then((response) => {
           if (response.ok) {
             caches.open(DYNAMIC_CACHE)
@@ -145,7 +146,7 @@ async function handleApiRequest(request) {
 
   // Network-first for other API requests
   try {
-    const response = await fetch(request);
+    const response = await fetch(req);
     if (response.ok && shouldCache) {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, response.clone());

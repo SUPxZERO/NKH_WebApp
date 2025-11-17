@@ -63,15 +63,5 @@ Route::middleware('auth')->group(function () {
     });
 
 
-Route::get('/debug-session', function () {
-    return response()->json([
-        'config' => config('session'),
-        'cookie' => request()->cookie(config('session.cookie')),
-        'session_id' => session()->getId(),
-        'user_id' => Auth::id(),
-        'cookies' => request()->cookies->all(),
-        'headers' => request()->headers->all(),
-    ]);
-});
 
 require __DIR__ . '/auth.php';
