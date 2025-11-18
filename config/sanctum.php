@@ -12,7 +12,7 @@ return [
     | and production domains which access your API via a frontend SPA.
     |
     */
-
+ 
     // Avoid resolving the Url generator (app('url')) while loading configuration
     // because the UrlGenerator depends on the request instance which may not
     // yet be available during bootstrap. Use APP_URL instead when present.
