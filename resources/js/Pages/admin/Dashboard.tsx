@@ -37,8 +37,8 @@ const useDashboardAnalytics = () => {
   return useQuery<Analytics>({
     queryKey: ['admin.dashboard.analytics'],
     queryFn: async () => {
-      const data = await apiGet('/api/admin/dashboard/analytics');
-      return data;
+      const res = await apiGet('/api/admin/dashboard/analytics');
+      return res?.data as Analytics;
     },
   });
 };
@@ -47,8 +47,8 @@ const useOrderStats = () => {
   return useQuery<OrderStats>({
     queryKey: ['admin.dashboard.orderStats'],
     queryFn: async () => {
-      const data = await apiGet('/api/admin/dashboard/orders/stats');
-      return data;
+      const res = await apiGet('/api/admin/dashboard/orders/stats');
+      return res?.data as OrderStats;
     },
   });
 };
@@ -57,8 +57,9 @@ const useRevenue = (period: 'daily' | 'weekly' | 'monthly') => {
   return useQuery<RevenuePoint[]>({
     queryKey: ['admin.dashboard.revenue', period],
     queryFn: async () => {
-      const data = await apiGet(`/api/admin/dashboard/revenue/${period}`);
-      return data;
+      const res = await apiGet(`/api/admin/dashboard/revenue/${period}`);
+      const arr = res?.data as RevenuePoint[] | undefined;
+      return Array.isArray(arr) ? arr : [];
     },
   });
 };
@@ -88,7 +89,7 @@ export default function Dashboard() {
                 <Skeleton className="h-8 w-32" />
               ) : (
                 <div className="text-3xl font-extrabold">
-                  ${Number(revenue?.reduce((sum: number, point: RevenuePoint) => sum + point.value, 0) || 0).toFixed(2)}
+                  ${Number((Array.isArray(revenue) ? revenue.reduce((sum: number, point: RevenuePoint) => sum + point.value, 0) : 0)).toFixed(2)}
                 </div>
               )}
             </CardContent>
@@ -138,7 +139,7 @@ export default function Dashboard() {
                   <Skeleton className="h-48 w-full" />
                 </div>
               ) : (
-                <RevenueLine data={revenue || []} />
+                <RevenueLine data={(Array.isArray(revenue) ? revenue : [])} />
               )}
             </CardContent>
           </Card>

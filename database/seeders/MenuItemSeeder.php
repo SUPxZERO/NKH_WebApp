@@ -22,7 +22,7 @@ class MenuItemSeeder extends Seeder
             $desserts = $categories->where('slug', 'desserts')->first();
             $beverages = $categories->where('slug', 'beverages')->first();
             $mainDishes = $categories->where('slug', 'main-dishes')->first();
-            $grilled = $categories->where('slug', 'grilled')->first();
+            $grilled = $categories->where('slug', 'grilled-specialties')->first();
             $seafood = $categories->where('slug', 'seafood')->first();
             $vegetarian = $categories->where('slug', 'vegetarian')->first();
    

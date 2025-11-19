@@ -13,10 +13,13 @@ use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
-    // GET /api/categories (public)
-    public function index(): JsonResponse
+    // GET /api/categories (public) and /api/admin/categories
+    public function index(Request $request): JsonResponse
     {
-        $categories = Category::withoutGlobalScope('active')
+        $search = $request->get('search', '');
+        $status = $request->get('status', 'all');
+
+        $query = Category::query()
             ->with([
                 'translations',
                 'children',
@@ -29,9 +32,29 @@ class CategoryController extends Controller
                     $query->withoutGlobalScope('active');
                 }
             ])
-            ->orderBy('display_order')
-            ->get();
+            ->orderBy('display_order');
 
+        // Only root categories for tree view
+        $query->whereNull('parent_id');
+
+        // Status filter
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
+
+        // Search by slug or translated name
+        if ($search !== '') {
+            $query->where(function($q) use ($search) {
+                $q->where('slug', 'like', "%{$search}%")
+                  ->orWhereHas('translations', function($t) use ($search) {
+                      $t->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $categories = $query->get();
 
         return response()->json([
             'status' => 'success',
@@ -64,7 +87,12 @@ class CategoryController extends Controller
             ->orderBy('display_order');
         
         if ($search) {
-            $query->where('name', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('slug', 'like', "%{$search}%")
+                  ->orWhereHas('translations', function($t) use ($search) {
+                      $t->where('name', 'like', "%{$search}%");
+                  });
+            });
         }
         
         $categories = $query->get();
