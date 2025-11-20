@@ -33,7 +33,7 @@ export interface MenuItemOptionChoice {
   label: string;
   price_delta: number; // additional price for this choice
 }
-
+  
 export interface MenuItemOption {
   id: number;
   name: string; // e.g. "Size", "Spice Level"
