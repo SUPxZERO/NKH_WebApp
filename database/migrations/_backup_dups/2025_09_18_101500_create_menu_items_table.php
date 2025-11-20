@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->index();
             $table->unsignedInteger('display_order')->default(0);
             $table->timestamps();
-            $table->softDeletes();
+            
 
             $table->unique(['location_id', 'slug']);
             $table->unique(['location_id', 'sku']);

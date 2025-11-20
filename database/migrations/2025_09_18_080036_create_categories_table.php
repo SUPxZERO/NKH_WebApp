@@ -18,7 +18,6 @@ return new class extends Migration
             $table->unsignedInteger('display_order')->default(0);
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
-            $table->softDeletes();
     
             $table->unique(['location_id', 'slug']);
         });

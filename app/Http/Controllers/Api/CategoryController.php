@@ -200,6 +200,11 @@ class CategoryController extends Controller
     // DELETE /api/categories/{category} (role:admin,manager)
     public function destroy(Category $category): JsonResponse
     {
+
+        $category = Category::find($category->id);
+
+$category->delete();
+
         // Check if category has children
         if ($category->children()->exists()) {
             return response()->json([

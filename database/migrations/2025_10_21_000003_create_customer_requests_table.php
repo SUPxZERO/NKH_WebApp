@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('resolution')->nullable();
             $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
-            $table->softDeletes();
+            
         });
     }
 

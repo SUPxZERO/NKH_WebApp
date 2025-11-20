@@ -189,20 +189,18 @@ class OrderController extends Controller
             $payment = new Payment([
                 'invoice_id' => $invoice->id,
                 'payment_method_id' => $data['payment_method_id'],
-                'location_id' => $order->location_id,
-                'created_by' => optional($request->user())->id,
                 'amount' => $data['amount_paid'],
-                'currency' => $order->currency,
-                'reference' => null,
-                'transaction_id' => null,
+                'transaction_id' => 'TXN-'.Str::upper(Str::random(12)),
+                'reference_number' => null,
                 'status' => 'completed',
-                'paid_at' => now(),
+                'processed_at' => now(),
+                'notes' => null,
             ]);
             $invoice->payments()->save($payment);
 
             // Update invoice paid/due
             $newPaid = (float) $invoice->amount_paid + (float) $data['amount_paid'];
-            $newDue = max(0, (float) $invoice->total - $newPaid);
+            $newDue = max(0, (float) $invoice->total_amount - $newPaid);
             $invoice->update(['amount_paid' => $newPaid, 'amount_due' => $newDue]);
 
             // Close order & free table if dine-in

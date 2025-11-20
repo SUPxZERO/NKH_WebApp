@@ -16,16 +16,16 @@ class OrderItem extends Model
         'unit_price',
         'discount_amount',
         'tax_amount',
-        'total',
-        'kitchen_status',
-        'notes',
+        'total_price',
+        'status',
+        'special_instructions',
     ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
-        'total' => 'decimal:2',
+        'total_price' => 'decimal:2',
     ];
 
     public function order()

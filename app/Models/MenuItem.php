@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -24,11 +23,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $calories
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon|null $deleted_at
  */
 class MenuItem extends Model
 {
-    use HasFactory, SoftDeletes;
 
     protected $with = ['translations'];
 

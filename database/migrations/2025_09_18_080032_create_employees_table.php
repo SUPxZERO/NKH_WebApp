@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->enum('status', ['active','inactive','terminated','on_leave'])->default('active')->index();
             $table->timestamps();
-            $table->softDeletes();
     
             $table->unique(['location_id', 'employee_code']);
         });

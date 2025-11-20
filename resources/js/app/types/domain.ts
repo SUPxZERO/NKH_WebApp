@@ -14,7 +14,6 @@ export interface Category {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  deleted_at?: string | null;
   // Relations
   menu_items?: MenuItem[];
   location?: Location;
@@ -79,7 +78,6 @@ export interface MenuItem {
   };
   created_at: string;
   updated_at: string;
-  deleted_at?: string | null;
   translations?: MenuItemTranslation[];
   category?: Category;
   location?: Location;
@@ -211,7 +209,6 @@ export interface Employee {
   status: 'active' | 'inactive' | 'terminated' | 'on_leave';
   created_at: string;
   updated_at: string;
-  deleted_at?: string | null;
   user: User;
   position?: Position;
   location?: Location;
@@ -365,7 +362,6 @@ export interface Ingredient {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  deleted_at?: string | null;
   location?: Location;
 }
 

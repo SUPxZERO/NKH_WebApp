@@ -172,8 +172,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware([\Illumina
 
 // Admin/Manager management endpoints
 Route::prefix('admin')
-// Apply role-based restriction to admin endpoints (requires auth:sanctum on outer group)
-// ->middleware(['role:admin,manager'])
 // ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager'])
 ->group(function () {
         Route::get('/category-stats', [CategoryController::class, 'stats']);
@@ -224,7 +222,7 @@ Route::prefix('admin')
 
 // In-store operations for staff (Employee)
 Route::prefix('employee')
-// ->middleware('role:admin,manager,waiter')
+->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter'])
 ->group(function () {
     // POS menu
     Route::get('menu', [MenuItemController::class, 'index']);
@@ -233,23 +231,4 @@ Route::prefix('employee')
     Route::get('orders/{order}', [OrderController::class, 'show']);
     Route::post('orders/{order}/items', [OrderController::class, 'addItem']);
     Route::put('order-items/{orderItem}', [OrderController::class, 'updateItem']);
-    Route::delete('order-items/{orderItem}', [OrderController::class, 'removeItem']);
-    Route::post('orders/{order}/submit', [OrderController::class, 'submitToKitchen']);
 });
-
-// Customer self-service
-
-Route::get('/customer/profile', [CustomerController::class, 'profile']);
-Route::get('/customer/orders', [CustomerController::class, 'orders']);
-Route::get('/customer/orders/{order}', [OnlineOrderController::class, 'show']); // Customer can view their own order
-Route::get('/customer/loyalty-points', [CustomerController::class, 'loyaltyPoints']);
-
-Route::get('/customer/addresses', [OnlineOrderController::class, 'addressesIndex']);
-Route::post('/customer/addresses', [OnlineOrderController::class, 'addressesStore']);
-
-// Customer online orders (pickup/delivery, requires approval)
-Route::post('/online-orders', [OnlineOrderController::class, 'store']);
-
-
-// Customer online orders (pickup/delivery, requires approval)
-Route::post('/online-orders', [OnlineOrderController::class, 'store']);

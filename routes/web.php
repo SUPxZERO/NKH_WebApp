@@ -42,17 +42,22 @@ Route::prefix('admin')
             'orderStatsEndpoint' => '/api/admin/dashboard/orders/stats',
             'revenueEndpoint' => '/api/admin/dashboard/revenue',
         ]))->name('admin.dashboard');
+        Route::get('notifications', fn() => Inertia::render('admin/Notifications'))->name('admin.notifications');
         Route::get('categories', fn() => Inertia::render('admin/Categories'))->name('admin.categories');
         Route::get('menu-items', fn() => Inertia::render('admin/MenuItems'))->name('admin.menu-items');
         Route::get('categories', fn() => Inertia::render('admin/Categories'))->name('admin.categories');
         Route::get('employees', fn() => Inertia::render('admin/Employees'))->name('admin.employees');
+        Route::get('promotions', fn() => Inertia::render('admin/Promotions'))->name('admin.promotions');
         Route::get('customers', fn() => Inertia::render('admin/Customers'))->name('admin.customers');
+        Route::get('loyalty-points', fn() => Inertia::render('admin/LoyaltyPoints'))->name('admin.loyalty-points');
         Route::get('orders', fn() => Inertia::render('admin/Orders'))->name('admin.orders');
+        Route::get('inventory', fn() => Inertia::render('admin/Inventory'))->name('admin.inventory');
         Route::get('expenses', fn() => Inertia::render('admin/Expenses'))->name('admin.expenses');
         Route::get('floors', fn() => Inertia::render('admin/Floors'))->name('admin.floors');
         Route::get('tables', fn() => Inertia::render('admin/Tables'))->name('admin.tables');
         Route::get('invoices', fn() => Inertia::render('admin/Invoices'))->name('admin.invoices');
         Route::get('reservations', fn() => Inertia::render('admin/Reservations'))->name('admin.reservations');
+        Route::get('audit-logs', fn() => Inertia::render('admin/AuditLogs'))->name('admin.audit-logs');
         Route::get('settings', fn() => Inertia::render('admin/Settings'))->name('admin.settings');
         Route::get('customer-requests', [\App\Http\Controllers\Api\CustomerRequestController::class, 'index'])->name('admin.customer-requests');
     });

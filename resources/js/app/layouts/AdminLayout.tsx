@@ -12,16 +12,21 @@ type Props = { children: React.ReactNode };
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Notifications', href: '/admin/notifications', icon: Bell },
   { name: 'Customer Requests', href: '/admin/customer-requests', icon: FileText },
+  { name: 'Promotions', href: '/admin/promotions', icon: FileText },
   { name: 'Categories', href: '/admin/categories', icon: ShoppingBag },
   { name: 'Menu Items', href: '/admin/menu-items', icon: ChefHat },
   { name: 'Employees', href: '/admin/employees', icon: Users },
   { name: 'Customers', href: '/admin/customers', icon: Users },
+  { name: 'Loyalty Points', href: '/admin/loyalty-points', icon: Users },
   { name: 'Orders', href: '/admin/orders', icon: FileText },
   { name: 'Expenses', href: '/admin/expenses', icon: FileText },
+  { name: 'Inventory', href: '/admin/inventory', icon: BarChart3 },
   { name: 'Floors', href: '/admin/floors', icon: MapPin },
   { name: 'Tables', href: '/admin/tables', icon: MapPin },
   { name: 'Invoices', href: '/admin/invoices', icon: FileText },
+  { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
   { name: 'Reservations', href: '/admin/reservations', icon: Calendar },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
@@ -234,7 +239,7 @@ export default function AdminLayout({ children }: Props) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-7xl mx-auto"
+            className="w-full mx-auto"
           >
             {children}
           </motion.div>

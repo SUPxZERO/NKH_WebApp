@@ -60,12 +60,12 @@ class DashboardController extends Controller
         // Orders and Revenue
         $ordersQuery = Order::query();
         $todayOrders = (clone $ordersQuery)->whereDate('created_at', $today)->count();
-        $todayRevenue = (clone $ordersQuery)->whereDate('created_at', $today)->sum('total');
+        $todayRevenue = (clone $ordersQuery)->whereDate('created_at', $today)->sum('total_amount');
         $monthlyOrders = (clone $ordersQuery)->whereDate('created_at', '>=', $thisMonth)->count();
-        $monthlyRevenue = (clone $ordersQuery)->whereDate('created_at', '>=', $thisMonth)->sum('total');
+        $monthlyRevenue = (clone $ordersQuery)->whereDate('created_at', '>=', $thisMonth)->sum('total_amount');
         $lastMonthRevenue = (clone $ordersQuery)
             ->whereBetween('created_at', [$lastMonth, $thisMonth])
-            ->sum('total');
+            ->sum('total_amount');
 
         // Revenue Growth
         $revenueGrowth = $lastMonthRevenue > 0 
@@ -113,7 +113,7 @@ class DashboardController extends Controller
                 'categories.id',
                 DB::raw('(SELECT name FROM category_translations WHERE category_id = categories.id AND locale = ?) as name'),
                 DB::raw('COUNT(order_items.id) as total_orders'),
-                DB::raw('SUM(order_items.quantity * menu_items.price) as revenue')
+                DB::raw('SUM(order_items.total_price) as revenue')
             )
             ->setBindings([app()->getLocale()])
             ->groupBy('categories.id')
@@ -125,7 +125,7 @@ class DashboardController extends Controller
         $hourlyRevenue = Order::whereDate('created_at', $today)
             ->select(
                 DB::raw('HOUR(created_at) as hour'),
-                DB::raw('SUM(total) as revenue'),
+                DB::raw('SUM(total_amount) as revenue'),
                 DB::raw('COUNT(*) as orders')
             )
             ->groupBy('hour')
@@ -157,7 +157,7 @@ class DashboardController extends Controller
         // Revenue Trend
         $revenueTrend = Order::select(
             DB::raw('DATE(created_at) as date'),
-            DB::raw('SUM(total) as revenue'),
+            DB::raw('SUM(total_amount) as revenue'),
             DB::raw('COUNT(*) as orders')
         )
             ->whereDate('created_at', '>=', Carbon::now()->subDays(30))

@@ -79,7 +79,7 @@ class OnlineOrderController extends Controller
             abort(422, 'Customer profile not found.');
         }
 
-        return DB::transaction(function () use ($data, $customer) {
+        $order = DB::transaction(function () use ($data, $customer) {
             // Lock slot row to prevent race conditions
             $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
 
@@ -105,20 +105,18 @@ class OnlineOrderController extends Controller
             $orderNumber = $this->generateOrderNumber($data['location_id'], 'ONL');
 
             $scheduledAt = $slot->slot_date.' '.$slot->slot_start_time;
-            $type = $data['order_type'] === 'pickup' ? 'takeaway' : 'delivery';
 
             $order = Order::create([
                 'location_id' => $data['location_id'],
                 'customer_id' => $customer->id,
                 'order_number' => $orderNumber,
-                'type' => $type,
                 'order_type' => $data['order_type'],
                 'status' => 'pending', // All customer orders start as pending
                 'payment_status' => 'unpaid',
                 'currency' => 'USD',
-                'placed_at' => now(),
+                'ordered_at' => now(),
                 'scheduled_at' => $scheduledAt,
-                'notes' => $data['notes'] ?? null,
+                'special_instructions' => $data['notes'] ?? null,
                 'customer_address_id' => $data['customer_address_id'] ?? null,
             ]);
 
@@ -133,8 +131,9 @@ class OnlineOrderController extends Controller
                     'unit_price' => $menuItem->price,
                     'discount_amount' => 0,
                     'tax_amount' => 0,
-                    'total' => $lineTotal,
-                    'kitchen_status' => 'pending',
+                    'total_price' => $lineTotal,
+                    'status' => 'pending',
+                    'special_instructions' => null,
                 ]);
                 $subtotal += $lineTotal;
             }
@@ -145,10 +144,10 @@ class OnlineOrderController extends Controller
 
             $order->update([
                 'subtotal' => $subtotal,
-                'tax_total' => $tax,
-                'discount_total' => $discount,
+                'tax_amount' => $tax,
+                'discount_amount' => $discount,
                 'service_charge' => $service,
-                'total' => $total,
+                'total_amount' => $total,
             ]);
 
             // Increment slot usage

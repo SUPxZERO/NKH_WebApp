@@ -11,7 +11,7 @@ class InvoiceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Invoice::with(['order', 'payments']);
+        $query = Invoice::with(['order.customer.user', 'location', 'payments']);
         
         // Filter by date range
         if ($request->has('start_date')) {
@@ -32,7 +32,9 @@ class InvoiceController extends Controller
             if ($request->status === 'paid') {
                 $query->where('amount_due', '<=', 0);
             } elseif ($request->status === 'unpaid') {
-                $query->where('amount_due', '>', 0);
+                $query->where('amount_due', '>', 0)->where('amount_paid', '=', 0);
+            } elseif ($request->status === 'partial') {
+                $query->where('amount_due', '>', 0)->where('amount_paid', '>', 0);
             }
         }
         
@@ -49,6 +51,6 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice): InvoiceResource
     {
-        return new InvoiceResource($invoice->load(['order.items.menuItem', 'payments']));
+        return new InvoiceResource($invoice->load(['order.items.menuItem', 'order.customer.user', 'location', 'payments']));
     }
 }

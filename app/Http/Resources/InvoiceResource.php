@@ -15,10 +15,10 @@ class InvoiceResource extends JsonResource
             'location_id' => $this->location_id,
             'invoice_number' => $this->invoice_number,
             'subtotal' => $this->subtotal,
-            'tax_total' => $this->tax_total,
-            'discount_total' => $this->discount_total,
+            'tax_total' => $this->tax_amount,
+            'discount_total' => $this->discount_amount,
             'service_charge' => $this->service_charge,
-            'total' => $this->total,
+            'total' => $this->total_amount,
             'amount_paid' => $this->amount_paid,
             'amount_due' => $this->amount_due,
             'currency' => $this->currency,
@@ -29,14 +29,32 @@ class InvoiceResource extends JsonResource
             // Payment status
             'status' => $this->amount_due <= 0 ? 'paid' : 'unpaid',
             
+            // Location (for display in UI)
+            'location' => $this->whenLoaded('location', function () {
+                return [
+                    'id' => $this->location->id,
+                    'name' => $this->location->name,
+                ];
+            }),
+
             // Related order information
             'order' => $this->whenLoaded('order', function () {
                 return [
                     'id' => $this->order->id,
                     'order_number' => $this->order->order_number,
-                    'type' => $this->order->type,
+                    'type' => $this->order->order_type,
                     'status' => $this->order->status,
-                    'placed_at' => $this->order->placed_at?->toISOString(),
+                    // Backward-compat alias for older UI
+                    'placed_at' => $this->order->ordered_at?->toISOString(),
+                    'ordered_at' => $this->order->ordered_at?->toISOString(),
+                    'customer' => $this->order->relationLoaded('customer') ? [
+                        'id' => $this->order->customer->id,
+                        'user' => $this->order->customer->relationLoaded('user') ? [
+                            'id' => $this->order->customer->user->id,
+                            'name' => $this->order->customer->user->name,
+                            'email' => $this->order->customer->user->email,
+                        ] : null,
+                    ] : null,
                     'items' => OrderItemResource::collection($this->whenLoaded('order.items')),
                 ];
             }),
@@ -47,10 +65,10 @@ class InvoiceResource extends JsonResource
                     return [
                         'id' => $payment->id,
                         'amount' => $payment->amount,
-                        'currency' => $payment->currency,
+                        'currency' => $this->currency,
                         'status' => $payment->status,
-                        'paid_at' => $payment->paid_at?->toISOString(),
-                        'reference' => $payment->reference,
+                        'paid_at' => optional($payment->processed_at)?->toISOString(),
+                        'reference' => $payment->reference_number,
                     ];
                 });
             }),
