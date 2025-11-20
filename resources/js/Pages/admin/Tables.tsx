@@ -39,9 +39,7 @@ export default function Tables() {
 
   const qc = useQueryClient();
 
-  // Pagination state
-  const [page, setPage] = React.useState(1);
-  const [perPage, setPerPage] = React.useState(12);
+  // Pagination removed for grouped endpoint
 
   // Form state
   const [formData, setFormData] = React.useState({
@@ -51,20 +49,13 @@ export default function Tables() {
     status: 'available' as 'available' | 'reserved' | 'occupied' | 'unavailable'
   });
 
-  // Fetch tables
-  const { data: tables, isLoading } = useQuery({
-    queryKey: ['admin/tables', page, search, statusFilter, floorFilter],
+  // Fetch grouped tables by floor
+  const { data: grouped, isLoading } = useQuery({
+    queryKey: ['admin/tables/grouped', search, statusFilter, floorFilter],
     queryFn: () => {
-      let url = `/api/admin/tables?page=${page}&per_page=${perPage}&search=${search}`;
-      
-      if (statusFilter !== 'all') {
-        url += `&status=${statusFilter}`;
-      }
-      
-      if (floorFilter !== 'all') {
-        url += `&floor_id=${floorFilter}`;
-      }
-      
+      let url = `/api/admin/tables/grouped?search=${encodeURIComponent(search)}`;
+      if (statusFilter !== 'all') url += `&status=${statusFilter}`;
+      if (floorFilter !== 'all') url += `&floor_id=${floorFilter}`;
       return apiGet(url);
     }
   }) as { data: any, isLoading: boolean };
@@ -83,6 +74,7 @@ export default function Tables() {
       setOpenCreate(false);
       resetForm();
       qc.invalidateQueries({ queryKey: ['admin/tables'] });
+      qc.invalidateQueries({ queryKey: ['admin/tables/grouped'] });
     },
     onError: (error: any) => {
       setError(error.response?.data?.message || 'Failed to create table');
@@ -97,6 +89,7 @@ export default function Tables() {
       setOpenEdit(false);
       resetForm();
       qc.invalidateQueries({ queryKey: ['admin/tables'] });
+      qc.invalidateQueries({ queryKey: ['admin/tables/grouped'] });
     },
     onError: (error: any) => {
       setError(error.response?.data?.message || 'Failed to update table');
@@ -109,6 +102,7 @@ export default function Tables() {
     onSuccess: () => {
       toastSuccess('Table deleted successfully!');
       qc.invalidateQueries({ queryKey: ['admin/tables'] });
+      qc.invalidateQueries({ queryKey: ['admin/tables/grouped'] });
     },
     onError: (error: any) => {
       toastError(error.response?.data?.message || 'Failed to delete table');
@@ -190,10 +184,10 @@ export default function Tables() {
     }
   };
 
-  const totalTables = tables?.data?.length || 0;
-  const availableTables = tables?.data?.filter((table: DiningTable) => table.status === 'available').length || 0;
-  const occupiedTables = tables?.data?.filter((table: DiningTable) => table.status === 'occupied').length || 0;
-  const reservedTables = tables?.data?.filter((table: DiningTable) => table.status === 'reserved').length || 0;
+  const totalTables = grouped?.totals?.total || 0;
+  const availableTables = grouped?.totals?.available || 0;
+  const occupiedTables = grouped?.totals?.occupied || 0;
+  const reservedTables = grouped?.totals?.reserved || 0;
 
   return (
     <AdminLayout>
@@ -298,128 +292,112 @@ export default function Tables() {
           </Button>
         </motion.div>
 
-        {/* Tables Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Tables by Floor */}
+        <div className="space-y-8">
           {isLoading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-4 bg-white/10 rounded w-3/4"></div>
-                      <div className="h-3 bg-white/10 rounded w-1/2"></div>
-                      <div className="h-8 bg-white/10 rounded"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}>
+                  <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                    <CardContent className="p-6">
+                      <div className="animate-pulse space-y-4">
+                        <div className="h-4 bg-white/10 rounded w-3/4"></div>
+                        <div className="h-3 bg-white/10 rounded w-1/2"></div>
+                        <div className="h-8 bg-white/10 rounded"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
           ) : (
-            tables?.data?.map((table: DiningTable, index: number) => (
-              <motion.div
-                key={table.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                    {/* Table Header */}
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-semibold text-white text-lg">
-                          Table {table.code}
-                        </h3>
-                        <p className="text-sm text-gray-400">
-                          {table.floor?.name}
-                        </p>
-                      </div>
-                      <Badge className={getStatusColor(table.status)}>
-                        <div className="flex items-center gap-1">
-                          {getStatusIcon(table.status)}
-                          {table.status}
-                        </div>
-                      </Badge>
-                    </div>
-
-                    {/* Table Details */}
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center text-sm text-gray-300">
-                        <Users className="w-4 h-4 mr-2 text-gray-400" />
-                        Capacity: {table.capacity} people
-                      </div>
-
-                      <div className="flex items-center text-sm text-gray-300">
-                        <Building className="w-4 h-4 mr-2 text-gray-400" />
-                        Floor: {table.floor?.name}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleView(table)}
-                        className="flex-1 border-white/20 hover:bg-white/10"
+            (grouped?.floors?.length ? grouped.floors : []).map((section: any, sIdx: number) => (
+              <div key={section.floor.id}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-white">{section.floor.name}</h2>
+                  <span className="text-sm text-gray-400">{section.tables.length} tables</span>
+                </div>
+                {section.tables.length === 0 ? (
+                  <div className="text-gray-400 bg-white/5 border border-white/10 rounded-xl p-6">No tables on this floor.</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {section.tables.map((table: DiningTable, index: number) => (
+                      <motion.div
+                        key={table.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.03 }}
                       >
-                        <Eye className="w-3 h-3 mr-1" />
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleEdit(table)}
-                        className="flex-1 border-white/20 hover:bg-white/10"
-                      >
-                        <Edit className="w-3 h-3 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDelete(table.id)}
-                        className="border-red-500/20 hover:bg-red-500/10 text-red-400"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                        <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group">
+                          <CardContent className="p-6">
+                            {/* Table Header */}
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h3 className="font-semibold text-white text-lg">Table {table.code}</h3>
+                                <p className="text-sm text-gray-400">{section.floor.name}</p>
+                              </div>
+                              <Badge className={getStatusColor(table.status)}>
+                                <div className="flex items-center gap-1">
+                                  {getStatusIcon(table.status)}
+                                  {table.status}
+                                </div>
+                              </Badge>
+                            </div>
+
+                            {/* Table Details */}
+                            <div className="space-y-3 mb-4">
+                              <div className="flex items-center text-sm text-gray-300">
+                                <Users className="w-4 h-4 mr-2 text-gray-400" />
+                                Capacity: {table.capacity} people
+                              </div>
+
+                              <div className="flex items-center text-sm text-gray-300">
+                                <Building className="w-4 h-4 mr-2 text-gray-400" />
+                                Floor: {section.floor.name}
+                              </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleView({ ...table, floor: { name: section.floor.name } } as any)}
+                                className="flex-1 border-white/20 hover:bg-white/10"
+                              >
+                                <Eye className="w-3 h-3 mr-1" />
+                                View
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleEdit(table)}
+                                className="flex-1 border-white/20 hover:bg-white/10"
+                              >
+                                <Edit className="w-3 h-3 mr-1" />
+                                Edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="danger"
+                                onClick={() => handleDelete(table.id)}
+                                className="border-red-500/20 hover:bg-red-500/10 text-red-400"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))
           )}
         </div>
 
-        {/* Pagination */}
-        {tables?.meta && (
-          <div className="flex justify-center gap-2 mt-8">
-            <Button
-              variant="secondary"
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Previous
-            </Button>
-            <span className="px-4 py-2 text-white">
-              Page {page} of {tables?.meta?.last_page || 1}
-            </span>
-            <Button
-              variant="secondary"
-              disabled={page === tables?.meta?.last_page}
-              onClick={() => setPage(page + 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Next
-            </Button>
-          </div>
-        )}
+        {/* Pagination removed for grouped view */}
       </div>
 
       {/* Create/Edit Modal */}

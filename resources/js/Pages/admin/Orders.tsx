@@ -42,11 +42,28 @@ export default function Orders() {
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(15);
 
+  // --- HELPER: Safe Number Parsing ---
+  const getAmount = (value: any): number => {
+    if (value === null || value === undefined || value === '') return 0;
+    const num = parseFloat(String(value));
+    return isNaN(num) ? 0 : num;
+  };
+
   // Fetch orders
+  // Typed as 'any' to handle flexible API responses safely
   const { data: orders, isLoading } = useQuery({
     queryKey: ['admin/orders', page, search, statusFilter, typeFilter],
     queryFn: () => apiGet(`/api/admin/orders?page=${page}&per_page=${perPage}&search=${search}&status=${statusFilter}&type=${typeFilter}`)
   }) as { data: any, isLoading: boolean };
+
+  // --- SAFE DATA EXTRACTION ---
+  // Guarantees 'orderList' is always an array, fixing the "Empty List" bug
+  const orderList: Order[] = React.useMemo(() => {
+    if (!orders) return [];
+    if (Array.isArray(orders)) return orders;
+    if (orders.data && Array.isArray(orders.data)) return orders.data;
+    return [];
+  }, [orders]);
 
   // Update order status mutation
   const updateStatusMutation = useMutation({
@@ -212,8 +229,16 @@ export default function Orders() {
                 </Card>
               </motion.div>
             ))
+          ) : orderList.length === 0 ? (
+             <div className="col-span-full text-center py-12 bg-white/5 rounded-xl border border-white/10 border-dashed">
+                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white">No Orders Found</h3>
+                <p className="text-gray-400 mt-2">Waiting for new orders to arrive...</p>
+             </div>
           ) : (
-            orders?.data?.map((order: Order, index: number) => (
+            orderList.map((order: Order, index: number) => (
               <motion.div
                 key={order.id}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -228,10 +253,10 @@ export default function Orders() {
                         <h3 className="font-semibold text-white text-lg">#{order.order_number}</h3>
                         <p className="text-sm text-gray-400">
                           {new Date(order.created_at).toLocaleDateString()} at{' '}
-                          {new Date(order.created_at).toLocaleTimeString()}
+                          {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col items-end gap-1">
                         <Badge className={getStatusColor(order.status)}>
                           {order.status}
                         </Badge>
@@ -252,20 +277,13 @@ export default function Orders() {
                       
                       <div className="flex items-center text-sm text-gray-300">
                         <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                        Total: ${Number(order.total).toFixed(2)}
+                        <span className="text-white font-medium">Total: ${getAmount(order.total).toFixed(2)}</span>
                       </div>
 
                       {order.table && (
                         <div className="flex items-center text-sm text-gray-300">
                           <MapPin className="w-4 h-4 mr-2 text-gray-400" />
                           Table {order.table.number}
-                        </div>
-                      )}
-
-                      {order.placed_at && (
-                        <div className="flex items-center text-sm text-gray-300">
-                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                          Placed: {new Date(order.placed_at).toLocaleString()}
                         </div>
                       )}
                     </div>
@@ -277,7 +295,7 @@ export default function Orders() {
                           size="sm"
                           variant="primary"
                           onClick={() => handleStatusUpdate(order.id, 'received')}
-                          className="flex-1"
+                          className="flex-1 bg-blue-600 hover:bg-blue-700"
                         >
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Accept
@@ -288,7 +306,7 @@ export default function Orders() {
                           size="sm"
                           variant="primary"
                           onClick={() => handleStatusUpdate(order.id, 'preparing')}
-                          className="flex-1"
+                          className="flex-1 bg-orange-600 hover:bg-orange-700"
                         >
                           <Clock className="w-3 h-3 mr-1" />
                           Start Prep
@@ -299,7 +317,7 @@ export default function Orders() {
                           size="sm"
                           variant="primary"
                           onClick={() => handleStatusUpdate(order.id, 'ready')}
-                          className="flex-1"
+                          className="flex-1 bg-green-600 hover:bg-green-700"
                         >
                           <Package className="w-3 h-3 mr-1" />
                           Mark Ready
@@ -310,7 +328,7 @@ export default function Orders() {
                           size="sm"
                           variant="primary"
                           onClick={() => handleStatusUpdate(order.id, 'completed')}
-                          className="flex-1"
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                         >
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Complete
@@ -411,11 +429,13 @@ export default function Orders() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Total:</span>
-                    <span className="text-white font-semibold">${Number(selectedOrder.total).toFixed(2)}</span>
+                    <span className="text-white font-semibold">${getAmount(selectedOrder.total).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Payment Status:</span>
-                    <span className="text-white">{selectedOrder.payment_status}</span>
+                    <span className={`font-medium ${selectedOrder.payment_status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
+                       {selectedOrder.payment_status.toUpperCase()}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -451,7 +471,7 @@ export default function Orders() {
                       <span className="text-white font-medium">{item.menu_item?.name}</span>
                       <span className="text-gray-400 ml-2">x{item.quantity}</span>
                     </div>
-                    <span className="text-white">${parseFloat(item.total_price).toFixed(2)}</span>
+                    <span className="text-white">${getAmount(item.total_price).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -488,12 +508,12 @@ export default function Orders() {
                   onChange={(e) => handleStatusUpdate(selectedOrder.id, e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="received">Received</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="ready">Ready</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option className="bg-slate-900" value="pending">Pending</option>
+                  <option className="bg-slate-900" value="received">Received</option>
+                  <option className="bg-slate-900" value="preparing">Preparing</option>
+                  <option className="bg-slate-900" value="ready">Ready</option>
+                  <option className="bg-slate-900" value="completed">Completed</option>
+                  <option className="bg-slate-900" value="cancelled">Cancelled</option>
                 </select>
               </div>
 
@@ -501,11 +521,16 @@ export default function Orders() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Payment Status</label>
                 <select
                   value={selectedOrder.payment_status}
+                  onChange={(e) => {
+                     // Cast the value to the specific union type
+                     const newVal = e.target.value as 'unpaid' | 'paid' | 'refunded';
+                     if(selectedOrder) setSelectedOrder({...selectedOrder, payment_status: newVal});
+                  }}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
                 >
-                  <option value="unpaid">Unpaid</option>
-                  <option value="paid">Paid</option>
-                  <option value="refunded">Refunded</option>
+                  <option className="bg-slate-900" value="unpaid">Unpaid</option>
+                  <option className="bg-slate-900" value="paid">Paid</option>
+                  <option className="bg-slate-900" value="refunded">Refunded</option>
                 </select>
               </div>
             </div>
@@ -514,6 +539,7 @@ export default function Orders() {
               <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
               <textarea
                 value={selectedOrder.notes || ''}
+                onChange={(e) => setSelectedOrder({...selectedOrder, notes: e.target.value})}
                 rows={3}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-400"
                 placeholder="Order notes..."
@@ -535,6 +561,11 @@ export default function Orders() {
               <Button
                 type="button"
                 variant="primary"
+                onClick={() => {
+                    // Here you would normally trigger a mutation to update the whole order
+                    setOpenEdit(false);
+                    toastSuccess('Order updated (Simulation)');
+                }}
                 className="flex-1"
               >
                 Save Changes

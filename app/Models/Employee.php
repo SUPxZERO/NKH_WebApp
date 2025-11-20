@@ -18,7 +18,6 @@ class Employee extends Model
         'hire_date',
         'salary_type',
         'salary',
-        'phone',
         'address',
         'status',
     ];

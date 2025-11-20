@@ -84,21 +84,21 @@ class UserSeeder extends Seeder
         // ---------------------------
         $employees = [
             ['name' => 'Ratha Meng', 'email' => 'demo@employee.com', 'location' => 1],
-            ['name' => 'Maria Santos', 'email' => 'maria.santos@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Maria Santos', 'email' => 'maria.santos@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Bopha Keo', 'email' => 'bopha.keo@nkhrestaurant.com', 'location' => 1],
-            ['name' => 'Sovannak Pich', 'email' => 'sovannak.pich@nkhrestaurant.com', 'location' => 3],
+            ['name' => 'Sovannak Pich', 'email' => 'sovannak.pich@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Sokha Rath', 'email' => 'sokha.rath@nkhrestaurant.com', 'location' => 1],
-            ['name' => 'Dara Chea', 'email' => 'dara.chea@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Dara Chea', 'email' => 'dara.chea@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Sreypov Noun', 'email' => 'sreypov.noun@nkhrestaurant.com', 'location' => 1],
-            ['name' => 'Kimheng Ly', 'email' => 'kimheng.ly@nkhrestaurant.com', 'location' => 2],
-            ['name' => 'Pheaktra Ouk', 'email' => 'pheaktra.ouk@nkhrestaurant.com', 'location' => 3],
-            ['name' => 'Veasna Chhay', 'email' => 'veasna.chhay@nkhrestaurant.com', 'location' => 4],
+            ['name' => 'Kimheng Ly', 'email' => 'kimheng.ly@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Pheaktra Ouk', 'email' => 'pheaktra.ouk@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Veasna Chhay', 'email' => 'veasna.chhay@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Bunthoeun Sao', 'email' => 'bunthoeun.sao@nkhrestaurant.com', 'location' => 1],
-            ['name' => 'Chenda Ros', 'email' => 'chenda.ros@nkhrestaurant.com', 'location' => 2],
+            ['name' => 'Chenda Ros', 'email' => 'chenda.ros@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Sopheak Mao', 'email' => 'sopheak.mao@nkhrestaurant.com', 'location' => 1],
-            ['name' => 'Rachana Heng', 'email' => 'rachana.heng@nkhrestaurant.com', 'location' => 2],
-            ['name' => 'Sreyleak Kong', 'email' => 'sreyleak.kong@nkhrestaurant.com', 'location' => 3],
-            ['name' => 'Pisey Nhem', 'email' => 'pisey.nhem@nkhrestaurant.com', 'location' => 4],
+            ['name' => 'Rachana Heng', 'email' => 'rachana.heng@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Sreyleak Kong', 'email' => 'sreyleak.kong@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Pisey Nhem', 'email' => 'pisey.nhem@nkhrestaurant.com', 'location' => 1],
         ];
 
         foreach ($employees as $employeeData) {
@@ -127,7 +127,7 @@ class UserSeeder extends Seeder
             ['name' => 'Narong Sok', 'email' => 'narong.sok@gmail.com', 'location' => 2],
             ['name' => 'Sokny Phan', 'email' => 'sokny.phan@gmail.com', 'location' => 1],
             ['name' => 'Sothy Chan', 'email' => 'sothy.chan@gmail.com', 'location' => 3],
-            ['name' => 'Nita Heng', 'email' => 'nita.heng@gmail.com', 'location' => 4],
+            ['name' => 'Nita Heng', 'email' => 'nita.heng@gmail.com', 'location' => 1],
             ['name' => 'Alex Johnson', 'email' => 'alex.johnson@gmail.com', 'location' => 2],
             ['name' => 'Vanna Oum', 'email' => 'vanna.oum@gmail.com', 'location' => 1],
         ];

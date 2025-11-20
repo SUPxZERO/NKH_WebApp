@@ -197,6 +197,7 @@ Route::prefix('admin')
     // Tables
     Route::apiResource('tables', TableController::class);
     Route::patch('tables/{table}/status', [TableController::class, 'updateStatus']);
+    Route::get('tables/grouped', [\App\Http\Controllers\Admin\TableController::class, 'index']);
     // Invoices
     Route::get('invoices', [InvoiceController::class, 'index']);
     Route::get('invoices/{invoice}', [InvoiceController::class, 'show']);

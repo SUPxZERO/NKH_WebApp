@@ -22,10 +22,11 @@ class UpdateEmployeeRequest extends FormRequest
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'phone' => ['nullable', 'string', 'max:30', Rule::unique('users', 'phone')->ignore($userId)],
             'password' => ['sometimes', 'string', 'min:8'],
-            'role' => ['sometimes', 'string', 'in:admin,manager,waiter'],
+            'role' => ['sometimes', 'string', 'in:admin,manager,cashier,waiter,chef,employee'],
             'position_id' => ['sometimes', 'exists:positions,id'],
+            'salary_type' => ['sometimes', 'in:hourly,monthly'],
             'salary' => ['nullable', 'numeric', 'min:0'],
-            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
+            'status' => ['sometimes', 'in:active,inactive,terminated,on_leave'],
             'is_active' => ['boolean'],
         ];
     }
@@ -33,7 +34,7 @@ class UpdateEmployeeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'role.in' => 'Role must be one of: admin, manager, waiter',
+            'role.in' => 'Role must be one of: admin, manager, cashier, waiter, chef, employee',
             'email.unique' => 'Email address already exists',
             'phone.unique' => 'Phone number already exists',
         ];

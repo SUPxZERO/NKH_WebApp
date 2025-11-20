@@ -71,7 +71,7 @@ class OrderManagementTest extends TestCase
             'user_id' => $user->id,
             'location_id' => $this->location->id,
             'position_id' => $position->id,
-            'employee_number' => 'EMP001',
+            'employee_code' => 'EMP001',
             'hire_date' => now(),
             'is_active' => true,
         ]);

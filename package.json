@@ -39,6 +39,8 @@
         "clsx": "^2.1.1",
         "dompurify": "^3.2.7",
         "framer-motion": "^12.23.22",
+        "jspdf": "^3.0.4",
+        "jspdf-autotable": "^5.0.2",
         "laravel-echo": "^2.2.4",
         "lucide-react": "^0.544.0",
         "pusher-js": "^8.4.0",

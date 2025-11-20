@@ -48,16 +48,15 @@ class OrderController extends Controller
                 'table_id' => $table->id,
                 'employee_id' => $employee->id,
                 'order_number' => $this->generateOrderNumber($employee->location_id, 'DIN'),
-                'type' => 'dine_in',
                 'order_type' => 'dine-in',
                 'status' => $isEmployeeOrder ? 'received' : 'pending',
                 'approval_status' => $isEmployeeOrder ? 'approved' : 'pending',
                 'is_auto_approved' => $isEmployeeOrder,
                 'payment_status' => 'unpaid',
                 'currency' => 'USD',
-                'placed_at' => now(),
+                'ordered_at' => now(),
                 'approved_at' => $isEmployeeOrder ? now() : null,
-                'notes' => $data['notes'] ?? null,
+                'special_instructions' => $data['notes'] ?? null,
             ]);
 
             // Mark table as occupied
@@ -91,8 +90,8 @@ class OrderController extends Controller
                 $newQty = $existing->quantity + $data['quantity'];
                 $existing->update([
                     'quantity' => $newQty,
-                    'total' => $existing->unit_price * $newQty - $existing->discount_amount + $existing->tax_amount,
-                    'notes' => $data['notes'] ?? $existing->notes,
+                    'total_price' => $existing->unit_price * $newQty - $existing->discount_amount + $existing->tax_amount,
+                    'special_instructions' => $data['notes'] ?? $existing->special_instructions,
                 ]);
                 $line = $existing;
             } else {
@@ -102,9 +101,9 @@ class OrderController extends Controller
                     'unit_price' => $menuItem->price,
                     'discount_amount' => 0,
                     'tax_amount' => 0,
-                    'total' => $menuItem->price * $data['quantity'],
-                    'kitchen_status' => 'pending',
-                    'notes' => $data['notes'] ?? null,
+                    'total_price' => $menuItem->price * $data['quantity'],
+                    'status' => 'pending',
+                    'special_instructions' => $data['notes'] ?? null,
                 ]);
             }
 
@@ -127,8 +126,8 @@ class OrderController extends Controller
         DB::transaction(function () use ($orderItem, $data) {
             $orderItem->update([
                 'quantity' => $data['quantity'],
-                'notes' => $data['notes'] ?? $orderItem->notes,
-                'total' => $orderItem->unit_price * $data['quantity'] - $orderItem->discount_amount + $orderItem->tax_amount,
+                'special_instructions' => $data['notes'] ?? $orderItem->special_instructions,
+                'total_price' => $orderItem->unit_price * $data['quantity'] - $orderItem->discount_amount + $orderItem->tax_amount,
             ]);
 
             $this->recalculateTotals($orderItem->order->fresh(['items']));
@@ -174,12 +173,12 @@ class OrderController extends Controller
                     'location_id' => $order->location_id,
                     'invoice_number' => $invoiceNumber,
                     'subtotal' => $order->subtotal,
-                    'tax_total' => $order->tax_total,
-                    'discount_total' => $order->discount_total,
+                    'tax_amount' => $order->tax_amount,
+                    'discount_amount' => $order->discount_amount,
                     'service_charge' => $order->service_charge,
-                    'total' => $order->total,
+                    'total_amount' => $order->total_amount,
                     'amount_paid' => 0,
-                    'amount_due' => $order->total,
+                    'amount_due' => $order->total_amount,
                     'currency' => $order->currency,
                     'issued_at' => now(),
                 ]);
@@ -211,7 +210,7 @@ class OrderController extends Controller
                 'status' => 'completed',
                 // Keep payment_status within enum: unpaid | paid | refunded
                 'payment_status' => $newDue <= 0 ? 'paid' : 'unpaid',
-                'closed_at' => now(),
+                'completed_at' => now(),
             ]);
 
             if ($order->table) {
@@ -247,21 +246,31 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
         
-        // Filter by type
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
+        // Filter by order type (frontend sends ?type=)
+        if ($request->has('type') && $request->type !== 'all') {
+            $query->where('order_type', $request->type);
+        }
+        
+        // Search by order number or customer name/email
+        if ($request->filled('search')) {
+            $s = $request->string('search');
+            $query->where(function ($q) use ($s) {
+                $q->where('order_number', 'like', "%{$s}%")
+                  ->orWhereHas('customer.user', function ($uq) use ($s) {
+                      $uq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%");
+                  });
+            });
         }
         
         // Filter by date range
         if ($request->has('start_date')) {
-            $query->whereDate('placed_at', '>=', $request->start_date);
+            $query->whereDate('ordered_at', '>=', $request->start_date);
         }
-        
         if ($request->has('end_date')) {
-            $query->whereDate('placed_at', '<=', $request->end_date);
+            $query->whereDate('ordered_at', '<=', $request->end_date);
         }
         
-        $orders = $query->orderBy('placed_at', 'desc')
+        $orders = $query->orderBy('ordered_at', 'desc')
                        ->paginate($request->get('per_page', 15));
         
         return OrderResource::collection($orders);
@@ -284,7 +293,7 @@ class OrderController extends Controller
         ]);
         
         // Update all order items to preparing status
-        $order->items()->update(['kitchen_status' => 'preparing']);
+        $order->items()->update(['status' => 'preparing']);
         
         return new OrderResource($order->fresh(['items.menuItem', 'table']));
     }
@@ -332,7 +341,7 @@ class OrderController extends Controller
     private function recalculateTotals(Order $order): void
     {
         $subtotal = $order->items->sum(function ($i) {
-            return (float) $i->total;
+            return (float) $i->total_price;
         });
 
         // TODO: read tax rate from settings; default 0
@@ -345,10 +354,27 @@ class OrderController extends Controller
 
         $order->update([
             'subtotal' => $subtotal,
-            'tax_total' => $tax,
-            'discount_total' => $discount,
+            'tax_amount' => $tax,
+            'discount_amount' => $discount,
             'service_charge' => $service,
-            'total' => $total,
+            'total_amount' => $total,
         ]);
+    }
+
+    // PUT /api/admin/orders/{order}/status
+    public function updateStatus(Request $request, Order $order): OrderResource
+    {
+        $request->validate([
+            'status' => 'required|in:pending,received,preparing,ready,completed,cancelled',
+        ]);
+        $order->update(['status' => $request->status]);
+        return new OrderResource($order->fresh(['items.menuItem', 'table']));
+    }
+
+    // DELETE /api/admin/orders/{order}
+    public function destroy(Order $order): JsonResponse
+    {
+        $order->delete();
+        return response()->json(['message' => 'Order deleted successfully.']);
     }
 }

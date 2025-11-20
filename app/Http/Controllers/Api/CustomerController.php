@@ -15,13 +15,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
     // GET /api/admin/customers (role:admin,manager)
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Customer::query()->with(['user', 'preferred_location', 'addresses']);
+        $query = Customer::query()->with(['user', 'preferredLocation', 'addresses']);
         
         // Search functionality
         if ($request->has('search')) {
@@ -64,6 +65,7 @@ class CustomerController extends Controller
             // Create customer record
             $customer = Customer::create([
                 'user_id' => $user->id,
+                'customer_code' => 'CUST-'.strtoupper(Str::random(6)),
                 'preferred_location_id' => $data['preferred_location_id'] ?? null,
                 'birth_date' => $data['birth_date'] ?? null,
                 'gender' => $data['gender'] ?? null,
@@ -72,7 +74,7 @@ class CustomerController extends Controller
                 'notes' => $data['notes'] ?? null,
             ]);
             
-            return $customer->load(['user', 'preferred_location', 'addresses']);
+            return $customer->load(['user', 'preferredLocation', 'addresses']);
         });
         
         return new CustomerResource($customer);
@@ -81,7 +83,7 @@ class CustomerController extends Controller
     // GET /api/admin/customers/{customer} (role:admin,manager)
     public function show(Customer $customer): CustomerResource
     {
-        return new CustomerResource($customer->load(['user', 'preferred_location', 'addresses']));
+        return new CustomerResource($customer->load(['user', 'preferredLocation', 'addresses']));
     }
 
     // PUT /api/admin/customers/{customer} (role:admin,manager)
@@ -120,7 +122,7 @@ class CustomerController extends Controller
             }
         });
         
-        return new CustomerResource($customer->fresh(['user', 'preferred_location', 'addresses']));
+        return new CustomerResource($customer->fresh(['user', 'preferredLocation', 'addresses']));
     }
 
     // DELETE /api/admin/customers/{customer} (role:admin,manager)

@@ -12,11 +12,11 @@ class EmployeeResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'employee_number' => $this->employee_number,
+            'employee_code' => $this->employee_code,
             'hire_date' => $this->hire_date?->format('Y-m-d'),
+            'salary_type' => $this->salary_type,
             'salary' => $this->salary,
-            'hourly_rate' => $this->hourly_rate,
-            'is_active' => $this->is_active,
+            'status' => $this->status,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             
@@ -34,7 +34,7 @@ class EmployeeResource extends JsonResource
             'position' => $this->whenLoaded('position', function () {
                 return [
                     'id' => $this->position->id,
-                    'name' => $this->position->name,
+                    'title' => $this->position->title,
                     'description' => $this->position->description,
                 ];
             }),
@@ -44,7 +44,7 @@ class EmployeeResource extends JsonResource
                 return [
                     'id' => $this->location->id,
                     'name' => $this->location->name,
-                    'address' => $this->location->address,
+                    'address_line1' => $this->location->address_line1,
                 ];
             }),
         ];

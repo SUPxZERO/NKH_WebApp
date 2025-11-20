@@ -25,6 +25,8 @@ import { Badge } from '@/app/components/ui/Badge';
 import { apiGet } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Invoice, Order, Location } from '@/app/types/domain';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function Invoices() {
   const [search, setSearch] = React.useState('');
@@ -38,6 +40,13 @@ export default function Invoices() {
   // Pagination state
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(15);
+
+  // --- HELPER: Safe Number Parsing ---
+  // This fixes the "Cannot read properties of null (reading 'toString')" error
+  const getAmount = (value: any): number => {
+    if (value === null || value === undefined) return 0;
+    return parseFloat(String(value));
+  };
 
   // Fetch invoices
   const { data: invoices, isLoading } = useQuery({
@@ -85,14 +94,92 @@ export default function Invoices() {
   };
 
   const handleDownload = (invoice: Invoice) => {
-    // This would typically generate and download a PDF
-    toastSuccess(`Invoice ${invoice.invoice_number} download started`);
+    try {
+      const doc = new jsPDF();
+
+      const number = invoice.invoice_number || String(invoice.id || 'unknown');
+      const issuedDate = invoice.issued_at ? new Date(invoice.issued_at).toLocaleDateString() : 'N/A';
+      const statusText = getPaymentStatusText(invoice);
+
+      doc.setFontSize(18);
+      doc.text(`Invoice #${number}`, 14, 16);
+
+      doc.setFontSize(11);
+      doc.text(`Date: ${issuedDate}`, 14, 24);
+      doc.text(`Status: ${statusText}`, 14, 30);
+
+      doc.setFontSize(13);
+      doc.text('Customer Details', 14, 40);
+      doc.setFontSize(11);
+      const customerName = invoice.order?.customer?.user?.name || 'Guest';
+      const customerEmail = invoice.order?.customer?.user?.email || 'N/A';
+      doc.text(`Name: ${customerName}`, 14, 48);
+      doc.text(`Email: ${customerEmail}`, 14, 54);
+
+      const items = invoice.order?.items || [];
+      const tableBody = items.map((item: any) => {
+        const qty = getAmount(item?.quantity);
+        const total = getAmount(item?.total_price);
+        const unit = qty > 0 ? total / qty : 0;
+        return [
+          item?.menu_item?.name || 'Item',
+          String(qty),
+          `$${getAmount(unit).toFixed(2)}`,
+          `$${getAmount(total).toFixed(2)}`
+        ];
+      });
+
+      autoTable(doc, {
+        startY: 64,
+        head: [['Item Name', 'Quantity', 'Price', 'Total']],
+        body: tableBody,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [52, 58, 64] }
+      });
+
+
+      const finalY = (doc as any).lastAutoTable?.finalY || 64;
+
+      doc.setFontSize(13);
+      doc.text('Summary', 14, finalY + 10);
+      doc.setFontSize(11);
+
+      const sSubtotal = getAmount(invoice.subtotal);
+      const sTax = getAmount(invoice.tax_total);
+      const sDiscount = getAmount(invoice.discount_total);
+      const sTotal = getAmount(invoice.total);
+
+      const pageWidth = (doc as any).internal?.pageSize?.getWidth ? (doc as any).internal.pageSize.getWidth() : 210;
+      const rightX = pageWidth - 14;
+      const labelX = rightX - 60;
+
+      doc.text('Subtotal:', labelX, finalY + 18, { align: 'left' });
+      doc.text(`$${sSubtotal.toFixed(2)}`, rightX, finalY + 18, { align: 'right' });
+
+      doc.text('Tax:', labelX, finalY + 24, { align: 'left' });
+      doc.text(`$${sTax.toFixed(2)}`, rightX, finalY + 24, { align: 'right' });
+
+      doc.text('Discount:', labelX, finalY + 30, { align: 'left' });
+      doc.text(`-$${sDiscount.toFixed(2)}`, rightX, finalY + 30, { align: 'right' });
+
+      doc.setFontSize(12);
+      doc.text('Grand Total:', labelX, finalY + 38, { align: 'left' });
+      doc.text(`$${sTotal.toFixed(2)}`, rightX, finalY + 38, { align: 'right' });
+
+      doc.save(`invoice_${number}.pdf`);
+      toastSuccess(`Invoice ${number} download started`);
+    } catch (e) {
+      toastError('Failed to generate PDF. Please ensure dependencies are installed.');
+    }
   };
 
   const getPaymentStatusColor = (invoice: Invoice) => {
-    if (invoice.amount_due <= 0) {
+    const due = getAmount(invoice.amount_due);
+    const paid = getAmount(invoice.amount_paid);
+
+    if (due <= 0) {
       return 'bg-green-500/20 text-green-400 border-green-500/30';
-    } else if (invoice.amount_paid > 0) {
+    } else if (paid > 0) {
       return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
     } else {
       return 'bg-red-500/20 text-red-400 border-red-500/30';
@@ -100,9 +187,12 @@ export default function Invoices() {
   };
 
   const getPaymentStatusText = (invoice: Invoice) => {
-    if (invoice.amount_due <= 0) {
+    const due = getAmount(invoice.amount_due);
+    const paid = getAmount(invoice.amount_paid);
+
+    if (due <= 0) {
       return 'Paid';
-    } else if (invoice.amount_paid > 0) {
+    } else if (paid > 0) {
       return 'Partial';
     } else {
       return 'Unpaid';
@@ -126,18 +216,18 @@ export default function Invoices() {
               <p className="text-gray-400 mt-1">Manage billing and payment processing</p>
             </div>
 
-            {/* Summary Cards */}
+            {/* Summary Cards - UPDATED WITH SAFE GETAMOUNT */}
             <div className="flex gap-4">
               <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
                 <div className="text-sm text-gray-400">Total Revenue</div>
                 <div className="text-xl font-bold text-white">
-                  ${invoices?.data?.reduce((sum: number, inv: Invoice) => sum + parseFloat(inv.total.toString()), 0).toFixed(2) || '0.00'}
+                  ${invoices?.data?.reduce((sum: number, inv: Invoice) => sum + getAmount(inv.total), 0).toFixed(2) || '0.00'}
                 </div>
               </div>
               <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
                 <div className="text-sm text-gray-400">Outstanding</div>
                 <div className="text-xl font-bold text-red-400">
-                  ${invoices?.data?.reduce((sum: number, inv: Invoice) => sum + parseFloat(inv.amount_due.toString()), 0).toFixed(2) || '0.00'}
+                  ${invoices?.data?.reduce((sum: number, inv: Invoice) => sum + getAmount(inv.amount_due), 0).toFixed(2) || '0.00'}
                 </div>
               </div>
             </div>
@@ -207,7 +297,7 @@ export default function Invoices() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-md p-5">
                   <CardContent className="p-6">
                     <div className="animate-pulse space-y-4">
                       <div className="h-4 bg-white/10 rounded w-3/4"></div>
@@ -245,18 +335,18 @@ export default function Invoices() {
                     <div className="space-y-3 mb-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-400">Total Amount:</span>
-                        <span className="text-white font-semibold">${parseFloat(invoice.total.toString()).toFixed(2)}</span>
+                        <span className="text-white font-semibold">${getAmount(invoice.total).toFixed(2)}</span>
                       </div>
                       
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-400">Amount Paid:</span>
-                        <span className="text-green-400">${parseFloat(invoice.amount_paid.toString()).toFixed(2)}</span>
+                        <span className="text-green-400">${getAmount(invoice.amount_paid).toFixed(2)}</span>
                       </div>
 
-                      {invoice.amount_due > 0 && (
+                      {getAmount(invoice.amount_due) > 0 && (
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-400">Amount Due:</span>
-                          <span className="text-red-400">${parseFloat(invoice.amount_due.toString()).toFixed(2)}</span>
+                          <span className="text-red-400">${getAmount(invoice.amount_due).toFixed(2)}</span>
                         </div>
                       )}
 
@@ -398,33 +488,33 @@ export default function Invoices() {
               <div className="bg-white/5 rounded-lg p-4 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Subtotal:</span>
-                  <span className="text-white">${parseFloat(selectedInvoice.subtotal.toString()).toFixed(2)}</span>
+                  <span className="text-white">${getAmount(selectedInvoice.subtotal).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Tax:</span>
-                  <span className="text-white">${parseFloat(selectedInvoice.tax_total.toString()).toFixed(2)}</span>
+                  <span className="text-white">${getAmount(selectedInvoice.tax_total).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Service Charge:</span>
-                  <span className="text-white">${parseFloat(selectedInvoice.service_charge.toString()).toFixed(2)}</span>
+                  <span className="text-white">${getAmount(selectedInvoice.service_charge).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Discount:</span>
-                  <span className="text-red-400">-${parseFloat(selectedInvoice.discount_total.toString()).toFixed(2)}</span>
+                  <span className="text-red-400">-${getAmount(selectedInvoice.discount_total).toFixed(2)}</span>
                 </div>
                 <hr className="border-white/10" />
                 <div className="flex justify-between text-lg font-semibold">
                   <span className="text-white">Total:</span>
-                  <span className="text-white">${parseFloat(selectedInvoice.total.toString()).toFixed(2)}</span>
+                  <span className="text-white">${getAmount(selectedInvoice.total).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Amount Paid:</span>
-                  <span className="text-green-400">${parseFloat(selectedInvoice.amount_paid.toString()).toFixed(2)}</span>
+                  <span className="text-green-400">${getAmount(selectedInvoice.amount_paid).toFixed(2)}</span>
                 </div>
-                {selectedInvoice.amount_due > 0 && (
+                {getAmount(selectedInvoice.amount_due) > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Amount Due:</span>
-                    <span className="text-red-400">${parseFloat(selectedInvoice.amount_due.toString()).toFixed(2)}</span>
+                    <span className="text-red-400">${getAmount(selectedInvoice.amount_due).toFixed(2)}</span>
                   </div>
                 )}
               </div>
@@ -440,7 +530,7 @@ export default function Invoices() {
                       <span className="text-white font-medium">{item.menu_item?.name}</span>
                       <span className="text-gray-400 ml-2">x{item.quantity}</span>
                     </div>
-                    <span className="text-white">${parseFloat(item.total_price).toFixed(2)}</span>
+                    <span className="text-white">${getAmount(item.total_price).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -454,7 +544,7 @@ export default function Invoices() {
                   {selectedInvoice.payments.map((payment: any) => (
                     <div key={payment.id} className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                       <div>
-                        <span className="text-white font-medium">${parseFloat(payment.amount).toFixed(2)}</span>
+                        <span className="text-white font-medium">${getAmount(payment.amount).toFixed(2)}</span>
                         <span className="text-gray-400 ml-2">
                           {payment.paid_at ? new Date(payment.paid_at).toLocaleDateString() : 'Pending'}
                         </span>

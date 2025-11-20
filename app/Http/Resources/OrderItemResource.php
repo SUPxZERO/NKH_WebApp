@@ -18,9 +18,12 @@ class OrderItemResource extends JsonResource
             'unit_price' => $this->unit_price,
             'discount_amount' => $this->discount_amount,
             'tax_amount' => $this->tax_amount,
-            'total' => $this->total,
-            'kitchen_status' => $this->kitchen_status,
-            'notes' => $this->notes,
+            'total_price' => $this->total_price,
+            // Backward compatible aliases for older UI
+            'total' => $this->total_price,
+            'status' => $this->status,
+            'special_instructions' => $this->special_instructions,
+            'notes' => $this->special_instructions,
         ];
     }
 }

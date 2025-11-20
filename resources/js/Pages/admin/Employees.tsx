@@ -3,12 +3,12 @@ import AdminLayout from '@/app/layouts/AdminLayout';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
 import { Employee, Position, Location, ApiResponse, PaginatedResponse } from '@/app/types/domain';
-import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
+import { Card, CardContent } from '@/app/components/ui/Card'; // Adjusted imports based on usage
 import { Input } from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
 import { Skeleton } from '@/app/components/ui/Loading';
 import Modal from '@/app/components/ui/Modal';
-import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
+import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Plus, Search, Edit, Trash2, User, Phone, Mail, Calendar, DollarSign, MapPin, Badge } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -149,9 +149,9 @@ export default function Employees() {
       salary: employee.salary?.toString() || '',
       address: employee.address || '',
       position_id: employee.position_id?.toString() || '',
-      location_id: employee.location_id.toString(),
+      location_id: employee.location_id?.toString() || '', // Added safe check
       status: employee.status,
-      role: employee.user.roles[0] || 'employee'
+      role: employee.user.roles?.[0] || 'employee' // Added safe check
     });
     setOpenEdit(true);
   };
@@ -163,6 +163,9 @@ export default function Employees() {
   };
 
   const getStatusColor = (status: string) => {
+    // Added safety check here just in case
+    if (!status) return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    
     switch (status) {
       case 'active': return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'inactive': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
@@ -242,33 +245,38 @@ export default function Employees() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-white text-lg">
-                          {employee.user.name}
+                          {employee.user?.name || 'Unknown User'}
                         </h3>
                         <p className="text-gray-400 text-sm">
                           {employee.position?.title || 'No Position'}
                         </p>
                       </div>
+                      
+                      {/* --- FIX APPLIED HERE --- */}
                       <span className={`px-2 py-1 rounded-full text-xs border ${getStatusColor(employee.status)}`}>
-                        {employee.status.replace('_', ' ').toUpperCase()}
+                        {(employee.status || 'active').replace('_', ' ').toUpperCase()}
                       </span>
+
                     </div>
 
                     {/* Details */}
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm text-gray-300">
                         <Mail className="w-4 h-4" />
-                        {employee.user.email}
+                        {employee.user?.email}
                       </div>
-                      {employee.phone && (
+                      {employee.user?.phone && (
                         <div className="flex items-center gap-2 text-sm text-gray-300">
                           <Phone className="w-4 h-4" />
-                          {employee.phone}
+                          {employee.user?.phone}
                         </div>
                       )}
-                      <div className="flex items-center gap-2 text-sm text-gray-300">
-                        <Badge className="w-4 h-4" />
-                        {employee.employee_code}
-                      </div>
+                      {employee.employee_code && (
+                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                          <Badge className="w-4 h-4" />
+                          {employee.employee_code}
+                        </div>
+                      )}
                       {employee.hire_date && (
                         <div className="flex items-center gap-2 text-sm text-gray-300">
                           <Calendar className="w-4 h-4" />

@@ -18,7 +18,7 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Employee::with(['user', 'position', 'location']);
+        $query = Employee::with(['user.roles', 'position', 'location']);
         
         // Filter by location if provided
         if ($request->has('location_id')) {
@@ -62,11 +62,11 @@ class EmployeeController extends Controller
                 'user_id' => $user->id,
                 'location_id' => $data['location_id'],
                 'position_id' => $data['position_id'],
-                'employee_number' => $data['employee_number'],
+                'employee_code' => $data['employee_code'],
                 'hire_date' => $data['hire_date'],
+                'salary_type' => $data['salary_type'] ?? 'monthly',
                 'salary' => $data['salary'] ?? null,
-                'hourly_rate' => $data['hourly_rate'] ?? null,
-                'is_active' => $data['is_active'] ?? true,
+                'status' => $data['status'] ?? 'active',
             ]);
             
             return $employee->load(['user', 'position', 'location']);
@@ -110,9 +110,9 @@ class EmployeeController extends Controller
             // Update employee record
             $employeeUpdate = [];
             if (isset($data['position_id'])) $employeeUpdate['position_id'] = $data['position_id'];
+            if (isset($data['salary_type'])) $employeeUpdate['salary_type'] = $data['salary_type'];
             if (isset($data['salary'])) $employeeUpdate['salary'] = $data['salary'];
-            if (isset($data['hourly_rate'])) $employeeUpdate['hourly_rate'] = $data['hourly_rate'];
-            if (isset($data['is_active'])) $employeeUpdate['is_active'] = $data['is_active'];
+            if (isset($data['status'])) $employeeUpdate['status'] = $data['status'];
             
             if (!empty($employeeUpdate)) {
                 $employee->update($employeeUpdate);
@@ -126,7 +126,7 @@ class EmployeeController extends Controller
     {
         DB::transaction(function () use ($employee) {
             // Deactivate instead of hard delete to preserve data integrity
-            $employee->update(['is_active' => false]);
+            $employee->update(['status' => 'inactive']);
             $employee->user()->update(['is_active' => false]);
         });
         

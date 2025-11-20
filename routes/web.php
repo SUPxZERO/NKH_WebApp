@@ -47,6 +47,7 @@ Route::prefix('admin')
         Route::get('categories', fn() => Inertia::render('admin/Categories'))->name('admin.categories');
         Route::get('employees', fn() => Inertia::render('admin/Employees'))->name('admin.employees');
         Route::get('customers', fn() => Inertia::render('admin/Customers'))->name('admin.customers');
+        Route::get('orders', fn() => Inertia::render('admin/Orders'))->name('admin.orders');
         Route::get('expenses', fn() => Inertia::render('admin/Expenses'))->name('admin.expenses');
         Route::get('floors', fn() => Inertia::render('admin/Floors'))->name('admin.floors');
         Route::get('tables', fn() => Inertia::render('admin/Tables'))->name('admin.tables');

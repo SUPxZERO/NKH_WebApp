@@ -13,8 +13,12 @@ class DiningTableResource extends JsonResource
             'id' => $this->id,
             'floor_id' => $this->floor_id,
             'code' => $this->code,
+            'number' => $this->code,
             'capacity' => $this->capacity,
             'status' => $this->status,
+            'created_at' => optional($this->created_at)->toISOString(),
+            'updated_at' => optional($this->updated_at)->toISOString(),
+            'floor' => new FloorResource($this->whenLoaded('floor')),
         ];
     }
 }

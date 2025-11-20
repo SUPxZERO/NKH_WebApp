@@ -20,7 +20,6 @@ return new class extends Migration
             $table->date('hire_date')->nullable();
             $table->enum('salary_type', ['hourly','monthly'])->default('monthly');
             $table->decimal('salary', 12, 2)->nullable();
-            $table->string('phone', 30)->nullable();
             $table->string('address')->nullable();
             $table->enum('status', ['active','inactive','terminated','on_leave'])->default('active')->index();
             $table->timestamps();

@@ -131,7 +131,6 @@ class EmployeeSeeder extends Seeder
                     'salary' => $assignment['salary'],
                     'salary_type' => $assignment['salary_type'],
                     'status' => $this->getEmployeeStatus(),
-                    'phone' => $user->phone,
                     'address' => $this->generateAddress(),
                 ]
             );
