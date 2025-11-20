@@ -317,7 +317,7 @@ export default function Customers() {
                         onClick={() => handleDelete(customer.id)}
                         className="h-9 w-9 p-0 bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3 text-white" />
                       </Button>
                     </div>
                   </CardContent>

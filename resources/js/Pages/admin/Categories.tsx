@@ -339,7 +339,7 @@ export default function Categories() {
                 onClick={() => handleDelete(category)}
                 className="h-8 px-2 border-red-500/20 bg-red-500/5 hover:bg-red-500/20 text-red-400"
               >
-                <Trash2 size={14} />
+                <Trash2 className="w-3 h-3 text-white" size={14} />
               </Button>
             </div>
           </motion.div>

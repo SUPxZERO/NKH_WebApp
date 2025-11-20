@@ -442,7 +442,7 @@ export default function Expenses() {
                         onClick={() => handleDelete(expense.id)}
                         className="border-red-500/20 hover:bg-red-500/10 text-red-400"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-3 h-3 text-white" />
                       </Button>
                     </div>
                   </CardContent>
