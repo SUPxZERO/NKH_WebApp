@@ -256,10 +256,10 @@ export default function Invoices() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Status</option>
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="partial">Partially Paid</option>
+            <option value="all" className='text-black'>All Status</option>
+            <option value="paid" className='text-black'>Paid</option>
+            <option value="unpaid" className='text-black'>Unpaid</option>
+            <option value="partial" className='text-black'>Partially Paid</option>
           </select>
 
           <select

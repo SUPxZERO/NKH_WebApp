@@ -172,12 +172,12 @@ export default function Orders() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="received">Received</option>
-            <option value="preparing">Preparing</option>
-            <option value="ready">Ready</option>
-            <option value="completed">Completed</option>
+            <option value="all"  className='text-black'>All Status</option>
+            <option value="pending" className='text-black'>Pending</option>
+            <option value="received" className='text-black'>Received</option>
+            <option value="preparing" className='text-black'>Preparing</option>
+            <option value="ready" className='text-black'>Ready</option>
+            <option value="completed" className='text-black'>Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
 

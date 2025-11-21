@@ -17,6 +17,11 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\CustomerRequestController;
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\PromotionController;
+use App\Http\Controllers\Api\LoyaltyPointController;
+use App\Http\Controllers\Api\IngredientController;
+use App\Http\Controllers\Api\ExpenseCategoryController;
+use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
 
@@ -190,12 +195,24 @@ Route::prefix('admin')
     Route::apiResource('customers', CustomerController::class);
     // Expenses
     Route::apiResource('expenses', ExpenseController::class);
+    Route::get('expense-categories', [ExpenseCategoryController::class, 'index']);
     // Floors
     Route::apiResource('floors', FloorController::class);
+    // Promotions
+    Route::get('promotion-stats', [PromotionController::class, 'stats']);
+    Route::apiResource('promotions', PromotionController::class);
+    // Loyalty Points
+    Route::get('loyalty-stats', [LoyaltyPointController::class, 'stats']);
+    Route::apiResource('loyalty-points', LoyaltyPointController::class);
+    // Ingredients (Inventory)
+    Route::apiResource('ingredients', IngredientController::class);
     // Tables
+    Route::get('tables/grouped', [\App\Http\Controllers\Admin\TableController::class, 'index']);
     Route::apiResource('tables', TableController::class);
     Route::patch('tables/{table}/status', [TableController::class, 'updateStatus']);
-    Route::get('tables/grouped', [\App\Http\Controllers\Admin\TableController::class, 'index']);
+    // Audit Logs
+    Route::get('audit-logs', [AuditLogController::class, 'index']);
+    Route::get('audit-stats', [AuditLogController::class, 'stats']);
     // Invoices
     Route::get('invoices', [InvoiceController::class, 'index']);
     Route::get('invoices/{invoice}', [InvoiceController::class, 'show']);
@@ -216,6 +233,8 @@ Route::prefix('admin')
 
     // Order oversight and approvals
     Route::get('orders', [OrderController::class, 'index']); // Assuming an index method for admin
+    Route::put('orders/{order}/status', [OrderController::class, 'updateStatus']);
+    Route::delete('orders/{order}', [OrderController::class, 'destroy']);
     Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
     Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
 });

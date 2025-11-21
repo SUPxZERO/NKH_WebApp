@@ -301,12 +301,12 @@ export default function Reservations() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="seated">Seated</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="completed">Completed</option>
+            <option value="all" className='text-black'>All Status</option>
+            <option value="pending" className='text-black'>Pending</option>
+            <option value="confirmed" className='text-black'>Confirmed</option>
+            <option value="seated" className='text-black'>Seated</option>
+            <option value="cancelled" className='text-black'>Cancelled</option>
+            <option value="completed" className='text-black'>Completed</option>
           </select>
 
           <select

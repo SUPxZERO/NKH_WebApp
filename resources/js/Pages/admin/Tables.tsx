@@ -258,11 +258,11 @@ export default function Tables() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Status</option>
-            <option value="available">Available</option>
-            <option value="reserved">Reserved</option>
-            <option value="occupied">Occupied</option>
-            <option value="unavailable">Unavailable</option>
+            <option value="all" className='text-black'>All Status</option>
+            <option value="available" className='text-black'>Available</option>
+            <option value="reserved" className='text-black'>Reserved</option>
+            <option value="occupied" className='text-black'>Occupied</option>
+            <option value="unavailable" className='text-black'>Unavailable</option>
           </select>
 
           <select

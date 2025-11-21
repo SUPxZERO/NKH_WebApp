@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Users, ShoppingBag, Settings, 
   BarChart3, Calendar, MapPin, FileText, Menu as MenuIcon,
-  X, Bell, User, LogOut, ChefHat
+  X, Bell, User, LogOut, ChefHat, Building, Grid3X3,
+  Tag, Star, Package, Shield, MessageSquare, DollarSign
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -13,20 +14,20 @@ type Props = { children: React.ReactNode };
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Notifications', href: '/admin/notifications', icon: Bell },
-  { name: 'Customer Requests', href: '/admin/customer-requests', icon: FileText },
-  { name: 'Promotions', href: '/admin/promotions', icon: FileText },
+  { name: 'Customer Requests', href: '/admin/customer-requests', icon: MessageSquare },
+  { name: 'Promotions', href: '/admin/promotions', icon: Tag },
   { name: 'Categories', href: '/admin/categories', icon: ShoppingBag },
   { name: 'Menu Items', href: '/admin/menu-items', icon: ChefHat },
   { name: 'Employees', href: '/admin/employees', icon: Users },
   { name: 'Customers', href: '/admin/customers', icon: Users },
-  { name: 'Loyalty Points', href: '/admin/loyalty-points', icon: Users },
-  { name: 'Orders', href: '/admin/orders', icon: FileText },
-  { name: 'Expenses', href: '/admin/expenses', icon: FileText },
-  { name: 'Inventory', href: '/admin/inventory', icon: BarChart3 },
-  { name: 'Floors', href: '/admin/floors', icon: MapPin },
-  { name: 'Tables', href: '/admin/tables', icon: MapPin },
+  { name: 'Loyalty Points', href: '/admin/loyalty-points', icon: Star },
+  { name: 'Orders', href: '/admin/orders', icon: Package },
+  { name: 'Expenses', href: '/admin/expenses', icon: DollarSign },
+  { name: 'Inventory', href: '/admin/inventory', icon: Package },
+  { name: 'Floors', href: '/admin/floors', icon: Building },
+  { name: 'Tables', href: '/admin/tables', icon: Grid3X3 },
   { name: 'Invoices', href: '/admin/invoices', icon: FileText },
-  { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
+  { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
   { name: 'Reservations', href: '/admin/reservations', icon: Calendar },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
