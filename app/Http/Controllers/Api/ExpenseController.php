@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Resources\ExpenseResource;
 
 class ExpenseController extends Controller
 {
@@ -46,22 +47,13 @@ class ExpenseController extends Controller
                           ->orderByDesc('id')
                           ->paginate($request->integer('per_page', 15));
 
-        // Alias relation name to match frontend: expense_category
-        $expenses->getCollection()->transform(function (Expense $e) {
-            $arr = $e->toArray();
-            $arr['expense_category'] = $e->category?->toArray();
-            return $arr;
-        });
-
-        return $expenses;
+        return ExpenseResource::collection($expenses);
     }
 
     public function show(Expense $expense)
     {
         $expense->loadMissing(['category', 'location', 'creator']);
-        $arr = $expense->toArray();
-        $arr['expense_category'] = $expense->category?->toArray();
-        return $arr;
+        return new ExpenseResource($expense);
     }
 
     public function store(Request $request)
@@ -92,9 +84,7 @@ class ExpenseController extends Controller
         ]);
 
         $expense->load(['category', 'location', 'creator']);
-        $arr = $expense->toArray();
-        $arr['expense_category'] = $expense->category?->toArray();
-        return $arr;
+        return new ExpenseResource($expense);
     }
 
     public function update(Request $request, Expense $expense)
@@ -113,9 +103,7 @@ class ExpenseController extends Controller
 
         $expense->update($data);
         $expense->load(['category', 'location', 'creator']);
-        $arr = $expense->toArray();
-        $arr['expense_category'] = $expense->category?->toArray();
-        return $arr;
+        return new ExpenseResource($expense);
     }
 
     public function destroy(Expense $expense): JsonResponse

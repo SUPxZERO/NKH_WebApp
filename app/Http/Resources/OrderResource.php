@@ -24,10 +24,14 @@ class OrderResource extends JsonResource
             'discount_amount' => $this->discount_amount,
             'service_charge' => $this->service_charge,
             'total_amount' => $this->total_amount,
+            // UI alias for backwards compatibility
+            'total' => $this->total_amount,
             'currency' => $this->currency,
             'ordered_at' => optional($this->ordered_at)->toISOString(),
             'scheduled_at' => optional($this->scheduled_at)->toISOString(),
             'completed_at' => optional($this->completed_at)->toISOString(),
+            // UI uses created_at in displays
+            'created_at' => optional($this->created_at)->toISOString(),
             'special_instructions' => $this->special_instructions,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'invoice' => new InvoiceResource($this->whenLoaded('invoice')),

@@ -52,10 +52,16 @@ class DatabaseSeeder extends Seeder
             OrderItemSeeder::class,
             InvoiceSeeder::class,
             PaymentSeeder::class,
+            LoyaltyPointTransactionSeeder::class,
             
             // Phase 6: Advanced Operations
             ReservationSeeder::class,
             InventoryTransactionSeeder::class,
+            ExpenseCategorySeeder::class,
+            ExpenseSeeder::class,
+            LoyaltyPointsSeeder::class,
+            AuditLogSeeder::class,
+            PromotionSeeder::class,
         ]);
 
         // Re-enable foreign key checks

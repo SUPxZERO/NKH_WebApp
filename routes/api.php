@@ -175,9 +175,14 @@ Route::get('/_debug/auth', function (Request $request) {
 Route::get('/user', [AuthController::class, 'me'])->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 
+// Conditionally enforce admin auth in non-local environments
+$adminMiddleware = config('app.enforce_admin_auth')
+    ? [\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager']
+    : [];
+
 // Admin/Manager management endpoints
 Route::prefix('admin')
-// ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager'])
+->middleware($adminMiddleware)
 ->group(function () {
         Route::get('/category-stats', [CategoryController::class, 'stats']);
         Route::get('/categories/hierarchy', [CategoryController::class, 'hierarchy']);

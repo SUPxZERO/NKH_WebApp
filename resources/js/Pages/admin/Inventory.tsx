@@ -270,10 +270,10 @@ export default function Inventory() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Items</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="low_stock">Low Stock</option>
+            <option value="all" className='text-black'>All Items</option>
+            <option value="active" className='text-black'>Active</option>
+            <option value="inactive" className='text-black'>Inactive</option>
+            <option value="low_stock" className='text-black'>Low Stock</option>
           </select>
 
           <Button

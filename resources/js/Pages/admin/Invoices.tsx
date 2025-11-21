@@ -267,10 +267,10 @@ export default function Invoices() {
             onChange={(e) => setDateFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
+            <option value="all" className='text-black'>All Time</option>
+            <option value="today" className='text-black'>Today</option>
+            <option value="week" className='text-black'>This Week</option>
+            <option value="month" className='text-black'>This Month</option>
           </select>
 
           <Button

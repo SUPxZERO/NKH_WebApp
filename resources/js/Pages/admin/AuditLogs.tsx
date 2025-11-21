@@ -183,12 +183,12 @@ export default function AuditLogs() {
             onChange={(e) => setActionFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Actions</option>
-            <option value="create">Create</option>
-            <option value="update">Update</option>
-            <option value="delete">Delete</option>
-            <option value="login">Login</option>
-            <option value="view">View</option>
+            <option value="all" className='text-black'>All Actions</option>
+            <option value="create" className='text-black'>Create</option>
+            <option value="update" className='text-black'>Update</option>
+            <option value="delete" className='text-black'>Delete</option>
+            <option value="login" className='text-black'>Login</option>
+            <option value="view" className='text-black'>View</option>
           </select>
 
           <select
@@ -196,10 +196,10 @@ export default function AuditLogs() {
             onChange={(e) => setDateFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
+            <option value="all" className='text-black'>All Time</option>
+            <option value="today" className='text-black'>Today</option>
+            <option value="week" className='text-black'>This Week</option>
+            <option value="month" className='text-black'>This Month</option>
           </select>
 
           <Button

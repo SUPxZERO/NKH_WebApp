@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // Feature flags / toggles
+    'enforce_admin_auth' => (bool) env('ENFORCE_ADMIN_AUTH', false),
+
 ];

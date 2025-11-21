@@ -5,7 +5,9 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 // - Retries once on 419 (CSRF token mismatch) after refreshing the cookie
 
 const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL as string) || '';
-const API_BASE_URL = BACKEND_BASE ? `${BACKEND_BASE.replace(/\/$/, '')}/api` : '/api';
+const API_BASE_URL = BACKEND_BASE
+  ? `${BACKEND_BASE.replace(/\/$/, '')}/api/`
+  : '/api/';
 
 function createClient(): AxiosInstance {
   const instance = axios.create({
@@ -41,6 +43,17 @@ function createClient(): AxiosInstance {
     const method = (config.method || 'get').toLowerCase();
     if (method !== 'get' && method !== 'head' && method !== 'options') {
       await ensureCsrfCookie();
+    }
+    // Preserve legacy token-based flows if a token exists in localStorage
+    try {
+      if (typeof window !== 'undefined') {
+        const token = window.localStorage?.getItem('token');
+        if (token) {
+          (config.headers = config.headers || {}).Authorization = `Bearer ${token}`;
+        }
+      }
+    } catch (_) {
+      // no-op
     }
     return config;
   });

@@ -1,44 +1,4 @@
-import axios from 'axios';
-
-const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL) || '';
-const API_BASE = BACKEND_BASE ? `${BACKEND_BASE.replace(/\/$/, '')}/api` : '/api';
-
-const api = axios.create({
-    baseURL: API_BASE,
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-    }
-});
-
-// Send cookies (Laravel session / Sanctum) for same-origin requests
-api.defaults.withCredentials = true;
-// Ensure axios looks for Laravel's XSRF cookie and sends the header automatically
-api.defaults.xsrfCookieName = 'XSRF-TOKEN';
-api.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
-
-// Add request interceptor for auth token
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
-// Add response interceptor for error handling
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Handle unauthorized access
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-        }
-        return Promise.reject(error);
-    }
-);
+import { apiClient as api } from '@/app/libs/apiClient';
 
 export const dashboardApi = {
     getStats: () => api.get('/admin/dashboard/stats'),

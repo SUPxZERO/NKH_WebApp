@@ -11,25 +11,31 @@ class InvoiceSeeder extends Seeder
     public function run(): void
     {
         $completedOrders = Order::whereIn('status', ['completed', 'ready'])->get();
-        
+
         foreach ($completedOrders as $order) {
-            $invoiceDate = $order->completed_at ?? $order->ordered_at->addMinutes(rand(20, 60));
-            $dueDate = $invoiceDate->copy()->addDays(rand(0, 30)); // Some invoices due immediately, others later
-            
+            if (Invoice::where('order_id', $order->id)->exists()) {
+                continue;
+            }
+
+            $invoiceDate = $order->completed_at ?? $order->ordered_at->copy()->addMinutes(rand(20, 60));
+            $dueDate = $invoiceDate->copy()->addDays(rand(0, 30));
+            $status = $this->getInvoiceStatus();
+            $invoiceNumber = $this->generateInvoiceNumber($order);
+
             Invoice::create([
                 'order_id' => $order->id,
                 'location_id' => $order->location_id,
-                'invoice_number' => $this->generateInvoiceNumber($order),
+                'invoice_number' => $invoiceNumber,
                 'subtotal' => $order->subtotal,
                 'tax_amount' => $order->tax_amount,
                 'discount_amount' => $order->discount_amount,
                 'total_amount' => $order->total_amount,
-                'amount_paid' => $this->getAmountPaid($order->total_amount),
-                'amount_due' => $this->getAmountDue($order->total_amount),
-                'status' => $this->getInvoiceStatus(),
+                'amount_paid' => $this->getAmountPaid($order->total_amount, $status),
+                'amount_due' => $this->getAmountDue($order->total_amount, $status),
+                'status' => $status,
                 'issued_at' => $invoiceDate,
                 'due_at' => $dueDate,
-                'paid_at' => $this->getPaidDate($invoiceDate),
+                'paid_at' => $this->getPaidDate($invoiceDate, $status),
                 'notes' => $this->getInvoiceNotes(),
             ]);
         }
@@ -39,15 +45,18 @@ class InvoiceSeeder extends Seeder
     {
         $locationCode = $order->location->code ?? 'NKH';
         $date = ($order->completed_at ?? $order->ordered_at)->format('Ymd');
-        $sequence = str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT);
-        
-        return "INV-{$locationCode}-{$date}-{$sequence}";
+        for ($i = 0; $i < 10; $i++) {
+            $sequence = str_pad((string) random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
+            $candidate = "INV-{$locationCode}-{$date}-{$sequence}";
+            if (! Invoice::where('invoice_number', $candidate)->exists()) {
+                return $candidate;
+            }
+        }
+        return "INV-{$locationCode}-{$date}-{$order->id}";
     }
 
-    private function getAmountPaid(float $totalAmount): float
+    private function getAmountPaid(float $totalAmount, string $status): float
     {
-        $status = $this->getInvoiceStatus();
-        
         switch ($status) {
             case 'paid':
                 return $totalAmount;
@@ -62,10 +71,8 @@ class InvoiceSeeder extends Seeder
         }
     }
 
-    private function getAmountDue(float $totalAmount): float
+    private function getAmountDue(float $totalAmount, string $status): float
     {
-        $status = $this->getInvoiceStatus();
-        
         switch ($status) {
             case 'paid':
                 return 0.00;
@@ -90,10 +97,8 @@ class InvoiceSeeder extends Seeder
         return 'cancelled';
     }
 
-    private function getPaidDate($invoiceDate): ?string
+    private function getPaidDate($invoiceDate, string $status): ?string
     {
-        $status = $this->getInvoiceStatus();
-        
         switch ($status) {
             case 'paid':
                 return $invoiceDate->copy()->addMinutes(rand(10, 60))->format('Y-m-d H:i:s');

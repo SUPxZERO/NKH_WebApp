@@ -164,8 +164,8 @@ class OrderController extends Controller
             $order->loadMissing('items');
             $this->recalculateTotals($order);
 
-            // Create invoice
-            $invoiceNumber = $this->generateOrderNumber($order->location_id, 'INV');
+            // Create invoice with unique invoice number
+            $invoiceNumber = $this->generateInvoiceNumber($order->location_id, 'INV');
             $invoice = $order->invoice;
             if (!$invoice) {
                 $invoice = new Invoice([
@@ -229,6 +229,16 @@ class OrderController extends Controller
         return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
     }
 
+    private function generateInvoiceNumber(int $locationId, string $prefix = 'INV'): string
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), Str::upper(Str::random(5)));
+            $exists = Invoice::where('location_id', $locationId)->where('invoice_number', $number)->exists();
+            if (!$exists) return $number;
+        }
+        return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
+    }
+
     // GET /api/admin/orders (Admin oversight)
     public function index(Request $request)
     {
@@ -239,9 +249,9 @@ class OrderController extends Controller
             $query->where('location_id', $request->location_id);
         }
         
-        // Filter by status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
+        // Filter by status (ignore 'all')
+        if ($request->filled('status') && $request->string('status') !== 'all') {
+            $query->where('status', $request->string('status'));
         }
         
         // Filter by order type (frontend sends ?type=)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
+use App\Http\Resources\ExpenseCategoryResource;
 
 class ExpenseCategoryController extends Controller
 {
@@ -19,6 +20,7 @@ class ExpenseCategoryController extends Controller
             $s = $request->string('search');    
             $query->where('name', 'like', "%{$s}%");
         }
-        return $query->orderBy('name')->get();
+        $categories = $query->orderBy('name')->get();
+        return ExpenseCategoryResource::collection($categories);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Promotion;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Resources\PromotionResource;
 
 class PromotionController extends Controller
 {
@@ -27,7 +28,13 @@ class PromotionController extends Controller
         }
 
         if ($request->filled('type')) {
-            $query->where('type', $request->string('type'));
+            $t = $request->string('type');
+            $dbType = match ($t) {
+                'fixed_amount' => 'fixed',
+                'buy_x_get_y', 'free_item' => 'percentage', // temporary mapping
+                default => $t,
+            };
+            $query->where('type', $dbType);
         }
 
         if ($request->boolean('expired', false)) {
@@ -35,28 +42,15 @@ class PromotionController extends Controller
         }
 
         $promotions = $query->orderBy('id', 'desc')->paginate($request->integer('per_page', 12));
-        // Transform to expected frontend shape
-        $promotions->getCollection()->transform(function (Promotion $p) {
-            $arr = $p->toArray();
-            $arr['discount_value'] = $p->value;
-            $arr['start_date'] = optional($p->start_at)?->toISOString();
-            $arr['end_date'] = optional($p->end_at)?->toISOString();
-            return $arr;
-        });
-        return $promotions;
+        return PromotionResource::collection($promotions);
     }
 
     public function show(Promotion $promotion)
     {
-        return [
-            ...$promotion->toArray(),
-            'discount_value' => $promotion->value,
-            'start_date' => optional($promotion->start_at)?->toISOString(),
-            'end_date' => optional($promotion->end_at)?->toISOString(),
-        ];
+        return new PromotionResource($promotion);
     }
 
-    public function store(Request $request): Promotion
+    public function store(Request $request): PromotionResource
     {
         $data = $request->validate([
             'location_id' => ['nullable', 'integer'],
@@ -75,12 +69,18 @@ class PromotionController extends Controller
             'terms_conditions' => ['nullable', 'string'],
         ]);
 
+        $dbType = match ($data['type']) {
+            'fixed_amount' => 'fixed',
+            'buy_x_get_y', 'free_item' => 'percentage',
+            default => $data['type'],
+        };
+
         $promotion = Promotion::create([
             'location_id' => $data['location_id'] ?? null,
             'code' => $data['code'] ?? null,
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
-            'type' => $data['type'],
+            'type' => $dbType,
             'value' => $data['discount_value'],
             'min_order_amount' => $data['min_order_amount'] ?? null,
             'usage_limit' => $data['usage_limit'] ?? null,
@@ -89,10 +89,10 @@ class PromotionController extends Controller
             'is_active' => $data['is_active'] ?? true,
         ]);
 
-        return $promotion;
+        return new PromotionResource($promotion);
     }
 
-    public function update(Request $request, Promotion $promotion): Promotion
+    public function update(Request $request, Promotion $promotion): PromotionResource
     {
         $data = $request->validate([
             'location_id' => ['nullable', 'integer'],
@@ -111,12 +111,18 @@ class PromotionController extends Controller
             'terms_conditions' => ['nullable', 'string'],
         ]);
 
+        $dbType = isset($data['type']) ? match ($data['type']) {
+            'fixed_amount' => 'fixed',
+            'buy_x_get_y', 'free_item' => 'percentage',
+            default => $data['type'],
+        } : $promotion->type;
+
         $promotion->update([
             'location_id' => $data['location_id'] ?? $promotion->location_id,
             'code' => $data['code'] ?? $promotion->code,
             'name' => $data['name'] ?? $promotion->name,
             'description' => $data['description'] ?? $promotion->description,
-            'type' => $data['type'] ?? $promotion->type,
+            'type' => $dbType,
             'value' => $data['discount_value'] ?? $promotion->value,
             'min_order_amount' => $data['min_order_amount'] ?? $promotion->min_order_amount,
             'usage_limit' => $data['usage_limit'] ?? $promotion->usage_limit,
@@ -125,13 +131,7 @@ class PromotionController extends Controller
             'is_active' => $data['is_active'] ?? $promotion->is_active,
         ]);
 
-        $promotion = $promotion->fresh();
-        return [
-            ...$promotion->toArray(),
-            'discount_value' => $promotion->value,
-            'start_date' => optional($promotion->start_at)?->toISOString(),
-            'end_date' => optional($promotion->end_at)?->toISOString(),
-        ];
+        return new PromotionResource($promotion->fresh());
     }
 
     public function destroy(Promotion $promotion): JsonResponse
