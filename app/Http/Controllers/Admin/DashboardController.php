@@ -15,20 +15,21 @@ class DashboardController extends Controller
     {
         $startOfDay = Carbon::now()->startOfDay();
         $endOfDay = Carbon::now()->endOfDay();
-        
-        $employees = Employee::withCount(['orders' => function($query) use ($startOfDay, $endOfDay) {
-            $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
-        }])
-        ->orderBy('orders_count', 'desc')
-        ->get()
-        ->map(function($employee) {
-            return [
-                'id' => $employee->id,
-                'name' => $employee->user->name,
-                'ordersHandled' => $employee->orders_count,
-                'rating' => 4.5 // You might want to implement actual rating logic
-            ];
-        });
+
+        $employees = Employee::with('user')
+            ->withCount(['orders' => function($query) use ($startOfDay, $endOfDay) {
+                $query->whereBetween('ordered_at', [$startOfDay, $endOfDay]);
+            }])
+            ->orderBy('orders_count', 'desc')
+            ->get()
+            ->map(function($employee) {
+                return [
+                    'id' => $employee->id,
+                    'name' => optional($employee->user)->name,
+                    'ordersHandled' => $employee->orders_count,
+                    'rating' => 4.5 // You might want to implement actual rating logic
+                ];
+            });
 
         return response()->json([
             'data' => [
@@ -40,7 +41,7 @@ class DashboardController extends Controller
     public function orderStats()
     {
         $stats = Order::select('status', DB::raw('count(*) as count'))
-            ->whereDate('created_at', Carbon::today())
+            ->whereDate('ordered_at', Carbon::today())
             ->groupBy('status')
             ->get()
             ->pluck('count', 'status')
@@ -51,7 +52,7 @@ class DashboardController extends Controller
                 'pending' => $stats['pending'] ?? 0,
                 'preparing' => $stats['preparing'] ?? 0,
                 'ready' => $stats['ready'] ?? 0,
-                'delivered' => $stats['delivered'] ?? 0,
+                'delivered' => $stats['completed'] ?? 0,
                 'cancelled' => $stats['cancelled'] ?? 0,
             ]
         ]);
@@ -62,26 +63,27 @@ class DashboardController extends Controller
         $now = Carbon::now();
         
         $query = Order::select(
-            DB::raw('DATE(created_at) as date'),
+            DB::raw('DATE(completed_at) as date'),
             DB::raw('SUM(total_amount) as total')
         )
         ->where('status', 'completed')
-        ->where('payment_status', 'paid')
-        ->groupBy('date');
+        ->whereNotNull('completed_at')
+        ->groupBy('date')
+        ->orderBy('date');
 
         switch ($period) {
             case 'daily':
-                $query->whereDate('created_at', $now);
+                $query->whereDate('completed_at', $now);
                 break;
             case 'weekly':
-                $query->whereBetween('created_at', [
+                $query->whereBetween('completed_at', [
                     $now->copy()->startOfWeek(),
                     $now->copy()->endOfWeek()
                 ]);
                 break;
             case 'monthly':
-                $query->whereMonth('created_at', $now->month)
-                    ->whereYear('created_at', $now->year);
+                $query->whereMonth('completed_at', $now->month)
+                    ->whereYear('completed_at', $now->year);
                 break;
         }
 

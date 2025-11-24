@@ -33,6 +33,8 @@ class OrderResource extends JsonResource
             // UI uses created_at in displays
             'created_at' => optional($this->created_at)->toISOString(),
             'special_instructions' => $this->special_instructions,
+            'table' => new DiningTableResource($this->whenLoaded('table')),
+            'customer' => new CustomerResource($this->whenLoaded('customer')),
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'invoice' => new InvoiceResource($this->whenLoaded('invoice')),
         ];

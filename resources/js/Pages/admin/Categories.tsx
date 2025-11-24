@@ -64,10 +64,10 @@ export default function Categories() {
 
   // Fetch category stats
   const { data: categoryStats, error: statsError } = useQuery({
-    queryKey: ['admin/category-stats'],
-    queryFn: () => apiGet('/api/admin/category-stats'),
+    queryKey: ['/admin/categories/stats'],
+    queryFn: () => apiGet('/api/admin/categories/stats'),
     enabled: authInitialized
-  }) as { data: any, error?: any };
+  });
 
   // Fetch category list
   const {
@@ -76,7 +76,7 @@ export default function Categories() {
     isLoading
   } = useQuery({
     queryKey: ['admin/categories', { search, statusFilter }],
-    queryFn: () => apiGet(`/api/admin/categories?search=${encodeURIComponent(search)}&status=${encodeURIComponent(statusFilter)}`).then((r: any) => r.data),
+    queryFn: () => apiGet(`/api/admin/categories/hierarchy?search=${encodeURIComponent(search)}`),
     enabled: authInitialized
   }) as any;
 
@@ -429,9 +429,9 @@ export default function Categories() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="bg-slate-900 border border-white/10 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-purple-500/50"
             >
-              <option value="all" className='text-black'>All Status</option>
-              <option value="active" className='text-black'>Active</option>
-              <option value="inactive" className='text-black'>Inactive</option>
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
             </select>
 
             <Button

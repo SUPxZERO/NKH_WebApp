@@ -7,6 +7,7 @@ use App\Http\Requests\Api\Category\StoreCategoryRequest;
 use App\Http\Requests\Api\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\MenuItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
@@ -69,6 +70,7 @@ class CategoryController extends Controller
     public function hierarchy(Request $request): JsonResponse
     {
         $search = $request->get('search', '');
+        $status = $request->get('status', 'all');
         
         $query = Category::withoutGlobalScope('active')
             ->with([
@@ -95,6 +97,13 @@ class CategoryController extends Controller
             });
         }
         
+        // Status filter
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
+        
         $categories = $query->get();
 
         return response()->json([
@@ -107,16 +116,20 @@ class CategoryController extends Controller
     // GET /api/admin/category-stats (admin)
     public function stats(): JsonResponse
     {
-        // Get counts including soft-deleted items
-        $total = Category::withTrashed()->count();
-        $active = Category::withTrashed()->where('is_active', true)->count();
-        $parentCategories = Category::withTrashed()->parents()->count();
-        $subCategories = Category::withTrashed()->whereNotNull('parent_id')->count();
+        // Aggregate counts (no SoftDeletes used on these models/tables)
+        $total = Category::query()->count();
+        $active = Category::query()->where('is_active', true)->count();
+        $parentCategories = Category::query()->whereNull('parent_id')->count();
+        $subCategories = Category::query()->whereNotNull('parent_id')->count();
         
-        // Count all menu items including inactive ones
-        $menuItemsCount = \App\Models\MenuItem::withoutGlobalScope('active')
-            ->withTrashed()
-            ->count();
+        // Count all menu items including inactive ones (ignore any non-existent global scopes)
+        $menuItemsQuery = MenuItem::query();
+        try {
+            $menuItemsQuery = $menuItemsQuery->withoutGlobalScope('active');
+        } catch (\Throwable $e) {
+            // no-op if scope doesn't exist
+        }
+        $menuItemsCount = $menuItemsQuery->count();
 
         return response()->json([
             'total' => $total,

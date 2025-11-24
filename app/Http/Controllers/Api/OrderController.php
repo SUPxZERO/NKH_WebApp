@@ -250,8 +250,11 @@ class OrderController extends Controller
         }
         
         // Filter by status (ignore 'all')
-        if ($request->filled('status') && $request->string('status') !== 'all') {
-            $query->where('status', $request->string('status'));
+        if ($request->filled('status')) {
+            $status = (string) $request->string('status');
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
         }
         
         // Filter by order type (frontend sends ?type=)

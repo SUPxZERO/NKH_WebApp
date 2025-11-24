@@ -12,25 +12,41 @@ import { cn } from '@/app/utils/cn';
 type Props = { children: React.ReactNode };
 
 const navigation = [
+  // Main
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { name: 'Notifications', href: '/admin/notifications', icon: Bell },
+
+  // Operations
+  { name: 'Orders', href: '/admin/orders', icon: Package },
+  { name: 'Reservations', href: '/admin/reservations', icon: Calendar },
   { name: 'Customer Requests', href: '/admin/customer-requests', icon: MessageSquare },
-  { name: 'Promotions', href: '/admin/promotions', icon: Tag },
+  { name: 'Notifications', href: '/admin/notifications', icon: Bell },
+
+  // Menu Management
   { name: 'Categories', href: '/admin/categories', icon: ShoppingBag },
   { name: 'Menu Items', href: '/admin/menu-items', icon: ChefHat },
+  { name: 'Promotions', href: '/admin/promotions', icon: Tag },
+
+  // People
   { name: 'Employees', href: '/admin/employees', icon: Users },
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Loyalty Points', href: '/admin/loyalty-points', icon: Star },
-  { name: 'Orders', href: '/admin/orders', icon: Package },
+
+  // Finance
   { name: 'Expenses', href: '/admin/expenses', icon: DollarSign },
-  { name: 'Inventory', href: '/admin/inventory', icon: Package },
+  { name: 'Invoices', href: '/admin/invoices', icon: FileText },
+
+  // Restaurant Layout
   { name: 'Floors', href: '/admin/floors', icon: Building },
   { name: 'Tables', href: '/admin/tables', icon: Grid3X3 },
-  { name: 'Invoices', href: '/admin/invoices', icon: FileText },
+
+  // System
+  { name: 'Inventory', href: '/admin/inventory', icon: Package },
   { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
-  { name: 'Reservations', href: '/admin/reservations', icon: Calendar },
+
+  // Settings
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
+
 
 export default function AdminLayout({ children }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

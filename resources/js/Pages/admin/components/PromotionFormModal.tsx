@@ -124,10 +124,10 @@ export default function PromotionFormModal({
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
               >
-                <option value="percentage">Percentage Off</option>
-                <option value="fixed_amount">Fixed Amount Off</option>
-                <option value="buy_x_get_y">Buy X Get Y Free</option>
-                <option value="free_item">Free Item</option>
+                <option value="percentage" className='text-black'>Percentage Off</option>
+                <option value="fixed_amount" className='text-black'>Fixed Amount Off</option>
+                <option value="buy_x_get_y" className='text-black'>Buy X Get Y Free</option>
+                <option value="free_item" className='text-black'>Free Item</option>
               </select>
             </div>
 

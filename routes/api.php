@@ -185,6 +185,8 @@ Route::prefix('admin')
 ->middleware($adminMiddleware)
 ->group(function () {
         Route::get('/category-stats', [CategoryController::class, 'stats']);
+        // Alias to match frontend caller
+        Route::get('/categories/stats', [CategoryController::class, 'stats']);
         Route::get('/categories/hierarchy', [CategoryController::class, 'hierarchy']);
         Route::get('/categories', [CategoryController::class, 'index']);
         Route::post('/categories', [CategoryController::class, 'store']);

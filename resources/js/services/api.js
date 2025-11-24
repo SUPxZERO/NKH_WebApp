@@ -5,8 +5,8 @@ export const dashboardApi = {
 };
 
 export const categoriesApi = {
-    getAll: (params) => api.get('/admin/categories', { params }),
     getStats: () => api.get('/admin/category-stats'),
+    getAll: (params) => api.get('/admin/categories', { params }),
     get: (id) => api.get(`/admin/categories/${id}`),
     create: (data) => api.post('/admin/categories', data),
     update: (id, data) => api.put(`/admin/categories/${id}`, data),

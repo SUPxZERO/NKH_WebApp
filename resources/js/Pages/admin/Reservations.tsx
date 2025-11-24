@@ -31,7 +31,7 @@ import { Reservation, DiningTable, Customer, Location } from '@/app/types/domain
 export default function Reservations() {
   const [search, setSearch] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
-  const [dateFilter, setDateFilter] = React.useState('today');
+  const [dateFilter, setDateFilter] = React.useState('all');
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
