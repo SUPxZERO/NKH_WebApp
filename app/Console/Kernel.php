@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\SeedDatabase::class,
+        Commands\InsertHoldOrderUI::class,
     ];
 
     /**

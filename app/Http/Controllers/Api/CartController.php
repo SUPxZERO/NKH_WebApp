@@ -39,7 +39,7 @@ class CartController extends Controller
                     'quantity' => $item->quantity,
                     'notes' => $item->notes,
                     'customizations' => $item->customizations,
-                    'image_url' => $menuItem->image_path ? asset($menuItem->image_path) : null,
+                    'image_path' => $menuItem->image_path ? asset($menuItem->image_path) : null,
                 ];
             });
 

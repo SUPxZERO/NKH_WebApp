@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\OnlineOrderController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\CustomerDashboardController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\EmployeeScheduleController;
+use App\Http\Controllers\Api\EmployeeTimeOffController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FloorController;
@@ -250,7 +252,7 @@ Route::prefix('admin')
 
 // In-store operations for staff (Employee)
 Route::prefix('employee')
-->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter'])
+// ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter'])
 ->group(function () {
     // POS menu
     Route::get('menu', [MenuItemController::class, 'index']);
@@ -259,6 +261,15 @@ Route::prefix('employee')
     Route::get('orders/{order}', [OrderController::class, 'show']);
     Route::post('orders/{order}/items', [OrderController::class, 'addItem']);
     Route::put('order-items/{orderItem}', [OrderController::class, 'updateItem']);
+    
+    // Employee Schedule
+    Route::get('shifts', [EmployeeScheduleController::class, 'shifts']);
+    Route::get('shifts/{id}', [EmployeeScheduleController::class, 'showShift']);
+    
+    // Time Off Requests
+    Route::get('time-off-requests', [EmployeeTimeOffController::class, 'index']);
+    Route::post('time-off-requests', [EmployeeTimeOffController::class, 'store']);
+    Route::delete('time-off-requests/{id}', [EmployeeTimeOffController::class, 'destroy']);
 });
 
 // Customer Dashboard Routes (for authenticated customers)
@@ -283,3 +294,12 @@ Route::prefix('customer')
     Route::delete('cart', [CartController::class, 'clear']);
     Route::post('cart/sync', [CartController::class, 'sync']);
 });
+
+// Order Holds
+Route::prefix('order-holds')
+    // ->middleware(['auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [OrderHoldController::class, 'index']);
+        Route::post('/', [OrderHoldController::class, 'store']);
+        Route::delete('{id}', [OrderHoldController::class, 'destroy']);
+    });

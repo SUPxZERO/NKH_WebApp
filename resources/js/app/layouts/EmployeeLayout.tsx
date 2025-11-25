@@ -2,19 +2,35 @@ import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ShoppingBag, Users, Utensils, Calendar, Settings,
-  Menu as MenuIcon, X, Bell, User, LogOut, ChefHat
+  // Improved Icons for Core Navigation
+  CreditCard, // For POS/Transactions
+  ChefHat,    // For Kitchen/Order Prep
+  CalendarDays, // For Schedule/Shifts
+  Settings,   // Standard
+  
+  // Other necessary icons
+  ShoppingBag, Users, Utensils, Calendar,
+  Menu as MenuIcon, X, Bell, User, LogOut
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
 type Props = { children: React.ReactNode };
 
 const navigation = [
-  { name: 'POS', href: '/employee/pos', icon: ShoppingBag },
-  { name: 'Orders', href: '/employee/orders', icon: Utensils },
-  { name: 'Schedule', href: '/employee/schedule', icon: Calendar },
+  // 1. POS: Changed from ShoppingBag to CreditCard (focus on transaction)
+  { name: 'POS', href: '/employee/pos', icon: CreditCard }, 
+  
+  // 2. Kitchen/Order Mgmt: Changed from Utensils to ChefHat (focus on preparation/role)
+  { name: 'Kitchen', href: '/employee/kitchen', icon: ChefHat }, 
+  
+  // 3. Schedule: Changed from Calendar to CalendarDays (focus on daily shifts)
+  { name: 'Schedule', href: '/employee/schedule', icon: CalendarDays }, 
+  
+  // 4. Settings: Kept as Settings (Universal icon)
   { name: 'Settings', href: '/employee/settings', icon: Settings },
 ];
+
+// ... rest of your component
 
 export default function EmployeeLayout({ children }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

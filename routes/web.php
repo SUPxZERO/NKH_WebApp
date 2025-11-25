@@ -31,6 +31,8 @@ Route::middleware(['auth', 'role:Customer'])->group(function () {
 // Employee routes
 Route::prefix('employee')->middleware(['auth', 'role:employee'])->group(function () {
     Route::get('pos', fn() => Inertia::render('Employee/POS'))->name('employee.pos');
+    Route::get('schedule', fn() => Inertia::render('Employee/Schedule'))->name('employee.schedule');
+    Route::get('kitchen', fn() => Inertia::render('Employee/KitchenDisplay'))->name('employee.kitchen');
 });
 
 // Admin routes
