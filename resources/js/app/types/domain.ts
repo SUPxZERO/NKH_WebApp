@@ -33,7 +33,7 @@ export interface MenuItemOptionChoice {
   label: string;
   price_delta: number; // additional price for this choice
 }
-  
+
 export interface MenuItemOption {
   id: number;
   name: string; // e.g. "Size", "Spice Level"
@@ -64,9 +64,13 @@ export interface MenuItem {
   image_path?: string | null;
   image_url?: string | null; // Alias for image_path for compatibility
   is_popular: boolean;
+  is_featured?: boolean; // Featured item flag for homepage
+  featured_order?: number; // Order in featured items display
+  badge?: string | null; // Badge text like "Best Seller", "Chef's Choice"
   is_active: boolean;
   display_order: number;
   rating?: number | null; // Average rating
+  reviews_count?: number; // Number of reviews
   prep_time?: number | null; // Preparation time in minutes
   ingredients?: string[]; // List of ingredients
   dietary_restrictions?: string[]; // e.g., ["vegetarian", "gluten-free"]

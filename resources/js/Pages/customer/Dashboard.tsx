@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Head } from '@inertiajs/react';
+import { motion, Variants } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
-import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
-import Button from '@/app/components/ui/Button';
-import { Skeleton } from '@/app/components/ui/Loading';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/libs/apiClient';
 import { ApiResponse, Order } from '@/app/types/domain';
-import { Clock, Star, Gift, ShoppingBag } from 'lucide-react';
+import {
+  Star,
+  ShoppingBag,
+  Gift,
+  TrendingUp,
+  Utensils,
+  Clock,
+  Heart,
+  MapPin,
+  RefreshCw,
+  Package,
+  Sparkles,
+} from 'lucide-react';
+
+// Dashboard Components
+import StatCard from '@/app/components/dashboard/StatCard';
+import ActivityFeed, { Activity } from '@/app/components/dashboard/ActivityFeed';
+import QuickActions, { QuickAction } from '@/app/components/dashboard/QuickActions';
+import DashboardChart from '@/app/components/dashboard/DashboardChart';
+
+// UI Components
+import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
+import Button from '@/app/components/ui/Button';
+import { Skeleton } from '@/app/components/ui/Loading';
 
 interface CustomerProfile {
   id: number;
@@ -14,200 +36,410 @@ interface CustomerProfile {
   email: string;
   loyalty_points: number;
   total_orders: number;
+  total_spent: number;
   favorite_items: string[];
+  member_since: string;
+  next_reward_points: number;
 }
 
+interface DashboardStats {
+  orders_this_month: number;
+  orders_trend: number;
+  points_earned_this_month: number;
+  available_rewards: number;
+}
+
+// Animation variants
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  },
+};
+
 export default function Dashboard() {
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  // Data fetching
+  const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
     queryKey: ['customer.profile'],
-    queryFn: () => apiGet<ApiResponse<CustomerProfile>>('/customer/profile').then(r => r.data),
+    queryFn: () => apiGet<ApiResponse<CustomerProfile>>('/customer/profile').then((r) => r.data),
     staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['customer.stats'],
+    queryFn: () =>
+      apiGet<ApiResponse<DashboardStats>>('/customer/dashboard/stats').then((r) => r.data),
+    staleTime: 1000 * 60,
   });
 
   const { data: recentOrders, isLoading: ordersLoading } = useQuery({
     queryKey: ['customer.orders.recent'],
-    queryFn: () => apiGet<ApiResponse<Order[]>>('/customer/orders?limit=3').then(r => r.data),
+    queryFn: () => apiGet<ApiResponse<Order[]>>('/customer/orders?limit=5').then((r) => r.data),
     staleTime: 1000 * 60,
   });
 
+  // Transform orders into activity feed
+  const activities: Activity[] = useMemo(() => {
+    if (!recentOrders) return [];
+
+    return recentOrders.map((order) => ({
+      id: order.id,
+      type:
+        order.status === 'delivered'
+          ? 'order_delivered'
+          : order.status === 'cancelled'
+            ? 'order_cancelled'
+            : 'order_placed',
+      title: `Order #${order.id}`,
+      description:
+        order.status === 'delivered'
+          ? 'Successfully delivered'
+          : order.status === 'cancelled'
+            ? 'Order was cancelled'
+            : order.status === 'preparing'
+              ? 'Being prepared'
+              : 'Order placed',
+      timestamp: order.placed_at || order.created_at,
+      metadata: {
+        amount: order.total,
+        orderId: String(order.id),
+      },
+    }));
+  }, [recentOrders]);
+
+  // Quick actions configuration
+  const quickActions: QuickAction[] = [
+    {
+      id: 'order-now',
+      label: 'Order Now',
+      description: 'Browse menu & order',
+      icon: Utensils,
+      color: 'pink',
+      onClick: () => (window.location.href = '/menu'),
+    },
+    {
+      id: 'track-order',
+      label: 'Track Orders',
+      description: 'View order status',
+      icon: Package,
+      color: 'blue',
+      onClick: () => (window.location.href = '/orders'),
+    },
+    {
+      id: 'favorites',
+      label: 'Favorites',
+      description: 'Reorder favorites',
+      icon: Heart,
+      color: 'red',
+      onClick: () => console.log('Favorites'),
+    },
+    {
+      id: 'rewards',
+      label: 'My Rewards',
+      description: 'View & redeem',
+      icon: Gift,
+      color: 'purple',
+      onClick: () => console.log('Rewards'),
+    },
+  ];
+
   return (
     <CustomerLayout>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <section className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-gradient-to-br from-fuchsia-600/20 via-pink-500/10 to-rose-500/20 border border-white/10 backdrop-blur-xl">
+      <Head>
+        <title>Dashboard - NKH Restaurant</title>
+        <meta name="description" content="Your personal restaurant dashboard" />
+      </Head>
+
+      <motion.div
+        className="space-y-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Welcome Hero */}
+        <motion.section
+          className="relative overflow-hidden rounded-3xl p-8 md:p-12 bg-gradient-to-br from-fuchsia-600/20 via-pink-500/10 to-rose-500/20 border border-white/10 backdrop-blur-xl"
+          variants={itemVariants}
+        >
           <div className="relative z-10">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              Welcome back{profile?.name ? `, ${profile.name}` : ''}! 👋
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Ready to satisfy your cravings? Check out today's specials or reorder your favorites.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button>Order Now</Button>
-              <Button variant="secondary">View Menu</Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <motion.h1
+                  className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  Welcome back
+                  {profile?.name && (
+                    <span className="bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
+                      , {profile.name}
+                    </span>
+                  )}
+                  ! 👋
+                </motion.h1>
+                <p className="text-lg text-gray-700 dark:text-gray-300 mb-6 max-w-2xl">
+                  Ready to satisfy your cravings? Check out today's specials or reorder your favorites.
+                </p>
+
+                <div className="flex flex-wrap gap-4">
+                  <Button
+                    leftIcon={<Utensils className="w-5 h-5" />}
+                    onClick={() => (window.location.href = '/menu')}
+                  >
+                    Browse Menu
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    leftIcon={<Clock className="w-5 h-5" />}
+                    onClick={() => console.log('Quick reorder')}
+                  >
+                    Quick Reorder
+                  </Button>
+                </div>
+              </div>
+
+              {/* Member badge */}
+              {profile?.member_since && (
+                <motion.div
+                  className="hidden md:block px-4 py-2 rounded-xl bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/20"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Member Since</div>
+                  <div className="font-semibold text-gray-900 dark:text-white">
+                    {new Date(profile.member_since).getFullYear()}
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
+
+          {/* Decorative elements */}
           <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
-        </section>
+          <div className="pointer-events-none absolute -left-10 -bottom-24 h-60 w-60 rounded-full bg-rose-500/20 blur-3xl" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Stats Cards */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-fuchsia-500/20">
-                      <Star className="w-5 h-5 text-fuchsia-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500">Loyalty Points</div>
-                      {profileLoading ? (
-                        <Skeleton className="h-6 w-16" />
-                      ) : (
-                        <div className="text-xl font-bold">{profile?.loyalty_points || 0}</div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Floating food emoji */}
+          <motion.div
+            className="absolute top-8 right-12 text-5xl hidden lg:block"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            🍕
+          </motion.div>
+        </motion.section>
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-emerald-500/20">
-                      <ShoppingBag className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500">Total Orders</div>
-                      {profileLoading ? (
-                        <Skeleton className="h-6 w-16" />
-                      ) : (
-                        <div className="text-xl font-bold">{profile?.total_orders || 0}</div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Stats Grid */}
+        <motion.section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" variants={itemVariants}>
+          <StatCard
+            title="Loyalty Points"
+            value={profile?.loyalty_points || 0}
+            icon={Star}
+            color="pink"
+            loading={profileLoading}
+            trend={
+              stats?.points_earned_this_month
+                ? { value: stats.points_earned_this_month, isPositive: true }
+                : undefined
+            }
+            onClick={() => console.log('View points history')}
+          />
 
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-orange-500/20">
-                      <Gift className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500">Rewards Available</div>
-                      <div className="text-xl font-bold">2</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          <StatCard
+            title="Total Orders"
+            value={profile?.total_orders || 0}
+            icon={ShoppingBag}
+            color="blue"
+            loading={profileLoading}
+            trend={
+              stats?.orders_trend
+                ? { value: stats.orders_trend, isPositive: stats.orders_trend > 0 }
+                : undefined
+            }
+          />
 
-            {/* Recent Orders */}
+          <StatCard
+            title="Total Spent"
+            value={`$${(profile?.total_spent || 0).toFixed(2)}`}
+            icon={TrendingUp}
+            color="green"
+            loading={profileLoading}
+          />
+
+          <StatCard
+            title="Available Rewards"
+            value={stats?.available_rewards || 0}
+            icon={Gift}
+            color="purple"
+            loading={statsLoading}
+            onClick={() => console.log('View rewards')}
+          />
+        </motion.section>
+
+        {/* Quick Actions */}
+        <motion.section variants={itemVariants}>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Quick Actions
+          </h2>
+          <QuickActions actions={quickActions} columns={4} />
+        </motion.section>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Activity */}
+          <motion.div className="lg:col-span-2" variants={itemVariants}>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Recent Orders</h2>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Recent Activity
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Your latest orders and rewards
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    leftIcon={<RefreshCw className="w-4 h-4" />}
+                    onClick={() => refetchProfile()}
+                  >
+                    Refresh
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {ordersLoading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-white/10">
-                        <div className="space-y-1">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-3 w-24" />
-                        </div>
-                        <Skeleton className="h-8 w-20" />
-                      </div>
-                    ))
-                  ) : recentOrders?.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No orders yet. Time to place your first order!</p>
-                    </div>
-                  ) : (
-                    recentOrders?.map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5">
-                        <div>
-                          <div className="font-medium">Order #{order.id}</div>
-                          <div className="text-sm text-gray-500 flex items-center gap-2">
-                            <Clock className="w-3 h-3" />
-                            {order.placed_at ? new Date(order.placed_at).toLocaleDateString() : 'N/A'}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium">${order.total.toFixed(2)}</div>
-                          <div className={`text-xs px-2 py-1 rounded-full ${
-                            order.status === 'delivered' ? 'bg-emerald-500/20 text-emerald-400' :
-                            order.status === 'preparing' ? 'bg-orange-500/20 text-orange-400' :
-                            'bg-blue-500/20 text-blue-400'
-                          }`}>
-                            {order.status}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                <ActivityFeed activities={activities} loading={ordersLoading} maxItems={5} />
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
+          <motion.div className="space-y-6" variants={itemVariants}>
             {/* Favorite Items */}
             <Card>
               <CardHeader>
-                <h3 className="font-semibold">Your Favorites</h3>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-red-500" />
+                  Your Favorites
+                </h3>
               </CardHeader>
               <CardContent>
                 {profileLoading ? (
                   <div className="space-y-2">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Skeleton key={i} className="h-8 w-full" />
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
                     ))}
                   </div>
-                ) : profile?.favorite_items?.length === 0 ? (
-                  <p className="text-sm text-gray-500">No favorites yet. Order something delicious!</p>
-                ) : (
+                ) : profile?.favorite_items && profile.favorite_items.length > 0 ? (
                   <div className="space-y-2">
-                    {profile?.favorite_items?.map((item, i) => (
-                      <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white/5">
-                        <span className="text-sm">{item}</span>
-                        <Button variant="ghost" size="sm">+</Button>
+                    {profile.favorite_items.slice(0, 5).map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                      >
+                        <span className="text-sm font-medium">{item}</span>
+                        <Button variant="ghost" size="sm">
+                          +
+                        </Button>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No favorites yet. Order something delicious!
+                  </p>
                 )}
               </CardContent>
             </Card>
 
-            {/* Promotions */}
+            {/* Next Reward Progress */}
+            {profile && profile.next_reward_points > 0 && (
+              <Card>
+                <CardHeader>
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-500" />
+                    Next Reward
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                        <span className="font-semibold">
+                          {profile.loyalty_points} / {profile.next_reward_points} pts
+                        </span>
+                      </div>
+                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                          initial={{ width: 0 }}
+                          animate={{
+                            width: `${Math.min(
+                              (profile.loyalty_points / profile.next_reward_points) * 100,
+                              100
+                            )}%`,
+                          }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {profile.next_reward_points - profile.loyalty_points} more points to your
+                      next reward!
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Special Offers */}
             <Card>
               <CardHeader>
-                <h3 className="font-semibold">Special Offers</h3>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-orange-500" />
+                  Special Offers
+                </h3>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="p-3 rounded-xl bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30">
                     <div className="font-medium text-sm">Free Delivery</div>
-                    <div className="text-xs text-gray-400">On orders over $25</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      On orders over $25
+                    </div>
                   </div>
                   <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30">
                     <div className="font-medium text-sm">20% Off</div>
-                    <div className="text-xs text-gray-400">Your next pizza order</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      Your next pizza order
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </CustomerLayout>
   );
 }

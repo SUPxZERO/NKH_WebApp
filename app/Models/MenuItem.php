@@ -39,11 +39,17 @@ class MenuItem extends Model
         'cost',
         'image_path',
         'image',
+        'description',
         'is_popular',
+        'is_featured',
+        'featured_order',
+        'badge',
         'is_active',
         'display_order',
         'prep_time',
         'calories',
+        'rating',
+        'reviews_count',
     ];
     
     protected static function boot()
@@ -62,8 +68,13 @@ class MenuItem extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'cost' => 'decimal:2',
+        'rating' => 'float',
         'is_popular' => 'boolean',
+        'is_featured' => 'boolean',
         'is_active' => 'boolean',
+        'reviews_count' => 'integer',
+        'featured_order' => 'integer',
+        'display_order' => 'integer',
     ];
 
     public function location()

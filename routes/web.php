@@ -8,8 +8,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 
-// Public route
-Route::get('/', fn() => Inertia::render('Customer/Home'))->name('customer.home');
+// Public route - Homepage with real data
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('customer.home');
 
 // Customer protected routes
 Route::middleware(['auth', 'role:Customer'])->group(function () {

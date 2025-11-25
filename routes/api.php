@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\TableController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OnlineOrderController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\CustomerDashboardController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FloorController;
@@ -257,4 +259,27 @@ Route::prefix('employee')
     Route::get('orders/{order}', [OrderController::class, 'show']);
     Route::post('orders/{order}/items', [OrderController::class, 'addItem']);
     Route::put('order-items/{orderItem}', [OrderController::class, 'updateItem']);
+});
+
+// Customer Dashboard Routes (for authenticated customers)
+Route::prefix('customer')
+// ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
+->group(function () {
+    // Dashboard endpoints
+    Route::get('profile', [CustomerDashboardController::class, 'profile']);
+    Route::get('dashboard/stats', [CustomerDashboardController::class, 'dashboardStats']);
+    Route::get('orders', [CustomerDashboardController::class, 'orders']);
+    Route::get('favorites', [CustomerDashboardController::class, 'favorites']);
+    
+    // Addresses
+    Route::get('addresses', [OnlineOrderController::class, 'addressesIndex']);
+    Route::post('addresses', [OnlineOrderController::class, 'addressesStore']);
+    
+    // Cart Management
+    Route::get('cart', [CartController::class, 'index']);
+    Route::post('cart', [CartController::class, 'store']);
+    Route::put('cart/{cartItem}', [CartController::class, 'update']);
+    Route::delete('cart/{cartItem}', [CartController::class, 'destroy']);
+    Route::delete('cart', [CartController::class, 'clear']);
+    Route::post('cart/sync', [CartController::class, 'sync']);
 });

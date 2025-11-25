@@ -178,7 +178,7 @@ export default function Orders() {
             <option value="preparing" className='text-black'>Preparing</option>
             <option value="ready" className='text-black'>Ready</option>
             <option value="completed" className='text-black'>Completed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="cancelled" className='text-black'>Cancelled</option>
           </select>
 
           <select
@@ -186,10 +186,10 @@ export default function Orders() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all">All Types</option>
-            <option value="dine-in">Dine In</option>
-            <option value="pickup">Pickup</option>
-            <option value="delivery">Delivery</option>
+            <option value="all" className='text-black'>All Types</option>
+            <option value="dine-in" className='text-black'>Dine In</option>
+            <option value="pickup" className='text-black'>Pickup</option>
+            <option value="delivery" className='text-black'>Delivery</option>
           </select>
 
           <div className="flex gap-2">

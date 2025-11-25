@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  # 1. The Laravel Application (PHP-FPM)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        user: laravel
+        uid: 1000
+    image: nkh-restaurant-app
+    container_name: nkh_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG}
+      DB_HOST: db
+      DB_CONNECTION: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+    networks:
+      - nkh_network
+    depends_on:
+      - db
+      - redis
+
+  # 2. The Web Server (Nginx)
+  webserver:
+    image: nginx:alpine
+    container_name: nkh_webserver
+    restart: unless-stopped
+    ports:
+      - "8000:80"  # Exposing App on localhost:8000
+    volumes:
+      - ./:/var/www
+      # This links the separate config file into the container
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - nkh_network
+    depends_on:
+      - app
+
+  # 3. Database (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: nkh_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - nkh_network
+    ports:
+      - "3306:3306"
+
+  # 4. Redis (Cache/Queue)
+  redis:
+    image: redis:alpine
+    container_name: nkh_redis
+    restart: unless-stopped
+    networks:
+      - nkh_network
+
+networks:
+  nkh_network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
