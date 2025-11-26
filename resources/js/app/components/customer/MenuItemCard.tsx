@@ -29,12 +29,12 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
     if (layout === 'list') {
         return (
             <motion.div
-                className="group relative flex gap-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 p-4 transition-all duration-300 hover:shadow-xl hover:shadow-fuchsia-500/10"
+                className="group relative flex flex-col md:flex-row gap-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 p-4 transition-all duration-300 hover:shadow-xl hover:shadow-fuchsia-500/10"
                 whileHover={{ y: -2 }}
                 layout
             >
                 {/* Image */}
-                <div className="relative w-32 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+                <div className="relative w-full md:w-32 h-40 md:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
                     {item.image_path ? (
                         <img
                             src={item.image_path || ''}
@@ -87,6 +87,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
                                 {item.name}
                             </h3>
+
                             {item.description && (
                                 <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
                                     {item.description}
@@ -111,17 +112,17 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between mt-auto pt-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-auto pt-3 gap-3">
                         <div className="flex items-center gap-3">
-                            {/* Rating */}
                             {item.rating && (
                                 <div className="flex items-center gap-1 text-sm">
                                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                    <span className="font-semibold text-gray-900 dark:text-white">{item.rating.toFixed(1)}</span>
+                                    <span className="font-semibold text-gray-900 dark:text-white">
+                                        {item.rating.toFixed(1)}
+                                    </span>
                                 </div>
                             )}
 
-                            {/* Prep Time */}
                             {item.prep_time && (
                                 <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                                     <Clock className="w-4 h-4" />
@@ -131,8 +132,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
                         </div>
 
                         <div className="flex items-center gap-3">
-                            {/* Price */}
-                            <div>
+                            <div className="text-right">
                                 {hasDiscount && (
                                     <div className="text-sm text-gray-400 line-through">
                                         ${item.original_price?.toFixed(2)}
@@ -143,7 +143,6 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
                                 </div>
                             </div>
 
-                            {/* Add Button */}
                             <Button
                                 size="sm"
                                 onClick={(e) => {
@@ -160,6 +159,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
             </motion.div>
         );
     }
+
 
     // Grid layout (default)
     return (

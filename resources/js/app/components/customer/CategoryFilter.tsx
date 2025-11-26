@@ -20,18 +20,21 @@ export function CategoryFilter({
         return (
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-10 w-24 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                    <div
+                        key={i}
+                        className="h-10 w-24 sm:w-28 md:w-32 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"
+                    />
                 ))}
             </div>
         );
     }
 
     return (
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-2 sm:px-0">
             <motion.button
                 onClick={() => onSelectCategory(undefined)}
                 className={cn(
-                    'px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all flex-shrink-0',
+                    'px-4 py-2 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all flex-shrink-0',
                     !selectedCategory
                         ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30'
                         : 'bg-white/60 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 border border-white/20'
@@ -47,7 +50,7 @@ export function CategoryFilter({
                     key={category.id}
                     onClick={() => onSelectCategory(category.id)}
                     className={cn(
-                        'px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all flex-shrink-0',
+                        'px-4 py-2 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all flex-shrink-0',
                         selectedCategory === category.id
                             ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30'
                             : 'bg-white/60 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 border border-white/20'
@@ -57,7 +60,9 @@ export function CategoryFilter({
                 >
                     {category.name}
                     {category.menu_items && (
-                        <span className="ml-2 text-xs opacity-70">({category.menu_items.length})</span>
+                        <span className="ml-2 text-xs sm:text-sm opacity-70">
+                            ({category.menu_items.length})
+                        </span>
                     )}
                 </motion.button>
             ))}

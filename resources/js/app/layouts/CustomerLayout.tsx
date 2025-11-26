@@ -14,7 +14,7 @@ import {
   Settings,
   Phone,
   Mail,
-  Clock
+  Clock,ClipboardList
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -28,8 +28,9 @@ const navigation = [
   { name: 'Menu', href: '/menu', icon: Utensils },
   { name: 'Dashboard', href: '/dashboard', icon: User },
   { name: 'Cart', href: '/cart', icon: ShoppingCart },
-  { name: 'Favorites', href: '/favorites', icon: Heart },
-  { name: 'Rewards', href: '/rewards', icon: Star },
+  { name: 'Order', href: '/customer/orders', icon: ClipboardList },
+  // { name: 'Favorites', href: '/customer/favorites', icon: Heart },
+  // { name: 'Rewards', href: '/customer/rewards', icon: Star },
 ];
 
 export default function CustomerLayout({ children, className }: Props) {
@@ -120,7 +121,7 @@ export default function CustomerLayout({ children, className }: Props) {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-1">
-              {navigation.slice(0, 4).map((item) => {
+              {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = url === item.href || (item.href !== '/' && url.startsWith(item.href));
                 return (
