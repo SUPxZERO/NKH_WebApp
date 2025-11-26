@@ -122,12 +122,14 @@ export interface OrderItemCustomization {
 
 export interface OrderItem {
   menu_item_id: number;
-  name?: string; // Optional since it can be derived from menu item
+  menu_item?: MenuItem;   // Add this here
+  name?: string;
   unit_price: number;
   quantity: number;
   notes?: string;
   customizations?: OrderItemCustomization[];
 }
+
 
 export interface Order {
   id: number;

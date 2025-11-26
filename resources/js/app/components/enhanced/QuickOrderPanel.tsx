@@ -72,9 +72,9 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
                       <CardContent className="p-0">
                         {/* Item Image */}
                         <div className="relative h-32 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
-                          {item.image_url ? (
+                          {item.image_path ? (
                             <img
-                              src={item.image_url}
+                              src={item.image_path}
                               alt={item.name}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />

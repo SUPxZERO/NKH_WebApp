@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { OrderItem } from '@/app/types/domain';
 import { QuantitySelector } from './QuantitySelector';
-import { cn } from '@/app/utils/cn';
 
 interface CartItemProps {
     item: OrderItem;
@@ -23,17 +22,16 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
             transition={{ duration: 0.3 }}
             layout
         >
-            {/* Product Image */}
             <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-                <div className="w-full h-full flex items-center justify-center text-4xl">
-                    🍽️
-                </div>
+                <img
+                    src={item.menu_item?.image_path ?? ""}
+                    alt={item.menu_item?.name || item.name || `Item #${item.menu_item_id}`}
+                    className="w-full h-full object-cover"
+                />
             </div>
 
-            {/* Content */}
             <div className="flex-1 flex flex-col justify-between min-w-0">
                 <div>
-                    {/* Title & Remove Button */}
                     <div className="flex items-start justify-between gap-2 mb-2">
                         <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1">
                             {item.name || `Item #${item.menu_item_id}`}
@@ -50,7 +48,6 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
                         </motion.button>
                     </div>
 
-                    {/* Notes if any */}
                     {item.notes && (
                         <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-2">
                             Note: {item.notes}
@@ -58,9 +55,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
                     )}
                 </div>
 
-                {/* Bottom Row: Price & Quantity */}
                 <div className="flex items-center justify-between gap-4">
-                    {/* Unit Price */}
                     <div className="flex items-baseline gap-2">
                         <span className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
                             ${itemTotal.toFixed(2)}
@@ -70,7 +65,6 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
                         </span>
                     </div>
 
-                    {/* Quantity Selector */}
                     <QuantitySelector
                         quantity={item.quantity}
                         onIncrease={() => onUpdateQuantity(item.menu_item_id, item.quantity + 1)}

@@ -22,7 +22,7 @@ interface MockMenuItem {
   category_id: number;
   name: string;
   price: number;
-  image_url?: string | null;
+  image_path?: string | null;
   prep_time?: number;
   rating?: number;
   orders_count?: number;
@@ -84,7 +84,7 @@ export function SmartOrderRecommendations({
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     category_id: 1,
-    image_url: null,
+    image_path: null,
     prep_time: 10,
     rating: 4.5,
     orders_count: 50,
@@ -235,9 +235,9 @@ export function SmartOrderRecommendations({
                       <CardContent className="p-0">
                         {/* Item Image */}
                         <div className="relative h-32 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
-                          {item.image_url ? (
+                          {item.image_path ? (
                             <img
-                              src={item.image_url}
+                              src={item.image_path}
                               alt={item.name}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />

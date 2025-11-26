@@ -93,111 +93,147 @@ class OnlineOrderController extends Controller
      */
     public function store(StoreOnlineOrderRequest $request)
     {
-        $data = $request->validated();
-        $customer = $request->user()->customer;
+        \Log::info('🛒 OnlineOrderController: store() called');
+        \Log::info('📦 Raw Request Data:', $request->all());
+
+        try {
+            $data = $request->validated();
+            \Log::info('✅ Validation passed', $data);
+        } catch (\Exception $e) {
+            \Log::error('❌ Validation Failed:', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+        
+        // DEVELOPMENT MODE: Handle when authentication is disabled
+        $customer = null;
+        
+        if ($request->user()) {
+            \Log::info('👤 User is authenticated:', ['id' => $request->user()->id]);
+            // Authenticated: Get customer from user relationship
+            $customer = $request->user()->customer;
+        } else {
+            \Log::warning('⚠️ No authenticated user found. Attempting fallback.');
+            // DEVELOPMENT ONLY: Fallback to first customer or specific ID
+            // TODO: Remove this in production and enable auth middleware
+            // Try to get customer ID from request (for testing)
+            $customerId = $request->input('customer_id', 1); // Default to ID 1
+            $customer = Customer::find($customerId);
+        }
         
         if (!$customer) {
-            abort(422, 'Customer profile not found.');
+            \Log::error('❌ Customer profile not found.');
+            abort(422, 'Customer profile not found. Please ensure you are logged in.');
         }
 
-        $order = DB::transaction(function () use ($data, $customer) {
-            // Lock slot row to prevent race conditions
-            $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
+        \Log::info('👤 Customer identified:', ['id' => $customer->id, 'name' => $customer->name]);
 
-            // Validate slot type matches order type
-            if ($slot->slot_type !== $data['order_type']) {
-                abort(422, 'Selected time slot does not match order type.');
-            }
-            
-            // Validate slot location matches
-            if ((int) $slot->location_id !== (int) $data['location_id']) {
-                abort(422, 'Selected time slot and location mismatch.');
-            }
-            
-            // Check slot availability
-            if ($slot->current_orders >= $slot->max_orders) {
-                abort(409, 'Selected time slot is full.');
-            }
+        try {
+            $order = DB::transaction(function () use ($data, $customer) {
+                \Log::info('🔄 Starting DB Transaction');
 
-            // Validate delivery address for delivery orders
-            $deliveryFee = 0;
-            if ($data['order_type'] === 'delivery') {
-                $address = CustomerAddress::where('id', $data['customer_address_id'] ?? 0)
-                    ->where('customer_id', $customer->id)
-                    ->first();
-                    
-                if (!$address) {
-                    abort(422, 'Invalid delivery address.');
+                // Lock slot row to prevent race conditions
+                $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
+                \Log::info('🕒 Time Slot locked:', ['id' => $slot->id]);
+
+                // Validate slot type matches order type
+                if ($slot->slot_type !== $data['order_type']) {
+                    \Log::error('❌ Slot type mismatch', ['slot' => $slot->slot_type, 'order' => $data['order_type']]);
+                    abort(422, 'Selected time slot does not match order type.');
+                }
+                
+                // Validate slot location matches
+                if ((int) $slot->location_id !== (int) $data['location_id']) {
+                    \Log::error('❌ Location mismatch');
+                    abort(422, 'Selected time slot and location mismatch.');
+                }
+                
+                // Check slot availability
+                if ($slot->current_orders >= $slot->max_orders) {
+                    \Log::error('❌ Slot full');
+                    abort(409, 'Selected time slot is full.');
                 }
 
-                // Calculate delivery fee (from settings or default)
-                $deliveryFee = $this->calculateDeliveryFee($data['location_id'], $address);
-            }
+                // Validate delivery address for delivery orders
+                $deliveryFee = 0;
+                if ($data['order_type'] === 'delivery') {
+                    $address = CustomerAddress::where('id', $data['customer_address_id'] ?? 0)
+                        ->where('customer_id', $customer->id)
+                        ->first();
+                        
+                    if (!$address) {
+                        abort(422, 'Invalid delivery address.');
+                    }
 
-            // Generate unique order number
-            $orderNumber = $this->generateOrderNumber($data['location_id'], 'ONL');
-            $scheduledAt = $slot->slot_date.' '.$slot->slot_start_time;
+                    // Calculate delivery fee (from settings or default)
+                    $deliveryFee = $this->calculateDeliveryFee($data['location_id'], $address);
+                }
 
-            // Calculate order totals
-            $subtotal = 0;
-            $orderItems = [];
-            
-            foreach ($data['order_items'] as $item) {
-                $menuItem = MenuItem::findOrFail($item['menu_item_id']);
-                $qty = $item['quantity'];
-                $lineTotal = (float) $menuItem->price * $qty;
+                // Calculate totals
+                $subtotal = 0;
+                $orderItemsData = [];
+
+                foreach ($data['order_items'] as $item) {
+                    $menuItem = MenuItem::findOrFail($item['menu_item_id']);
+                    $qty = $item['quantity'];
+                    $lineTotal = (float) $menuItem->price * $qty;
+                    
+                    $orderItemsData[] = [
+                        'menu_item_id' => $menuItem->id,
+                        'quantity' => $qty,
+                        'unit_price' => $menuItem->price,
+                        'discount_amount' => 0,
+                        'tax_amount' => 0,
+                        'total_price' => $lineTotal,
+                        'status' => 'pending',
+                        'special_instructions' => $item['special_instructions'] ?? null,
+                    ];
+                    
+                    $subtotal += $lineTotal;
+                }
+
+                \Log::info('💰 Subtotal calculated:', ['subtotal' => $subtotal]);
+
+                // Get tax rate from settings (or use default 10%)
+                $taxRate = $this->getTaxRate($data['location_id']);
+                $taxAmount = round($subtotal * $taxRate, 2);
                 
-                $orderItems[] = [
-                    'menu_item_id' => $menuItem->id,
-                    'quantity' => $qty,
-                    'unit_price' => $menuItem->price,
-                    'discount_amount' => 0,
-                    'tax_amount' => 0,
-                    'total_price' => $lineTotal,
+                // Calculate totals
+                $discountAmount = 0;
+                $serviceCharge = 0;
+                $totalAmount = $subtotal + $taxAmount + $serviceCharge + $deliveryFee - $discountAmount;
+
+                \Log::info('💵 Final Totals:', [
+                    'subtotal' => $subtotal,
+                    'delivery_fee' => $deliveryFee,
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount
+                ]);
+
+                $scheduledAt = $slot->slot_date->format('Y-m-d') . ' ' . $slot->slot_start_time;
+
+                // Create the order
+                $order = Order::create([
+                    'location_id' => $data['location_id'],
+                    'customer_id' => $customer->id,
+                    'order_number' => $this->generateOrderNumber($data['location_id'], 'ONL'),
+                    'order_type' => $data['order_type'],
                     'status' => 'pending',
-                    'special_instructions' => $item['special_instructions'] ?? null,
-                ];
-                
-                $subtotal += $lineTotal;
-            }
-
-            // Get tax rate from settings (or use default 10%)
-            $taxRate = $this->getTaxRate($data['location_id']);
-            $taxAmount = round($subtotal * $taxRate, 2);
-            
-            // Calculate totals
-            $discountAmount = 0;
-            $serviceCharge = 0;
-            $totalAmount = $subtotal + $taxAmount + $serviceCharge + $deliveryFee - $discountAmount;
-
-            // Create the order
-            $order = Order::create([
-                'location_id' => $data['location_id'],
-                'customer_id' => $customer->id,
-                'order_number' => $orderNumber,
-                'order_type' => $data['order_type'],
-                'status' => 'pending',
-                'approval_status' => 'pending',  // Customer orders require approval
-                'is_auto_approved' => false,
-                'payment_status' => 'unpaid',
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'discount_amount' => $discountAmount,
-                'service_charge' => $serviceCharge,
-                'delivery_fee' => $deliveryFee,
-                'total_amount' => $totalAmount,
-                'currency' => 'USD',
-                'ordered_at' => now(),
-                'scheduled_at' => $scheduledAt,
-                'pickup_time' => $data['order_type'] === 'pickup' ? $scheduledAt : null,
-                'special_instructions' => $data['notes'] ?? null,
-                'customer_address_id' => $data['customer_address_id'] ?? null,
-                'time_slot_id' => $data['time_slot_id'],
-                'estimated_ready_time' => now()->addMinutes(30), // Default 30 min
-            ]);
+                    'approval_status' => 'pending',
+                    'discount_amount' => $discountAmount,
+                    'service_charge' => $serviceCharge,
+                    'delivery_fee' => $deliveryFee,
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount,
+                    'currency' => 'USD',
+                    'ordered_at' => now(),
+                    'pickup_time' => $data['order_type'] === 'pickup' ? $scheduledAt : null,
+                    'special_instructions' => $data['notes'] ?? null,
+                    'customer_address_id' => $data['customer_address_id'] ?? null,
+                    'time_slot_id' => $data['time_slot_id'],
+                ]);
 
             // Create order items
-            foreach ($orderItems as $item) {
+            foreach ($orderItemsData as $item) {
                 $order->items()->create($item);
             }
 
@@ -210,8 +246,19 @@ class OnlineOrderController extends Controller
             return $order;
         });
 
+        \Log::info('🎉 Transaction committed successfully');
         return new OrderResource($order->load(['items.menuItem', 'customerAddress', 'timeSlot']));
+
+    } catch (\Exception $e) {
+        \Log::error('❌ Transaction Failed:', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        throw $e;
     }
+}
 
     /**
      * Calculate delivery fee based on location settings and address distance

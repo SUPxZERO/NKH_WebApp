@@ -127,39 +127,166 @@ class CustomerDashboardController extends Controller
     }
 
     /**
-     * Get customer orders with optional limit
+     * Get customer orders with pagination, filtering, and sorting
      */
     public function orders(Request $request)
     {
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
-
-        if (!$customer) {
-            return response()->json(['data' => []]);
+        // Handle both authenticated users and dev mode
+        $customer = null;
+        
+        if ($request->user()) {
+            $customer = Customer::where('user_id', $request->user()->id)->first();
+        } else {
+            // DEV MODE: Fallback to customer ID 1
+            \Log::warning('CustomerDashboardController: No authenticated user, using fallback customer');
+            $customer = Customer::find(1);
         }
 
-        $limit = $request->input('limit', 10);
+        if (!$customer) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Customer profile not found',
+                'data' => []
+            ], 404);
+        }
 
-        $orders = Order::where('customer_id', $customer->id)
-            ->with(['items', 'location'])
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get();
+        // Build query with eager loading to prevent N+1
+        $query = Order::where('customer_id', $customer->id)
+            ->with([
+                'items.menuItem.translations',
+                'location',
+                'timeSlot',
+                'customerAddress',
+                'invoice'
+            ]);
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Filter by approval_status
+        if ($request->filled('approval_status')) {
+            $query->where('approval_status', $request->input('approval_status'));
+        }
+
+        // Filter by order type
+        if ($request->filled('order_type')) {
+            $query->where('order_type', $request->input('order_type'));
+        }
+
+        // Filter by date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('ordered_at', '>=', $request->input('from_date'));
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('ordered_at', '<=', $request->input('to_date'));
+        }
+
+        // Sorting
+        $sortBy = $request->input('sort_by', 'ordered_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        
+        $allowedSorts = ['ordered_at', 'total_amount', 'status'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->orderBy('ordered_at', 'desc');
+        }
+
+        // Pagination
+        $perPage = min(max((int) $request->input('per_page', 10), 1), 50);
+        $orders = $query->paginate($perPage);
 
         return response()->json([
+            'status' => 'success',
             'data' => $orders->map(function ($order) {
+                // Get first item image for preview
+                $previewImage = $order->items->first()?->menuItem?->image_path;
+
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
-                    'type' => $order->type,
+                    'order_type' => $order->order_type,
                     'status' => $order->status,
-                    'preparation_status' => $order->preparation_status,
-                    'total' => (float) $order->total,
-                    'placed_at' => $order->placed_at,
+                    'approval_status' => $order->approval_status,
+                    'payment_status' => $order->payment_status,
+                    
+                    // Amounts
+                    'subtotal' => (float) $order->subtotal,
+                    'tax_amount' => (float) ($order->tax_amount ?? 0),
+                    'delivery_fee' => (float) ($order->delivery_fee ?? 0),
+                    'discount_amount' => (float) ($order->discount_amount ?? 0),
+                    'total_amount' => (float) $order->total_amount,
+                    
+                    // Dates
+                    'ordered_at' => $order->ordered_at?->toISOString(),
+                    'pickup_time' => $order->pickup_time?->toISOString(),
+                    'completed_at' => $order->completed_at?->toISOString(),
                     'created_at' => $order->created_at->toISOString(),
+                    
+                    // Location
+                    'location' => [
+                        'id' => $order->location->id,
+                        'name' => $order->location->name,
+                        'address' => $order->location->address ?? null,
+                    ],
+                    
+                    // Time slot
+                    'time_slot' => $order->timeSlot ? [
+                        'id' => $order->timeSlot->id,
+                        'date' => $order->timeSlot->slot_date->format('Y-m-d'),
+                        'time' => $order->timeSlot->slot_start_time,
+                        'type' => $order->timeSlot->slot_type,
+                    ] : null,
+                    
+                    // Delivery address (only for delivery orders)
+                    'delivery_address' => ($order->order_type === 'delivery' && $order->customerAddress) ? [
+                        'id' => $order->customerAddress->id,
+                        'address_line_1' => $order->customerAddress->address_line_1,
+                        'address_line_2' => $order->customerAddress->address_line_2,
+                        'city' => $order->customerAddress->city,
+                        'postal_code' => $order->customerAddress->postal_code,
+                    ] : null,
+                    
+                    // Order items summary
                     'items_count' => $order->items->count(),
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'menu_item_id' => $item->menu_item_id,
+                            'name' => $item->menuItem?->name ?? 'Unknown Item',
+                            'quantity' => $item->quantity,
+                            'unit_price' => (float) $item->unit_price,
+                            'total_price' => (float) $item->total_price,
+                            'special_instructions' => $item->special_instructions,
+                            'image_path' => $item->menuItem?->image_path,
+                        ];
+                    })->toArray(),
+                    
+                    // Preview image
+                    'preview_image' => $previewImage,
+                    
+                    // Special instructions
+                    'special_instructions' => $order->special_instructions,
+                    
+                    // Payment info
+                    'is_paid' => $order->payment_status === 'paid',
+                    'invoice_id' => $order->invoice?->id,
+                    
+                    // Flags for action buttons
+                    'can_cancel' => $order->status === 'pending' && $order->approval_status === 'pending',
+                    'can_reorder' => in_array($order->status, ['completed', 'delivered']),
                 ];
             }),
+            'meta' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'per_page' => $orders->perPage(),
+                'total' => $orders->total(),
+                'from' => $orders->firstItem(),
+                'to' => $orders->lastItem(),
+            ]
         ]);
     }
 

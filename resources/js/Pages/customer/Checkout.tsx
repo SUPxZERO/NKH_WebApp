@@ -50,23 +50,49 @@ export default function Checkout() {
       })),
     };
 
-    try {
-      await toastLoading(
-        placeOrder.mutateAsync(payload),
-        {
-          loading: 'Placing your order...',
-          success: 'Order placed successfully!',
-          error: 'Failed to place order. Please try again.'
-        }
-      );
+    console.log('🛒 Checkout Payload:', JSON.stringify(payload, null, 2));
 
-      // Success - clear cart and redirect
+    try {
+      const result = await placeOrder.mutateAsync(payload);
+
+      console.log('✅ Order placed successfully:', result);
+
+      // Show success toast
+      toastSuccess('Order placed successfully!');
+
+      // Clear cart ONLY on success
       cart.clear();
-      window.location.href = '/customer/orders';
+
+      // Redirect to order history
+      setTimeout(() => {
+        window.location.href = '/customer/orders';
+      }, 1000);
+
     } catch (error: any) {
-      console.error('Order placement error:', error);
-      const errorMsg = error?.response?.data?.message || error?.message || 'Unknown error occurred';
+      console.error('❌ Order placement error:', error);
+      console.error('Error response:', error?.response);
+      console.error('Error data:', error?.response?.data);
+
+      // Extract detailed error message
+      let errorMsg = 'Failed to place order. Please try again.';
+
+      if (error?.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error?.response?.data?.errors) {
+        // Laravel validation errors
+        const errors = error.response.data.errors;
+        const firstError = Object.values(errors)[0];
+        errorMsg = Array.isArray(firstError) ? firstError[0] : String(firstError);
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+
+      // DEBUG: Alert the error
+      window.alert(`Order Failed: ${errorMsg}`);
+
       toastError(errorMsg);
+
+      // DO NOT clear cart on error - user should be able to retry
     }
   }
 

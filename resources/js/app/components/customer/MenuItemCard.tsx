@@ -35,9 +35,9 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
             >
                 {/* Image */}
                 <div className="relative w-32 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-                    {item.image_path || item.image_url ? (
+                    {item.image_path ? (
                         <img
-                            src={item.image_path || item.image_url || ''}
+                            src={item.image_path || ''}
                             alt={item.name}
                             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                             loading="lazy"
@@ -171,9 +171,9 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
         >
             {/* Image */}
             <div className="relative h-56 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-                {item.image_path || item.image_url ? (
+                {item.image_path ? (
                     <img
-                        src={item.image_path || item.image_url || ''}
+                        src={item.image_path || ''}
                         alt={item.name}
                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"

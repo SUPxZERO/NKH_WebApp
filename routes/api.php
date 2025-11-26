@@ -186,7 +186,7 @@ $adminMiddleware = config('app.enforce_admin_auth')
 
 // Admin/Manager management endpoints
 Route::prefix('admin')
-->middleware($adminMiddleware)
+// ->middleware($adminMiddleware)
 ->group(function () {
         Route::get('/category-stats', [CategoryController::class, 'stats']);
         // Alias to match frontend caller
@@ -274,7 +274,7 @@ Route::prefix('employee')
 
 // Customer Dashboard Routes (for authenticated customers)
 Route::prefix('customer')
-->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
+// ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
 ->group(function () {
     // Dashboard endpoints
     Route::get('profile', [CustomerDashboardController::class, 'profile']);

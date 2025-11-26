@@ -10,17 +10,19 @@ class MenuItemResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        // Handle image URL - check if it's in public/images directly
-        $imageUrl = null;
-        if ($this->image_path) {
-            if (str_starts_with($this->image_path, 'http')) {
-                $imageUrl = $this->image_path;
-            } elseif (str_starts_with($this->image_path, 'images/')) {
-                // Direct public path
-                $imageUrl = asset($this->image_path);
-            } else {
-                // Storage path
-                $imageUrl = asset('storage/' . $this->image_path);
+        // Handle image URL
+        $imagePath = $this->image_path;
+        if ($imagePath) {
+            // Normalize slashes
+            $imagePath = str_replace('\\', '/', $imagePath);
+            
+            // If it's not a full URL and doesn't start with /, add /storage or /
+            if (!str_starts_with($imagePath, 'http')) {
+                if (str_starts_with($imagePath, 'images/')) {
+                    $imagePath = '/' . $imagePath;
+                } elseif (!str_starts_with($imagePath, '/')) {
+                    $imagePath = '/storage/' . $imagePath;
+                }
             }
         }
 
@@ -39,8 +41,7 @@ class MenuItemResource extends JsonResource
             'price' => (float) $this->price,
             'cost' => $this->when($this->cost !== null, (float) $this->cost),
             'original_price' => $this->when(isset($this->original_price), (float) $this->original_price),
-            'image_path' => $this->image_path,
-            'image_url' => $imageUrl,
+            'image_path' => $imagePath,
             'is_popular' => (bool) $this->is_popular,
             'is_featured' => (bool) ($this->is_featured ?? false),
             'featured_order' => (int) ($this->featured_order ?? 0),

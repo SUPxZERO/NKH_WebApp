@@ -129,9 +129,9 @@ export function FoodCard({
       {/* 🖼️ Food Image Container */}
       <div className={imageContainerStyles}>
         {/* 📸 Food Image */}
-        {item.image_url ? (
+        {item.image_path ? (
           <motion.img
-            src={item.image_url}
+            src={item.image_path}
             alt={item.name}
             className={cn(
               'w-full h-full object-cover transition-all duration-700',
