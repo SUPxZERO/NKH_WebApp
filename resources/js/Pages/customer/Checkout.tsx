@@ -15,21 +15,59 @@ export default function Checkout() {
   const placeOrder = usePlaceOnlineOrder();
 
   async function onPlaceOrder() {
-    if (cart.items.length === 0) return;
+    // Validation
+    if (cart.items.length === 0) {
+      toastError('Your cart is empty');
+      return;
+    }
+
+    if (!cart.location_id) {
+      toastError('Please select a restaurant location');
+      return;
+    }
+
+    if (!cart.timeSlot) {
+      toastError('Please select a time slot');
+      return;
+    }
+
+    if (cart.mode === 'delivery' && !cart.selectedAddress) {
+      toastError('Please select a delivery address');
+      return;
+    }
+
+    // Build payload matching backend API expectations
     const payload = {
-      mode: cart.mode,
-      items: cart.items,
-      address_id: cart.mode === 'delivery' ? cart.selectedAddress?.id : undefined,
-      time_slot_id: cart.timeSlot?.id,
-      notes: cart.notes,
+      order_type: cart.mode as 'delivery' | 'pickup',  // Type assertion to exclude 'dine-in'
+      location_id: cart.location_id,
+      customer_address_id: cart.mode === 'delivery' ? cart.selectedAddress?.id : undefined,
+      time_slot_id: Number(cart.timeSlot.id), // Convert to number
+      notes: cart.notes || undefined,
+      order_items: cart.items.map(item => ({
+        menu_item_id: item.menu_item_id,
+        quantity: item.quantity,
+        special_instructions: undefined, // Can add per-item notes later
+      })),
     };
 
-    await toastLoading(
-      placeOrder.mutateAsync(payload),
-      { loading: 'Placing order...', success: 'Order placed!', error: 'Failed to place order' }
-    ).then(() => {
+    try {
+      await toastLoading(
+        placeOrder.mutateAsync(payload),
+        {
+          loading: 'Placing your order...',
+          success: 'Order placed successfully!',
+          error: 'Failed to place order. Please try again.'
+        }
+      );
+
+      // Success - clear cart and redirect
       cart.clear();
-    }).catch(() => {});
+      window.location.href = '/customer/orders';
+    } catch (error: any) {
+      console.error('Order placement error:', error);
+      const errorMsg = error?.response?.data?.message || error?.message || 'Unknown error occurred';
+      toastError(errorMsg);
+    }
   }
 
   return (
@@ -86,7 +124,7 @@ export default function Checkout() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full" onClick={onPlaceOrder} disabled={placeOrder.isPending || cart.items.length === 0}>
+                <Button className="w-full" onClick={onPlaceOrder} disabled={placeOrder.isPending || cart.items.length === 0 || !cart.location_id || !cart.timeSlot}>
                   {placeOrder.isPending ? 'Placing...' : 'Place Order'}
                 </Button>
               </CardFooter>

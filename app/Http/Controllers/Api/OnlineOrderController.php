@@ -8,11 +8,14 @@ use App\Http\Requests\Api\OnlineOrder\StoreOnlineOrderRequest;
 use App\Http\Resources\CustomerAddressResource;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderTimeSlotResource;
+use App\Models\CartItem;
+use App\Models\Customer;
 use App\Models\CustomerAddress;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderTimeSlot;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +49,7 @@ class OnlineOrderController extends Controller
     {
         $customer = $request->user()->customer;
         if (!$customer) {
-            abort(404);
+            abort(404, 'Customer profile not found');
         }
 
         return CustomerAddressResource::collection($customer->addresses()->latest()->paginate());
@@ -57,7 +60,7 @@ class OnlineOrderController extends Controller
     {
         $customer = $request->user()->customer;
         if (!$customer) {
-            abort(404);
+            abort(404, 'Customer profile not found');
         }
 
         $payload = $request->validated();
@@ -70,11 +73,29 @@ class OnlineOrderController extends Controller
         return new CustomerAddressResource($address);
     }
 
-    // POST /api/online-orders (auth:sanctum, role:customer)
+    /**
+     * POST /api/online-orders (auth:sanctum, role:customer)
+     * 
+     * Creates a new online order (pickup or delivery) from customer cart
+     * 
+     * Request body:
+     * {
+     *   "order_type": "delivery" | "pickup",
+     *   "location_id": 1,
+     *   "customer_address_id": 2,  // required if delivery
+     *   "time_slot_id": 5,
+     *   "notes": "Leave at door",
+     *   "order_items": [
+     *     { "menu_item_id": 10, "quantity": 2 },
+     *     { "menu_item_id": 15, "quantity": 1 }
+     *   ]
+     * }
+     */
     public function store(StoreOnlineOrderRequest $request)
     {
         $data = $request->validated();
         $customer = $request->user()->customer;
+        
         if (!$customer) {
             abort(422, 'Customer profile not found.');
         }
@@ -83,49 +104,50 @@ class OnlineOrderController extends Controller
             // Lock slot row to prevent race conditions
             $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
 
+            // Validate slot type matches order type
             if ($slot->slot_type !== $data['order_type']) {
                 abort(422, 'Selected time slot does not match order type.');
             }
+            
+            // Validate slot location matches
             if ((int) $slot->location_id !== (int) $data['location_id']) {
                 abort(422, 'Selected time slot and location mismatch.');
             }
+            
+            // Check slot availability
             if ($slot->current_orders >= $slot->max_orders) {
                 abort(409, 'Selected time slot is full.');
             }
 
+            // Validate delivery address for delivery orders
+            $deliveryFee = 0;
             if ($data['order_type'] === 'delivery') {
                 $address = CustomerAddress::where('id', $data['customer_address_id'] ?? 0)
                     ->where('customer_id', $customer->id)
                     ->first();
+                    
                 if (!$address) {
                     abort(422, 'Invalid delivery address.');
                 }
+
+                // Calculate delivery fee (from settings or default)
+                $deliveryFee = $this->calculateDeliveryFee($data['location_id'], $address);
             }
 
+            // Generate unique order number
             $orderNumber = $this->generateOrderNumber($data['location_id'], 'ONL');
-
             $scheduledAt = $slot->slot_date.' '.$slot->slot_start_time;
 
-            $order = Order::create([
-                'location_id' => $data['location_id'],
-                'customer_id' => $customer->id,
-                'order_number' => $orderNumber,
-                'order_type' => $data['order_type'],
-                'status' => 'pending', // All customer orders start as pending
-                'payment_status' => 'unpaid',
-                'currency' => 'USD',
-                'ordered_at' => now(),
-                'scheduled_at' => $scheduledAt,
-                'special_instructions' => $data['notes'] ?? null,
-                'customer_address_id' => $data['customer_address_id'] ?? null,
-            ]);
-
+            // Calculate order totals
             $subtotal = 0;
+            $orderItems = [];
+            
             foreach ($data['order_items'] as $item) {
                 $menuItem = MenuItem::findOrFail($item['menu_item_id']);
                 $qty = $item['quantity'];
                 $lineTotal = (float) $menuItem->price * $qty;
-                $order->items()->create([
+                
+                $orderItems[] = [
                     'menu_item_id' => $menuItem->id,
                     'quantity' => $qty,
                     'unit_price' => $menuItem->price,
@@ -133,32 +155,102 @@ class OnlineOrderController extends Controller
                     'tax_amount' => 0,
                     'total_price' => $lineTotal,
                     'status' => 'pending',
-                    'special_instructions' => null,
-                ]);
+                    'special_instructions' => $item['special_instructions'] ?? null,
+                ];
+                
                 $subtotal += $lineTotal;
             }
 
-            // Taxes/discounts/service can be extended later
-            $tax = 0.0; $discount = 0.0; $service = 0.0;
-            $total = $subtotal + $tax + $service - $discount;
+            // Get tax rate from settings (or use default 10%)
+            $taxRate = $this->getTaxRate($data['location_id']);
+            $taxAmount = round($subtotal * $taxRate, 2);
+            
+            // Calculate totals
+            $discountAmount = 0;
+            $serviceCharge = 0;
+            $totalAmount = $subtotal + $taxAmount + $serviceCharge + $deliveryFee - $discountAmount;
 
-            $order->update([
+            // Create the order
+            $order = Order::create([
+                'location_id' => $data['location_id'],
+                'customer_id' => $customer->id,
+                'order_number' => $orderNumber,
+                'order_type' => $data['order_type'],
+                'status' => 'pending',
+                'approval_status' => 'pending',  // Customer orders require approval
+                'is_auto_approved' => false,
+                'payment_status' => 'unpaid',
                 'subtotal' => $subtotal,
-                'tax_amount' => $tax,
-                'discount_amount' => $discount,
-                'service_charge' => $service,
-                'total_amount' => $total,
+                'tax_amount' => $taxAmount,
+                'discount_amount' => $discountAmount,
+                'service_charge' => $serviceCharge,
+                'delivery_fee' => $deliveryFee,
+                'total_amount' => $totalAmount,
+                'currency' => 'USD',
+                'ordered_at' => now(),
+                'scheduled_at' => $scheduledAt,
+                'pickup_time' => $data['order_type'] === 'pickup' ? $scheduledAt : null,
+                'special_instructions' => $data['notes'] ?? null,
+                'customer_address_id' => $data['customer_address_id'] ?? null,
+                'time_slot_id' => $data['time_slot_id'],
+                'estimated_ready_time' => now()->addMinutes(30), // Default 30 min
             ]);
+
+            // Create order items
+            foreach ($orderItems as $item) {
+                $order->items()->create($item);
+            }
 
             // Increment slot usage
             $slot->increment('current_orders');
 
+            // Clear customer's cart items (if they exist)
+            CartItem::where('customer_id', $customer->id)->delete();
+
             return $order;
         });
 
-        return new OrderResource($order->load(['items.menuItem']));
+        return new OrderResource($order->load(['items.menuItem', 'customerAddress', 'timeSlot']));
     }
 
+    /**
+     * Calculate delivery fee based on location settings and address distance
+     */
+    private function calculateDeliveryFee(int $locationId, CustomerAddress $address): float
+    {
+        // Try to get from settings
+        $setting = Setting::where('location_id', $locationId)
+            ->where('key', 'delivery_fee')
+            ->first();
+
+        if ($setting && isset($setting->value)) {
+            return (float) $setting->value;
+        }
+
+        // Default delivery fee
+        return 2.50;
+    }
+
+    /**
+     * Get tax rate from location settings
+     */
+    private function getTaxRate(int $locationId): float
+    {
+        $setting = Setting::where('location_id', $locationId)
+            ->where('key', 'tax_rate')
+            ->first();
+
+        if ($setting && isset($setting->value)) {
+            return (float) $setting->value;
+        }
+
+        // Default 10% tax
+        return 0.10;
+    }
+
+    /**
+     * Generate unique order number
+     */
     private function generateOrderNumber(int $locationId, string $prefix = 'ORD'): string
     {
         for ($i = 0; $i < 5; $i++) {

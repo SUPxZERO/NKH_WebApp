@@ -31,13 +31,17 @@ class Order extends Model
         'tax_amount',
         'discount_amount',
         'service_charge',
+        'delivery_fee',
         'total_amount',
         'currency',
         'ordered_at',
         'scheduled_at',
+        'pickup_time',
         'completed_at',
         'special_instructions',
+        'delivery_instructions',
         'customer_address_id',
+        'time_slot_id',
         'estimated_ready_time',
         'approval_status',
         'approved_by',
@@ -51,9 +55,11 @@ class Order extends Model
         'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'service_charge' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'ordered_at' => 'datetime',
         'scheduled_at' => 'datetime',
+        'pickup_time' => 'datetime',
         'completed_at' => 'datetime',
         'estimated_ready_time' => 'datetime',
         'is_auto_approved' => 'boolean',
@@ -97,6 +103,11 @@ class Order extends Model
     public function customerAddress()
     {
         return $this->belongsTo(CustomerAddress::class, 'customer_address_id');
+    }
+
+    public function timeSlot()
+    {
+        return $this->belongsTo(OrderTimeSlot::class, 'time_slot_id');
     }
 
     public function getIsCustomerRequestAttribute(): bool

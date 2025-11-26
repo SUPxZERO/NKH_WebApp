@@ -274,7 +274,7 @@ Route::prefix('employee')
 
 // Customer Dashboard Routes (for authenticated customers)
 Route::prefix('customer')
-// ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
+->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
 ->group(function () {
     // Dashboard endpoints
     Route::get('profile', [CustomerDashboardController::class, 'profile']);
@@ -293,6 +293,9 @@ Route::prefix('customer')
     Route::delete('cart/{cartItem}', [CartController::class, 'destroy']);
     Route::delete('cart', [CartController::class, 'clear']);
     Route::post('cart/sync', [CartController::class, 'sync']);
+    
+    // **CRITICAL FIX: Enable online orders endpoint**
+    Route::post('online-orders', [OnlineOrderController::class, 'store']);
 });
 
 // Order Holds

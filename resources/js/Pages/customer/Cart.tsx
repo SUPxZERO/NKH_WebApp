@@ -6,6 +6,8 @@ import { useCartStore } from '@/app/store/cart';
 import { CartItem } from '@/app/components/cart/CartItem';
 import { CartSummary } from '@/app/components/cart/CartSummary';
 import { CartEmpty } from '@/app/components/cart/CartEmpty';
+import { ModeSelector } from '@/app/components/cart/ModeSelector';
+import { LocationSelector } from '@/app/components/cart/LocationSelector';
 import Button from '@/app/components/ui/Button';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import { toastSuccess, toastError } from '@/app/utils/toast';
@@ -63,6 +65,12 @@ export default function Cart() {
       toastError('Your cart is empty');
       return;
     }
+
+    if (!cart.location_id) {
+      toastError('Please select a restaurant location');
+      return;
+    }
+
     window.location.href = '/checkout';
   };
 
@@ -161,18 +169,34 @@ export default function Cart() {
           <CartEmpty onBrowseMenu={() => (window.location.href = '/menu')} />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Cart Items */}
-            <motion.div className="lg:col-span-8 space-y-4" variants={itemVariants}>
-              <AnimatePresence mode="popLayout">
-                {cart.items.map((item) => (
-                  <CartItem
-                    key={item.menu_item_id}
-                    item={item}
-                    onUpdateQuantity={handleUpdateQuantity}
-                    onRemove={handleRemoveItem}
-                  />
-                ))}
-              </AnimatePresence>
+            {/* Left Column - Cart Items + Selectors */}
+            <motion.div className="lg:col-span-8 space-y-6" variants={itemVariants}>
+              {/* Mode Selector */}
+              <ModeSelector
+                mode={cart.mode as 'delivery' | 'pickup'}
+                onChange={(mode) => cart.setMode(mode)}
+              />
+
+              {/* Location Selector */}
+              <LocationSelector
+                selectedId={cart.location_id}
+                onSelect={(id, name) => cart.setLocation(id, name)}
+              />
+
+              {/* Cart Items */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Items</h2>
+                <AnimatePresence mode="popLayout">
+                  {cart.items.map((item) => (
+                    <CartItem
+                      key={item.menu_item_id}
+                      item={item}
+                      onUpdateQuantity={handleUpdateQuantity}
+                      onRemove={handleRemoveItem}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
 
               {/* Continue Shopping Button (Mobile) */}
               <div className="lg:hidden pt-4">
@@ -187,7 +211,7 @@ export default function Cart() {
               </div>
             </motion.div>
 
-            {/* Cart Summary */}
+            {/* Right Column - Cart Summary */}
             <motion.div className="lg:col-span-4" variants={itemVariants}>
               <CartSummary
                 subtotal={cart.subtotal}
@@ -197,7 +221,7 @@ export default function Cart() {
                 itemCount={cart.items.length}
                 mode={cart.mode}
                 onCheckout={handleCheckout}
-                isCheckoutDisabled={cart.items.length === 0}
+                isCheckoutDisabled={cart.items.length === 0 || !cart.location_id}
               />
             </motion.div>
           </div>

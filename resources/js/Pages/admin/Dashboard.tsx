@@ -66,7 +66,7 @@ const useRevenue = (period: 'daily' | 'weekly' | 'monthly') => {
 
 export default function Dashboard() {
   const { data: analytics, isLoading } = useDashboardAnalytics();
-  const { data: orderStats, isLoading: statsLoading } = useOrderStats();
+  const { data:   orderStats, isLoading: statsLoading } = useOrderStats();
   const { data: revenue, isLoading: revenueLoading } = useRevenue('daily');
 
   // Real-time updates
