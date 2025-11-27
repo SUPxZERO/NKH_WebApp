@@ -21,6 +21,7 @@ class InventoryTransaction extends Model
         'notes',
         'transacted_at',
         'created_by',
+        'order_item_id',
     ];
 
     protected $casts = [
@@ -38,6 +39,11 @@ class InventoryTransaction extends Model
     public function ingredient()
     {
         return $this->belongsTo(Ingredient::class);
+    }
+
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class);
     }
 
     public function sourceable()

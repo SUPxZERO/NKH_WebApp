@@ -16,6 +16,7 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -152,11 +153,11 @@ class OrderController extends Controller
     }
 
     // POST /api/orders/{order}/invoice (role:admin,manager,waiter)
-    public function generateInvoice(GenerateInvoiceRequest $request, Order $order): OrderResource
+    public function generateInvoice(GenerateInvoiceRequest $request, Order $order, InvoiceService $invoiceService): OrderResource
     {
         $data = $request->validated();
 
-        DB::transaction(function () use ($order, $data, $request) {
+        DB::transaction(function () use ($order, $data, $request, $invoiceService) {
             if ($order->status !== 'received') {
                 abort(409, 'Order is not pending.');
             }
@@ -198,21 +199,23 @@ class OrderController extends Controller
             ]);
             $invoice->payments()->save($payment);
 
-            // Update invoice paid/due
-            $newPaid = (float) $invoice->amount_paid + (float) $data['amount_paid'];
-            $newDue = max(0, (float) $invoice->total_amount - $newPaid);
-            $invoice->update(['amount_paid' => $newPaid, 'amount_due' => $newDue]);
+            // Recalculate invoice + order financial status from completed payments
+            $invoice->refresh();
+            $invoice->loadMissing('payments', 'order');
+            $invoiceService->reconcileStatus($invoice);
 
-            // Close order & free table if dine-in
-            $order->update([
-                'status' => 'completed',
-                // Keep payment_status within enum: unpaid | paid | refunded
-                'payment_status' => $newDue <= 0 ? 'paid' : 'unpaid',
-                'completed_at' => now(),
-            ]);
+            $invoice->refresh();
 
-            if ($order->table) {
-                $order->table->update(['status' => 'available']);
+            // Close order & free table only when fully paid
+            if ($invoice->amount_due <= 0) {
+                $order->update([
+                    'status' => 'completed',
+                    'completed_at' => now(),
+                ]);
+
+                if ($order->table) {
+                    $order->table->update(['status' => 'available']);
+                }
             }
         });
 
@@ -378,7 +381,21 @@ class OrderController extends Controller
         $request->validate([
             'status' => 'required|in:pending,received,preparing,ready,completed,cancelled',
         ]);
-        $order->update(['status' => $request->status]);
+        $newStatus = $request->status;
+
+        // Prevent marking order as completed while items are not in a terminal state
+        if ($newStatus === 'completed') {
+            $order->loadMissing('items');
+            $hasOpenItems = $order->items
+                ->whereNotIn('status', ['served', 'cancelled'])
+                ->isNotEmpty();
+
+            if ($hasOpenItems) {
+                abort(409, 'Cannot complete order while some items are not served or cancelled.');
+            }
+        }
+
+        $order->update(['status' => $newStatus]);
         return new OrderResource($order->fresh(['items.menuItem', 'table']));
     }
 

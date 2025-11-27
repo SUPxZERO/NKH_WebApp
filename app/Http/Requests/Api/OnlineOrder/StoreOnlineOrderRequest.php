@@ -16,6 +16,7 @@ class StoreOnlineOrderRequest extends FormRequest
             'customer_address_id' => ['nullable','required_if:order_type,delivery','exists:customer_addresses,id'],
             'time_slot_id' => ['required','exists:order_time_slots,id'],
             'notes' => ['nullable','string'],
+            'promotion_code' => ['nullable','string'],
             'order_items' => ['required','array','min:1'],
             'order_items.*.menu_item_id' => ['required','exists:menu_items,id'],
             'order_items.*.quantity' => ['required','integer','min:1'],

@@ -303,7 +303,13 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {/* **RESPONSIVENESS IMPROVEMENT:** Switched to a more fluid, wrapping grid for categories
+              **Original:** grid-cols-2 md:grid-cols-3 lg:grid-cols-6 
+              **Change:** The original forces too many columns on small screens if there are >3 items.
+              A better approach is: grid-cols-2 (for small phones) sm:grid-cols-3 (for larger phones/small tablets) md:grid-cols-4 (for tablets) lg:grid-cols-6 (for desktop).
+              The new grid is more flexible, ensuring the boxes aren't too small on intermediate screens.
+          */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {categories.map((category, index) => (
               <motion.button
                 key={category.id}
@@ -473,38 +479,54 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <motion.div
-                  key={step.number}
-                  variants={itemVariants}
-                  className="relative text-center"
-                >
-                  {/* Connector Line */}
-                  {index < steps.length - 1 && (
-                    <div className="hidden lg:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-fuchsia-500/50 to-pink-500/50" />
-                  )}
+          {/* Added a relative container for better positioning of connector lines on all screen sizes */}
+          <div className="relative"> 
+            {/* Horizontal Connector Line for desktop view */}
+            <div className="hidden lg:block absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500/50 via-pink-500/50 to-fuchsia-500/50 pointer-events-none">
+              {/* Added markers for a continuous line look */}
+              {steps.slice(1, -1).map((_, index) => (
+                <div key={index} className="absolute top-1/2 -mt-0.5 w-2 h-2 rounded-full bg-fuchsia-500/50" style={{ left: `${(index + 1) * 100 / (steps.length - 1)}%` }} />
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-6 md:gap-8 relative z-10">
+              {steps.map((step, index) => {
+                const Icon = step.icon;
+                return (
+                  <motion.div
+                    key={step.number}
+                    variants={itemVariants}
+                    className="relative text-center"
+                  >
+                    {/* Vertical Connector Line for mobile/tablet views (between steps 1/2 and 3/4) */}
+                    {/* It connects step 1 to 3 and 2 to 4 on MD screen if grid is 2x2. It's complex to get right with pure Tailwind. 
+                        We can add a vertical line that only shows on screens smaller than LG for the first two items. 
+                        For simplicity and correctness with a 2x2 grid, we'll only add it for the first and second step.
+                    */}
+                    {(index === 0 || index === 1) && steps.length > 2 && (
+                      <div className="block lg:hidden absolute left-1/2 -translate-x-1/2 top-24 bottom-0 w-0.5 bg-fuchsia-500/30" />
+                    )}
 
-                  {/* Step Circle */}
-                  <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-fuchsia-600/20 to-pink-600/20 border-2 border-fuchsia-500/30 backdrop-blur-xl mb-6 mx-auto">
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-fuchsia-600 to-pink-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                    <Icon className="w-10 h-10 text-fuchsia-600 dark:text-fuchsia-400 z-10" />
-                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                      {step.number}
+
+                    {/* Step Circle */}
+                    <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-fuchsia-600/20 to-pink-600/20 border-2 border-fuchsia-500/30 backdrop-blur-xl mb-6 mx-auto">
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-fuchsia-600 to-pink-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                      <Icon className="w-10 h-10 text-fuchsia-600 dark:text-fuchsia-400 z-10" />
+                      <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                        {step.number}
+                      </div>
                     </div>
-                  </div>
 
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {step.description}
-                  </p>
-                </motion.div>
-              );
-            })}
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {step.description}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </motion.section>
 

@@ -55,6 +55,7 @@ class HomeController extends Controller
     {
         return Category::query()
             ->where('is_active', true)
+            ->whereNot('parent_id', null)
             ->withCount(['menuItems as count' => function ($query) {
                 $query->where('is_active', true);
             }])

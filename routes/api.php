@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\CustomerRequestController;
 use App\Http\Controllers\Api\PositionController;
+use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\PromotionController;
 use App\Http\Controllers\Api\LoyaltyPointController;
@@ -49,6 +50,9 @@ Route::get('/time-slots', [OnlineOrderController::class, 'timeSlots']);
 
 // New public menu route
 Route::get('/menu', [MenuItemController::class, 'index']);
+
+// Payment webhooks (secure with signature verification in production)
+Route::post('/payments/webhook/success', [PaymentWebhookController::class, 'handleSuccess']);
 
 // Public reference data
 Route::get('/positions', [PositionController::class, 'index']);

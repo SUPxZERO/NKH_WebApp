@@ -15,6 +15,7 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderTimeSlot;
+use App\Models\Promotion;
 use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -42,6 +43,69 @@ class OnlineOrderController extends Controller
             ->orderBy('slot_start_time');
 
         return OrderTimeSlotResource::collection($query->paginate());
+    }
+
+    /**
+     * Apply and validate a promotion code. Returns [discountAmount, promotionId].
+     */
+    private function applyPromotion(?string $code, Customer $customer, float $subtotal, int $locationId): array
+    {
+        if (!$code) {
+            return [0.0, null];
+        }
+
+        $promotion = Promotion::query()
+            ->where('code', $code)
+            ->where('is_active', true)
+            ->where(function ($q) use ($locationId) {
+                $q->whereNull('location_id')
+                  ->orWhere('location_id', $locationId);
+            })
+            ->where(function ($q) {
+                $now = now();
+                $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
+            })
+            ->where(function ($q) {
+                $now = now();
+                $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
+            })
+            ->first();
+
+        if (!$promotion) {
+            abort(422, 'Invalid or expired promotion code.');
+        }
+
+        if (!is_null($promotion->min_order_amount) && $subtotal < (float) $promotion->min_order_amount) {
+            abort(422, 'Order does not meet the minimum amount for this promotion.');
+        }
+
+        // Global usage limit (count orders using this promotion)
+        if (!is_null($promotion->usage_limit)) {
+            $used = Order::where('promotion_id', $promotion->id)->count();
+            if ($used >= $promotion->usage_limit) {
+                abort(422, 'This promotion has reached its usage limit.');
+            }
+        }
+
+        // Per-customer limit
+        if (!is_null($promotion->per_customer_limit)) {
+            $usedByCustomer = Order::where('promotion_id', $promotion->id)
+                ->where('customer_id', $customer->id)
+                ->count();
+
+            if ($usedByCustomer >= $promotion->per_customer_limit) {
+                abort(422, 'You have already used this promotion the maximum number of times.');
+            }
+        }
+
+        $discount = match ($promotion->type) {
+            'percentage' => round($subtotal * ((float) $promotion->value / 100), 2),
+            'fixed' => min($subtotal, (float) $promotion->value),
+            'happy_hour' => round($subtotal * ((float) $promotion->value / 100), 2),
+            default => 0.0,
+        };
+
+        return [$discount, $promotion->id];
     }
 
     // GET /api/customer/addresses (auth:sanctum, role:customer)
@@ -193,14 +257,26 @@ class OnlineOrderController extends Controller
 
                 \Log::info('💰 Subtotal calculated:', ['subtotal' => $subtotal]);
 
+                if ($subtotal <= 0) {
+                    abort(422, 'Order subtotal must be greater than zero.');
+                }
+
+                // Apply promotion (if any)
+                [$discountAmount, $promotionId] = $this->applyPromotion(
+                    $data['promotion_code'] ?? null,
+                    $customer,
+                    $subtotal,
+                    (int) $data['location_id']
+                );
+
                 // Get tax rate from settings (or use default 10%)
                 $taxRate = $this->getTaxRate($data['location_id']);
-                $taxAmount = round($subtotal * $taxRate, 2);
+                $taxableBase = max(0, $subtotal - $discountAmount);
+                $taxAmount = round($taxableBase * $taxRate, 2);
                 
                 // Calculate totals
-                $discountAmount = 0;
                 $serviceCharge = 0;
-                $totalAmount = $subtotal + $taxAmount + $serviceCharge + $deliveryFee - $discountAmount;
+                $totalAmount = $taxableBase + $taxAmount + $serviceCharge + $deliveryFee;
 
                 \Log::info('💵 Final Totals:', [
                     'subtotal' => $subtotal,
@@ -219,11 +295,13 @@ class OnlineOrderController extends Controller
                     'order_type' => $data['order_type'],
                     'status' => 'pending',
                     'approval_status' => 'pending',
+                    'subtotal' => $subtotal,
                     'discount_amount' => $discountAmount,
                     'service_charge' => $serviceCharge,
                     'delivery_fee' => $deliveryFee,
                     'tax_amount' => $taxAmount,
                     'total_amount' => $totalAmount,
+                    'promotion_id' => $promotionId,
                     'currency' => 'USD',
                     'ordered_at' => now(),
                     'pickup_time' => $data['order_type'] === 'pickup' ? $scheduledAt : null,

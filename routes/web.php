@@ -16,10 +16,11 @@ Route::middleware(['auth', 'role:Customer'])->group(function () {
         Route::get('/dashboard', fn() => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
         Route::get('/menu', fn() => Inertia::render('Customer/Menu'))->name('customer.menu');
         Route::get('/cart', fn() => Inertia::render('Customer/Cart'))->name('customer.cart');
-        Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
-        Route::get('/customer/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');
+        Route::get('customer/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');
         Route::get('/orders/{order}', fn() => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
         Route::get('/track/{orderId}', fn() => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
+        // Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
+        Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
     });
 
 // Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');

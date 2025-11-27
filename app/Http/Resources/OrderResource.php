@@ -23,7 +23,11 @@ class OrderResource extends JsonResource
             'tax_amount' => $this->tax_amount,
             'discount_amount' => $this->discount_amount,
             'service_charge' => $this->service_charge,
+            'delivery_fee' => $this->when(isset($this->delivery_fee), $this->delivery_fee),
             'total_amount' => $this->total_amount,
+            // Backward-compat aliases expected by some UI code
+            'tax_total' => $this->tax_amount,
+            'discount_total' => $this->discount_amount,
             // UI alias for backwards compatibility
             'total' => $this->total_amount,
             'currency' => $this->currency,

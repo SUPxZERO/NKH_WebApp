@@ -47,7 +47,8 @@ class Order extends Model
         'approved_by',
         'approved_at',
         'rejection_reason',
-        'is_auto_approved'
+        'is_auto_approved',
+        'promotion_id',
     ];
 
     protected $casts = [
@@ -93,6 +94,11 @@ class Order extends Model
     public function invoice()
     {
         return $this->hasOne(Invoice::class);
+    }
+
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class);
     }
 
     public function payments()

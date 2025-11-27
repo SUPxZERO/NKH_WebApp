@@ -147,6 +147,7 @@ export interface Order {
   tax_total: number;
   discount_total: number;
   service_charge: number;
+  delivery_fee?: number;
   total: number;
   currency: string;
   placed_at?: string | null;
@@ -157,7 +158,7 @@ export interface Order {
   order_type: 'dine-in' | 'pickup' | 'delivery';
   customer_address_id?: number | null;
   delivery_address?: string | null; // For display purposes
-  payment_status: 'unpaid' | 'paid' | 'refunded';
+  payment_status: 'unpaid' | 'paid' | 'refunded' | 'partial';
   scheduled_at?: string | null;
   kitchen_submitted_at?: string | null;
   approved_at?: string | null;
