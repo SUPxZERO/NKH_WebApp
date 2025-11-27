@@ -72,35 +72,55 @@ export default function Menu() {
 
   // Filtered and sorted items
   const processedItems = useMemo(() => {
-    if (!menuItems) return [];
+      if (!menuItems) return [];
 
-    let filtered = [...menuItems];
+      let filtered = [...menuItems];
 
-    // Sort
-    switch (sortBy) {
-      case 'popular':
-        filtered.sort((a, b) => {
-          if (a.is_popular && !b.is_popular) return -1;
-          if (!a.is_popular && b.is_popular) return 1;
-          return (b.rating || 0) - (a.rating || 0);
-        });
-        break;
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'name':
-        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        break;
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-    }
+      // 👉 FILTER BY CATEGORY
+      if (selectedCategory) {
+          filtered = filtered.filter(
+              (item) => item.category_id === selectedCategory
+          );
+      }
 
-    return filtered;
-  }, [menuItems, sortBy]);
+      // 👉 FILTER BY SEARCH
+      if (searchQuery.trim() !== "") {
+          filtered = filtered.filter((item) =>
+              (item.name ?? "").toLowerCase().includes(searchQuery.toLowerCase())
+          );
+      }
+
+      // 👉 SORT
+      switch (sortBy) {
+          case 'popular':
+              filtered.sort((a, b) => {
+                  if (a.is_popular && !b.is_popular) return -1;
+                  if (!a.is_popular && b.is_popular) return 1;
+                  return (b.rating || 0) - (a.rating || 0);
+              });
+              break;
+          case 'price-low':
+              filtered.sort((a, b) => a.price - b.price);
+              break;
+          case 'price-high':
+              filtered.sort((a, b) => b.price - a.price);
+              break;
+          case 'name':
+              filtered.sort((a, b) =>
+                  (a.name || '').localeCompare(b.name || '')
+              );
+              break;
+          case 'newest':
+              filtered.sort(
+                  (a, b) =>
+                      new Date(b.created_at).getTime() -
+                      new Date(a.created_at).getTime()
+              );
+              break;
+      }
+
+      return filtered;
+  }, [menuItems, selectedCategory, searchQuery, sortBy]);
 
   const handleAddToCart = (item: MenuItem) => {
     cart.addItem({

@@ -63,7 +63,7 @@ Route::prefix('admin')
         Route::get('reservations', fn() => Inertia::render('admin/Reservations'))->name('admin.reservations');
         Route::get('audit-logs', fn() => Inertia::render('admin/AuditLogs'))->name('admin.audit-logs');
         Route::get('settings', fn() => Inertia::render('admin/Settings'))->name('admin.settings');
-        Route::get('customer-requests', [\App\Http\Controllers\Api\CustomerRequestController::class, 'index'])->name('admin.customer-requests');
+        // Approval managed within main Orders page - no separate route needed
     });
 // Test time slots seeder
 Route::middleware('auth')->group(function () {

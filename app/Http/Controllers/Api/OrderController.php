@@ -286,7 +286,37 @@ class OrderController extends Controller
         
         $orders = $query->orderBy('ordered_at', 'desc')
                        ->paginate($request->get('per_page', 15));
-        
+    
+        return OrderResource::collection($orders);
+    }
+
+    // GET /api/admin/orders/pending-approval
+    // List all orders pending approval (replaces CustomerRequestController::index)
+    public function pendingApproval(Request $request)
+    {
+        $query = Order::with(['customer.user', 'items.menuItem', 'customerAddress'])
+            ->where('approval_status', Order::APPROVAL_STATUS_PENDING)
+            ->whereIn('order_type', ['delivery', 'pickup']);
+
+        // Optional filters
+        if ($request->filled('location_id')) {
+            $query->where('location_id', $request->location_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhereHas('customer.user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $orders = $query->orderBy('ordered_at', 'desc')
+                       ->paginate($request->get('per_page', 15));
+
         return OrderResource::collection($orders);
     }
 
@@ -313,40 +343,71 @@ class OrderController extends Controller
     }
 
     // PATCH /api/admin/orders/{order}/approve (Admin approval for online orders)
-    public function approve(Request $request, Order $order): OrderResource
+    public function approve(Request $request, Order $order): JsonResponse|OrderResource
     {
-        if ($order->approval_status !== 'pending') {
-            abort(409, 'Order is not pending approval.');
+        // Validation
+        if ($order->approval_status !== Order::APPROVAL_STATUS_PENDING) {
+            return response()->json([
+                'message' => 'Order is not pending approval.',
+                'current_status' => $order->approval_status
+            ], 409);
         }
 
-        // Ensure an authenticated user is present before attempting to access ->id
+        // Ensure authenticated user exists
         if (!$request->user()) {
             abort(401, 'Unauthenticated.');
         }
 
-        $order->update([
-            'status' => 'received',
-            'approval_status' => 'approved',
+        // Use the model method for approval
+        $success = $order->approve($request->user()->id);
+
+        if (!$success) {
+            return response()->json([
+                'message' => 'Failed to approve order.',
+            ], 500);
+        }
+
+        // Log the approval action
+        \Log::info('Order approved', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
             'approved_by' => $request->user()->id,
-            'approved_at' => now(),
+            'approved_by_name' => $request->user()->name,
         ]);
 
-        return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));
+        return new OrderResource($order->fresh(['items.menuItem', 'customerAddress', 'approvedBy']));
     }
 
     // PATCH /api/admin/orders/{order}/reject (Admin rejection for online orders)
-    public function reject(Request $request, Order $order): OrderResource
+    public function reject(Request $request, Order $order): JsonResponse|OrderResource
     {
-        if ($order->approval_status !== 'pending') {
-            abort(409, 'Order is not pending approval.');
+        // Validation
+        if ($order->approval_status !== Order::APPROVAL_STATUS_PENDING) {
+            return response()->json([
+                'message' => 'Order is not pending approval.',
+                'current_status' => $order->approval_status
+            ], 409);
         }
 
-        $request->validate(['rejection_reason' => 'required|string|max:255']);
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|min:10|max:500'
+        ]);
 
-        $order->update([
-            'status' => 'cancelled',
-            'approval_status' => 'rejected',
-            'rejection_reason' => $request->rejection_reason,
+        // Use the model method for rejection
+        $success = $order->reject($validated['rejection_reason']);
+
+        if (!$success) {
+            return response()->json([
+                'message' => 'Failed to reject order.',
+            ], 500);
+        }
+
+        // Log the rejection action
+        \Log::info('Order rejected', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'rejected_by' => $request->user()?->id,
+            'rejection_reason' => $validated['rejection_reason'],
         ]);
 
         return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));

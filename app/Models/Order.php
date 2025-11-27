@@ -14,9 +14,7 @@ class Order extends Model
     const APPROVAL_STATUS_APPROVED = 'approved';
     const APPROVAL_STATUS_REJECTED = 'rejected';
 
-    protected $appends = [
-        'is_customer_request',
-    ];
+    // Removed is_customer_request accessor - no longer needed
 
     protected $fillable = [
         'location_id',
@@ -116,13 +114,72 @@ class Order extends Model
         return $this->belongsTo(OrderTimeSlot::class, 'time_slot_id');
     }
 
-    public function getIsCustomerRequestAttribute(): bool
+    /**
+     * User who approved this order (admin/manager)
+     */
+    public function approvedBy()
     {
-        return in_array($this->order_type, ['delivery', 'pickup']) && !$this->is_auto_approved;
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    public function customerRequest()
+    // ==================== HELPER METHODS ====================
+
+    /**
+     * Check if order requires manual approval
+     */
+    public function requiresApproval(): bool
     {
-        return $this->hasOne(CustomerRequest::class);
+        return in_array($this->order_type, ['delivery', 'pickup']) 
+            && !$this->is_auto_approved;
+    }
+
+    /**
+     * Check if order is pending approval
+     */
+    public function isPendingApproval(): bool
+    {
+        return $this->approval_status === self::APPROVAL_STATUS_PENDING;
+    }
+
+    /**
+     * Check if order is approved
+     */
+    public function isApproved(): bool
+    {
+        return $this->approval_status === self::APPROVAL_STATUS_APPROVED;
+    }
+
+    /**
+     * Check if order is rejected
+     */
+    public function isRejected(): bool
+    {
+        return $this->approval_status === self::APPROVAL_STATUS_REJECTED;
+    }
+
+    /**
+     * Approve the order
+     */
+    public function approve(int $userId): bool
+    {
+        return $this->update([
+            'status' => 'received',
+            'approval_status' => self::APPROVAL_STATUS_APPROVED,
+            'approved_by' => $userId,
+            'approved_at' => now(),
+            'rejection_reason' => null,
+        ]);
+    }
+
+    /**
+     * Reject the order
+     */
+    public function reject(string $reason): bool
+    {
+        return $this->update([
+            'status' => 'cancelled',
+            'approval_status' => self::APPROVAL_STATUS_REJECTED,
+            'rejection_reason' => $reason,
+        ]);
     }
 }

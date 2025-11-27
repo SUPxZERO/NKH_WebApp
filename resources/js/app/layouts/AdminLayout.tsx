@@ -18,7 +18,6 @@ const navigation = [
   // Operations
   { name: 'Orders', href: '/admin/orders', icon: Package },
   { name: 'Reservations', href: '/admin/reservations', icon: Calendar },
-  { name: 'Customer Requests', href: '/admin/customer-requests', icon: MessageSquare },
   { name: 'Notifications', href: '/admin/notifications', icon: Bell },
 
   // Menu Management

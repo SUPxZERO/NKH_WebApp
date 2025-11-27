@@ -1,21 +1,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Clock, 
-  CheckCircle, 
+import {
+  Search,
+  Filter,
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  Clock,
+  CheckCircle,
   XCircle,
   DollarSign,
   MapPin,
   User,
   Calendar,
-  Package
+  Package,
+  ThumbsUp,
+  ThumbsDown,
+  AlertCircle
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { Card, CardContent } from '@/app/components/ui/Card';
@@ -23,7 +26,7 @@ import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Order, Customer, Employee, Location, DiningTable } from '@/app/types/domain';
 
@@ -31,9 +34,12 @@ export default function Orders() {
   const [search, setSearch] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
   const [typeFilter, setTypeFilter] = React.useState('all');
+  const [approvalFilter, setApprovalFilter] = React.useState<'all' | 'pending'>('all');
   const [openView, setOpenView] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
+  const [openReject, setOpenReject] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+  const [rejectionReason, setRejectionReason] = React.useState('');
   const [error, setError] = React.useState('');
 
   const qc = useQueryClient();
@@ -49,15 +55,18 @@ export default function Orders() {
     return isNaN(num) ? 0 : num;
   };
 
-  // Fetch orders
-  // Typed as 'any' to handle flexible API responses safely
+  // Fetch orders - use different endpoint for pending approval
   const { data: orders, isLoading } = useQuery({
-    queryKey: ['admin/orders', page, search, statusFilter, typeFilter],
-    queryFn: () => apiGet(`/api/admin/orders?page=${page}&per_page=${perPage}&search=${search}&status=${statusFilter}&type=${typeFilter}`)
+    queryKey: ['admin/orders', page, search, statusFilter, typeFilter, approvalFilter],
+    queryFn: () => {
+      const endpoint = approvalFilter === 'pending'
+        ? `/api/admin/orders/pending-approval?page=${page}&per_page=${perPage}&search=${search}`
+        : `/api/admin/orders?page=${page}&per_page=${perPage}&search=${search}&status=${statusFilter}&type=${typeFilter}`;
+      return apiGet(endpoint);
+    }
   }) as { data: any, isLoading: boolean };
 
   // --- SAFE DATA EXTRACTION ---
-  // Guarantees 'orderList' is always an array, fixing the "Empty List" bug
   const orderList: Order[] = React.useMemo(() => {
     if (!orders) return [];
     if (Array.isArray(orders)) return orders;
@@ -67,7 +76,7 @@ export default function Orders() {
 
   // Update order status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number, status: string }) => 
+    mutationFn: ({ id, status }: { id: number, status: string }) =>
       apiPut(`/api/admin/orders/${id}/status`, { status }),
     onSuccess: () => {
       toastSuccess('Order status updated successfully!');
@@ -108,6 +117,57 @@ export default function Orders() {
 
   const handleStatusUpdate = (id: number, status: string) => {
     updateStatusMutation.mutate({ id, status });
+  };
+
+  // Approve order handler - FIXED to use apiPatch
+  const handleApprove = async (order: Order) => {
+    if (!window.confirm(`Approve order #${order.order_number}?`)) return;
+
+    try {
+      await apiPatch(`/api/admin/orders/${order.id}/approve`, {});
+      toastSuccess('Order approved successfully!');
+      qc.invalidateQueries({ queryKey: ['admin/orders'] });
+    } catch (error: any) {
+      toastError(error.response?.data?.message || 'Failed to approve order');
+    }
+  };
+
+  // Reject order handler
+  const handleReject = (order: Order) => {
+    setSelectedOrder(order);
+    setOpenReject(true);
+  };
+
+  const confirmReject = async () => {
+    if (!selectedOrder) return;
+
+    if (rejectionReason.length < 10) {
+      toastError('Rejection reason must be at least 10 characters');
+      return;
+    }
+
+    try {
+      await apiPatch(`/api/admin/orders/${selectedOrder.id}/reject`, {
+        rejection_reason: rejectionReason
+      });
+      toastSuccess('Order rejected successfully!');
+      qc.invalidateQueries({ queryKey: ['admin/orders'] });
+      setOpenReject(false);
+      setSelectedOrder(null);
+      setRejectionReason('');
+    } catch (error: any) {
+      toastError(error.response?.data?.message || 'Failed to reject order');
+    }
+  };
+
+  const getApprovalStatusColor = (status: string | undefined) => {
+    if (!status) return '';
+    switch (status) {
+      case 'pending': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+      case 'approved': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -172,7 +232,7 @@ export default function Orders() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all"  className='text-black'>All Status</option>
+            <option value="all" className='text-black'>All Status</option>
             <option value="pending" className='text-black'>Pending</option>
             <option value="received" className='text-black'>Received</option>
             <option value="preparing" className='text-black'>Preparing</option>
@@ -208,6 +268,44 @@ export default function Orders() {
           </div>
         </motion.div>
 
+        {/* Approval Status Filter - Beautiful Gradient Buttons */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6 flex gap-3"
+        >
+          <button
+            onClick={() => setApprovalFilter('all')}
+            className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${approvalFilter === 'all'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105'
+              : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:border-white/20'
+              }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Package className="w-4 h-4" />
+              Orders Track
+            </div>
+          </button>
+          <button
+            onClick={() => setApprovalFilter('pending')}
+            className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${approvalFilter === 'pending'
+              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-500/50 scale-105'
+              : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:border-white/20'
+              }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              Pending Approval
+              {approvalFilter === 'pending' && orderList.length > 0 && (
+                <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                  {orderList.length}
+                </span>
+              )}
+            </div>
+          </button>
+        </motion.div>
+
         {/* Orders Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {isLoading ? (
@@ -230,13 +328,13 @@ export default function Orders() {
               </motion.div>
             ))
           ) : orderList.length === 0 ? (
-             <div className="col-span-full text-center py-12 bg-white/5 rounded-xl border border-white/10 border-dashed">
-                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Package className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">No Orders Found</h3>
-                <p className="text-gray-400 mt-2">Waiting for new orders to arrive...</p>
-             </div>
+            <div className="col-span-full text-center py-12 bg-white/5 rounded-xl border border-white/10 border-dashed">
+              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white">No Orders Found</h3>
+              <p className="text-gray-400 mt-2">Waiting for new orders to arrive...</p>
+            </div>
           ) : (
             orderList.map((order: Order, index: number) => (
               <motion.div
@@ -274,7 +372,7 @@ export default function Orders() {
                           {order.customer.user?.name || 'Guest Customer'}
                         </div>
                       )}
-                      
+
                       <div className="flex items-center text-sm text-gray-300">
                         <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
                         <span className="text-white font-medium">Total: ${getAmount(order.total).toFixed(2)}</span>
@@ -288,53 +386,108 @@ export default function Orders() {
                       )}
                     </div>
 
-                    {/* Quick Status Actions */}
-                    <div className="flex gap-2 mb-4">
-                      {order.status === 'pending' && (
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          onClick={() => handleStatusUpdate(order.id, 'received')}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700"
-                        >
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Accept
-                        </Button>
-                      )}
-                      {order.status === 'received' && (
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          onClick={() => handleStatusUpdate(order.id, 'preparing')}
-                          className="flex-1 bg-orange-600 hover:bg-orange-700"
-                        >
-                          <Clock className="w-3 h-3 mr-1" />
-                          Start Prep
-                        </Button>
-                      )}
-                      {order.status === 'preparing' && (
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          onClick={() => handleStatusUpdate(order.id, 'ready')}
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                        >
-                          <Package className="w-3 h-3 mr-1" />
-                          Mark Ready
-                        </Button>
-                      )}
-                      {order.status === 'ready' && (
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          onClick={() => handleStatusUpdate(order.id, 'completed')}
-                          className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                        >
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Complete
-                        </Button>
-                      )}
-                    </div>
+                    {/* Approval Status & Actions */}
+                    {(approvalFilter === 'pending' || (order as any).approval_status) && (
+                      <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-gray-400 uppercase tracking-wide">Approval Status</span>
+                          <Badge className={getApprovalStatusColor((order as any).approval_status || 'pending')}>
+                            {(order as any).approval_status || 'pending'}
+                          </Badge>
+                        </div>
+
+                        {/* Approve/Reject Buttons - GREEN for approve, RED for reject */}
+                        {((order as any).approval_status === 'pending' || approvalFilter === 'pending') &&
+                          (order.order_type === 'delivery' || order.order_type === 'pickup') && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="flex gap-2 mt-3"
+                            >
+                              <Button
+                                size="sm"
+                                onClick={() => handleApprove(order)}
+                                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-105"
+                              >
+                                <ThumbsUp className="w-3 h-3 mr-1.5" />
+                                Approve Order
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleReject(order)}
+                                className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-105"
+                              >
+                                <ThumbsDown className="w-3 h-3 mr-1.5" />
+                                Reject Order
+                              </Button>
+                            </motion.div>
+                          )}
+
+                        {/* Rejection Reason Display */}
+                        {(order as any).approval_status === 'rejected' && (order as any).rejection_reason && (
+                          <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-300">
+                            <span className="font-medium">Reason:</span> {(order as any).rejection_reason}
+                          </div>
+                        )}
+
+                        {/* Approved By Display */}
+                        {(order as any).approval_status === 'approved' && (order as any).approved_at && (
+                          <div className="mt-2 text-xs text-emerald-300">
+                            ✓ Approved on {new Date((order as any).approved_at).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Quick Status Actions - Only in Orders Track */}
+                    {approvalFilter === 'all' && (
+                      <div className="flex gap-2 mb-4">
+                        {order.status === 'pending' && (
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            onClick={() => handleStatusUpdate(order.id, 'received')}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700"
+                          >
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Accept
+                          </Button>
+                        )}
+                        {order.status === 'received' && (
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            onClick={() => handleStatusUpdate(order.id, 'preparing')}
+                            className="flex-1 bg-orange-600 hover:bg-orange-700"
+                          >
+                            <Clock className="w-3 h-3 mr-1" />
+                            Start Prep
+                          </Button>
+                        )}
+                        {order.status === 'preparing' && (
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            onClick={() => handleStatusUpdate(order.id, 'ready')}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                          >
+                            <Package className="w-3 h-3 mr-1" />
+                            Mark Ready
+                          </Button>
+                        )}
+                        {order.status === 'ready' && (
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            onClick={() => handleStatusUpdate(order.id, 'completed')}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                          >
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Complete
+                          </Button>
+                        )}
+                      </div>
+                    )}
 
                     {/* Actions */}
                     <div className="flex gap-2">
@@ -410,7 +563,6 @@ export default function Orders() {
       >
         {selectedOrder && (
           <div className="space-y-6">
-            {/* Order Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-white">Order Information</h3>
@@ -434,7 +586,7 @@ export default function Orders() {
                   <div className="flex justify-between">
                     <span className="text-gray-400">Payment Status:</span>
                     <span className={`font-medium ${selectedOrder.payment_status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
-                       {selectedOrder.payment_status.toUpperCase()}
+                      {selectedOrder.payment_status.toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -461,7 +613,6 @@ export default function Orders() {
               </div>
             </div>
 
-            {/* Order Items */}
             <div>
               <h3 className="text-lg font-semibold text-white mb-4">Order Items</h3>
               <div className="space-y-2">
@@ -477,7 +628,6 @@ export default function Orders() {
               </div>
             </div>
 
-            {/* Notes */}
             {selectedOrder.notes && (
               <div>
                 <h3 className="text-lg font-semibold text-white mb-2">Notes</h3>
@@ -522,9 +672,8 @@ export default function Orders() {
                 <select
                   value={selectedOrder.payment_status}
                   onChange={(e) => {
-                     // Cast the value to the specific union type
-                     const newVal = e.target.value as 'unpaid' | 'paid' | 'refunded';
-                     if(selectedOrder) setSelectedOrder({...selectedOrder, payment_status: newVal});
+                    const newVal = e.target.value as 'unpaid' | 'paid' | 'refunded';
+                    if (selectedOrder) setSelectedOrder({ ...selectedOrder, payment_status: newVal });
                   }}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
                 >
@@ -539,7 +688,7 @@ export default function Orders() {
               <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
               <textarea
                 value={selectedOrder.notes || ''}
-                onChange={(e) => setSelectedOrder({...selectedOrder, notes: e.target.value})}
+                onChange={(e) => setSelectedOrder({ ...selectedOrder, notes: e.target.value })}
                 rows={3}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-400"
                 placeholder="Order notes..."
@@ -562,9 +711,8 @@ export default function Orders() {
                 type="button"
                 variant="primary"
                 onClick={() => {
-                    // Here you would normally trigger a mutation to update the whole order
-                    setOpenEdit(false);
-                    toastSuccess('Order updated (Simulation)');
+                  setOpenEdit(false);
+                  toastSuccess('Order updated (Simulation)');
                 }}
                 className="flex-1"
               >
@@ -573,6 +721,108 @@ export default function Orders() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Reject Order Modal */}
+      <Modal
+        open={openReject}
+        onClose={() => {
+          setOpenReject(false);
+          setSelectedOrder(null);
+          setRejectionReason('');
+        }}
+        title={`Reject Order #${selectedOrder?.order_number}`}
+        size="lg"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-red-300 font-medium">Order Rejection</h4>
+              <p className="text-red-300/70 text-sm mt-1">
+                Please provide a detailed reason for rejecting this order. The customer will be notified.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Rejection Reason <span className="text-red-400">*</span>
+            </label>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={4}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-400 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
+              placeholder="e.g., Kitchen is closed for maintenance, Out of stock ingredients, etc."
+            />
+            <div className="flex justify-between items-center mt-2">
+              <span className={`text-xs ${rejectionReason.length < 10 ? 'text-red-400' :
+                rejectionReason.length > 500 ? 'text-red-400' : 'text-gray-400'
+                }`}>
+                {rejectionReason.length < 10 && `Need ${10 - rejectionReason.length} more characters`}
+                {rejectionReason.length >= 10 && rejectionReason.length <= 500 && '✓ Valid length'}
+                {rejectionReason.length > 500 && `${rejectionReason.length - 500} characters over limit`}
+              </span>
+              <span className="text-xs text-gray-400">
+                {rejectionReason.length} / 500
+              </span>
+            </div>
+          </div>
+
+          {selectedOrder && (
+            <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+              <h4 className="text-sm font-medium text-gray-300 mb-3">Order Summary</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Customer:</span>
+                  <span className="text-white">{selectedOrder.customer?.user?.name || 'Guest'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Total Amount:</span>
+                  <span className="text-white font-medium">${getAmount(selectedOrder.total).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Order Type:</span>
+                  <Badge className={getTypeColor(selectedOrder.order_type)}>
+                    {selectedOrder.order_type}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setOpenReject(false);
+                setSelectedOrder(null);
+                setRejectionReason('');
+              }}
+              className="flex-1 border-white/20 hover:bg-white/10"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmReject}
+              disabled={rejectionReason.length < 10 || rejectionReason.length > 500}
+              className={`flex-1 transition-all duration-300 ${rejectionReason.length >= 10 && rejectionReason.length <= 500
+                ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg shadow-red-500/30'
+                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                }`}
+            >
+              <ThumbsDown className="w-4 h-4 mr-2" />
+              Confirm Rejection
+            </Button>
+          </div>
+        </motion.div>
       </Modal>
     </AdminLayout>
   );

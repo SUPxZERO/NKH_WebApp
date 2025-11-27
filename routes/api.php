@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\SettingController;
-use App\Http\Controllers\Api\CustomerRequestController;
+// CustomerRequestController removed - functionality consolidated to OrderController
 use App\Http\Controllers\Api\PositionController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\LocationController;
@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\LoyaltyPointController;
 use App\Http\Controllers\Api\IngredientController;
 use App\Http\Controllers\Api\ExpenseCategoryController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\OrderHoldController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
 
@@ -236,18 +237,15 @@ Route::prefix('admin')
     // Settings
     Route::get('settings', [SettingController::class, 'index']);
     Route::put('settings', [SettingController::class, 'update']);
-    // Customer Requests
-    Route::get('customer-requests', [CustomerRequestController::class, 'index']);
-    Route::get('customer-requests/{customerRequest}', [CustomerRequestController::class, 'show']);
-    Route::patch('customer-requests/{customerRequest}', [CustomerRequestController::class, 'update']);
+    // Order oversight and approvals
+    Route::get('orders', [OrderController::class, 'index']);
+    Route::get('orders/pending-approval', [OrderController::class, 'pendingApproval']); // Replaces customer-requests
 
     // Dashboard
     Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
     Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
     Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
 
-    // Order oversight and approvals
-    Route::get('orders', [OrderController::class, 'index']); // Assuming an index method for admin
     Route::put('orders/{order}/status', [OrderController::class, 'updateStatus']);
     Route::delete('orders/{order}', [OrderController::class, 'destroy']);
     Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
