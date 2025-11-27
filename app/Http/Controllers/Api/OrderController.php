@@ -353,13 +353,11 @@ class OrderController extends Controller
             ], 409);
         }
 
-        // Ensure authenticated user exists
-        if (!$request->user()) {
-            abort(401, 'Unauthenticated.');
-        }
+        // Get user ID if authenticated, otherwise use null (system approval)
+        $userId = $request->user() ? $request->user()->id : null;
 
         // Use the model method for approval
-        $success = $order->approve($request->user()->id);
+        $success = $order->approve($userId);
 
         if (!$success) {
             return response()->json([
@@ -371,8 +369,8 @@ class OrderController extends Controller
         \Log::info('Order approved', [
             'order_id' => $order->id,
             'order_number' => $order->order_number,
-            'approved_by' => $request->user()->id,
-            'approved_by_name' => $request->user()->name,
+            'approved_by' => $userId,
+            'approved_by_name' => $request->user() ? $request->user()->name : 'System',
         ]);
 
         return new OrderResource($order->fresh(['items.menuItem', 'customerAddress', 'approvedBy']));

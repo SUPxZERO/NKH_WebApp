@@ -160,7 +160,7 @@ class Order extends Model
     /**
      * Approve the order
      */
-    public function approve(int $userId): bool
+    public function approve(?int $userId): bool
     {
         return $this->update([
             'status' => 'received',
