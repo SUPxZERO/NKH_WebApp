@@ -30,11 +30,13 @@ export default function EmployeeList() {
         queryKey: ['employees', currentPage, searchTerm, locationFilter, statusFilter],
         queryFn: () =>
             apiGet('/api/admin/employees', {
-                page: currentPage,
-                search: searchTerm,
-                location_id: locationFilter || undefined,
-                status: statusFilter || undefined,
-                per_page: 25,
+                params: {
+                    page: currentPage,
+                    search: searchTerm,
+                    location_id: locationFilter || undefined,
+                    status: statusFilter || undefined,
+                    per_page: 25,
+                },
             }),
     });
 
@@ -169,7 +171,7 @@ export default function EmployeeList() {
                                 </div>
                                 <p className="text-gray-500 mt-2">Loading employees...</p>
                             </div>
-                        ) : employeesData?.data && employeesData.data.length > 0 ? (
+                        ) : (employeesData as any)?.data && (employeesData as any).data.length > 0 ? (
                             <>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
@@ -184,7 +186,7 @@ export default function EmployeeList() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {employeesData.data.map((employee: any) => (
+                                            {(employeesData as any).data.map((employee: any) => (
                                                 <tr
                                                     key={employee.id}
                                                     className="border-b border-gray-100 hover:bg-gray-50 transition"
@@ -231,10 +233,10 @@ export default function EmployeeList() {
                                 </div>
 
                                 {/* Pagination */}
-                                {employeesData.pagination && employeesData.pagination.last_page > 1 && (
+                                {(employeesData as any)?.pagination && (employeesData as any).pagination.last_page > 1 && (
                                     <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                                         <p className="text-sm text-gray-600">
-                                            Page {employeesData.pagination.current_page} of {employeesData.pagination.last_page}
+                                            Page {(employeesData as any).pagination.current_page} of {(employeesData as any).pagination.last_page}
                                         </p>
                                         <div className="flex gap-2">
                                             <button
@@ -246,7 +248,7 @@ export default function EmployeeList() {
                                             </button>
                                             <button
                                                 onClick={() => setCurrentPage(prev => prev + 1)}
-                                                disabled={currentPage === employeesData.pagination.last_page}
+                                                disabled={currentPage === (employeesData as any).pagination.last_page}
                                                 className="p-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
                                             >
                                                 <ChevronRight className="w-4 h-4" />

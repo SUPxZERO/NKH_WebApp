@@ -7,6 +7,27 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+DROP TABLE IF EXISTS `attendance_metrics`;
+CREATE TABLE `attendance_metrics` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint unsigned NOT NULL,
+  `attendance_id` bigint unsigned NOT NULL,
+  `minutes_late` int unsigned NOT NULL DEFAULT '0',
+  `minutes_early_departure` int unsigned NOT NULL DEFAULT '0',
+  `break_duration_minutes` int unsigned NOT NULL DEFAULT '0',
+  `total_shift_hours` decimal(10,2) NOT NULL,
+  `overtime_hours` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `attendance_metrics_employee_id_index` (`employee_id`),
+  KEY `attendance_metrics_attendance_id_index` (`attendance_id`),
+  KEY `attendance_metrics_employee_id_created_at_index` (`employee_id`,`created_at`),
+  CONSTRAINT `attendance_metrics_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendances` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `attendance_metrics_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `attendances`;
 CREATE TABLE `attendances` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -165,12 +186,19 @@ CREATE TABLE `employees` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
   `position_id` bigint unsigned DEFAULT NULL,
+  `department` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `location_id` bigint unsigned NOT NULL,
   `employee_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `hire_date` date DEFAULT NULL,
   `salary_type` enum('hourly','monthly') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monthly',
+  `hourly_rate` decimal(12,2) DEFAULT NULL,
   `salary` decimal(12,2) DEFAULT NULL,
   `address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `emergency_contact_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `emergency_contact_phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `preferred_shift_start` time DEFAULT NULL,
   `status` enum('active','inactive','terminated','on_leave') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -183,6 +211,26 @@ CREATE TABLE `employees` (
   CONSTRAINT `employees_position_id_foreign` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `employees_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `employment_history`;
+CREATE TABLE `employment_history` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint unsigned NOT NULL,
+  `action` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `previous_value` json DEFAULT NULL,
+  `new_value` json DEFAULT NULL,
+  `changed_by_user_id` bigint unsigned DEFAULT NULL,
+  `effective_date` date NOT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `employment_history_employee_id_index` (`employee_id`),
+  KEY `employment_history_changed_by_user_id_index` (`changed_by_user_id`),
+  KEY `employment_history_effective_date_index` (`effective_date`),
+  KEY `employment_history_action_index` (`action`),
+  CONSTRAINT `employment_history_changed_by_user_id_foreign` FOREIGN KEY (`changed_by_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `employment_history_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `expense_categories`;
 CREATE TABLE `expense_categories` (
@@ -436,7 +484,7 @@ CREATE TABLE `locations` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `locations_code_unique` (`code`),
   KEY `locations_is_active_index` (`is_active`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `loyalty_points`;
 CREATE TABLE `loyalty_points` (
@@ -515,7 +563,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE `notifications` (
@@ -712,6 +760,23 @@ CREATE TABLE `payments` (
   CONSTRAINT `payments_payment_method_id_foreign` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `payroll_details`;
+CREATE TABLE `payroll_details` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `payroll_id` bigint unsigned NOT NULL,
+  `type` enum('earning','deduction') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `percentage` decimal(5,2) DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `payroll_details_payroll_id_index` (`payroll_id`),
+  KEY `payroll_details_type_index` (`type`),
+  CONSTRAINT `payroll_details_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `payrolls`;
 CREATE TABLE `payrolls` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -775,7 +840,7 @@ CREATE TABLE `positions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `positions_title_unique` (`title`),
   KEY `positions_is_active_index` (`is_active`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `promotions`;
 CREATE TABLE `promotions` (
@@ -867,7 +932,7 @@ CREATE TABLE `recipe_ingredients` (
   KEY `recipe_ingredients_ingredient_id_foreign` (`ingredient_id`),
   CONSTRAINT `recipe_ingredients_ingredient_id_foreign` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `recipe_ingredients_recipe_id_foreign` FOREIGN KEY (`recipe_id`) REFERENCES `recipes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=167 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `recipes`;
 CREATE TABLE `recipes` (
@@ -880,7 +945,7 @@ CREATE TABLE `recipes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `recipes_menu_item_id_unique` (`menu_item_id`),
   CONSTRAINT `recipes_menu_item_id_foreign` FOREIGN KEY (`menu_item_id`) REFERENCES `menu_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `reservations`;
 CREATE TABLE `reservations` (
@@ -972,6 +1037,26 @@ CREATE TABLE `settings` (
   CONSTRAINT `settings_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `shift_templates`;
+CREATE TABLE `shift_templates` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `location_id` bigint unsigned NOT NULL,
+  `position_id` bigint unsigned DEFAULT NULL,
+  `name` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `day_of_week` tinyint unsigned NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shift_templates_location_id_index` (`location_id`),
+  KEY `shift_templates_position_id_index` (`position_id`),
+  KEY `shift_templates_day_of_week_index` (`day_of_week`),
+  CONSTRAINT `shift_templates_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `shift_templates_position_id_foreign` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `shifts`;
 CREATE TABLE `shifts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -981,6 +1066,10 @@ CREATE TABLE `shifts` (
   `date` date NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
+  `actual_start_time` time DEFAULT NULL,
+  `actual_end_time` time DEFAULT NULL,
+  `calculated_hours` decimal(10,2) DEFAULT NULL,
+  `published_at` timestamp NULL DEFAULT NULL,
   `status` enum('scheduled','completed','cancelled','no_show') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'scheduled',
   `notes` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -989,6 +1078,7 @@ CREATE TABLE `shifts` (
   KEY `shifts_position_id_foreign` (`position_id`),
   KEY `shifts_employee_id_date_index` (`employee_id`,`date`),
   KEY `shifts_location_id_date_index` (`location_id`,`date`),
+  KEY `shifts_status_index` (`status`),
   CONSTRAINT `shifts_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
   CONSTRAINT `shifts_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE,
   CONSTRAINT `shifts_position_id_foreign` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE SET NULL
@@ -1018,7 +1108,7 @@ CREATE TABLE `suppliers` (
   KEY `suppliers_type_index` (`type`),
   KEY `suppliers_is_active_index` (`is_active`),
   CONSTRAINT `suppliers_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `tables`;
 CREATE TABLE `tables` (
@@ -1034,6 +1124,24 @@ CREATE TABLE `tables` (
   KEY `tables_status_index` (`status`),
   CONSTRAINT `tables_floor_id_foreign` FOREIGN KEY (`floor_id`) REFERENCES `floors` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `time_off_balances`;
+CREATE TABLE `time_off_balances` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `employee_id` bigint unsigned NOT NULL,
+  `year` int unsigned NOT NULL,
+  `vacation_hours_available` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `vacation_hours_used` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `sick_hours_available` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `sick_hours_used` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `personal_hours_available` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `personal_hours_used` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `time_off_balances_employee_id_year_unique` (`employee_id`,`year`),
+  CONSTRAINT `time_off_balances_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `time_off_requests`;
 CREATE TABLE `time_off_requests` (
@@ -1076,7 +1184,7 @@ CREATE TABLE `units` (
   UNIQUE KEY `units_code_unique` (`code`),
   KEY `units_base_unit_foreign` (`base_unit`),
   CONSTRAINT `units_base_unit_foreign` FOREIGN KEY (`base_unit`) REFERENCES `units` (`code`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -1098,6 +1206,7 @@ CREATE TABLE `users` (
   KEY `users_is_active_index` (`is_active`),
   CONSTRAINT `users_default_location_id_foreign` FOREIGN KEY (`default_location_id`) REFERENCES `locations` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
 INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `auditable_type`, `auditable_id`, `ip_address`, `user_agent`, `metadata`, `created_at`, `updated_at`) VALUES
@@ -1222,13 +1331,13 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `auditable_type`, `auditabl
 (119, 2, 'view:report', NULL, NULL, '192.168.125.133', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0', '{\"path\": \"/api/admin/view\", \"request_id\": \"5bd6576b7242\"}', '2025-11-11 06:30:01', '2025-11-11 06:30:01'),
 (120, 15, 'create:order', NULL, NULL, '192.168.28.116', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0', '{\"path\": \"/api/admin/create\", \"request_id\": \"0a2738b81970\"}', '2025-11-03 01:26:01', '2025-11-03 01:26:01');
 INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
-('laravel-cache-5c785c036466adea360111aa28563bfd556b5fba', 'i:5;', 1764398317),
-('laravel-cache-5c785c036466adea360111aa28563bfd556b5fba:timer', 'i:1764398317;', 1764398317),
+('laravel-cache-5c785c036466adea360111aa28563bfd556b5fba', 'i:1;', 1764405427),
+('laravel-cache-5c785c036466adea360111aa28563bfd556b5fba:timer', 'i:1764405427;', 1764405427),
 ('laravel-cache-admin@nkh.com|127.0.0.1', 'i:1;', 1764319858),
 ('laravel-cache-admin@nkh.com|127.0.0.1:timer', 'i:1764319858;', 1764319858),
 ('laravel-cache-customer@nkh.com|127.0.0.1', 'i:1;', 1764320574),
 ('laravel-cache-customer@nkh.com|127.0.0.1:timer', 'i:1764320574;', 1764320574),
-('laravel-cache-homepage_data', 'a:4:{s:13:\"featuredItems\";a:3:{i:0;a:21:{s:2:\"id\";i:8;s:11:\"location_id\";i:1;s:11:\"category_id\";i:2;s:4:\"name\";s:8:\"Pad Thai\";s:3:\"sku\";N;s:4:\"slug\";s:8:\"pad-thai\";s:11:\"description\";s:67:\"Classic Thai stir-fried noodles with shrimp, tofu, and bean sprouts\";s:5:\"price\";d:14;s:4:\"cost\";d:4.5;s:10:\"image_path\";s:31:\"/images/menu-items/pad-thai.jpg\";s:10:\"is_popular\";b:1;s:11:\"is_featured\";b:1;s:14:\"featured_order\";i:1;s:5:\"badge\";N;s:9:\"is_active\";b:1;s:13:\"display_order\";i:0;s:6:\"rating\";N;s:13:\"reviews_count\";i:0;s:9:\"prep_time\";N;s:10:\"created_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}s:10:\"updated_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}i:1;a:21:{s:2:\"id\";i:2;s:11:\"location_id\";i:1;s:11:\"category_id\";i:1;s:4:\"name\";s:13:\"Chicken Satay\";s:3:\"sku\";N;s:4:\"slug\";s:13:\"chicken-satay\";s:11:\"description\";s:78:\"Grilled chicken skewers marinated in aromatic spices, served with peanut sauce\";s:5:\"price\";d:12;s:4:\"cost\";d:4.5;s:10:\"image_path\";s:36:\"/images/menu-items/chicken-satay.jpg\";s:10:\"is_popular\";b:1;s:11:\"is_featured\";b:1;s:14:\"featured_order\";i:2;s:5:\"badge\";N;s:9:\"is_active\";b:1;s:13:\"display_order\";i:0;s:6:\"rating\";N;s:13:\"reviews_count\";i:0;s:9:\"prep_time\";N;s:10:\"created_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}s:10:\"updated_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}i:2;a:21:{s:2:\"id\";i:4;s:11:\"location_id\";i:1;s:11:\"category_id\";i:1;s:4:\"name\";s:18:\"Green Papaya Salad\";s:3:\"sku\";N;s:4:\"slug\";s:12:\"papaya-salad\";s:11:\"description\";s:77:\"Fresh and tangy salad with shredded green papaya, tomatoes, and lime dressing\";s:5:\"price\";d:9;s:4:\"cost\";d:2.5;s:10:\"image_path\";s:35:\"/images/menu-items/papaya-salad.jpg\";s:10:\"is_popular\";b:1;s:11:\"is_featured\";b:1;s:14:\"featured_order\";i:4;s:5:\"badge\";N;s:9:\"is_active\";b:1;s:13:\"display_order\";i:0;s:6:\"rating\";N;s:13:\"reviews_count\";i:0;s:9:\"prep_time\";N;s:10:\"created_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}s:10:\"updated_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}}s:10:\"categories\";a:6:{i:0;a:6:{s:2:\"id\";i:6;s:4:\"name\";s:14:\"Hot Appetizers\";s:4:\"slug\";s:14:\"hot-appetizers\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:1;a:6:{s:2:\"id\";i:15;s:4:\"name\";s:20:\"Traditional Desserts\";s:4:\"slug\";s:20:\"traditional-desserts\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:2;a:6:{s:2:\"id\";i:9;s:4:\"name\";s:19:\"Grilled Specialties\";s:4:\"slug\";s:19:\"grilled-specialties\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:3;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:3;a:6:{s:2:\"id\";i:18;s:4:\"name\";s:13:\"Hot Beverages\";s:4:\"slug\";s:13:\"hot-beverages\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:4;a:6:{s:2:\"id\";i:13;s:4:\"name\";s:17:\"Traditional Soups\";s:4:\"slug\";s:17:\"traditional-soups\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:5;a:6:{s:2:\"id\";i:7;s:4:\"name\";s:15:\"Cold Appetizers\";s:4:\"slug\";s:15:\"cold-appetizers\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}}s:12:\"testimonials\";a:3:{i:0;a:6:{s:2:\"id\";i:1;s:13:\"customer_name\";s:13:\"Sarah Johnson\";s:13:\"customer_role\";s:16:\"Regular Customer\";s:7:\"content\";s:142:\"Best food delivery experience! The quality is consistently amazing and delivery is always on time. The gourmet burger is my absolute favorite!\";s:6:\"rating\";i:5;s:6:\"avatar\";s:4:\"👩\";}i:1;a:6:{s:2:\"id\";i:2;s:13:\"customer_name\";s:12:\"Michael Chen\";s:13:\"customer_role\";s:15:\"Food Enthusiast\";s:7:\"content\";s:137:\"I\'ve tried many restaurants, but NKH stands out. Fresh ingredients, creative recipes, and excellent customer service. Highly recommended!\";s:6:\"rating\";i:5;s:6:\"avatar\";s:4:\"👨\";}i:2;a:6:{s:2:\"id\";i:3;s:13:\"customer_name\";s:15:\"Emily Rodriguez\";s:13:\"customer_role\";s:14:\"Happy Customer\";s:7:\"content\";s:121:\"The pasta carbonara is authentic and delicious! Love the easy ordering process and the food always arrives hot and fresh.\";s:6:\"rating\";i:5;s:6:\"avatar\";s:11:\"👩‍🦱\";}}s:5:\"stats\";a:4:{s:10:\"totalItems\";i:33;s:13:\"averageRating\";d:4.9;s:14:\"totalCustomers\";i:11;s:19:\"averageDeliveryTime\";i:30;}}', 1764398332);
+('laravel-cache-homepage_data', 'a:4:{s:13:\"featuredItems\";a:3:{i:0;a:21:{s:2:\"id\";i:8;s:11:\"location_id\";i:1;s:11:\"category_id\";i:2;s:4:\"name\";s:8:\"Pad Thai\";s:3:\"sku\";N;s:4:\"slug\";s:8:\"pad-thai\";s:11:\"description\";s:67:\"Classic Thai stir-fried noodles with shrimp, tofu, and bean sprouts\";s:5:\"price\";d:14;s:4:\"cost\";d:4.5;s:10:\"image_path\";s:31:\"/images/menu-items/pad-thai.jpg\";s:10:\"is_popular\";b:1;s:11:\"is_featured\";b:1;s:14:\"featured_order\";i:1;s:5:\"badge\";N;s:9:\"is_active\";b:1;s:13:\"display_order\";i:0;s:6:\"rating\";N;s:13:\"reviews_count\";i:0;s:9:\"prep_time\";N;s:10:\"created_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}s:10:\"updated_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}i:1;a:21:{s:2:\"id\";i:2;s:11:\"location_id\";i:1;s:11:\"category_id\";i:1;s:4:\"name\";s:13:\"Chicken Satay\";s:3:\"sku\";N;s:4:\"slug\";s:13:\"chicken-satay\";s:11:\"description\";s:78:\"Grilled chicken skewers marinated in aromatic spices, served with peanut sauce\";s:5:\"price\";d:12;s:4:\"cost\";d:4.5;s:10:\"image_path\";s:36:\"/images/menu-items/chicken-satay.jpg\";s:10:\"is_popular\";b:1;s:11:\"is_featured\";b:1;s:14:\"featured_order\";i:2;s:5:\"badge\";N;s:9:\"is_active\";b:1;s:13:\"display_order\";i:0;s:6:\"rating\";N;s:13:\"reviews_count\";i:0;s:9:\"prep_time\";N;s:10:\"created_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}s:10:\"updated_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}i:2;a:21:{s:2:\"id\";i:4;s:11:\"location_id\";i:1;s:11:\"category_id\";i:1;s:4:\"name\";s:18:\"Green Papaya Salad\";s:3:\"sku\";N;s:4:\"slug\";s:12:\"papaya-salad\";s:11:\"description\";s:77:\"Fresh and tangy salad with shredded green papaya, tomatoes, and lime dressing\";s:5:\"price\";d:9;s:4:\"cost\";d:2.5;s:10:\"image_path\";s:35:\"/images/menu-items/papaya-salad.jpg\";s:10:\"is_popular\";b:1;s:11:\"is_featured\";b:1;s:14:\"featured_order\";i:4;s:5:\"badge\";N;s:9:\"is_active\";b:1;s:13:\"display_order\";i:0;s:6:\"rating\";N;s:13:\"reviews_count\";i:0;s:9:\"prep_time\";N;s:10:\"created_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}s:10:\"updated_at\";O:25:\"Illuminate\\Support\\Carbon\":3:{s:4:\"date\";s:26:\"2025-11-26 08:02:49.000000\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}}s:10:\"categories\";a:6:{i:0;a:6:{s:2:\"id\";i:6;s:4:\"name\";s:14:\"Hot Appetizers\";s:4:\"slug\";s:14:\"hot-appetizers\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:1;a:6:{s:2:\"id\";i:15;s:4:\"name\";s:20:\"Traditional Desserts\";s:4:\"slug\";s:20:\"traditional-desserts\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:2;a:6:{s:2:\"id\";i:9;s:4:\"name\";s:19:\"Grilled Specialties\";s:4:\"slug\";s:19:\"grilled-specialties\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:3;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:3;a:6:{s:2:\"id\";i:18;s:4:\"name\";s:13:\"Hot Beverages\";s:4:\"slug\";s:13:\"hot-beverages\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:4;a:6:{s:2:\"id\";i:13;s:4:\"name\";s:17:\"Traditional Soups\";s:4:\"slug\";s:17:\"traditional-soups\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}i:5;a:6:{s:2:\"id\";i:7;s:4:\"name\";s:15:\"Cold Appetizers\";s:4:\"slug\";s:15:\"cold-appetizers\";s:4:\"icon\";s:7:\"🍽️\";s:5:\"count\";i:0;s:5:\"color\";s:26:\"from-gray-500 to-slate-500\";}}s:12:\"testimonials\";a:3:{i:0;a:6:{s:2:\"id\";i:1;s:13:\"customer_name\";s:13:\"Sarah Johnson\";s:13:\"customer_role\";s:16:\"Regular Customer\";s:7:\"content\";s:142:\"Best food delivery experience! The quality is consistently amazing and delivery is always on time. The gourmet burger is my absolute favorite!\";s:6:\"rating\";i:5;s:6:\"avatar\";s:4:\"👩\";}i:1;a:6:{s:2:\"id\";i:2;s:13:\"customer_name\";s:12:\"Michael Chen\";s:13:\"customer_role\";s:15:\"Food Enthusiast\";s:7:\"content\";s:137:\"I\'ve tried many restaurants, but NKH stands out. Fresh ingredients, creative recipes, and excellent customer service. Highly recommended!\";s:6:\"rating\";i:5;s:6:\"avatar\";s:4:\"👨\";}i:2;a:6:{s:2:\"id\";i:3;s:13:\"customer_name\";s:15:\"Emily Rodriguez\";s:13:\"customer_role\";s:14:\"Happy Customer\";s:7:\"content\";s:121:\"The pasta carbonara is authentic and delicious! Love the easy ordering process and the food always arrives hot and fresh.\";s:6:\"rating\";i:5;s:6:\"avatar\";s:11:\"👩‍🦱\";}}s:5:\"stats\";a:4:{s:10:\"totalItems\";i:33;s:13:\"averageRating\";d:4.9;s:14:\"totalCustomers\";i:11;s:19:\"averageDeliveryTime\";i:30;}}', 1764402862);
 
 
 INSERT INTO `categories` (`id`, `location_id`, `parent_id`, `slug`, `display_order`, `is_active`, `image`, `created_at`, `updated_at`) VALUES
@@ -1311,23 +1420,24 @@ INSERT INTO `customers` (`id`, `customer_code`, `loyalty_points`, `total_spent`,
 (9, 'CUST-73009', 483, '108.09', 'km', '\"no_spicy\"', 1, 28, 1, '1967-11-04', 'other', NULL, 0, NULL, '2025-11-26 08:02:54', '2025-11-26 08:03:01'),
 (10, 'CUST-46608', 236, '1091.57', 'km', '\"vegan\"', 0, 29, 1, '1996-12-08', 'male', NULL, 0, NULL, '2025-11-26 08:02:54', '2025-11-26 08:03:01'),
 (11, 'CUST-67677', 335, '731.47', 'km', NULL, 1, 30, 1, '1978-05-02', 'male', NULL, 0, NULL, '2025-11-26 08:02:54', '2025-11-26 08:03:01');
-INSERT INTO `employees` (`id`, `user_id`, `position_id`, `location_id`, `employee_code`, `hire_date`, `salary_type`, `salary`, `address`, `status`, `created_at`, `updated_at`) VALUES
-(1, 32, 3, 1, 'NKH-DT-EMP-1507', '2025-08-05', 'monthly', '2200.00', '160 Street 51, Daun Penh District, Phnom Penh', 'on_leave', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(2, 6, 3, 1, 'NKH-DT-EMP-7701', '2025-08-12', 'monthly', '2200.00', '883 Monivong Blvd, Mean Chey District, Phnom Penh', 'active', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
-(3, 7, 4, 1, 'NKH-DT-EMP-3674', '2025-05-02', 'monthly', '1600.00', '675 Street 51, Chamkarmon District, Phnom Penh', 'inactive', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
-(4, 8, 4, 1, 'NKH-DT-EMP-2091', '2025-07-04', 'monthly', '1600.00', '576 Norodom Blvd, Mean Chey District, Phnom Penh', 'on_leave', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
-(5, 9, 7, 1, 'NKH-DT-EMP-9604', '2025-09-28', 'monthly', '1400.00', '748 Street 271, Chamkarmon District, Phnom Penh', 'active', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
-(6, 10, 7, 1, 'NKH-DT-EMP-6779', '2024-12-04', 'monthly', '1400.00', '515 Sihanouk Blvd, Tuol Kork District, Phnom Penh', 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
-(7, 11, 8, 1, 'NKH-DT-EMP-5892', '2025-02-05', 'hourly', '8.50', '249 Mao Tse Toung Blvd, Chamkarmon District, Phnom Penh', 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
-(8, 12, 8, 1, 'NKH-DT-EMP-5015', '2025-07-13', 'hourly', '8.50', '178 Monivong Blvd, Sen Sok District, Phnom Penh', 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
-(9, 13, 8, 1, 'NKH-DT-EMP-4245', '2024-11-30', 'hourly', '8.50', '647 Street 51, Tuol Kork District, Phnom Penh', 'on_leave', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
-(10, 14, 8, 1, 'NKH-DT-EMP-7866', '2025-05-09', 'hourly', '8.50', '353 Street 310, Daun Penh District, Phnom Penh', 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
-(11, 15, 5, 1, 'NKH-DT-EMP-8336', '2025-06-30', 'hourly', '12.00', '703 Monivong Blvd, Chamkarmon District, Phnom Penh', 'active', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
-(12, 16, 5, 1, 'NKH-DT-EMP-6558', '2025-02-02', 'hourly', '12.00', '492 Russian Blvd, Mean Chey District, Phnom Penh', 'active', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
-(13, 17, 9, 1, 'NKH-DT-EMP-9955', '2025-01-09', 'hourly', '10.00', '218 Street 51, Sen Sok District, Phnom Penh', 'active', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
-(14, 18, 9, 1, 'NKH-DT-EMP-3339', '2025-01-03', 'hourly', '10.00', '320 Street 271, Mean Chey District, Phnom Penh', 'on_leave', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
-(15, 19, 10, 1, 'NKH-DT-EMP-5974', '2025-04-28', 'hourly', '9.00', '418 Street 271, Daun Penh District, Phnom Penh', 'active', '2025-11-26 08:02:54', '2025-11-26 08:02:54'),
-(16, 20, 10, 1, 'NKH-DT-EMP-6313', '2025-04-24', 'hourly', '9.00', '63 Street 310, Mean Chey District, Phnom Penh', 'active', '2025-11-26 08:02:54', '2025-11-26 08:02:54');
+INSERT INTO `employees` (`id`, `user_id`, `position_id`, `department`, `location_id`, `employee_code`, `hire_date`, `salary_type`, `hourly_rate`, `salary`, `address`, `phone`, `emergency_contact_name`, `emergency_contact_phone`, `date_of_birth`, `preferred_shift_start`, `status`, `created_at`, `updated_at`) VALUES
+(1, 32, 3, NULL, 1, 'NKH-DT-EMP-1507', '2025-08-05', 'monthly', NULL, '2200.00', '160 Street 51, Daun Penh District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'on_leave', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
+(2, 6, 3, NULL, 1, 'NKH-DT-EMP-7701', '2025-08-12', 'monthly', NULL, '2200.00', '883 Monivong Blvd, Mean Chey District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
+(3, 7, 4, NULL, 1, 'NKH-DT-EMP-3674', '2025-05-02', 'monthly', NULL, '1600.00', '675 Street 51, Chamkarmon District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'inactive', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
+(4, 8, 4, NULL, 1, 'NKH-DT-EMP-2091', '2025-07-04', 'monthly', NULL, '1600.00', '576 Norodom Blvd, Mean Chey District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'on_leave', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
+(5, 9, 7, NULL, 1, 'NKH-DT-EMP-9604', '2025-09-28', 'monthly', NULL, '1400.00', '748 Street 271, Chamkarmon District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:51', '2025-11-26 08:02:51'),
+(6, 10, 7, NULL, 1, 'NKH-DT-EMP-6779', '2024-12-04', 'monthly', NULL, '1400.00', '515 Sihanouk Blvd, Tuol Kork District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
+(7, 11, 8, NULL, 1, 'NKH-DT-EMP-5892', '2025-02-05', 'hourly', NULL, '8.50', '249 Mao Tse Toung Blvd, Chamkarmon District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
+(8, 12, 8, NULL, 1, 'NKH-DT-EMP-5015', '2025-07-13', 'hourly', NULL, '8.50', '178 Monivong Blvd, Sen Sok District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
+(9, 13, 8, NULL, 1, 'NKH-DT-EMP-4245', '2024-11-30', 'hourly', NULL, '8.50', '647 Street 51, Tuol Kork District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'on_leave', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
+(10, 14, 8, NULL, 1, 'NKH-DT-EMP-7866', '2025-05-09', 'hourly', NULL, '8.50', '353 Street 310, Daun Penh District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:52', '2025-11-26 08:02:52'),
+(11, 15, 5, NULL, 1, 'NKH-DT-EMP-8336', '2025-06-30', 'hourly', NULL, '12.00', '703 Monivong Blvd, Chamkarmon District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
+(12, 16, 5, NULL, 1, 'NKH-DT-EMP-6558', '2025-02-02', 'hourly', NULL, '12.00', '492 Russian Blvd, Mean Chey District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
+(13, 17, 9, NULL, 1, 'NKH-DT-EMP-9955', '2025-01-09', 'hourly', NULL, '10.00', '218 Street 51, Sen Sok District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
+(14, 18, 9, NULL, 1, 'NKH-DT-EMP-3339', '2025-01-03', 'hourly', NULL, '10.00', '320 Street 271, Mean Chey District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'on_leave', '2025-11-26 08:02:53', '2025-11-26 08:02:53'),
+(15, 19, 10, NULL, 1, 'NKH-DT-EMP-5974', '2025-04-28', 'hourly', NULL, '9.00', '418 Street 271, Daun Penh District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:54', '2025-11-26 08:02:54'),
+(16, 20, 10, NULL, 1, 'NKH-DT-EMP-6313', '2025-04-24', 'hourly', NULL, '9.00', '63 Street 310, Mean Chey District, Phnom Penh', NULL, NULL, NULL, NULL, NULL, 'active', '2025-11-26 08:02:54', '2025-11-26 08:02:54');
+
 INSERT INTO `expense_categories` (`id`, `location_id`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Food Supplies', 'Ingredients, raw materials, and food products.', 1, '2025-11-26 08:03:01', '2025-11-26 08:03:01'),
 (2, 1, 'Utilities', 'Electricity, water, and internet services.', 1, '2025-11-26 08:03:01', '2025-11-26 08:03:01'),
@@ -1737,8 +1847,7 @@ INSERT INTO `leave_requests` (`id`, `employee_id`, `location_id`, `start_date`, 
 (30, 15, 1, '2026-02-07', '2026-02-11', 'unpaid', 'Annual vacation', 'approved', '2026-01-30 08:02:54', '2026-02-04 08:02:54'),
 (31, 16, 1, '2026-02-07', '2026-02-09', 'unpaid', 'Family emergency', 'pending', '2026-01-28 08:02:54', '2026-02-05 08:02:54'),
 (32, 16, 1, '2026-02-10', '2026-02-14', 'annual', 'Personal matters', 'approved', '2026-01-28 08:02:54', '2026-02-03 08:02:54');
-INSERT INTO `locations` (`id`, `code`, `name`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `country`, `phone`, `is_active`, `accepts_online_orders`, `accepts_pickup`, `accepts_delivery`, `created_at`, `updated_at`) VALUES
-(1, 'NKH-DT', 'NKH Downtown Flagship', '123 Main Street', 'Downtown District', 'Phnom Penh', 'Phnom Penh', '12000', 'Cambodia', '+855-23-123-456', 1, 1, 1, 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43');
+
 INSERT INTO `loyalty_points` (`id`, `customer_id`, `order_id`, `location_id`, `type`, `points`, `balance_after`, `occurred_at`, `notes`, `created_at`, `updated_at`) VALUES
 (1, 9, 218, 1, 'adjust', -4, -4, '2025-10-04 13:52:59', NULL, '2025-11-26 08:02:59', '2025-11-26 08:02:59'),
 (2, 1, 33, 1, 'redeem', -7, -7, '2025-10-16 18:37:59', NULL, '2025-11-26 08:02:59', '2025-11-26 08:02:59'),
@@ -2079,7 +2188,14 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (85, '2025_11_27_160100_add_order_item_to_inventory_transactions', 2),
 (86, '2025_11_27_181500_verify_and_cleanup_customer_requests_data', 3),
 (87, '2025_11_27_181501_drop_customer_requests_table', 4),
-(88, '2025_11_27_181502_verify_orders_approval_columns', 5);
+(88, '2025_11_27_181502_verify_orders_approval_columns', 5),
+(101, '2024_11_29_create_attendance_metrics_table', 6),
+(102, '2024_11_29_create_employment_history_table', 6),
+(103, '2024_11_29_create_payroll_details_table', 6),
+(104, '2024_11_29_create_shift_templates_table', 6),
+(105, '2024_11_29_create_time_off_balances_table', 6),
+(106, '2024_11_29_enhance_employees_table', 6),
+(107, '2024_11_29_enhance_shifts_table', 6);
 
 
 
@@ -3369,6 +3485,7 @@ INSERT INTO `payments` (`id`, `invoice_id`, `payment_method_id`, `amount`, `tran
 (59, 99, 5, '82.50', 'BANK-6926B4336FBFC', 'REF-20251126-1003-ONO', 'completed', '2025-10-27 17:32:42', 'Payment processed successfully', '2025-11-26 08:02:59', '2025-11-26 08:02:59'),
 (60, 100, 4, '59.95', 'DIGI-6926B433702AE', 'REF-20251126-4932-8O6', 'completed', '2025-09-02 12:39:29', 'Split payment', '2025-11-26 08:02:59', '2025-11-26 08:02:59');
 
+
 INSERT INTO `permissions` (`id`, `name`, `slug`, `description`, `created_at`, `updated_at`) VALUES
 (1, 'Manage Users', 'users.manage', NULL, '2025-11-26 08:02:42', '2025-11-26 08:02:42'),
 (2, 'Manage Roles', 'roles.manage', NULL, '2025-11-26 08:02:42', '2025-11-26 08:02:42'),
@@ -3394,227 +3511,15 @@ INSERT INTO `permissions` (`id`, `name`, `slug`, `description`, `created_at`, `u
 (22, 'Manage Promotions', 'promotions.manage', NULL, '2025-11-26 08:02:42', '2025-11-26 08:02:42'),
 (23, 'View Reports', 'reports.view', NULL, '2025-11-26 08:02:42', '2025-11-26 08:02:42');
 
-INSERT INTO `positions` (`id`, `title`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'General Manager', 'Overall restaurant operations management', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(2, 'Assistant Manager', 'Assists in daily operations and staff supervision', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(3, 'Head Chef', 'Kitchen operations and menu development', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(4, 'Sous Chef', 'Assists head chef and manages kitchen staff', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(5, 'Line Cook', 'Food preparation and cooking', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(6, 'Prep Cook', 'Food preparation and ingredient prep', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(7, 'Head Waiter', 'Supervises wait staff and ensures service quality', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(8, 'Waiter', 'Customer service and order taking', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(9, 'Bartender', 'Beverage preparation and bar service', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(10, 'Cashier', 'Payment processing and customer checkout', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(11, 'Host/Hostess', 'Guest greeting and seating coordination', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(12, 'Dishwasher', 'Kitchen cleaning and dishware maintenance', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(13, 'Cleaner', 'Restaurant cleaning and maintenance', 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43');
+
 INSERT INTO `promotions` (`id`, `location_id`, `code`, `name`, `description`, `type`, `value`, `min_order_amount`, `usage_limit`, `per_customer_limit`, `start_at`, `end_at`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 1, 'NY2025', 'New Year 10% Off', 'Celebrate New Year with 10% off all orders.', 'percentage', '10.00', '0.00', 1000, 2, '2025-01-01 00:00:00', '2025-01-15 23:59:59', 1, '2025-11-26 08:03:01', '2025-11-26 08:03:01'),
 (2, 1, 'LUNCH5', 'Lunch Fixed $5 Off', 'Get $5 off during lunch hours.', 'fixed', '5.00', '20.00', NULL, NULL, '2025-02-01 11:00:00', '2025-02-28 14:00:00', 1, '2025-11-26 08:03:01', '2025-11-26 08:03:01'),
 (3, 1, 'HAPPYHOUR', 'Happy Hour Special', 'Evening happy hour promotion.', 'happy_hour', '0.00', NULL, NULL, NULL, '2025-03-01 17:00:00', '2025-03-31 19:00:00', 0, '2025-11-26 08:03:01', '2025-11-26 08:03:01');
 
 
-INSERT INTO `recipe_ingredients` (`id`, `recipe_id`, `ingredient_id`, `quantity`, `unit`, `created_at`, `updated_at`) VALUES
-(1, 1, 2, '151.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(2, 1, 14, '115.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(3, 1, 20, '51.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(4, 1, 23, '331.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(5, 1, 30, '492.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(6, 1, 38, '440.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(7, 1, 40, '288.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(8, 2, 10, '141.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(9, 2, 21, '488.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(10, 2, 34, '136.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(11, 3, 2, '463.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(12, 3, 9, '149.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(13, 3, 13, '388.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(14, 3, 21, '83.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(15, 3, 30, '138.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(16, 4, 6, '53.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(17, 4, 16, '453.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(18, 4, 31, '190.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(19, 4, 36, '494.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(20, 4, 39, '425.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(21, 5, 10, '118.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(22, 5, 11, '76.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(23, 5, 16, '450.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(24, 5, 19, '266.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(25, 5, 24, '213.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(26, 5, 41, '125.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(27, 5, 42, '394.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(28, 6, 11, '225.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(29, 6, 15, '91.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(30, 6, 33, '379.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(31, 7, 7, '158.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(32, 7, 9, '276.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(33, 7, 12, '423.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(34, 7, 38, '63.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(35, 7, 41, '350.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(36, 8, 2, '224.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(37, 8, 16, '365.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(38, 8, 22, '399.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(39, 8, 33, '353.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(40, 8, 35, '181.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(41, 9, 1, '345.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(42, 9, 2, '432.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(43, 9, 3, '274.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(44, 9, 9, '149.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(45, 9, 21, '164.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(46, 9, 22, '139.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(47, 10, 14, '303.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(48, 10, 24, '153.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(49, 10, 32, '319.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(50, 11, 9, '113.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(51, 11, 15, '424.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(52, 11, 22, '141.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(53, 12, 3, '174.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(54, 12, 9, '479.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(55, 12, 17, '69.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(56, 12, 21, '65.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(57, 12, 29, '307.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(58, 13, 1, '382.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(59, 13, 8, '189.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(60, 13, 13, '106.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(61, 13, 15, '324.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(62, 13, 33, '174.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(63, 13, 34, '56.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(64, 14, 6, '269.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(65, 14, 19, '319.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(66, 14, 21, '298.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(67, 14, 24, '108.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(68, 14, 28, '125.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(69, 14, 37, '91.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(70, 14, 41, '385.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(71, 15, 15, '220.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(72, 15, 22, '157.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(73, 15, 27, '350.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(74, 15, 34, '477.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(75, 16, 10, '491.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(76, 16, 15, '466.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(77, 16, 34, '91.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(78, 16, 37, '367.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(79, 17, 9, '316.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(80, 17, 11, '61.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(81, 17, 28, '133.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(82, 17, 37, '218.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(83, 17, 38, '341.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(84, 18, 9, '62.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(85, 18, 12, '383.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(86, 18, 18, '327.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(87, 18, 41, '225.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(88, 19, 4, '228.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(89, 19, 8, '189.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(90, 19, 26, '369.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(91, 19, 32, '168.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(92, 19, 35, '219.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(93, 19, 37, '148.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(94, 19, 42, '350.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(95, 20, 5, '409.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(96, 20, 18, '386.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(97, 20, 32, '377.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(98, 20, 34, '305.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(99, 21, 1, '431.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(100, 21, 9, '60.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(101, 21, 14, '396.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(102, 21, 16, '347.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(103, 21, 17, '234.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(104, 21, 36, '226.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(105, 21, 40, '468.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(106, 22, 1, '272.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(107, 22, 3, '122.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(108, 22, 6, '348.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(109, 22, 7, '249.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(110, 22, 11, '407.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(111, 22, 29, '407.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(112, 22, 30, '174.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(113, 23, 15, '451.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(114, 23, 17, '99.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(115, 23, 19, '153.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(116, 24, 8, '449.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(117, 24, 18, '464.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(118, 24, 20, '473.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(119, 24, 26, '331.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(120, 24, 29, '430.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(121, 24, 31, '76.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(122, 25, 7, '60.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(123, 25, 26, '383.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(124, 25, 38, '210.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(125, 25, 41, '354.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(126, 26, 5, '470.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(127, 26, 8, '476.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(128, 26, 18, '280.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(129, 26, 30, '435.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(130, 26, 36, '130.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(131, 26, 42, '235.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(132, 27, 22, '121.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(133, 27, 30, '141.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(134, 27, 31, '428.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(135, 28, 17, '449.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(136, 28, 24, '106.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(137, 28, 37, '224.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(138, 28, 42, '182.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(139, 29, 1, '295.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(140, 29, 9, '286.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(141, 29, 11, '426.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(142, 29, 14, '103.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(143, 29, 19, '135.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(144, 29, 37, '323.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(145, 29, 42, '128.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(146, 30, 7, '351.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(147, 30, 15, '239.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(148, 30, 28, '315.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(149, 30, 37, '304.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(150, 30, 39, '300.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(151, 31, 5, '51.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(152, 31, 8, '59.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(153, 31, 39, '214.000', 'unit', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(154, 32, 11, '331.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(155, 32, 12, '353.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(156, 32, 24, '212.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(157, 32, 27, '203.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(158, 32, 29, '151.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(159, 32, 36, '327.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(160, 33, 5, '254.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(161, 33, 18, '358.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(162, 33, 24, '415.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(163, 33, 33, '284.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(164, 33, 36, '104.000', 'l', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(165, 33, 37, '444.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(166, 33, 41, '198.000', 'kg', '2025-11-26 08:02:50', '2025-11-26 08:02:50');
-INSERT INTO `recipes` (`id`, `menu_item_id`, `yield_portions`, `instructions`, `created_at`, `updated_at`) VALUES
-(1, 1, 3, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(2, 2, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(3, 3, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(4, 4, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(5, 5, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(6, 6, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(7, 7, 3, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(8, 8, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(9, 9, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(10, 10, 3, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(11, 11, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(12, 12, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(13, 13, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(14, 14, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(15, 15, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(16, 16, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(17, 17, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(18, 18, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(19, 19, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(20, 20, 3, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(21, 21, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(22, 22, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(23, 23, 3, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(24, 24, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(25, 25, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(26, 26, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(27, 27, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(28, 28, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(29, 29, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(30, 30, 1, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(31, 31, 3, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(32, 32, 2, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
-(33, 33, 4, '1. Prepare all ingredients\n2. Heat oil in a large pan/wok\n3. Cook main ingredients\n4. Add seasonings and spices\n5. Combine with remaining ingredients\n6. Simmer until done\n7. Check seasoning and adjust if needed\n8. Plate and garnish', '2025-11-26 08:02:50', '2025-11-26 08:02:50');
+
+
 INSERT INTO `reservations` (`id`, `code`, `location_id`, `customer_id`, `table_id`, `reservation_number`, `reserved_for`, `duration_minutes`, `guest_count`, `party_size`, `reservation_date`, `reservation_time`, `status`, `special_requests`, `notes`, `created_at`, `updated_at`) VALUES
 (1, 'bd03f34aac72d617bfd1', 1, 2, 6, 'RES-NKH-DT-20251021-1673', '2025-11-26 08:03:00', 60, 2, 2, '2025-10-21', '12:00:00', 'cancelled', 'Window seat preferred', 'Regular customer', '2025-10-15 18:26:58', '2025-10-21 20:26:58'),
 (2, 'c079dd9d6ec3c113307f', 1, 4, 4, 'RES-NKH-DT-20251120-5595', '2025-11-26 08:03:00', 60, 2, 4, '2025-11-20', '11:30:00', 'completed', 'Birthday celebration', 'VIP guest', '2025-11-18 11:54:59', '2025-11-20 12:54:59'),
@@ -3843,19 +3748,25 @@ INSERT INTO `roles` (`id`, `name`, `slug`, `description`, `created_at`, `updated
 (6, 'Employee', 'employee', 'General employee access', '2025-11-26 08:02:42', '2025-11-26 08:02:42'),
 (7, 'Customer', 'customer', 'Regular customer access', '2025-11-26 08:02:42', '2025-11-26 08:02:42');
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('kivpkqnFFu5YEuHav6r5FjRL5EVvCHKdrYed2J48', 21, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiY3VuR2ZaTWNoUG92Wld5aXlpQWhCVjlEUkFHOWJUWkZmclBWTjJNNyI7czoyMjoiUEhQREVCVUdCQVJfU1RBQ0tfREFUQSI7YToxOntzOjI2OiIwMUtCNzU2Q0NWTUQzQVZaU1pWUDFaQlhaTiI7Tjt9czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6MzoidXJsIjthOjE6e3M6ODoiaW50ZW5kZWQiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9kYXNoYm9hcmQiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToyMTt9', 1764398150),
-('UytLsPP3qFXFcFLuUIlVuBRaqzOuAez3E5XOW8Sf', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiQ3hWQ0NkMjNDQkZuNkFRWk96b01sRHpBNml6V0ZHNUUyMkhjaDVESiI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozNzoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2FkbWluL2Rhc2hib2FyZCI7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjI3OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvbG9naW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjIyOiJQSFBERUJVR0JBUl9TVEFDS19EQVRBIjthOjE6e3M6MjY6IjAxS0I3NTlNNjc0Vjg0WUNGTlZWOTg5TVRaIjtOO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1764398262);
+('57IzchFXSX7ynSZHMPbVoFvVwi9qSmFP0d2syyIb', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YToyOntzOjY6Il90b2tlbiI7czo0MDoibnZVaW9tOXpVSWVoWm1HMEhCa3h5U01oYWNSeHhOTk40UEVhOWkxdSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1764402711),
+('5Tmj4jfkwugTCj3gPME8pItsl69nsKA4j69FxGXR', 5, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiRXVobXRZcEswY3hJS1NOZWo0aUNEdlhJaWtaU2tTa1JKa2czckJRcCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzg6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9lbXBsb3llZS9raXRjaGVuIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozMToiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2Rhc2hib2FyZCI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjU7czoyMjoiUEhQREVCVUdCQVJfU1RBQ0tfREFUQSI7YTowOnt9fQ==', 1764405272),
+('aqOctsgqdi2cCkniXUAaNa0aOz1LoonMCDCePITP', 21, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoieGVzMFRLSEo4bFBZenFyT3RGaEJnUUdleHpwWTd5WFhlV3Fxc0RrYiI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozMToiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2Rhc2hib2FyZCI7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjMxOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvZGFzaGJvYXJkIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MjE7czoyMjoiUEhQREVCVUdCQVJfU1RBQ0tfREFUQSI7YTowOnt9fQ==', 1764405262),
+('E0qdaLLKqRqM5mlFNJ0dJow7TS0vsPO3mMilCeA3', 21, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiM2FKTWpSWUxuRGJ1amZKSkNXeHhPTERnZ0lrWGZGbUR0SkhZU1NBQSI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozMzoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3Jlc2VydmF0aW9uIjt9czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9kYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToyMTt9', 1764402702),
+('H7Xq0h9DAg7ga0zQoIUuMoaEpNU5gkAOk9gSjhQc', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YToyOntzOjY6Il90b2tlbiI7czo0MDoiaThSaEtPT3g4VkJNSmdpTWIxTjlxeUdCQ2QweWVGSVcxaGNrcjR6dSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1764402808),
+('iEYBmri2gKCu409oAlFwtZMnbF6vezgqWdqCoY9b', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YToyOntzOjY6Il90b2tlbiI7czo0MDoiZlRYYzEzU21qM0FxcWk3REdaTjl3UkJhWWVRaERFU3QyZ3NEeHpUZCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1764402586),
+('kivpkqnFFu5YEuHav6r5FjRL5EVvCHKdrYed2J48', 21, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiY3VuR2ZaTWNoUG92Wld5aXlpQWhCVjlEUkFHOWJUWkZmclBWTjJNNyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6MzoidXJsIjthOjE6e3M6ODoiaW50ZW5kZWQiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9kYXNoYm9hcmQiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToyMTtzOjIyOiJQSFBERUJVR0JBUl9TVEFDS19EQVRBIjthOjA6e319', 1764402562),
+('n8XTm4muTilBa08ae1DPEFe2tPpl0fPdxU9xmk2d', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoibXc1eXc5b0VEbUlvU1VJMEtIS05wQjRLdkdqMG5KUVpmNWJKTExEVyI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozNzoiaHR0cDovL2xvY2FsaG9zdDo4MDAwL2FkbWluL2xvY2F0aW9ucyI7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjM3OiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYWRtaW4vZGFzaGJvYXJkIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjIyOiJQSFBERUJVR0JBUl9TVEFDS19EQVRBIjthOjA6e319', 1764405262),
+('TnsEA3YIoihfdQ7zaI4IhyyecCct2oG1TACfotkA', 21, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoicnVqVGdRM2hEWG1BU0Z6NzBjeWFGWjFRbmRoTDhTZlFHc2didmE5OCI7czoyMjoiUEhQREVCVUdCQVJfU1RBQ0tfREFUQSI7YToxOntzOjI2OiIwMUtCNzlNRjdEWTJHU05XREFWNVFDQUVaQyI7Tjt9czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjIxO30=', 1764402806),
+('UytLsPP3qFXFcFLuUIlVuBRaqzOuAez3E5XOW8Sf', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiQ3hWQ0NkMjNDQkZuNkFRWk96b01sRHpBNml6V0ZHNUUyMkhjaDVESiI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozNzoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2FkbWluL2Rhc2hib2FyZCI7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjM0OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYWRtaW4vc2hpZnRzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjIyOiJQSFBERUJVR0JBUl9TVEFDS19EQVRBIjthOjA6e319', 1764405272),
+('vVt26n6TJoNdMeq0sz6khFPneHTBN4m6yoztl4vM', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YToyOntzOjY6Il90b2tlbiI7czo0MDoiWDA1ck16ZURMM2F4MHFqNWtaSm1KSlFEU0VKZmU4YjZGMm1QNVBUcyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1764402806),
+('wGlms2Af0LzSHI8o8s1WEikpXYQI4GPXtsy0jIjQ', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiSHF4RWZ3elVaOEpucExFRm9LUG5zM1pqajJkWXlBcDFpbjlGUFRmZiI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czoyNjoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL21lbnUiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjIyOiJQSFBERUJVR0JBUl9TVEFDS19EQVRBIjthOjA6e31zOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyNzoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2xvZ2luIjt9fQ==', 1764402719),
+('xUJUJ93Y88xxzBabCIzMLD8I87pFXNu0H7tUOKCi', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YToyOntzOjY6Il90b2tlbiI7czo0MDoiaXp3M250ZkFUY1pUc0dUakpDODA3bWZJeGcwcTZpVDBGajdpUlhXQyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1764402806);
+
 
 
 INSERT INTO `suppliers` (`id`, `location_id`, `code`, `name`, `contact_name`, `contact_phone`, `email`, `phone`, `address`, `type`, `payment_terms`, `notes`, `tax_id`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, NULL, 'SUP-001', 'Phnom Penh Produce Co.', 'Sokha Chen', '+855-12-345-678', 'orders@phnompenhproduce.com', NULL, '123 Norodom Blvd, Phnom Penh', 'produce', 'net_30', 'Local fresh produce supplier', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49'),
-(2, NULL, 'SUP-002', 'Mekong Seafood Supply', 'Dara Meas', '+855-12-456-789', 'sales@mekongseafood.com', NULL, '456 Sisowath Quay, Phnom Penh', 'seafood', 'net_15', 'Fresh seafood daily delivery', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49'),
-(3, NULL, 'SUP-003', 'Kampot Spice Traders', 'Kunthea Pich', '+855-12-567-890', 'info@kampotspices.com', NULL, '789 Street 13, Kampot', 'spices', 'net_30', 'Premium Kampot pepper and spices', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49'),
-(4, NULL, 'SUP-004', 'Asian Food Solutions', 'Sovann Kim', '+855-12-678-901', 'orders@asianfoodsolutions.com', NULL, '101 Street 271, Phnom Penh', 'dry_goods', 'net_45', 'Bulk dry goods supplier', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49'),
-(5, NULL, 'SUP-005', 'Battambang Rice Co.', 'Chanthy Roth', '+855-12-789-012', 'sales@battambangrice.com', NULL, '202 National Road 5, Battambang', 'rice', 'net_30', 'Premium jasmine rice supplier', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49'),
-(6, NULL, 'SUP-006', 'Siem Reap Organic Farms', 'Bopha Prak', '+855-12-890-123', 'contact@srorganics.com', NULL, '303 Charles de Gaulle, Siem Reap', 'produce', 'net_15', 'Organic vegetables and herbs', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49'),
-(7, NULL, 'SUP-007', 'Cambodia Beverage Co.', 'Vibol Tep', '+855-12-901-234', 'orders@cambev.com', NULL, '404 Mao Tse Toung Blvd, Phnom Penh', 'beverages', 'net_30', 'Beverages and drink supplies', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49'),
-(8, NULL, 'SUP-008', 'Kandal Poultry Farms', 'Sophal Nget', '+855-12-012-345', 'orders@kandalpoultry.com', NULL, '505 National Road 4, Kandal', 'poultry', 'cod', 'Fresh chicken and eggs', NULL, 1, '2025-11-26 08:02:49', '2025-11-26 08:02:49');
+(1, NULL, 'SUP-001', 'Fresh Foods Co.', NULL, NULL, 'orders@freshfoods.com', '+1-555-1000', NULL, 'food_produce', NULL, NULL, NULL, 1, '2025-11-29 08:06:41', '2025-11-29 08:06:41'),
+(2, NULL, 'SUP-002', 'Prime Meats Supply', NULL, NULL, 'sales@primemeats.com', '+1-555-2000', NULL, 'meat_seafood', NULL, NULL, NULL, 1, '2025-11-29 08:06:41', '2025-11-29 08:06:41');
 INSERT INTO `tables` (`id`, `floor_id`, `code`, `capacity`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 'GF-01', 4, 'available', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
 (2, 1, 'GF-02', 6, 'available', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
@@ -3894,21 +3805,8 @@ INSERT INTO `tables` (`id`, `floor_id`, `code`, `capacity`, `status`, `created_a
 (35, 4, 'VIP-05', 2, 'reserved', '2025-11-26 08:02:50', '2025-11-26 08:02:50'),
 (36, 4, 'VIP-06', 8, 'unavailable', '2025-11-26 08:02:50', '2025-11-26 08:02:50');
 
-INSERT INTO `units` (`id`, `code`, `name`, `display_name`, `base_unit`, `conversion_factor`, `is_base_unit`, `for_weight`, `for_volume`, `for_quantity`, `for_packaging`, `for_produce`, `created_at`, `updated_at`) VALUES
-(1, 'kg', 'Kilogram', 'kg', NULL, NULL, 1, 1, 0, 0, 0, 0, '2025-11-26 08:02:42', '2025-11-26 08:02:42'),
-(2, 'g', 'Gram', 'g', 'kg', '0.001', 0, 1, 0, 0, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(3, 'l', 'Liter', 'L', NULL, NULL, 1, 0, 1, 0, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(4, 'ml', 'Milliliter', 'mL', 'l', '0.001', 0, 0, 1, 0, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(5, 'pcs', 'Piece', 'pc', NULL, NULL, 1, 0, 0, 1, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(6, 'dz', 'Dozen', 'dz', 'pcs', '12.000', 0, 0, 0, 1, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(7, 'box', 'Box', 'box', NULL, NULL, 1, 0, 0, 0, 1, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(8, 'case', 'Case', 'case', NULL, NULL, 1, 0, 0, 0, 1, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(9, 'pack', 'Pack', 'pack', NULL, NULL, 1, 0, 0, 0, 1, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(10, 'bag', 'Bag', 'bag', NULL, NULL, 1, 0, 0, 0, 1, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(11, 'bunch', 'Bunch', 'bunch', NULL, NULL, 1, 0, 0, 0, 0, 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(12, 'tsp', 'Teaspoon', 'tsp', 'ml', '5.000', 0, 0, 1, 0, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(13, 'tbsp', 'Tablespoon', 'tbsp', 'ml', '15.000', 0, 0, 1, 0, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
-(14, 'cup', 'Cup', 'cup', 'ml', '250.000', 0, 0, 1, 0, 0, 0, '2025-11-26 08:02:43', '2025-11-26 08:02:43');
+
+
 INSERT INTO `users` (`id`, `name`, `email`, `phone`, `email_verified_at`, `password`, `is_active`, `remember_token`, `default_location_id`, `created_at`, `updated_at`) VALUES
 (1, 'System Administrator', 'demo@admin.com', '+855-12-345-678', '2025-11-26 08:02:43', '$2y$12$keKgju3jRczgMlaD6CImwuMFeeFpOt9AGAYMISErHWZmejgJdYzpi', 1, NULL, 1, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),
 (2, 'Secondary Admin', 'admin2@nkhrestaurant.com', '+855-12-987-654', '2025-11-26 08:02:43', '$2y$12$MOlB/lgqmTLI2NeQ56q/Led3unTuMxc/27VJUDt4K2jh/7f72SdHW', 1, NULL, 2, '2025-11-26 08:02:43', '2025-11-26 08:02:43'),

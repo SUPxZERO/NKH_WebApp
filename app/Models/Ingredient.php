@@ -9,28 +9,41 @@ class Ingredient extends Model
 {
 
     protected $fillable = [
-        'location_id',
-        'sku',
+        'code',
         'name',
-        'unit',
-        'quantity_on_hand',
-        'reorder_level',
-        'reorder_quantity',
-        'cost',
+        'description',
+        'category',
+        'unit_id',
+        'supplier_id',
+        'cost_per_unit',
+        'current_stock',
+        'min_stock_level',
+        'max_stock_level',
+        'reorder_point',
+        'storage_requirements',
+        'allergens',
+        'shelf_life_days',
         'is_active',
     ];
 
     protected $casts = [
-        'quantity_on_hand' => 'decimal:3',
-        'reorder_level' => 'decimal:3',
-        'reorder_quantity' => 'decimal:3',
-        'cost' => 'decimal:2',
+        'cost_per_unit' => 'decimal:2',
+        'current_stock' => 'decimal:3',
+        'min_stock_level' => 'decimal:3',
+        'max_stock_level' => 'decimal:3',
+        'reorder_point' => 'decimal:3',
         'is_active' => 'boolean',
+        'shelf_life_days' => 'integer',
     ];
 
-    public function location()
+    public function unit()
     {
-        return $this->belongsTo(Location::class);
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function recipeIngredients()

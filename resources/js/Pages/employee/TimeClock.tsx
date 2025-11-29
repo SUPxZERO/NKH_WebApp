@@ -12,7 +12,7 @@ export default function TimeClock() {
     const [elapsedTime, setElapsedTime] = useState(0);
     const qc = useQueryClient();
 
-    const { data: statusData, isLoading } = useQuery({
+    const { data: statusData, isLoading } = useQuery<any>({
         queryKey: ['attendance.today'],
         queryFn: () => apiGet('/api/attendance/today'),
         refetchInterval: 30000, // Refresh every 30 seconds
@@ -21,8 +21,8 @@ export default function TimeClock() {
     const clockInMutation = useMutation({
         mutationFn: () =>
             apiPost('/api/attendance/clock-in', {
-                employee_id: statusData?.employee_id,
-                location_id: statusData?.location_id,
+                employee_id: (statusData as any)?.employee_id,
+                location_id: (statusData as any)?.location_id,
                 notes: 'Clock in',
             }),
         onSuccess: () => {
@@ -37,7 +37,7 @@ export default function TimeClock() {
     const clockOutMutation = useMutation({
         mutationFn: () =>
             apiPost('/api/attendance/clock-out', {
-                attendance_id: statusData?.current_attendance?.id,
+                attendance_id: (statusData as any)?.current_attendance?.id,
                 notes: 'Clock out',
             }),
         onSuccess: () => {
@@ -53,13 +53,13 @@ export default function TimeClock() {
     // Timer effect
     useEffect(() => {
         const interval = setInterval(() => {
-            if (statusData?.current_status === 'clocked_in') {
-                setElapsedTime(prev => prev + 1);
+            if ((statusData as any)?.current_status === 'clocked_in') {
+                setElapsedTime((prev: number) => prev + 1);
             }
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [statusData?.current_status]);
+    }, [(statusData as any)?.current_status]);
 
     const formatTime = (seconds: number) => {
         const hours = Math.floor(seconds / 3600);
@@ -79,7 +79,7 @@ export default function TimeClock() {
         );
     }
 
-    const isClockedIn = statusData?.current_status === 'clocked_in';
+    const isClockedIn = (statusData as any)?.current_status === 'clocked_in';
 
     return (
         <EmployeeLayout>

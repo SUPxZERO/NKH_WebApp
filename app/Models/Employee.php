@@ -5,6 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $position_id
+ * @property int $location_id
+ * @property string $employee_code
+ * @property string $hire_date
+ * @property string $salary_type
+ * @property float $salary
+ * @property string|null $salary_type
+ * @property float|null $hourly_rate
+ * @property string $address
+ * @property string $status
+ */
 class Employee extends Model
 {
 

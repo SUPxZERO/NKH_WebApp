@@ -67,7 +67,7 @@ class PayrollController extends Controller
 
             return response()->json([
                 'message' => 'Payroll generated successfully',
-                'payrolls' => $payrolls->map(function ($payroll) {
+                'payrolls' => collect($payrolls)->map(function ($payroll) {
                     return [
                         'id' => $payroll->id,
                         'employee_id' => $payroll->employee_id,

@@ -8,6 +8,7 @@ use App\Models\Shift;
 use App\Models\Employee;
 use App\Models\Location;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceService
 {
@@ -21,24 +22,37 @@ class AttendanceService
         }
 
         // Get the shift for this day if exists
+        $clockInDate = $attendance->clock_in_at instanceof Carbon 
+            ? $attendance->clock_in_at->toDateString()
+            : Carbon::parse($attendance->clock_in_at)->toDateString();
+        
         $shift = Shift::where('employee_id', $attendance->employee_id)
-            ->whereDate('date', $attendance->clock_in_at->toDateString())
+            ->where(DB::raw('DATE(date)'), '=', $clockInDate)
             ->first();
 
         $minutesLate = 0;
         $minutesEarlyDeparture = 0;
 
+        // Ensure carbon instances
+        $clockInTime = $attendance->clock_in_at instanceof Carbon 
+            ? $attendance->clock_in_at 
+            : Carbon::parse($attendance->clock_in_at);
+        
+        $clockOutTime = $attendance->clock_out_at instanceof Carbon 
+            ? $attendance->clock_out_at 
+            : ($attendance->clock_out_at ? Carbon::parse($attendance->clock_out_at) : null);
+
         // Calculate tardiness if shift exists
         if ($shift) {
             $shiftStart = Carbon::createFromTimeString($shift->start_time);
-            $clockIn = $attendance->clock_in_at->copy()->setTimeFromTimeString($attendance->clock_in_at->format('H:i:s'));
+            $clockIn = $clockInTime->copy()->setTimeFromTimeString($clockInTime->format('H:i:s'));
 
             if ($clockIn->greaterThan($shiftStart)) {
                 $minutesLate = $clockIn->diffInMinutes($shiftStart);
             }
 
             $shiftEnd = Carbon::createFromTimeString($shift->end_time);
-            $clockOut = $attendance->clock_out_at->copy()->setTimeFromTimeString($attendance->clock_out_at->format('H:i:s'));
+            $clockOut = $clockOutTime->copy()->setTimeFromTimeString($clockOutTime->format('H:i:s'));
 
             if ($clockOut->lessThan($shiftEnd)) {
                 $minutesEarlyDeparture = $shiftEnd->diffInMinutes($clockOut);
@@ -46,7 +60,7 @@ class AttendanceService
         }
 
         // Calculate total hours
-        $totalMinutes = $attendance->clock_in_at->diffInMinutes($attendance->clock_out_at);
+        $totalMinutes = $clockInTime->diffInMinutes($clockOutTime);
         $totalHours = round($totalMinutes / 60, 2);
 
         // Calculate overtime (assuming 8-hour shift)

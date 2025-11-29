@@ -35,6 +35,11 @@ use App\Http\Controllers\Api\PurchaseOrderController;
 use App\Http\Controllers\Api\RecipeController;
 use App\Http\Controllers\Api\ShiftController;
 use App\Http\Controllers\Api\TimeOffRequestController;
+use App\Http\Controllers\Api\InventoryController;
+use App\Http\Controllers\Api\InventoryAdjustmentController;
+use App\Http\Controllers\Api\StockAlertController;
+use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
 
@@ -302,6 +307,38 @@ Route::prefix('admin')
     Route::get('time-off-balance/{employee}', [TimeOffRequestController::class, 'balance']);
     Route::get('time-off-requests/stats', [TimeOffRequestController::class, 'stats']);
     Route::get('time-off-calendar', [TimeOffRequestController::class, 'calendar']);
+    
+    // Sprint 4: Ingredients & Inventory Management
+    // Ingredients
+    Route::get('ingredients/categories', [IngredientController::class, 'categories']);
+    Route::get('ingredients/stats', [IngredientController::class, 'stats']);
+    Route::get('ingredients/low-stock', [IngredientController::class, 'lowStock']);
+    Route::get('ingredients/{ingredient}/cost-history', [IngredientController::class, 'costHistory']);
+    Route::apiResource('ingredients', IngredientController::class);
+    
+    // Inventory
+    // Inventory
+    Route::get('inventory', [InventoryController::class, 'index']);
+    Route::post('inventory/transfer', [InventoryController::class, 'transfer']);
+    Route::post('inventory/wastage', [InventoryController::class, 'recordWastage']);
+    Route::get('inventory/valuation', [InventoryController::class, 'valuation']);
+    Route::get('inventory/stats', [InventoryController::class, 'stats']);
+    Route::get('inventory/movements/{ingredient}', [InventoryController::class, 'movements']);
+    Route::get('inventory/{ingredient}', [InventoryController::class, 'show']);
+    
+    // Inventory Adjustments
+    Route::get('inventory-adjustments/stats', [InventoryAdjustmentController::class, 'stats']);
+    Route::apiResource('inventory-adjustments', InventoryAdjustmentController::class);
+    Route::post('inventory-adjustments/{adjustment}/approve', [InventoryAdjustmentController::class, 'approve']);
+    Route::post('inventory-adjustments/{adjustment}/reject', [InventoryAdjustmentController::class, 'reject']);
+    
+    // Stock Alerts
+    Route::get('stock-alerts', [StockAlertController::class, 'index']);
+    Route::post('stock-alerts/{alert}/acknowledge', [StockAlertController::class, 'acknowledge']);
+    Route::get('stock-alerts/reorder-recommendations', [StockAlertController::class, 'reorderRecommendations']);
+    Route::put('stock-alerts/thresholds/{ingredient}', [StockAlertController::class, 'updateThresholds']);
+    Route::get('stock-alerts/stats', [StockAlertController::class, 'stats']);
+
 
     // Attendance & Time Clock (NEW)
     Route::post('attendance/clock-in', [AttendanceController::class, 'clockIn']);

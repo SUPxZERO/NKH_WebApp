@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -26,11 +27,14 @@ return new class extends Migration
                 $table->timestamp('published_at')->nullable()->after('calculated_hours');
             }
 
-            // Add missing indexes
-            if (!Schema::hasIndexes('shifts', ['location_id', 'date'])) {
+            // Add missing indexes (skip if they already exist)
+            $indexes = DB::select("SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_NAME = 'shifts' AND COLUMN_NAME IN ('location_id', 'date')");
+            if (empty($indexes)) {
                 $table->index(['location_id', 'date']);
             }
-            if (!Schema::hasIndex('shifts', 'status')) {
+            
+            $statusIndex = DB::select("SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_NAME = 'shifts' AND COLUMN_NAME = 'status'");
+            if (empty($statusIndex)) {
                 $table->index('status');
             }
         });

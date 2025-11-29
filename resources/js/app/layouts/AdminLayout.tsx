@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, ShoppingBag, Settings,
   BarChart3, Calendar, MapPin, FileText, Menu as MenuIcon,
   X, Bell, User, LogOut, ChefHat, Building, Grid3X3,
-  Tag, Star, Package, Shield, MessageSquare, DollarSign, ClipboardList
+  Tag, Star, Package, Shield, MessageSquare, DollarSign, ClipboardList, AlertTriangle, Beaker
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -29,6 +29,9 @@ const navigation = [
   // Inventory & Procurement
   { name: 'Purchase Orders', href: '/admin/purchase-orders', icon: Package },
   { name: 'Inventory', href: '/admin/inventory', icon: Package },
+  { name: 'Ingredients', href: '/admin/ingredients', icon: Beaker },
+  { name: 'Inventory Adjustments', href: '/admin/inventory-adjustments', icon: ClipboardList },
+  { name: 'Stock Alerts', href: '/admin/stock-alerts', icon: AlertTriangle },
   { name: 'Suppliers', href: '/admin/suppliers', icon: Building },
   { name: 'Units', href: '/admin/units', icon: Grid3X3 },
 

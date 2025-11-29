@@ -5,6 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $employee_id
+ * @property \Carbon\Carbon $period_start
+ * @property \Carbon\Carbon $period_end
+ * @property float $gross_pay
+ * @property float $bonuses
+ * @property float $deductions
+ * @property float $net_pay
+ * @property string $status
+ * @property \Carbon\Carbon|null $paid_at
+ */
 class Payroll extends Model
 {
     use HasFactory;
