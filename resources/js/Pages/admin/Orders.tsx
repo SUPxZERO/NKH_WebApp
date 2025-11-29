@@ -276,18 +276,6 @@ export default function Orders() {
           className="mb-6 flex gap-3"
         >
           <button
-            onClick={() => setApprovalFilter('all')}
-            className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${approvalFilter === 'all'
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105'
-              : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:border-white/20'
-              }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Package className="w-4 h-4" />
-              Orders Track
-            </div>
-          </button>
-          <button
             onClick={() => setApprovalFilter('pending')}
             className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${approvalFilter === 'pending'
               ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-500/50 scale-105'
@@ -302,6 +290,18 @@ export default function Orders() {
                   {orderList.length}
                 </span>
               )}
+            </div>
+          </button>
+          <button
+            onClick={() => setApprovalFilter('all')}
+            className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${approvalFilter === 'all'
+              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105'
+              : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:border-white/20'
+              }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Package className="w-4 h-4" />
+              Orders Track
             </div>
           </button>
         </motion.div>
@@ -384,6 +384,13 @@ export default function Orders() {
                           Table {order.table.number}
                         </div>
                       )}
+
+                      {(order as any).time_slot && (
+                        <div className="flex items-center text-sm text-gray-300">
+                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                          {(order as any).time_slot.label || `${(order as any).time_slot.date} at ${(order as any).time_slot.time}`}
+                        </div>
+                      )}
                     </div>
 
                     {/* Approval Status & Actions */}
@@ -407,7 +414,7 @@ export default function Orders() {
                               <Button
                                 size="sm"
                                 onClick={() => handleApprove(order)}
-                                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-105"
+                                className="flex-1 bg-green-600 hover:from-green-700 hover:to-emerald-700 text-white transition-all duration-300 hover:scale-105"
                               >
                                 <ThumbsUp className="w-3 h-3 mr-1.5" />
                                 Approve Order
@@ -607,6 +614,14 @@ export default function Orders() {
                     <div className="flex justify-between">
                       <span className="text-gray-400">Table:</span>
                       <span className="text-white">Table {selectedOrder.table.number}</span>
+                    </div>
+                  )}
+                  {(selectedOrder as any).time_slot && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Scheduled Time:</span>
+                      <span className="text-white">
+                        {(selectedOrder as any).time_slot.label || `${(selectedOrder as any).time_slot.date} at ${(selectedOrder as any).time_slot.time}`}
+                      </span>
                     </div>
                   )}
                 </div>

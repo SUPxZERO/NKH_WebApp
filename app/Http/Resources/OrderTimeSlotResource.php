@@ -11,6 +11,11 @@ class OrderTimeSlotResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'label' => $this->slot_date->format('M j, Y') . ' at ' . $this->slot_start_time,
+            'start' => $this->slot_date->format('Y-m-d') . 'T' . $this->slot_start_time,
+            'end' => $this->slot_date->format('Y-m-d') . 'T' . $this->slot_start_time, // You can calculate end time if needed
+            'available' => $this->current_orders < $this->max_orders,
+            // Additional data for backend compatibility
             'location_id' => $this->location_id,
             'slot_date' => $this->slot_date->toDateString(),
             'slot_start_time' => $this->slot_start_time,

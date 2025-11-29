@@ -18,6 +18,7 @@ class OrderResource extends JsonResource
             'order_number' => $this->order_number,
             'order_type' => $this->order_type,
             'status' => $this->status,
+            'approval_status' => $this->approval_status,
             'payment_status' => $this->payment_status,
             'subtotal' => $this->subtotal,
             'tax_amount' => $this->tax_amount,
@@ -34,13 +35,25 @@ class OrderResource extends JsonResource
             'ordered_at' => optional($this->ordered_at)->toISOString(),
             'scheduled_at' => optional($this->scheduled_at)->toISOString(),
             'completed_at' => optional($this->completed_at)->toISOString(),
+            'approved_at' => optional($this->approved_at)->toISOString(),
+            'rejected_at' => optional($this->rejected_at)->toISOString(),
             // UI uses created_at in displays
             'created_at' => optional($this->created_at)->toISOString(),
             'special_instructions' => $this->special_instructions,
+            'rejection_reason' => $this->rejection_reason,
             'table' => new DiningTableResource($this->whenLoaded('table')),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'invoice' => new InvoiceResource($this->whenLoaded('invoice')),
+            'time_slot' => $this->when($this->timeSlot, function() {
+                return [
+                    'id' => $this->timeSlot->id,
+                    'label' => $this->timeSlot->slot_date->format('M j, Y') . ' at ' . $this->timeSlot->slot_start_time,
+                    'date' => $this->timeSlot->slot_date->format('Y-m-d'),
+                    'time' => $this->timeSlot->slot_start_time,
+                    'type' => $this->timeSlot->slot_type,
+                ];
+            }),
         ];
     }
 }

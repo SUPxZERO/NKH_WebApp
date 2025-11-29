@@ -245,7 +245,11 @@ class OrderController extends Controller
     // GET /api/admin/orders (Admin oversight)
     public function index(Request $request)
     {
-        $query = Order::with(['items.menuItem', 'table', 'customer.user', 'employee.user']);
+        $query = Order::with(['items.menuItem', 'table', 'customer.user', 'employee.user', 'timeSlot']);
+        
+        // CRITICAL: Exclude orders pending approval from the main Orders Track
+        // Only approved orders should appear here. Pending orders are shown in the Pending Approval tab.
+        $query->where('approval_status', '!=', Order::APPROVAL_STATUS_PENDING);
         
         // Filter by location
         if ($request->has('location_id')) {
@@ -294,7 +298,7 @@ class OrderController extends Controller
     // List all orders pending approval (replaces CustomerRequestController::index)
     public function pendingApproval(Request $request)
     {
-        $query = Order::with(['customer.user', 'items.menuItem', 'customerAddress'])
+        $query = Order::with(['customer.user', 'items.menuItem', 'customerAddress', 'timeSlot'])
             ->where('approval_status', Order::APPROVAL_STATUS_PENDING)
             ->whereIn('order_type', ['delivery', 'pickup']);
 
