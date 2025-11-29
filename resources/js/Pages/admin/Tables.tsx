@@ -427,7 +427,7 @@ export default function Tables() {
                 onChange={(e) => setFormData({ ...formData, floor_id: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
               >
-                <option value="">Select Floor</option>
+                <option value="" className="bg-gray-800">Select Floor</option>
                 {floors?.data?.map((floor: Floor) => (
                   <option key={floor.id} value={floor.id} className="bg-gray-800">
                     {floor.name}
@@ -468,10 +468,10 @@ export default function Tables() {
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
               >
-                <option value="available">Available</option>
-                <option value="reserved">Reserved</option>
-                <option value="occupied">Occupied</option>
-                <option value="unavailable">Unavailable</option>
+                <option value="available" className="bg-gray-800">Available</option>
+                <option value="reserved" className="bg-gray-800">Reserved</option>
+                <option value="occupied" className="bg-gray-800">Occupied</option>
+                <option value="unavailable" className="bg-gray-800">Unavailable</option>
               </select>
             </div>
           </div>
