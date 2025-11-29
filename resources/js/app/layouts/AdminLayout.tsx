@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, ShoppingBag, Settings,
   BarChart3, Calendar, MapPin, FileText, Menu as MenuIcon,
   X, Bell, User, LogOut, ChefHat, Building, Grid3X3,
-  Tag, Star, Package, Shield, MessageSquare, DollarSign, ClipboardList, AlertTriangle, Beaker
+  Tag, Star, Package, Shield, MessageSquare, DollarSign, ClipboardList, AlertTriangle, Beaker, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -29,6 +29,7 @@ const navigation = [
   // Inventory & Procurement
   { name: 'Purchase Orders', href: '/admin/purchase-orders', icon: Package },
   { name: 'Inventory', href: '/admin/inventory', icon: Package },
+  { name: 'Inventory Reports', href: '/admin/inventory-reports', icon: BarChart3 },
   { name: 'Ingredients', href: '/admin/ingredients', icon: Beaker },
   { name: 'Inventory Adjustments', href: '/admin/inventory-adjustments', icon: ClipboardList },
   { name: 'Stock Alerts', href: '/admin/stock-alerts', icon: AlertTriangle },
@@ -50,7 +51,9 @@ const navigation = [
   { name: 'Floors', href: '/admin/floors', icon: Building },
   { name: 'Tables', href: '/admin/tables', icon: Grid3X3 },
 
-  // Finance
+  // Finance & Analytics
+  { name: 'Sales Analytics', href: '/admin/sales-analytics', icon: BarChart3 },
+  { name: 'Financial Dashboard', href: '/admin/financial-dashboard', icon: TrendingUp },
   { name: 'Expenses', href: '/admin/expenses', icon: DollarSign },
   { name: 'Invoices', href: '/admin/invoices', icon: FileText },
 

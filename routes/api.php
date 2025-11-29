@@ -38,6 +38,8 @@ use App\Http\Controllers\Api\TimeOffRequestController;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\InventoryAdjustmentController;
 use App\Http\Controllers\Api\StockAlertController;
+use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -338,6 +340,34 @@ Route::prefix('admin')
     Route::get('stock-alerts/reorder-recommendations', [StockAlertController::class, 'reorderRecommendations']);
     Route::put('stock-alerts/thresholds/{ingredient}', [StockAlertController::class, 'updateThresholds']);
     Route::get('stock-alerts/stats', [StockAlertController::class, 'stats']);
+    
+    // Sprint 5: Analytics & Reporting
+    Route::prefix('analytics')->group(function () {
+        Route::get('sales/overview', [AnalyticsController::class, 'salesOverview']);
+        Route::get('sales/trends', [AnalyticsController::class, 'salesTrends']);
+        Route::get('sales/top-items', [AnalyticsController::class, 'topSellingItems']);
+        Route::get('sales/by-category', [AnalyticsController::class, 'salesByCategory']);
+        Route::get('sales/peak-hours', [AnalyticsController::class, 'peakHours']);
+        Route::get('sales/by-payment-method', [AnalyticsController::class, 'salesByPaymentMethod']);
+        Route::get('sales/customer-metrics', [AnalyticsController::class, 'customerMetrics']);
+        Route::get('sales/daily-summary', [AnalyticsController::class, 'dailySummary']);
+    });
+    
+    // Reports
+    Route::prefix('reports')->group(function () {
+        // Inventory Reports
+        Route::get('inventory/valuation', [ReportsController::class, 'inventoryValuation']);
+        Route::get('inventory/usage-rates', [ReportsController::class, 'usageRates']);
+        Route::get('inventory/waste-tracking', [ReportsController::class, 'wasteTracking']);
+        Route::get('inventory/cost-analysis', [ReportsController::class, 'costAnalysis']);
+        Route::get('inventory/turnover', [ReportsController::class, 'inventoryTurnover']);
+        
+        // Financial Reports
+        Route::get('financial/profit-loss', [ReportsController::class, 'profitLoss']);
+        Route::get('financial/revenue-expenses', [ReportsController::class, 'revenueExpenses']);
+        Route::get('financial/cogs', [ReportsController::class, 'cogs']);
+        Route::get('financial/margins', [ReportsController::class, 'margins']);
+    });
 
 
     // Attendance & Time Clock (NEW)

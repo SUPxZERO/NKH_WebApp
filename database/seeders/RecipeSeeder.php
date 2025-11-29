@@ -33,20 +33,22 @@ class RecipeSeeder extends Seeder
 
             // Add 3-7 random ingredients plus common ingredients
             $recipeIngredients = [];
+            $usedIngredientIds = [];
             $randomIngredients = $ingredients->random(rand(3, 7));
             
             foreach ($randomIngredients as $ingredient) {
                 $recipeIngredients[] = [
                     'ingredient_id' => $ingredient->id,
                     'quantity' => rand(50, 500),
-                    'unit' => $ingredient->unit,
+                    'unit' => is_string($ingredient->unit) ? $ingredient->unit : ($ingredient->unit->code ?? 'unit'),
                 ];
+                $usedIngredientIds[] = $ingredient->id;
             }
 
-            // Add common ingredients
+            // Add common ingredients (skip if already added)
             foreach ($commonIngredients as $name => $props) {
                 $ingredient = $ingredients->where('name', $name)->first();
-                if ($ingredient) {
+                if ($ingredient && !in_array($ingredient->id, $usedIngredientIds)) {
                     $recipeIngredients[] = [
                         'ingredient_id' => $ingredient->id,
                         'quantity' => rand($props['min'], $props['max']),

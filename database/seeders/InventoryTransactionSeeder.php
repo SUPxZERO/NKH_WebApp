@@ -43,7 +43,7 @@ class InventoryTransactionSeeder extends Seeder
                     'user_id' => $user->id,
                     'movement_type' => $this->getMovementType(),
                     'quantity' => $this->getQuantity(),
-                    'unit' => $ingredient->unit,
+                    'unit' => is_string($ingredient->unit) ? $ingredient->unit : ($ingredient->unit->code ?? 'unit'),
                     'reference_type' => $this->getReferenceType(),
                     'reference_id' => rand(1, 100),
                     'notes' => $this->getNotes(),

@@ -9,6 +9,8 @@ class SupplierSeeder extends Seeder
 {
     public function run(): void
     {
+        Supplier::truncate();
+
         $suppliers = [
             [
                 'name' => 'Phnom Penh Produce Co.',

@@ -77,6 +77,3 @@ USER $user
 # Expose port 8000 (standard Laravel port) instead of 9000
 EXPOSE 8000
 
-# Run php artisan serve
-# --host=0.0.0.0 is REQUIRED to be accessible outside the container
-CMD ["php", "artisan", "serve", "--host=127.0.0.1", "--port=8000"]

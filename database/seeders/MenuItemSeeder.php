@@ -18,6 +18,12 @@ class MenuItemSeeder extends Seeder
             $categories = Category::where('location_id', $location->id)->get()->keyBy('slug');
 
             $appetizers = $categories->where('slug', 'appetizers')->first();
+            
+            // Skip menu items if appetizers category doesn't exist for this location
+            if (!$appetizers) {
+                continue;
+            }
+            
             $soupsSalads = $categories->where('slug', 'soups-salads')->first();
             $desserts = $categories->where('slug', 'desserts')->first();
             $beverages = $categories->where('slug', 'beverages')->first();

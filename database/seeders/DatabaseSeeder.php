@@ -33,6 +33,9 @@ class DatabaseSeeder extends Seeder
             // Phase 3: Inventory Management
             IngredientSeeder::class,
             SupplierSeeder::class,
+            InventorySeeder::class,
+            InventoryAdjustmentSeeder::class,
+            StockAlertSeeder::class,
             
             // Phase 4: Menu Management
             MenuItemSeeder::class,

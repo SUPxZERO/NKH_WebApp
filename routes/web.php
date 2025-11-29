@@ -85,6 +85,11 @@ Route::prefix('admin')
         Route::get('inventory-adjustments', fn() => Inertia::render('admin/InventoryAdjustments'))->name('admin.inventory-adjustments');
         Route::get('stock-alerts', fn() => Inertia::render('admin/StockAlerts'))->name('admin.stock-alerts');
         
+        // Sprint 5: Analytics & Reporting
+        Route::get('sales-analytics', fn() => Inertia::render('admin/SalesAnalytics'))->name('admin.sales-analytics');
+        Route::get('inventory-reports', fn() => Inertia::render('admin/InventoryReports'))->name('admin.inventory-reports');
+        Route::get('financial-dashboard', fn() => Inertia::render('admin/FinancialDashboard'))->name('admin.financial-dashboard');
+        
         // Approval managed within main Orders page - no separate route needed
     });
 // Test time slots seeder
