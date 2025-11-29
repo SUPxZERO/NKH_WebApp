@@ -52,7 +52,7 @@ export default function Reservations() {
     reserved_for: '',
     duration_minutes: '60',
     guest_count: '2',
-    status: 'pending' as 'pending' | 'confirmed' | 'seated' | 'cancelled' | 'completed',
+    status: 'pending' as 'pending' | 'confirmed' | 'seated' | 'cancelled' | 'completed' | 'no_show',
     notes: ''
   });
 
@@ -89,6 +89,25 @@ export default function Reservations() {
       return apiGet(url);
     }
   }) as { data: any, isLoading: boolean };
+
+  const reservationList: Reservation[] = React.useMemo(() => {
+    if (!reservations) return [];
+    if (Array.isArray(reservations)) return reservations as Reservation[];
+    if (reservations.data && Array.isArray(reservations.data)) return reservations.data as Reservation[];
+    return [];
+  }, [reservations]);
+
+  const todayTimeline = React.useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return reservationList
+      .filter((res) => {
+        if (!res.reserved_for) return false;
+        const d = new Date(res.reserved_for);
+        if (Number.isNaN(d.getTime())) return false;
+        return d.toISOString().split('T')[0] === todayStr;
+      })
+      .sort((a, b) => new Date(a.reserved_for).getTime() - new Date(b.reserved_for).getTime());
+  }, [reservationList]);
 
   // Fetch tables
   const { data: tables } = useQuery({
@@ -134,7 +153,7 @@ export default function Reservations() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/reservations/${id}`),
     onSuccess: () => {
-      toastSuccess('Reservation deleted successfully!');
+      toastSuccess('Reservation cancelled successfully!');
       qc.invalidateQueries({ queryKey: ['admin/reservations'] });
     },
     onError: (error: any) => {
@@ -181,7 +200,7 @@ export default function Reservations() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this reservation?')) {
+    if (window.confirm('Are you sure you want to cancel this reservation?')) {
       deleteMutation.mutate(id);
     }
   };
@@ -212,6 +231,7 @@ export default function Reservations() {
       case 'seated': return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'cancelled': return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'completed': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      case 'no_show': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
       default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
@@ -223,6 +243,7 @@ export default function Reservations() {
       case 'seated': return <Armchair className="w-4 h-4" />;
       case 'cancelled': return <XCircle className="w-4 h-4" />;
       case 'completed': return <CheckCircle className="w-4 h-4" />;
+      case 'no_show': return <AlertCircle className="w-4 h-4" />;
       default: return <AlertCircle className="w-4 h-4" />;
     }
   };
@@ -307,6 +328,7 @@ export default function Reservations() {
             <option value="seated" className='text-black'>Seated</option>
             <option value="cancelled" className='text-black'>Cancelled</option>
             <option value="completed" className='text-black'>Completed</option>
+            <option value="no_show" className='text-black'>No Show</option>
           </select>
 
           <select
@@ -333,6 +355,52 @@ export default function Reservations() {
             Clear
           </Button>
         </motion.div>
+
+        {/* Today's Timeline - compact operational view */}
+        {todayTimeline.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6 bg-white/5 border border-white/10 rounded-xl p-4"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-300" />
+                Today's Timeline
+              </h2>
+              <span className="text-xs text-gray-400">
+                {todayTimeline.length} reservation{todayTimeline.length === 1 ? '' : 's'}
+              </span>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {todayTimeline.map((res) => (
+                <div
+                  key={res.id}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-white">
+                        {new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {res.customer?.user?.name || 'Unknown Customer'} • Table {res.table?.code || '-'} •{' '}
+                        {res.guest_count} guests
+                      </span>
+                    </div>
+                  </div>
+                  <Badge className={getStatusColor(res.status)}>
+                    <div className="flex items-center gap-1 text-xs">
+                      {getStatusIcon(res.status)}
+                      {res.status}
+                    </div>
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Reservations Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -577,6 +645,7 @@ export default function Reservations() {
                 <option value="seated">Seated</option>
                 <option value="cancelled">Cancelled</option>
                 <option value="completed">Completed</option>
+                <option value="no_show">No Show</option>
               </select>
             </div>
           </div>

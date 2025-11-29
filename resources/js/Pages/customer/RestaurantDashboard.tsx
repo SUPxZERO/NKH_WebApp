@@ -15,8 +15,6 @@ import {
   Zap,
   TrendingUp,
   Award,
-  Calendar,
-  Plus,
   ArrowRight,
   ChefHat,
   Utensils,

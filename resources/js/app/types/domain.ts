@@ -347,7 +347,7 @@ export interface Reservation {
   reserved_for: string; // datetime
   duration_minutes: number;
   guest_count: number;
-  status: 'pending' | 'confirmed' | 'seated' | 'cancelled' | 'completed';
+  status: 'pending' | 'confirmed' | 'seated' | 'cancelled' | 'completed' | 'no_show';
   notes?: string | null;
   created_at: string;
   updated_at: string;

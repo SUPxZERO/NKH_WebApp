@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ReservationController;
+use App\Http\Controllers\Api\CustomerReservationController;
 use App\Http\Controllers\Api\SettingController;
 // CustomerRequestController removed - functionality consolidated to OrderController
 use App\Http\Controllers\Api\PositionController;
@@ -28,6 +29,12 @@ use App\Http\Controllers\Api\IngredientController;
 use App\Http\Controllers\Api\ExpenseCategoryController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\OrderHoldController;
+use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\UnitController;
+use App\Http\Controllers\Api\PurchaseOrderController;
+use App\Http\Controllers\Api\RecipeController;
+use App\Http\Controllers\Api\ShiftController;
+use App\Http\Controllers\Api\TimeOffRequestController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
 
@@ -58,6 +65,12 @@ Route::post('/payments/webhook/success', [PaymentWebhookController::class, 'hand
 // Public reference data
 Route::get('/positions', [PositionController::class, 'index']);
 Route::get('/locations', [LocationController::class, 'index']);
+
+// Sprint 1: Suppliers & Units (CRUD accessible to all for now)
+Route::apiResource('suppliers', SupplierController::class);
+Route::get('/suppliers/types', [SupplierController::class, 'types']);
+Route::apiResource('units', UnitController::class);
+Route::get('/units/base-units', [UnitController::class, 'baseUnits']);
 
 // Debug endpoint to inspect auth in API context (remove after troubleshooting)
 Route::get('/_debug/auth', function (Request $request) {
@@ -191,8 +204,8 @@ $adminMiddleware = config('app.enforce_admin_auth')
 
 // Admin/Manager management endpoints
 Route::prefix('admin')
-// ->middleware($adminMiddleware)
-->group(function () {
+    // ->middleware($adminMiddleware)
+    ->group(function () {
         Route::get('/category-stats', [CategoryController::class, 'stats']);
         // Alias to match frontend caller
         Route::get('/categories/stats', [CategoryController::class, 'stats']);
@@ -250,6 +263,60 @@ Route::prefix('admin')
     Route::delete('orders/{order}', [OrderController::class, 'destroy']);
     Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
     Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
+    
+    // Sprint 1: Foundation Modules
+    // Locations (enhanced admin endpoint)
+    Route::get('locations', [LocationController::class, 'adminIndex']);
+    
+    // Positions (enhanced admin endpoint)
+    Route::get('positions', [PositionController::class, 'adminIndex']);
+    
+    // Sprint 2: Inventory & Procurement
+    // Purchase Orders
+    Route::apiResource('purchase-orders', PurchaseOrderController::class);
+    Route::post('purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve']);
+    Route::post('purchase-orders/{purchaseOrder}/mark-ordered', [PurchaseOrderController::class, 'markOrdered']);
+    Route::post('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive']);
+    Route::post('purchase-orders/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel']);
+    Route::get('purchase-orders-stats', [PurchaseOrderController::class, 'stats']);
+    
+    // Recipes
+    Route::apiResource('recipes', RecipeController::class);
+    Route::post('recipes/{recipe}/duplicate', [RecipeController::class, 'duplicate']);
+    Route::get('recipes/{recipe}/costing', [RecipeController::class, 'costing']);
+    Route::get('recipes-stats', [RecipeController::class, 'stats']);
+    
+    // Sprint 3: Employee Scheduling & Time Management
+    // Shifts
+    Route::apiResource('shifts', ShiftController::class);
+    Route::get('schedule', [ShiftController::class, 'schedule']);
+    Route::post('shifts/publish', [ShiftController::class, 'publish']);
+    Route::post('shifts/conflicts', [ShiftController::class, 'conflicts']);
+    Route::get('shifts/stats', [ShiftController::class, 'stats']);
+    Route::post('shifts/copy', [ShiftController::class, 'copy']);
+    
+    // Time Off Requests
+    Route::apiResource('time-off-requests', TimeOffRequestController::class);
+    Route::post('time-off-requests/{timeOffRequest}/approve', [TimeOffRequestController::class, 'approve']);
+    Route::post('time-off-requests/{timeOffRequest}/reject', [TimeOffRequestController::class, 'reject']);
+    Route::get('time-off-balance/{employee}', [TimeOffRequestController::class, 'balance']);
+    Route::get('time-off-requests/stats', [TimeOffRequestController::class, 'stats']);
+    Route::get('time-off-calendar', [TimeOffRequestController::class, 'calendar']);
+
+    // Attendance & Time Clock (NEW)
+    Route::post('attendance/clock-in', [AttendanceController::class, 'clockIn']);
+    Route::post('attendance/clock-out', [AttendanceController::class, 'clockOut']);
+    Route::get('attendance/today', [AttendanceController::class, 'today']);
+    Route::get('attendance/history', [AttendanceController::class, 'history']);
+    Route::post('attendance/{attendance}/adjust', [AttendanceController::class, 'adjust']);
+
+    // Payroll Management (NEW)
+    Route::post('payroll/generate', [PayrollController::class, 'generate']);
+    Route::post('payroll/{payroll}/finalize', [PayrollController::class, 'finalize']);
+    Route::get('payroll/history', [PayrollController::class, 'history']);
+    Route::get('payroll/{payroll}/details', [PayrollController::class, 'details']);
+    Route::post('payroll/{payroll}/add-detail', [PayrollController::class, 'addDetail']);
+    Route::delete('payroll-details/{detail}', [PayrollController::class, 'removeDetail']);
 });
 
 // In-store operations for staff (Employee)
@@ -276,8 +343,8 @@ Route::prefix('employee')
 
 // Customer Dashboard Routes (for authenticated customers)
 Route::prefix('customer')
-// ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
-->group(function () {
+    // ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
+    ->group(function () {
     // Dashboard endpoints
     Route::get('profile', [CustomerDashboardController::class, 'profile']);
     Route::get('dashboard/stats', [CustomerDashboardController::class, 'dashboardStats']);
@@ -298,6 +365,12 @@ Route::prefix('customer')
     
     // **CRITICAL FIX: Enable online orders endpoint**
     Route::post('online-orders', [OnlineOrderController::class, 'store']);
+
+    // Reservations (customer self-service)
+    Route::get('reservations', [CustomerReservationController::class, 'index']);
+    Route::get('reservations/availability', [CustomerReservationController::class, 'availability']);
+    Route::post('reservations', [CustomerReservationController::class, 'store']);
+    Route::delete('reservations/{reservation}', [CustomerReservationController::class, 'destroy']);
 });
 
 // Order Holds

@@ -59,4 +59,24 @@ class Employee extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
+
+    public function timeOffBalances()
+    {
+        return $this->hasMany(TimeOffBalance::class);
+    }
+
+    public function employmentHistory()
+    {
+        return $this->hasMany(EmploymentHistory::class);
+    }
+
+    public function attendanceMetrics()
+    {
+        return $this->hasMany(AttendanceMetric::class);
+    }
 }

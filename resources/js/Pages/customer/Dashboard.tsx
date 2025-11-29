@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { motion, Variants } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
-import { ApiResponse, Order } from '@/app/types/domain';
+import { apiGet, apiPost, apiDelete } from '@/app/libs/apiClient';
+import { ApiResponse, Order, Reservation } from '@/app/types/domain';
 import {
   Star,
   ShoppingBag,
@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Package,
   Sparkles,
+  Calendar,
 } from 'lucide-react';
 
 // Dashboard Components
@@ -75,6 +76,16 @@ const itemVariants: Variants = {
 
 export default function Dashboard() {
   // Data fetching
+  const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [bookingTime, setBookingTime] = useState('19:00');
+  const [bookingGuestCount, setBookingGuestCount] = useState('2');
+  const [bookingNotes, setBookingNotes] = useState('');
+  const [bookingError, setBookingError] = useState('');
+  const [bookingSuccess, setBookingSuccess] = useState('');
+  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [isBookingSubmitting, setIsBookingSubmitting] = useState(false);
+
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
     queryKey: ['customer.profile'],
     queryFn: () => apiGet<ApiResponse<CustomerProfile>>('/customer/profile').then((r) => r.data),
@@ -91,6 +102,16 @@ export default function Dashboard() {
   const { data: recentOrders, isLoading: ordersLoading } = useQuery({
     queryKey: ['customer.orders.recent'],
     queryFn: () => apiGet<ApiResponse<Order[]>>('/customer/orders?limit=5').then((r) => r.data),
+    staleTime: 1000 * 60,
+  });
+
+  const {
+    data: customerReservations = [],
+    isLoading: reservationsLoading,
+    refetch: refetchReservations,
+  } = useQuery({
+    queryKey: ['customer.reservations'],
+    queryFn: () => apiGet<{ data: Reservation[] }>('/customer/reservations').then((r) => r.data),
     staleTime: 1000 * 60,
   });
 
@@ -158,6 +179,75 @@ export default function Dashboard() {
       onClick: () => console.log('Rewards'),
     },
   ];
+
+  const handleCheckAvailability = async () => {
+    setBookingError('');
+    setBookingSuccess('');
+    setAvailabilityMessage(null);
+
+    if (!bookingDate || !bookingTime) {
+      setBookingError('Please select a date and time.');
+      return;
+    }
+
+    setIsCheckingAvailability(true);
+    try {
+      const res = await apiGet<{ available: boolean; message?: string }>(
+        `/customer/reservations/availability?date=${bookingDate}&time=${bookingTime}&guest_count=${bookingGuestCount}`
+      );
+
+      if (res.available) {
+        setAvailabilityMessage(res.message || 'Great news! A table is available.');
+      } else {
+        setAvailabilityMessage(res.message || 'No tables available for that time.');
+      }
+    } catch (error: any) {
+      setBookingError(error?.response?.data?.message || 'Failed to check availability.');
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  const handleCreateReservation = async () => {
+    setBookingError('');
+    setBookingSuccess('');
+    setAvailabilityMessage(null);
+
+    if (!bookingDate || !bookingTime) {
+      setBookingError('Please select a date and time.');
+      return;
+    }
+
+    setIsBookingSubmitting(true);
+    try {
+      const reserved_for = `${bookingDate}T${bookingTime}`;
+      await apiPost<Reservation>('/customer/reservations', {
+        reserved_for,
+        guest_count: parseInt(bookingGuestCount, 10),
+        notes: bookingNotes || undefined,
+      });
+
+      setBookingSuccess('Reservation created successfully!');
+      setBookingNotes('');
+      await refetchReservations();
+    } catch (error: any) {
+      setBookingError(error?.response?.data?.message || 'Failed to create reservation.');
+    } finally {
+      setIsBookingSubmitting(false);
+    }
+  };
+
+  const handleCancelReservation = async (reservationId: number) => {
+    if (!window.confirm('Cancel this reservation?')) return;
+    setBookingError('');
+    setBookingSuccess('');
+    try {
+      await apiDelete(`/customer/reservations/${reservationId}`);
+      await refetchReservations();
+    } catch (error: any) {
+      setBookingError(error?.response?.data?.message || 'Failed to cancel reservation.');
+    }
+  };
 
   return (
     <CustomerLayout>
@@ -439,6 +529,156 @@ export default function Dashboard() {
             </Card>
           </motion.div>
         </div>
+
+        <motion.section variants={itemVariants}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Book a Table
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Choose your time and party size, then confirm your reservation.
+                    </p>
+                  </div>
+                  <Calendar className="w-5 h-5 text-pink-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Date</label>
+                    <input
+                      type="date"
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Time</label>
+                    <input
+                      type="time"
+                      value={bookingTime}
+                      onChange={(e) => setBookingTime(e.target.value)}
+                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Guests</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={bookingGuestCount}
+                      onChange={(e) => setBookingGuestCount(e.target.value)}
+                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Notes (optional)</label>
+                    <textarea
+                      rows={2}
+                      value={bookingNotes}
+                      onChange={(e) => setBookingNotes(e.target.value)}
+                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 resize-none"
+                      placeholder="Birthday, quiet table, etc."
+                    />
+                  </div>
+                </div>
+
+                {bookingError && (
+                  <div className="mb-2 text-xs text-red-500">
+                    {bookingError}
+                  </div>
+                )}
+                {bookingSuccess && (
+                  <div className="mb-2 text-xs text-emerald-500">
+                    {bookingSuccess}
+                  </div>
+                )}
+                {availabilityMessage && (
+                  <div className="mb-2 text-xs text-pink-500">
+                    {availabilityMessage}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-3 mt-2">
+                  <Button
+                    variant="secondary"
+                    leftIcon={<Clock className="w-4 h-4" />}
+                    onClick={handleCheckAvailability}
+                    disabled={isCheckingAvailability || isBookingSubmitting}
+                  >
+                    {isCheckingAvailability ? 'Checking...' : 'Check Availability'}
+                  </Button>
+                  <Button
+                    leftIcon={<Utensils className="w-4 h-4" />}
+                    onClick={handleCreateReservation}
+                    disabled={isBookingSubmitting}
+                  >
+                    {isBookingSubmitting ? 'Booking...' : 'Book Now'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    My Reservations
+                  </h2>
+                  <Clock className="w-5 h-5 text-gray-400" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {reservationsLoading ? (
+                  <div className="space-y-2">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-full" />
+                    ))}
+                  </div>
+                ) : customerReservations.length === 0 ? (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    You have no upcoming reservations yet.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {customerReservations.slice(0, 4).map((res) => {
+                      const d = new Date(res.reserved_for);
+                      return (
+                        <div
+                          key={res.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm"
+                        >
+                          <div>
+                            <div className="font-semibold text-gray-900 dark:text-white">
+                              {d.toLocaleDateString()} • {d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400">
+                              {res.guest_count} guests • Table {res.table?.code || 'TBD'} • {res.status}
+                            </div>
+                          </div>
+                          {['pending', 'confirmed'].includes(res.status) && (
+                            <button
+                              onClick={() => handleCancelReservation(res.id)}
+                              className="text-xs font-medium text-red-500 hover:text-red-600"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </motion.section>
       </motion.div>
     </CustomerLayout>
   );

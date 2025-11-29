@@ -19,8 +19,9 @@ Route::middleware(['auth', 'role:Customer'])->group(function () {
         Route::get('customer/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');
         Route::get('/orders/{order}', fn() => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
         Route::get('/track/{orderId}', fn() => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
-        // Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
+        Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
         Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
+        // Route::get('reservation', fn() => Inertia::render('Customer/Reservation'))->name('customer.reservation');
     });
 
 // Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
@@ -51,6 +52,7 @@ Route::prefix('admin')
         Route::get('menu-items', fn() => Inertia::render('admin/MenuItems'))->name('admin.menu-items');
         Route::get('categories', fn() => Inertia::render('admin/Categories'))->name('admin.categories');
         Route::get('employees', fn() => Inertia::render('admin/Employees'))->name('admin.employees');
+        Route::get('locations', fn() => Inertia::render('admin/Locations'))->name('admin.locations');
         Route::get('promotions', fn() => Inertia::render('admin/Promotions'))->name('admin.promotions');
         Route::get('customers', fn() => Inertia::render('admin/Customers'))->name('admin.customers');
         Route::get('loyalty-points', fn() => Inertia::render('admin/LoyaltyPoints'))->name('admin.loyalty-points');
@@ -63,6 +65,20 @@ Route::prefix('admin')
         Route::get('reservations', fn() => Inertia::render('admin/Reservations'))->name('admin.reservations');
         Route::get('audit-logs', fn() => Inertia::render('admin/AuditLogs'))->name('admin.audit-logs');
         Route::get('settings', fn() => Inertia::render('admin/Settings'))->name('admin.settings');
+        
+        // Sprint 1: Foundation Modules
+        Route::get('suppliers', fn() => Inertia::render('admin/Suppliers'))->name('admin.suppliers');
+        Route::get('positions', fn() => Inertia::render('admin/Positions'))->name('admin.positions');
+        Route::get('units', fn() => Inertia::render('admin/Units'))->name('admin.units');
+        
+        // Sprint 2: Inventory & Procurement
+        Route::get('purchase-orders', fn() => Inertia::render('admin/PurchaseOrders'))->name('admin.purchase-orders');
+        Route::get('recipes', fn() => Inertia::render('admin/Recipes'))->name('admin.recipes');
+        
+        // Sprint 3: Employee Scheduling & Time Management
+        Route::get('shifts', fn() => Inertia::render('admin/Shifts'))->name('admin.shifts');
+        Route::get('time-off-requests', fn() => Inertia::render('admin/TimeOffRequests'))->name('admin.time-off-requests');
+        
         // Approval managed within main Orders page - no separate route needed
     });
 // Test time slots seeder

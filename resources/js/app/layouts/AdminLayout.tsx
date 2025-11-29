@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, Users, ShoppingBag, Settings, 
+import {
+  LayoutDashboard, Users, ShoppingBag, Settings,
   BarChart3, Calendar, MapPin, FileText, Menu as MenuIcon,
   X, Bell, User, LogOut, ChefHat, Building, Grid3X3,
-  Tag, Star, Package, Shield, MessageSquare, DollarSign
+  Tag, Star, Package, Shield, MessageSquare, DollarSign, ClipboardList
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -23,26 +23,36 @@ const navigation = [
   // Menu Management
   { name: 'Categories', href: '/admin/categories', icon: ShoppingBag },
   { name: 'Menu Items', href: '/admin/menu-items', icon: ChefHat },
+  { name: 'Recipes', href: '/admin/recipes', icon: ChefHat },
   { name: 'Promotions', href: '/admin/promotions', icon: Tag },
 
-  // People
+  // Inventory & Procurement
+  { name: 'Purchase Orders', href: '/admin/purchase-orders', icon: Package },
+  { name: 'Inventory', href: '/admin/inventory', icon: Package },
+  { name: 'Suppliers', href: '/admin/suppliers', icon: Building },
+  { name: 'Units', href: '/admin/units', icon: Grid3X3 },
+
+  // People Management
   { name: 'Employees', href: '/admin/employees', icon: Users },
   { name: 'Customers', href: '/admin/customers', icon: Users },
+  { name: 'Positions', href: '/admin/positions', icon: User },
   { name: 'Loyalty Points', href: '/admin/loyalty-points', icon: Star },
+
+  // Scheduling & Time Off
+  { name: 'Shifts', href: '/admin/shifts', icon: Calendar },
+  { name: 'Time Off Requests', href: '/admin/time-off-requests', icon: ClipboardList },
+
+  // Restaurant Layout
+  { name: 'Locations', href: '/admin/locations', icon: MapPin },
+  { name: 'Floors', href: '/admin/floors', icon: Building },
+  { name: 'Tables', href: '/admin/tables', icon: Grid3X3 },
 
   // Finance
   { name: 'Expenses', href: '/admin/expenses', icon: DollarSign },
   { name: 'Invoices', href: '/admin/invoices', icon: FileText },
 
-  // Restaurant Layout
-  { name: 'Floors', href: '/admin/floors', icon: Building },
-  { name: 'Tables', href: '/admin/tables', icon: Grid3X3 },
-
   // System
-  { name: 'Inventory', href: '/admin/inventory', icon: Package },
   { name: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
-
-  // Settings
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
@@ -142,15 +152,15 @@ export default function AdminLayout({ children }: Props) {
                   <motion.div
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group',
-                      isActive 
-                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg' 
+                      isActive
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600'
                     )}
                     whileHover={{ x: 2 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
-                    
+
                     <AnimatePresence>
                       {!sidebarCollapsed && (
                         <motion.span
@@ -187,7 +197,7 @@ export default function AdminLayout({ children }: Props) {
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
               </div>
-              
+
               <AnimatePresence>
                 {!sidebarCollapsed && (
                   <motion.div

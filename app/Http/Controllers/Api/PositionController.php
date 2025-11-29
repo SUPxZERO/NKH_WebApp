@@ -7,6 +7,7 @@ use App\Http\Requests\Api\Position\StorePositionRequest;
 use App\Http\Requests\Api\Position\UpdatePositionRequest;
 use App\Http\Resources\PositionResource;
 use App\Models\Position;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PositionController extends Controller
@@ -16,6 +17,36 @@ class PositionController extends Controller
     {
         $query = Position::query()->where('is_active', true)->orderBy('title');
         return PositionResource::collection($query->paginate());
+    }
+
+    // GET /api/admin/positions (admin)
+    public function adminIndex(Request $request)
+    {
+        $query = Position::withCount('employees');
+
+        // Search
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($request->has('is_active')) {
+            $query->where('is_active', $request->is_active);
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'title');
+        $sortOrder = $request->get('sort_order', 'asc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $perPage = $request->get('per_page', 15);
+        $positions = $query->paginate($perPage);
+
+        return response()->json($positions);
     }
 
     // POST /api/positions (role:admin,manager)
@@ -29,6 +60,7 @@ class PositionController extends Controller
     // GET /api/positions/{position}
     public function show(Position $position): PositionResource
     {
+        $position->loadCount('employees');
         return new PositionResource($position);
     }
 
@@ -42,7 +74,14 @@ class PositionController extends Controller
     // DELETE /api/positions/{position} (role:admin,manager)
     public function destroy(Position $position)
     {
+        // Check if position has employees
+        if ($position->employees()->exists()) {
+            return response()->json([
+                'message' => 'Cannot delete position with  existing employees. Please mark as inactive instead.'
+            ], 422);
+        }
+
         $position->delete();
-        return response()->json(['message' => 'Position deleted.']);
+        return response()->json(['message' => 'Position deleted successfully.']);
     }
 }

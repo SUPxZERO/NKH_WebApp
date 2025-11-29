@@ -14,15 +14,23 @@ class Reservation extends Model
         'table_id',
         'customer_id',
         'code',
+        'reservation_number',
         'reserved_for',
+        'party_size',
+        'reservation_date',
+        'reservation_time',
         'duration_minutes',
         'guest_count',
         'status',
+        'special_requests',
         'notes',
     ];
 
     protected $casts = [
-        'reserved_for' => 'datetime',
+        'reservation_date' => 'date',
+        'party_size' => 'integer',
+        'duration_minutes' => 'integer',
+        'guest_count' => 'integer',
     ];
 
     public function location()
