@@ -11,12 +11,14 @@ import {
     Filter,
     BarChart3,
     PieChart as PieChartIcon,
-    Clock
+    Clock,
+    FileText
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { apiGet } from '@/app/utils/api';
+import DateRangePicker from '@/app/components/DateRangePicker';
 import {
     LineChart,
     Line,
@@ -36,38 +38,63 @@ import {
 const COLORS = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
 
 export default function SalesAnalytics() {
-    const [dateRange, setDateRange] = React.useState('7days');
+    const [startDate, setStartDate] = React.useState<Date | undefined>(
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    );
+    const [endDate, setEndDate] = React.useState<Date | undefined>(new Date());
     const [viewMode, setViewMode] = React.useState<'overview' | 'detailed'>('overview');
+
+    // Build query params based on date range
+    const getQueryParams = () => {
+        if (startDate && endDate) {
+            return `start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`;
+        }
+        return 'range=7days';
+    };
+
+    // Quick date preset buttons
+    const setQuickDate = (days: number) => {
+        setEndDate(new Date());
+        setStartDate(new Date(Date.now() - days * 24 * 60 * 60 * 1000));
+    };
 
     // Fetch sales overview
     const { data: overview } = useQuery({
-        queryKey: ['sales-overview', dateRange],
-        queryFn: () => apiGet(`/api/admin/analytics/sales/overview?range=${dateRange}`)
+        queryKey: ['sales-overview', startDate, endDate],
+        queryFn: () => apiGet(`/api/admin/analytics/sales/overview?${getQueryParams()}`)
     });
 
     // Fetch sales trends
     const { data: trends } = useQuery({
-        queryKey: ['sales-trends', dateRange],
-        queryFn: () => apiGet(`/api/admin/analytics/sales/trends?range=${dateRange}`)
+        queryKey: ['sales-trends', startDate, endDate],
+        queryFn: () => apiGet(`/api/admin/analytics/sales/trends?${getQueryParams()}`)
     });
 
     // Fetch top items
     const { data: topItems } = useQuery({
-        queryKey: ['top-items', dateRange],
-        queryFn: () => apiGet(`/api/admin/analytics/sales/top-items?range=${dateRange}`)
+        queryKey: ['top-items', startDate, endDate],
+        queryFn: () => apiGet(`/api/admin/analytics/sales/top-items?${getQueryParams()}`)
     });
 
     // Fetch category breakdown
     const { data: categories } = useQuery({
-        queryKey: ['sales-by-category', dateRange],
-        queryFn: () => apiGet(`/api/admin/analytics/sales/by-category?range=${dateRange}`)
+        queryKey: ['sales-by-category', startDate, endDate],
+        queryFn: () => apiGet(`/api/admin/analytics/sales/by-category?${getQueryParams()}`)
     });
 
     // Fetch peak hours
     const { data: peakHours } = useQuery({
-        queryKey: ['peak-hours', dateRange],
-        queryFn: () => apiGet(`/api/admin/analytics/sales/peak-hours?range=${dateRange}`)
+        queryKey: ['peak-hours', startDate, endDate],
+        queryFn: () => apiGet(`/api/admin/analytics/sales/peak-hours?${getQueryParams()}`)
     });
+
+    const handleExportPDF = () => {
+        window.open(`/api/admin/analytics/sales/export/pdf?${getQueryParams()}`, '_blank');
+    };
+
+    const handleExportExcel = () => {
+        window.location.href = `/api/admin/analytics/sales/export/excel?${getQueryParams()}`;
+    };
 
     const stats = [
         { label: 'Total Revenue', value: `$${Number(overview?.total_revenue || 0).toLocaleString()}`, icon: DollarSign, color: 'text-green-400', bgColor: 'bg-green-500/20' },
@@ -84,31 +111,62 @@ export default function SalesAnalytics() {
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                        className="flex flex-col gap-4"
                     >
-                        <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                                Sales Analytics
-                            </h1>
-                            <p className="text-gray-400 mt-1">Track revenue, trends, and performance insights</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                                    Sales Analytics
+                                </h1>
+                                <p className="text-gray-400 mt-1">Track revenue, trends, and performance insights</p>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <Button
+                                    onClick={handleExportPDF}
+                                    className="hover:from-blue-700 hover:to-cyan-700"
+                                >
+                                    <FileText className="w-4 h-4 mr-2" /> PDF
+                                </Button>
+                                <Button
+                                    onClick={handleExportExcel}
+                                    className="hover:from-green-700 hover:to-emerald-700"
+                                >
+                                    <Download className="w-4 h-4 mr-2" /> CSV
+                                </Button>
+                            </div>
                         </div>
 
-                        <div className="flex gap-4">
-                            <select
-                                value={dateRange}
-                                onChange={(e) => setDateRange(e.target.value)}
-                                className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white"
-                            >
-                                <option value="today" className="text-black">Today</option>
-                                <option value="7days" className="text-black">Last 7 Days</option>
-                                <option value="30days" className="text-black">Last 30 Days</option>
-                                <option value="90days" className="text-black">Last 90 Days</option>
-                                <option value="year" className="text-black">This Year</option>
-                            </select>
+                        {/* Date Range Controls */}
+                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <DateRangePicker
+                                startDate={startDate}
+                                endDate={endDate}
+                                onStartDateChange={(date) => setStartDate(date ?? undefined)}
+                                onEndDateChange={(date) => setEndDate(date ?? undefined)}
+                            />
 
-                            <Button className="bg-gradient-to-r from-fuchsia-600 to-pink-600">
-                                <Download className="w-4 h-4 mr-2" /> Export
-                            </Button>
+                            {/* Quick Presets */}
+                            <div className="flex gap-2 flex-wrap">
+                                <button
+                                    onClick={() => setQuickDate(7)}
+                                    className="px-3 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors"
+                                >
+                                    7 Days
+                                </button>
+                                <button
+                                    onClick={() => setQuickDate(30)}
+                                    className="px-3 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors"
+                                >
+                                    30 Days
+                                </button>
+                                <button
+                                    onClick={() => setQuickDate(90)}
+                                    className="px-3 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors"
+                                >
+                                    90 Days
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 </div>

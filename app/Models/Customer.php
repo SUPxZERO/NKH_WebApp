@@ -23,6 +23,18 @@ class Customer extends Model
         'preferences',
         'points_balance',
         'notes',
+        // New CRM fields
+        'last_visit_date',
+        'last_purchase_date',
+        'visit_count',
+        'average_order_value',
+        'customer_tier',
+        'referral_code',
+        'email_verified_at',
+        'phone_verified_at',
+        'communication_preferences',
+        'tags',
+        'no_show_count',
     ];
 
     protected $casts = [
@@ -33,8 +45,19 @@ class Customer extends Model
         'total_spent' => 'decimal:2',
         'marketing_consent' => 'boolean',
         'dietary_preferences' => 'array',
+        // New CRM field casts
+        'last_visit_date' => 'datetime',
+        'last_purchase_date' => 'datetime',
+        'visit_count' => 'integer',
+        'average_order_value' => 'decimal:2',
+        'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
+        'communication_preferences' => 'array',
+        'tags' => 'array',
+        'no_show_count' => 'integer',
     ];
 
+    // Existing relationships
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -68,5 +91,56 @@ class Customer extends Model
     public function cartItems()
     {
         return $this->hasMany(CartItem::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    // New relationships
+    public function customerPreferences()
+    {
+        return $this->hasMany(CustomerPreference::class);
+    }
+
+    public function loginHistory()
+    {
+        return $this->hasMany(CustomerLoginHistory::class);
+    }
+
+    public function communicationLog()
+    {
+        return $this->hasMany(CustomerCommunicationLog::class);
+    }
+
+    // Helper methods
+    public function calculateTier()
+    {
+        $spent = floatval($this->total_spent);
+        
+        if ($spent >= 10000) return 'platinum';
+        if ($spent >= 5000) return 'gold';
+        if ($spent >= 2000) return 'silver';
+        return 'bronze';
+    }
+
+    public function updateEngagementMetrics()
+    {
+        $orderCount = $this->orders()->count();
+        $totalSpent = $this->orders()->sum('total_amount');
+        
+        $this->update([
+            'visit_count' => $orderCount,
+            'total_spent' => $totalSpent,
+            'average_order_value' => $orderCount > 0 ? $totalSpent / $orderCount : 0,
+            'customer_tier' => $this->calculateTier(),
+        ]);
+    }
+
+    public function getDefaultAddress()
+    {
+        return $this->addresses()->where('is_default', true)->first() 
+            ?? $this->addresses()->first();
     }
 }

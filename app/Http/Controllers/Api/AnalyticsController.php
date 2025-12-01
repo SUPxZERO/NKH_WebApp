@@ -7,10 +7,15 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\MenuItem;
 use App\Models\Category;
+use App\Models\Inventory;
+use App\Models\Ingredient;
+use App\Models\InventoryTransaction;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AnalyticsController extends Controller
 {
@@ -57,17 +62,22 @@ class AnalyticsController extends Controller
         $range = $request->get('range', '7days');
         $dates = $this->getDateRange($range);
 
-        $topItems = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+        $topItems = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+            ->join('menu_item_translations', function($join) {
+                $join->on('menu_items.id', '=', 'menu_item_translations.menu_item_id')
+                     ->where('menu_item_translations.locale', '=', 'en');
+            })
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
             ->where('orders.status', '!=', 'cancelled')
             ->select([
                 'menu_items.id',
-                'menu_items.name',
+                'menu_item_translations.name',
                 DB::raw('SUM(order_items.quantity) as quantity_sold'),
-                DB::raw('SUM(order_items.subtotal) as revenue')
+                DB::raw('SUM(order_items.total_price) as revenue')
             ])
-            ->groupBy('menu_items.id', 'menu_items.name')
+            ->groupBy('menu_items.id', 'menu_item_translations.name')
             ->orderByDesc('quantity_sold')
             ->limit(10)
             ->get();
@@ -80,16 +90,21 @@ class AnalyticsController extends Controller
         $range = $request->get('range', '7days');
         $dates = $this->getDateRange($range);
 
-        $categoryData = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+        $categoryData = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
             ->join('categories', 'menu_items.category_id', '=', 'categories.id')
+            ->join('category_translations', function($join) {
+                $join->on('categories.id', '=', 'category_translations.category_id')
+                     ->where('category_translations.locale', '=', 'en');
+            })
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
             ->where('orders.status', '!=', 'cancelled')
             ->select([
-                'categories.name',
-                DB::raw('SUM(order_items.subtotal) as value')
+                'category_translations.name',
+                DB::raw('SUM(order_items.total_price) as value')
             ])
-            ->groupBy('categories.id', 'categories.name')
+            ->groupBy('categories.id', 'category_translations.name')
             ->get();
 
         return response()->json(['data' => $categoryData]);
@@ -179,6 +194,391 @@ class AnalyticsController extends Controller
             ->first();
 
         return response()->json($summary);
+    }
+
+    /**
+     * Export sales analytics to PDF
+     */
+    public function exportSalesPDF(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $dates = $this->getDateRangeFromRequest($request);
+        
+        $data = [
+            'overview' => $this->getSalesData($dates),
+            'trends' => $this->getTrendsData($dates),
+            'topItems' => $this->getTopItemsData($dates),
+            'categories' => $this->getCategoryData($dates),
+            'start_date' => $dates['start']->format('M d, Y'),
+            'end_date' => $dates['end']->format('M d, Y'),
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('exports.sales-analytics', $data);
+        return $pdf->download('sales-analytics-' . date('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Export sales analytics to Excel
+     */
+    public function exportSalesExcel(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $dates = $this->getDateRangeFromRequest($request);
+        
+        // Fallback: Return CSV
+        $data = $this->getSalesData($dates);
+        $csv = "Metric,Value\n";
+        $csv .= "Total Revenue," . ($data['total_revenue'] ?? 0) . "\n";
+        $csv .= "Total Orders," . ($data['total_orders'] ?? 0) . "\n";
+        $csv .= "Avg Order Value," . ($data['avg_order_value'] ?? 0) . "\n";
+        $csv .= "Unique Customers," . ($data['unique_customers'] ?? 0) . "\n";
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="sales-analytics-' . date('Y-m-d') . '.csv"');
+    }
+
+    /**
+     * Export Inventory Reports
+     */
+    public function exportInventoryPDF(Request $request)
+    {
+        $dates = $this->getDateRangeFromRequest($request);
+
+        // 1. Valuation Data
+        $currentValue = Inventory::join('ingredients', 'inventory.ingredient_id', '=', 'ingredients.id')
+            ->sum(DB::raw('inventory.quantity * ingredients.cost_per_unit'));
+        
+        $itemsCount = Inventory::count();
+
+        $valuation = [
+            'total_value' => $currentValue,
+            'items_count' => $itemsCount
+        ];
+
+        // 2. Waste Data (Mock or Calculate)
+        $wasteValue = InventoryTransaction::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->where('type', 'waste') // Assuming 'waste' type exists or similar
+            ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
+            ->sum(DB::raw('inventory_transactions.quantity * ingredients.cost_per_unit'));
+
+        $wasteData = [
+            'total_waste_value' => $wasteValue
+        ];
+
+        // 3. Turnover Data
+        $avgTurnover = Ingredient::select(DB::raw('AVG(CASE WHEN current_stock > 0 THEN (max_stock_level / current_stock) ELSE 0 END) as rate'))
+            ->value('rate');
+
+        $turnoverByCategory = Ingredient::select([
+                'category',
+                DB::raw('AVG(CASE WHEN current_stock > 0 THEN (max_stock_level / current_stock) ELSE 0 END) as turnover_rate')
+            ])
+            ->groupBy('category')
+            ->get()
+            ->toArray();
+
+        $turnover = [
+            'avg_turnover' => $avgTurnover,
+            'by_category' => $turnoverByCategory
+        ];
+
+        // 4. Cost Analysis
+        $topCostItems = Ingredient::select([
+                'ingredients.name',
+                'ingredients.current_stock as quantity',
+                'ingredients.cost_per_unit',
+                DB::raw('(ingredients.current_stock * ingredients.cost_per_unit) as total_cost')
+            ])
+            ->with('unit:id,code')
+            ->orderByDesc('total_cost')
+            ->limit(10)
+            ->get()
+            ->map(function ($item) {
+                $itemArray = $item->toArray();
+                $itemArray['unit'] = $item->unit?->code ?? 'unit';
+                return $itemArray;
+            })
+            ->toArray();
+
+        $costCategories = Ingredient::select([
+                'ingredients.category as name',
+                DB::raw('SUM(ingredients.current_stock * ingredients.cost_per_unit) as value')
+            ])
+            ->groupBy('ingredients.category')
+            ->get()
+            ->toArray();
+
+        $costAnalysis = [
+            'top_items' => $topCostItems,
+            'categories' => $costCategories
+        ];
+
+        $data = [
+            'valuation' => $valuation,
+            'wasteData' => $wasteData,
+            'turnover' => $turnover,
+            'costAnalysis' => $costAnalysis,
+            'start_date' => $dates['start']->format('M d, Y'),
+            'end_date' => $dates['end']->format('M d, Y'),
+        ];
+
+        $pdf = Pdf::loadView('exports.inventory-reports', $data);
+        return $pdf->download('inventory-report-' . date('Y-m-d') . '.pdf');
+    }
+
+    public function exportInventoryCSV(Request $request)
+    {
+        $dates = $this->getDateRangeFromRequest($request);
+        
+        $currentValue = Inventory::join('ingredients', 'inventory.ingredient_id', '=', 'ingredients.id')
+            ->sum(DB::raw('inventory.quantity * ingredients.cost_per_unit'));
+
+        $csv = "Metric,Value\n";
+        $csv .= "Total Inventory Value," . number_format($currentValue, 2) . "\n";
+        $csv .= "Report Date," . date('Y-m-d') . "\n";
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="inventory-report-' . date('Y-m-d') . '.csv"');
+    }
+
+    /**
+     * Export Financial Reports
+     */
+    public function exportFinancialPDF(Request $request)
+    {
+        $dates = $this->getDateRangeFromRequest($request);
+
+        // 1. Profit & Loss Data
+        $revenue = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->where('status', '!=', 'cancelled')
+            ->sum('total_amount');
+
+        $expenses = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
+            ->sum('amount');
+
+        // COGS
+        $cogsValue = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
+            ->where('type', 'usage')
+            ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
+            ->sum(DB::raw('inventory_transactions.quantity * ingredients.cost_per_unit'));
+
+        $totalExpenses = $expenses + $cogsValue;
+        $netProfit = $revenue - $totalExpenses;
+        $margin = $revenue > 0 ? ($netProfit / $revenue) * 100 : 0;
+
+        $expenseBreakdown = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
+            ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
+            ->select([
+                'expense_categories.name as category',
+                DB::raw('SUM(expenses.amount) as amount')
+            ])
+            ->groupBy('expense_categories.id', 'expense_categories.name')
+            ->get()
+            ->map(function ($item) use ($expenses) {
+                return [
+                    'category' => $item->category,
+                    'amount' => $item->amount,
+                    'percentage' => $expenses > 0 ? ($item->amount / $expenses) * 100 : 0,
+                    'change' => 0 // Placeholder
+                ];
+            })
+            ->toArray();
+
+        $profitLoss = [
+            'total_revenue' => $revenue,
+            'cogs' => $cogsValue,
+            'total_expenses' => $totalExpenses, // Operating + COGS
+            'net_profit' => $netProfit,
+            'profit_margin' => $margin,
+            'expense_categories' => $expenseBreakdown
+        ];
+
+        // 2. Margins Data
+        $marginsByCategory = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+            ->join('categories', 'menu_items.category_id', '=', 'categories.id')
+            ->join('category_translations', function($join) {
+                $join->on('categories.id', '=', 'category_translations.category_id')
+                     ->where('category_translations.locale', '=', 'en');
+            })
+            ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+            ->where('orders.status', '!=', 'cancelled')
+            ->select([
+                'category_translations.name as category',
+                DB::raw('SUM(order_items.total_price) as revenue'),
+                DB::raw('SUM(order_items.total_price * 0.3) as cost'), // Mock cost 30%
+            ])
+            ->groupBy('categories.id', 'category_translations.name')
+            ->get()
+            ->map(function ($item) {
+                $margin = $item->revenue > 0 ? (($item->revenue - $item->cost) / $item->revenue) * 100 : 0;
+                return [
+                    'category' => $item->category,
+                    'revenue' => $item->revenue,
+                    'cost' => $item->cost,
+                    'margin' => $margin
+                ];
+            })
+            ->toArray();
+
+        $margins = ['by_category' => $marginsByCategory];
+
+        // 3. COGS Breakdown
+        $cogsBreakdown = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
+            ->where('type', 'usage')
+            ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
+            ->select([
+                'ingredients.category as name',
+                DB::raw('SUM(inventory_transactions.quantity * ingredients.cost_per_unit) as value')
+            ])
+            ->groupBy('ingredients.category')
+            ->get()
+            ->toArray();
+
+        $cogsData = [
+            'breakdown' => $cogsBreakdown,
+            'total' => $cogsValue
+        ];
+
+        $data = [
+            'profitLoss' => $profitLoss,
+            'margins' => $margins,
+            'cogs' => $cogsData,
+            'start_date' => $dates['start']->format('M d, Y'),
+            'end_date' => $dates['end']->format('M d, Y'),
+        ];
+
+        $pdf = Pdf::loadView('exports.financial-dashboard', $data);
+        return $pdf->download('financial-report-' . date('Y-m-d') . '.pdf');
+    }
+
+    public function exportFinancialCSV(Request $request)
+    {
+        $dates = $this->getDateRangeFromRequest($request);
+
+        $revenue = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->where('status', '!=', 'cancelled')
+            ->sum('total_amount');
+
+        $expenses = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
+            ->sum('amount');
+
+        $csv = "Metric,Value\n";
+        $csv .= "Total Revenue," . number_format($revenue, 2) . "\n";
+        $csv .= "Total Expenses," . number_format($expenses, 2) . "\n";
+        $csv .= "Net Profit," . number_format($revenue - $expenses, 2) . "\n";
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="financial-report-' . date('Y-m-d') . '.csv"');
+    }
+
+    private function getDateRangeFromRequest(Request $request): array
+    {
+        if ($request->has('start_date') && $request->has('end_date')) {
+            return [
+                'start' => Carbon::parse($request->start_date)->startOfDay(),
+                'end' => Carbon::parse($request->end_date)->endOfDay(),
+            ];
+        }
+        
+        return $this->getDateRange($request->get('range', '7days'));
+    }
+
+    private function getSalesData($dates): array
+    {
+        $stats = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->where('status', '!=', 'cancelled')
+            ->select([
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(total_amount) as total_revenue'),
+                DB::raw('AVG(total_amount) as avg_order_value'),
+                DB::raw('COUNT(DISTINCT customer_id) as unique_customers')
+            ])
+            ->first();
+
+        return $stats->toArray();
+    }
+
+    private function getTrendsData($dates): array
+    {
+        $daysDiff = $dates['start']->diffInDays($dates['end']);
+        $groupBy = $daysDiff > 60 ? "DATE_FORMAT(created_at, '%Y-%m')" : "DATE(created_at)";
+
+        $trends = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->where('status', '!=', 'cancelled')
+            ->select([
+                DB::raw($groupBy . ' as date'),
+                DB::raw('COUNT(*) as orders'),
+                DB::raw('SUM(total_amount) as revenue')
+            ])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->toArray();
+
+        return $trends;
+    }
+
+    private function getTopItemsData($dates): array
+    {
+        $topItems = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+            ->join('menu_item_translations', function($join) {
+                $join->on('menu_items.id', '=', 'menu_item_translations.menu_item_id')
+                     ->where('menu_item_translations.locale', '=', 'en');
+            })
+            ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+            ->where('orders.status', '!=', 'cancelled')
+            ->select([
+                'menu_item_translations.name',
+                DB::raw('SUM(order_items.quantity) as quantity_sold'),
+                DB::raw('SUM(order_items.total_price) as revenue')
+            ])
+            ->groupBy('menu_items.id', 'menu_item_translations.name')
+            ->orderByDesc('quantity_sold')
+            ->limit(10)
+            ->get()
+            ->map(fn ($item) => (array) $item)
+            ->toArray();
+
+        return $topItems;
+    }
+
+    private function getCategoryData($dates): array
+    {
+        $categoryData = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+            ->join('categories', 'menu_items.category_id', '=', 'categories.id')
+            ->join('category_translations', function($join) {
+                $join->on('categories.id', '=', 'category_translations.category_id')
+                     ->where('category_translations.locale', '=', 'en');
+            })
+            ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+            ->where('orders.status', '!=', 'cancelled')
+            ->select([
+                'category_translations.name',
+                DB::raw('SUM(order_items.total_price) as value')
+            ])
+            ->groupBy('categories.id', 'category_translations.name')
+            ->get()
+            ->map(fn ($item) => (array) $item)
+            ->toArray();
+
+        return $categoryData;
     }
 
     private function getDateRange(string $range): array

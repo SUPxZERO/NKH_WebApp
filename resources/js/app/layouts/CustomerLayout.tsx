@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShoppingCart, 
-  User, 
-  Menu as MenuIcon, 
+import {
+  ShoppingCart,
+  User,
+  Menu as MenuIcon,
   X,
   Home,
   Utensils,
@@ -14,11 +14,12 @@ import {
   Settings,
   Phone,
   Mail,
-  Clock,ClipboardList
+  Clock, ClipboardList,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
-type Props = { 
+type Props = {
   children: React.ReactNode;
   className?: string;
 };
@@ -36,6 +37,10 @@ const navigation = [
 export default function CustomerLayout({ children, className }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
+
+  const handleLogout = () => {
+    router.post('/logout');
+  };
 
   return (
     <div className={cn(
@@ -96,6 +101,15 @@ export default function CustomerLayout({ children, className }: Props) {
                     </Link>
                   );
                 })}
+
+                {/* Logout Button in Mobile Menu */}
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 w-full"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
               </nav>
             </div>
           </motion.div>
@@ -162,6 +176,15 @@ export default function CustomerLayout({ children, className }: Props) {
               >
                 <User className="w-5 h-5" />
               </Link>
+
+              {/* Logout Button - Desktop */}
+              <button
+                onClick={handleLogout}
+                className="hidden lg:flex p-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
 
               {/* Mobile Menu Toggle */}
               <button

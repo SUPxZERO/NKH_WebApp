@@ -322,13 +322,13 @@ export default function Reservations() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all" className='text-black'>All Status</option>
-            <option value="pending" className='text-black'>Pending</option>
-            <option value="confirmed" className='text-black'>Confirmed</option>
-            <option value="seated" className='text-black'>Seated</option>
-            <option value="cancelled" className='text-black'>Cancelled</option>
-            <option value="completed" className='text-black'>Completed</option>
-            <option value="no_show" className='text-black'>No Show</option>
+            <option value="all" className='text-gray-800'>All Status</option>
+            <option value="pending" className='text-gray-800'>Pending</option>
+            <option value="confirmed" className='text-gray-800'>Confirmed</option>
+            <option value="seated" className='text-gray-800'>Seated</option>
+            <option value="cancelled" className='text-gray-800'>Cancelled</option>
+            <option value="completed" className='text-gray-800'>Completed</option>
+            <option value="no_show" className='text-gray-800'>No Show</option>
           </select>
 
           <select
@@ -336,10 +336,10 @@ export default function Reservations() {
             onChange={(e) => setDateFilter(e.target.value)}
             className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
           >
-            <option value="all" className='text-black'>All Dates</option>
-            <option value="today" className='text-black'>Today</option>
-            <option value="tomorrow" className='text-black'>Tomorrow</option>
-            <option value="week" className='text-black'>This Week</option>
+            <option value="all" className='text-gray-800'>All Dates</option>
+            <option value="today" className='text-gray-800'>Today</option>
+            <option value="tomorrow" className='text-gray-800'>Tomorrow</option>
+            <option value="week" className='text-gray-800'>This Week</option>
           </select>
 
           <Button
@@ -569,7 +569,7 @@ export default function Reservations() {
                 onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
               >
-                <option value="">Select Customer</option>
+                <option value="" className='bg-gray-800'>Select Customer</option>
                 {customers?.data?.map((customer: Customer) => (
                   <option key={customer.id} value={customer.id} className="bg-gray-800">
                     {customer.user?.name}
@@ -640,12 +640,12 @@ export default function Reservations() {
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
               >
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="seated">Seated</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="completed">Completed</option>
-                <option value="no_show">No Show</option>
+                <option value="pending" className='bg-gray-800'>Pending</option>
+                <option value="confirmed" className='bg-gray-800'>Confirmed</option>
+                <option value="seated" className='bg-gray-800'>Seated</option>
+                <option value="cancelled" className='bg-gray-800'>Cancelled</option>
+                <option value="completed" className='bg-gray-800'>Completed</option>
+                <option value="no_show" className='bg-gray-800'>No Show</option>
               </select>
             </div>
           </div>

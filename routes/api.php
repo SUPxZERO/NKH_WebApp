@@ -41,6 +41,10 @@ use App\Http\Controllers\Api\StockAlertController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\OperatingHoursController;
+use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
@@ -228,6 +232,9 @@ Route::prefix('admin')
     // Employees
     Route::apiResource('employees', EmployeeController::class);
     // Customers
+    Route::get('customers/{customer}/history', [CustomerController::class, 'history']);
+    Route::get('customers/{customer}/stats', [CustomerController::class, 'stats']);
+    Route::post('customers/{customer}/update-tier', [CustomerController::class, 'updateTier']);
     Route::apiResource('customers', CustomerController::class);
     // Expenses
     Route::apiResource('expenses', ExpenseController::class);
@@ -351,6 +358,10 @@ Route::prefix('admin')
         Route::get('sales/by-payment-method', [AnalyticsController::class, 'salesByPaymentMethod']);
         Route::get('sales/customer-metrics', [AnalyticsController::class, 'customerMetrics']);
         Route::get('sales/daily-summary', [AnalyticsController::class, 'dailySummary']);
+        
+        // Export routes
+        Route::get('sales/export/pdf', [AnalyticsController::class, 'exportSalesPDF']);
+        Route::get('sales/export/excel', [AnalyticsController::class, 'exportSalesExcel']);
     });
     
     // Reports
@@ -361,12 +372,16 @@ Route::prefix('admin')
         Route::get('inventory/waste-tracking', [ReportsController::class, 'wasteTracking']);
         Route::get('inventory/cost-analysis', [ReportsController::class, 'costAnalysis']);
         Route::get('inventory/turnover', [ReportsController::class, 'inventoryTurnover']);
+        Route::get('inventory/export/pdf', [AnalyticsController::class, 'exportInventoryPDF']);
+        Route::get('inventory/export/csv', [AnalyticsController::class, 'exportInventoryCSV']);
         
         // Financial Reports
         Route::get('financial/profit-loss', [ReportsController::class, 'profitLoss']);
         Route::get('financial/revenue-expenses', [ReportsController::class, 'revenueExpenses']);
         Route::get('financial/cogs', [ReportsController::class, 'cogs']);
         Route::get('financial/margins', [ReportsController::class, 'margins']);
+        Route::get('financial/export/pdf', [AnalyticsController::class, 'exportFinancialPDF']);
+        Route::get('financial/export/csv', [AnalyticsController::class, 'exportFinancialCSV']);
     });
 
 
@@ -374,6 +389,29 @@ Route::prefix('admin')
     Route::post('attendance/clock-in', [AttendanceController::class, 'clockIn']);
     Route::post('attendance/clock-out', [AttendanceController::class, 'clockOut']);
     Route::get('attendance/today', [AttendanceController::class, 'today']);
+
+    // Sprint 6: Access Control
+    Route::apiResource('roles', RoleController::class);
+    Route::get('permissions/all', [RoleController::class, 'getAllPermissions']);
+    
+    // Sprint 6: Operating Hours
+    Route::get('operating-hours/location/{location}', [OperatingHoursController::class, 'getByLocation']);
+    Route::post('operating-hours/bulk-update', [OperatingHoursController::class, 'bulkUpdate']);
+    Route::post('operating-hours/copy-to-all-days', [OperatingHoursController::class, 'copyToAllDays']);
+    Route::apiResource('operating-hours', OperatingHoursController::class);
+    
+    // Sprint 6: Settings
+    Route::get('settings/key/{key}', [SettingsController::class, 'getByKey']);
+    Route::post('settings/bulk-update', [SettingsController::class, 'bulkUpdate']);
+    Route::apiResource('settings', SettingsController::class);
+    
+    // Sprint 6: Translations
+    Route::get('translations/categories', [TranslationController::class, 'getCategoryTranslations']);
+    Route::get('translations/menu-items', [TranslationController::class, 'getMenuItemTranslations']);
+    Route::get('translations/missing', [TranslationController::class, 'getMissingTranslations']);
+    Route::put('translations/category/{category}', [TranslationController::class, 'updateCategoryTranslation']);
+    Route::put('translations/menu-item/{menuItem}', [TranslationController::class, 'updateMenuItemTranslation']);
+    Route::post('translations/bulk-update', [TranslationController::class, 'bulkUpdateTranslations']);
     Route::get('attendance/history', [AttendanceController::class, 'history']);
     Route::post('attendance/{attendance}/adjust', [AttendanceController::class, 'adjust']);
 
@@ -418,9 +456,16 @@ Route::prefix('customer')
     Route::get('orders', [CustomerDashboardController::class, 'orders']);
     Route::get('favorites', [CustomerDashboardController::class, 'favorites']);
     
-    // Addresses
-    Route::get('addresses', [OnlineOrderController::class, 'addressesIndex']);
-    Route::post('addresses', [OnlineOrderController::class, 'addressesStore']);
+    // NEW: Customer CRM endpoints
+    Route::get('stats', [CustomerController::class, 'stats']);
+    Route::get('history', [CustomerController::class, 'history']);
+    
+    // Enhanced Address Management
+    Route::get('addresses', [CustomerController::class, 'getAddresses']);
+    Route::post('addresses', [CustomerController::class, 'storeAddress']);
+    Route::put('addresses/{address}', [CustomerController::class, 'updateAddress']);
+    Route::delete('addresses/{address}', [CustomerController::class, 'destroyAddress']);
+    Route::post('addresses/{address}/set-default', [CustomerController::class, 'setDefaultAddress']);
     
     // Cart Management
     Route::get('cart', [CartController::class, 'index']);

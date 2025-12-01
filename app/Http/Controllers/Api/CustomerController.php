@@ -166,4 +166,180 @@ class CustomerController extends Controller
             ],
         ]);
     }
+
+    // GET /api/customers/{customer}/history - Get customer activity history
+    public function history(Customer $customer): JsonResponse
+    {
+        $history = [
+            'orders' => $customer->orders()
+                ->with(['items', 'location'])
+                ->latest()
+                ->limit(50)
+                ->get(),
+            'reservations' => $customer->reservations()
+                ->with(['location', 'table'])
+                ->latest()
+                ->limit(20)
+                ->get(),
+            'loyalty_transactions' => $customer->loyaltyPoints()
+                ->latest('occurred_at')
+                ->limit(100)
+                ->get(),
+            'feedback' => $customer->feedback()
+                ->with(['order', 'location'])
+                ->latest()
+                ->get(),
+        ];
+
+        return response()->json(['data' => $history]);
+    }
+
+    // GET /api/customers/{customer}/stats - Get customer statistics
+    public function stats(Customer $customer): JsonResponse
+    {
+        $stats = [
+            'total_orders' => $customer->orders()->count(),
+            'total_spent' => $customer->total_spent,
+            'average_order_value' => $customer->average_order_value,
+            'visit_count' => $customer->visit_count,
+            'last_visit_date' => $customer->last_visit_date,
+            'last_purchase_date' => $customer->last_purchase_date,
+            'customer_tier' => $customer->customer_tier,
+            'points_balance' => $customer->points_balance,
+            'no_show_count' => $customer->no_show_count,
+            'favorite_items' => $customer->orders()
+                ->join('order_items',' orders.id', '=', 'order_items.order_id')
+                ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+                ->select('menu_items.id', 'menu_items.name', DB::raw('COUNT(*) as order_count'))
+                ->groupBy('menu_items.id', 'menu_items.name')
+                ->orderByDesc('order_count')
+                ->limit(5)
+                ->get(),
+            'preferred_location' => $customer->preferredLocation,
+        ];
+
+        return response()->json(['data' => $stats]);
+    }
+
+    // POST /api/customers/{customer}/update-tier - Manually update customer tier
+    public function updateTier(Customer $customer): JsonResponse
+    {
+        $customer->updateEngagementMetrics();
+        
+        return response()->json([
+            'message' => 'Customer tier updated successfully',
+            'data' => [
+                'customer_tier' => $customer->fresh()->customer_tier,
+                'total_spent' => $customer->total_spent,
+            ]
+        ]);
+    }
+
+    // GET /api/customer/addresses - Get customer addresses
+    public function getAddresses(Request $request): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+        
+        $addresses = $customer->addresses()->get();
+        return response()->json(['data' => $addresses]);
+    }
+
+    // POST /api/customer/addresses - Add new address
+    public function storeAddress(Request $request): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+
+        $validated = $request->validate([
+            'label' => 'required|string|max:100',
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:120',
+            'province' => 'required|string|max:120',
+            'postal_code' => 'required|string|max:20',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'delivery_instructions' => 'nullable|string',
+            'is_default' => 'boolean',
+        ]);
+
+        // If setting as default, unset other defaults
+        if ($validated['is_default'] ?? false) {
+            $customer->addresses()->update(['is_default' => false]);
+        }
+
+        $address = $customer->addresses()->create($validated);
+
+        return response()->json([
+            'message' => 'Address added successfully',
+            'data' => $address
+        ], 201);
+    }
+
+    // PUT /api/customer/addresses/{address} - Update address
+    public function updateAddress(Request $request, $addressId): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+
+        $address = $customer->addresses()->findOrFail($addressId);
+
+        $validated = $request->validate([
+            'label' => 'string|max:100',
+            'address_line_1' => 'string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'string|max:120',
+            'province' => 'string|max:120',
+            'postal_code' => 'string|max:20',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'delivery_instructions' => 'nullable|string',
+            'is_default' => 'boolean',
+        ]);
+
+        // If setting as default, unset other defaults
+        if (($validated['is_default'] ?? false) && !$address->is_default) {
+            $customer->addresses()->update(['is_default' => false]);
+        }
+
+        $address->update($validated);
+
+        return response()->json([
+            'message' => 'Address updated successfully',
+            'data' => $address
+        ]);
+    }
+
+    // DELETE /api/customer/addresses/{address} - Delete address
+    public function destroyAddress(Request $request, $addressId): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+
+        $address = $customer->addresses()->findOrFail($addressId);
+        $address->delete();
+
+        return response()->json(['message' => 'Address deleted successfully']);
+    }
+
+    // POST /api/customer/addresses/{address}/set-default - Mark address as default
+    public function setDefaultAddress(Request $request, $addressId): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+
+        $address = $customer->addresses()->findOrFail($addressId);
+        
+        // Unset all defaults
+        $customer->addresses()->update(['is_default' => false]);
+        
+        // Set this one as default
+        $address->update(['is_default' => true]);
+
+        return response()->json([
+            'message' => 'Default address set successfully',
+            'data' => $address
+        ]);
+    }
 }

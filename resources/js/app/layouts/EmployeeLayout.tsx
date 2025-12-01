@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   // Improved Icons for Core Navigation
   CreditCard, // For POS/Transactions
   ChefHat,    // For Kitchen/Order Prep
   CalendarDays, // For Schedule/Shifts
   Settings,   // Standard
-  
+
   // Other necessary icons
   ShoppingBag, Users, Utensils, Calendar,
   Menu as MenuIcon, X, Bell, User, LogOut
@@ -18,14 +18,14 @@ type Props = { children: React.ReactNode };
 
 const navigation = [
   // 1. POS: Changed from ShoppingBag to CreditCard (focus on transaction)
-  { name: 'POS', href: '/employee/pos', icon: CreditCard }, 
-  
+  { name: 'POS', href: '/employee/pos', icon: CreditCard },
+
   // 2. Kitchen/Order Mgmt: Changed from Utensils to ChefHat (focus on preparation/role)
-  { name: 'Kitchen', href: '/employee/kitchen', icon: ChefHat }, 
-  
+  { name: 'Kitchen', href: '/employee/kitchen', icon: ChefHat },
+
   // 3. Schedule: Changed from Calendar to CalendarDays (focus on daily shifts)
-  { name: 'Schedule', href: '/employee/schedule', icon: CalendarDays }, 
-  
+  { name: 'Schedule', href: '/employee/schedule', icon: CalendarDays },
+
   // 4. Settings: Kept as Settings (Universal icon)
   { name: 'Settings', href: '/employee/settings', icon: Settings },
 ];
@@ -35,6 +35,10 @@ const navigation = [
 export default function EmployeeLayout({ children }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
+
+  const handleLogout = () => {
+    router.post('/logout');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
@@ -92,6 +96,15 @@ export default function EmployeeLayout({ children }: Props) {
                     </Link>
                   );
                 })}
+
+                {/* Logout Button in Mobile Menu */}
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 w-full"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
               </nav>
             </div>
           </motion.div>
@@ -148,7 +161,7 @@ export default function EmployeeLayout({ children }: Props) {
                 </span>
               </button>
 
-              {/* User Menu */}
+              {/* User Menu with Logout */}
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
                   <User className="w-4 h-4 text-white" />
@@ -158,6 +171,15 @@ export default function EmployeeLayout({ children }: Props) {
                   <p className="text-xs text-gray-500">On Duty</p>
                 </div>
               </div>
+
+              {/* Logout Button - Desktop */}
+              <button
+                onClick={handleLogout}
+                className="hidden lg:flex p-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
 
               {/* Mobile Menu Toggle */}
               <button

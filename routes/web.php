@@ -90,6 +90,11 @@ Route::prefix('admin')
         Route::get('inventory-reports', fn() => Inertia::render('admin/InventoryReports'))->name('admin.inventory-reports');
         Route::get('financial-dashboard', fn() => Inertia::render('admin/FinancialDashboard'))->name('admin.financial-dashboard');
         
+        // Sprint 6: Configuration & Access Control
+        Route::get('roles', fn() => Inertia::render('admin/Roles'))->name('admin.roles');
+        Route::get('operating-hours', fn() => Inertia::render('admin/OperatingHours'))->name('admin.operating-hours');
+        Route::get('translations', fn() => Inertia::render('admin/Translations'))->name('admin.translations');
+        
         // Approval managed within main Orders page - no separate route needed
     });
 // Test time slots seeder
