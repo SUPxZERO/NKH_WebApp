@@ -448,7 +448,7 @@ Route::prefix('employee')
 
 // Customer Dashboard Routes (for authenticated customers)
 Route::prefix('customer')
-    // ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
+    // ->middleware(['auth:sanctum'])
     ->group(function () {
     // Dashboard endpoints
     Route::get('profile', [CustomerDashboardController::class, 'profile']);
@@ -457,8 +457,8 @@ Route::prefix('customer')
     Route::get('favorites', [CustomerDashboardController::class, 'favorites']);
     
     // NEW: Customer CRM endpoints
-    Route::get('stats', [CustomerController::class, 'stats']);
-    Route::get('history', [CustomerController::class, 'history']);
+    Route::get('stats', [CustomerController::class, 'customerStats']);
+    Route::get('history', [CustomerController::class, 'customerHistory']);
     
     // Enhanced Address Management
     Route::get('addresses', [CustomerController::class, 'getAddresses']);

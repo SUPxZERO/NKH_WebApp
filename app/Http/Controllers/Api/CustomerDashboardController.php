@@ -33,8 +33,8 @@ class CustomerDashboardController extends Controller
         // Calculate stats
         $totalOrders = Order::where('customer_id', $customer->id)->count();
         $totalSpent = Order::where('customer_id', $customer->id)
-            ->whereIn('status', ['completed', 'delivered'])
-            ->sum('total');
+            ->whereIn('status', ['completed', 'open'])
+            ->sum('total_amount');
 
         // Get favorite items (most ordered items)
         $favoriteItems = DB::table('order_items')

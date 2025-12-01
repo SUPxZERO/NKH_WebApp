@@ -1,0 +1,545 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+    User,
+    Mail,
+    Phone,
+    MapPin,
+    Calendar,
+    Save,
+    Plus,
+    Trash2,
+    Edit,
+    Check,
+    Shield,
+    Home
+} from 'lucide-react';
+import CustomerLayout from '@/app/layouts/CustomerLayout';
+import { Card, CardContent } from '@/app/components/ui/Card';
+import { Button } from '@/app/components/ui/Button';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
+import { cn } from '@/app/utils/cn';
+
+interface Address {
+    id: number;
+    label: string;
+    address_line_1: string;
+    address_line_2?: string;
+    city: string;
+    province: string;
+    postal_code: string;
+    delivery_instructions?: string;
+    is_default: boolean;
+}
+
+export default function Profile() {
+    const queryClient = useQueryClient();
+    const [editMode, setEditMode] = useState(false);
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+
+    // Fetch profile
+    const { data: profileData } = useQuery({
+        queryKey: ['customer', 'profile'],
+        queryFn: () => apiGet('/api/customer/profile')
+    });
+
+    // Fetch addresses
+    const { data: addressesData } = useQuery({
+        queryKey: ['customer', 'addresses'],
+        queryFn: () => apiGet('/api/customer/addresses')
+    });
+
+    const profile = profileData?.data;
+    const addresses = addressesData?.data || [];
+
+    // Profile form state
+    const [formData, setFormData] = useState({
+        name: profile?.user?.name || '',
+        email: profile?.user?.email || '',
+        phone: profile?.user?.phone || '',
+        birth_date: profile?.birth_date || '',
+        gender: profile?.gender || '',
+        preferred_language: profile?.preferred_language || 'en',
+        marketing_consent: profile?.marketing_consent || false,
+    });
+
+    // Address form state
+    const [addressForm, setAddressForm] = useState({
+        label: '',
+        address_line_1: '',
+        address_line_2: '',
+        city: '',
+        province: '',
+        postal_code: '',
+        delivery_instructions: '',
+        is_default: false,
+    });
+
+    // Update profile when data loads
+    React.useEffect(() => {
+        if (profile) {
+            setFormData({
+                name: profile.user?.name || '',
+                email: profile.user?.email || '',
+                phone: profile.user?.phone || '',
+                birth_date: profile.birth_date || '',
+                gender: profile.gender || '',
+                preferred_language: profile.preferred_language || 'en',
+                marketing_consent: profile.marketing_consent || false,
+            });
+        }
+    }, [profile]);
+
+    // Update profile mutation
+    const updateProfileMutation = useMutation({
+        mutationFn: (data: any) => apiPut(`/api/admin/customers/${profile.id}`, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customer', 'profile'] });
+            setEditMode(false);
+        }
+    });
+
+    // Address mutations
+    const createAddressMutation = useMutation({
+        mutationFn: (data: any) => apiPost('/api/customer/addresses', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
+            setShowAddressModal(false);
+            resetAddressForm();
+        }
+    });
+
+    const updateAddressMutation = useMutation({
+        mutationFn: ({ id, data }: { id: number; data: any }) =>
+            apiPut(`/api/customer/addresses/${id}`, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
+            setShowAddressModal(false);
+            setEditingAddress(null);
+            resetAddressForm();
+        }
+    });
+
+    const deleteAddressMutation = useMutation({
+        mutationFn: (id: number) => apiDelete(`/api/customer/addresses/${id}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
+        }
+    });
+
+    const setDefaultMutation = useMutation({
+        mutationFn: (id: number) => apiPost(`/api/customer/addresses/${id}/set-default`, {}),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
+        }
+    });
+
+    const handleSaveProfile = () => {
+        updateProfileMutation.mutate(formData);
+    };
+
+    const handleAddAddress = () => {
+        setEditingAddress(null);
+        resetAddressForm();
+        setShowAddressModal(true);
+    };
+
+    const handleEditAddress = (address: Address) => {
+        setEditingAddress(address);
+        setAddressForm({
+            label: address.label,
+            address_line_1: address.address_line_1,
+            address_line_2: address.address_line_2 || '',
+            city: address.city,
+            province: address.province,
+            postal_code: address.postal_code,
+            delivery_instructions: address.delivery_instructions || '',
+            is_default: address.is_default,
+        });
+        setShowAddressModal(true);
+    };
+
+    const handleSaveAddress = () => {
+        if (editingAddress) {
+            updateAddressMutation.mutate({ id: editingAddress.id, data: addressForm });
+        } else {
+            createAddressMutation.mutate(addressForm);
+        }
+    };
+
+    const resetAddressForm = () => {
+        setAddressForm({
+            label: '',
+            address_line_1: '',
+            address_line_2: '',
+            city: '',
+            province: '',
+            postal_code: '',
+            delivery_instructions: '',
+            is_default: false,
+        });
+    };
+
+    return (
+        <CustomerLayout>
+            <div className="p-6 max-w-4xl mx-auto space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <User className="w-8 h-8 text-purple-600" />
+                            My Profile
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400 mt-2">
+                            Manage your personal information and preferences
+                        </p>
+                    </div>
+                    {!editMode && (
+                        <Button onClick={() => setEditMode(true)} variant="outline">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit Profile
+                        </Button>
+                    )}
+                </div>
+
+                {/* Personal Information */}
+                <Card>
+                    <CardContent className="p-6">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            Personal Information
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <Mail className="w-4 h-4 inline mr-2" />
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    disabled={!editMode}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <Mail className="w-4 h-4 inline mr-2" />
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    disabled={!editMode}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <Phone className="w-4 h-4 inline mr-2" />
+                                    Phone
+                                </label>
+                                <input
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    disabled={!editMode}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <Calendar className="w-4 h-4 inline mr-2" />
+                                    Birth Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={formData.birth_date}
+                                    onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                                    disabled={!editMode}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Gender
+                                </label>
+                                <select
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                    disabled={!editMode}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                >
+                                    <option value="">Prefer not to say</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Preferred Language
+                                </label>
+                                <select
+                                    value={formData.preferred_language}
+                                    onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value })}
+                                    disabled={!editMode}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                >
+                                    <option value="en">English</option>
+                                    <option value="km">ខ្មែរ (Khmer)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="mt-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.marketing_consent}
+                                    onChange={(e) => setFormData({ ...formData, marketing_consent: e.target.checked })}
+                                    disabled={!editMode}
+                                    className="w-5 h-5 rounded text-purple-600"
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    I want to receive promotional emails and offers
+                                </span>
+                            </label>
+                        </div>
+
+                        {editMode && (
+                            <div className="flex gap-3 mt-6">
+                                <Button onClick={handleSaveProfile} disabled={updateProfileMutation.isPending}>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                </Button>
+                                <Button variant="outline" onClick={() => setEditMode(false)}>
+                                    Cancel
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Addresses */}
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                <MapPin className="w-5 h-5 inline mr-2" />
+                                My Addresses
+                            </h2>
+                            <Button onClick={handleAddAddress} variant="outline" size="sm">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add Address
+                            </Button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {addresses.map((address: Address) => (
+                                <motion.div
+                                    key={address.id}
+                                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                                    whileHover={{ scale: 1.02 }}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <h3 className="font-semibold text-gray-900 dark:text-white">
+                                                    {address.label}
+                                                </h3>
+                                                {address.is_default && (
+                                                    <span className="text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-600 px-2 py-1 rounded-full">
+                                                        Default
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                {address.address_line_1}
+                                                {address.address_line_2 && `, ${address.address_line_2}`}
+                                            </p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                {address.city}, {address.province} {address.postal_code}
+                                            </p>
+                                            {address.delivery_instructions && (
+                                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                                                    Instructions: {address.delivery_instructions}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            {!address.is_default && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setDefaultMutation.mutate(address.id)}
+                                                >
+                                                    <Home className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleEditAddress(address)}
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    if (confirm('Delete this address?')) {
+                                                        deleteAddressMutation.mutate(address.id);
+                                                    }
+                                                }}
+                                                className="text-red-600"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+
+                            {addresses.length === 0 && (
+                                <div className="text-center py-12">
+                                    <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-600 dark:text-gray-400">
+                                        No addresses saved. Add one to make ordering easier!
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Address Modal */}
+                {showAddressModal && (
+                    <>
+                        <div
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                            onClick={() => {
+                                setShowAddressModal(false);
+                                setEditingAddress(null);
+                            }}
+                        />
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                            <motion.div
+                                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="p-6 space-y-4">
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                        {editingAddress ? 'Edit Address' : 'Add New Address'}
+                                    </h2>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Label *</label>
+                                        <input
+                                            type="text"
+                                            value={addressForm.label}
+                                            onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })}
+                                            placeholder="Home, Office, etc."
+                                            className="w-full px-4 py-2 border rounded-lg"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Address Line 1 *</label>
+                                        <input
+                                            type="text"
+                                            value={addressForm.address_line_1}
+                                            onChange={(e) => setAddressForm({ ...addressForm, address_line_1: e.target.value })}
+                                            className="w-full px-4 py-2 border rounded-lg"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Address Line 2</label>
+                                        <input
+                                            type="text"
+                                            value={addressForm.address_line_2}
+                                            onChange={(e) => setAddressForm({ ...addressForm, address_line_2: e.target.value })}
+                                            className="w-full px-4 py-2 border rounded-lg"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">City *</label>
+                                            <input
+                                                type="text"
+                                                value={addressForm.city}
+                                                onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                                                className="w-full px-4 py-2 border rounded-lg"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">Province *</label>
+                                            <input
+                                                type="text"
+                                                value={addressForm.province}
+                                                onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
+                                                className="w-full px-4 py-2 border rounded-lg"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Postal Code *</label>
+                                        <input
+                                            type="text"
+                                            value={addressForm.postal_code}
+                                            onChange={(e) => setAddressForm({ ...addressForm, postal_code: e.target.value })}
+                                            className="w-full px-4 py-2 border rounded-lg"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Delivery Instructions</label>
+                                        <textarea
+                                            value={addressForm.delivery_instructions}
+                                            onChange={(e) => setAddressForm({ ...addressForm, delivery_instructions: e.target.value })}
+                                            rows={3}
+                                            className="w-full px-4 py-2 border rounded-lg"
+                                        />
+                                    </div>
+
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={addressForm.is_default}
+                                            onChange={(e) => setAddressForm({ ...addressForm, is_default: e.target.checked })}
+                                            className="w-5 h-5"
+                                        />
+                                        <span className="text-sm">Set as default address</span>
+                                    </label>
+
+                                    <div className="flex gap-3 pt-4">
+                                        <Button variant="outline" onClick={() => setShowAddressModal(false)} className="flex-1">
+                                            Cancel
+                                        </Button>
+                                        <Button onClick={handleSaveAddress} className="flex-1">
+                                            {editingAddress ? 'Update' : 'Add'} Address
+                                        </Button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </>
+                )}
+            </div>
+        </CustomerLayout>
+    );
+}

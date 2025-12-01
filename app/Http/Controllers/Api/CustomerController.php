@@ -342,4 +342,64 @@ class CustomerController extends Controller
             'data' => $address
         ]);
     }
+
+    // GET /api/customer/stats - Get authenticated customer's statistics
+    public function customerStats(Request $request): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+
+        $stats = [
+            'total_orders' => $customer->orders()->count(),
+            'total_spent' => $customer->total_spent ?? 0,
+            'average_order_value' => $customer->average_order_value ?? 0,
+            'visit_count' => $customer->visit_count ?? 0,
+            'last_visit_date' => $customer->last_visit_date,
+            'last_purchase_date' => $customer->last_purchase_date,
+            'customer_tier' => $customer->customer_tier ?? 'bronze',
+            'points_balance' => $customer->points_balance ?? 0,
+            'no_show_count' => $customer->no_show_count ?? 0,
+            'favorite_items' => $customer->orders()
+                ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+                ->select('menu_items.id', 'menu_items.name', DB::raw('COUNT(*) as order_count'))
+                ->groupBy('menu_items.id', 'menu_items.name')
+                ->orderByDesc('order_count')
+                ->limit(5)
+                ->get(),
+            'preferred_location' => $customer->preferredLocation,
+        ];
+
+        return response()->json(['data' => $stats]);
+    }
+
+    // GET /api/customer/history - Get authenticated customer's activity history
+    public function customerHistory(Request $request): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+
+        $history = [
+            'orders' => $customer->orders()
+                ->with(['items', 'location'])
+                ->latest()
+                ->limit(50)
+                ->get(),
+            'reservations' => $customer->reservations()
+                ->with(['location', 'table'])
+                ->latest()
+                ->limit(20)
+                ->get(),
+            'loyalty_transactions' => $customer->loyaltyPoints()
+                ->latest('occurred_at')
+                ->limit(100)
+                ->get(),
+            'feedback' => $customer->feedback()
+                ->with(['order', 'location'])
+                ->latest()
+                ->get(),
+        ];
+
+        return response()->json(['data' => $history]);
+    }
 }

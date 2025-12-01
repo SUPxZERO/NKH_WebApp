@@ -97,6 +97,15 @@ Route::prefix('admin')
         
         // Approval managed within main Orders page - no separate route needed
     });
+
+// Customer Routes (authenticated)
+Route::prefix('customer')->middleware('auth')->group(function () {
+    Route::get('/profile', fn() => Inertia::render('Customer/Profile'))->name('customer.profile');
+    Route::get('/loyalty', fn() => Inertia::render('Customer/Loyalty'))->name('customer.loyalty');
+    Route::get('/reservations', fn() => Inertia::render('Customer/Reservations'))->name('customer.reservations');
+    Route::get('/feedback', fn() => Inertia::render('Customer/Feedback'))->name('customer.feedback');
+});
+
 // Test time slots seeder
 Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
