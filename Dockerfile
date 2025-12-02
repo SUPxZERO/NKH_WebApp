@@ -15,8 +15,8 @@ COPY tailwind.config.js ./
 COPY postcss.config.js ./
 RUN npm run build
 
-# --- Stage 2: Build Backend (Laravel 11 / PHP 8.2) ---
-FROM php:8.2-fpm
+# --- Stage 2: Build Backend (Laravel 11 / PHP 8.4) ---
+FROM php:8.4-fpm
 
 # Arguments
 ARG user=www
