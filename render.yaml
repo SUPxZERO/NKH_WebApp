@@ -1,0 +1,78 @@
+services:
+  # Web service (Laravel + React)
+  - type: web
+    name: nkh-restaurant-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: oregon
+    plan: free
+    
+    # Environment variables
+    envVars:
+      - key: APP_NAME
+        value: NKH Restaurant
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+        # Will be set manually after first deployment
+      - key: APP_URL
+        sync: false
+        # Will be set to your render URL
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: error
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: nkh-restaurant-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: nkh-restaurant-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: nkh-restaurant-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: nkh-restaurant-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: nkh-restaurant-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: 120
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: MAIL_MAILER
+        value: log
+      - key: BROADCAST_CONNECTION
+        value: log
+      
+    # Health check
+    healthCheckPath: /
+    
+    # Build command (runs migrations and optimizations after deployment)
+    buildCommand: |
+      echo "Build completed via Dockerfile"
+
+databases:
+  - name: nkh-restaurant-db
+    databaseName: nkh_restaurant
+    user: nkh_admin
+    region: oregon
+    plan: free
+    # MySQL 8.0
+    ipAllowList: []

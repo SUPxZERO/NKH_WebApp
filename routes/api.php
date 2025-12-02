@@ -49,6 +49,15 @@ use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
 
+// Health check endpoint for Docker/Render
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+        'database' => DB::connection()->getDatabaseName()
+    ]);
+});
+
 // Public endpoints
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);

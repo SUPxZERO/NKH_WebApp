@@ -5,20 +5,20 @@ WORKDIR /app
 
 # Copy package files first to leverage cache
 COPY package*.json vite.config.js ./
-RUN npm install
+RUN npm ci --only=production
 
 # Copy resources and build
 COPY resources ./resources
 COPY public ./public
-# If you have other config files used by vite, copy them here
-COPY tsconfig.json .
-COPY vite.config.js .
+COPY tsconfig.json ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
 RUN npm run build
 
 # --- Stage 2: Build Backend (Laravel 11 / PHP 8.2) ---
 FROM php:8.2-fpm
 
-# Arguments defined in docker-compose.yml
+# Arguments
 ARG user=www
 ARG uid=1000
 
@@ -32,50 +32,71 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libzip-dev \
-    default-mysql-client
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    default-mysql-client \
+    supervisor \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions required by Laravel
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
+# Install Redis extension (useful for caching/queues in production)
+RUN pecl install redis && docker-php-ext-enable redis
+
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+# Create system user
+RUN useradd -G www-data,root -u $uid -d /home/$user $user \
+    && mkdir -p /home/$user/.composer \
+    && chown -R $user:$user /home/$user
 
 # Set working directory
 WORKDIR /var/www
 
-# Copy only composer files first (for caching)
-COPY composer.json composer.lock ./
+# Copy composer files first (for caching)
+COPY --chown=$user:$user composer.json composer.lock ./
 
-# Install dependencies (without scripts initially for better layer caching)
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+# Install dependencies as user to avoid permission issues
+USER $user
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-cache
+
+# Switch back to root to copy files
+USER root
 
 # Copy the rest of the application
-COPY . .
+COPY --chown=$user:$user . .
 
 # Copy built frontend assets from Stage 1
-COPY --from=frontend_build /app/public/build ./public/build
+COPY --from=frontend_build --chown=$user:$user /app/public/build ./public/build
 
-# Run post-install scripts and optimize
+# Run optimizations
+USER $user
 RUN composer dump-autoload --optimize
 
-# Set permissions
-RUN chown -R $user:$user /var/www/storage /var/www/bootstrap/cache
+# Create necessary directories and set permissions
+USER root
+RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} \
+    && mkdir -p /var/www/storage/logs \
+    && mkdir -p /var/www/bootstrap/cache \
+    && chown -R $user:$user /var/www/storage \
+    && chown -R $user:$user /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage \
+    && chmod -R 775 /var/www/bootstrap/cache
+
+# Copy deployment script and make it executable
+COPY deployment/render-deploy.sh /usr/local/bin/render-deploy.sh
+RUN chmod +x /usr/local/bin/render-deploy.sh
 
 # Switch to our user
 USER $user
 
-# --- CHANGED SECTION ---
-
-# Expose port 8000 (standard Laravel port) instead of 9000
+# Expose port 8000
 EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
+    CMD curl -f http://localhost:8000/api/health || exit 1
 
 # Start Laravel's built-in server
 CMD php artisan serve --host=0.0.0.0 --port=8000
