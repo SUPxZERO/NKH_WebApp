@@ -1,11 +1,55 @@
+# Dependencies
 node_modules
 vendor
-.git
-.gitignore
-npm-debug.log
-yarn-error.log
-docker-compose.yml
-docker
+
+# Build artifacts
+/public/build
+/public/hot
+/public/storage
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# IDE
 .idea
 .vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Testing
+/tests
+/.phpunit.cache
+phpunit.xml
+
+# Documentation
 *.md
+/docs
+
+# CI/CD
+/.github
+docker-compose.yml
+
+# Storage (will be created in container)
+/storage/*.key
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# Cache
+/bootstrap/cache/*
+
+# Logs
+npm-debug.log
+yarn-error.log

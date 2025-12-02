@@ -1,11 +1,11 @@
 # --- Stage 1: Build Frontend Assets (React/Inertia) ---
-FROM node:18-alpine as frontend_build
+FROM node:20-alpine as frontend_build
 
 WORKDIR /app
 
 # Copy package files first to leverage cache
 COPY package*.json vite.config.js ./
-RUN npm ci
+RUN npm install
 
 # Copy resources and build
 COPY resources ./resources
@@ -54,25 +54,18 @@ RUN useradd -G www-data,root -u $uid -d /home/$user $user \
 # Set working directory
 WORKDIR /var/www
 
-# Copy composer files first (for caching)
-COPY --chown=$user:$user composer.json composer.lock ./
-
-# Install dependencies as user to avoid permission issues
-USER $user
-RUN composer install --prefer-dist --no-interaction --optimize-autoloader
-
-# Switch back to root to copy files
-USER root
-
-# Copy the rest of the application
+# Copy entire application first (needed for Laravel's post-install scripts)
 COPY --chown=$user:$user . .
 
 # Copy built frontend assets from Stage 1
 COPY --from=frontend_build --chown=$user:$user /app/public/build ./public/build
 
-# Run optimizations
+# Install dependencies and run optimizations
 USER $user
-RUN composer dump-autoload --optimize
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
 # Create necessary directories and set permissions
 USER root
@@ -84,9 +77,7 @@ RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-# Copy deployment script and make it executable
-COPY deployment/render-deploy.sh /usr/local/bin/render-deploy.sh
-RUN chmod +x /usr/local/bin/render-deploy.sh
+
 
 # Switch to our user
 USER $user
@@ -94,9 +85,7 @@ USER $user
 # Expose port 8000
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-    CMD curl -f http://localhost:8000/api/health || exit 1
+
 
 # Start Laravel's built-in server
 CMD php artisan serve --host=0.0.0.0 --port=8000
