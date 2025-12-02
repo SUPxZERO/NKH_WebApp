@@ -77,3 +77,5 @@ USER $user
 # Expose port 8000 (standard Laravel port) instead of 9000
 EXPOSE 8000
 
+# Start Laravel's built-in server
+CMD php artisan serve --host=0.0.0.0 --port=8000
