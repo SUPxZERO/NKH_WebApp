@@ -61,6 +61,9 @@ COPY --chown=$user:$user . .
 # Copy built frontend assets from Stage 1
 COPY --from=frontend_build --chown=$user:$user /app/public/build ./public/build
 
+# Ensure www user owns /var/www
+RUN chown -R $user:$user /var/www
+
 # Install dependencies
 USER $user
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
