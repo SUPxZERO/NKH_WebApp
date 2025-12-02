@@ -59,7 +59,7 @@ COPY --chown=$user:$user composer.json composer.lock ./
 
 # Install dependencies as user to avoid permission issues
 USER $user
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-cache
+RUN composer install --prefer-dist --no-interaction --optimize-autoloader --no-cache
 
 # Switch back to root to copy files
 USER root
