@@ -51,6 +51,7 @@ interface POItem {
     quantity: number;
     unit_price: number;
     notes?: string;
+    quantity_received?: number; // added to track received quantity
 }
 
 interface PurchaseOrder {
