@@ -88,5 +88,14 @@ EXPOSE 8000
 
 
 
-# Start Laravel's built-in server
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Create startup script that runs migrations before starting server
+RUN echo '#!/bin/bash\n\
+    set -e\n\
+    echo "Running database migrations..."\n\
+    php artisan migrate --force || echo "Migration failed, continuing..."\n\
+    echo "Starting Laravel server..."\n\
+    exec php artisan serve --host=0.0.0.0 --port=8000' > /usr/local/bin/start.sh \
+    && chmod +x /usr/local/bin/start.sh
+
+# Start Laravel with migrations
+CMD ["/usr/local/bin/start.sh"]
