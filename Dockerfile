@@ -54,8 +54,8 @@ WORKDIR /var/www
 # Copy only composer files first (for caching)
 COPY composer.json composer.lock ./
 
-# Install dependencies
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+# Install dependencies (without scripts initially for better layer caching)
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 # Copy the rest of the application
 COPY . .
@@ -63,11 +63,11 @@ COPY . .
 # Copy built frontend assets from Stage 1
 COPY --from=frontend_build /app/public/build ./public/build
 
-# Generate autoloader
+# Run post-install scripts and optimize
 RUN composer dump-autoload --optimize
 
 # Set permissions
-RUN chown -R 777 /var/www/storage /var/www/bootstrap/cache
+RUN chown -R $user:$user /var/www/storage /var/www/bootstrap/cache
 
 # Switch to our user
 USER $user
