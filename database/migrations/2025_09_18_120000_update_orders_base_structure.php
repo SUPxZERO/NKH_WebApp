@@ -90,6 +90,18 @@ return new class extends Migration
                 }
             }
 
+            // PostgreSQL: check pg_catalog for existing constraint
+            if ($driver === 'pgsql') {
+                $row = DB::selectOne(
+                    "SELECT conname FROM pg_constraint WHERE conrelid = 'orders'::regclass AND conname = ?",
+                    ['orders_location_id_order_number_unique']
+                );
+                
+                if ($row) {
+                    $shouldCreate = false;
+                }
+            }
+
             // SQLite: inspect PRAGMA index_list and PRAGMA index_info to detect an existing index
             if ($driver === 'sqlite') {
                 try {
