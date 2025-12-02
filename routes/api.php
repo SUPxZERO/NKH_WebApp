@@ -446,44 +446,8 @@ Route::prefix('employee')
     Route::delete('time-off-requests/{id}', [EmployeeTimeOffController::class, 'destroy']);
 });
 
-// Customer Dashboard Routes (for authenticated customers)
-Route::prefix('customer')
-    // ->middleware(['auth:sanctum'])
-    ->group(function () {
-    // Dashboard endpoints
-    Route::get('profile', [CustomerDashboardController::class, 'profile']);
-    Route::get('dashboard/stats', [CustomerDashboardController::class, 'dashboardStats']);
-    Route::get('orders', [CustomerDashboardController::class, 'orders']);
-    Route::get('favorites', [CustomerDashboardController::class, 'favorites']);
-    
-    // NEW: Customer CRM endpoints
-    Route::get('stats', [CustomerController::class, 'customerStats']);
-    Route::get('history', [CustomerController::class, 'customerHistory']);
-    
-    // Enhanced Address Management
-    Route::get('addresses', [CustomerController::class, 'getAddresses']);
-    Route::post('addresses', [CustomerController::class, 'storeAddress']);
-    Route::put('addresses/{address}', [CustomerController::class, 'updateAddress']);
-    Route::delete('addresses/{address}', [CustomerController::class, 'destroyAddress']);
-    Route::post('addresses/{address}/set-default', [CustomerController::class, 'setDefaultAddress']);
-    
-    // Cart Management
-    Route::get('cart', [CartController::class, 'index']);
-    Route::post('cart', [CartController::class, 'store']);
-    Route::put('cart/{cartItem}', [CartController::class, 'update']);
-    Route::delete('cart/{cartItem}', [CartController::class, 'destroy']);
-    Route::delete('cart', [CartController::class, 'clear']);
-    Route::post('cart/sync', [CartController::class, 'sync']);
-    
-    // **CRITICAL FIX: Enable online orders endpoint**
-    Route::post('online-orders', [OnlineOrderController::class, 'store']);
-
-    // Reservations (customer self-service)
-    Route::get('reservations', [CustomerReservationController::class, 'index']);
-    Route::get('reservations/availability', [CustomerReservationController::class, 'availability']);
-    Route::post('reservations', [CustomerReservationController::class, 'store']);
-    Route::delete('reservations/{reservation}', [CustomerReservationController::class, 'destroy']);
-});
+// Customer Dashboard Routes - MOVED TO WEB.PHP to share session state
+// See routes/web.php for 'api/customer' routes
 
 // Order Holds
 Route::prefix('order-holds')

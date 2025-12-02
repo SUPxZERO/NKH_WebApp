@@ -106,6 +106,45 @@ Route::prefix('customer')->middleware('auth')->group(function () {
     Route::get('/feedback', fn() => Inertia::render('Customer/Feedback'))->name('customer.feedback');
 });
 
+Route::get('/test-auth', function() {
+    return response()->json([
+        'user' => Auth::user(),
+        'id' => Auth::id(),
+        'session' => session()->all(),
+    ]);
+})->middleware('auth');
+
+// Customer API Routes (Moved from api.php to share session)
+Route::prefix('api/customer')->middleware('auth')->group(function () {
+    // Dashboard endpoints
+    Route::get('profile', [App\Http\Controllers\Api\CustomerDashboardController::class, 'profile']);
+    Route::get('dashboard/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'dashboardStats']);
+    Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
+    Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);
+    
+    // CRM endpoints
+    Route::get('stats', [App\Http\Controllers\Api\CustomerController::class, 'customerStats']);
+    Route::get('history', [App\Http\Controllers\Api\CustomerController::class, 'customerHistory']);
+    
+    // Address Management
+    Route::get('addresses', [App\Http\Controllers\Api\CustomerController::class, 'getAddresses']);
+    Route::post('addresses', [App\Http\Controllers\Api\CustomerController::class, 'storeAddress']);
+    Route::put('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'updateAddress']);
+    Route::delete('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'destroyAddress']);
+    Route::post('addresses/{address}/set-default', [App\Http\Controllers\Api\CustomerController::class, 'setDefaultAddress']);
+    
+    // Cart Management
+    Route::get('cart', [App\Http\Controllers\Api\CartController::class, 'index']);
+    Route::post('cart', [App\Http\Controllers\Api\CartController::class, 'store']);
+    Route::put('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'update']);
+    Route::delete('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
+    Route::delete('cart', [App\Http\Controllers\Api\CartController::class, 'clear']);
+    Route::post('cart/sync', [App\Http\Controllers\Api\CartController::class, 'sync']);
+    
+    // Online Orders
+    Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store']);
+});
+
 // Test time slots seeder
 Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

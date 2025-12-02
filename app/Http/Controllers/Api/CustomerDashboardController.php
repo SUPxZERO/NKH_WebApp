@@ -17,12 +17,30 @@ class CustomerDashboardController extends Controller
      */
     public function profile(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
+        
+        \Log::info('CustomerDashboardController::profile called', [
+            'user_id' => $user ? $user->id : 'null',
+            'guard' => 'default',
+            'is_web' => Auth::guard('web')->check(),
+            'is_sanctum' => Auth::guard('sanctum')->check(),
+        ]);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not authenticated',
+            ], 401);
+        }
         
         // Get customer record
         $customer = Customer::with(['user', 'preferredLocation'])
             ->where('user_id', $user->id)
             ->first();
+            
+        \Log::info('Customer lookup result', [
+            'found' => $customer ? 'yes' : 'no',
+            'customer_id' => $customer ? $customer->id : 'null'
+        ]);
 
         if (!$customer) {
             return response()->json([
@@ -78,7 +96,17 @@ class CustomerDashboardController extends Controller
      */
     public function dashboardStats(Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
+        
+        if (!$user) {
+            return response()->json(['data' => [
+                'orders_this_month' => 0,
+                'orders_trend' => 0,
+                'points_earned_this_month' => 0,
+                'available_rewards' => 0,
+            ]]);
+        }
+        
         $customer = Customer::where('user_id', $user->id)->first();
 
         if (!$customer) {

@@ -74,6 +74,8 @@ const itemVariants: Variants = {
   },
 };
 
+
+
 export default function Dashboard() {
   // Data fetching
   const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -248,6 +250,7 @@ export default function Dashboard() {
       setBookingError(error?.response?.data?.message || 'Failed to cancel reservation.');
     }
   };
+  
 
   return (
     <CustomerLayout>
