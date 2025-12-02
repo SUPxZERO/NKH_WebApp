@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy package files first to leverage cache
 COPY package*.json vite.config.js ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy resources and build
 COPY resources ./resources
