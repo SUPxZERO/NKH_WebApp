@@ -61,12 +61,9 @@ COPY --chown=$user:$user . .
 # Copy built frontend assets from Stage 1
 COPY --from=frontend_build --chown=$user:$user /app/public/build ./public/build
 
-# Install dependencies and run optimizations
+# Install dependencies
 USER $user
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 # Create necessary directories and set permissions
 USER root
@@ -78,7 +75,9 @@ RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-
+# Copy and setup startup script
+COPY docker-start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
 
 # Switch to our user
 USER $user
@@ -86,16 +85,5 @@ USER $user
 # Expose port 8000
 EXPOSE 8000
 
-
-
-# Create startup script that runs migrations before starting server
-RUN echo '#!/bin/bash\n\
-    set -e\n\
-    echo "Running database migrations..."\n\
-    php artisan migrate --force || echo "Migration failed, continuing..."\n\
-    echo "Starting Laravel server..."\n\
-    exec php artisan serve --host=0.0.0.0 --port=8000' > /usr/local/bin/start.sh \
-    && chmod +x /usr/local/bin/start.sh
-
-# Start Laravel with migrations
+# Start Laravel with optimizations and migrations
 CMD ["/usr/local/bin/start.sh"]
