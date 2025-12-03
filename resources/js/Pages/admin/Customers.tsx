@@ -319,7 +319,7 @@ export default function Customers() {
               <select value={formData.preferred_location_id} onChange={(e) => setFormData({ ...formData, preferred_location_id: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
                 <option value="">Select</option>
-                {locations?.data?.map((loc: Location) => (
+                {(locations as any)?.data?.map((loc: Location) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
               </select>

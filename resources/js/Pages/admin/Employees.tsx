@@ -86,12 +86,12 @@ export default function Employees() {
   const employeeList: Employee[] = useMemo(() => {
     if (!employees) return [];
     if (Array.isArray(employees)) return employees;
-    if (employees.data && Array.isArray(employees.data)) return employees.data;
+    if ((employees as any)?.data && Array.isArray((employees as any).data)) return (employees as any).data;
     return [];
   }, [employees]);
 
   const stats = useMemo(() => ({
-    total: employees?.meta?.total || employeeList.length,
+    total: (employees as any)?.meta?.total || employeeList.length,
     active: employeeList.filter(e => e.status === 'active').length,
     onLeave: employeeList.filter(e => e.status === 'on_leave').length,
     inactive: employeeList.filter(e => e.status === 'inactive' || e.status === 'terminated').length
@@ -246,15 +246,15 @@ export default function Employees() {
           </div>
 
           {/* Pagination */}
-          {employees?.meta && (
+          {(employees as any)?.meta && (
             <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/5">
               <div className="text-sm text-gray-400">
-                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, employees.meta.total)} of {employees.meta.total}
+                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, (employees as any).meta.total)} of {(employees as any).meta.total}
               </div>
               <div className="flex gap-2">
                 <Button variant="secondary" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}
                   className="border-white/10"><ChevronLeft className="w-4 h-4" /></Button>
-                <Button variant="secondary" size="sm" disabled={page === employees.meta.last_page} onClick={() => setPage(p => p + 1)}
+                <Button variant="secondary" size="sm" disabled={page === (employees as any).meta.last_page} onClick={() => setPage(p => p + 1)}
                   className="border-white/10"><ChevronRight className="w-4 h-4" /></Button>
               </div>
             </div>
@@ -318,7 +318,7 @@ export default function Employees() {
               <select value={formData.position_id} onChange={(e) => setFormData({ ...formData, position_id: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
                 <option value="">Select Position</option>
-                {positions?.data?.map((pos: Position) => (
+                {(positions as any)?.data?.map((pos: Position) => (
                   <option key={pos.id} value={pos.id} className="bg-gray-800">{pos.title}</option>
                 ))}
               </select>
@@ -328,7 +328,7 @@ export default function Employees() {
               <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                 required className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
                 <option value="">Select Location</option>
-                {locations?.data?.map((loc: Location) => (
+                {(locations as any)?.data?.map((loc: Location) => (
                   <option key={loc.id} value={loc.id} className="bg-gray-800">{loc.name}</option>
                 ))}
               </select>

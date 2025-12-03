@@ -222,7 +222,7 @@ export default function MenuItems() {
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
               className="bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm min-w-[180px]">
               <option value="all">All Categories</option>
-              {categories?.data?.map((cat: Category) => (
+              {(categories as any)?.data?.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>{cat.name || cat.translations?.[0]?.name}</option>
               ))}
             </select>
@@ -314,16 +314,17 @@ export default function MenuItems() {
           </div>
 
           {/* Pagination */}
-          {menuItems?.meta && (
+          {(menuItems as any)?.meta && (
             <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/5">
               <div className="text-sm text-gray-400">
-                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, menuItems.meta.total)} of {menuItems.meta.total}
+                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, (menuItems as any).meta.total)} of {(menuItems as any).meta.total}
               </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}
-                  className="border-white/10"><ChevronLeft className="w-4 h-4" /></Button>
-                <Button variant="secondary" size="sm" disabled={page === menuItems.meta.last_page} onClick={() => setPage(p => p + 1)}
-                  className="border-white/10"><ChevronRight className="w-4 h-4" /></Button>
+              <div className="flex items-center gap-2">
+                <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
+                <span className="text-sm text-gray-400">
+                  Page {page} of {Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
+                </span>
+                <Button variant="secondary" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}>Next</Button>
               </div>
             </div>
           )}
@@ -349,7 +350,7 @@ export default function MenuItems() {
               <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
                 <option value="">Select Category</option>
-                {categories?.data?.map((cat: Category) => (
+                {(categories as any)?.data?.map((cat: Category) => (
                   <option key={cat.id} value={cat.id} className="bg-gray-800">
                     {cat.name || cat.translations?.[0]?.name}
                   </option>
