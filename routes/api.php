@@ -47,6 +47,7 @@ use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\TimeSlotController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
 
@@ -438,6 +439,11 @@ Route::prefix('admin')
     Route::get('payroll/{payroll}/details', [PayrollController::class, 'details']);
     Route::post('payroll/{payroll}/add-detail', [PayrollController::class, 'addDetail']);
     Route::delete('payroll-details/{detail}', [PayrollController::class, 'removeDetail']);
+
+    // Notifications
+    Route::get('notifications/stats', [NotificationController::class, 'stats']);
+    Route::put('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::apiResource('notifications', NotificationController::class);
 });
 
 // In-store operations for staff (Employee)

@@ -1,163 +1,149 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-    Search,
-    Plus,
-    Eye,
-    Edit,
-    Trash2,
-    Phone,
-    Mail,
-    MapPin,
-    User,
-    ToggleLeft,
-    ToggleRight,
-    Package,
-    FileText
+    Search, Plus, Edit, Trash2, Truck, Phone, Mail,
+    MapPin, CheckCircle, XCircle, Package, FileText
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
-import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
+import { cn } from '@/app/utils/cn';
 import { Location } from '@/app/types/domain';
 
-interface Supplier {
-    id: number;
-    location_id: number | null;
-    location?: Location;
-    code: string;
-    name: string;
-    contact_name: string | null;
-    contact_phone: string | null;
-    email: string | null;
-    phone: string | null;
-    address: string | null;
-    type: string;
-    payment_terms: string | null;
-    notes: string | null;
-    tax_id: string | null;
-    is_active: boolean;
-    created_at: string;
-    updated_at: string;
-}
+// Stats Ribbon
+const SupplierStatsRibbon = ({ stats }: { stats: any }) => (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Suppliers</p>
+                    <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+                </div>
+                <Truck className="w-8 h-8 text-purple-400" />
+            </div>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
+                    <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.active}</p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-emerald-400" />
+            </div>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Food & Produce</p>
+                    <p className="text-2xl font-bold text-blue-400 mt-1">{stats.food}</p>
+                </div>
+                <Package className="w-8 h-8 text-blue-400" />
+            </div>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Beverages</p>
+                    <p className="text-2xl font-bold text-amber-400 mt-1">{stats.beverage}</p>
+                </div>
+                <FileText className="w-8 h-8 text-amber-400" />
+            </div>
+        </div>
+    </div>
+);
 
 export default function Suppliers() {
-    const [search, setSearch] = React.useState('');
-    const [statusFilter, setStatusFilter] = React.useState('all');
-    const [typeFilter, setTypeFilter] = React.useState('all');
-    const [locationFilter, setLocationFilter] = React.useState('all');
-    const [openCreate, setOpenCreate] = React.useState(false);
-    const [openEdit, setOpenEdit] = React.useState(false);
-    const [openView, setOpenView] = React.useState(false);
-    const [selectedSupplier, setSelectedSupplier] = React.useState<Supplier | null>(null);
-    const [editingSupplier, setEditingSupplier] = React.useState<Supplier | null>(null);
-    const [error, setError] = React.useState('');
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [typeFilter, setTypeFilter] = useState('all');
+    const [openCreate, setOpenCreate] = useState(false);
+    const [openEdit, setOpenEdit] = useState(false);
+    const [editingSupplier, setEditingSupplier] = useState<any>(null);
 
     const qc = useQueryClient();
-    const [page, setPage] = React.useState(1);
-    const [perPage] = React.useState(12);
+    const [page, setPage] = useState(1);
+    const [perPage] = useState(20);
 
-    const [formData, setFormData] = React.useState({
-        location_id: '',
-        code: '',
-        name: '',
-        contact_name: '',
-        contact_phone: '',
-        email: '',
-        phone: '',
-        address: '',
-        type: 'food_produce',
-        payment_terms: '',
-        notes: '',
-        tax_id: '',
-        is_active: true
+    const [formData, setFormData] = useState({
+        location_id: '', code: '', name: '', contact_name: '', contact_phone: '',
+        email: '', phone: '', address: '', type: 'food_produce',
+        payment_terms: '', notes: '', tax_id: '', is_active: true
     });
 
-    // Fetch suppliers
+    // Fetch Data
     const { data: suppliers, isLoading } = useQuery({
-        queryKey: ['suppliers', page, search, statusFilter, typeFilter, locationFilter],
+        queryKey: ['suppliers', page, search, statusFilter, typeFilter],
         queryFn: () => {
             let url = `/api/suppliers?page=${page}&per_page=${perPage}&search=${search}`;
             if (statusFilter !== 'all') url += `&is_active=${statusFilter === 'active' ? '1' : '0'}`;
             if (typeFilter !== 'all') url += `&type=${typeFilter}`;
-            if (locationFilter !== 'all') url += `&location_id=${locationFilter}`;
             return apiGet(url);
         }
     });
 
-    // Fetch locations
     const { data: locations } = useQuery({
         queryKey: ['locations'],
         queryFn: () => apiGet('/api/locations')
     });
 
+    const supplierList = useMemo(() => suppliers?.data || [], [suppliers]);
+
+    const stats = useMemo(() => ({
+        total: suppliers?.meta?.total || supplierList.length,
+        active: supplierList.filter((s: any) => s.is_active).length,
+        food: supplierList.filter((s: any) => s.type === 'food_produce').length,
+        beverage: supplierList.filter((s: any) => s.type === 'beverages').length
+    }), [supplierList, suppliers]);
+
+    const supplierTypes = {
+        food_produce: 'Food & Produce',
+        beverages: 'Beverages',
+        meat_seafood: 'Meat & Seafood',
+        dairy: 'Dairy Products',
+        equipment: 'Equipment',
+        supplies: 'Supplies & Packaging',
+        cleaning: 'Cleaning Products',
+        utilities: 'Utilities',
+        services: 'Services',
+        other: 'Other'
+    };
+
     // Mutations
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/suppliers', data),
-        onSuccess: () => {
-            toastSuccess('Supplier created successfully!');
-            setOpenCreate(false);
-            resetForm();
-            qc.invalidateQueries({ queryKey: ['suppliers'] });
-        },
-        onError: (error: any) => setError(error.response?.data?.message || 'Failed to create supplier')
+        onSuccess: () => { toastSuccess('Supplier created'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/suppliers/${id}`, data),
-        onSuccess: () => {
-            toastSuccess('Supplier updated successfully!');
-            setOpenEdit(false);
-            resetForm();
-            qc.invalidateQueries({ queryKey: ['suppliers'] });
-        },
-        onError: (error: any) => setError(error.response?.data?.message || 'Failed to update supplier')
+        onSuccess: () => { toastSuccess('Supplier updated'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/suppliers/${id}`),
-        onSuccess: () => {
-            toastSuccess('Supplier deleted successfully!');
-            qc.invalidateQueries({ queryKey: ['suppliers'] });
-        },
-        onError: (error: any) => toastError(error.response?.data?.message || 'Failed to delete supplier')
+        onSuccess: () => { toastSuccess('Supplier deleted'); qc.invalidateQueries({ queryKey: ['suppliers'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
-    const toggleStatusMutation = useMutation({
-        mutationFn: ({ id, is_active }: { id: number, is_active: boolean }) =>
-            apiPut(`/api/suppliers/${id}`, { is_active }),
-        onSuccess: () => {
-            toastSuccess('Supplier status updated!');
-            qc.invalidateQueries({ queryKey: ['suppliers'] });
-        }
-    });
-
-    const resetForm = () => {
-        setFormData({
-            location_id: '',
-            code: '',
-            name: '',
-            contact_name: '',
-            contact_phone: '',
-            email: '',
-            phone: '',
-            address: '',
-            type: 'food_produce',
-            payment_terms: '',
-            notes: '',
-            tax_id: '',
-            is_active: true
-        });
+    const closeModal = () => {
+        setOpenCreate(false);
+        setOpenEdit(false);
         setEditingSupplier(null);
-        setError('');
+        setFormData({
+            location_id: '', code: '', name: '', contact_name: '', contact_phone: '',
+            email: '', phone: '', address: '', type: 'food_produce',
+            payment_terms: '', notes: '', tax_id: '', is_active: true
+        });
     };
 
-    const handleEdit = (supplier: Supplier) => {
+    const handleEdit = (supplier: any) => {
+        setEditingSupplier(supplier);
         setFormData({
             location_id: supplier.location_id?.toString() || '',
             code: supplier.code,
@@ -173,367 +159,152 @@ export default function Suppliers() {
             tax_id: supplier.tax_id || '',
             is_active: supplier.is_active
         });
-        setEditingSupplier(supplier);
         setOpenEdit(true);
+    };
+
+    const handleDelete = (id: number) => {
+        if (confirm('Delete this supplier?')) deleteMutation.mutate(id);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-
         const data = {
             ...formData,
             location_id: formData.location_id ? parseInt(formData.location_id) : null
         };
-
-        if (editingSupplier) {
-            updateMutation.mutate({ id: editingSupplier.id, data });
-        } else {
-            createMutation.mutate(data);
-        }
+        if (editingSupplier) updateMutation.mutate({ id: editingSupplier.id, data });
+        else createMutation.mutate(data);
     };
-
-    const supplierTypes = {
-        food_produce: 'Food & Produce',
-        beverages: 'Beverages',
-        meat_seafood: 'Meat & Seafood',
-        dairy: 'Dairy Products',
-        equipment: 'Equipment',
-        supplies: 'Supplies & Packaging',
-        cleaning: 'Cleaning Products',
-        utilities: 'Utilities',
-        services: 'Services',
-        other: 'Other'
-    };
-
-    const totalSuppliers = suppliers?.data?.length || 0;
-    const activeSuppliers = suppliers?.data?.filter((s: Supplier) => s.is_active).length || 0;
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-                {/* Header */}
-                <div className="mb-8">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-                    >
-                        <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                                Suppliers Management
-                            </h1>
-                            <p className="text-gray-400 mt-1">Manage vendor relationships and contacts</p>
-                        </div>
-
-                        <div className="flex gap-4">
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Total</div>
-                                <div className="text-xl font-bold text-white">{totalSuppliers}</div>
-                            </div>
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Active</div>
-                                <div className="text-xl font-bold text-green-400">{activeSuppliers}</div>
-                            </div>
-                        </div>
-
-                        <Button
-                            onClick={() => { resetForm(); setOpenCreate(true); }}
-                            className="bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Supplier
-                        </Button>
-                    </motion.div>
+            <div className="min-h-screen bg-slate-900 p-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white tracking-tight">Suppliers</h1>
+                        <p className="text-slate-400 mt-1">Manage vendor relationships</p>
+                    </div>
+                    <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="w-4 h-4 mr-2" /> Add Supplier
+                    </Button>
                 </div>
 
-                {/* Filters */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4"
-                >
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <Input
-                            placeholder="Search suppliers..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-                        />
+                <SupplierStatsRibbon stats={stats} />
+
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+                    <div className="flex gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Input placeholder="Search suppliers..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+                        </div>
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
+                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            <option value="all">All Types</option>
+                            {Object.entries(supplierTypes).map(([key, label]) => (
+                                <option key={key} value={key}>{label}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
+                        <div className="col-span-3">Name / Code</div>
+                        <div className="col-span-3">Contact</div>
+                        <div className="col-span-3">Type</div>
+                        <div className="col-span-2">Status</div>
+                        <div className="col-span-1 text-right">Actions</div>
+                    </div>
+                    <div className="divide-y divide-white/5">
+                        {isLoading ? (
+                            <div className="p-8 text-center text-gray-500">Loading...</div>
+                        ) : supplierList.map((supplier: any) => (
+                            <motion.div key={supplier.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
+                                <div className="col-span-3">
+                                    <div className="font-medium text-white">{supplier.name}</div>
+                                    <div className="text-xs text-gray-500">{supplier.code}</div>
+                                </div>
+                                <div className="col-span-3 text-sm text-gray-300">
+                                    <div className="flex items-center gap-2"><Phone size={12} className="text-gray-500" /> {supplier.phone || '-'}</div>
+                                    <div className="flex items-center gap-2 mt-1"><Mail size={12} className="text-gray-500" /> {supplier.email || '-'}</div>
+                                </div>
+                                <div className="col-span-3">
+                                    <span className="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs border border-blue-500/20">
+                                        {supplierTypes[supplier.type as keyof typeof supplierTypes]}
+                                    </span>
+                                </div>
+                                <div className="col-span-2">
+                                    <span className={cn("px-2 py-1 rounded-md text-xs font-medium border",
+                                        supplier.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20")}>
+                                        {supplier.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                                <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button size="sm" variant="secondary" onClick={() => handleEdit(supplier)} className="h-8 w-8 p-0 border-white/10"><Edit size={14} /></Button>
+                                    <Button size="sm" variant="danger" onClick={() => handleDelete(supplier.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingSupplier ? 'Edit Supplier' : 'New Supplier'} size="lg">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required className="bg-slate-950 border-white/10" />
+                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="bg-slate-950 border-white/10" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Type</label>
+                            <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                                {Object.entries(supplierTypes).map(([key, label]) => (
+                                    <option key={key} value={key}>{label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Location</label>
+                            <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
+                                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                                <option value="">No specific location</option>
+                                {locations?.data?.map((l: Location) => (
+                                    <option key={l.id} value={l.id}>{l.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="bg-slate-950 border-white/10" />
+                        <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="bg-slate-950 border-white/10" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input label="Contact Name" value={formData.contact_name} onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })} className="bg-slate-950 border-white/10" />
+                        <Input label="Contact Phone" value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })} className="bg-slate-950 border-white/10" />
+                    </div>
+                    <Input label="Address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="bg-slate-950 border-white/10" />
+
+                    <div className="flex items-center gap-2 pt-2">
+                        <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-slate-950 border-white/20" />
+                        <span className="text-sm text-gray-300">Active</span>
                     </div>
 
-                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                        <option value="all" className="text-black">All Status</option>
-                        <option value="active" className="text-black">Active</option>
-                        <option value="inactive" className="text-black">Inactive</option>
-                    </select>
-
-                    <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                        <option value="all" className="text-black">All Types</option>
-                        {Object.entries(supplierTypes).map(([key, label]) => (
-                            <option key={key} value={key} className="text-black">{label}</option>
-                        ))}
-                    </select>
-
-                    <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                        <option value="all" className="text-black">All Locations</option>
-                        {locations?.data?.map((location: Location) => (
-                            <option key={location.id} value={location.id} className="text-black">{location.name}</option>
-                        ))}
-                    </select>
-
-                    <Button variant="secondary" onClick={() => { setSearch(''); setStatusFilter('all'); setTypeFilter('all'); setLocationFilter('all'); }}
-                        className="border-white/20 hover:bg-white/10">
-                        Clear
-                    </Button>
-                </motion.div>
-
-                {/* Suppliers Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {isLoading ? (
-                        Array.from({ length: 6 }).map((_, i) => (
-                            <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-md">
-                                <CardContent className="p-6">
-                                    <div className="animate-pulse space-y-4">
-                                        <div className="h-4 bg-white/10 rounded w-3/4"></div>
-                                        <div className="h-3 bg-white/10 rounded w-1/2"></div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))
-                    ) : (
-                        suppliers?.data?.map((supplier: Supplier, index: number) => (
-                            <motion.div key={supplier.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.1 }}>
-                                <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
-                                    <CardContent className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 className="font-semibold text-white text-lg">{supplier.name}</h3>
-                                                <p className="text-sm text-gray-400">{supplier.code}</p>
-                                            </div>
-                                            <Badge className={supplier.is_active
-                                                ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                                                : 'bg-red-500/20 text-red-400 border-red-500/30'}>
-                                                {supplier.is_active ? 'Active' : 'Inactive'}
-                                            </Badge>
-                                        </div>
-
-                                        <div className="space-y-2 mb-4">
-                                            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                                {supplierTypes[supplier.type as keyof typeof supplierTypes]}
-                                            </Badge>
-
-                                            {supplier.contact_name && (
-                                                <div className="flex items-center text-sm text-gray-300">
-                                                    <User className="w-4 h-4 mr-2 text-gray-400" />
-                                                    {supplier.contact_name}
-                                                </div>
-                                            )}
-                                            {supplier.phone && (
-                                                <div className="flex items-center text-sm text-gray-300">
-                                                    <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                                                    {supplier.phone}
-                                                </div>
-                                            )}
-                                            {supplier.email && (
-                                                <div className="flex items-center text-sm text-gray-300">
-                                                    <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                                                    {supplier.email}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="flex items-center justify-between mb-4">
-                                            <span className="text-sm text-gray-400">Status:</span>
-                                            <button onClick={() => toggleStatusMutation.mutate({ id: supplier.id, is_active: !supplier.is_active })}
-                                                className="flex items-center gap-1 text-sm hover:opacity-80">
-                                                {supplier.is_active ? (
-                                                    <ToggleRight className="w-5 h-5 text-green-400" />
-                                                ) : (
-                                                    <ToggleLeft className="w-5 h-5 text-gray-400" />
-                                                )}
-                                            </button>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <Button size="sm" variant="secondary" onClick={() => { setSelectedSupplier(supplier); setOpenView(true); }}
-                                                className="flex-1 border-white/20 hover:bg-white/10">
-                                                <Eye className="w-3 h-3 mr-1" />View
-                                            </Button>
-                                            <Button size="sm" variant="secondary" onClick={() => handleEdit(supplier)}
-                                                className="flex-1 border-white/20 hover:bg-white/10">
-                                                <Edit className="w-3 h-3 mr-1" />Edit
-                                            </Button>
-                                            <Button size="sm" variant="danger"
-                                                onClick={() => window.confirm('Delete this supplier?') && deleteMutation.mutate(supplier.id)}
-                                                className="border-red-500/20 hover:bg-red-500/10 text-red-400">
-                                                <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))
-                    )}
-                </div>
-
-                {/* Create/Edit Modal */}
-                <Modal open={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
-                    title={editingSupplier ? 'Edit Supplier' : 'Create Supplier'} size="lg">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">{error}</div>}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Supplier Code *</label>
-                                <Input required value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" placeholder="e.g., SUP-001" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Supplier Name *</label>
-                                <Input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Type *</label>
-                                <select required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    {Object.entries(supplierTypes).map(([key, label]) => (
-                                        <option key={key} value={key} className="bg-gray-800">{label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
-                                <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    <option value="">No specific location</option>
-                                    {locations?.data?.map((location: Location) => (
-                                        <option key={location.id} value={location.id} className="bg-gray-800">{location.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Contact Name</label>
-                                <Input value={formData.contact_name} onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Contact Phone</label>
-                                <Input value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                                <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
-                                <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Address</label>
-                                <Input value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Payment Terms</label>
-                                <Input value={formData.payment_terms} onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" placeholder="e.g., Net 30" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Tax ID</label>
-                                <Input value={formData.tax_id} onChange={(e) => setFormData({ ...formData, tax_id: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-                                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" rows={3} />
-                            </div>
-                            <div>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" checked={formData.is_active}
-                                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded" />
-                                    <span className="text-sm text-gray-300">Active</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-3 pt-4">
-                            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
-                                className="flex-1 border-white/20 hover:bg-white/10">Cancel</Button>
-                            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending}
-                                className="flex-1">{editingSupplier ? 'Update' : 'Create'} Supplier</Button>
-                        </div>
-                    </form>
-                </Modal>
-
-                {/* View Modal */}
-                <Modal open={openView} onClose={() => { setOpenView(false); setSelectedSupplier(null); }}
-                    title="Supplier Details" size="lg">
-                    {selectedSupplier && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-white mb-3">Basic Information</h3>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Code:</span>
-                                            <span className="text-white font-semibold">{selectedSupplier.code}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Name:</span>
-                                            <span className="text-white">{selectedSupplier.name}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Type:</span>
-                                            <span className="text-white">{supplierTypes[selectedSupplier.type as keyof typeof supplierTypes]}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Status:</span>
-                                            <Badge className={selectedSupplier.is_active
-                                                ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
-                                                {selectedSupplier.is_active ? 'Active' : 'Inactive'}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-semibold text-white mb-3">Contact Information</h3>
-                                    <div className="space-y-2 text-sm text-gray-300">
-                                        {selectedSupplier.contact_name && <div>Contact: {selectedSupplier.contact_name}</div>}
-                                        {selectedSupplier.phone && <div>Phone: {selectedSupplier.phone}</div>}
-                                        {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
-                                        {selectedSupplier.address && <div>Address: {selectedSupplier.address}</div>}
-                                    </div>
-                                </div>
-                            </div>
-                            {selectedSupplier.notes && (
-                                <div>
-                                    <h3 className="text-lg font-semibold text-white mb-2">Notes</h3>
-                                    <p className="text-sm text-gray-300">{selectedSupplier.notes}</p>
-                                </div>
-                            )}
-                            <div className="flex gap-3 pt-4">
-                                <Button variant="secondary" onClick={() => handleEdit(selectedSupplier)}
-                                    className="flex-1 border-white/20 hover:bg-white/10">
-                                    <Edit className="w-4 h-4 mr-2" />Edit Supplier
-                                </Button>
-                                <Button variant="secondary" onClick={() => { setOpenView(false); setSelectedSupplier(null); }}
-                                    className="border-white/20 hover:bg-white/10">Close</Button>
-                            </div>
-                        </div>
-                    )}
-                </Modal>
-            </div>
+                    <div className="flex gap-3 pt-4">
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
+                        <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">Save</Button>
+                    </div>
+                </form>
+            </Modal>
         </AdminLayout>
     );
 }

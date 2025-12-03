@@ -1,52 +1,113 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Calendar, 
-  Clock, 
-  Users, 
-  MapPin,
-  User,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Armchair
+import {
+  Search, Filter, Plus, Eye, Edit, Trash2, Calendar, Clock,
+  Users, MapPin, User, CheckCircle, XCircle, AlertCircle,
+  Armchair, MoreHorizontal, Phone, ChevronLeft, ChevronRight,
+  Utensils, AlertTriangle, ArrowRight
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { Card, CardContent } from '@/app/components/ui/Card';
+import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Reservation, DiningTable, Customer, Location } from '@/app/types/domain';
+import { Reservation, DiningTable, Customer } from '@/app/types/domain';
+import { cn } from '@/app/utils/cn';
+
+// --- Components ---
+
+const StatsRibbon = ({ stats }: { stats: any }) => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
+      <div>
+        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Bookings</p>
+        <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+      </div>
+      <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+        <Calendar className="w-5 h-5 text-purple-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
+      <div>
+        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Seated Now</p>
+        <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.seated}</p>
+      </div>
+      <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+        <Utensils className="w-5 h-5 text-emerald-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
+      <div>
+        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Pending</p>
+        <p className="text-2xl font-bold text-blue-400 mt-1">{stats.pending}</p>
+      </div>
+      <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+        <Clock className="w-5 h-5 text-blue-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
+      <div>
+        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Needs Action</p>
+        <p className="text-2xl font-bold text-amber-400 mt-1">{stats.late}</p>
+      </div>
+      <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+        <AlertTriangle className="w-5 h-5 text-amber-400" />
+      </div>
+    </div>
+  </div>
+);
+
+const StatusPill = ({ status }: { status: string }) => {
+  const styles = {
+    pending: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    confirmed: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    seated: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
+    completed: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+    no_show: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  }[status] || 'bg-gray-500/10 text-gray-400';
+
+  const icon = {
+    pending: Clock,
+    confirmed: CheckCircle,
+    seated: Utensils,
+    cancelled: XCircle,
+    completed: CheckCircle,
+    no_show: AlertCircle,
+  }[status] || Clock;
+
+  const Icon = icon;
+
+  return (
+    <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium w-fit", styles)}>
+      <Icon className="w-3 h-3" />
+      <span className="capitalize">{status.replace('_', ' ')}</span>
+    </div>
+  );
+};
 
 export default function Reservations() {
-  const [search, setSearch] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('all');
-  const [dateFilter, setDateFilter] = React.useState('all');
-  const [openCreate, setOpenCreate] = React.useState(false);
-  const [openEdit, setOpenEdit] = React.useState(false);
-  const [openView, setOpenView] = React.useState(false);
-  const [selectedReservation, setSelectedReservation] = React.useState<Reservation | null>(null);
-  const [editingReservation, setEditingReservation] = React.useState<Reservation | null>(null);
-  const [error, setError] = React.useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('today'); // Default to today for better UX
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
+  const [error, setError] = useState('');
 
   const qc = useQueryClient();
 
   // Pagination state
-  const [page, setPage] = React.useState(1);
-  const [perPage, setPerPage] = React.useState(12);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15); // Increased for density
 
   // Form state
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     table_id: '',
     customer_id: '',
     reserved_for: '',
@@ -61,15 +122,15 @@ export default function Reservations() {
     queryKey: ['admin/reservations', page, search, statusFilter, dateFilter],
     queryFn: () => {
       let url = `/api/admin/reservations?page=${page}&per_page=${perPage}&search=${search}`;
-      
+
       if (statusFilter !== 'all') {
         url += `&status=${statusFilter}`;
       }
-      
+
       if (dateFilter !== 'all') {
         const today = new Date();
         let startDate = '';
-        
+
         switch (dateFilter) {
           case 'today':
             startDate = today.toISOString().split('T')[0];
@@ -85,81 +146,75 @@ export default function Reservations() {
             break;
         }
       }
-      
+
       return apiGet(url);
     }
   }) as { data: any, isLoading: boolean };
 
-  const reservationList: Reservation[] = React.useMemo(() => {
+  const reservationList: Reservation[] = useMemo(() => {
     if (!reservations) return [];
     if (Array.isArray(reservations)) return reservations as Reservation[];
     if (reservations.data && Array.isArray(reservations.data)) return reservations.data as Reservation[];
     return [];
   }, [reservations]);
 
-  const todayTimeline = React.useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    return reservationList
-      .filter((res) => {
-        if (!res.reserved_for) return false;
-        const d = new Date(res.reserved_for);
-        if (Number.isNaN(d.getTime())) return false;
-        return d.toISOString().split('T')[0] === todayStr;
-      })
-      .sort((a, b) => new Date(a.reserved_for).getTime() - new Date(b.reserved_for).getTime());
-  }, [reservationList]);
+  // Calculate stats
+  const stats = useMemo(() => {
+    const list = reservationList;
+    const now = new Date();
+    const lateThreshold = new Date(now.getTime() - 15 * 60000); // 15 mins ago
 
-  // Fetch tables
-  const { data: tables } = useQuery({
-    queryKey: ['tables'],
-    queryFn: () => apiGet('/api/admin/tables')
-  }) as { data: any };
+    return {
+      total: reservations?.meta?.total || list.length,
+      seated: list.filter(r => r.status === 'seated').length,
+      pending: list.filter(r => r.status === 'pending').length,
+      late: list.filter(r =>
+        (r.status === 'pending' || r.status === 'confirmed') &&
+        new Date(r.reserved_for) < lateThreshold
+      ).length
+    };
+  }, [reservationList, reservations]);
 
-  // Fetch customers
-  const { data: customers } = useQuery({
-    queryKey: ['customers'],
-    queryFn: () => apiGet('/api/admin/customers')
-  }) as { data: any };
+  // Fetch tables & customers
+  const { data: tables } = useQuery({ queryKey: ['tables'], queryFn: () => apiGet('/api/admin/tables') }) as { data: any };
+  const { data: customers } = useQuery({ queryKey: ['customers'], queryFn: () => apiGet('/api/admin/customers') }) as { data: any };
 
-  // Create mutation
+  // Mutations
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/admin/reservations', data),
     onSuccess: () => {
-      toastSuccess('Reservation created successfully!');
+      toastSuccess('Reservation created');
       setOpenCreate(false);
       resetForm();
       qc.invalidateQueries({ queryKey: ['admin/reservations'] });
     },
-    onError: (error: any) => {
-      setError(error.response?.data?.message || 'Failed to create reservation');
-    }
+    onError: (err: any) => setError(err.response?.data?.message || 'Failed to create')
   });
 
-  // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/reservations/${id}`, data),
     onSuccess: () => {
-      toastSuccess('Reservation updated successfully!');
+      toastSuccess('Reservation updated');
       setOpenEdit(false);
       resetForm();
       qc.invalidateQueries({ queryKey: ['admin/reservations'] });
     },
-    onError: (error: any) => {
-      setError(error.response?.data?.message || 'Failed to update reservation');
-    }
+    onError: (err: any) => setError(err.response?.data?.message || 'Failed to update')
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/reservations/${id}`),
     onSuccess: () => {
-      toastSuccess('Reservation cancelled successfully!');
+      toastSuccess('Reservation cancelled');
       qc.invalidateQueries({ queryKey: ['admin/reservations'] });
     },
-    onError: (error: any) => {
-      toastError(error.response?.data?.message || 'Failed to delete reservation');
-    }
+    onError: (err: any) => toastError(err.response?.data?.message || 'Failed to delete')
   });
+
+  // Quick Actions
+  const handleQuickStatus = (id: number, status: string) => {
+    updateMutation.mutate({ id, data: { status } });
+  };
 
   const resetForm = () => {
     setFormData({
@@ -175,16 +230,11 @@ export default function Reservations() {
     setError('');
   };
 
-  const handleCreate = () => {
-    resetForm();
-    setOpenCreate(true);
-  };
-
   const handleEdit = (reservation: Reservation) => {
     setFormData({
       table_id: reservation.table_id.toString(),
       customer_id: reservation.customer_id.toString(),
-      reserved_for: reservation.reserved_for.slice(0, 16), // datetime-local format
+      reserved_for: reservation.reserved_for.slice(0, 16),
       duration_minutes: reservation.duration_minutes.toString(),
       guest_count: reservation.guest_count.toString(),
       status: reservation.status,
@@ -194,21 +244,9 @@ export default function Reservations() {
     setOpenEdit(true);
   };
 
-  const handleView = (reservation: Reservation) => {
-    setSelectedReservation(reservation);
-    setOpenView(true);
-  };
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to cancel this reservation?')) {
-      deleteMutation.mutate(id);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
     const data = {
       ...formData,
       table_id: parseInt(formData.table_id),
@@ -224,564 +262,359 @@ export default function Reservations() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'confirmed': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'seated': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'cancelled': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'completed': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-      case 'no_show': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
+  const isLate = (res: Reservation) => {
+    return (res.status === 'pending' || res.status === 'confirmed') &&
+      new Date(res.reserved_for) < new Date(Date.now() - 15 * 60000);
   };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'confirmed': return <CheckCircle className="w-4 h-4" />;
-      case 'seated': return <Armchair className="w-4 h-4" />;
-      case 'cancelled': return <XCircle className="w-4 h-4" />;
-      case 'completed': return <CheckCircle className="w-4 h-4" />;
-      case 'no_show': return <AlertCircle className="w-4 h-4" />;
-      default: return <AlertCircle className="w-4 h-4" />;
-    }
-  };
-
-  const totalReservations = reservations?.data?.length || 0;
-  const pendingReservations = reservations?.data?.filter((res: Reservation) => res.status === 'pending').length || 0;
-  const confirmedReservations = reservations?.data?.filter((res: Reservation) => res.status === 'confirmed').length || 0;
-  const seatedReservations = reservations?.data?.filter((res: Reservation) => res.status === 'seated').length || 0;
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      <div className="min-h-screen bg-slate-900 p-6">
         {/* Header */}
-        <div className="mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Reservations</h1>
+            <p className="text-slate-400 mt-1">Manage bookings and seating flow</p>
+          </div>
+          <Button
+            onClick={() => { resetForm(); setOpenCreate(true); }}
+            className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-900/20"
           >
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Reservations Management
-              </h1>
-              <p className="text-gray-400 mt-1">Manage table reservations and bookings</p>
-            </div>
-
-            {/* Summary Cards */}
-            <div className="flex gap-4">
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Total</div>
-                <div className="text-xl font-bold text-white">{totalReservations}</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Pending</div>
-                <div className="text-xl font-bold text-yellow-400">{pendingReservations}</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Confirmed</div>
-                <div className="text-xl font-bold text-blue-400">{confirmedReservations}</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Seated</div>
-                <div className="text-xl font-bold text-green-400">{seatedReservations}</div>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleCreate}
-              className="bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Reservation
-            </Button>
-          </motion.div>
+            <Plus className="w-4 h-4 mr-2" />
+            New Booking
+          </Button>
         </div>
 
+        {/* Stats */}
+        <StatsRibbon stats={stats} />
+
         {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4"
-        >
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search reservations..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-            />
-          </div>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="all" className='text-gray-800'>All Status</option>
-            <option value="pending" className='text-gray-800'>Pending</option>
-            <option value="confirmed" className='text-gray-800'>Confirmed</option>
-            <option value="seated" className='text-gray-800'>Seated</option>
-            <option value="cancelled" className='text-gray-800'>Cancelled</option>
-            <option value="completed" className='text-gray-800'>Completed</option>
-            <option value="no_show" className='text-gray-800'>No Show</option>
-          </select>
-
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="all" className='text-gray-800'>All Dates</option>
-            <option value="today" className='text-gray-800'>Today</option>
-            <option value="tomorrow" className='text-gray-800'>Tomorrow</option>
-            <option value="week" className='text-gray-800'>This Week</option>
-          </select>
-
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSearch('');
-              setStatusFilter('all');
-              setDateFilter('today');
-            }}
-            className="border-white/20 hover:bg-white/10"
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            Clear
-          </Button>
-        </motion.div>
-
-        {/* Today's Timeline - compact operational view */}
-        {todayTimeline.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-6 bg-white/5 border border-white/10 rounded-xl p-4"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gray-300" />
-                Today's Timeline
-              </h2>
-              <span className="text-xs text-gray-400">
-                {todayTimeline.length} reservation{todayTimeline.length === 1 ? '' : 's'}
-              </span>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search by name, code, or phone..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500"
+              />
             </div>
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {todayTimeline.map((res) => (
-                <div
-                  key={res.id}
-                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5"
+            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+              {['today', 'tomorrow', 'week', 'all'].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setDateFilter(filter)}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap",
+                    dateFilter === filter
+                      ? "bg-purple-600 text-white"
+                      : "bg-slate-800 text-gray-400 hover:bg-slate-700 hover:text-white"
+                  )}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-white">
-                        {new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {res.customer?.user?.name || 'Unknown Customer'} • Table {res.table?.code || '-'} •{' '}
-                        {res.guest_count} guests
-                      </span>
-                    </div>
-                  </div>
-                  <Badge className={getStatusColor(res.status)}>
-                    <div className="flex items-center gap-1 text-xs">
-                      {getStatusIcon(res.status)}
-                      {res.status}
-                    </div>
-                  </Badge>
-                </div>
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
               ))}
             </div>
-          </motion.div>
-        )}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm min-w-[140px]"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="seated">Seated</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
 
-        {/* Reservations Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-4 bg-white/10 rounded w-3/4"></div>
-                      <div className="h-3 bg-white/10 rounded w-1/2"></div>
-                      <div className="h-8 bg-white/10 rounded"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))
-          ) : (
-            reservations?.data?.map((reservation: Reservation, index: number) => (
-              <motion.div
-                key={reservation.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                    {/* Reservation Header */}
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-semibold text-white text-lg">
-                          #{reservation.code}
-                        </h3>
-                        <p className="text-sm text-gray-400">
-                          {reservation.customer?.user?.name}
-                        </p>
+        {/* Main List */}
+        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="col-span-2 md:col-span-1">Time</div>
+            <div className="col-span-4 md:col-span-3">Customer</div>
+            <div className="col-span-3 md:col-span-2">Table</div>
+            <div className="col-span-3 md:col-span-2">Status</div>
+            <div className="col-span-12 md:col-span-4 text-right hidden md:block">Actions</div>
+          </div>
+
+          {/* Table Body */}
+          <div className="divide-y divide-white/5">
+            {isLoading ? (
+              <div className="p-8 text-center text-gray-400">Loading reservations...</div>
+            ) : reservationList.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-8 h-8 text-gray-500" />
+                </div>
+                <h3 className="text-white font-medium">No reservations found</h3>
+                <p className="text-gray-400 text-sm mt-1">Try adjusting your filters or create a new booking.</p>
+              </div>
+            ) : (
+              reservationList.map((res) => {
+                const late = isLate(res);
+                return (
+                  <motion.div
+                    key={res.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={cn(
+                      "grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group relative",
+                      late && "bg-amber-500/5 border-l-2 border-amber-500"
+                    )}
+                  >
+                    {/* Time */}
+                    <div className="col-span-2 md:col-span-1">
+                      <div className="font-bold text-white text-lg">
+                        {new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
-                      <Badge className={getStatusColor(reservation.status)}>
-                        <div className="flex items-center gap-1">
-                          {getStatusIcon(reservation.status)}
-                          {reservation.status}
+                      <div className="text-xs text-gray-500">
+                        {new Date(res.reserved_for).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                      </div>
+                    </div>
+
+                    {/* Customer */}
+                    <div className="col-span-4 md:col-span-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white">
+                          {res.customer?.user?.name?.charAt(0) || 'G'}
                         </div>
-                      </Badge>
+                        <div>
+                          <div className="font-medium text-white truncate">{res.customer?.user?.name}</div>
+                          <div className="text-xs text-gray-400 flex items-center gap-1">
+                            <Users className="w-3 h-3" /> {res.guest_count} guests
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Reservation Details */}
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center text-sm text-gray-300">
-                        <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                        {new Date(reservation.reserved_for).toLocaleDateString()} at {new Date(reservation.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {/* Table */}
+                    <div className="col-span-3 md:col-span-2">
+                      <div className="flex items-center gap-2 text-gray-300">
+                        <Armchair className="w-4 h-4 text-gray-500" />
+                        <span>Table {res.table?.code || 'Unassigned'}</span>
                       </div>
+                    </div>
 
-                      <div className="flex items-center text-sm text-gray-300">
-                        <Users className="w-4 h-4 mr-2 text-gray-400" />
-                        {reservation.guest_count} guests
-                      </div>
-
-                      <div className="flex items-center text-sm text-gray-300">
-                        <Armchair className="w-4 h-4 mr-2 text-gray-400" />
-                        Table {reservation.table?.code}
-                      </div>
-
-                      <div className="flex items-center text-sm text-gray-300">
-                        <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                        {reservation.duration_minutes} minutes
-                      </div>
-
-                      {reservation.notes && (
-                        <div className="text-sm text-gray-300 line-clamp-2">
-                          <strong>Notes:</strong> {reservation.notes}
+                    {/* Status */}
+                    <div className="col-span-3 md:col-span-2">
+                      <StatusPill status={res.status} />
+                      {late && (
+                        <div className="text-xs text-amber-500 mt-1 font-medium flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3" /> Late Arrival
                         </div>
                       )}
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
+                    {/* Actions (Desktop) */}
+                    <div className="col-span-12 md:col-span-4 flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                      {res.status === 'confirmed' || res.status === 'pending' ? (
+                        <Button
+                          size="sm"
+                          onClick={() => handleQuickStatus(res.id, 'seated')}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 text-xs"
+                        >
+                          <Utensils className="w-3 h-3 mr-1.5" /> Seat Now
+                        </Button>
+                      ) : null}
+
+                      {res.status === 'seated' ? (
+                        <Button
+                          size="sm"
+                          onClick={() => handleQuickStatus(res.id, 'completed')}
+                          className="bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1.5" /> Finish
+                        </Button>
+                      ) : null}
+
                       <Button
                         size="sm"
                         variant="secondary"
-                        onClick={() => handleView(reservation)}
-                        className="flex-1 border-white/20 hover:bg-white/10"
+                        onClick={() => handleEdit(res)}
+                        className="h-8 w-8 p-0 border-white/10 hover:bg-white/10"
                       >
-                        <Eye className="w-3 h-3 mr-1" />
-                        View
+                        <Edit className="w-3 h-3" />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleEdit(reservation)}
-                        className="flex-1 border-white/20 hover:bg-white/10"
-                      >
-                        <Edit className="w-3 h-3 mr-1" />
-                        Edit
-                      </Button>
+
                       <Button
                         size="sm"
                         variant="danger"
-                        onClick={() => handleDelete(reservation.id)}
-                        className="border-red-500/20 hover:bg-red-500/10 text-red-400"
+                        onClick={() => {
+                          if (confirm('Cancel this reservation?')) deleteMutation.mutate(res.id);
+                        }}
+                        className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"
                       >
-                        <Trash2 className="w-3 h-3 text-white" />
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Pagination */}
+          {reservations?.meta && (
+            <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/5">
+              <div className="text-sm text-gray-400">
+                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, reservations.meta.total)} of {reservations.meta.total}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => p - 1)}
+                  className="border-white/10 hover:bg-white/10"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page === reservations.meta.last_page}
+                  onClick={() => setPage(p => p + 1)}
+                  className="border-white/10 hover:bg-white/10"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           )}
         </div>
-
-        {/* Pagination */}
-        {reservations?.meta && (
-          <div className="flex justify-center gap-2 mt-8">
-            <Button
-              variant="secondary"
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Previous
-            </Button>
-            <span className="px-4 py-2 text-white">
-              Page {page} of {reservations?.meta?.last_page || 1}
-            </span>
-            <Button
-              variant="secondary"
-              disabled={page === reservations?.meta?.last_page}
-              onClick={() => setPage(page + 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Next
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Create/Edit Modal */}
       <Modal
         open={openCreate || openEdit}
-        onClose={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          resetForm();
-        }}
-        title={editingReservation ? 'Edit Reservation' : 'Create Reservation'}
+        onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
+        title={editingReservation ? 'Edit Reservation' : 'New Reservation'}
         size="lg"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
-              {error}
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" /> {error}
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Customer *</label>
-              <select
-                required
-                value={formData.customer_id}
-                onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-              >
-                <option value="" className='bg-gray-800'>Select Customer</option>
-                {customers?.data?.map((customer: Customer) => (
-                  <option key={customer.id} value={customer.id} className="bg-gray-800">
-                    {customer.user?.name}
-                  </option>
-                ))}
-              </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Customer</label>
+                <select
+                  required
+                  value={formData.customer_id}
+                  onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
+                  className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                >
+                  <option value="">Select Customer</option>
+                  {customers?.data?.map((c: Customer) => (
+                    <option key={c.id} value={c.id}>{c.user?.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Date & Time</label>
+                <Input
+                  type="datetime-local"
+                  required
+                  value={formData.reserved_for}
+                  onChange={(e) => setFormData({ ...formData, reserved_for: e.target.value })}
+                  className="bg-slate-900 border-white/10 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Duration (min)</label>
+                <Input
+                  type="number"
+                  value={formData.duration_minutes}
+                  onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
+                  className="bg-slate-900 border-white/10 text-white"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Table *</label>
-              <select
-                required
-                value={formData.table_id}
-                onChange={(e) => setFormData({ ...formData, table_id: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-              >
-                <option value="">Select Table</option>
-                {tables?.data?.map((table: DiningTable) => (
-                  <option key={table.id} value={table.id} className="bg-gray-800">
-                    Table {table.code} (Capacity: {table.capacity})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Table</label>
+                <select
+                  required
+                  value={formData.table_id}
+                  onChange={(e) => setFormData({ ...formData, table_id: e.target.value })}
+                  className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                >
+                  <option value="">Select Table</option>
+                  {tables?.data?.map((t: DiningTable) => (
+                    <option key={t.id} value={t.id}>Table {t.code} ({t.capacity} seats)</option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Date & Time *</label>
-              <Input
-                type="datetime-local"
-                required
-                value={formData.reserved_for}
-                onChange={(e) => setFormData({ ...formData, reserved_for: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Guests</label>
+                <Input
+                  type="number"
+                  required
+                  value={formData.guest_count}
+                  onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
+                  className="bg-slate-900 border-white/10 text-white"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Duration (minutes)</label>
-              <Input
-                type="number"
-                min="30"
-                max="480"
-                value={formData.duration_minutes}
-                onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
-                placeholder="60"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Guest Count *</label>
-              <Input
-                type="number"
-                min="1"
-                max="20"
-                required
-                value={formData.guest_count}
-                onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
-                placeholder="2"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-              >
-                <option value="pending" className='bg-gray-800'>Pending</option>
-                <option value="confirmed" className='bg-gray-800'>Confirmed</option>
-                <option value="seated" className='bg-gray-800'>Seated</option>
-                <option value="cancelled" className='bg-gray-800'>Cancelled</option>
-                <option value="completed" className='bg-gray-800'>Completed</option>
-                <option value="no_show" className='bg-gray-800'>No Show</option>
-              </select>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                  className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="seated">Seated</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="completed">Completed</option>
+                  <option value="no_show">No Show</option>
+                </select>
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+            <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Notes</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-400"
-              placeholder="Special requests or notes..."
+              className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              placeholder="Allergies, special requests, etc."
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 border-t border-white/10">
             <Button
               type="button"
               variant="secondary"
-              onClick={() => {
-                setOpenCreate(false);
-                setOpenEdit(false);
-                resetForm();
-              }}
-              className="flex-1 border-white/20 hover:bg-white/10"
+              onClick={() => { setOpenCreate(false); setOpenEdit(false); }}
+              className="flex-1 border-white/10 hover:bg-white/10"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              variant="primary"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
               disabled={createMutation.isPending || updateMutation.isPending}
-              className="flex-1"
             >
-              {editingReservation ? 'Update' : 'Create'} Reservation
+              {editingReservation ? 'Save Changes' : 'Create Booking'}
             </Button>
           </div>
         </form>
-      </Modal>
-
-      {/* View Reservation Modal */}
-      <Modal
-        open={openView}
-        onClose={() => {
-          setOpenView(false);
-          setSelectedReservation(null);
-        }}
-        title="Reservation Details"
-        size="lg"
-      >
-        {selectedReservation && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Reservation Information</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Code:</span>
-                    <span className="text-white font-semibold">#{selectedReservation.code}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Customer:</span>
-                    <span className="text-white">{selectedReservation.customer?.user?.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Table:</span>
-                    <span className="text-white">Table {selectedReservation.table?.code}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Status:</span>
-                    <Badge className={getStatusColor(selectedReservation.status)}>
-                      <div className="flex items-center gap-1">
-                        {getStatusIcon(selectedReservation.status)}
-                        {selectedReservation.status}
-                      </div>
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Booking Details</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Date:</span>
-                    <span className="text-white">{new Date(selectedReservation.reserved_for).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Time:</span>
-                    <span className="text-white">{new Date(selectedReservation.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Duration:</span>
-                    <span className="text-white">{selectedReservation.duration_minutes} minutes</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Guests:</span>
-                    <span className="text-white">{selectedReservation.guest_count} people</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Created:</span>
-                    <span className="text-white">{new Date(selectedReservation.created_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {selectedReservation.notes && (
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Notes</h3>
-                <p className="text-gray-300 bg-white/5 p-3 rounded-lg">{selectedReservation.notes}</p>
-              </div>
-            )}
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                variant="secondary"
-                onClick={() => handleEdit(selectedReservation)}
-                className="flex-1 border-white/20 hover:bg-white/10"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Reservation
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setOpenView(false);
-                  setSelectedReservation(null);
-                }}
-                className="border-white/20 hover:bg-white/10"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        )}
       </Modal>
     </AdminLayout>
   );

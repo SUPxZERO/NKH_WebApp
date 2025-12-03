@@ -1,84 +1,119 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  Shield, 
-  User,
-  Calendar,
-  Globe,
-  Monitor,
-  Database,
-  Activity,
-  Clock,
-  FileText
+import {
+  Search, Filter, Eye, Shield, User, Calendar, Globe, Monitor,
+  Database, Activity, Clock, FileText, AlertCircle
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
 import { apiGet } from '@/app/utils/api';
-import { AuditLog } from '@/app/types/domain';
+import { cn } from '@/app/utils/cn';
+
+// Stats Ribbon
+const AuditStatsRibbon = ({ stats }: { stats: any }) => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Logs</p>
+          <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+        </div>
+        <FileText className="w-8 h-8 text-purple-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Today</p>
+          <p className="text-2xl font-bold text-blue-400 mt-1">{stats.today}</p>
+        </div>
+        <Clock className="w-8 h-8 text-blue-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Active Users</p>
+          <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.activeUsers}</p>
+        </div>
+        <User className="w-8 h-8 text-emerald-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Top Action</p>
+          <p className="text-lg font-bold text-amber-400 mt-1 truncate">{stats.topAction}</p>
+        </div>
+        <Activity className="w-8 h-8 text-amber-400" />
+      </div>
+    </div>
+  </div>
+);
+
+interface AuditLog {
+  id: number; user_id?: number; user?: { name: string; email: string }; action: string;
+  auditable_type?: string; auditable_id?: number; ip_address?: string;
+  user_agent?: string | null; properties?: any; created_at: string;
+  metadata?: any;
+}
+
+const formatUserAgent = (ua: string | null | undefined): string => {
+  if (!ua) return 'Unknown';
+  if (ua.includes('Chrome')) return 'Chrome';
+  if (ua.includes('Firefox')) return 'Firefox';
+  if (ua.includes('Safari')) return 'Safari';
+  if (ua.includes('Edge')) return 'Edge';
+  return 'Other';
+};
 
 export default function AuditLogs() {
-  const [search, setSearch] = React.useState('');
-  const [actionFilter, setActionFilter] = React.useState('all');
-  const [userFilter, setUserFilter] = React.useState('all');
-  const [dateFilter, setDateFilter] = React.useState('all');
-  const [openView, setOpenView] = React.useState(false);
-  const [selectedLog, setSelectedLog] = React.useState<AuditLog | null>(null);
+  const [search, setSearch] = useState('');
+  const [actionFilter, setActionFilter] = useState('all');
+  const [userFilter, setUserFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [openView, setOpenView] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-  // Pagination state
-  const [page, setPage] = React.useState(1);
-  const [perPage, setPerPage] = React.useState(15);
+  const [page, setPage] = useState(1);
+  const [perPage] = useState(20);
 
-  // Fetch audit logs
+  // Fetch Data
   const { data: auditLogs, isLoading } = useQuery({
     queryKey: ['admin/audit-logs', page, search, actionFilter, userFilter, dateFilter],
     queryFn: () => {
       let url = `/api/admin/audit-logs?page=${page}&per_page=${perPage}&search=${search}`;
-      
-      if (actionFilter !== 'all') {
-        url += `&action=${actionFilter}`;
-      }
-      
-      if (userFilter !== 'all') {
-        url += `&user_id=${userFilter}`;
-      }
-      
+      if (actionFilter !== 'all') url += `&action=${actionFilter}`;
+      if (userFilter !== 'all') url += `&user_id=${userFilter}`;
       if (dateFilter !== 'all') {
         const today = new Date();
         let startDate = '';
-        
-        switch (dateFilter) {
-          case 'today':
-            startDate = today.toISOString().split('T')[0];
-            url += `&date=${startDate}`;
-            break;
-          case 'week':
-            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            url += `&start_date=${weekAgo.toISOString().split('T')[0]}&end_date=${today.toISOString().split('T')[0]}`;
-            break;
-          case 'month':
-            const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-            url += `&start_date=${monthAgo.toISOString().split('T')[0]}&end_date=${today.toISOString().split('T')[0]}`;
-            break;
-        }
+        if (dateFilter === 'today') startDate = today.toISOString().split('T')[0];
+        else if (dateFilter === 'week') startDate = new Date(today.getTime() - 7 * 86400000).toISOString().split('T')[0];
+        else if (dateFilter === 'month') startDate = new Date(today.getTime() - 30 * 86400000).toISOString().split('T')[0];
+        url += `&start_date=${startDate}`;
       }
-      
       return apiGet(url);
     }
-  }) as { data: any, isLoading: boolean };
+  });
 
-  // Fetch audit stats
   const { data: auditStats } = useQuery({
     queryKey: ['admin/audit-stats'],
     queryFn: () => apiGet('/api/admin/audit-stats')
-  }) as { data: any };
+  });
+
+  const logList = useMemo(() => auditLogs?.data || [], [auditLogs]);
+
+  const stats = useMemo(() => ({
+    total: auditLogs?.meta?.total || logList.length,
+    today: auditStats?.today_count || 0,
+    activeUsers: auditStats?.unique_users || 0,
+    topAction: auditStats?.top_action || 'N/A'
+  }), [logList, auditLogs, auditStats]);
 
   const handleView = (log: AuditLog) => {
     setSelectedLog(log);
@@ -86,377 +121,145 @@ export default function AuditLogs() {
   };
 
   const getActionColor = (action: string) => {
-    const actionLower = action.toLowerCase();
-    if (actionLower.includes('create')) return 'bg-green-500/20 text-green-400 border-green-500/30';
-    if (actionLower.includes('update') || actionLower.includes('edit')) return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-    if (actionLower.includes('delete')) return 'bg-red-500/20 text-red-400 border-red-500/30';
-    if (actionLower.includes('login') || actionLower.includes('auth')) return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-    if (actionLower.includes('view') || actionLower.includes('read')) return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+    const lower = action.toLowerCase();
+    if (lower.includes('create')) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+    if (lower.includes('update') || lower.includes('edit')) return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    if (lower.includes('delete')) return 'bg-red-500/10 text-red-400 border-red-500/20';
+    if (lower.includes('login')) return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+    return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
   };
 
   const getActionIcon = (action: string) => {
-    const actionLower = action.toLowerCase();
-    if (actionLower.includes('create')) return <Database className="w-4 h-4" />;
-    if (actionLower.includes('update') || actionLower.includes('edit')) return <FileText className="w-4 h-4" />;
-    if (actionLower.includes('delete')) return <Shield className="w-4 h-4" />;
-    if (actionLower.includes('login') || actionLower.includes('auth')) return <User className="w-4 h-4" />;
-    if (actionLower.includes('view') || actionLower.includes('read')) return <Eye className="w-4 h-4" />;
-    return <Activity className="w-4 h-4" />;
+    const lower = action.toLowerCase();
+    if (lower.includes('create')) return <Database size={14} />;
+    if (lower.includes('update') || lower.includes('edit')) return <FileText size={14} />;
+    if (lower.includes('delete')) return <Shield size={14} />;
+    if (lower.includes('login')) return <User size={14} />;
+    return <Activity size={14} />;
   };
 
-  const formatUserAgent = (userAgent: string | null | undefined) => {
-    if (!userAgent) return 'Unknown';
-    
-    // Simple user agent parsing
-    if (userAgent.includes('Chrome')) return 'Chrome';
-    if (userAgent.includes('Firefox')) return 'Firefox';
-    if (userAgent.includes('Safari')) return 'Safari';
-    if (userAgent.includes('Edge')) return 'Edge';
-    if (userAgent.includes('Mobile')) return 'Mobile';
+  const formatUserAgent = (ua: string | null) => {
+    if (!ua) return 'Unknown';
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Safari')) return 'Safari';
+    if (ua.includes('Edge')) return 'Edge';
     return 'Other';
   };
 
-  const totalLogs = auditLogs?.data?.length || 0;
-  const todayLogs = auditStats?.today_count || 0;
-  const uniqueUsers = auditStats?.unique_users || 0;
-  const topAction = auditStats?.top_action || 'N/A';
-
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-          >
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Audit Logs
-              </h1>
-              <p className="text-gray-400 mt-1">System activity tracking and monitoring</p>
-            </div>
-
-            {/* Summary Cards */}
-            <div className="flex gap-4">
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Total Logs</div>
-                <div className="text-xl font-bold text-white">{totalLogs}</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Today</div>
-                <div className="text-xl font-bold text-blue-400">{todayLogs}</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Active Users</div>
-                <div className="text-xl font-bold text-green-400">{uniqueUsers}</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                <div className="text-sm text-gray-400">Top Action</div>
-                <div className="text-xl font-bold text-purple-400">{topAction}</div>
-              </div>
-            </div>
-          </motion.div>
+      <div className="min-h-screen bg-slate-900 p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Audit Logs</h1>
+            <p className="text-slate-400 mt-1">System activity monitoring</p>
+          </div>
         </div>
 
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4"
-        >
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search logs..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-            />
+        <AuditStatsRibbon stats={stats} />
+
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input placeholder="Search logs..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+            </div>
+            <select value={actionFilter} onChange={(e) => setActionFilter(e.target.value)}
+              className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+              <option value="all">All Actions</option>
+              <option value="create">Create</option>
+              <option value="update">Update</option>
+              <option value="delete">Delete</option>
+              <option value="login">Login</option>
+            </select>
+            <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
+              className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
           </div>
+        </div>
 
-          <select
-            value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="all" className='text-black'>All Actions</option>
-            <option value="create" className='text-black'>Create</option>
-            <option value="update" className='text-black'>Update</option>
-            <option value="delete" className='text-black'>Delete</option>
-            <option value="login" className='text-black'>Login</option>
-            <option value="view" className='text-black'>View</option>
-          </select>
-
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="all" className='text-black'>All Time</option>
-            <option value="today" className='text-black'>Today</option>
-            <option value="week" className='text-black'>This Week</option>
-            <option value="month" className='text-black'>This Month</option>
-          </select>
-
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setSearch('');
-              setActionFilter('all');
-              setUserFilter('all');
-              setDateFilter('all');
-            }}
-            className="border-white/20 hover:bg-white/10"
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            Clear
-          </Button>
-        </motion.div>
-
-        {/* Audit Logs Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left p-4 text-gray-300 font-semibold">Timestamp</th>
-                      <th className="text-left p-4 text-gray-300 font-semibold">User</th>
-                      <th className="text-left p-4 text-gray-300 font-semibold">Action</th>
-                      <th className="text-left p-4 text-gray-300 font-semibold">Resource</th>
-                      <th className="text-left p-4 text-gray-300 font-semibold">IP Address</th>
-                      <th className="text-left p-4 text-gray-300 font-semibold">Browser</th>
-                      <th className="text-left p-4 text-gray-300 font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {isLoading ? (
-                      Array.from({ length: 10 }).map((_, i) => (
-                        <tr key={i} className="border-b border-white/5">
-                          <td className="p-4">
-                            <div className="animate-pulse h-4 bg-white/10 rounded w-24"></div>
-                          </td>
-                          <td className="p-4">
-                            <div className="animate-pulse h-4 bg-white/10 rounded w-20"></div>
-                          </td>
-                          <td className="p-4">
-                            <div className="animate-pulse h-6 bg-white/10 rounded w-16"></div>
-                          </td>
-                          <td className="p-4">
-                            <div className="animate-pulse h-4 bg-white/10 rounded w-32"></div>
-                          </td>
-                          <td className="p-4">
-                            <div className="animate-pulse h-4 bg-white/10 rounded w-24"></div>
-                          </td>
-                          <td className="p-4">
-                            <div className="animate-pulse h-4 bg-white/10 rounded w-16"></div>
-                          </td>
-                          <td className="p-4">
-                            <div className="animate-pulse h-8 bg-white/10 rounded w-16"></div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      auditLogs?.data?.map((log: AuditLog) => (
-                        <tr key={log.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                          <td className="p-4">
-                            <div className="text-white text-sm">
-                              {new Date(log.created_at).toLocaleDateString()}
-                            </div>
-                            <div className="text-gray-400 text-xs">
-                              {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-white text-sm">
-                              {log.user?.name || 'System'}
-                            </div>
-                            <div className="text-gray-400 text-xs">
-                              {log.user?.email || 'N/A'}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <Badge className={getActionColor(log.action)}>
-                              <div className="flex items-center gap-1">
-                                {getActionIcon(log.action)}
-                                {log.action}
-                              </div>
-                            </Badge>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-white text-sm">
-                              {log.auditable_type || 'N/A'}
-                            </div>
-                            {log.auditable_id && (
-                              <div className="text-gray-400 text-xs">
-                                ID: {log.auditable_id}
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <div className="text-white text-sm flex items-center gap-1">
-                              <Globe className="w-3 h-3" />
-                              {log.ip_address || 'N/A'}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-white text-sm flex items-center gap-1">
-                              <Monitor className="w-3 h-3" />
-                              {formatUserAgent(log.user_agent)}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => handleView(log)}
-                              className="border-white/20 hover:bg-white/10"
-                            >
-                              <Eye className="w-3 h-3 mr-1" />
-                              View
-                            </Button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Pagination */}
-        {auditLogs?.meta && (
-          <div className="flex justify-center gap-2 mt-8">
-            <Button
-              variant="secondary"
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Previous
-            </Button>
-            <span className="px-4 py-2 text-white">
-              Page {page} of {auditLogs?.meta?.last_page || 1}
-            </span>
-            <Button
-              variant="secondary"
-              disabled={page === auditLogs?.meta?.last_page}
-              onClick={() => setPage(page + 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Next
-            </Button>
+        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
+            <div className="col-span-2">Timestamp</div>
+            <div className="col-span-2">User</div>
+            <div className="col-span-2">Action</div>
+            <div className="col-span-3">Resource</div>
+            <div className="col-span-2">Details</div>
+            <div className="col-span-1 text-right">View</div>
           </div>
-        )}
+          <div className="divide-y divide-white/5">
+            {isLoading ? (
+              <div className="p-8 text-center text-gray-500">Loading...</div>
+            ) : logList.map((log: AuditLog) => (
+              <motion.div key={log.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
+                <div className="col-span-2 text-sm text-gray-300">
+                  <div className="text-white">{new Date(log.created_at).toLocaleDateString()}</div>
+                  <div className="text-xs text-gray-500">{new Date(log.created_at).toLocaleTimeString()}</div>
+                </div>
+                <div className="col-span-2">
+                  <div className="font-medium text-white">{log.user?.name || 'System'}</div>
+                  <div className="text-xs text-gray-500">{log.user?.email || '-'}</div>
+                </div>
+                <div className="col-span-2">
+                  <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getActionColor(log.action))}>
+                    {getActionIcon(log.action)} {log.action}
+                  </span>
+                </div>
+                <div className="col-span-3 text-sm text-gray-300">
+                  <div className="text-white">{log.auditable_type || '-'}</div>
+                  <div className="text-xs text-gray-500">ID: {log.auditable_id || '-'}</div>
+                </div>
+                <div className="col-span-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-2"><Globe size={12} /> {log.ip_address || '-'}</div>
+                  <div className="flex items-center gap-2 mt-1"><Monitor size={12} /> {formatUserAgent(log.user_agent ?? null)}</div>
+                </div>
+                <div className="col-span-1 flex justify-end">
+                  <Button size="sm" variant="secondary" onClick={() => handleView(log)} className="h-8 w-8 p-0 border-white/10"><Eye size={14} /></Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* View Log Modal */}
-      <Modal
-        open={openView}
-        onClose={() => {
-          setOpenView(false);
-          setSelectedLog(null);
-        }}
-        title="Audit Log Details"
-        size="lg"
-      >
+      <Modal open={openView} onClose={() => setOpenView(false)} title="Log Details" size="lg">
         {selectedLog && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Log Information</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-sm font-medium text-gray-400 mb-2">General</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">ID:</span>
-                    <span className="text-white">{selectedLog.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Action:</span>
-                    <Badge className={getActionColor(selectedLog.action)}>
-                      <div className="flex items-center gap-1">
-                        {getActionIcon(selectedLog.action)}
-                        {selectedLog.action}
-                      </div>
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Resource Type:</span>
-                    <span className="text-white">{selectedLog.auditable_type || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Resource ID:</span>
-                    <span className="text-white">{selectedLog.auditable_id || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Timestamp:</span>
-                    <span className="text-white">{new Date(selectedLog.created_at).toLocaleString()}</span>
-                  </div>
+                  <div className="flex justify-between"><span className="text-gray-500">ID:</span> <span className="text-white">{selectedLog.id}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">Action:</span> <span className="text-white">{selectedLog.action}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">Date:</span> <span className="text-white">{new Date(selectedLog.created_at).toLocaleString()}</span></div>
                 </div>
               </div>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">User & Session</h3>
+              <div>
+                <h3 className="text-sm font-medium text-gray-400 mb-2">User</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">User:</span>
-                    <span className="text-white">{selectedLog.user?.name || 'System'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Email:</span>
-                    <span className="text-white">{selectedLog.user?.email || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">IP Address:</span>
-                    <span className="text-white">{selectedLog.ip_address || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Browser:</span>
-                    <span className="text-white">{formatUserAgent(selectedLog.user_agent)}</span>
-                  </div>
+                  <div className="flex justify-between"><span className="text-gray-500">Name:</span> <span className="text-white">{selectedLog.user?.name || 'System'}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">IP:</span> <span className="text-white">{selectedLog.ip_address}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">Browser:</span> <span className="text-white">{formatUserAgent(selectedLog.user_agent ?? null)}</span></div>
                 </div>
               </div>
             </div>
-
-            {selectedLog.user_agent && (
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">User Agent</h3>
-                <p className="text-gray-300 bg-white/5 p-3 rounded-lg text-sm break-all">
-                  {selectedLog.user_agent}
-                </p>
-              </div>
-            )}
-
             {selectedLog.metadata && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Metadata</h3>
-                <pre className="text-gray-300 bg-white/5 p-3 rounded-lg text-sm overflow-auto max-h-40">
+                <h3 className="text-sm font-medium text-gray-400 mb-2">Metadata</h3>
+                <pre className="bg-slate-950 border border-white/10 rounded-lg p-4 text-xs text-gray-300 overflow-auto max-h-60">
                   {JSON.stringify(selectedLog.metadata, null, 2)}
                 </pre>
               </div>
             )}
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setOpenView(false);
-                  setSelectedLog(null);
-                }}
-                className="flex-1 border-white/20 hover:bg-white/10"
-              >
-                Close
-              </Button>
+            <div className="flex justify-end">
+              <Button variant="secondary" onClick={() => setOpenView(false)}>Close</Button>
             </div>
           </div>
         )}

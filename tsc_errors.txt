@@ -1,0 +1,28 @@
+resources/js/Pages/admin/AuditLogs.tsx(206,104): error TS2345: Argument of type 'string | null | undefined' is not assignable to parameter of type 'string | null'.
+  Type 'undefined' is not assignable to type 'string | null'.
+resources/js/Pages/admin/AuditLogs.tsx(234,151): error TS2345: Argument of type 'string | null | undefined' is not assignable to parameter of type 'string | null'.
+  Type 'undefined' is not assignable to type 'string | null'.
+resources/js/Pages/admin/Customers.tsx(322,29): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(89,19): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(89,51): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(89,75): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(94,23): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(249,23): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(252,93): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(252,120): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(257,84): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(321,29): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/Employees.tsx(331,29): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(92,19): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(92,51): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(92,75): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(97,23): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(225,28): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(317,23): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(320,93): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(320,120): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(325,84): error TS2339: Property 'meta' does not exist on type '{}'.
+resources/js/Pages/admin/MenuItems.tsx(352,30): error TS2339: Property 'data' does not exist on type '{}'.
+resources/js/Pages/admin/Promotions.tsx(260,9): error TS2322: Type '{ name: string; description: string; code: string; type: string; discount_value: string; min_order_amount: string; max_discount_amount: string; usage_limit: string; start_date: string; end_date: string; is_active: boolean; applicable_to: string; terms_conditions: string; }' is not assignable to type '{ name: string; description: string; code: string; type: "percentage" | "fixed_amount" | "buy_x_get_y" | "free_item"; discount_value: string; min_order_amount: string; max_discount_amount: string; ... 5 more ...; terms_conditions: string; }'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"percentage" | "fixed_amount" | "buy_x_get_y" | "free_item"'.

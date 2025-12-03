@@ -1,281 +1,294 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Bell, 
-  MessageSquare, 
-  AlertTriangle, 
-  Info, 
-  CheckCircle, 
-  XCircle,
-  Clock,
-  Users,
-  Settings,
-  Zap
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Search, Bell, MessageSquare, AlertTriangle, Info, CheckCircle,
+  XCircle, Clock, Users, Settings, Zap, Trash2, Eye, Check
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
+import { Input } from '@/app/components/ui/Input';
+import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
+import { toastSuccess, toastError } from '@/app/utils/toast';
+import { cn } from '@/app/utils/cn';
+
+// Stats Ribbon
+const NotificationStatsRibbon = ({ stats }: { stats: any }) => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Notifications</p>
+          <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+        </div>
+        <Bell className="w-8 h-8 text-purple-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Unread</p>
+          <p className="text-2xl font-bold text-amber-400 mt-1">{stats.unread}</p>
+        </div>
+        <MessageSquare className="w-8 h-8 text-amber-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">System Alerts</p>
+          <p className="text-2xl font-bold text-red-400 mt-1">{stats.systemAlerts}</p>
+        </div>
+        <AlertTriangle className="w-8 h-8 text-red-400" />
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">User Messages</p>
+          <p className="text-2xl font-bold text-blue-400 mt-1">{stats.userMessages}</p>
+        </div>
+        <Users className="w-8 h-8 text-blue-400" />
+      </div>
+    </div>
+  </div>
+);
+
+interface Notification {
+  id: string; title: string; message: string; type: 'info' | 'success' | 'warning' | 'error' | 'system';
+  user_id?: number; user?: { name: string }; read_at?: string; created_at: string;
+}
 
 export default function Notifications() {
-  const upcomingFeatures = [
-    {
-      icon: <Bell className="w-6 h-6" />,
-      title: 'Real-time Notifications',
-      description: 'Instant alerts for orders, reservations, and system events',
-      status: 'planned'
-    },
-    {
-      icon: <MessageSquare className="w-6 h-6" />,
-      title: 'Broadcast Messages',
-      description: 'Send announcements to all staff or specific roles',
-      status: 'planned'
-    },
-    {
-      icon: <Clock className="w-6 h-6" />,
-      title: 'Scheduled Notifications',
-      description: 'Schedule notifications for future delivery',
-      status: 'planned'
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      title: 'Targeted Messaging',
-      description: 'Send notifications to specific users or locations',
-      status: 'planned'
-    },
-    {
-      icon: <AlertTriangle className="w-6 h-6" />,
-      title: 'Priority Alerts',
-      description: 'Urgent notifications with different priority levels',
-      status: 'planned'
-    },
-    {
-      icon: <Settings className="w-6 h-6" />,
-      title: 'Notification Preferences',
-      description: 'Customize notification settings per user',
-      status: 'planned'
-    }
-  ];
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openView, setOpenView] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
-  const notificationTypes = [
-    {
-      icon: <Info className="w-5 h-5" />,
-      type: 'Info',
-      color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      description: 'General information and updates'
-    },
-    {
-      icon: <CheckCircle className="w-5 h-5" />,
-      type: 'Success',
-      color: 'bg-green-500/20 text-green-400 border-green-500/30',
-      description: 'Successful operations and confirmations'
-    },
-    {
-      icon: <AlertTriangle className="w-5 h-5" />,
-      type: 'Warning',
-      color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      description: 'Important warnings and alerts'
-    },
-    {
-      icon: <XCircle className="w-5 h-5" />,
-      type: 'Error',
-      color: 'bg-red-500/20 text-red-400 border-red-500/30',
-      description: 'System errors and critical issues'
-    },
-    {
-      icon: <Bell className="w-5 h-5" />,
-      type: 'Order',
-      color: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      description: 'Order-related notifications'
-    },
-    {
-      icon: <Zap className="w-5 h-5" />,
-      type: 'System',
-      color: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-      description: 'System maintenance and updates'
+  const qc = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [perPage] = useState(20);
+
+  const [formData, setFormData] = useState({
+    title: '', message: '', type: 'info', user_id: '', send_to_all: false
+  });
+
+  // Fetch Data
+  const { data: notifications, isLoading } = useQuery({
+    queryKey: ['notifications', page, search, typeFilter, statusFilter],
+    queryFn: () => {
+      let url = `/api/admin/notifications?page=${page}&per_page=${perPage}&search=${search}`;
+      if (typeFilter !== 'all') url += `&type=${typeFilter}`;
+      if (statusFilter !== 'all') url += `&status=${statusFilter}`;
+      return apiGet(url);
     }
-  ];
+  });
+
+  const { data: users } = useQuery({ queryKey: ['users'], queryFn: () => apiGet('/api/admin/users') });
+  const { data: statsData } = useQuery({ queryKey: ['notification-stats'], queryFn: () => apiGet('/api/admin/notifications/stats') });
+
+  const notificationList = useMemo(() => notifications?.data || [], [notifications]);
+
+  const stats = useMemo(() => ({
+    total: statsData?.total || 0,
+    unread: statsData?.unread || 0,
+    systemAlerts: statsData?.system_alerts || 0,
+    userMessages: statsData?.user_messages || 0
+  }), [statsData]);
+
+  // Mutations
+  const createMutation = useMutation({
+    mutationFn: (data: any) => apiPost('/api/admin/notifications', data),
+    onSuccess: () => { toastSuccess('Notification sent'); closeModal(); qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['notification-stats'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+  });
+
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: string) => apiPut(`/api/admin/notifications/${id}/read`, {}),
+    onSuccess: () => { toastSuccess('Marked as read'); qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['notification-stats'] }); }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiDelete(`/api/admin/notifications/${id}`),
+    onSuccess: () => { toastSuccess('Notification deleted'); qc.invalidateQueries({ queryKey: ['notifications'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+  });
+
+  const closeModal = () => {
+    setOpenCreate(false);
+    setFormData({ title: '', message: '', type: 'info', user_id: '', send_to_all: false });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = {
+      ...formData,
+      user_id: formData.send_to_all ? null : parseInt(formData.user_id)
+    };
+    createMutation.mutate(data);
+  };
+
+  const getTypeIcon = (type: string) => {
+    if (type === 'success') return <CheckCircle size={14} />;
+    if (type === 'warning') return <AlertTriangle size={14} />;
+    if (type === 'error') return <XCircle size={14} />;
+    if (type === 'system') return <Zap size={14} />;
+    return <Info size={14} />;
+  };
+
+  const getTypeColor = (type: string) => {
+    if (type === 'success') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+    if (type === 'warning') return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+    if (type === 'error') return 'text-red-400 bg-red-500/10 border-red-500/20';
+    if (type === 'system') return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+    return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+  };
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-r from-fuchsia-500 to-pink-500 p-4 rounded-full">
-                <Bell className="w-12 h-12 text-white" />
-              </div>
-            </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-2">
-              Notifications Management
-            </h1>
-            <p className="text-gray-400 text-lg">Real-time alerts and messaging system</p>
-            
-            <div className="mt-6">
-              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 px-4 py-2 text-lg">
-                <Clock className="w-5 h-5 mr-2" />
-                Coming Soon
-              </Badge>
-            </div>
-          </motion.div>
+      <div className="min-h-screen bg-slate-900 p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Notifications</h1>
+            <p className="text-slate-400 mt-1">System alerts and user messaging</p>
+          </div>
+          <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
+            <Bell className="w-4 h-4 mr-2" /> Send Notification
+          </Button>
         </div>
 
-        {/* Coming Soon Message */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-12"
-        >
-          <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/20 backdrop-blur-md">
-            <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">
-                Advanced Notification System in Development
-              </h2>
-              <p className="text-gray-300 text-lg mb-6 max-w-3xl mx-auto">
-                We're building a comprehensive notification management system that will enable real-time alerts, 
-                broadcast messaging, scheduled notifications, and targeted communication across your restaurant operations.
-              </p>
-              <div className="flex justify-center gap-4">
-                <Button
-                  variant="secondary"
-                  className="border-white/20 hover:bg-white/10"
-                  disabled
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Configure Settings
-                </Button>
-                <Button
-                  variant="secondary"
-                  className="border-white/20 hover:bg-white/10"
-                  disabled
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Send Notification
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <NotificationStatsRibbon stats={stats} />
 
-        {/* Planned Features */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-12"
-        >
-          <h3 className="text-2xl font-bold text-white mb-6 text-center">Planned Features</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {upcomingFeatures.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-gradient-to-r from-fuchsia-500 to-pink-500 p-3 rounded-lg">
-                        {feature.icon}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-white text-lg mb-2">
-                          {feature.title}
-                        </h4>
-                        <p className="text-gray-400 text-sm mb-3">
-                          {feature.description}
-                        </p>
-                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                          {feature.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input placeholder="Search notifications..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+            </div>
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
+              className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+              <option value="all">All Types</option>
+              <option value="info">Info</option>
+              <option value="success">Success</option>
+              <option value="warning">Warning</option>
+              <option value="error">Error</option>
+              <option value="system">System</option>
+            </select>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+              <option value="all">All Status</option>
+              <option value="read">Read</option>
+              <option value="unread">Unread</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
+            <div className="col-span-4">Title / Message</div>
+            <div className="col-span-2">Type</div>
+            <div className="col-span-2">User</div>
+            <div className="col-span-2">Date</div>
+            <div className="col-span-1">Status</div>
+            <div className="col-span-1 text-right">Actions</div>
+          </div>
+          <div className="divide-y divide-white/5">
+            {isLoading ? (
+              <div className="p-8 text-center text-gray-500">Loading...</div>
+            ) : notificationList.map((notification: Notification) => (
+              <motion.div key={notification.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className={cn("grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group", !notification.read_at && "bg-white/5")}>
+                <div className="col-span-4">
+                  <div className={cn("font-medium text-white", !notification.read_at && "font-bold")}>{notification.title}</div>
+                  <div className="text-xs text-gray-500 truncate">{notification.message}</div>
+                </div>
+                <div className="col-span-2">
+                  <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getTypeColor(notification.type))}>
+                    {getTypeIcon(notification.type)} {notification.type.toUpperCase()}
+                  </span>
+                </div>
+                <div className="col-span-2 text-sm text-gray-300">
+                  {notification.user ? notification.user.name : <span className="text-purple-400 italic">All Users</span>}
+                </div>
+                <div className="col-span-2 text-sm text-gray-400">
+                  {new Date(notification.created_at).toLocaleString()}
+                </div>
+                <div className="col-span-1">
+                  {notification.read_at ? <span className="text-gray-500 text-xs flex items-center gap-1"><Check size={12} /> Read</span> : <span className="text-emerald-400 text-xs font-bold">New</span>}
+                </div>
+                <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!notification.read_at && <Button size="sm" variant="secondary" onClick={() => markAsReadMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-white/10" title="Mark as Read"><Check size={14} /></Button>}
+                  <Button size="sm" variant="secondary" onClick={() => { setSelectedNotification(notification); setOpenView(true); }} className="h-8 w-8 p-0 border-white/10"><Eye size={14} /></Button>
+                  <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
+                </div>
               </motion.div>
             ))}
           </div>
-        </motion.div>
-
-        {/* Notification Types Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h3 className="text-2xl font-bold text-white mb-6 text-center">Notification Types</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {notificationTypes.map((type, index) => (
-              <motion.div
-                key={type.type}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Badge className={type.color}>
-                        <div className="flex items-center gap-1">
-                          {type.icon}
-                          {type.type}
-                        </div>
-                      </Badge>
-                    </div>
-                    <p className="text-gray-400 text-sm">
-                      {type.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Development Status */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="mt-12 text-center"
-        >
-          <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-            <CardContent className="p-6">
-              <h4 className="text-lg font-semibold text-white mb-3">Development Timeline</h4>
-              <p className="text-gray-400 mb-4">
-                The notification system is currently in the planning phase. Implementation will include:
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
-                <div className="text-left">
-                  <h5 className="font-semibold text-white mb-2">Backend Features:</h5>
-                  <ul className="space-y-1">
-                    <li>• Database schema for notifications</li>
-                    <li>• API endpoints for CRUD operations</li>
-                    <li>• Real-time WebSocket integration</li>
-                    <li>• Notification scheduling system</li>
-                  </ul>
-                </div>
-                <div className="text-left">
-                  <h5 className="font-semibold text-white mb-2">Frontend Features:</h5>
-                  <ul className="space-y-1">
-                    <li>• Notification management interface</li>
-                    <li>• Real-time notification center</li>
-                    <li>• User preference settings</li>
-                    <li>• Mobile push notifications</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        </div>
       </div>
+
+      <Modal open={openCreate} onClose={closeModal} title="Send Notification" size="lg">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="bg-slate-950 border-white/10" />
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Message</label>
+            <textarea value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required rows={4}
+              className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Type</label>
+              <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                <option value="info">Info</option>
+                <option value="success">Success</option>
+                <option value="warning">Warning</option>
+                <option value="error">Error</option>
+                <option value="system">System</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Recipient</label>
+              <select value={formData.send_to_all ? 'all' : formData.user_id} onChange={(e) => {
+                if (e.target.value === 'all') setFormData({ ...formData, send_to_all: true, user_id: '' });
+                else setFormData({ ...formData, send_to_all: false, user_id: e.target.value });
+              }}
+                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                <option value="all">All Users</option>
+                {users?.data?.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
+            <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">Send</Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal open={openView} onClose={() => setOpenView(false)} title="Notification Details">
+        {selectedNotification && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">{selectedNotification.title}</h3>
+              <Badge className={getTypeColor(selectedNotification.type)}>{selectedNotification.type.toUpperCase()}</Badge>
+            </div>
+            <div className="bg-white/5 p-4 rounded-lg border border-white/10 text-gray-300 text-sm whitespace-pre-wrap">
+              {selectedNotification.message}
+            </div>
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>To: {selectedNotification.user ? selectedNotification.user.name : 'All Users'}</span>
+              <span>{new Date(selectedNotification.created_at).toLocaleString()}</span>
+            </div>
+            <Button onClick={() => setOpenView(false)} className="w-full mt-4">Close</Button>
+          </div>
+        )}
+      </Modal>
     </AdminLayout>
   );
 }

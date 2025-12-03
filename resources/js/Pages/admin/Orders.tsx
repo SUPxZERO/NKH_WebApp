@@ -1,61 +1,123 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Search,
-  Filter,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Clock,
-  CheckCircle,
-  XCircle,
-  DollarSign,
-  MapPin,
-  User,
-  Calendar,
-  Package,
-  ThumbsUp,
-  ThumbsDown,
-  AlertCircle
+  Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2, Clock,
+  CheckCircle, XCircle, DollarSign, MapPin, User, Calendar, Package,
+  ThumbsUp, ThumbsDown, AlertCircle, Utensils, AlertTriangle,
+  ShoppingBag, Truck, Coffee, ChefHat
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Order, Customer, Employee, Location, DiningTable } from '@/app/types/domain';
+import { Order } from '@/app/types/domain';
+import { cn } from '@/app/utils/cn';
+
+// --- Stats Ribbon Component ---
+const OrderStatsRibbon = ({ stats }: { stats: any }) => (
+  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Orders</p>
+          <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+          <Package className="w-5 h-5 text-purple-400" />
+        </div>
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Pending</p>
+          <p className="text-2xl font-bold text-yellow-400 mt-1">{stats.pending}</p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-yellow-500/20 flex items-center justify-center border border-yellow-500/30">
+          <Clock className="w-5 h-5 text-yellow-400" />
+        </div>
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Preparing</p>
+          <p className="text-2xl font-bold text-orange-400 mt-1">{stats.preparing}</p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+          <ChefHat className="w-5 h-5 text-orange-400" />
+        </div>
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Ready</p>
+          <p className="text-2xl font-bold text-green-400 mt-1">{stats.ready}</p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30">
+          <CheckCircle className="w-5 h-5 text-green-400" />
+        </div>
+      </div>
+    </div>
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Need Approval</p>
+          <p className="text-2xl font-bold text-amber-400 mt-1">{stats.needsApproval}</p>
+        </div>
+        <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+          <AlertTriangle className="w-5 h-5 text-amber-400" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// --- Status Pill Component ---
+const StatusPill = ({ status }: { status: string }) => {
+  const styles = {
+    pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    received: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    preparing: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    ready: 'bg-green-500/10 text-green-400 border-green-500/20',
+    completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
+  }[status] || 'bg-gray-500/10 text-gray-400';
+
+  return (
+    <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium w-fit", styles)}>
+      <span className="capitalize">{status}</span>
+    </div>
+  );
+};
 
 export default function Orders() {
-  const [search, setSearch] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('all');
-  const [typeFilter, setTypeFilter] = React.useState('all');
-  const [approvalFilter, setApprovalFilter] = React.useState<'all' | 'pending'>('all');
-  const [openView, setOpenView] = React.useState(false);
-  const [openEdit, setOpenEdit] = React.useState(false);
-  const [openReject, setOpenReject] = React.useState(false);
-  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
-  const [rejectionReason, setRejectionReason] = React.useState('');
-  const [error, setError] = React.useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [approvalFilter, setApprovalFilter] = useState<'all' | 'pending'>('all');
+  const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
+  const [openView, setOpenView] = useState(false);
+  const [openReject, setOpenReject] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const qc = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [perPage] = useState(20); // Increased from 15
 
-  // Pagination state
-  const [page, setPage] = React.useState(1);
-  const [perPage, setPerPage] = React.useState(15);
-
-  // --- HELPER: Safe Number Parsing ---
   const getAmount = (value: any): number => {
     if (value === null || value === undefined || value === '') return 0;
     const num = parseFloat(String(value));
     return isNaN(num) ? 0 : num;
   };
 
-  // Fetch orders - use different endpoint for pending approval
+  // Fetch orders
   const { data: orders, isLoading } = useQuery({
     queryKey: ['admin/orders', page, search, statusFilter, typeFilter, approvalFilter],
     queryFn: () => {
@@ -66,82 +128,71 @@ export default function Orders() {
     }
   }) as { data: any, isLoading: boolean };
 
-  // --- SAFE DATA EXTRACTION ---
-  const orderList: Order[] = React.useMemo(() => {
+  const orderList: Order[] = useMemo(() => {
     if (!orders) return [];
     if (Array.isArray(orders)) return orders;
     if (orders.data && Array.isArray(orders.data)) return orders.data;
     return [];
   }, [orders]);
 
-  // Update order status mutation
+  // Calculate stats
+  const stats = useMemo(() => {
+    const list = orderList;
+    return {
+      total: orders?.meta?.total || list.length,
+      pending: list.filter(o => o.status === 'pending').length,
+      preparing: list.filter(o => o.status === 'preparing').length,
+      ready: list.filter(o => o.status === 'ready').length,
+      needsApproval: list.filter(o => (o as any).approval_status === 'pending').length
+    };
+  }, [orderList, orders]);
+
+  // Mutations
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number, status: string }) =>
       apiPut(`/api/admin/orders/${id}/status`, { status }),
     onSuccess: () => {
-      toastSuccess('Order status updated successfully!');
+      toastSuccess('Status updated');
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
     },
-    onError: (error: any) => {
-      toastError(error.response?.data?.message || 'Failed to update order status');
-    }
+    onError: (error: any) => toastError(error.response?.data?.message || 'Failed to update')
   });
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiDelete(`/api/admin/orders/${id}`),
-    onSuccess: () => {
-      toastSuccess('Order deleted successfully!');
-      qc.invalidateQueries({ queryKey: ['admin/orders'] });
-    },
-    onError: (error: any) => {
-      toastError(error.response?.data?.message || 'Failed to delete order');
-    }
-  });
-
-  const handleView = (order: Order) => {
-    setSelectedOrder(order);
-    setOpenView(true);
-  };
-
-  const handleEdit = (order: Order) => {
-    setSelectedOrder(order);
-    setOpenEdit(true);
-  };
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this order?')) {
-      deleteMutation.mutate(id);
-    }
-  };
-
-  const handleStatusUpdate = (id: number, status: string) => {
-    updateStatusMutation.mutate({ id, status });
-  };
-
-  // Approve order handler - FIXED to use apiPatch
   const handleApprove = async (order: Order) => {
-    if (!window.confirm(`Approve order #${order.order_number}?`)) return;
-
     try {
       await apiPatch(`/api/admin/orders/${order.id}/approve`, {});
-      toastSuccess('Order approved successfully!');
+      toastSuccess('Order approved');
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
     } catch (error: any) {
-      toastError(error.response?.data?.message || 'Failed to approve order');
+      toastError(error.response?.data?.message || 'Failed to approve');
     }
   };
 
-  // Reject order handler
+  const handleBulkApprove = async () => {
+    if (selectedOrders.size === 0) return;
+    if (!confirm(`Approve ${selectedOrders.size} orders?`)) return;
+
+    try {
+      await Promise.all(
+        Array.from(selectedOrders).map(id =>
+          apiPatch(`/api/admin/orders/${id}/approve`, {})
+        )
+      );
+      toastSuccess(`${selectedOrders.size} orders approved`);
+      setSelectedOrders(new Set());
+      qc.invalidateQueries({ queryKey: ['admin/orders'] });
+    } catch (error: any) {
+      toastError('Failed to approve some orders');
+    }
+  };
+
   const handleReject = (order: Order) => {
     setSelectedOrder(order);
     setOpenReject(true);
   };
 
   const confirmReject = async () => {
-    if (!selectedOrder) return;
-
-    if (rejectionReason.length < 10) {
+    if (!selectedOrder || rejectionReason.length < 10) {
       toastError('Rejection reason must be at least 10 characters');
       return;
     }
@@ -150,478 +201,409 @@ export default function Orders() {
       await apiPatch(`/api/admin/orders/${selectedOrder.id}/reject`, {
         rejection_reason: rejectionReason
       });
-      toastSuccess('Order rejected successfully!');
+      toastSuccess('Order rejected');
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
       setOpenReject(false);
       setSelectedOrder(null);
       setRejectionReason('');
     } catch (error: any) {
-      toastError(error.response?.data?.message || 'Failed to reject order');
+      toastError(error.response?.data?.message || 'Failed to reject');
     }
   };
 
-  const getApprovalStatusColor = (status: string | undefined) => {
-    if (!status) return '';
-    switch (status) {
-      case 'pending': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-      case 'approved': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-      case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
+  const handleQuickStatus = (id: number, status: string) => {
+    updateStatusMutation.mutate({ id, status });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'received': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'preparing': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      case 'ready': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'completed': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-      case 'cancelled': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
+  const toggleSelectOrder = (id: number) => {
+    const newSelected = new Set(selectedOrders);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedOrders(newSelected);
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'dine-in': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-      case 'pickup': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'delivery': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+  const toggleSelectAll = () => {
+    if (selectedOrders.size === orderList.length) {
+      setSelectedOrders(new Set());
+    } else {
+      setSelectedOrders(new Set(orderList.map(o => o.id)));
     }
   };
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      <div className="min-h-screen bg-slate-900 p-6">
         {/* Header */}
-        <div className="mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-          >
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Orders Management
-              </h1>
-              <p className="text-gray-400 mt-1">Manage restaurant orders and track status</p>
-            </div>
-          </motion.div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Orders</h1>
+            <p className="text-slate-400 mt-1">Manage and track all orders</p>
+          </div>
         </div>
 
+        {/* Stats */}
+        <OrderStatsRibbon stats={stats} />
+
         {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4"
-        >
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search orders..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-            />
-          </div>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="all" className='text-black'>All Status</option>
-            <option value="pending" className='text-black'>Pending</option>
-            <option value="received" className='text-black'>Received</option>
-            <option value="preparing" className='text-black'>Preparing</option>
-            <option value="ready" className='text-black'>Ready</option>
-            <option value="completed" className='text-black'>Completed</option>
-            <option value="cancelled" className='text-black'>Cancelled</option>
-          </select>
-
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="all" className='text-black'>All Types</option>
-            <option value="dine-in" className='text-black'>Dine In</option>
-            <option value="pickup" className='text-black'>Pickup</option>
-            <option value="delivery" className='text-black'>Delivery</option>
-          </select>
-
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSearch('');
-                setStatusFilter('all');
-                setTypeFilter('all');
-              }}
-              className="flex-1 border-white/20 hover:bg-white/10"
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              Clear
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* Approval Status Filter - Beautiful Gradient Buttons */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-6 flex gap-3"
-        >
-          <button
-            onClick={() => setApprovalFilter('pending')}
-            className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${approvalFilter === 'pending'
-              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-500/50 scale-105'
-              : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:border-white/20'
-              }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-                pproval
-              {approvalFilter === 'pending' && orderList.length > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
-                  {orderList.length}
-                </span>
-              )}
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search by order number, customer..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500"
+              />
             </div>
-          </button>
-          <button
-            onClick={() => setApprovalFilter('all')}
-            className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${approvalFilter === 'all'
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105'
-              : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:border-white/20'
-              }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Package className="w-4 h-4" />
-              Orders Track
-            </div>
-          </button>
-        </motion.div>
 
-        {/* Orders Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
+            <div className="flex flex-wrap gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm min-w-[140px]"
               >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                  <CardContent className="p-6">
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-4 bg-white/10 rounded w-3/4"></div>
-                      <div className="h-3 bg-white/10 rounded w-1/2"></div>
-                      <div className="h-8 bg-white/10 rounded"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))
-          ) : orderList.length === 0 ? (
-            <div className="col-span-full text-center py-12 bg-white/5 rounded-xl border border-white/10 border-dashed">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Package className="w-8 h-8 text-gray-400" />
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="received">Received</option>
+                <option value="preparing">Preparing</option>
+                <option value="ready">Ready</option>
+                <option value="completed">Completed</option>
+              </select>
+
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm min-w-[140px]"
+              >
+                <option value="all">All Types</option>
+                <option value="dine-in">Dine-In</option>
+                <option value="pickup">Pickup</option>
+                <option value="delivery">Delivery</option>
+              </select>
+
+              <button
+                onClick={() => setApprovalFilter(approvalFilter === 'all' ? 'pending' : 'all')}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  approvalFilter === 'pending'
+                    ? "bg-amber-600 text-white"
+                    : "bg-slate-800 text-gray-400 hover:bg-slate-700"
+                )}
+              >
+                {approvalFilter === 'pending' ? `Needs Approval (${stats.needsApproval})` : 'Show All'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bulk Actions Bar */}
+        {selectedOrders.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-purple-600 border border-purple-500 rounded-xl p-4 mb-6 flex items-center justify-between"
+          >
+            <span className="text-white font-medium">
+              {selectedOrders.size} order{selectedOrders.size === 1 ? '' : 's'} selected
+            </span>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleBulkApprove}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                <ThumbsUp className="w-4 h-4 mr-2" />
+                Bulk Approve
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setSelectedOrders(new Set())}
+                className="border-white/20 hover:bg-white/10"
+              >
+                Clear Selection
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Orders Table */}
+        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="col-span-1 flex items-center">
+              <input
+                type="checkbox"
+                checked={selectedOrders.size === orderList.length && orderList.length > 0}
+                onChange={toggleSelectAll}
+                className="w-4 h-4 rounded border-white/20 bg-slate-900 text-purple-600"
+              />
+            </div>
+            <div className="col-span-2">Order</div>
+            <div className="col-span-2">Customer</div>
+            <div className="col-span-2">Type</div>
+            <div className="col-span-2">Status</div>
+            <div className="col-span-1">Total</div>
+            <div className="col-span-2 text-right">Actions</div>
+          </div>
+
+          {/* Table Body */}
+          <div className="divide-y divide-white/5">
+            {isLoading ? (
+              <div className="p-12 text-center text-gray-400">Loading orders...</div>
+            ) : orderList.length === 0 ? (
+              <div className="p-12 text-center">
+                <Package className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <h3 className="text-white font-medium">No orders found</h3>
+                <p className="text-gray-400 text-sm mt-1">Try adjusting your filters</p>
               </div>
-              <h3 className="text-xl font-semibold text-white">No Orders Found</h3>
-              <p className="text-gray-400 mt-2">Waiting for new orders to arrive...</p>
-            </div>
-          ) : (
-            orderList.map((order: Order, index: number) => (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                    {/* Order Header */}
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-semibold text-white text-lg">#{order.order_number}</h3>
-                        <p className="text-sm text-gray-400">
-                          {new Date(order.created_at).toLocaleDateString()} at{' '}
-                          {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <Badge className={getStatusColor(order.status)}>
-                          {order.status}
-                        </Badge>
-                        <Badge className={getTypeColor(order.order_type)}>
-                          {order.order_type}
-                        </Badge>
-                      </div>
+            ) : (
+              orderList.map((order) => (
+                <motion.div
+                  key={order.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group"
+                >
+                  {/* Checkbox */}
+                  <div className="col-span-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedOrders.has(order.id)}
+                      onChange={() => toggleSelectOrder(order.id)}
+                      className="w-4 h-4 rounded border-white/20 bg-slate-900 text-purple-600"
+                    />
+                  </div>
+
+                  {/* Order Number & Time */}
+                  <div className="col-span-2">
+                    <div className="font-bold text-white">#{order.order_number}</div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
+                  </div>
 
-                    {/* Order Details */}
-                    <div className="space-y-3 mb-4">
-                      {order.customer && (
-                        <div className="flex items-center text-sm text-gray-300">
-                          <User className="w-4 h-4 mr-2 text-gray-400" />
-                          {order.customer.user?.name || 'Guest Customer'}
-                        </div>
-                      )}
+                  {/* Customer */}
+                  <div className="col-span-2">
+                    <div className="text-white truncate">{order.customer?.user?.name || 'Guest'}</div>
+                    {order.table && (
+                      <div className="text-xs text-gray-500">Table {order.table.number}</div>
+                    )}
+                  </div>
 
-                      <div className="flex items-center text-sm text-gray-300">
-                        <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                        <span className="text-white font-medium">Total: ${getAmount(order.total).toFixed(2)}</span>
-                      </div>
-
-                      {order.table && (
-                        <div className="flex items-center text-sm text-gray-300">
-                          <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                          Table {order.table.number}
-                        </div>
-                      )}
-
-                      {(order as any).time_slot && (
-                        <div className="flex items-center text-sm text-gray-300">
-                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                          {(order as any).time_slot.label || `${(order as any).time_slot.date} at ${(order as any).time_slot.time}`}
-                        </div>
-                      )}
+                  {/* Type */}
+                  <div className="col-span-2">
+                    <div className="flex items-center gap-2 text-gray-300">
+                      {order.order_type === 'dine-in' && <Coffee className="w-4 h-4" />}
+                      {order.order_type === 'pickup' && <ShoppingBag className="w-4 h-4" />}
+                      {order.order_type === 'delivery' && <Truck className="w-4 h-4" />}
+                      <span className="capitalize text-sm">{order.order_type}</span>
                     </div>
+                  </div>
 
-                    {/* Approval Status & Actions */}
-                    {(approvalFilter === 'pending' || (order as any).approval_status) && (
-                      <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-gray-400 uppercase tracking-wide">Approval Status</span>
-                          <Badge className={getApprovalStatusColor((order as any).approval_status || 'pending')}>
-                            {(order as any).approval_status || 'pending'}
-                          </Badge>
-                        </div>
-
-                        {/* Approve/Reject Buttons - GREEN for approve, RED for reject */}
-                        {((order as any).approval_status === 'pending' || approvalFilter === 'pending') &&
-                          (order.order_type === 'delivery' || order.order_type === 'pickup') && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="flex gap-2 mt-3"
-                            >
-                              <Button
-                                size="sm"
-                                onClick={() => handleApprove(order)}
-                                className="flex-1 bg-green-600 hover:from-green-700 hover:to-emerald-700 text-white transition-all duration-300 hover:scale-105"
-                              >
-                                <ThumbsUp className="w-3 h-3 mr-1.5" />
-                                Approve Order
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => handleReject(order)}
-                                className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-105"
-                              >
-                                <ThumbsDown className="w-3 h-3 mr-1.5" />
-                                Reject Order
-                              </Button>
-                            </motion.div>
-                          )}
-
-                        {/* Rejection Reason Display */}
-                        {(order as any).approval_status === 'rejected' && (order as any).rejection_reason && (
-                          <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-300">
-                            <span className="font-medium">Reason:</span> {(order as any).rejection_reason}
-                          </div>
-                        )}
-
-                        {/* Approved By Display */}
-                        {(order as any).approval_status === 'approved' && (order as any).approved_at && (
-                          <div className="mt-2 text-xs text-emerald-300">
-                            ✓ Approved on {new Date((order as any).approved_at).toLocaleDateString()}
-                          </div>
-                        )}
+                  {/* Status */}
+                  <div className="col-span-2">
+                    <StatusPill status={order.status} />
+                    {(order as any).approval_status === 'pending' && (
+                      <div className="text-xs text-amber-500 mt-1 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> Needs Approval
                       </div>
                     )}
+                  </div>
 
-                    {/* Quick Status Actions - Only in Orders Track */}
-                    {approvalFilter === 'all' && (
-                      <div className="flex gap-2 mb-4">
+                  {/* Total */}
+                  <div className="col-span-1 font-semibold text-white">
+                    ${getAmount(order.total).toFixed(2)}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {(order as any).approval_status === 'pending' ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleApprove(order)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white h-8"
+                        >
+                          <ThumbsUp className="w-3 h-3 mr-1" /> Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleReject(order)}
+                          className="bg-red-600 hover:bg-red-700 text-white h-8"
+                        >
+                          <ThumbsDown className="w-3 h-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
                         {order.status === 'pending' && (
                           <Button
                             size="sm"
-                            variant="primary"
-                            onClick={() => handleStatusUpdate(order.id, 'received')}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700"
+                            onClick={() => handleQuickStatus(order.id, 'received')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs"
                           >
-                            <CheckCircle className="w-3 h-3 mr-1" />
                             Accept
                           </Button>
                         )}
                         {order.status === 'received' && (
                           <Button
                             size="sm"
-                            variant="primary"
-                            onClick={() => handleStatusUpdate(order.id, 'preparing')}
-                            className="flex-1 bg-orange-600 hover:bg-orange-700"
+                            onClick={() => handleQuickStatus(order.id, 'preparing')}
+                            className="bg-orange-600 hover:bg-orange-700 text-white h-8 text-xs"
                           >
-                            <Clock className="w-3 h-3 mr-1" />
-                            Start Prep
+                            Prep
                           </Button>
                         )}
                         {order.status === 'preparing' && (
                           <Button
                             size="sm"
-                            variant="primary"
-                            onClick={() => handleStatusUpdate(order.id, 'ready')}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            onClick={() => handleQuickStatus(order.id, 'ready')}
+                            className="bg-green-600 hover:bg-green-700 text-white h-8 text-xs"
                           >
-                            <Package className="w-3 h-3 mr-1" />
-                            Mark Ready
+                            Ready
                           </Button>
                         )}
                         {order.status === 'ready' && (
                           <Button
                             size="sm"
-                            variant="primary"
-                            onClick={() => handleStatusUpdate(order.id, 'completed')}
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => handleQuickStatus(order.id, 'completed')}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 text-xs"
                           >
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Complete
+                            Done
                           </Button>
                         )}
-                      </div>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => { setSelectedOrder(order); setOpenView(true); }}
+                          className="h-8 w-8 p-0 border-white/10"
+                        >
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                      </>
                     )}
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleView(order)}
-                        className="flex-1 border-white/20 hover:bg-white/10"
-                      >
-                        <Eye className="w-3 h-3 mr-1" />
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => handleEdit(order)}
-                        className="flex-1 border-white/20 hover:bg-white/10"
-                      >
-                        <Edit className="w-3 h-3 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDelete(order.id)}
-                        className="border-red-500/20 hover:bg-red-500/10 text-red-400"
-                      >
-                        <Trash2 className="w-3 h-3 text-white" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))
+          {/* Pagination */}
+          {orders?.meta && (
+            <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/5">
+              <div className="text-sm text-gray-400">
+                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, orders.meta.total)} of {orders.meta.total}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => p - 1)}
+                  className="border-white/10"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page === orders.meta.last_page}
+                  onClick={() => setPage(p => p + 1)}
+                  className="border-white/10"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           )}
         </div>
-
-        {/* Pagination */}
-        {orders?.meta && (
-          <div className="flex justify-center gap-2 mt-8">
-            <Button
-              variant="secondary"
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Previous
-            </Button>
-            <span className="px-4 py-2 text-white">
-              Page {page} of {orders?.meta?.last_page || 1}
-            </span>
-            <Button
-              variant="secondary"
-              disabled={page === orders?.meta?.last_page}
-              onClick={() => setPage(page + 1)}
-              className="border-white/20 hover:bg-white/10"
-            >
-              Next
-            </Button>
-          </div>
-        )}
       </div>
 
-      {/* View Order Modal */}
+      {/* Reject Modal */}
+      <Modal
+        open={openReject}
+        onClose={() => { setOpenReject(false); setRejectionReason(''); }}
+        title={`Reject Order #${selectedOrder?.order_number}`}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+            <p className="text-red-300 text-sm">Customer will be notified of rejection. Please provide a clear reason.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Rejection Reason <span className="text-red-400">*</span>
+            </label>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={4}
+              className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-400"
+              placeholder="e.g., Kitchen closed, Out of ingredients, etc."
+            />
+            <div className="text-xs text-gray-400 mt-1">{rejectionReason.length} / 500</div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setOpenReject(false)}
+              className="flex-1 border-white/10"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmReject}
+              className="flex-1 bg-red-600 hover:bg-red-700"
+            >
+              Confirm Rejection
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* View Modal - Simplified */}
       <Modal
         open={openView}
-        onClose={() => {
-          setOpenView(false);
-          setSelectedOrder(null);
-        }}
+        onClose={() => setOpenView(false)}
         title={`Order #${selectedOrder?.order_number}`}
         size="xl"
       >
         {selectedOrder && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Order Information</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Order Info</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Status:</span>
-                    <Badge className={getStatusColor(selectedOrder.status)}>
-                      {selectedOrder.status}
-                    </Badge>
+                    <StatusPill status={selectedOrder.status} />
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Type:</span>
-                    <Badge className={getTypeColor(selectedOrder.order_type)}>
-                      {selectedOrder.order_type}
-                    </Badge>
+                    <span className="text-white capitalize">{selectedOrder.order_type}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Total:</span>
                     <span className="text-white font-semibold">${getAmount(selectedOrder.total).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Payment Status:</span>
-                    <span className={`font-medium ${selectedOrder.payment_status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
-                      {selectedOrder.payment_status.toUpperCase()}
-                    </span>
-                  </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Customer Information</h3>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Customer</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Name:</span>
                     <span className="text-white">{selectedOrder.customer?.user?.name || 'Guest'}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Email:</span>
-                    <span className="text-white">{selectedOrder.customer?.user?.email || 'N/A'}</span>
-                  </div>
                   {selectedOrder.table && (
                     <div className="flex justify-between">
                       <span className="text-gray-400">Table:</span>
                       <span className="text-white">Table {selectedOrder.table.number}</span>
-                    </div>
-                  )}
-                  {(selectedOrder as any).time_slot && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Scheduled Time:</span>
-                      <span className="text-white">
-                        {(selectedOrder as any).time_slot.label || `${(selectedOrder as any).time_slot.date} at ${(selectedOrder as any).time_slot.time}`}
-                      </span>
                     </div>
                   )}
                 </div>
@@ -642,202 +624,8 @@ export default function Orders() {
                 ))}
               </div>
             </div>
-
-            {selectedOrder.notes && (
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Notes</h3>
-                <p className="text-gray-300 bg-white/5 p-3 rounded-lg">{selectedOrder.notes}</p>
-              </div>
-            )}
           </div>
         )}
-      </Modal>
-
-      {/* Edit Order Modal */}
-      <Modal
-        open={openEdit}
-        onClose={() => {
-          setOpenEdit(false);
-          setSelectedOrder(null);
-        }}
-        title={`Edit Order #${selectedOrder?.order_number}`}
-        size="lg"
-      >
-        {selectedOrder && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                <select
-                  value={selectedOrder.status}
-                  onChange={(e) => handleStatusUpdate(selectedOrder.id, e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-                >
-                  <option className="bg-slate-900" value="pending">Pending</option>
-                  <option className="bg-slate-900" value="received">Received</option>
-                  <option className="bg-slate-900" value="preparing">Preparing</option>
-                  <option className="bg-slate-900" value="ready">Ready</option>
-                  <option className="bg-slate-900" value="completed">Completed</option>
-                  <option className="bg-slate-900" value="cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Payment Status</label>
-                <select
-                  value={selectedOrder.payment_status}
-                  onChange={(e) => {
-                    const newVal = e.target.value as 'unpaid' | 'paid' | 'refunded';
-                    if (selectedOrder) setSelectedOrder({ ...selectedOrder, payment_status: newVal });
-                  }}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-                >
-                  <option className="bg-slate-900" value="unpaid">Unpaid</option>
-                  <option className="bg-slate-900" value="paid">Paid</option>
-                  <option className="bg-slate-900" value="refunded">Refunded</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-              <textarea
-                value={selectedOrder.notes || ''}
-                onChange={(e) => setSelectedOrder({ ...selectedOrder, notes: e.target.value })}
-                rows={3}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-400"
-                placeholder="Order notes..."
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => {
-                  setOpenEdit(false);
-                  setSelectedOrder(null);
-                }}
-                className="flex-1 border-white/20 hover:bg-white/10"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                onClick={() => {
-                  setOpenEdit(false);
-                  toastSuccess('Order updated (Simulation)');
-                }}
-                className="flex-1"
-              >
-                Save Changes
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      {/* Reject Order Modal */}
-      <Modal
-        open={openReject}
-        onClose={() => {
-          setOpenReject(false);
-          setSelectedOrder(null);
-          setRejectionReason('');
-        }}
-        title={`Reject Order #${selectedOrder?.order_number}`}
-        size="lg"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
-        >
-          <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-red-300 font-medium">Order Rejection</h4>
-              <p className="text-red-300/70 text-sm mt-1">
-                Please provide a detailed reason for rejecting this order. The customer will be notified.
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Rejection Reason <span className="text-red-400">*</span>
-            </label>
-            <textarea
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              rows={4}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-400 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
-              placeholder="e.g., Kitchen is closed for maintenance, Out of stock ingredients, etc."
-            />
-            <div className="flex justify-between items-center mt-2">
-              <span className={`text-xs ${rejectionReason.length < 10 ? 'text-red-400' :
-                rejectionReason.length > 500 ? 'text-red-400' : 'text-gray-400'
-                }`}>
-                {rejectionReason.length < 10 && `Need ${10 - rejectionReason.length} more characters`}
-                {rejectionReason.length >= 10 && rejectionReason.length <= 500 && '✓ Valid length'}
-                {rejectionReason.length > 500 && `${rejectionReason.length - 500} characters over limit`}
-              </span>
-              <span className="text-xs text-gray-400">
-                {rejectionReason.length} / 500
-              </span>
-            </div>
-          </div>
-
-          {selectedOrder && (
-            <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-              <h4 className="text-sm font-medium text-gray-300 mb-3">Order Summary</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Customer:</span>
-                  <span className="text-white">{selectedOrder.customer?.user?.name || 'Guest'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Total Amount:</span>
-                  <span className="text-white font-medium">${getAmount(selectedOrder.total).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Order Type:</span>
-                  <Badge className={getTypeColor(selectedOrder.order_type)}>
-                    {selectedOrder.order_type}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setOpenReject(false);
-                setSelectedOrder(null);
-                setRejectionReason('');
-              }}
-              className="flex-1 border-white/20 hover:bg-white/10"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={confirmReject}
-              disabled={rejectionReason.length < 10 || rejectionReason.length > 500}
-              className={`flex-1 transition-all duration-300 ${rejectionReason.length >= 10 && rejectionReason.length <= 500
-                ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg shadow-red-500/30'
-                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
-            >
-              <ThumbsDown className="w-4 h-4 mr-2" />
-              Confirm Rejection
-            </Button>
-          </div>
-        </motion.div>
       </Modal>
     </AdminLayout>
   );
