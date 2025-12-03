@@ -72,6 +72,8 @@ const navigationTree = [
     children: [
       { name: 'Shifts', href: '/admin/shifts' },
       { name: 'Time Off Requests', href: '/admin/time-off-requests' },
+      { name: 'Attendance Management', href: '/admin/attendance-management' },
+      { name: 'Payroll Management', href: '/admin/payroll-management' },
     ]
   },
   {

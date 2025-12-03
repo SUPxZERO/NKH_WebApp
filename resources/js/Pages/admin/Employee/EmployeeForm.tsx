@@ -39,36 +39,36 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
     const [formData, setFormData] = useState<EmployeeFormData>(
         employee
             ? {
-                  name: employee.user.name,
-                  email: employee.user.email,
-                  phone: employee.phone || employee.user.phone || '',
-                  position_id: employee.position_id,
-                  location_id: employee.location_id,
-                  salary_type: employee.salary_type,
-                  salary: employee.salary,
-                  hourly_rate: employee.hourly_rate,
-                  hire_date: employee.hire_date,
-                  date_of_birth: employee.date_of_birth,
-                  emergency_contact_name: employee.emergency_contact_name || '',
-                  emergency_contact_phone: employee.emergency_contact_phone || '',
-                  department: employee.department || '',
-              }
+                name: employee.user.name,
+                email: employee.user.email,
+                phone: employee.phone || employee.user.phone || '',
+                position_id: employee.position_id,
+                location_id: employee.location_id,
+                salary_type: employee.salary_type,
+                salary: employee.salary,
+                hourly_rate: employee.hourly_rate,
+                hire_date: employee.hire_date,
+                date_of_birth: employee.date_of_birth,
+                emergency_contact_name: employee.emergency_contact_name || '',
+                emergency_contact_phone: employee.emergency_contact_phone || '',
+                department: employee.department || '',
+            }
             : {
-                  name: '',
-                  email: '',
-                  phone: '',
-                  position_id: 0,
-                  location_id: 0,
-                  salary_type: 'monthly',
-                  department: '',
-                  hire_date: new Date().toISOString().split('T')[0],
-                  date_of_birth: '',
-                  emergency_contact_name: '',
-                  emergency_contact_phone: '',
-                  password: '',
-                  password_confirmation: '',
-                  role: 'staff',
-              }
+                name: '',
+                email: '',
+                phone: '',
+                position_id: 0,
+                location_id: 0,
+                salary_type: 'monthly',
+                department: '',
+                hire_date: new Date().toISOString().split('T')[0],
+                date_of_birth: '',
+                emergency_contact_name: '',
+                emergency_contact_phone: '',
+                password: '',
+                password_confirmation: '',
+                role: 'staff',
+            }
     );
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -122,21 +122,21 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                         {isEdit ? 'Edit Employee' : 'Create New Employee'}
                     </h1>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Personal Information */}
-                    <Card>
+                    <Card className="bg-white/5 backdrop-blur-md border-white/10">
                         <CardHeader>
-                            <h2 className="text-xl font-semibold">Personal Information</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Personal Information</h2>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Full Name *
                                     </label>
                                     <Input
@@ -151,7 +151,7 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Email *
                                     </label>
                                     <Input
@@ -167,7 +167,7 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Phone *
                                     </label>
                                     <Input
@@ -182,7 +182,7 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Date of Birth *
                                     </label>
                                     <Input
@@ -199,9 +199,9 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                     </Card>
 
                     {/* Employment Details */}
-                    <Card>
+                    <Card className="bg-white/5 backdrop-blur-md border-white/10">
                         <CardHeader>
-                            <h2 className="text-xl font-semibold">Employment Details</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Employment Details</h2>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -270,9 +270,9 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                     </Card>
 
                     {/* Compensation */}
-                    <Card>
+                    <Card className="bg-white/5 backdrop-blur-md border-white/10">
                         <CardHeader>
-                            <h2 className="text-xl font-semibold">Compensation</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Compensation</h2>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -325,9 +325,9 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                     </Card>
 
                     {/* Emergency Contact */}
-                    <Card>
+                    <Card className="bg-white/5 backdrop-blur-md border-white/10">
                         <CardHeader>
-                            <h2 className="text-xl font-semibold">Emergency Contact</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Emergency Contact</h2>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

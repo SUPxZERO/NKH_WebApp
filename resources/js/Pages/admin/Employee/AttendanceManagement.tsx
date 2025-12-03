@@ -138,19 +138,19 @@ export default function AttendanceManagement() {
             <div className="space-y-6">
                 {/* Header */}
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Attendance Management</h1>
-                    <p className="mt-2 text-gray-600">View, filter, and adjust employee attendance records</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Attendance Management</h1>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400">View, filter, and adjust employee attendance records</p>
                 </div>
 
                 {/* Filters Card */}
-                <Card>
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
                     <CardHeader>
-                        <h3 className="text-lg font-semibold">Filters</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h3>
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Start Date
                                 </label>
                                 <Input
@@ -164,7 +164,7 @@ export default function AttendanceManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     End Date
                                 </label>
                                 <Input
@@ -178,7 +178,7 @@ export default function AttendanceManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Employee Search
                                 </label>
                                 <div className="relative">
@@ -196,7 +196,7 @@ export default function AttendanceManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Location
                                 </label>
                                 <select
@@ -227,9 +227,9 @@ export default function AttendanceManagement() {
                 </Card>
 
                 {/* Attendance Table */}
-                <Card>
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
                     <CardHeader>
-                        <h3 className="text-lg font-semibold">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                             Attendance Records{' '}
                             {(attendanceData as any)?.total && `(${(attendanceData as any).total})`}
                         </h3>
@@ -303,9 +303,9 @@ export default function AttendanceManagement() {
                                                     ) : (
                                                         record.clock_in_at
                                                             ? new Date(record.clock_in_at).toLocaleTimeString([], {
-                                                                  hour: '2-digit',
-                                                                  minute: '2-digit',
-                                                              })
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            })
                                                             : '-'
                                                     )}
                                                 </td>
@@ -325,9 +325,9 @@ export default function AttendanceManagement() {
                                                     ) : (
                                                         record.clock_out_at
                                                             ? new Date(record.clock_out_at).toLocaleTimeString([], {
-                                                                  hour: '2-digit',
-                                                                  minute: '2-digit',
-                                                              })
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            })
                                                             : '-'
                                                     )}
                                                 </td>
@@ -336,15 +336,14 @@ export default function AttendanceManagement() {
                                                 </td>
                                                 <td className="px-4 py-3 text-sm">
                                                     <span
-                                                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                            record.is_late
+                                                        className={`px-2 py-1 rounded-full text-xs font-medium ${record.is_late
                                                                 ? 'bg-yellow-100 text-yellow-800'
                                                                 : record.status === 'absent'
-                                                                ? 'bg-red-100 text-red-800'
-                                                                : record.has_overtime
-                                                                ? 'bg-blue-100 text-blue-800'
-                                                                : 'bg-green-100 text-green-800'
-                                                        }`}
+                                                                    ? 'bg-red-100 text-red-800'
+                                                                    : record.has_overtime
+                                                                        ? 'bg-blue-100 text-blue-800'
+                                                                        : 'bg-green-100 text-green-800'
+                                                            }`}
                                                     >
                                                         {getStatusBadge(record)}
                                                     </span>

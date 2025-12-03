@@ -36,6 +36,13 @@ Successfully redesigned 19 admin interface pages to align with the modern, high-
 - **Notifications**: Created `NotificationController` and registered API routes (`/api/admin/notifications`, `/api/admin/notifications/stats`) to support the new Notifications page.
 - **Verification**: Verified existence of stats endpoints for other pages.
 
+## TypeScript Fixes
+- **Clean Build**: Resolved all TypeScript errors across the project, ensuring a successful `npm run build`.
+- **Fixes Applied**:
+    - **Promotions.tsx**: Fixed `formData` type mismatch.
+    - **AuditLogs.tsx**: Resolved interface conflicts and `null` handling in `formatUserAgent`.
+    - **MenuItems.tsx**, **Employees.tsx**, **Customers.tsx**: Fixed "Property does not exist" errors by adding proper type assertions and optional chaining for API response data (`data`, `meta`).
+
 ## Design System Highlights
 - **Theme**: Consistent `bg-slate-900` dark mode.
 - **Components**: Reused `Card`, `Button`, `Input`, `Modal`, `Badge` for consistency.

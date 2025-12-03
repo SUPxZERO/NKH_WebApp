@@ -234,7 +234,7 @@ export default function Shifts() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+            <div className="space-y-6">
                 {/* Header */}
                 <div className="mb-8">
                     <motion.div
@@ -243,24 +243,24 @@ export default function Shifts() {
                         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                     >
                         <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                                 Shift Management
                             </h1>
-                            <p className="text-gray-400 mt-1">Schedule and manage employee shifts</p>
+                            <p className="text-gray-600 dark:text-gray-400 mt-1">Schedule and manage employee shifts</p>
                         </div>
 
-                        <div className="flex gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
                                 <div className="text-sm text-gray-400">Total Shifts</div>
-                                <div className="text-xl font-bold text-white">{stats?.total_shifts || 0}</div>
+                                <div className="text-xl font-bold text-gray-900 dark:text-white">{stats?.total_shifts || 0}</div>
                             </div>
                             <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
                                 <div className="text-sm text-gray-400">Published</div>
-                                <div className="text-xl font-bold text-blue-400">{stats?.published || 0}</div>
+                                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{stats?.published || 0}</div>
                             </div>
                             <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
                                 <div className="text-sm text-gray-400">Draft</div>
-                                <div className="text-xl font-bold text-yellow-400">{stats?.draft || 0}</div>
+                                <div className="text-xl font-bold text-yellow-600 dark:text-yellow-400">{stats?.draft || 0}</div>
                             </div>
                         </div>
 
@@ -272,7 +272,6 @@ export default function Shifts() {
                             </Button>
                             <Button
                                 onClick={() => { resetForm(); setOpenCreate(true); }}
-                                className="bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Shift

@@ -78,6 +78,8 @@ Route::prefix('admin')
         // Sprint 3: Employee Scheduling & Time Management
         Route::get('shifts', fn() => Inertia::render('admin/Shifts'))->name('admin.shifts');
         Route::get('time-off-requests', fn() => Inertia::render('admin/TimeOffRequests'))->name('admin.time-off-requests');
+        Route::get('attendance-management', fn() => Inertia::render('admin/Employee/AttendanceManagement'))->name('admin.attendance-management');
+        Route::get('payroll-management', fn() => Inertia::render('admin/Employee/PayrollManagement'))->name('admin.payroll-management');
         
         // Sprint 4: Ingredients & Inventory Management
         Route::get('ingredients', fn() => Inertia::render('admin/Ingredients'))->name('admin.ingredients');

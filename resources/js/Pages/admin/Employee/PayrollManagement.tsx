@@ -234,8 +234,8 @@ export default function PayrollManagement() {
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Payroll Management</h1>
-                        <p className="mt-2 text-gray-600">Generate, manage, and finalize employee payroll</p>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Payroll Management</h1>
+                        <p className="mt-2 text-gray-600 dark:text-gray-400">Generate, manage, and finalize employee payroll</p>
                     </div>
                     <Button
                         onClick={handleExportPayroll}
@@ -248,14 +248,14 @@ export default function PayrollManagement() {
                 </div>
 
                 {/* Controls Card */}
-                <Card>
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
                     <CardHeader>
-                        <h3 className="text-lg font-semibold">Payroll Period</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Payroll Period</h3>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Month
                                 </label>
                                 <Input
@@ -266,7 +266,7 @@ export default function PayrollManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Employees
                                 </label>
                                 <div className="border border-gray-300 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
@@ -323,37 +323,37 @@ export default function PayrollManagement() {
                 {/* Payroll Summary */}
                 {(payrollData as any)?.data?.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <Card>
+                        <Card className="bg-white/5 backdrop-blur-md border-white/10">
                             <CardContent className="pt-6">
-                                <p className="text-sm text-gray-600">Total Employees</p>
-                                <p className="text-2xl font-bold text-gray-900">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Employees</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {(payrollData as any).data.length}
                                 </p>
                             </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className="bg-white/5 backdrop-blur-md border-white/10">
                             <CardContent className="pt-6">
-                                <p className="text-sm text-gray-600">Total Gross Pay</p>
-                                <p className="text-2xl font-bold text-gray-900">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Gross Pay</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     ${totalGross.toFixed(2)}
                                 </p>
                             </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className="bg-white/5 backdrop-blur-md border-white/10">
                             <CardContent className="pt-6">
-                                <p className="text-sm text-gray-600">Total Net Pay</p>
-                                <p className="text-2xl font-bold text-green-600">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Net Pay</p>
+                                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                                     ${totalNet.toFixed(2)}
                                 </p>
                             </CardContent>
                         </Card>
 
-                        <Card>
+                        <Card className="bg-white/5 backdrop-blur-md border-white/10">
                             <CardContent className="pt-6">
-                                <p className="text-sm text-gray-600">Total Deductions</p>
-                                <p className="text-2xl font-bold text-red-600">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Deductions</p>
+                                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                                     ${(totalGross - totalNet).toFixed(2)}
                                 </p>
                             </CardContent>
@@ -362,9 +362,9 @@ export default function PayrollManagement() {
                 )}
 
                 {/* Payroll Table */}
-                <Card>
+                <Card className="bg-white/5 backdrop-blur-md border-white/10">
                     <CardHeader>
-                        <h3 className="text-lg font-semibold">Payroll Records</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Payroll Records</h3>
                     </CardHeader>
                     <CardContent>
                         {payrollLoading ? (
