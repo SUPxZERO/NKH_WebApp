@@ -102,27 +102,33 @@ class OperatingHoursController extends Controller
     {
         $request->validate([
             'location_id' => 'required|exists:locations,id',
-            'hours' => 'required|array',
+            'service_type' => 'required|in:dine-in,pickup,delivery',
+            'hours' => 'present|array',
             'hours.*.day_of_week' => 'required|integer|between:0,6',
-            'hours.*.service_type' => 'required|in:dine-in,pickup,delivery',
             'hours.*.opening_time' => 'required|date_format:H:i',
             'hours.*.closing_time' => 'required|date_format:H:i',
         ]);
 
         DB::beginTransaction();
         try {
+            // Delete existing hours for this location and service type
+            // Use get() then delete() to ensure observers fire
+            OperatingHours::where('location_id', $request->location_id)
+                ->where('service_type', $request->service_type)
+                ->get()
+                ->each(function ($hour) {
+                    $hour->delete();
+                });
+
+            // Create new hours
             foreach ($request->hours as $hour) {
-                OperatingHours::updateOrCreate(
-                    [
-                        'location_id' => $request->location_id,
-                        'day_of_week' => $hour['day_of_week'],
-                        'service_type' => $hour['service_type'],
-                    ],
-                    [
-                        'opening_time' => $hour['opening_time'],
-                        'closing_time' => $hour['closing_time'],
-                    ]
-                );
+                OperatingHours::create([
+                    'location_id' => $request->location_id,
+                    'day_of_week' => $hour['day_of_week'],
+                    'service_type' => $request->service_type,
+                    'opening_time' => $hour['opening_time'],
+                    'closing_time' => $hour['closing_time'],
+                ]);
             }
 
             DB::commit();

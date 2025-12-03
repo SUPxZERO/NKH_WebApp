@@ -143,6 +143,17 @@ Route::prefix('api/customer')->middleware('auth')->group(function () {
     
     // Online Orders
     Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store']);
+    
+    // Reservations
+    Route::get('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'index']);
+    Route::post('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'store']);
+    Route::get('reservations/availability', [App\Http\Controllers\Api\CustomerReservationController::class, 'availability']);
+    Route::delete('reservations/{reservation}', [App\Http\Controllers\Api\CustomerReservationController::class, 'destroy']);
+    
+    // Rewards
+    Route::get('rewards', [App\Http\Controllers\Api\RewardController::class, 'index']);
+    Route::post('rewards/redeem', [App\Http\Controllers\Api\RewardController::class, 'redeem']);
+    Route::get('rewards/history', [App\Http\Controllers\Api\RewardController::class, 'history']);
 });
 
 // Test time slots seeder

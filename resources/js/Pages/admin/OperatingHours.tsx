@@ -80,7 +80,7 @@ export default function OperatingHours() {
 
     // Save mutation
     const saveMutation = useMutation({
-        mutationFn: (data: { location_id: number; hours: OperatingHour[] }) =>
+        mutationFn: (data: { location_id: number; service_type: string; hours: OperatingHour[] }) =>
             apiPost('/api/admin/operating-hours/bulk-update', data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['operating-hours', selectedLocation] });
@@ -133,6 +133,7 @@ export default function OperatingHours() {
         const hours = Object.values(schedules);
         saveMutation.mutate({
             location_id: selectedLocation,
+            service_type: selectedServiceType,
             hours
         });
     };

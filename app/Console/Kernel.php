@@ -22,7 +22,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Generate time slots for the next 7 days every day at midnight
+        $schedule->command('timeslots:generate 7')
+            ->daily()
+            ->at('00:01')
+            ->appendOutputTo(storage_path('logs/timeslots.log'));
     }
 
     /**

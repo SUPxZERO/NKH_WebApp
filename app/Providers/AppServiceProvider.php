@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\OrderItem;
+use App\Models\OperatingHours;
 use App\Observers\OrderItemObserver;
+use App\Observers\OperatingHoursObserver;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Register model observers
         OrderItem::observe(OrderItemObserver::class);
+        OperatingHours::observe(OperatingHoursObserver::class);
 
         // Log slow queries for debugging (development only)
         if (app()->environment(['local', 'development'])) {

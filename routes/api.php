@@ -46,6 +46,7 @@ use App\Http\Controllers\Api\OperatingHoursController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\PayrollController;
+use App\Http\Controllers\Api\TimeSlotController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Http\Request;
 
@@ -85,6 +86,12 @@ Route::post('/payments/webhook/success', [PaymentWebhookController::class, 'hand
 // Public reference data
 Route::get('/positions', [PositionController::class, 'index']);
 Route::get('/locations', [LocationController::class, 'index']);
+
+// Time slots
+Route::get('/timeslots', [TimeSlotController::class, 'index']);
+Route::get('/timeslots/stats', [TimeSlotController::class, 'stats']);
+Route::post('/timeslots/regenerate', [TimeSlotController::class, 'regenerate'])->middleware('auth');
+Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup'])->middleware('auth');
 
 // Sprint 1: Suppliers & Units (CRUD accessible to all for now)
 Route::apiResource('suppliers', SupplierController::class);

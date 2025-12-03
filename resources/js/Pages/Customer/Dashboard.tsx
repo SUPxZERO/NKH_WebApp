@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { motion, Variants } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiDelete } from '@/app/libs/apiClient';
 import { ApiResponse, Order, Reservation } from '@/app/types/domain';
 import {
@@ -18,13 +18,26 @@ import {
   Package,
   Sparkles,
   Calendar,
+  Trophy,
+  Zap,
+  Target,
+  Award,
+  Users,
+  TrendingDown,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  Percent,
+  DollarSign,
+  Share2,
+  Bell,
+  CheckCircle2,
 } from 'lucide-react';
 
 // Dashboard Components
 import StatCard from '@/app/components/dashboard/StatCard';
 import ActivityFeed, { Activity } from '@/app/components/dashboard/ActivityFeed';
 import QuickActions, { QuickAction } from '@/app/components/dashboard/QuickActions';
-import DashboardChart from '@/app/components/dashboard/DashboardChart';
 
 // UI Components
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
@@ -48,6 +61,26 @@ interface DashboardStats {
   orders_trend: number;
   points_earned_this_month: number;
   available_rewards: number;
+}
+
+interface Reward {
+  id: number;
+  title: string;
+  description: string;
+  points_required: number;
+  type: 'discount' | 'free_item' | 'upgrade';
+  value: string;
+  icon: string;
+}
+
+interface Achievement {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  progress?: number;
+  total?: number;
 }
 
 // Animation variants
@@ -74,10 +107,45 @@ const itemVariants: Variants = {
   },
 };
 
-
+const MOCK_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 1,
+    title: 'First Order',
+    description: 'Place your first order',
+    icon: '🎯',
+    unlocked: true,
+  },
+  {
+    id: 2,
+    title: 'Regular Customer',
+    description: 'Place 10 orders',
+    icon: '⭐',
+    unlocked: true,
+    progress: 10,
+    total: 10,
+  },
+  {
+    id: 3,
+    title: 'Food Explorer',
+    description: 'Try 20 different items',
+    icon: '🗺️',
+    unlocked: false,
+    progress: 12,
+    total: 20,
+  },
+  {
+    id: 4,
+    title: 'Loyalty Champion',
+    description: 'Earn 1,000 points',
+    icon: '🏆',
+    unlocked: false,
+    progress: 560,
+    total: 1000,
+  },
+];
 
 export default function Dashboard() {
-  // Data fetching
+  const queryClient = useQueryClient();
   const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [bookingTime, setBookingTime] = useState('19:00');
   const [bookingGuestCount, setBookingGuestCount] = useState('2');
@@ -87,7 +155,10 @@ export default function Dashboard() {
   const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [isBookingSubmitting, setIsBookingSubmitting] = useState(false);
+  const [showRewardsModal, setShowRewardsModal] = useState(false);
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
 
+  // Data fetching
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
     queryKey: ['customer.profile'],
     queryFn: () => apiGet<ApiResponse<CustomerProfile>>('/customer/profile').then((r) => r.data),
@@ -116,6 +187,46 @@ export default function Dashboard() {
     queryFn: () => apiGet<{ data: Reservation[] }>('/customer/reservations').then((r) => r.data),
     staleTime: 1000 * 60,
   });
+
+  // Loyalty & rewards data
+  const { data: customerStatsData } = useQuery({
+    queryKey: ['customer', 'stats'],
+    queryFn: () => apiGet('/api/customer/stats'),
+  });
+
+  const { data: historyData } = useQuery({
+    queryKey: ['customer', 'history'],
+    queryFn: () => apiGet('/api/customer/history'),
+  });
+
+  // Fetch rewards from API
+  const { data: rewardsData, isLoading: rewardsLoading, refetch: refetchRewards } = useQuery({
+    queryKey: ['customer', 'rewards'],
+    queryFn: () => apiGet<{ data: Reward[]; customer_points: number }>('/customer/rewards'),
+    staleTime: 1000 * 60,
+  });
+
+  const REWARDS = rewardsData?.data || [];
+  const loyaltyTransactions = (historyData as any)?.data?.loyalty_transactions || [];
+  const customerStats = (customerStatsData as any)?.data;
+
+  // Calculate spending analytics
+  const spendingData = useMemo(() => {
+    if (!recentOrders || recentOrders.length === 0) return [];
+
+    // Group orders by month
+    const monthlySpending: Record<string, number> = {};
+    recentOrders.forEach((order) => {
+      const date = new Date(order.placed_at || order.created_at);
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
+      monthlySpending[monthKey] = (monthlySpending[monthKey] || 0) + order.total;
+    });
+
+    return Object.entries(monthlySpending).map(([month, amount]) => ({
+      month,
+      amount: Number(amount.toFixed(2)),
+    }));
+  }, [recentOrders]);
 
   // Transform orders into activity feed
   const activities: Activity[] = useMemo(() => {
@@ -165,20 +276,20 @@ export default function Dashboard() {
       onClick: () => (window.location.href = '/customer/reservations'),
     },
     {
-      id: 'profile',
-      label: 'My Profile',
-      description: 'Manage account',
-      icon: Heart,
-      color: 'red',
-      onClick: () => (window.location.href = '/customer/profile'),
-    },
-    {
       id: 'rewards',
-      label: 'Loyalty Program',
-      description: 'View points & tiers',
+      label: 'Rewards',
+      description: 'Redeem points',
       icon: Gift,
       color: 'purple',
-      onClick: () => (window.location.href = '/customer/loyalty'),
+      onClick: () => setShowRewardsModal(true),
+    },
+    {
+      id: 'refer',
+      label: 'Refer Friend',
+      description: 'Get $10 credit',
+      icon: Share2,
+      color: 'green',
+      onClick: () => console.log('Open referral modal'),
     },
   ];
 
@@ -250,7 +361,55 @@ export default function Dashboard() {
       setBookingError(error?.response?.data?.message || 'Failed to cancel reservation.');
     }
   };
-  
+
+  const handleRedeemReward = async (reward: Reward) => {
+    if (!profile || profile.loyalty_points < reward.points_required) {
+      alert('You don\'t have enough points for this reward!');
+      return;
+    }
+
+    if (window.confirm(`Redeem ${reward.title} for ${reward.points_required} points?`)) {
+      try {
+        const response = await apiPost<{
+          message: string;
+          data: {
+            redemption_code: string;
+            new_balance: number;
+            points_deducted: number;
+          };
+        }>('/customer/rewards/redeem', {
+          reward_id: reward.id,
+          points_required: reward.points_required,
+          reward_title: reward.title,
+        });
+
+        // Show success message with redemption code
+        alert(
+          `✅ ${response.message}` +
+          `Redemption Code: ${response.data.redemption_code}\n` +
+          `Points Used: ${response.data.points_deducted}\n` +
+          `New Balance: ${response.data.new_balance} points\n\n` +
+          `Show this code at checkout to claim your reward!`
+        );
+
+        // Refresh data
+        await Promise.all([
+          refetchProfile(),
+          refetchRewards(),
+          queryClient.invalidateQueries({ queryKey: ['customer', 'history'] }),
+        ]);
+
+        setShowRewardsModal(false);
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || 'Failed to redeem reward. Please try again.';
+        alert(`❌ Error: ${errorMessage}`);
+      }
+    }
+  };
+
+  const availableRewardsCount = REWARDS.filter(
+    (r) => profile && profile.loyalty_points >= r.points_required
+  ).length;
 
   return (
     <CustomerLayout>
@@ -300,7 +459,7 @@ export default function Dashboard() {
                   </Button>
                   <Button
                     variant="secondary"
-                    leftIcon={<Clock className="w-5 h-5" />}
+                    leftIcon={<RefreshCw className="w-5 h-5" />}
                     onClick={() => console.log('Quick reorder')}
                   >
                     Quick Reorder
@@ -352,7 +511,7 @@ export default function Dashboard() {
                 ? { value: stats.points_earned_this_month, isPositive: true }
                 : undefined
             }
-            onClick={() => console.log('View points history')}
+            onClick={() => (window.location.href = '/customer/loyalty')}
           />
 
           <StatCard
@@ -378,11 +537,11 @@ export default function Dashboard() {
 
           <StatCard
             title="Available Rewards"
-            value={stats?.available_rewards || 0}
+            value={availableRewardsCount}
             icon={Gift}
             color="purple"
             loading={statsLoading}
-            onClick={() => console.log('View rewards')}
+            onClick={() => setShowRewardsModal(true)}
           />
         </motion.section>
 
@@ -397,7 +556,7 @@ export default function Dashboard() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Activity */}
-          <motion.div className="lg:col-span-2" variants={itemVariants}>
+          <motion.div className="lg:col-span-2 space-y-6" variants={itemVariants}>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -423,47 +582,89 @@ export default function Dashboard() {
                 <ActivityFeed activities={activities} loading={ordersLoading} maxItems={5} />
               </CardContent>
             </Card>
+
+            {/* Achievements Section */}
+            <Card>
+              <CardHeader>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-yellow-500" />
+                  Your Achievements
+                </h3>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  {MOCK_ACHIEVEMENTS.map((achievement) => (
+                    <div
+                      key={achievement.id}
+                      className={`p-3 rounded-lg border-2 transition-all ${achievement.unlocked
+                        ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30'
+                        : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                        }`}
+                    >
+                      <div className="text-2xl mb-2">{achievement.icon}</div>
+                      <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                        {achievement.title}
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        {achievement.description}
+                      </div>
+                      {!achievement.unlocked && achievement.progress !== undefined && (
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>{achievement.progress}</span>
+                            <span>{achievement.total}</span>
+                          </div>
+                          <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-yellow-500 to-orange-500"
+                              style={{
+                                width: `${(achievement.progress! / achievement.total!) * 100}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Spending Analytics */}
+            {spendingData.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    Spending Overview
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {spendingData.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{item.month}</span>
+                        <div className="flex items-center gap-3 flex-1 mx-4">
+                          <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
+                              style={{ width: `${(item.amount / Math.max(...spendingData.map(d => d.amount))) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white min-w-[60px] text-right">
+                            ${item.amount.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
 
           {/* Sidebar */}
           <motion.div className="space-y-6" variants={itemVariants}>
-            {/* Favorite Items */}
-            <Card>
-              <CardHeader>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-red-500" />
-                  Your Favorites
-                </h3>
-              </CardHeader>
-              <CardContent>
-                {profileLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-12 w-full" />
-                    ))}
-                  </div>
-                ) : profile?.favorite_items && profile.favorite_items.length > 0 ? (
-                  <div className="space-y-2">
-                    {profile.favorite_items.slice(0, 5).map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                      >
-                        <span className="text-sm font-medium">{item}</span>
-                        <Button variant="ghost" size="sm">
-                          +
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 text-center py-4">
-                    No favorites yet. Order something delicious!
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Next Reward Progress */}
             {profile && profile.next_reward_points > 0 && (
               <Card>
@@ -500,39 +701,126 @@ export default function Dashboard() {
                       {profile.next_reward_points - profile.loyalty_points} more points to your
                       next reward!
                     </p>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setShowRewardsModal(true)}
+                    >
+                      View Rewards
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Special Offers */}
+            {/* Loyalty Tier */}
+            {customerStats && (
+              <Card>
+                <CardHeader>
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Award className="w-4 h-4 text-purple-500" />
+                    Loyalty Tier
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center">
+                    <div className="text-4xl mb-2">
+                      {customerStats.customer_tier === 'platinum' && '💎'}
+                      {customerStats.customer_tier === 'gold' && '🥇'}
+                      {customerStats.customer_tier === 'silver' && '🥈'}
+                      {customerStats.customer_tier === 'bronze' && '🥉'}
+                    </div>
+                    <div className="text-lg font-bold capitalize text-gray-900 dark:text-white">
+                      {customerStats.customer_tier} Member
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Enjoy exclusive benefits and perks
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full mt-3"
+                      onClick={() => (window.location.href = '/customer/loyalty')}
+                    >
+                      View Benefits
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Favorite Items */}
             <Card>
               <CardHeader>
                 <h3 className="font-semibold flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-orange-500" />
-                  Special Offers
+                  <Heart className="w-4 h-4 text-red-500" />
+                  Your Favorites
+                </h3>
+              </CardHeader>
+              <CardContent>
+                {profileLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
+                ) : profile?.favorite_items && profile.favorite_items.length > 0 ? (
+                  <div className="space-y-2">
+                    {profile.favorite_items.slice(0, 5).map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                      >
+                        <span className="text-sm font-medium">{item}</span>
+                        <Button variant="ghost" size="sm">
+                          +
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No favorites yet. Order something delicious!
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Referral Program */}
+            <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/20">
+              <CardHeader>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Users className="w-4 h-4 text-emerald-500" />
+                  Refer a Friend
                 </h3>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30">
-                    <div className="font-medium text-sm">Free Delivery</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      On orders over $25
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Give $10, Get $10! Share your referral code with friends.
+                  </p>
+                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-emerald-500/30">
+                    <div className="text-xs text-gray-500 mb-1">Your Code</div>
+                    <div className="text-lg font-mono font-bold text-emerald-600">
+                      {profile?.name ? profile.name.substring(0, 3).toUpperCase() + '2024' : 'GET10'}
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30">
-                    <div className="font-medium text-sm">20% Off</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Your next pizza order
-                    </div>
-                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    leftIcon={<Share2 className="w-4 h-4" />}
+                  >
+                    Share Code
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         </div>
 
+        {/* Reservation Section */}
         <motion.section variants={itemVariants}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
@@ -682,7 +970,93 @@ export default function Dashboard() {
             </Card>
           </div>
         </motion.section>
+
+        {/* Rewards Modal */}
+        {showRewardsModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setShowRewardsModal(false)}
+          >
+            <motion.div
+              className="bg-white dark:bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Gift className="w-6 h-6 text-purple-500" />
+                    Rewards Marketplace
+                  </h2>
+                  <button
+                    onClick={() => setShowRewardsModal(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  You have <span className="font-bold text-purple-600">{profile?.loyalty_points || 0} points</span> available
+                </p>
+              </div>
+              <div className="p-6">
+                {rewardsLoading ? (
+                  <div className="text-center py-12">
+                    <div className="text-gray-500">Loading rewards...</div>
+                  </div>
+                ) : REWARDS.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-gray-500">No rewards available at this time.</div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {REWARDS.map((reward) => {
+                      const canRedeem = profile && profile.loyalty_points >= reward.points_required;
+                      return (
+                        <div
+                          key={reward.id}
+                          className={`p-4 rounded-xl border-2 transition-all ${canRedeem
+                            ? 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30 hover:border-purple-500/50'
+                            : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-60'
+                            }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="text-4xl">{reward.icon}</div>
+                            <div className="text-right">
+                              <div className="text-xs text-gray-600 dark:text-gray-400">Value</div>
+                              <div className="text-lg font-bold text-purple-600">{reward.value}</div>
+                            </div>
+                          </div>
+                          <div className="font-semibold text-gray-900 dark:text-white mb-1">
+                            {reward.title}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            {reward.description}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-sm font-medium">
+                              <Star className="w-4 h-4 text-yellow-500" />
+                              <span>{reward.points_required} pts</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant={canRedeem ? 'primary' : 'secondary'}
+                              disabled={!canRedeem}
+                              onClick={() => handleRedeemReward(reward)}
+                            >
+                              {canRedeem ? 'Redeem' : 'Not Enough Points'}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
       </motion.div>
     </CustomerLayout>
-  );
-}
+  );}

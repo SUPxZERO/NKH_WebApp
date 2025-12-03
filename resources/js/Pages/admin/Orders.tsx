@@ -284,7 +284,7 @@ export default function Orders() {
           >
             <div className="flex items-center justify-center gap-2">
               <AlertCircle className="w-4 h-4" />
-              Pending Approval
+                pproval
               {approvalFilter === 'pending' && orderList.length > 0 && (
                 <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
                   {orderList.length}
