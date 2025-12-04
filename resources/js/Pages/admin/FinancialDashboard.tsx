@@ -89,7 +89,7 @@ export default function FinancialDashboard() {
     };
 
     const handleExportExcel = () => {
-        window.location.href = `/api/admin/reports/financial/export/excel?${getQueryParams()}`;
+        window.location.href = `/api/admin/reports/financial/export/csv?${getQueryParams()}`;
     };
 
     const stats = [

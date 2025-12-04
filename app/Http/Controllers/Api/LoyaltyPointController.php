@@ -45,11 +45,18 @@ class LoyaltyPointController extends Controller
     {
         $data = $request->validate([
             'customer_id' => ['required', 'exists:customers,id'],
+            'location_id' => ['nullable', 'exists:locations,id'],
             'type' => ['required', 'in:earn,redeem,adjust'],
             'points' => ['required', 'integer'],
             'occurred_at' => ['required', 'date'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        // Set default location_id if not provided
+        $data['location_id'] = $data['location_id'] 
+            ?? auth()->user()?->employee?->location_id 
+            ?? \App\Models\Location::first()?->id
+            ?? 1;
 
         // Calculate new balance_after (simple last known + points)
         $last = LoyaltyPoint::where('customer_id', $data['customer_id'])
@@ -60,6 +67,7 @@ class LoyaltyPointController extends Controller
 
         $lp = LoyaltyPoint::create([
             'customer_id' => $data['customer_id'],
+            'location_id' => $data['location_id'],
             'type' => $data['type'],
             'points' => $data['points'],
             'balance_after' => $prev + $data['points'],

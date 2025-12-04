@@ -134,9 +134,9 @@ class UnitController extends Controller
      */
     public function destroy(Unit $unit): JsonResponse
     {
-        // Check if unit is being used
+        // Check if unit is being used (fix: use 'unit_id' not 'unit')
         $inUseCheck = \DB::table('ingredients')
-            ->where('unit', $unit->code)
+            ->where('unit_id', $unit->id)
             ->exists();
 
         if ($inUseCheck) {

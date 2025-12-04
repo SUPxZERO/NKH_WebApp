@@ -20,13 +20,19 @@ class InventoryAdjustment extends Model
         'status',
         'adjusted_by',
         'approved_by',
-        'approval_notes'
+        'approved_at',
+        'approval_notes',
+        'rejected_by',
+        'rejected_at',
+        'rejection_reason'
     ];
 
     protected $casts = [
         'quantity_before' => 'decimal:3',
         'quantity_after' => 'decimal:3',
         'quantity_change' => 'decimal:3',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function ingredient()

@@ -165,4 +165,21 @@ class SupplierController extends Controller
 
         return response()->json($types);
     }
+
+    /**
+     * Get supplier statistics
+     */
+    public function stats(): JsonResponse
+    {
+        return response()->json([
+            'total' => Supplier::count(),
+            'active' => Supplier::where('is_active', true)->count(),
+            'food' => Supplier::where('type', 'food_produce')->count(),
+            'beverage' => Supplier::where('type', 'beverages')->count(),
+            'by_type' => Supplier::select('type')
+                ->selectRaw('count(*) as count')
+                ->groupBy('type')
+                ->pluck('count', 'type'),
+        ]);
+    }
 }

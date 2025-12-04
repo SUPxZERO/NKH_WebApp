@@ -85,14 +85,33 @@ export default function Reservations() {
     };
 
     const handleBookReservation = () => {
-        if (!selectedLocation || !selectedDate || !selectedTime || !partySize) return;
+        if (!selectedLocation || !selectedDate || !selectedTime || !partySize) {
+            alert('Please fill in all required fields');
+            return;
+        }
 
-        createReservationMutation.mutate({
+        // ✅ FIX: Backend expects 'reserved_for' as combined ISO datetime (Y-m-d\TH:i)
+        const reservedFor = `${selectedDate}T${selectedTime}`;
+
+        // ✅ FIX: Backend expects 'guest_count' NOT 'party_size'
+        // ✅ FIX: Backend expects 'notes' NOT 'special_requests'
+        const payload = {
             location_id: selectedLocation,
-            reservation_date: selectedDate,
-            reservation_time: selectedTime,
-            party_size: partySize,
-            special_requests: specialRequests || null
+            reserved_for: reservedFor,        // ✅ Combined datetime
+            guest_count: partySize,           // ✅ Renamed from party_size
+            notes: specialRequests || null   // ✅ Renamed from special_requests
+        };
+
+        console.log('📋 Reservation payload:', payload);
+
+        createReservationMutation.mutate(payload, {
+            onError: (error: any) => {
+                console.error('❌ Reservation failed:', error);
+                const errorMsg = error?.response?.data?.message ||
+                    error?.response?.data?.errors ||
+                    'Failed to create reservation';
+                alert(`Reservation Failed: ${JSON.stringify(errorMsg)}`);
+            }
         });
     };
 

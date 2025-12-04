@@ -99,6 +99,7 @@ Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup']);
 // Sprint 1: Suppliers & Units (CRUD accessible to all for now)
 Route::apiResource('suppliers', SupplierController::class);
 Route::get('/suppliers/types', [SupplierController::class, 'types']);
+Route::get('/supplier-stats', [SupplierController::class, 'stats']);
 Route::apiResource('units', UnitController::class);
 Route::get('/units/base-units', [UnitController::class, 'baseUnits']);
 
@@ -227,10 +228,17 @@ Route::get('/_debug/auth', function (Request $request) {
 Route::get('/user', [AuthController::class, 'me'])->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 
-// Conditionally enforce admin auth in non-local environments
-$adminMiddleware = config('app.enforce_admin_auth')
-    ? [\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager']
-    : [];
+// Admin routes - always need session for user() to work, auth is optional in local
+$adminMiddleware = [
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+];
+
+// In production, enforce authentication
+if (config('app.enforce_admin_auth') || app()->environment('production')) {
+    $adminMiddleware[] = 'auth:sanctum';
+    $adminMiddleware[] = 'role:admin,manager';
+}
 
 // Admin/Manager management endpoints
 Route::prefix('admin')
@@ -249,8 +257,10 @@ Route::prefix('admin')
     // Menu Items
     Route::apiResource('menu-items', MenuItemController::class);
     // Employees
+    Route::get('employee-stats', [EmployeeController::class, 'stats']);
     Route::apiResource('employees', EmployeeController::class);
     // Customers
+    Route::get('customer-stats', [CustomerController::class, 'aggregateStats']);
     Route::get('customers/{customer}/history', [CustomerController::class, 'history']);
     Route::get('customers/{customer}/stats', [CustomerController::class, 'stats']);
     Route::post('customers/{customer}/update-tier', [CustomerController::class, 'updateTier']);
@@ -266,8 +276,8 @@ Route::prefix('admin')
     // Loyalty Points
     Route::get('loyalty-stats', [LoyaltyPointController::class, 'stats']);
     Route::apiResource('loyalty-points', LoyaltyPointController::class);
-    // Ingredients (Inventory)
-    Route::apiResource('ingredients', IngredientController::class);
+    // Ingredients (Inventory) - Moved to Sprint 4 section to avoid route conflict
+    // Route::apiResource('ingredients', IngredientController::class);
     // Tables
     Route::get('tables/grouped', [\App\Http\Controllers\Admin\TableController::class, 'index']);
     Route::apiResource('tables', TableController::class);
@@ -298,8 +308,12 @@ Route::prefix('admin')
     Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
     
     // Sprint 1: Foundation Modules
-    // Locations (enhanced admin endpoint)
+    // Locations (full CRUD for admin)
     Route::get('locations', [LocationController::class, 'adminIndex']);
+    Route::post('locations', [LocationController::class, 'store']);
+    Route::get('locations/{location}', [LocationController::class, 'show']);
+    Route::put('locations/{location}', [LocationController::class, 'update']);
+    Route::delete('locations/{location}', [LocationController::class, 'destroy']);
     
     // Positions (enhanced admin endpoint)
     Route::get('positions', [PositionController::class, 'adminIndex']);

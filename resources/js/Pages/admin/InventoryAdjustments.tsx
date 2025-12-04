@@ -220,7 +220,7 @@ export default function InventoryAdjustments() {
             id: selectedAdjustment.id,
             data: {
                 approved_by: 1, // Replace with actual user ID
-                approval_notes: approvalNotes
+                rejection_reason: approvalNotes
             }
         });
     };

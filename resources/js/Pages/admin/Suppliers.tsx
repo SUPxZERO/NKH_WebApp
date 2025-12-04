@@ -90,14 +90,21 @@ export default function Suppliers() {
         queryFn: () => apiGet('/api/locations')
     });
 
+    // Fetch stats from backend for accurate totals
+    const { data: statsData } = useQuery({
+        queryKey: ['supplier-stats'],
+        queryFn: () => apiGet('/api/supplier-stats')
+    });
+
     const supplierList = useMemo(() => suppliers?.data || [], [suppliers]);
 
+    // Use backend stats for accurate totals, with fallback to list-based calculation
     const stats = useMemo(() => ({
-        total: suppliers?.meta?.total || supplierList.length,
-        active: supplierList.filter((s: any) => s.is_active).length,
-        food: supplierList.filter((s: any) => s.type === 'food_produce').length,
-        beverage: supplierList.filter((s: any) => s.type === 'beverages').length
-    }), [supplierList, suppliers]);
+        total: statsData?.total ?? suppliers?.meta?.total ?? supplierList.length,
+        active: statsData?.active ?? supplierList.filter((s: any) => s.is_active).length,
+        food: statsData?.food ?? supplierList.filter((s: any) => s.type === 'food_produce').length,
+        beverage: statsData?.beverage ?? supplierList.filter((s: any) => s.type === 'beverages').length
+    }), [supplierList, suppliers, statsData]);
 
     const supplierTypes = {
         food_produce: 'Food & Produce',

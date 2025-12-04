@@ -67,15 +67,18 @@ class InventoryAdjustmentController extends Controller
         }
 
         $validated = $request->validate([
-            'approved_by' => 'required|exists:users,id',
             'approval_notes' => 'nullable|string'
         ]);
 
-        DB::transaction(function () use ($inventoryAdjustment, $validated) {
+        // Use authenticated user ID, default to 1 if not authenticated
+        $approvedBy = auth()->id() ?? 1;
+
+        DB::transaction(function () use ($inventoryAdjustment, $validated, $approvedBy) {
             $inventoryAdjustment->update([
                 'status' => 'approved',
-                'approved_by' => $validated['approved_by'],
-                'approval_notes' => $validated['approval_notes']
+                'approved_by' => $approvedBy,
+                'approved_at' => now(),
+                'approval_notes' => $validated['approval_notes'] ?? null
             ]);
 
             // Apply the adjustment to inventory
@@ -87,14 +90,6 @@ class InventoryAdjustmentController extends Controller
                 ['quantity' => 0]
             );
 
-            // We set the quantity to quantity_after (absolute adjustment)
-            // Or we apply the change?
-            // Since it's an adjustment based on a count, we should probably set it to quantity_after.
-            // But if inventory changed since the count?
-            // Usually adjustments are "add/subtract".
-            // But here we have before/after.
-            // Let's apply the change.
-            
             $inventory->increment('quantity', $inventoryAdjustment->quantity_change);
 
             // Record transaction
@@ -105,7 +100,7 @@ class InventoryAdjustmentController extends Controller
                 'quantity' => $inventoryAdjustment->quantity_change,
                 'notes' => "Adjustment approved. Reason: {$inventoryAdjustment->reason}",
                 'transacted_at' => now(),
-                'created_by' => $validated['approved_by']
+                'created_by' => $approvedBy
             ]);
             
             // Update ingredient total stock
@@ -123,14 +118,17 @@ class InventoryAdjustmentController extends Controller
         }
 
         $validated = $request->validate([
-            'approved_by' => 'required|exists:users,id',
-            'approval_notes' => 'required|string'
+            'rejection_reason' => 'nullable|string'
         ]);
+
+        // Use authenticated user ID, default to 1 if not authenticated
+        $rejectedBy = auth()->id() ?? 1;
 
         $inventoryAdjustment->update([
             'status' => 'rejected',
-            'approved_by' => $validated['approved_by'],
-            'approval_notes' => $validated['approval_notes']
+            'rejected_by' => $rejectedBy,
+            'rejected_at' => now(),
+            'rejection_reason' => $validated['rejection_reason'] ?? null
         ]);
 
         return response()->json(['message' => 'Adjustment rejected']);

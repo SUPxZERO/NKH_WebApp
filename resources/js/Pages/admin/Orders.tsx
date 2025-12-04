@@ -120,11 +120,32 @@ export default function Orders() {
   // Fetch orders
   const { data: orders, isLoading } = useQuery({
     queryKey: ['admin/orders', page, search, statusFilter, typeFilter, approvalFilter],
-    queryFn: () => {
-      const endpoint = approvalFilter === 'pending'
-        ? `/api/admin/orders/pending-approval?page=${page}&per_page=${perPage}&search=${search}`
-        : `/api/admin/orders?page=${page}&per_page=${perPage}&search=${search}&status=${statusFilter}&type=${typeFilter}`;
-      return apiGet(endpoint);
+    queryFn: async () => {
+      // ✅ Build query parameters
+      const params = new URLSearchParams({
+        page: String(page),
+        per_page: String(perPage),
+      });
+
+      if (search) params.append('search', search);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (typeFilter !== 'all') params.append('type', typeFilter);
+      if (approvalFilter !== 'all') params.append('approval_status', approvalFilter);
+
+      const endpoint = `/api/admin/orders?${params.toString()}`;
+
+      console.log('🔍 Fetching orders:', { endpoint, filters: { page, search, statusFilter, typeFilter, approvalFilter } });
+
+      const response = await apiGet(endpoint);
+
+      console.log('📦 Orders response:', {
+        total: response?.meta?.total || response?.total || 'unknown',
+        count: response?.data?.length || (Array.isArray(response) ? response.length : 0),
+        hasData: !!response,
+        sample: response?.data?.[0] || null
+      });
+
+      return response;
     }
   }) as { data: any, isLoading: boolean };
 

@@ -12,9 +12,12 @@ class UpdateCategoryRequest extends FormRequest
     {
         return [
             'location_id' => ['nullable','exists:locations,id'],
+            'parent_id' => ['nullable', 'exists:categories,id'],
             'slug' => ['sometimes','string','max:150'],
             'display_order' => ['sometimes','integer','min:0'],
             'is_active' => ['sometimes','boolean'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }

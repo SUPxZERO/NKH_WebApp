@@ -83,6 +83,12 @@ export default function Employees() {
   const { data: positions } = useQuery({ queryKey: ['positions'], queryFn: () => apiGet('/positions') });
   const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: () => apiGet('/locations') });
 
+  // Fetch stats from backend for accurate totals
+  const { data: statsData } = useQuery({
+    queryKey: ['employee-stats'],
+    queryFn: () => apiGet('/admin/employee-stats')
+  });
+
   const employeeList: Employee[] = useMemo(() => {
     if (!employees) return [];
     if (Array.isArray(employees)) return employees;
@@ -90,12 +96,13 @@ export default function Employees() {
     return [];
   }, [employees]);
 
+  // Use backend stats with fallback to list-based calculation
   const stats = useMemo(() => ({
-    total: (employees as any)?.meta?.total || employeeList.length,
-    active: employeeList.filter(e => e.status === 'active').length,
-    onLeave: employeeList.filter(e => e.status === 'on_leave').length,
-    inactive: employeeList.filter(e => e.status === 'inactive' || e.status === 'terminated').length
-  }), [employeeList, employees]);
+    total: (statsData as any)?.total ?? (employees as any)?.meta?.total ?? employeeList.length,
+    active: (statsData as any)?.active ?? employeeList.filter(e => e.status === 'active').length,
+    onLeave: (statsData as any)?.on_leave ?? employeeList.filter(e => e.status === 'on_leave').length,
+    inactive: (statsData as any)?.inactive ?? employeeList.filter(e => e.status === 'inactive' || e.status === 'terminated').length
+  }), [employeeList, employees, statsData]);
 
   // Mutations
   const createMutation = useMutation({

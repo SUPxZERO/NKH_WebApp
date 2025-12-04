@@ -75,7 +75,10 @@ class CategoryController extends Controller
         $query = Category::withoutGlobalScope('active')
             ->with([
                 'translations',
-                'children',
+                'children.translations',
+                'children.children.translations',
+                'children.children.children.translations',
+                'children.children.children.children.translations',
                 'menuItems' => function($query) {
                     $query->withoutGlobalScope('active');
                 }
@@ -152,7 +155,15 @@ class CategoryController extends Controller
         }
 
         $category = Category::create($data);
-        $category->load(['parent', 'children']);
+
+        // Save translation
+        $category->translations()->create([
+            'locale' => app()->getLocale(),
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+        ]);
+
+        $category->load(['translations', 'parent', 'children']);
         
         return new CategoryResource($category);
     }
@@ -192,7 +203,20 @@ class CategoryController extends Controller
         }
 
         $category->update($data);
-        $category->load(['parent', 'children']);
+
+        // Update translation
+        $translationData = [];
+        if ($request->has('name')) $translationData['name'] = $request->input('name');
+        if ($request->has('description')) $translationData['description'] = $request->input('description');
+
+        if (!empty($translationData)) {
+            $category->translations()->updateOrCreate(
+                ['locale' => app()->getLocale()],
+                $translationData
+            );
+        }
+
+        $category->load(['translations', 'parent', 'children']);
         
         return new CategoryResource($category);
     }
@@ -213,22 +237,17 @@ class CategoryController extends Controller
     // DELETE /api/categories/{category} (role:admin,manager)
     public function destroy(Category $category): JsonResponse
     {
-
-        $category = Category::find($category->id);
-
-$category->delete();
-
-        // Check if category has children
+        // Check if category has children FIRST (before any deletion)
         if ($category->children()->exists()) {
             return response()->json([
                 'message' => 'Cannot delete category with sub-categories. Please delete sub-categories first.'
             ], 422);
         }
 
-        // Check if category has menu items
-        if ($category->menuItems()->exists()) {
+        // Check if category has menu items (including soft-deleted ones)
+        if ($category->menuItems()->withTrashed()->exists()) {
             return response()->json([
-                'message' => 'Cannot delete category with menu items. Please move or delete menu items first.'
+                'message' => 'Cannot delete category with menu items (including archived ones). Please permanently delete or move them first.'
             ], 422);
         }
 

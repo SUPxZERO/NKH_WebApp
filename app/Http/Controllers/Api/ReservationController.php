@@ -59,7 +59,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'table_id' => ['required', 'integer', 'exists:tables,id'],
             'customer_id' => ['required', 'integer', 'exists:customers,id'],
-            'reserved_for' => ['required', 'date_format:Y-m-d\\TH:i'],
+            'reserved_for' => ['required', 'date'],
             'duration_minutes' => ['nullable', 'integer', 'min:30', 'max:480'],
             'guest_count' => ['required', 'integer', 'min:1'],
             'status' => ['nullable', 'in:pending,confirmed,seated,completed,cancelled,no_show'],
@@ -81,7 +81,7 @@ class ReservationController extends Controller
             abort(422, 'Guest count exceeds table capacity.');
         }
 
-        $reservedAt = Carbon::createFromFormat('Y-m-d\\TH:i', $validated['reserved_for']);
+        $reservedAt = Carbon::parse($validated['reserved_for']);
         $reservationDate = $reservedAt->toDateString();
         $reservationTime = $reservedAt->format('H:i:s');
 
@@ -138,7 +138,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'table_id' => ['sometimes', 'integer', 'exists:tables,id'],
             'customer_id' => ['sometimes', 'integer', 'exists:customers,id'],
-            'reserved_for' => ['sometimes', 'date_format:Y-m-d\\TH:i'],
+            'reserved_for' => ['sometimes', 'date'],
             'duration_minutes' => ['sometimes', 'integer', 'min:30', 'max:480'],
             'guest_count' => ['sometimes', 'integer', 'min:1'],
             'status' => ['sometimes', 'in:pending,confirmed,seated,completed,cancelled,no_show'],
@@ -171,9 +171,13 @@ class ReservationController extends Controller
             }
 
             if (isset($validated['reserved_for'])) {
-                $reservedAt = Carbon::createFromFormat('Y-m-d\\TH:i', $validated['reserved_for']);
+                $reservedAt = Carbon::parse($validated['reserved_for']);
             } else {
-                $reservedAt = Carbon::createFromFormat('Y-m-d H:i:s', $reservation->reservation_date.' '.$reservation->reservation_time);
+                $dateStr = $reservation->reservation_date instanceof \Carbon\Carbon 
+                    ? $reservation->reservation_date->format('Y-m-d') 
+                    : substr((string)$reservation->reservation_date, 0, 10);
+                    
+                $reservedAt = Carbon::parse($dateStr . ' ' . $reservation->reservation_time);
             }
 
             $reservationDate = $reservedAt->toDateString();

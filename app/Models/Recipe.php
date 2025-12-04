@@ -11,8 +11,24 @@ class Recipe extends Model
 
     protected $fillable = [
         'menu_item_id',
-        'yield_portions',
+        'name',
+        'description',
         'instructions',
+        'prep_time_minutes',
+        'cook_time_minutes',
+        'servings',
+        'yield_portions',
+        'is_active',
+        'total_cost',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'prep_time_minutes' => 'integer',
+        'cook_time_minutes' => 'integer',
+        'servings' => 'integer',
+        'yield_portions' => 'integer',
+        'total_cost' => 'decimal:2',
     ];
 
     public function menuItem()
@@ -25,3 +41,4 @@ class Recipe extends Model
         return $this->hasMany(RecipeIngredient::class);
     }
 }
+

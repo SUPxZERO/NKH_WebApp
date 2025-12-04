@@ -87,8 +87,8 @@ export default function Categories() {
   const stats = useMemo(() => ({
     total: statsData?.total || 0,
     active: statsData?.active || 0,
-    sub: statsData?.categories || 0,
-    items: statsData?.menu_items || 0
+    sub: statsData?.sub_categories || 0,
+    items: statsData?.menu_items_total || 0
   }), [statsData]);
 
   // Mutations

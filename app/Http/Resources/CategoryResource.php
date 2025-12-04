@@ -30,6 +30,7 @@ class CategoryResource extends JsonResource
             'name' => $translation ? $translation->name : null,
             'slug' => $this->slug,
             'description' => $translation ? $translation->description : null,
+            'image' => $this->image ? \Illuminate\Support\Facades\Storage::url($this->image) : null,
             'display_order' => (int) $this->display_order,
             'is_active' => (bool) $this->is_active,
             'children' => CategoryResource::collection($this->whenLoaded('children')),

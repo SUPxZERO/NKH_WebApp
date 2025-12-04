@@ -245,11 +245,15 @@ class OrderController extends Controller
     // GET /api/admin/orders (Admin oversight)
     public function index(Request $request)
     {
-        $query = Order::with(['items.menuItem', 'table', 'customer.user', 'employee.user', 'timeSlot']);
+        $query = Order::with(['items.menuItem', 'table', 'customer.user', 'employee.user', 'timeSlot', 'location']);
         
-        // CRITICAL: Exclude orders pending approval from the main Orders Track
-        // Only approved orders should appear here. Pending orders are shown in the Pending Approval tab.
-        $query->where('approval_status', '!=', Order::APPROVAL_STATUS_PENDING);
+        // ✅ FIX: Show ALL orders by default (removed hardcoded exclusion of pending approval orders)
+        // Admin can filter by approval_status if needed via query parameter
+        
+        // Filter by approval status (optional filter - defaults to showing all)
+        if ($request->filled('approval_status') && $request->approval_status !== 'all') {
+            $query->where('approval_status', $request->approval_status);
+        }
         
         // Filter by location
         if ($request->has('location_id')) {
@@ -288,9 +292,24 @@ class OrderController extends Controller
             $query->whereDate('ordered_at', '<=', $request->end_date);
         }
         
+        // ✅ Add diagnostic logging
+        \Log::info('📊 Admin Orders Query', [
+            'filters' => $request->only(['status', 'type', 'approval_status', 'location_id', 'search', 'start_date', 'end_date']),
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+        
         $orders = $query->orderBy('ordered_at', 'desc')
                        ->paginate($request->get('per_page', 15));
-    
+        
+        // ✅ Log result count for debugging
+        \Log::info('✅ Admin Orders Result', [
+            'total' => $orders->total(),
+            'current_page' => $orders->currentPage(),
+            'per_page' => $orders->perPage(),
+            'showing' => $orders->count()
+        ]);
+
         return OrderResource::collection($orders);
     }
 

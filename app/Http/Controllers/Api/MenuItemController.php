@@ -27,7 +27,7 @@ class MenuItemController extends Controller
             }
 
             // Filter active/inactive items
-            if ($request->boolean('active_only', true)) {
+            if ($request->boolean('active_only', false)) {
                 $query->where('is_active', true);
             }
 
@@ -92,6 +92,13 @@ class MenuItemController extends Controller
             'display_order' => $data['display_order'] ?? 0,
         ]);
 
+        // Save translation
+        $menuItem->translations()->create([
+            'locale' => app()->getLocale(),
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+        ]);
+
         return new MenuItemResource($menuItem->load(['translations']));
     }
 
@@ -116,7 +123,28 @@ class MenuItemController extends Controller
         // Map image file input to image_path column
         unset($data['image']);
 
-        $menuItem->update($data);
+        // Separate translation fields
+        $translationFields = ['name', 'description'];
+        $modelData = array_diff_key($data, array_flip($translationFields));
+
+        // Explicitly handle is_active if present (for toggle status)
+        if ($request->has('is_active')) {
+            $modelData['is_active'] = $request->boolean('is_active');
+        }
+
+        $menuItem->update($modelData);
+
+        // Update translation
+        $translationData = [];
+        if ($request->has('name')) $translationData['name'] = $request->input('name');
+        if ($request->has('description')) $translationData['description'] = $request->input('description');
+
+        if (!empty($translationData)) {
+            $menuItem->translations()->updateOrCreate(
+                ['locale' => app()->getLocale()],
+                $translationData
+            );
+        }
 
         return new MenuItemResource($menuItem->fresh()->load(['translations']));
     }
@@ -124,10 +152,21 @@ class MenuItemController extends Controller
     // DELETE /api/menu-items/{item} (role:admin,manager)
     public function destroy(MenuItem $menuItem)
     {
+        // Check if item has existing orders - inform user but still soft delete
+        $orderCount = $menuItem->orderItems()->count();
+        
         if ($menuItem->image_path) {
             Storage::disk('public')->delete($menuItem->image_path);
         }
+        
+        // Soft delete the item (SoftDeletes trait is used)
         $menuItem->delete();
-        return response()->json(['message' => 'Menu item deleted.']);
+        
+        $message = 'Menu item deleted.';
+        if ($orderCount > 0) {
+            $message = "Menu item archived (has {$orderCount} historical orders).";
+        }
+        
+        return response()->json(['message' => $message]);
     }
 }

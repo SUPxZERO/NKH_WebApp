@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -26,20 +27,19 @@ use Illuminate\Database\Eloquent\Model;
  */
 class MenuItem extends Model
 {
+    use HasFactory, SoftDeletes;
 
     protected $with = ['translations'];
 
     protected $fillable = [
         'location_id',
         'category_id',
-        'name',
         'sku',
         'slug',
         'price',
         'cost',
         'image_path',
         'image',
-        'description',
         'is_popular',
         'is_featured',
         'featured_order',
@@ -56,9 +56,11 @@ class MenuItem extends Model
     {
         parent::boot();
         
+        /*
         static::addGlobalScope('active', function ($query) {
             $query->where('is_active', true);
         });
+        */
         
         static::addGlobalScope('ordered', function ($query) {
             $query->orderBy('display_order', 'asc');

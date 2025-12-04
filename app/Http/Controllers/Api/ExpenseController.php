@@ -70,8 +70,13 @@ class ExpenseController extends Controller
             'status' => ['nullable', 'in:draft,approved,paid,voided'],
         ]);
 
+        // Set default location_id if not provided
+        $locationId = $data['location_id'] 
+            ?? $request->user()?->employee?->location_id 
+            ?? \App\Models\Location::first()?->id;
+
         $expense = Expense::create([
-            'location_id' => $data['location_id'] ?? null,
+            'location_id' => $locationId,
             'expense_category_id' => $data['expense_category_id'],
             'expense_date' => $data['expense_date'],
             'amount' => $data['amount'],

@@ -30,6 +30,8 @@ interface Ingredient {
     reorder_point?: number;
     unit?: { code: string; name: string };
     supplier?: { name: string };
+    supplier_id?: number;
+    cost_per_unit?: number;
 }
 
 interface Alert {
@@ -94,6 +96,36 @@ export default function StockAlerts() {
         },
         onError: () => toastError('Failed to acknowledge alert')
     });
+
+    const createPOMutation = useMutation({
+        mutationFn: (data: any) => apiPost('/api/admin/purchase-orders', data),
+        onSuccess: () => {
+            toastSuccess('Purchase Order created successfully');
+            setOpenReorder(false);
+            setReorderQuantity('');
+        },
+        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to create PO')
+    });
+
+    const handleCreatePO = () => {
+        if (!selectedIngredient || !reorderQuantity) return;
+
+        if (!selectedIngredient.supplier_id) {
+            toastError('Ingredient has no supplier assigned');
+            return;
+        }
+
+        const data = {
+            supplier_id: selectedIngredient.supplier_id,
+            order_date: new Date().toISOString().split('T')[0],
+            items: [{
+                ingredient_id: selectedIngredient.id,
+                quantity: parseFloat(reorderQuantity),
+                unit_price: selectedIngredient.cost_per_unit || 0
+            }]
+        };
+        createPOMutation.mutate(data);
+    };
 
     const getAlertTypeColor = (type: string) => {
         switch (type) {
@@ -398,7 +430,7 @@ export default function StockAlerts() {
                             <div className="flex gap-3 pt-4">
                                 <Button variant="secondary" onClick={() => { setOpenReorder(false); setReorderQuantity(''); }}
                                     className="flex-1 border-white/20 hover:bg-white/10">Cancel</Button>
-                                <Button variant="primary" onClick={() => { toastSuccess('PO created!'); setOpenReorder(false); }}
+                                <Button variant="primary" onClick={handleCreatePO} disabled={createPOMutation.isPending}
                                     className="flex-1 bg-blue-600 hover:bg-blue-700">Create Purchase Order</Button>
                             </div>
                         </div>

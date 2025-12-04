@@ -132,4 +132,17 @@ class EmployeeController extends Controller
         
         return response()->json(['message' => 'Employee deactivated successfully.']);
     }
+
+    /**
+     * Get aggregate statistics for Employee management dashboard
+     */
+    public function stats(): JsonResponse
+    {
+        return response()->json([
+            'total' => Employee::count(),
+            'active' => Employee::where('status', 'active')->count(),
+            'on_leave' => Employee::where('status', 'on_leave')->count(),
+            'inactive' => Employee::whereIn('status', ['inactive', 'terminated'])->count(),
+        ]);
+    }
 }

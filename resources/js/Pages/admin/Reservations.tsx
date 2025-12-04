@@ -231,10 +231,24 @@ export default function Reservations() {
   };
 
   const handleEdit = (reservation: Reservation) => {
+    let dateStr = '';
+    if (reservation.reserved_for) {
+      try {
+        const d = new Date(reservation.reserved_for);
+        if (!isNaN(d.getTime())) {
+          // Adjust to local ISO string for datetime-local input
+          const offset = d.getTimezoneOffset() * 60000;
+          dateStr = new Date(d.getTime() - offset).toISOString().slice(0, 16);
+        }
+      } catch (e) {
+        console.error("Invalid date:", reservation.reserved_for);
+      }
+    }
+
     setFormData({
       table_id: reservation.table_id.toString(),
       customer_id: reservation.customer_id.toString(),
-      reserved_for: reservation.reserved_for.slice(0, 16),
+      reserved_for: dateStr,
       duration_minutes: reservation.duration_minutes.toString(),
       guest_count: reservation.guest_count.toString(),
       status: reservation.status,
@@ -263,8 +277,12 @@ export default function Reservations() {
   };
 
   const isLate = (res: Reservation) => {
+    if (!res.reserved_for) return false;
+    const d = new Date(res.reserved_for);
+    if (isNaN(d.getTime())) return false;
+
     return (res.status === 'pending' || res.status === 'confirmed') &&
-      new Date(res.reserved_for) < new Date(Date.now() - 15 * 60000);
+      d < new Date(Date.now() - 15 * 60000);
   };
 
   return (
@@ -368,12 +386,18 @@ export default function Reservations() {
                   >
                     {/* Time */}
                     <div className="col-span-2 md:col-span-1">
-                      <div className="font-bold text-white text-lg">
-                        {new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(res.reserved_for).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                      </div>
+                      {res.reserved_for && !isNaN(new Date(res.reserved_for).getTime()) ? (
+                        <>
+                          <div className="font-bold text-white text-lg">
+                            {new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(res.reserved_for).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs text-gray-500 italic">Invalid Date</div>
+                      )}
                     </div>
 
                     {/* Customer */}

@@ -140,8 +140,10 @@ export default function MenuItems() {
     const data = new FormData();
     Object.entries(formData).forEach(([key, val]) => {
       if (key === 'is_popular' || key === 'is_active') data.append(key, val ? '1' : '0');
+      else if (key === 'category_id' && (val === '' || val === 'null' || val === undefined)) return; // Skip empty category_id
       else data.append(key, String(val));
     });
+    data.append('location_id', '1'); // Default location ID
     if (image) data.append('image', image);
 
     if (editingItem) updateMutation.mutate({ id: editingItem.id, data });
@@ -151,8 +153,8 @@ export default function MenuItems() {
   const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
     setFormData({
-      name: item.translations?.[0]?.name || '',
-      description: item.translations?.[0]?.description || '',
+      name: item.name || '',
+      description: item.description || '',
       slug: item.slug, sku: item.sku || '', price: item.price.toString(),
       cost: item.cost?.toString() || '', category_id: item.category_id?.toString() || '',
       is_popular: item.is_popular, is_active: item.is_active, display_order: item.display_order
@@ -350,11 +352,19 @@ export default function MenuItems() {
               <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
                 <option value="">Select Category</option>
-                {(categories as any)?.data?.map((cat: Category) => (
-                  <option key={cat.id} value={cat.id} className="bg-gray-800">
-                    {cat.name || cat.translations?.[0]?.name}
-                  </option>
-                ))}
+                {(() => {
+                  const renderCategoryOptions = (cats: any[], level = 0) => {
+                    return cats.map(cat => (
+                      <React.Fragment key={cat.id}>
+                        <option value={cat.id} className="bg-gray-800">
+                          {'\u00A0'.repeat(level * 4)}{cat.name || cat.translations?.[0]?.name}
+                        </option>
+                        {cat.children && cat.children.length > 0 && renderCategoryOptions(cat.children, level + 1)}
+                      </React.Fragment>
+                    ));
+                  };
+                  return (categories as any)?.data ? renderCategoryOptions((categories as any).data) : null;
+                })()}
               </select>
             </div>
           </div>

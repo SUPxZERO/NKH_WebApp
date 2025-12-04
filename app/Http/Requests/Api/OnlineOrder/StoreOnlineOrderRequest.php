@@ -17,7 +17,7 @@ class StoreOnlineOrderRequest extends FormRequest
             // Accept either time_slot_id OR slot_date + slot_time
             'time_slot_id' => ['nullable','exists:order_time_slots,id'],
             'slot_date' => ['required_without:time_slot_id','date','after_or_equal:today'],
-            'slot_time' => ['required_without:time_slot_id','date_format:H:i'],
+            'slot_time' => ['required_without:time_slot_id','date_format:H:i,H:i:s'], // Accept both formats
             'notes' => ['nullable','string'],
             'promotion_code' => ['nullable','string'],
             'order_items' => ['required','array','min:1'],

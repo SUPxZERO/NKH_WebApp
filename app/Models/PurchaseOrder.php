@@ -13,26 +13,26 @@ class PurchaseOrder extends Model
         'location_id',
         'supplier_id',
         'created_by',
+        'po_number',
         'order_date',
-        'expected_date',
-        'received_at',
+        'expected_delivery_date',
+        'received_date',
         'status',
-        'subtotal',
-        'tax_total',
-        'discount_total',
-        'total',
-        'currency',
+        'total_amount',
         'notes',
     ];
 
     protected $casts = [
         'order_date' => 'date',
         'expected_date' => 'date',
+        'expected_delivery_date' => 'date',
         'received_at' => 'datetime',
+        'received_date' => 'datetime',
         'subtotal' => 'decimal:2',
         'tax_total' => 'decimal:2',
         'discount_total' => 'decimal:2',
         'total' => 'decimal:2',
+        'total_amount' => 'decimal:2',
     ];
 
     public function location()

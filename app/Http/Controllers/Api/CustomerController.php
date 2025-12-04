@@ -402,4 +402,26 @@ class CustomerController extends Controller
 
         return response()->json(['data' => $history]);
     }
+
+    // GET /api/admin/customer-stats - Admin aggregate stats
+    public function aggregateStats(): JsonResponse
+    {
+        $total = Customer::count();
+        $active = Customer::whereHas('user', function($q) {
+            $q->where('is_active', true);
+        })->count();
+        $vip = Customer::where('customer_tier', 'gold')
+            ->orWhere('customer_tier', 'platinum')
+            ->count();
+        $newThisMonth = Customer::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        return response()->json([
+            'total' => $total,
+            'active' => $active,
+            'vip' => $vip,
+            'new_this_month' => $newThisMonth,
+        ]);
+    }
 }

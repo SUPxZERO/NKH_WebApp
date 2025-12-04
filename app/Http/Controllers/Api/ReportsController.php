@@ -159,7 +159,7 @@ class ReportsController extends Controller
             ->where('status', '!=', 'cancelled')
             ->sum('total_amount');
 
-        $totalExpenses = Expense::whereBetween('date', [$dates['start'], $dates['end']])
+        $totalExpenses = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
             ->sum('amount');
 
         // Calculate COGS
@@ -175,7 +175,7 @@ class ReportsController extends Controller
         $profitMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
 
         // Expense breakdown
-        $expenseCategories = Expense::whereBetween('date', [$dates['start'], $dates['end']])
+        $expenseCategories = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
             ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
             ->select([
                 'expense_categories.name as category',
@@ -221,8 +221,8 @@ class ReportsController extends Controller
                 $dateStr = $item->date;
                 $expenses = Expense::when(
                     $groupBy === "DATE(created_at)",
-                    fn($q) => $q->whereDate('date', $dateStr),
-                    fn($q) => $q->where(DB::raw("DATE_FORMAT(date, '%Y-%m')"), $dateStr)
+                    fn($q) => $q->whereDate('expense_date', $dateStr),
+                    fn($q) => $q->where(DB::raw("DATE_FORMAT(expense_date, '%Y-%m')"), $dateStr)
                 )->sum('amount');
 
                 $item->expenses = $expenses;

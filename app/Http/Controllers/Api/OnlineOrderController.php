@@ -386,7 +386,7 @@ class OnlineOrderController extends Controller
                     'pickup_time' => $data['order_type'] === 'pickup' ? $scheduledAt : null,
                     'special_instructions' => $data['notes'] ?? null,
                     'customer_address_id' => $data['customer_address_id'] ?? null,
-                    'time_slot_id' => $data['time_slot_id'],
+                    'time_slot_id' => $slot->id,
                 ]);
 
             // Create order items

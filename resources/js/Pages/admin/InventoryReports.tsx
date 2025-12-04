@@ -95,7 +95,7 @@ export default function InventoryReports() {
     };
 
     const handleExportExcel = () => {
-        window.location.href = `/api/admin/reports/inventory/export/excel?${getQueryParams()}`;
+        window.location.href = `/api/admin/reports/inventory/export/csv?${getQueryParams()}`;
     };
 
     const stats = [
@@ -105,7 +105,7 @@ export default function InventoryReports() {
             icon: DollarSign,
             color: 'text-green-400',
             bgColor: 'bg-green-500/20',
-            change: valuation?.change_percent
+            change: `${(valuation?.change_percent || 0).toFixed(1)}%`
         },
         {
             label: 'Items in Stock',
@@ -215,7 +215,7 @@ export default function InventoryReports() {
                                             <p className="text-sm text-gray-400">{stat.label}</p>
                                             <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
                                             {stat.change && (
-                                                <p className={`text-xs mt-1 ${stat.change.startsWith('-') ? 'text-red-400' : 'text-green-400'}`}>
+                                                <p className={`text-xs mt-1 ${String(stat.change).startsWith('-') ? 'text-red-400' : 'text-green-400'}`}>
                                                     {stat.change}
                                                 </p>
                                             )}
@@ -348,15 +348,15 @@ export default function InventoryReports() {
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="text-white font-semibold">{cat.category}</h4>
                                         <Badge className={
-                                            cat.turnover_rate > 10 ? 'bg-green-500/20 text-green-400' :
-                                                cat.turnover_rate > 5 ? 'bg-yellow-500/20 text-yellow-400' :
+                                            Number(cat.turnover_rate || 0) > 10 ? 'bg-green-500/20 text-green-400' :
+                                                Number(cat.turnover_rate || 0) > 5 ? 'bg-yellow-500/20 text-yellow-400' :
                                                     'bg-red-500/20 text-red-400'
                                         }>
-                                            {cat.turnover_rate.toFixed(1)}x
+                                            {Number(cat.turnover_rate || 0).toFixed(1)}x
                                         </Badge>
                                     </div>
                                     <p className="text-sm text-gray-400">
-                                        {cat.turnover_rate > 10 ? 'Excellent' : cat.turnover_rate > 5 ? 'Good' : 'Needs Attention'}
+                                        {Number(cat.turnover_rate || 0) > 10 ? 'Excellent' : Number(cat.turnover_rate || 0) > 5 ? 'Good' : 'Needs Attention'}
                                     </p>
                                 </div>
                             ))}

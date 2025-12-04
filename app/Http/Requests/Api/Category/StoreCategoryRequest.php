@@ -12,9 +12,12 @@ class StoreCategoryRequest extends FormRequest
     {
         return [
             'location_id' => ['nullable','exists:locations,id'],
+            'parent_id' => ['nullable', 'exists:categories,id'],
             'slug' => ['required','string','max:150'],
             'display_order' => ['nullable','integer','min:0'],
             'is_active' => ['boolean'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }

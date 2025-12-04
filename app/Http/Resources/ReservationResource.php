@@ -4,14 +4,25 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class ReservationResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        // Use Carbon to properly format datetime as ISO 8601 string
         $reservedAt = null;
         if ($this->reservation_date && $this->reservation_time) {
-            $reservedAt = $this->reservation_date.'T'.$this->reservation_time;
+            try {
+                $dateStr = $this->reservation_date instanceof \Carbon\Carbon 
+                    ? $this->reservation_date->format('Y-m-d') 
+                    : substr((string)$this->reservation_date, 0, 10);
+                    
+                $reservedAt = Carbon::parse($dateStr . ' ' . $this->reservation_time)->toIso8601String();
+            } catch (\Exception $e) {
+                // Fallback to original concatenation if parsing fails
+                $reservedAt = null;
+            }
         }
 
         return [

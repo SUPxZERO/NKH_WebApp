@@ -93,19 +93,19 @@ export default function Locations() {
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/locations', data),
+        mutationFn: (data: any) => apiPost('/api/admin/locations', data),
         onSuccess: () => { toastSuccess('Location created'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/locations'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/locations/${id}`, data),
+        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/locations/${id}`, data),
         onSuccess: () => { toastSuccess('Location updated'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/locations'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/locations/${id}`),
+        mutationFn: (id: number) => apiDelete(`/api/admin/locations/${id}`),
         onSuccess: () => { toastSuccess('Location deleted'); qc.invalidateQueries({ queryKey: ['admin/locations'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
