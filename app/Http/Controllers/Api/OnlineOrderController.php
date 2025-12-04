@@ -24,25 +24,52 @@ use Illuminate\Support\Str;
 
 class OnlineOrderController extends Controller
 {
-    // GET /api/time-slots?date=YYYY-MM-DD&mode=delivery
+    /**
+     * GET /api/time-slots?date=YYYY-MM-DD&mode=delivery&location_id=1
+     */
     public function timeSlots(Request $request)
     {
         $validated = $request->validate([
             'date' => ['nullable','date_format:Y-m-d'],
             'mode' => ['required','in:pickup,delivery'],
+            'location_id' => ['required','integer','exists:locations,id'],
+            'interval' => ['nullable','integer','in:15,30,60'], // Slot interval in minutes
         ]);
 
         // Default to today if no date provided
         $date = $validated['date'] ?? now()->format('Y-m-d');
-        $type = $validated['mode'];
+        $serviceType = $validated['mode'];
+        $locationId = $validated['location_id'];
+        $interval = $validated['interval'] ?? 30; // Default 30 minute slots
 
-        $query = OrderTimeSlot::query()
-            ->where('slot_date', $date)
-            ->where('slot_type', $type)
-            ->whereColumn('current_orders', '<', 'max_orders')
-            ->orderBy('slot_start_time');
+        // Use TimeSlotService to generate real-time slots
+        $timeSlotService = app(\App\Services\TimeSlotService::class);
+        $slots = $timeSlotService->getAvailableTimeSlots(
+            $locationId,
+            $serviceType,
+            $date,
+            $interval
+        );
 
-        return OrderTimeSlotResource::collection($query->paginate());
+        // Transform to expected format
+        $formattedSlots = $slots->map(function ($slot) use ($locationId, $serviceType) {
+            return [
+                'id' => md5($slot['slot_date'] . $slot['slot_time'] . $locationId . $serviceType), // Generate unique ID
+                'label' => $slot['full_label'],
+                'start' => $slot['slot_date'] . 'T' . $slot['slot_time'],
+                'end' => $slot['slot_date'] . 'T' . $slot['slot_time'],
+                'available' => $slot['is_available'],
+                'location_id' => $locationId,
+                'slot_date' => $slot['slot_date'],
+                'slot_start_time' => $slot['slot_time'],
+                'slot_type' => $serviceType,
+            ];
+        });
+
+        return response()->json([
+            'data' => $formattedSlots->values(),
+            'total' => $formattedSlots->count(),
+        ]);
     }
 
     /**
@@ -192,29 +219,81 @@ class OnlineOrderController extends Controller
         \Log::info('👤 Customer identified:', ['id' => $customer->id, 'name' => $customer->name]);
 
         try {
-            $order = DB::transaction(function () use ($data, $customer) {
+            $order = DB::transaction(function () use ($data, $customer, $request) {
                 \Log::info('🔄 Starting DB Transaction');
 
-                // Lock slot row to prevent race conditions
-                $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
-                \Log::info('🕒 Time Slot locked:', ['id' => $slot->id]);
+                // Handle time slot - support both old (time_slot_id) and new (slot_date + slot_time) approaches
+                $slot = null;
+                $slotDate = null;
+                $slotTime = null;
 
-                // Validate slot type matches order type
-                if ($slot->slot_type !== $data['order_type']) {
-                    \Log::error('❌ Slot type mismatch', ['slot' => $slot->slot_type, 'order' => $data['order_type']]);
-                    abort(422, 'Selected time slot does not match order type.');
-                }
-                
-                // Validate slot location matches
-                if ((int) $slot->location_id !== (int) $data['location_id']) {
-                    \Log::error('❌ Location mismatch');
-                    abort(422, 'Selected time slot and location mismatch.');
-                }
-                
-                // Check slot availability
-                if ($slot->current_orders >= $slot->max_orders) {
-                    \Log::error('❌ Slot full');
-                    abort(409, 'Selected time slot is full.');
+                if (isset($data['time_slot_id'])) {
+                    // Legacy approach: use existing OrderTimeSlot
+                    $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
+                    \Log::info('🕒 Time Slot locked (legacy):', ['id' => $slot->id]);
+                    
+                    $slotDate = $slot->slot_date->format('Y-m-d');
+                    $slotTime = $slot->slot_start_time;
+                    
+                    // Validate slot type matches order type
+                    if ($slot->slot_type !== $data['order_type']) {
+                        \Log::error('❌ Slot type mismatch', ['slot' => $slot->slot_type, 'order' => $data['order_type']]);
+                        abort(422, 'Selected time slot does not match order type.');
+                    }
+                    
+                    // Validate slot location matches
+                    if ((int) $slot->location_id !== (int) $data['location_id']) {
+                        \Log::error('❌ Location mismatch');
+                        abort(422, 'Selected time slot and location mismatch.');
+                    }
+                    
+                    // Check slot availability
+                    if ($slot->current_orders >= $slot->max_orders) {
+                        \Log::error('❌ Slot full');
+                        abort(409, 'Selected time slot is fully booked.');
+                    }
+                } else {
+                    // New dynamic approach: validate using TimeSlotService
+                    $slotDate = $data['slot_date'];
+                    $slotTime = $data['slot_time'];
+                    
+                    \Log::info('🕒 Using dynamic time slot:', [
+                        'date' => $slotDate,
+                        'time' => $slotTime,
+                        'type' => $data['order_type']
+                    ]);
+                    
+                    // Validate the time slot using TimeSlotService
+                    $timeSlotService = app(\App\Services\TimeSlotService::class);
+                    $validation = $timeSlotService->validateTimeSlot(
+                        $data['location_id'],
+                        $slotDate,
+                        $slotTime,
+                        $data['order_type']
+                    );
+                    
+                    if (!$validation['valid']) {
+                        \Log::error('❌ Time slot validation failed:', ['message' => $validation['message']]);
+                        abort(422, $validation['message']);
+                    }
+                    
+                    // Get or create the OrderTimeSlot record for booking tracking
+                    $slot = $timeSlotService->getOrCreateTimeSlot(
+                        $data['location_id'],
+                        $slotDate,
+                        $slotTime,
+                        $data['order_type'],
+                        10 // max_orders default
+                    );
+                    
+                    // Lock for update to prevent race conditions
+                    $slot = OrderTimeSlot::where('id', $slot->id)->lockForUpdate()->first();
+                    
+                    // Check availability again after locking
+                    if ($slot->current_orders >= $slot->max_orders) {
+                        \Log::error('❌ Slot became full during transaction');
+                        abort(409, 'Selected time slot is fully booked. Please select another time.');
+                    }
                 }
 
                 // Validate delivery address for delivery orders

@@ -91,8 +91,10 @@ Route::get('/locations', [LocationController::class, 'index']);
 // Time slots
 Route::get('/timeslots', [TimeSlotController::class, 'index']);
 Route::get('/timeslots/stats', [TimeSlotController::class, 'stats']);
-Route::post('/timeslots/regenerate', [TimeSlotController::class, 'regenerate'])->middleware('auth');
-Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup'])->middleware('auth');
+Route::post('/timeslots/regenerate', [TimeSlotController::class, 'regenerate']);
+// ->middleware('auth');
+Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup']);
+// ->middleware('auth');
 
 // Sprint 1: Suppliers & Units (CRUD accessible to all for now)
 Route::apiResource('suppliers', SupplierController::class);

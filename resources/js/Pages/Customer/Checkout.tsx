@@ -12,7 +12,10 @@ import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
 
 export default function Checkout() {
   const cart = useCartStore();
-  const { data: slots, isLoading: slotsLoading } = useTimeSlots(cart.mode === 'delivery' ? 'delivery' : 'pickup');
+  const { data: slots, isLoading: slotsLoading } = useTimeSlots(
+    cart.mode === 'delivery' ? 'delivery' : 'pickup',
+    cart.location_id // Pass location_id from cart
+  );
   const placeOrder = usePlaceOnlineOrder();
 
   async function onPlaceOrder() {
@@ -42,7 +45,9 @@ export default function Checkout() {
       order_type: cart.mode as 'delivery' | 'pickup',  // Type assertion to exclude 'dine-in'
       location_id: cart.location_id,
       customer_address_id: cart.mode === 'delivery' ? cart.selectedAddress?.id : undefined,
-      time_slot_id: Number(cart.timeSlot.id), // Convert to number
+      // Send slot_date and slot_time for dynamic time slot system
+      slot_date: cart.timeSlot?.slot_date,
+      slot_time: cart.timeSlot?.slot_start_time,
       notes: cart.notes || undefined,
       order_items: cart.items.map(item => ({
         menu_item_id: item.menu_item_id,
@@ -113,12 +118,30 @@ export default function Checkout() {
                 <div className="font-semibold">Time Slot</div>
               </CardHeader>
               <CardContent>
-                {slotsLoading ? (
+                {!cart.location_id ? (
+                  <div className="text-sm text-gray-400 p-4 text-center border border-white/10 rounded-xl bg-white/5">
+                    Please select a restaurant location first
+                  </div>
+                ) : slotsLoading ? (
                   <Skeleton className="h-10 w-full" />
+                ) : (!slots || slots.length === 0) ? (
+                  <div className="text-sm text-gray-400 p-4 text-center border border-white/10 rounded-xl bg-white/5">
+                    <div className="font-medium text-gray-300 mb-1">No time slots available</div>
+                    <div className="text-xs">The restaurant is currently closed for {cart.mode}. Please check operating hours or try a different date.</div>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {(slots || []).map((s) => (
-                      <button key={s.id} onClick={() => cart.setTimeSlot(s)} className={`px-3 py-2 rounded-xl border text-sm ${cart.timeSlot?.id === s.id ? 'border-fuchsia-400 bg-fuchsia-500/10' : 'border-white/10 bg-white/5'}`}>{s.label}</button>
+                    {slots.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => cart.setTimeSlot(s)}
+                        className={`px-3 py-2 rounded-xl border text-sm transition-all ${cart.timeSlot?.id === s.id
+                          ? 'border-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-300'
+                          : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                          }`}
+                      >
+                        {s.label}
+                      </button>
                     ))}
                   </div>
                 )}

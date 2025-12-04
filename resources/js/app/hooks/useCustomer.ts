@@ -10,10 +10,17 @@ export function useCustomerAddresses() {
   });
 }
 
-export function useTimeSlots(mode: 'delivery' | 'pickup') {
+export function useTimeSlots(mode: 'delivery' | 'pickup', locationId?: number, date?: string) {
   return useQuery({
-    queryKey: ['time-slots', mode],
-    queryFn: () => apiGet<ApiResponse<TimeSlot[]>>('/time-slots', { params: { mode } }).then(r => r.data),
+    queryKey: ['time-slots', mode, locationId, date],
+    queryFn: () => apiGet<ApiResponse<TimeSlot[]>>('/time-slots', {
+      params: {
+        mode,
+        location_id: locationId,
+        date: date || undefined
+      }
+    }).then(r => r.data),
     staleTime: 1000 * 60,
+    enabled: !!locationId, // Only run query if location is selected
   });
 }

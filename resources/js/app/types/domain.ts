@@ -106,11 +106,16 @@ export interface CustomerAddress {
 }
 
 export interface TimeSlot {
-  id: string; // e.g. ISO string or unique id
+  id: string; // e.g.  ISO string or unique id
   label: string; // e.g. "Today 12:30 - 1:00 PM"
   start: string; // ISO
   end: string; // ISO
   available: boolean;
+  // Added for dynamic time slot system
+  slot_date?: string; // Y-m-d format
+  slot_start_time?: string; // H:i format
+  location_id?: number;
+  slot_type?: string;
 }
 
 export type OrderMode = 'delivery' | 'pickup' | 'dine-in';
