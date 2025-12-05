@@ -16,7 +16,7 @@ class PurchaseOrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = PurchaseOrder::with(['supplier', 'location', 'items']);
+        $query = PurchaseOrder::with(['supplier', 'location', 'items.ingredient']);
 
         // Search
         if ($request->has('search')) {
@@ -107,13 +107,14 @@ class PurchaseOrderController extends Controller
 
             // Create purchase order items
             foreach ($validated['items'] as $item) {
+                $itemTotal = $item['quantity'] * $item['unit_price'];
                 PurchaseOrderItem::create([
                     'purchase_order_id' => $purchaseOrder->id,
                     'ingredient_id' => $item['ingredient_id'],
                     'quantity_ordered' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
-                    'quantity_received' => 0,
-                    'notes' => $item['notes'] ?? null
+                    'total' => $itemTotal,
+                    'quantity_received' => 0
                 ]);
             }
 
@@ -202,7 +203,7 @@ class PurchaseOrderController extends Controller
                             'ingredient_id' => $item['ingredient_id'],
                             'quantity_ordered' => $item['quantity'],
                             'unit_price' => $item['unit_price'],
-                            'notes' => $item['notes'] ?? null
+                            'total' => $itemTotal
                         ]);
                     } else {
                         PurchaseOrderItem::create([
@@ -210,8 +211,8 @@ class PurchaseOrderController extends Controller
                             'ingredient_id' => $item['ingredient_id'],
                             'quantity_ordered' => $item['quantity'],
                             'unit_price' => $item['unit_price'],
-                            'quantity_received' => 0,
-                            'notes' => $item['notes'] ?? null
+                            'total' => $itemTotal,
+                            'quantity_received' => 0
                         ]);
                     }
                 }
@@ -296,6 +297,11 @@ class PurchaseOrderController extends Controller
 
     /**
      * Receive items for a purchase order
+     * This method updates:
+     * 1. PurchaseOrderItem.quantity_received
+     * 2. Inventory table (per-location stock)
+     * 3. Ingredient.current_stock (global stock)
+     * 4. InventoryTransaction (audit trail)
      */
     public function receive(Request $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
@@ -307,16 +313,60 @@ class PurchaseOrderController extends Controller
 
         DB::beginTransaction();
         try {
+            $locationId = $purchaseOrder->location_id;
+            
             foreach ($validated['items'] as $item) {
-                $poItem = PurchaseOrderItem::find($item['item_id']);
-                $newReceived = $poItem->quantity_received + $item['quantity_received'];
+                if ($item['quantity_received'] <= 0) {
+                    continue; // Skip items with 0 or negative quantities
+                }
+                
+                $poItem = PurchaseOrderItem::with('ingredient')->find($item['item_id']);
+                $quantityToReceive = $item['quantity_received'];
+                $newReceived = $poItem->quantity_received + $quantityToReceive;
 
+                // Update PO item received quantity
                 $poItem->update([
                     'quantity_received' => $newReceived
+                ]);
+                
+                // Update Inventory (per-location stock) if location is specified
+                if ($locationId) {
+                    $inventory = \App\Models\Inventory::firstOrCreate(
+                        [
+                            'location_id' => $locationId,
+                            'ingredient_id' => $poItem->ingredient_id
+                        ],
+                        ['quantity' => 0]
+                    );
+                    $inventory->increment('quantity', $quantityToReceive);
+                }
+                
+                // Update Ingredient.current_stock (global stock)
+                $ingredient = \App\Models\Ingredient::find($poItem->ingredient_id);
+                if ($ingredient) {
+                    $ingredient->increment('current_stock', $quantityToReceive);
+                }
+                
+                // Create InventoryTransaction for audit trail
+                \App\Models\InventoryTransaction::create([
+                    'location_id' => $locationId,
+                    'ingredient_id' => $poItem->ingredient_id,
+                    'type' => 'purchase_received',
+                    'movement_type' => 'purchase_received',
+                    'quantity' => $quantityToReceive,
+                    'unit_cost' => $poItem->unit_price,
+                    'value' => $quantityToReceive * $poItem->unit_price,
+                    'sourceable_type' => PurchaseOrder::class,
+                    'sourceable_id' => $purchaseOrder->id,
+                    'notes' => "Received from PO #{$purchaseOrder->po_number}",
+                    'transacted_at' => now(),
+                    'created_by' => auth()->id() ?? 1,
+                    'user_id' => auth()->id() ?? 1
                 ]);
             }
 
             // Update PO status based on received quantities
+            $purchaseOrder->load('items'); // Reload items
             $allItems = $purchaseOrder->items;
             $allReceived = $allItems->every(function ($item) {
                 return $item->quantity_received >= $item->quantity_ordered;
@@ -336,7 +386,7 @@ class PurchaseOrderController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Items received successfully',
+                'message' => 'Items received successfully. Inventory updated.',
                 'data' => $purchaseOrder
             ]);
         } catch (\Exception $e) {

@@ -54,7 +54,7 @@ export default function ShiftScheduler() {
     const { data: shiftsData, isLoading } = useQuery({
         queryKey: ['shifts.calendar', monthStart.toISOString(), selectedLocation],
         queryFn: () =>
-            apiGet('/api/shifts', {
+            apiGet('/api/admin/shifts', {
                 params: {
                     start_date: monthStart.toISOString().split('T')[0],
                     end_date: monthEnd.toISOString().split('T')[0],
@@ -72,18 +72,18 @@ export default function ShiftScheduler() {
     // Fetch employees
     const { data: employees } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => apiGet('/api/employees'),
+        queryFn: () => apiGet('/api/admin/employees'),
     });
 
     // Fetch shift templates
     const { data: templates } = useQuery({
         queryKey: ['shift-templates'],
-        queryFn: () => apiGet('/api/shift-templates'),
+        queryFn: () => apiGet('/api/admin/shifts/stats'),
     });
 
     // Create shift mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/shifts', data),
+        mutationFn: (data: any) => apiPost('/api/admin/shifts', data),
         onSuccess: () => {
             toastSuccess('Shift created successfully');
             setShowCreateModal(false);
@@ -104,7 +104,7 @@ export default function ShiftScheduler() {
 
     // Delete shift mutation
     const deleteMutation = useMutation({
-        mutationFn: (shiftId: number) => apiPost(`/api/shifts/${shiftId}/delete`, {}),
+        mutationFn: (shiftId: number) => apiPost(`/api/admin/shifts/${shiftId}`, { _method: 'DELETE' }),
         onSuccess: () => {
             toastSuccess('Shift deleted successfully');
             qc.invalidateQueries({ queryKey: ['shifts.calendar'] });
@@ -116,7 +116,7 @@ export default function ShiftScheduler() {
 
     // Apply template
     const applyTemplateMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/shifts/apply-template', data),
+        mutationFn: (data: any) => apiPost('/api/admin/shifts/copy', data),
         onSuccess: () => {
             toastSuccess('Template applied successfully');
             qc.invalidateQueries({ queryKey: ['shifts.calendar'] });
@@ -254,9 +254,8 @@ export default function ShiftScheduler() {
                                     {days.map((date, idx) => (
                                         <div
                                             key={idx}
-                                            className={`min-h-24 p-2 border border-gray-200 ${
-                                                !date ? 'bg-gray-50' : ''
-                                            }`}
+                                            className={`min-h-24 p-2 border border-gray-200 ${!date ? 'bg-gray-50' : ''
+                                                }`}
                                         >
                                             {date && (
                                                 <>
@@ -267,11 +266,10 @@ export default function ShiftScheduler() {
                                                         {getShiftsForDate(date).map((shift: Shift) => (
                                                             <div
                                                                 key={shift.id}
-                                                                className={`text-xs p-1 rounded truncate cursor-pointer group relative ${
-                                                                    shift.status === 'published'
+                                                                className={`text-xs p-1 rounded truncate cursor-pointer group relative ${shift.status === 'published'
                                                                         ? 'bg-green-100 text-green-800 hover:bg-green-200'
                                                                         : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                                                                }`}
+                                                                    }`}
                                                                 title={`${shift.employee_name}: ${shift.start_time} - ${shift.end_time}`}
                                                             >
                                                                 <div className="flex justify-between items-start">

@@ -123,6 +123,23 @@ export default function InventoryAdjustments() {
         queryFn: () => apiGet('/api/admin/inventory-adjustments/stats')
     });
 
+    // Fetch specific inventory item for "Quantity Before"
+    const { data: currentInventory } = useQuery({
+        queryKey: ['inventory-item', formData.ingredient_id, formData.location_id],
+        queryFn: () => apiGet(`/api/admin/inventory?ingredient_id=${formData.ingredient_id}&location_id=${formData.location_id}`),
+        enabled: !!formData.ingredient_id && !!formData.location_id
+    });
+
+    // Auto-fill quantity_before when inventory data is fetched
+    React.useEffect(() => {
+        if (currentInventory && currentInventory.data && currentInventory.data.length > 0) {
+            setFormData(prev => ({ ...prev, quantity_before: currentInventory.data[0].quantity }));
+        } else if (formData.ingredient_id && formData.location_id) {
+            // If no inventory record exists, quantity is 0
+            setFormData(prev => ({ ...prev, quantity_before: '0' }));
+        }
+    }, [currentInventory, formData.ingredient_id, formData.location_id]);
+
     // Mutations
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/inventory-adjustments', data),
@@ -132,6 +149,8 @@ export default function InventoryAdjustments() {
             resetForm();
             qc.invalidateQueries({ queryKey: ['inventory-adjustments'] });
             qc.invalidateQueries({ queryKey: ['adjustment-stats'] });
+            qc.invalidateQueries({ queryKey: ['inventory'] });
+            qc.invalidateQueries({ queryKey: ['ingredients'] });
         },
         onError: (error: any) => setError(error.response?.data?.message || 'Failed to create adjustment')
     });
@@ -144,6 +163,8 @@ export default function InventoryAdjustments() {
             setOpenApprove(false);
             setApprovalNotes('');
             qc.invalidateQueries({ queryKey: ['inventory-adjustments'] });
+            qc.invalidateQueries({ queryKey: ['inventory'] });
+            qc.invalidateQueries({ queryKey: ['ingredients'] });
         },
         onError: (error: any) => toastError(error.response?.data?.message || 'Failed to approve')
     });

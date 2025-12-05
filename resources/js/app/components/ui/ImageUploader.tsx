@@ -15,7 +15,7 @@ export function ImageUploader({
   value,
   onChange,
   accept = 'image/*',
-  maxSize = 5,
+  maxSize = 10,
   className,
   placeholder = 'Click to upload or drag and drop'
 }: ImageUploaderProps) {
@@ -25,19 +25,8 @@ export function ImageUploader({
 
   const handleFile = useCallback((file: File) => {
     setError(null);
-    
-    // Validate file size
-    if (file.size > maxSize * 1024 * 1024) {
-      setError(`File size must be less than ${maxSize}MB`);
-      return;
-    }
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
-      return;
-    }
-
+    // No client-side restrictions - let backend handle validation
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -46,12 +35,12 @@ export function ImageUploader({
       onChange(file, previewUrl);
     };
     reader.readAsDataURL(file);
-  }, [maxSize, onChange]);
+  }, [onChange]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFile(files[0]);
@@ -122,7 +111,7 @@ export function ImageUploader({
             </div>
             <div className="text-sm text-gray-300 mb-2">{placeholder}</div>
             <div className="text-xs text-gray-500">
-              PNG, JPG, GIF up to {maxSize}MB
+              PNG, JPG, WebP up to {maxSize}MB
             </div>
           </div>
         )}

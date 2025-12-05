@@ -17,7 +17,7 @@ class StoreMenuItemRequest extends FormRequest
             'slug' => ['required','string','max:150'],
             'price' => ['required','numeric','min:0'],
             'cost' => ['nullable','numeric','min:0'],
-            'image' => ['nullable','image','mimes:jpeg,png,jpg,webp','max:10240'],
+            'image' => ['nullable'],
             'is_popular' => ['boolean'],
             'is_active' => ['boolean'],
             'display_order' => ['nullable','integer','min:0'],

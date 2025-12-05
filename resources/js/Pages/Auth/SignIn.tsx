@@ -245,29 +245,55 @@ export default function SignIn() {
           </div>
         </motion.div>
 
-        {/* Demo Credentials */}
+        {/* Demo Credentials - Auto Fill Buttons */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="mt-6 p-4 rounded-2xl bg-white/5 border border-white/10"
         >
-          <p className="text-xs text-gray-400 text-center mb-2">Demo Credentials:</p>
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="text-center">
-              <p className="text-emerald-400 font-medium">Customer</p>
-              <p className="text-gray-500">demo@customer.com</p>
-            </div>
-            <div className="text-center">
-              <p className="text-blue-400 font-medium">Employee</p>
-              <p className="text-gray-500">demo@employee.com</p>
-            </div>
-            <div className="text-center">
-              <p className="text-purple-400 font-medium">Admin</p>
-              <p className="text-gray-500">demo@admin.com</p>
-            </div>
+          <p className="text-xs text-gray-400 text-center mb-3">Auto Fill Demo Credentials:</p>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setValue('role', 'customer');
+                setValue('email', 'demo@customer.com');
+                setValue('password', 'demo123');
+              }}
+              className="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors group"
+            >
+              <p className="text-emerald-400 font-medium text-xs group-hover:text-emerald-300">Customer</p>
+              <p className="text-gray-500 text-[10px] group-hover:text-gray-400">Auto Fill</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setValue('role', 'employee');
+                setValue('email', 'demo@employee.com');
+                setValue('password', 'demo123');
+              }}
+              className="p-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 transition-colors group"
+            >
+              <p className="text-blue-400 font-medium text-xs group-hover:text-blue-300">Employee</p>
+              <p className="text-gray-500 text-[10px] group-hover:text-gray-400">Auto Fill</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setValue('role', 'admin');
+                setValue('email', 'demo@admin.com');
+                setValue('password', 'demo123');
+              }}
+              className="p-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-colors group"
+            >
+              <p className="text-purple-400 font-medium text-xs group-hover:text-purple-300">Admin</p>
+              <p className="text-gray-500 text-[10px] group-hover:text-gray-400">Auto Fill</p>
+            </button>
           </div>
-          <p className="text-center text-gray-500 text-xs mt-2">Password: demo123</p>
+          <p className="text-center text-gray-500 text-[10px] mt-3">Password: demo123</p>
         </motion.div>
       </motion.div>
     </div>

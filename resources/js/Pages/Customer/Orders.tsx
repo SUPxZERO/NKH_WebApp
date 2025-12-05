@@ -127,16 +127,6 @@ export default function Orders() {
         });
     };
 
-    const handleReorder = (order: Order) => {
-        // TODO: Implement reorder functionality
-        console.log('Reorder:', order.id);
-    };
-
-    const handleCancelOrder = (order: Order) => {
-        // TODO: Implement cancel order functionality
-        console.log('Cancel order:', order.id);
-    };
-
     const OrderCard = ({ order }: { order: Order }) => {
         const isExpanded = expandedOrder === order.id;
         const statusInfo = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending;
@@ -234,24 +224,6 @@ export default function Orders() {
                         >
                             {isExpanded ? 'Hide' : 'View'} Details
                         </Button>
-                        {order.can_reorder && (
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => handleReorder(order)}
-                            >
-                                Reorder
-                            </Button>
-                        )}
-                        {order.can_cancel && (
-                            <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => handleCancelOrder(order)}
-                            >
-                                Cancel
-                            </Button>
-                        )}
                     </div>
                 </div>
 

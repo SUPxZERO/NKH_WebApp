@@ -21,6 +21,8 @@ class InventoryTransaction extends Model
         'notes',
         'transacted_at',
         'created_by',
+        'user_id',
+        'movement_type',
         'order_item_id',
     ];
 

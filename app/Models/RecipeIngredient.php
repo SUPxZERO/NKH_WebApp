@@ -14,6 +14,7 @@ class RecipeIngredient extends Model
         'ingredient_id',
         'quantity',
         'unit',
+        'notes',
     ];
 
     protected $casts = [

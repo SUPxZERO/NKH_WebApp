@@ -25,6 +25,21 @@ class ReservationResource extends JsonResource
             }
         }
 
+        $canCancel = false;
+        try {
+            if ($this->reservation_date && in_array($this->status, ['pending', 'confirmed'], true)) {
+                $today = Carbon::today()->toDateString();
+
+                $reservationDate = $this->reservation_date instanceof \Carbon\Carbon
+                    ? $this->reservation_date->format('Y-m-d')
+                    : substr((string) $this->reservation_date, 0, 10);
+
+                $canCancel = $reservationDate > $today;
+            }
+        } catch (\Throwable $e) {
+            $canCancel = false;
+        }
+
         return [
             'id' => $this->id,
             'location_id' => $this->location_id,
@@ -39,6 +54,7 @@ class ReservationResource extends JsonResource
             'guest_count' => $this->party_size ?? $this->guest_count ?? 0,
             'status' => $this->status,
             'notes' => $this->notes ?? $this->special_requests,
+            'can_cancel' => $canCancel,
             'table' => new DiningTableResource($this->whenLoaded('table')),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'created_at' => optional($this->created_at)->toISOString(),

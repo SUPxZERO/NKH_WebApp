@@ -64,14 +64,14 @@ export default function PayrollManagement() {
     // Fetch employees
     const { data: employees, isLoading: employeesLoading } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => apiGet('/api/employees'),
+        queryFn: () => apiGet('/api/admin/employees'),
     });
 
     // Fetch payroll records for month
     const { data: payrollData, isLoading: payrollLoading } = useQuery({
         queryKey: ['payroll.management', selectedMonth, selectedEmployees],
         queryFn: () =>
-            apiGet('/api/payroll/history', {
+            apiGet('/api/admin/payroll/history', {
                 params: {
                     month: selectedMonth,
                     employee_ids: selectedEmployees.length > 0 ? selectedEmployees : undefined,
@@ -83,14 +83,14 @@ export default function PayrollManagement() {
     // Fetch payroll details
     const { data: detailsData } = useQuery({
         queryKey: ['payroll.details', viewingPayrollId],
-        queryFn: () => apiGet(`/api/payroll/${viewingPayrollId}/details`),
+        queryFn: () => apiGet(`/api/admin/payroll/${viewingPayrollId}/details`),
         enabled: !!viewingPayrollId,
     });
 
     // Generate payroll mutation
     const generateMutation = useMutation({
         mutationFn: (employeeIds: number[]) =>
-            apiPost('/api/payroll/generate', {
+            apiPost('/api/admin/payroll/generate', {
                 employee_ids: employeeIds.length > 0 ? employeeIds : undefined,
                 month: selectedMonth,
                 include_overtime: true,
@@ -107,7 +107,7 @@ export default function PayrollManagement() {
     // Finalize payroll mutation
     const finalizeMutation = useMutation({
         mutationFn: (payrollId: number) =>
-            apiPost(`/api/payroll/${payrollId}/finalize`, {}),
+            apiPost(`/api/admin/payroll/${payrollId}/finalize`, {}),
         onSuccess: () => {
             toastSuccess('Payroll finalized successfully');
             qc.invalidateQueries({ queryKey: ['payroll.management'] });
@@ -120,7 +120,7 @@ export default function PayrollManagement() {
     // Add detail mutation
     const addDetailMutation = useMutation({
         mutationFn: (payrollId: number) =>
-            apiPost(`/api/payroll/${payrollId}/add-detail`, newDetail),
+            apiPost(`/api/admin/payroll/${payrollId}/add-detail`, newDetail),
         onSuccess: () => {
             toastSuccess('Detail added successfully');
             setNewDetail({
@@ -140,7 +140,7 @@ export default function PayrollManagement() {
     // Remove detail mutation
     const removeDetailMutation = useMutation({
         mutationFn: (detailId: number) =>
-            apiDelete(`/api/payroll-details/${detailId}`),
+            apiDelete(`/api/admin/payroll-details/${detailId}`),
         onSuccess: () => {
             toastSuccess('Detail removed successfully');
             qc.invalidateQueries({ queryKey: ['payroll.details'] });

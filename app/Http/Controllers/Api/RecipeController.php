@@ -14,9 +14,9 @@ class RecipeController extends Controller
     /**
      * Display a listing of recipes
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
-        $query = Recipe::with(['menuItem', 'ingredients.ingredient']);
+        $query = Recipe::with(['menuItem.translations', 'ingredients.ingredient.unit']);
 
         // Search
         if ($request->has('search')) {
@@ -24,7 +24,7 @@ class RecipeController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhereHas('menuItem', function ($mq) use ($search) {
+                  ->orWhereHas('menuItem.translations', function ($mq) use ($search) {
                       $mq->where('name', 'like', "%{$search}%");
                   });
             });
@@ -48,7 +48,7 @@ class RecipeController extends Controller
         $perPage = $request->get('per_page', 15);
         $recipes = $query->paginate($perPage);
 
-        return response()->json($recipes);
+        return \App\Http\Resources\RecipeResource::collection($recipes);
     }
 
     /**
@@ -104,7 +104,7 @@ class RecipeController extends Controller
 
             return response()->json([
                 'message' => 'Recipe created successfully',
-                'data' => $recipe
+                'data' => new \App\Http\Resources\RecipeResource($recipe)
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -120,10 +120,10 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe): JsonResponse
     {
-        $recipe->load(['menuItem', 'ingredients.ingredient.unit']);
+        $recipe->load(['menuItem.translations', 'ingredients.ingredient.unit']);
         
         return response()->json([
-            'data' => $recipe
+            'data' => new \App\Http\Resources\RecipeResource($recipe)
         ]);
     }
 
@@ -134,7 +134,7 @@ class RecipeController extends Controller
     {
         $validated = $request->validate([
             'menu_item_id' => 'nullable|exists:menu_items,id',
-            'name' => 'required|string|max:255',
+            'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'instructions' => 'nullable|string',
             'prep_time_minutes' => 'nullable|integer|min:0',
@@ -143,24 +143,27 @@ class RecipeController extends Controller
             'is_active' => 'boolean',
             'ingredients' => 'sometimes|array|min:1',
             'ingredients.*.id' => 'nullable|exists:recipe_ingredients,id',
-            'ingredients.*.ingredient_id' => 'required|exists:ingredients,id',
-            'ingredients.*.quantity' => 'required|numeric|min:0',
+            'ingredients.*.ingredient_id' => 'required_with:ingredients|exists:ingredients,id',
+            'ingredients.*.quantity' => 'required_with:ingredients|numeric|min:0',
             'ingredients.*.notes' => 'nullable|string'
         ]);
 
         DB::beginTransaction();
         try {
-            // Update recipe
-            $recipe->update([
-                'menu_item_id' => $validated['menu_item_id'] ?? null,
-                'name' => $validated['name'],
-                'description' => $validated['description'] ?? null,
-                'instructions' => $validated['instructions'] ?? null,
-                'prep_time_minutes' => $validated['prep_time_minutes'] ?? null,
-                'cook_time_minutes' => $validated['cook_time_minutes'] ?? null,
-                'servings' => $validated['servings'] ?? 1,
-                'is_active' => $validated['is_active'] ?? $recipe->is_active
-            ]);
+            // Build update data dynamically - only include fields that were provided
+            $updateData = [];
+            if (array_key_exists('menu_item_id', $validated)) $updateData['menu_item_id'] = $validated['menu_item_id'];
+            if (array_key_exists('name', $validated)) $updateData['name'] = $validated['name'];
+            if (array_key_exists('description', $validated)) $updateData['description'] = $validated['description'];
+            if (array_key_exists('instructions', $validated)) $updateData['instructions'] = $validated['instructions'];
+            if (array_key_exists('prep_time_minutes', $validated)) $updateData['prep_time_minutes'] = $validated['prep_time_minutes'];
+            if (array_key_exists('cook_time_minutes', $validated)) $updateData['cook_time_minutes'] = $validated['cook_time_minutes'];
+            if (array_key_exists('servings', $validated)) $updateData['servings'] = $validated['servings'] ?? 1;
+            if (array_key_exists('is_active', $validated)) $updateData['is_active'] = $validated['is_active'];
+            
+            if (!empty($updateData)) {
+                $recipe->update($updateData);
+            }
 
             // Update ingredients if provided
             if (isset($validated['ingredients'])) {
@@ -190,13 +193,13 @@ class RecipeController extends Controller
                 $this->updateRecipeCost($recipe);
             }
 
-            $recipe->load(['menuItem', 'ingredients.ingredient']);
+            $recipe->load(['menuItem.translations', 'ingredients.ingredient.unit']);
 
             DB::commit();
 
             return response()->json([
                 'message' => 'Recipe updated successfully',
-                'data' => $recipe
+                'data' => new \App\Http\Resources\RecipeResource($recipe)
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -237,6 +240,8 @@ class RecipeController extends Controller
             $newRecipe = $recipe->replicate();
             $newRecipe->name = $recipe->name . ' (Copy)';
             $newRecipe->is_active = false;
+            // Set menu_item_id to null since it has a unique constraint
+            $newRecipe->menu_item_id = null;
             $newRecipe->save();
 
             // Copy ingredients
@@ -256,7 +261,7 @@ class RecipeController extends Controller
 
             return response()->json([
                 'message' => 'Recipe duplicated successfully',
-                'data' => $newRecipe
+                'data' => new \App\Http\Resources\RecipeResource($newRecipe)
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -287,28 +292,53 @@ class RecipeController extends Controller
     public function costing(Recipe $recipe): JsonResponse
     {
         $recipe->load(['ingredients.ingredient.unit']);
+        $recipeTotalCost = (float) ($recipe->total_cost ?? 0);
 
-        $breakdown = $recipe->ingredients->map(function ($recipeIngredient) {
+        $breakdown = $recipe->ingredients->map(function ($recipeIngredient) use ($recipeTotalCost) {
             $ingredient = $recipeIngredient->ingredient;
-            $cost = $recipeIngredient->quantity * ($ingredient->cost_per_unit ?? 0);
+            
+            // Handle case where ingredient may have been deleted
+            if (!$ingredient) {
+                return [
+                    'ingredient_id' => $recipeIngredient->ingredient_id,
+                    'ingredient_name' => 'Unknown Ingredient',
+                    'quantity' => (float) $recipeIngredient->quantity,
+                    'unit' => $recipeIngredient->unit ?? '-',
+                    'cost_per_unit' => 0,
+                    'total_cost' => 0,
+                    'percentage' => 0
+                ];
+            }
+            
+            $costPerUnit = (float) ($ingredient->cost_per_unit ?? 0);
+            $cost = (float) $recipeIngredient->quantity * $costPerUnit;
+
+            // Get unit name properly (unit is a relationship to Unit model)
+            $unitName = '-';
+            if ($ingredient->unit) {
+                $unitName = $ingredient->unit->name ?? $ingredient->unit->code ?? '-';
+            }
 
             return [
                 'ingredient_id' => $ingredient->id,
                 'ingredient_name' => $ingredient->name,
-                'quantity' => $recipeIngredient->quantity,
-                'unit' => $ingredient->unit,
-                'cost_per_unit' => $ingredient->cost_per_unit ?? 0,
+                'quantity' => (float) $recipeIngredient->quantity,
+                'unit' => $unitName,
+                'cost_per_unit' => $costPerUnit,
                 'total_cost' => $cost,
-                'percentage' => $recipe->total_cost > 0 ? ($cost / $recipe->total_cost) * 100 : 0
+                'percentage' => $recipeTotalCost > 0 ? ($cost / $recipeTotalCost) * 100 : 0
             ];
         });
+
+        $servings = (int) ($recipe->servings ?? 1);
+        $totalCost = (float) ($recipe->total_cost ?? 0);
 
         return response()->json([
             'recipe_id' => $recipe->id,
             'recipe_name' => $recipe->name,
-            'total_cost' => $recipe->total_cost,
-            'servings' => $recipe->servings,
-            'cost_per_serving' => $recipe->servings > 0 ? $recipe->total_cost / $recipe->servings : 0,
+            'total_cost' => $totalCost,
+            'servings' => $servings,
+            'cost_per_serving' => $servings > 0 ? $totalCost / $servings : 0,
             'breakdown' => $breakdown
         ]);
     }
@@ -318,17 +348,22 @@ class RecipeController extends Controller
      */
     public function stats(): JsonResponse
     {
+        // Calculate avg_ingredients safely
+        $avgIngredients = 0;
+        $recipeCount = Recipe::count();
+        if ($recipeCount > 0) {
+            $totalIngredients = RecipeIngredient::count();
+            $avgIngredients = round($totalIngredients / $recipeCount, 1);
+        }
+
         $stats = [
-            'total' => Recipe::count(),
+            'total' => $recipeCount,
             'active' => Recipe::where('is_active', true)->count(),
             'inactive' => Recipe::where('is_active', false)->count(),
             'with_menu_items' => Recipe::whereNotNull('menu_item_id')->count(),
             'without_menu_items' => Recipe::whereNull('menu_item_id')->count(),
-            'avg_ingredients' => round(RecipeIngredient::groupBy('recipe_id')
-                ->selectRaw('AVG(ingredient_count) as avg')
-                ->from(DB::raw('(SELECT recipe_id, COUNT(*) as ingredient_count FROM recipe_ingredients GROUP BY recipe_id) as counts'))
-                ->value('avg') ?? 0, 1),
-            'total_cost_average' => Recipe::where('is_active', true)->avg('total_cost') ?? 0
+            'avg_ingredients' => $avgIngredients,
+            'avg_cost' => (float) (Recipe::where('is_active', true)->avg('total_cost') ?? 0)
         ];
 
         return response()->json($stats);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Reservation extends Model
 {
@@ -46,5 +47,24 @@ class Reservation extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function canCustomerCancel(): bool
+    {
+        if (! in_array($this->status, ['pending', 'confirmed'], true)) {
+            return false;
+        }
+
+        if (! $this->reservation_date) {
+            return false;
+        }
+
+        $today = Carbon::today()->toDateString();
+
+        $reservationDate = $this->reservation_date instanceof Carbon
+            ? $this->reservation_date->format('Y-m-d')
+            : substr((string) $this->reservation_date, 0, 10);
+
+        return $reservationDate > $today;
     }
 }

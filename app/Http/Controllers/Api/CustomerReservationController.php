@@ -216,15 +216,8 @@ class CustomerReservationController extends Controller
             abort(403, 'You can only cancel your own reservations.');
         }
 
-        $now = Carbon::now();
-        $reservedAt = Carbon::createFromFormat('Y-m-d H:i:s', $reservation->reservation_date.' '.$reservation->reservation_time);
-
-        if ($reservedAt->isPast()) {
-            abort(422, 'You cannot cancel a past reservation.');
-        }
-
-        if (! in_array($reservation->status, ['pending', 'confirmed'], true)) {
-            abort(422, 'Only pending or confirmed reservations can be cancelled.');
+        if (! $reservation->canCustomerCancel()) {
+            abort(422, 'You can only cancel before the reservation day.');
         }
 
         $reservation->status = 'cancelled';

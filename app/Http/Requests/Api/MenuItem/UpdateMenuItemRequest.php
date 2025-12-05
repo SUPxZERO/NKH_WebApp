@@ -17,7 +17,7 @@ class UpdateMenuItemRequest extends FormRequest
             'slug' => ['sometimes','string','max:150'],
             'price' => ['sometimes','numeric','min:0'],
             'cost' => ['sometimes','nullable','numeric','min:0'],
-            'image' => ['sometimes','nullable','image','mimes:jpeg,png,jpg,webp','max:10240'],
+            'image' => ['sometimes','nullable'],
             'is_popular' => ['sometimes','boolean'],
             'is_active' => ['sometimes','boolean'],
             'display_order' => ['sometimes','integer','min:0'],

@@ -22,14 +22,12 @@ import {
   Zap,
   Target,
   Award,
-  Users,
   TrendingDown,
   ChevronRight,
   ArrowUp,
   ArrowDown,
   Percent,
   DollarSign,
-  Share2,
   Bell,
   CheckCircle2,
 } from 'lucide-react';
@@ -146,17 +144,7 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
-  const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [bookingTime, setBookingTime] = useState('19:00');
-  const [bookingGuestCount, setBookingGuestCount] = useState('2');
-  const [bookingNotes, setBookingNotes] = useState('');
-  const [bookingError, setBookingError] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState('');
-  const [availabilityMessage, setAvailabilityMessage] = useState<string | null>(null);
-  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
-  const [isBookingSubmitting, setIsBookingSubmitting] = useState(false);
   const [showRewardsModal, setShowRewardsModal] = useState(false);
-  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
 
   // Data fetching
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
@@ -165,14 +153,14 @@ export default function Dashboard() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ['customer.stats'],
     queryFn: () =>
       apiGet<ApiResponse<DashboardStats>>('/customer/dashboard/stats').then((r) => r.data),
     staleTime: 1000 * 60,
   });
 
-  const { data: recentOrders, isLoading: ordersLoading } = useQuery({
+  const { data: recentOrders, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ['customer.orders.recent'],
     queryFn: () => apiGet<ApiResponse<Order[]>>('/customer/orders?limit=5').then((r) => r.data),
     staleTime: 1000 * 60,
@@ -188,17 +176,6 @@ export default function Dashboard() {
     staleTime: 1000 * 60,
   });
 
-  // Loyalty & rewards data
-  const { data: customerStatsData } = useQuery({
-    queryKey: ['customer', 'stats'],
-    queryFn: () => apiGet('/api/customer/stats'),
-  });
-
-  const { data: historyData } = useQuery({
-    queryKey: ['customer', 'history'],
-    queryFn: () => apiGet('/api/customer/history'),
-  });
-
   // Fetch rewards from API
   const { data: rewardsData, isLoading: rewardsLoading, refetch: refetchRewards } = useQuery({
     queryKey: ['customer', 'rewards'],
@@ -207,55 +184,6 @@ export default function Dashboard() {
   });
 
   const REWARDS = rewardsData?.data || [];
-  const loyaltyTransactions = (historyData as any)?.data?.loyalty_transactions || [];
-  const customerStats = (customerStatsData as any)?.data;
-
-  // Calculate spending analytics
-  const spendingData = useMemo(() => {
-    if (!recentOrders || recentOrders.length === 0) return [];
-
-    // Group orders by month
-    const monthlySpending: Record<string, number> = {};
-    recentOrders.forEach((order) => {
-      const date = new Date(order.placed_at || order.created_at);
-      const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
-      monthlySpending[monthKey] = (monthlySpending[monthKey] || 0) + order.total;
-    });
-
-    return Object.entries(monthlySpending).map(([month, amount]) => ({
-      month,
-      amount: Number(amount.toFixed(2)),
-    }));
-  }, [recentOrders]);
-
-  // Transform orders into activity feed
-  const activities: Activity[] = useMemo(() => {
-    if (!recentOrders) return [];
-
-    return recentOrders.map((order) => ({
-      id: order.id,
-      type:
-        order.status === 'delivered'
-          ? 'order_delivered'
-          : order.status === 'cancelled'
-            ? 'order_cancelled'
-            : 'order_placed',
-      title: `Order #${order.id}`,
-      description:
-        order.status === 'delivered'
-          ? 'Successfully delivered'
-          : order.status === 'cancelled'
-            ? 'Order was cancelled'
-            : order.status === 'preparing'
-              ? 'Being prepared'
-              : 'Order placed',
-      timestamp: order.placed_at || order.created_at,
-      metadata: {
-        amount: order.total,
-        orderId: String(order.id),
-      },
-    }));
-  }, [recentOrders]);
 
   // Quick actions configuration
   const quickActions: QuickAction[] = [
@@ -283,82 +211,15 @@ export default function Dashboard() {
       color: 'purple',
       onClick: () => setShowRewardsModal(true),
     },
-    {
-      id: 'refer',
-      label: 'Refer Friend',
-      description: 'Get $10 credit',
-      icon: Share2,
-      color: 'green',
-      onClick: () => console.log('Open referral modal'),
-    },
   ];
-
-  const handleCheckAvailability = async () => {
-    setBookingError('');
-    setBookingSuccess('');
-    setAvailabilityMessage(null);
-
-    if (!bookingDate || !bookingTime) {
-      setBookingError('Please select a date and time.');
-      return;
-    }
-
-    setIsCheckingAvailability(true);
-    try {
-      const res = await apiGet<{ available: boolean; message?: string }>(
-        `/customer/reservations/availability?date=${bookingDate}&time=${bookingTime}&guest_count=${bookingGuestCount}`
-      );
-
-      if (res.available) {
-        setAvailabilityMessage(res.message || 'Great news! A table is available.');
-      } else {
-        setAvailabilityMessage(res.message || 'No tables available for that time.');
-      }
-    } catch (error: any) {
-      setBookingError(error?.response?.data?.message || 'Failed to check availability.');
-    } finally {
-      setIsCheckingAvailability(false);
-    }
-  };
-
-  const handleCreateReservation = async () => {
-    setBookingError('');
-    setBookingSuccess('');
-    setAvailabilityMessage(null);
-
-    if (!bookingDate || !bookingTime) {
-      setBookingError('Please select a date and time.');
-      return;
-    }
-
-    setIsBookingSubmitting(true);
-    try {
-      const reserved_for = `${bookingDate}T${bookingTime}`;
-      await apiPost<Reservation>('/customer/reservations', {
-        reserved_for,
-        guest_count: parseInt(bookingGuestCount, 10),
-        notes: bookingNotes || undefined,
-      });
-
-      setBookingSuccess('Reservation created successfully!');
-      setBookingNotes('');
-      await refetchReservations();
-    } catch (error: any) {
-      setBookingError(error?.response?.data?.message || 'Failed to create reservation.');
-    } finally {
-      setIsBookingSubmitting(false);
-    }
-  };
 
   const handleCancelReservation = async (reservationId: number) => {
     if (!window.confirm('Cancel this reservation?')) return;
-    setBookingError('');
-    setBookingSuccess('');
     try {
       await apiDelete(`/customer/reservations/${reservationId}`);
       await refetchReservations();
     } catch (error: any) {
-      setBookingError(error?.response?.data?.message || 'Failed to cancel reservation.');
+      alert(error?.response?.data?.message || 'Failed to cancel reservation.');
     }
   };
 
@@ -406,10 +267,6 @@ export default function Dashboard() {
       }
     }
   };
-
-  const availableRewardsCount = REWARDS.filter(
-    (r) => profile && profile.loyalty_points >= r.points_required
-  ).length;
 
   return (
     <CustomerLayout>
@@ -460,9 +317,9 @@ export default function Dashboard() {
                   <Button
                     variant="secondary"
                     leftIcon={<RefreshCw className="w-5 h-5" />}
-                    onClick={() => console.log('Quick reorder')}
+                    onClick={() => (window.location.href = '/customer/orders')}
                   >
-                    Quick Reorder
+                    View Orders
                   </Button>
                 </div>
               </div>
@@ -502,7 +359,7 @@ export default function Dashboard() {
         <motion.section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" variants={itemVariants}>
           <StatCard
             title="Loyalty Points"
-            value={profile?.loyalty_points || 0}
+            value={profile?.loyalty_points ?? 0}
             icon={Star}
             color="pink"
             loading={profileLoading}
@@ -516,7 +373,7 @@ export default function Dashboard() {
 
           <StatCard
             title="Total Orders"
-            value={profile?.total_orders || 0}
+            value={profile?.total_orders ?? 0}
             icon={ShoppingBag}
             color="blue"
             loading={profileLoading}
@@ -529,7 +386,7 @@ export default function Dashboard() {
 
           <StatCard
             title="Total Spent"
-            value={`$${(profile?.total_spent || 0).toFixed(2)}`}
+            value={`$${(profile?.total_spent ?? 0).toFixed(2)}`}
             icon={TrendingUp}
             color="green"
             loading={profileLoading}
@@ -537,7 +394,7 @@ export default function Dashboard() {
 
           <StatCard
             title="Available Rewards"
-            value={availableRewardsCount}
+            value={stats?.available_rewards ?? 0}
             icon={Gift}
             color="purple"
             loading={statsLoading}
@@ -553,153 +410,187 @@ export default function Dashboard() {
           <QuickActions actions={quickActions} columns={4} />
         </motion.section>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Activity */}
-          <motion.div className="lg:col-span-2 space-y-6" variants={itemVariants}>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Recent Activity
-                    </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Your latest orders and rewards
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    leftIcon={<RefreshCw className="w-4 h-4" />}
-                    onClick={() => refetchProfile()}
-                  >
-                    Refresh
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ActivityFeed activities={activities} loading={ordersLoading} maxItems={5} />
-              </CardContent>
-            </Card>
-
-            {/* Achievements Section */}
-            <Card>
-              <CardHeader>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-yellow-500" />
-                  Your Achievements
-                </h3>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3">
-                  {MOCK_ACHIEVEMENTS.map((achievement) => (
-                    <div
-                      key={achievement.id}
-                      className={`p-3 rounded-lg border-2 transition-all ${achievement.unlocked
-                        ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30'
-                        : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                        }`}
-                    >
-                      <div className="text-2xl mb-2">{achievement.icon}</div>
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {achievement.title}
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {achievement.description}
-                      </div>
-                      {!achievement.unlocked && achievement.progress !== undefined && (
-                        <div className="mt-2">
-                          <div className="flex justify-between text-xs mb-1">
-                            <span>{achievement.progress}</span>
-                            <span>{achievement.total}</span>
-                          </div>
-                          <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-yellow-500 to-orange-500"
-                              style={{
-                                width: `${(achievement.progress! / achievement.total!) * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Spending Analytics */}
-            {spendingData.length > 0 && (
+        {/* Main Content Grid - Clean Layout */}
+        <motion.section variants={itemVariants}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Recent Orders - Main Column */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* Recent Orders */}
               <Card>
                 <CardHeader>
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    Spending Overview
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <ShoppingBag className="w-5 h-5 text-blue-500" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Recent Orders</h3>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Your latest activity</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => (window.location.href = '/customer/orders')}
+                    >
+                      View All
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {spendingData.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">{item.month}</span>
-                        <div className="flex items-center gap-3 flex-1 mx-4">
-                          <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
-                              style={{ width: `${(item.amount / Math.max(...spendingData.map(d => d.amount))) * 100}%` }}
-                            />
+                  {ordersLoading ? (
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-14 w-full" />
+                      ))}
+                    </div>
+                  ) : recentOrders && recentOrders.length > 0 ? (
+                    <div className="space-y-2">
+                      {recentOrders.slice(0, 5).map((order) => (
+                        <div
+                          key={order.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                        >
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              Order #{order.id}
+                            </div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                              {new Date(order.created_at).toLocaleDateString()}
+                            </div>
                           </div>
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white min-w-[60px] text-right">
-                            ${item.amount.toFixed(2)}
-                          </span>
+                          <div className="text-right">
+                            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                              ${(order.total ?? 0).toFixed(2)}
+                            </div>
+                            <div className={`text-xs font-medium mt-0.5 ${
+                              order.status === 'completed' ? 'text-green-500' :
+                              order.status === 'pending' ? 'text-yellow-500' :
+                              order.status === 'cancelled' ? 'text-red-500' :
+                              'text-blue-500'
+                            }`}>
+                              {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <ShoppingBag className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-600 dark:text-gray-400">No orders yet. Time to order!</p>
+                      <Button
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => (window.location.href = '/menu')}
+                      >
+                        Browse Menu
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            )}
-          </motion.div>
 
-          {/* Sidebar */}
-          <motion.div className="space-y-6" variants={itemVariants}>
-            {/* Next Reward Progress */}
-            {profile && profile.next_reward_points > 0 && (
+              {/* Reservations Section */}
               <Card>
                 <CardHeader>
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-500" />
-                    Next Reward
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-pink-500" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Reservations</h3>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Book your table</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => (window.location.href = '/customer/reservations')}
+                    >
+                      View All
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {reservationsLoading ? (
+                    <div className="space-y-2">
+                      {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-12 w-full" />
+                      ))}
+                    </div>
+                  ) : customerReservations.length > 0 ? (
+                    <div className="space-y-2">
+                      {customerReservations.slice(0, 4).map((res) => {
+                        const d = new Date(res.reserved_for);
+                        return (
+                          <div
+                            key={res.id}
+                            className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                          >
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {d.toLocaleDateString()} at {d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                                {res.guest_count} guests • {res.status}
+                              </div>
+                            </div>
+                            {['pending', 'confirmed'].includes(res.status) && (
+                              <button
+                                onClick={() => handleCancelReservation(res.id)}
+                                className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-600 dark:text-gray-400">No reservations yet</p>
+                      <Button
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => (window.location.href = '/customer/reservations')}
+                      >
+                        Book a Table
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar - Loyalty & Info */}
+            <div className="lg:col-span-4 space-y-6">
+              {/* Loyalty Progress */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="w-5 h-5 text-purple-500" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Next Reward</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                        {profile?.loyalty_points ?? 0} / 100 pts
+                      </p>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                        <span className="font-semibold">
-                          {profile.loyalty_points} / {profile.next_reward_points} pts
-                        </span>
-                      </div>
-                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                          initial={{ width: 0 }}
-                          animate={{
-                            width: `${Math.min(
-                              (profile.loyalty_points / profile.next_reward_points) * 100,
-                              100
-                            )}%`,
-                          }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                        />
-                      </div>
+                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                        initial={{ width: 0 }}
+                        animate={{
+                          width: `${Math.min(((profile?.loyalty_points ?? 0) / 100) * 100, 100)}%`,
+                        }}
+                        transition={{ duration: 0.8 }}
+                      />
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {profile.next_reward_points - profile.loyalty_points} more points to your
-                      next reward!
+                      {Math.max(0, 100 - (profile?.loyalty_points ?? 0))} more points to next reward
                     </p>
                     <Button
                       variant="primary"
@@ -712,266 +603,75 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Loyalty Tier */}
-            {customerStats && (
+              {/* Favorites */}
               <Card>
                 <CardHeader>
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Award className="w-4 h-4 text-purple-500" />
-                    Loyalty Tier
-                  </h3>
+                  <div className="flex items-center gap-3">
+                    <Heart className="w-5 h-5 text-red-500" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Your Favorites</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Most ordered items</p>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center">
-                    <div className="text-4xl mb-2">
-                      {customerStats.customer_tier === 'platinum' && '💎'}
-                      {customerStats.customer_tier === 'gold' && '🥇'}
-                      {customerStats.customer_tier === 'silver' && '🥈'}
-                      {customerStats.customer_tier === 'bronze' && '🥉'}
+                  {profileLoading ? (
+                    <div className="space-y-2">
+                      {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-10 w-full" />
+                      ))}
                     </div>
-                    <div className="text-lg font-bold capitalize text-gray-900 dark:text-white">
-                      {customerStats.customer_tier} Member
+                  ) : profile?.favorite_items && profile.favorite_items.length > 0 ? (
+                    <div className="space-y-2">
+                      {profile.favorite_items.slice(0, 4).map((item, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 p-2 rounded-lg bg-white/5"
+                        >
+                          <Star className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                          <span className="text-sm text-gray-900 dark:text-white truncate">{item}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      Enjoy exclusive benefits and perks
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No favorites yet</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Member Info */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Award className="w-5 h-5 text-yellow-500" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Member</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Since {profile?.member_since ? new Date(profile.member_since).getFullYear() : '2024'}</p>
                     </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center space-y-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      You've earned <span className="font-bold text-gray-900 dark:text-white">{profile?.loyalty_points ?? 0}</span> points so far!
+                    </p>
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="w-full mt-3"
+                      className="w-full"
                       onClick={() => (window.location.href = '/customer/loyalty')}
                     >
-                      View Benefits
+                      Learn More
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            )}
-
-            {/* Favorite Items */}
-            <Card>
-              <CardHeader>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-red-500" />
-                  Your Favorites
-                </h3>
-              </CardHeader>
-              <CardContent>
-                {profileLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-12 w-full" />
-                    ))}
-                  </div>
-                ) : profile?.favorite_items && profile.favorite_items.length > 0 ? (
-                  <div className="space-y-2">
-                    {profile.favorite_items.slice(0, 5).map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
-                      >
-                        <span className="text-sm font-medium">{item}</span>
-                        <Button variant="ghost" size="sm">
-                          +
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 text-center py-4">
-                    No favorites yet. Order something delicious!
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Referral Program */}
-            <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/20">
-              <CardHeader>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Users className="w-4 h-4 text-emerald-500" />
-                  Refer a Friend
-                </h3>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Give $10, Get $10! Share your referral code with friends.
-                  </p>
-                  <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-emerald-500/30">
-                    <div className="text-xs text-gray-500 mb-1">Your Code</div>
-                    <div className="text-lg font-mono font-bold text-emerald-600">
-                      {profile?.name ? profile.name.substring(0, 3).toUpperCase() + '2024' : 'GET10'}
-                    </div>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full"
-                    leftIcon={<Share2 className="w-4 h-4" />}
-                  >
-                    Share Code
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-
-        {/* Reservation Section */}
-        <motion.section variants={itemVariants}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Book a Table
-                    </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Choose your time and party size, then confirm your reservation.
-                    </p>
-                  </div>
-                  <Calendar className="w-5 h-5 text-pink-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Date</label>
-                    <input
-                      type="date"
-                      value={bookingDate}
-                      onChange={(e) => setBookingDate(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Time</label>
-                    <input
-                      type="time"
-                      value={bookingTime}
-                      onChange={(e) => setBookingTime(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Guests</label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={20}
-                      value={bookingGuestCount}
-                      onChange={(e) => setBookingGuestCount(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Notes (optional)</label>
-                    <textarea
-                      rows={2}
-                      value={bookingNotes}
-                      onChange={(e) => setBookingNotes(e.target.value)}
-                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 resize-none"
-                      placeholder="Birthday, quiet table, etc."
-                    />
-                  </div>
-                </div>
-
-                {bookingError && (
-                  <div className="mb-2 text-xs text-red-500">
-                    {bookingError}
-                  </div>
-                )}
-                {bookingSuccess && (
-                  <div className="mb-2 text-xs text-emerald-500">
-                    {bookingSuccess}
-                  </div>
-                )}
-                {availabilityMessage && (
-                  <div className="mb-2 text-xs text-pink-500">
-                    {availabilityMessage}
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-3 mt-2">
-                  <Button
-                    variant="secondary"
-                    leftIcon={<Clock className="w-4 h-4" />}
-                    onClick={handleCheckAvailability}
-                    disabled={isCheckingAvailability || isBookingSubmitting}
-                  >
-                    {isCheckingAvailability ? 'Checking...' : 'Check Availability'}
-                  </Button>
-                  <Button
-                    leftIcon={<Utensils className="w-4 h-4" />}
-                    onClick={handleCreateReservation}
-                    disabled={isBookingSubmitting}
-                  >
-                    {isBookingSubmitting ? 'Booking...' : 'Book Now'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    My Reservations
-                  </h2>
-                  <Clock className="w-5 h-5 text-gray-400" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                {reservationsLoading ? (
-                  <div className="space-y-2">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Skeleton key={i} className="h-10 w-full" />
-                    ))}
-                  </div>
-                ) : customerReservations.length === 0 ? (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    You have no upcoming reservations yet.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {customerReservations.slice(0, 4).map((res) => {
-                      const d = new Date(res.reserved_for);
-                      return (
-                        <div
-                          key={res.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm"
-                        >
-                          <div>
-                            <div className="font-semibold text-gray-900 dark:text-white">
-                              {d.toLocaleDateString()} • {d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400">
-                              {res.guest_count} guests • Table {res.table?.code || 'TBD'} • {res.status}
-                            </div>
-                          </div>
-                          {['pending', 'confirmed'].includes(res.status) && (
-                            <button
-                              onClick={() => handleCancelReservation(res.id)}
-                              className="text-xs font-medium text-red-500 hover:text-red-600"
-                            >
-                              Cancel
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            </div>
           </div>
         </motion.section>
 
-        {/* Rewards Modal */}
+        {/* Rewards Modal - Clean and Centered */}
         {showRewardsModal && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"

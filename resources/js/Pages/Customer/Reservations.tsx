@@ -128,15 +128,18 @@ export default function Reservations() {
     maxDate.setMonth(maxDate.getMonth() + 3);
     const maxDateStr = maxDate.toISOString().split('T')[0];
 
-    // Group reservations by status
-    const upcomingReservations = reservations.filter((r: any) =>
-        ['pending', 'confirmed'].includes(r.status) &&
-        new Date(r.reservation_date) >= new Date()
-    );
-    const pastReservations = reservations.filter((r: any) =>
-        new Date(r.reservation_date) < new Date() ||
-        ['completed', 'cancelled', 'no_show'].includes(r.status)
-    );
+    // Group reservations by status using unified reserved_for datetime
+    const upcomingReservations = reservations.filter((r: any) => {
+        if (!r.reserved_for) return false;
+        const dt = new Date(r.reserved_for);
+        return ['pending', 'confirmed'].includes(r.status) && dt >= new Date();
+    });
+
+    const pastReservations = reservations.filter((r: any) => {
+        if (!r.reserved_for) return ['completed', 'cancelled', 'no_show'].includes(r.status);
+        const dt = new Date(r.reserved_for);
+        return dt < new Date() || ['completed', 'cancelled', 'no_show'].includes(r.status);
+    });
 
     return (
         <CustomerLayout>
@@ -199,7 +202,7 @@ export default function Reservations() {
                                                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                                     <Calendar className="w-4 h-4" />
                                                     <span>
-                                                        {new Date(reservation.reservation_date).toLocaleDateString('en-US', {
+                                                        {reservation.reserved_for && new Date(reservation.reserved_for).toLocaleDateString('en-US', {
                                                             weekday: 'long',
                                                             year: 'numeric',
                                                             month: 'long',
@@ -209,11 +212,11 @@ export default function Reservations() {
                                                 </div>
                                                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                                     <Clock className="w-4 h-4" />
-                                                    <span>{reservation.reservation_time}</span>
+                                                    <span>{reservation.reserved_for && new Date(reservation.reserved_for).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                                     <Users className="w-4 h-4" />
-                                                    <span>{reservation.party_size} {reservation.party_size === 1 ? 'Guest' : 'Guests'}</span>
+                                                    <span>{reservation.guest_count} {reservation.guest_count === 1 ? 'Guest' : 'Guests'}</span>
                                                 </div>
                                                 {reservation.table && (
                                                     <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
@@ -221,24 +224,26 @@ export default function Reservations() {
                                                         <span>Table {reservation.table.number}</span>
                                                     </div>
                                                 )}
-                                                {reservation.special_requests && (
+                                                {reservation.notes && (
                                                     <p className="text-gray-600 dark:text-gray-400 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                                        <strong>Special Requests:</strong> {reservation.special_requests}
+                                                        <strong>Special Requests:</strong> {reservation.notes}
                                                     </p>
                                                 )}
                                             </div>
 
-                                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleCancelReservation(reservation)}
-                                                    className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
-                                                >
-                                                    <X className="w-4 h-4 mr-2" />
-                                                    Cancel Reservation
-                                                </Button>
-                                            </div>
+                                            {reservation.can_cancel && (
+                                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleCancelReservation(reservation)}
+                                                        className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+                                                    >
+                                                        <X className="w-4 h-4 mr-2" />
+                                                        Cancel Reservation
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </CardContent>
                                     </Card>
                                 </motion.div>
@@ -274,24 +279,18 @@ export default function Reservations() {
                                             <div className="flex items-center gap-4">
                                                 <div className="text-center">
                                                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                                                        {new Date(reservation.reservation_date).getDate()}
+                                                        {reservation.reserved_for && new Date(reservation.reserved_for).getDate()}
                                                     </div>
                                                     <div className="text-xs text-gray-500">
-                                                        {new Date(reservation.reservation_date).toLocaleDateString('en-US', { month: 'short' })}
+                                                        {reservation.reserved_for && new Date(reservation.reserved_for).toLocaleDateString('en-US', { month: 'short' })}
                                                     </div>
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900 dark:text-white">
-                                                        {reservation.location?.name}
-                                                    </p>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                        {reservation.reservation_time} • {reservation.party_size} guests
-                                                    </p>
                                                 </div>
                                             </div>
                                             <span className={cn(
                                                 "px-3 py-1 rounded-full text-xs font-semibold",
-                                                reservation.status === 'completed' && "bg-gray-100 dark:bg-gray-800 text-gray-600",
+                                                reservation.status === 'confirmed'
+                                                    ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                                                    : "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400",
                                                 reservation.status === 'cancelled' && "bg-red-100 dark:bg-red-900/20 text-red-600",
                                                 reservation.status === 'no_show' && "bg-orange-100 dark:bg-orange-900/20 text-orange-600"
                                             )}>

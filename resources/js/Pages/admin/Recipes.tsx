@@ -62,7 +62,7 @@ interface RecipeIngredient { id?: number; ingredient_id: number; quantity: numbe
 interface Recipe {
     id: number; menu_item_id?: number; menu_item?: MenuItem; name: string; description?: string;
     instructions?: string; prep_time_minutes?: number; cook_time_minutes?: number; servings: number;
-    total_cost: number; is_active: boolean; ingredients?: RecipeIngredient[]; created_at: string;
+    total_cost: string | number; is_active: boolean; ingredients?: RecipeIngredient[]; created_at: string;
 }
 
 export default function Recipes() {
@@ -91,15 +91,21 @@ export default function Recipes() {
     const { data: recipes, isLoading } = useQuery({
         queryKey: ['recipes', page, search, statusFilter, menuItemFilter],
         queryFn: () => {
-            let url = `/api/recipes?page=${page}&per_page=${perPage}&search=${search}`;
+            let url = `/api/admin/recipes?page=${page}&per_page=${perPage}&search=${search}`;
             if (statusFilter !== 'all') url += `&is_active=${statusFilter === 'active' ? '1' : '0'}`;
             if (menuItemFilter !== 'all') url += `&menu_item_id=${menuItemFilter}`;
             return apiGet(url);
         }
     });
 
-    const { data: ingredients } = useQuery({ queryKey: ['ingredients'], queryFn: () => apiGet('/api/admin/ingredients') });
-    const { data: menuItems } = useQuery({ queryKey: ['menu-items'], queryFn: () => apiGet('/api/menu-items') });
+    const { data: ingredients } = useQuery({
+        queryKey: ['ingredients-all'],
+        queryFn: () => apiGet('/api/admin/ingredients?per_page=100')
+    });
+    const { data: menuItems } = useQuery({
+        queryKey: ['menu-items-all'],
+        queryFn: () => apiGet('/api/menu-items?per_page=100')
+    });
     const { data: statsData } = useQuery({ queryKey: ['recipes-stats'], queryFn: () => apiGet('/api/admin/recipes-stats') });
 
     const recipeList = useMemo(() => recipes?.data || [], [recipes]);
@@ -113,31 +119,31 @@ export default function Recipes() {
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/recipes', data),
+        mutationFn: (data: any) => apiPost('/api/admin/recipes', data),
         onSuccess: () => { toastSuccess('Recipe created'); closeModal(); qc.invalidateQueries({ queryKey: ['recipes'] }); qc.invalidateQueries({ queryKey: ['recipes-stats'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/recipes/${id}`, data),
+        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/recipes/${id}`, data),
         onSuccess: () => { toastSuccess('Recipe updated'); closeModal(); qc.invalidateQueries({ queryKey: ['recipes'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/recipes/${id}`),
+        mutationFn: (id: number) => apiDelete(`/api/admin/recipes/${id}`),
         onSuccess: () => { toastSuccess('Recipe deleted'); qc.invalidateQueries({ queryKey: ['recipes'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const duplicateMutation = useMutation({
-        mutationFn: (id: number) => apiPost(`/api/recipes/${id}/duplicate`, {}),
+        mutationFn: (id: number) => apiPost(`/api/admin/recipes/${id}/duplicate`, {}),
         onSuccess: () => { toastSuccess('Recipe duplicated'); qc.invalidateQueries({ queryKey: ['recipes'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const toggleStatusMutation = useMutation({
-        mutationFn: ({ id, is_active }: { id: number, is_active: boolean }) => apiPut(`/api/recipes/${id}`, { is_active }),
+        mutationFn: ({ id, is_active }: { id: number, is_active: boolean }) => apiPut(`/api/admin/recipes/${id}`, { is_active }),
         onSuccess: () => { toastSuccess('Status updated'); qc.invalidateQueries({ queryKey: ['recipes'] }); }
     });
 
@@ -170,7 +176,7 @@ export default function Recipes() {
 
     const handleViewCosting = async (recipe: Recipe) => {
         try {
-            const data = await apiGet(`/api/recipes/${recipe.id}/costing`);
+            const data = await apiGet(`/api/admin/recipes/${recipe.id}/costing`);
             setCostingData(data);
             setOpenCosting(true);
         } catch (error) {
@@ -202,8 +208,9 @@ export default function Recipes() {
 
     const calculateTotalCost = () => {
         return formData.ingredients.reduce((sum, ing) => {
-            const ingredient = ingredients?.data?.find((i: Ingredient) => i.id === ing.ingredient_id);
-            return sum + (ing.quantity * (ingredient?.cost_per_unit || 0));
+            const ingredient = ingredients?.data?.find((i: any) => i.id === ing.ingredient_id);
+            const costPerUnit = parseFloat(String(ingredient?.cost_per_unit)) || 0;
+            return sum + (ing.quantity * costPerUnit);
         }, 0);
     };
 
@@ -255,38 +262,109 @@ export default function Recipes() {
                     <div className="divide-y divide-white/5">
                         {isLoading ? (
                             <div className="p-8 text-center text-gray-500">Loading...</div>
-                        ) : recipeList.map((recipe: Recipe) => (
-                            <motion.div key={recipe.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
-                                <div className="col-span-3">
-                                    <div className="font-medium text-white flex items-center gap-2">
-                                        <ChefHat size={14} className="text-purple-400" /> {recipe.name}
+                        ) : recipeList.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <ChefHat className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-400 mb-2">No recipes found</h3>
+                                <p className="text-gray-500 text-sm mb-4">Create your first recipe to get started with menu costing</p>
+                                <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
+                                    <Plus className="w-4 h-4 mr-2" /> Create Recipe
+                                </Button>
+                            </div>
+                        ) : recipeList.map((recipe: Recipe) => {
+                            const recipeName = recipe.name || recipe.menu_item?.name || `Recipe #${recipe.id}`;
+                            const servings = Number(recipe.servings) || 1;
+                            const totalCost = parseFloat(String(recipe.total_cost)) || 0;
+                            const costPerServing = servings > 0 ? totalCost / servings : 0;
+
+                            return (
+                                <motion.div key={recipe.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                    className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
+                                    <div className="col-span-3">
+                                        <div className="font-medium text-white flex items-center gap-2">
+                                            <ChefHat size={14} className="text-purple-400" /> {recipeName}
+                                        </div>
+                                        <div className="text-xs text-gray-500">{recipe.ingredients?.length || 0} ingredients • {servings} servings</div>
                                     </div>
-                                    <div className="text-xs text-gray-500">{recipe.ingredients?.length || 0} ingredients • {recipe.servings} servings</div>
-                                </div>
-                                <div className="col-span-2 text-sm text-gray-300">{recipe.menu_item?.name || '-'}</div>
-                                <div className="col-span-2">
-                                    <div className="text-white font-medium">${(recipe.total_cost / recipe.servings).toFixed(2)}</div>
-                                    <div className="text-gray-500 text-xs">Total: ${recipe.total_cost.toFixed(2)}</div>
-                                </div>
-                                <div className="col-span-2 text-sm text-gray-400 flex items-center gap-1">
-                                    <Clock size={12} /> {(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)}m
-                                </div>
-                                <div className="col-span-1">
-                                    <button onClick={() => toggleStatusMutation.mutate({ id: recipe.id, is_active: !recipe.is_active })}>
-                                        {recipe.is_active ? <ToggleRight className="text-emerald-400 w-6 h-6" /> : <ToggleLeft className="text-gray-500 w-6 h-6" />}
-                                    </button>
-                                </div>
-                                <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button size="sm" variant="secondary" onClick={() => handleViewCosting(recipe)} className="h-8 w-8 p-0 border-white/10" title="Costing"><TrendingUp size={14} /></Button>
-                                    <Button size="sm" variant="secondary" onClick={() => duplicateMutation.mutate(recipe.id)} className="h-8 w-8 p-0 border-white/10" title="Duplicate"><Copy size={14} /></Button>
-                                    <Button size="sm" variant="secondary" onClick={() => handleEdit(recipe)} className="h-8 w-8 p-0 border-white/10"><Edit size={14} /></Button>
-                                    <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(recipe.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
-                                </div>
-                            </motion.div>
-                        ))}
+                                    <div className="col-span-2 text-sm text-gray-300">{recipe.menu_item?.name || '-'}</div>
+                                    <div className="col-span-2">
+                                        <div className="text-white font-medium">${costPerServing.toFixed(2)}</div>
+                                        <div className="text-gray-500 text-xs">Total: ${totalCost.toFixed(2)}</div>
+                                    </div>
+                                    <div className="col-span-2 text-sm text-gray-400 flex items-center gap-1">
+                                        <Clock size={12} /> {(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)}m
+                                    </div>
+                                    <div className="col-span-1">
+                                        <button onClick={() => toggleStatusMutation.mutate({ id: recipe.id, is_active: !recipe.is_active })}>
+                                            {recipe.is_active ? <ToggleRight className="text-emerald-400 w-6 h-6" /> : <ToggleLeft className="text-gray-500 w-6 h-6" />}
+                                        </button>
+                                    </div>
+                                    <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button size="sm" variant="secondary" onClick={() => handleViewCosting(recipe)} className="h-8 w-8 p-0 border-white/10" title="Costing"><TrendingUp size={14} /></Button>
+                                        <Button size="sm" variant="secondary" onClick={() => duplicateMutation.mutate(recipe.id)} className="h-8 w-8 p-0 border-white/10" title="Duplicate"><Copy size={14} /></Button>
+                                        <Button size="sm" variant="secondary" onClick={() => handleEdit(recipe)} className="h-8 w-8 p-0 border-white/10"><Edit size={14} /></Button>
+                                        <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(recipe.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 </div>
+
+                {/* Pagination */}
+                {recipes?.last_page > 1 && (
+                    <div className="flex items-center justify-between mt-4 px-2">
+                        <div className="text-sm text-gray-400">
+                            Showing {((recipes.current_page - 1) * perPage) + 1} - {Math.min(recipes.current_page * perPage, recipes.total)} of {recipes.total} recipes
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="border-white/10"
+                            >
+                                Previous
+                            </Button>
+                            <div className="flex items-center gap-1">
+                                {Array.from({ length: Math.min(5, recipes.last_page) }, (_, i) => {
+                                    let pageNum;
+                                    if (recipes.last_page <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (page <= 3) {
+                                        pageNum = i + 1;
+                                    } else if (page >= recipes.last_page - 2) {
+                                        pageNum = recipes.last_page - 4 + i;
+                                    } else {
+                                        pageNum = page - 2 + i;
+                                    }
+                                    return (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setPage(pageNum)}
+                                            className={`w-8 h-8 rounded text-sm ${page === pageNum
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => setPage(p => Math.min(recipes.last_page, p + 1))}
+                                disabled={page === recipes.last_page}
+                                className="border-white/10"
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRecipe ? 'Edit Recipe' : 'New Recipe'} size="xl">
@@ -315,7 +393,7 @@ export default function Recipes() {
                                     <select value={ing.ingredient_id} onChange={(e) => updateIngredient(i, 'ingredient_id', parseInt(e.target.value))}
                                         className="flex-1 bg-slate-950 border border-white/10 rounded px-2 py-1 text-white text-sm">
                                         <option value={0}>Select Ingredient</option>
-                                        {ingredients?.data?.map((ingItem: Ingredient) => <option key={ingItem.id} value={ingItem.id}>{ingItem.name} ({ingItem.unit})</option>)}
+                                        {ingredients?.data?.map((ingItem: any) => <option key={ingItem.id} value={ingItem.id}>{ingItem.name} ({typeof ingItem.unit === 'object' ? ingItem.unit?.name || ingItem.unit?.code : ingItem.unit})</option>)}
                                     </select>
                                     <Input type="number" step="0.01" value={ing.quantity} onChange={(e) => updateIngredient(i, 'quantity', parseFloat(e.target.value))} className="w-20 bg-slate-950 border-white/10 text-sm" placeholder="Qty" />
                                     <Button type="button" size="sm" variant="danger" onClick={() => removeIngredient(i)} className="h-8 w-8 p-0"><Trash2 size={14} /></Button>

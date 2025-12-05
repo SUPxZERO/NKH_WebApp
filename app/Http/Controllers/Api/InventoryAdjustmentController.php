@@ -15,7 +15,7 @@ class InventoryAdjustmentController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = InventoryAdjustment::with(['ingredient', 'location', 'adjustedBy']);
+        $query = InventoryAdjustment::with(['ingredient.unit', 'location', 'adjustedBy', 'adjusted_by_employee']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -50,6 +50,7 @@ class InventoryAdjustmentController extends Controller
             'adjusted_by' => 'required|exists:users,id'
         ]);
 
+        $validated['status'] = 'pending';
         $adjustment = InventoryAdjustment::create($validated);
 
         return response()->json($adjustment, 201);
@@ -60,10 +61,16 @@ class InventoryAdjustmentController extends Controller
         return response()->json($inventoryAdjustment->load(['ingredient', 'location', 'adjustedBy', 'approvedBy']));
     }
 
-    public function approve(Request $request, InventoryAdjustment $inventoryAdjustment): JsonResponse
+    public function approve(Request $request, InventoryAdjustment $adjustment): JsonResponse
     {
-        if ($inventoryAdjustment->status !== 'pending') {
-            return response()->json(['message' => 'Adjustment is not pending'], 422);
+        // Treat null as pending for backward compatibility
+        $currentStatus = strtolower($adjustment->status ?? 'pending');
+        
+        if ($currentStatus !== 'pending') {
+            return response()->json([
+                'message' => 'Adjustment is not pending',
+                'current_status' => $adjustment->status
+            ], 422);
         }
 
         $validated = $request->validate([
@@ -73,8 +80,12 @@ class InventoryAdjustmentController extends Controller
         // Use authenticated user ID, default to 1 if not authenticated
         $approvedBy = auth()->id() ?? 1;
 
-        DB::transaction(function () use ($inventoryAdjustment, $validated, $approvedBy) {
-            $inventoryAdjustment->update([
+        if (!$adjustment->location_id || !$adjustment->ingredient_id) {
+            return response()->json(['message' => 'Adjustment record is incomplete (missing location or ingredient)'], 422);
+        }
+
+        DB::transaction(function () use ($adjustment, $validated, $approvedBy) {
+            $adjustment->update([
                 'status' => 'approved',
                 'approved_by' => $approvedBy,
                 'approved_at' => now(),
@@ -84,37 +95,45 @@ class InventoryAdjustmentController extends Controller
             // Apply the adjustment to inventory
             $inventory = Inventory::firstOrCreate(
                 [
-                    'location_id' => $inventoryAdjustment->location_id,
-                    'ingredient_id' => $inventoryAdjustment->ingredient_id
+                    'location_id' => $adjustment->location_id,
+                    'ingredient_id' => $adjustment->ingredient_id
                 ],
                 ['quantity' => 0]
             );
 
-            $inventory->increment('quantity', $inventoryAdjustment->quantity_change);
+            $inventory->increment('quantity', $adjustment->quantity_change);
 
             // Record transaction
             InventoryTransaction::create([
-                'location_id' => $inventoryAdjustment->location_id,
-                'ingredient_id' => $inventoryAdjustment->ingredient_id,
+                'location_id' => $adjustment->location_id,
+                'ingredient_id' => $adjustment->ingredient_id,
                 'type' => 'adjustment',
-                'quantity' => $inventoryAdjustment->quantity_change,
-                'notes' => "Adjustment approved. Reason: {$inventoryAdjustment->reason}",
+                'movement_type' => 'adjustment',
+                'quantity' => $adjustment->quantity_change,
+                'notes' => "Adjustment approved. Reason: {$adjustment->reason}",
                 'transacted_at' => now(),
-                'created_by' => $approvedBy
+                'created_by' => $approvedBy,
+                'user_id' => $approvedBy
             ]);
             
             // Update ingredient total stock
-            $ingredient = Ingredient::find($inventoryAdjustment->ingredient_id);
-            $ingredient->increment('current_stock', $inventoryAdjustment->quantity_change);
+            $ingredient = Ingredient::find($adjustment->ingredient_id);
+            $ingredient->increment('current_stock', $adjustment->quantity_change);
         });
 
         return response()->json(['message' => 'Adjustment approved']);
     }
 
-    public function reject(Request $request, InventoryAdjustment $inventoryAdjustment): JsonResponse
+    public function reject(Request $request, InventoryAdjustment $adjustment): JsonResponse
     {
-        if ($inventoryAdjustment->status !== 'pending') {
-            return response()->json(['message' => 'Adjustment is not pending'], 422);
+        // Treat null as pending
+        $currentStatus = strtolower($adjustment->status ?? 'pending');
+
+        if ($currentStatus !== 'pending') {
+            return response()->json([
+                'message' => 'Adjustment is not pending',
+                'current_status' => $adjustment->status
+            ], 422);
         }
 
         $validated = $request->validate([
@@ -124,7 +143,7 @@ class InventoryAdjustmentController extends Controller
         // Use authenticated user ID, default to 1 if not authenticated
         $rejectedBy = auth()->id() ?? 1;
 
-        $inventoryAdjustment->update([
+        $adjustment->update([
             'status' => 'rejected',
             'rejected_by' => $rejectedBy,
             'rejected_at' => now(),
