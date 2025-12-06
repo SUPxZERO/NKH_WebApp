@@ -101,6 +101,7 @@ export interface CustomerAddress {
   latitude?: number | null;
   longitude?: number | null;
   delivery_instructions?: string | null;
+  is_default?: boolean;
   created_at: string;
   updated_at: string;
 }
