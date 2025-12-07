@@ -8,6 +8,8 @@ import {
   Tag, Star, Package, Shield, DollarSign, ClipboardList,
   AlertTriangle, Beaker, TrendingUp, ChevronRight, ChevronDown, Circle
 } from 'lucide-react';
+import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
+import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import { cn } from '@/app/utils/cn'; // Ensure this path matches your project
 
 // --- 1. New Hierarchical Navigation Structure ---
@@ -402,10 +404,10 @@ export default function AdminLayout({ children }: Props) {
           ))}
         </div>
 
-        {/* User Footer */}
+        {/* User Footer - Simplified */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className={cn(
-            'flex items-center gap-3 p-2 rounded-xl transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer',
+            'flex items-center gap-3 p-2 rounded-xl transition-colors',
             sidebarCollapsed && 'justify-center'
           )}>
             <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center border-2 border-white dark:border-gray-600 shadow-sm flex-shrink-0">
@@ -429,16 +431,6 @@ export default function AdminLayout({ children }: Props) {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {!sidebarCollapsed && (
-              <button
-                onClick={handleLogout}
-                className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                title="Logout"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            )}
           </div>
         </div>
       </motion.aside>
@@ -459,10 +451,8 @@ export default function AdminLayout({ children }: Props) {
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="relative p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-800" />
-              </button>
+              <NotificationDropdown variant="admin" />
+              <UserProfileDropdown variant="admin" />
             </div>
           </div>
         </header>

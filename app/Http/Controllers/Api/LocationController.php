@@ -69,8 +69,16 @@ class LocationController extends Controller
     public function store(StoreLocationRequest $request): LocationResource
     {
         $data = $request->validated();
+        $operatingHours = $data['operating_hours'] ?? [];
+        unset($data['operating_hours']);
+
         $location = Location::create($data);
-        return new LocationResource($location);
+
+        if (!empty($operatingHours)) {
+            $location->operatingHours()->createMany($operatingHours);
+        }
+
+        return new LocationResource($location->load('operatingHours'));
     }
 
     // GET /api/locations/{location}
@@ -82,8 +90,20 @@ class LocationController extends Controller
     // PUT /api/locations/{location} (role:admin,manager)
     public function update(UpdateLocationRequest $request, Location $location): LocationResource
     {
-        $location->update($request->validated());
-        return new LocationResource($location);
+        $data = $request->validated();
+        $operatingHours = $data['operating_hours'] ?? null;
+        unset($data['operating_hours']);
+
+        $location->update($data);
+
+        if ($operatingHours !== null) {
+            $location->operatingHours()->delete();
+            if (!empty($operatingHours)) {
+                $location->operatingHours()->createMany($operatingHours);
+            }
+        }
+
+        return new LocationResource($location->load('operatingHours'));
     }
 
     // DELETE /api/locations/{location} (role:admin,manager)

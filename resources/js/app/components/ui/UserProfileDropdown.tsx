@@ -25,6 +25,7 @@ import {
     ClipboardList,
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useThemeStore } from '@/app/store/theme';
 
 type UserRole = 'admin' | 'employee' | 'customer';
 
@@ -94,7 +95,7 @@ const profilePaths: Record<UserRole, string> = {
 
 export default function UserProfileDropdown({ className, variant }: UserProfileDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const { isDark, toggle } = useThemeStore();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Get user from page props
@@ -105,34 +106,6 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
     const userRole: UserRole = variant || user?.role || 'customer';
     const config = menuConfigs[userRole];
 
-    // Check initial dark mode
-    useEffect(() => {
-        setIsDarkMode(document.documentElement.classList.contains('dark'));
-    }, []);
-
-    // Handle click outside
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Toggle dark mode
-    const toggleDarkMode = () => {
-        document.documentElement.classList.toggle('dark');
-        setIsDarkMode(!isDarkMode);
-    };
-
-    // Handle logout
-    const handleLogout = () => {
-        setIsOpen(false);
-        router.post('/logout');
-    };
-
     // Get initials from name
     const getInitials = (name: string) => {
         return name
@@ -141,6 +114,12 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
             .join('')
             .toUpperCase()
             .slice(0, 2);
+    };
+
+    // Handle logout
+    const handleLogout = () => {
+        setIsOpen(false);
+        router.post('/logout');
     };
 
     // Get gradient colors based on role
@@ -345,7 +324,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                             {/* Dark Mode Toggle */}
                             <div className="py-2 px-2">
                                 <button
-                                    onClick={toggleDarkMode}
+                                    onClick={toggle}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group w-full"
                                 >
                                     <div className={cn(
@@ -355,24 +334,24 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                         userRole === 'employee' && 'group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30',
                                         userRole === 'customer' && 'group-hover:bg-fuchsia-100 dark:group-hover:bg-fuchsia-900/30'
                                     )}>
-                                        {isDarkMode ? (
+                                        {isDark ? (
                                             <Sun className="w-5 h-5 text-yellow-500" />
                                         ) : (
                                             <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                                         )}
                                     </div>
                                     <span className="font-medium text-gray-700 dark:text-gray-300">
-                                        {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                                        {isDark ? 'Light Mode' : 'Dark Mode'}
                                     </span>
                                     <div className={cn(
                                         'ml-auto w-11 h-6 rounded-full transition-colors relative',
-                                        isDarkMode
+                                        isDark
                                             ? userRole === 'admin' ? 'bg-purple-500' : userRole === 'employee' ? 'bg-blue-500' : 'bg-fuchsia-500'
                                             : 'bg-gray-200'
                                     )}>
                                         <div className={cn(
                                             'absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all',
-                                            isDarkMode ? 'left-6' : 'left-1'
+                                            isDark ? 'left-6' : 'left-1'
                                         )} />
                                     </div>
                                 </button>

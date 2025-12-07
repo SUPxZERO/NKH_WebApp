@@ -2,7 +2,7 @@
 import React from 'react';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useCartStore } from '@/app/store/cart';
-import AddressManager from '@/app/components/customer/AddressManager';
+import AddressManager from '@/app/components/customer/AddressManagerEnhanced';
 import { useTimeSlots } from '@/app/hooks/useCustomer';
 import { Card, CardContent, CardHeader, CardFooter } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
@@ -110,7 +110,14 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
             {cart.mode === 'delivery' && (
-              <AddressManager selected={cart.selectedAddress} onSelect={(a) => cart.setAddress(a)} />
+              <AddressManager
+                selected={cart.selectedAddress}
+                onSelect={(a) => cart.setAddress(a)}
+                allowAdd={true}
+                allowEdit={true}
+                allowDelete={true}
+                compact={false}
+              />
             )}
 
             <Card>

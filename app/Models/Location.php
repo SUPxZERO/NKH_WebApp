@@ -34,6 +34,8 @@ class Location extends Model
         'accepts_online_orders',
         'accepts_pickup',
         'accepts_delivery',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [

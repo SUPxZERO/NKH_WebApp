@@ -14,34 +14,40 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// Stats Ribbon
+// Stats Ribbon with Dark/Light Mode Support
 const UnitStatsRibbon = ({ stats }: { stats: any }) => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Units</p>
-                    <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Units</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
                 </div>
-                <Ruler className="w-8 h-8 text-purple-400" />
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+                    <Ruler className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
             </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Base Units</p>
-                    <p className="text-2xl font-bold text-blue-400 mt-1">{stats.base}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Base Units</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.base}</p>
                 </div>
-                <Scale className="w-8 h-8 text-blue-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                    <Scale className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
             </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Derived Units</p>
-                    <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.derived}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Derived Units</p>
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.derived}</p>
                 </div>
-                <Hash className="w-8 h-8 text-emerald-400" />
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                    <Hash className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
             </div>
         </div>
     </div>
@@ -186,11 +192,11 @@ export default function Units() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-slate-900 p-6">
+            <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Units</h1>
-                        <p className="text-slate-400 mt-1">Measurement units management</p>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Units</h1>
+                        <p className="text-gray-600 dark:text-slate-400 mt-1">Measurement units management</p>
                     </div>
                     <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
                         <Plus className="w-4 h-4 mr-2" /> Add Unit
@@ -199,15 +205,16 @@ export default function Units() {
 
                 <UnitStatsRibbon stats={stats} />
 
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
-                    <div className="flex gap-4">
-                        <div className="relative flex-1">
+                {/* Filters */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
+                    <div className="flex flex-wrap gap-4">
+                        <div className="relative flex-1 min-w-[200px]">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input placeholder="Search units..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+                                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
                         </div>
                         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
                             <option value="all">All Types</option>
                             <option value="for_weight">Weight</option>
                             <option value="for_volume">Volume</option>
@@ -215,7 +222,7 @@ export default function Units() {
                             <option value="for_packaging">Packaging</option>
                         </select>
                         <select value={baseUnitFilter} onChange={(e) => setBaseUnitFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
                             <option value="all">All Units</option>
                             <option value="base">Base Units</option>
                             <option value="derived">Derived Units</option>
@@ -223,8 +230,9 @@ export default function Units() {
                     </div>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
+                {/* Table */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                         <div className="col-span-3">Name / Code</div>
                         <div className="col-span-2">Type</div>
                         <div className="col-span-2">Base Unit</div>
@@ -232,35 +240,40 @@ export default function Units() {
                         <div className="col-span-2">Usage</div>
                         <div className="col-span-1 text-right">Actions</div>
                     </div>
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-gray-100 dark:divide-white/5">
                         {isLoading ? (
                             <div className="p-8 text-center text-gray-500">Loading...</div>
+                        ) : unitList.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <Ruler className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                <p className="text-gray-500 dark:text-gray-400">No units found</p>
+                            </div>
                         ) : unitList.map((unit: Unit) => (
                             <motion.div key={unit.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
+                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
                                 <div className="col-span-3">
-                                    <div className="font-medium text-white">{unit.name}</div>
+                                    <div className="font-medium text-gray-900 dark:text-white">{unit.name}</div>
                                     <div className="text-xs text-gray-500 font-mono">{unit.code} ({unit.display_name})</div>
                                 </div>
                                 <div className="col-span-2">
-                                    <span className="px-2 py-1 rounded-md text-xs font-medium border bg-blue-500/10 text-blue-400 border-blue-500/20 flex items-center gap-1 w-fit">
+                                    <span className="px-2 py-1 rounded-md text-xs font-medium border bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 flex items-center gap-1 w-fit">
                                         {getUnitIcon(unit)} {getUnitType(unit)}
                                     </span>
                                 </div>
-                                <div className="col-span-2 text-sm text-gray-300">
-                                    {unit.is_base_unit ? <span className="text-emerald-400 text-xs font-bold">BASE UNIT</span> : unit.base_unit}
+                                <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300">
+                                    {unit.is_base_unit ? <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold">BASE UNIT</span> : unit.base_unit}
                                 </div>
-                                <div className="col-span-2 text-sm text-gray-300 font-mono">
+                                <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300 font-mono">
                                     {unit.conversion_factor ? `×${unit.conversion_factor}` : '-'}
                                 </div>
                                 <div className="col-span-2 flex gap-1">
-                                    {unit.for_weight && <Badge className="bg-gray-800 text-gray-400 text-[10px] px-1">W</Badge>}
-                                    {unit.for_volume && <Badge className="bg-gray-800 text-gray-400 text-[10px] px-1">V</Badge>}
-                                    {unit.for_quantity && <Badge className="bg-gray-800 text-gray-400 text-[10px] px-1">Q</Badge>}
+                                    {unit.for_weight && <Badge className="bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] px-1">W</Badge>}
+                                    {unit.for_volume && <Badge className="bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] px-1">V</Badge>}
+                                    {unit.for_quantity && <Badge className="bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] px-1">Q</Badge>}
                                 </div>
                                 <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button size="sm" variant="secondary" onClick={() => handleEdit(unit)} className="h-8 w-8 p-0 border-white/10"><Edit size={14} /></Button>
-                                    <Button size="sm" variant="danger" onClick={() => handleDelete(unit.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
+                                    <Button size="sm" variant="secondary" onClick={() => handleEdit(unit)} className="h-8 w-8 p-0"><Edit size={14} /></Button>
+                                    <Button size="sm" variant="danger" onClick={() => handleDelete(unit.id)} className="h-8 w-8 p-0"><Trash2 size={14} /></Button>
                                 </div>
                             </motion.div>
                         ))}
@@ -271,15 +284,16 @@ export default function Units() {
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingUnit ? 'Edit Unit' : 'New Unit'} size="lg">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required className="bg-slate-950 border-white/10" placeholder="e.g. kg" />
-                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="bg-slate-950 border-white/10" placeholder="e.g. Kilogram" />
+                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. kg" />
+                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Kilogram" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <Input label="Display Name" value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required className="bg-slate-950 border-white/10" placeholder="e.g. kg" />
+                        <Input label="Display Name" value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required placeholder="e.g. kg" />
                         <div className="flex items-center pt-6">
                             <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={formData.is_base_unit} onChange={(e) => setFormData({ ...formData, is_base_unit: e.target.checked })} className="rounded bg-slate-950 border-white/10" />
-                                <span className="text-sm text-gray-300">Is Base Unit</span>
+                                <input type="checkbox" checked={formData.is_base_unit} onChange={(e) => setFormData({ ...formData, is_base_unit: e.target.checked })}
+                                    className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/10" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">Is Base Unit</span>
                             </label>
                         </div>
                     </div>
@@ -287,26 +301,26 @@ export default function Units() {
                     {!formData.is_base_unit && (
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Base Unit</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base Unit</label>
                                 <select value={formData.base_unit} onChange={(e) => setFormData({ ...formData, base_unit: e.target.value })}
-                                    className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                                    className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
                                     <option value="">Select Base Unit</option>
                                     {baseUnits?.map((u: Unit) => <option key={u.code} value={u.code}>{u.name} ({u.code})</option>)}
                                 </select>
                             </div>
-                            <Input label="Conversion Factor" type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} className="bg-slate-950 border-white/10" />
+                            <Input label="Conversion Factor" type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} />
                         </div>
                     )}
 
-                    <div className="border-t border-white/10 pt-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Applicable Types</label>
+                    <div className="border-t border-gray-200 dark:border-white/10 pt-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Applicable Types</label>
                         <div className="flex gap-4 flex-wrap">
                             {['weight', 'volume', 'quantity', 'packaging', 'produce'].map(type => (
                                 <label key={type} className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={(formData as any)[`for_${type}`]}
                                         onChange={(e) => setFormData({ ...formData, [`for_${type}`]: e.target.checked })}
-                                        className="rounded bg-slate-950 border-white/10" />
-                                    <span className="text-sm text-gray-300 capitalize">{type}</span>
+                                        className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/10" />
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{type}</span>
                                 </label>
                             ))}
                         </div>

@@ -14,34 +14,40 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// Stats Ribbon
+// Stats Ribbon with Dark/Light Mode Support
 const IngredientStatsRibbon = ({ stats }: { stats: any }) => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Items</p>
-                    <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Items</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
                 </div>
-                <Package className="w-8 h-8 text-purple-400" />
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+                    <Package className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
             </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Low Stock</p>
-                    <p className="text-2xl font-bold text-amber-400 mt-1">{stats.lowStock}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Low Stock</p>
+                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{stats.lowStock}</p>
                 </div>
-                <AlertTriangle className="w-8 h-8 text-amber-400" />
+                <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
             </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Value</p>
-                    <p className="text-2xl font-bold text-emerald-400 mt-1">${stats.totalValue.toFixed(0)}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Value</p>
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">${stats.totalValue.toFixed(0)}</p>
                 </div>
-                <DollarSign className="w-8 h-8 text-emerald-400" />
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
             </div>
         </div>
     </div>
@@ -189,15 +195,15 @@ export default function Ingredients() {
 
     const getCategoryColor = (category: string) => {
         const colors: Record<string, string> = {
-            protein: 'bg-red-500/10 text-red-400 border-red-500/20',
-            vegetable: 'bg-green-500/10 text-green-400 border-green-500/20',
-            fruit: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-            dairy: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-            grain: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-            spice: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-            oil: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-            beverage: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-            other: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+            protein: 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20',
+            vegetable: 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20',
+            fruit: 'bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20',
+            dairy: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20',
+            grain: 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20',
+            spice: 'bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/20',
+            oil: 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20',
+            beverage: 'bg-cyan-100 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/20',
+            other: 'bg-gray-100 dark:bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-500/20'
         };
         return colors[category] || colors.other;
     };
@@ -209,11 +215,11 @@ export default function Ingredients() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-slate-900 p-6">
+            <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Ingredients</h1>
-                        <p className="text-slate-400 mt-1">Inventory items and costs</p>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Ingredients</h1>
+                        <p className="text-gray-600 dark:text-slate-400 mt-1">Inventory items and costs</p>
                     </div>
                     <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
                         <Plus className="w-4 h-4 mr-2" /> Add Ingredient
@@ -222,25 +228,26 @@ export default function Ingredients() {
 
                 <IngredientStatsRibbon stats={stats} />
 
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
-                    <div className="flex gap-4">
-                        <div className="relative flex-1">
+                {/* Filters */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
+                    <div className="flex flex-wrap gap-4">
+                        <div className="relative flex-1 min-w-[200px]">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input placeholder="Search ingredients..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+                                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
                         </div>
                         <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
                             <option value="all">All Categories</option>
                             {Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                         </select>
                         <select value={supplierFilter} onChange={(e) => setSupplierFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
                             <option value="all">All Suppliers</option>
                             {suppliers?.data?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
                             <option value="all">All Status</option>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
@@ -248,8 +255,9 @@ export default function Ingredients() {
                     </div>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
+                {/* Table */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                         <div className="col-span-2">Code</div>
                         <div className="col-span-3">Name</div>
                         <div className="col-span-2">Category</div>
@@ -257,17 +265,22 @@ export default function Ingredients() {
                         <div className="col-span-2">Supplier</div>
                         <div className="col-span-1 text-right">Actions</div>
                     </div>
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-gray-100 dark:divide-white/5">
                         {isLoading ? (
                             <div className="p-8 text-center text-gray-500">Loading...</div>
+                        ) : ingredientList.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <Package className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                <p className="text-gray-500 dark:text-gray-400">No ingredients found</p>
+                            </div>
                         ) : ingredientList.map((ingredient: Ingredient) => (
                             <motion.div key={ingredient.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
-                                <div className="col-span-2 font-mono text-sm text-gray-300">{ingredient.code}</div>
+                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                                <div className="col-span-2 font-mono text-sm text-gray-600 dark:text-gray-300">{ingredient.code}</div>
                                 <div className="col-span-3">
-                                    <div className="font-medium text-white">{ingredient.name}</div>
+                                    <div className="font-medium text-gray-900 dark:text-white">{ingredient.name}</div>
                                     {isLowStock(ingredient) && (
-                                        <div className="flex items-center gap-1 text-amber-400 text-xs mt-1">
+                                        <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs mt-1">
                                             <AlertTriangle size={10} /> Low Stock
                                         </div>
                                     )}
@@ -278,13 +291,13 @@ export default function Ingredients() {
                                     </span>
                                 </div>
                                 <div className="col-span-2 text-sm">
-                                    <div className="text-white font-medium">{ingredient.current_stock} {ingredient.unit?.code}</div>
+                                    <div className="text-gray-900 dark:text-white font-medium">{ingredient.current_stock} {ingredient.unit?.code}</div>
                                     <div className="text-gray-500 text-xs">${Number(ingredient.cost_per_unit).toFixed(2)} / {ingredient.unit?.code}</div>
                                 </div>
-                                <div className="col-span-2 text-sm text-gray-400">{ingredient.supplier?.name || '-'}</div>
+                                <div className="col-span-2 text-sm text-gray-600 dark:text-gray-400">{ingredient.supplier?.name || '-'}</div>
                                 <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button size="sm" variant="secondary" onClick={() => handleEdit(ingredient)} className="h-8 w-8 p-0 border-white/10"><Edit size={14} /></Button>
-                                    <Button size="sm" variant="danger" onClick={() => handleDelete(ingredient.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
+                                    <Button size="sm" variant="secondary" onClick={() => handleEdit(ingredient)} className="h-8 w-8 p-0"><Edit size={14} /></Button>
+                                    <Button size="sm" variant="danger" onClick={() => handleDelete(ingredient.id)} className="h-8 w-8 p-0"><Trash2 size={14} /></Button>
                                 </div>
                             </motion.div>
                         ))}
@@ -295,33 +308,33 @@ export default function Ingredients() {
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingIngredient ? 'Edit Ingredient' : 'New Ingredient'} size="lg">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required className="bg-slate-950 border-white/10" />
-                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="bg-slate-950 border-white/10" />
+                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required />
+                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Category</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
                             <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                                className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
                                 {Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Unit</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit</label>
                             <select value={formData.unit_id} onChange={(e) => setFormData({ ...formData, unit_id: e.target.value })} required
-                                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                                className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
                                 <option value="">Select Unit</option>
                                 {units?.data?.map((u: any) => <option key={u.id} value={u.id}>{u.name} ({u.code})</option>)}
                             </select>
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                        <Input label="Cost / Unit" type="number" step="0.01" value={formData.cost_per_unit} onChange={(e) => setFormData({ ...formData, cost_per_unit: e.target.value })} required className="bg-slate-950 border-white/10" />
-                        <Input label="Reorder Point" type="number" step="0.01" value={formData.reorder_point} onChange={(e) => setFormData({ ...formData, reorder_point: e.target.value })} className="bg-slate-950 border-white/10" />
+                        <Input label="Cost / Unit" type="number" step="0.01" value={formData.cost_per_unit} onChange={(e) => setFormData({ ...formData, cost_per_unit: e.target.value })} required />
+                        <Input label="Reorder Point" type="number" step="0.01" value={formData.reorder_point} onChange={(e) => setFormData({ ...formData, reorder_point: e.target.value })} />
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Supplier</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supplier</label>
                             <select value={formData.supplier_id} onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
-                                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                                className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
                                 <option value="">None</option>
                                 {suppliers?.data?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>

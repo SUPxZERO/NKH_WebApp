@@ -14,43 +14,51 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// Stats Ribbon
+// Stats Ribbon with Dark/Light Mode
 const RecipeStatsRibbon = ({ stats }: { stats: any }) => (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Recipes</p>
-                    <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Recipes</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
                 </div>
-                <ChefHat className="w-8 h-8 text-purple-400" />
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+                    <ChefHat className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
             </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
-                    <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.active}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.active}</p>
                 </div>
-                <ToggleRight className="w-8 h-8 text-emerald-400" />
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                    <ToggleRight className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
             </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Avg Cost</p>
-                    <p className="text-2xl font-bold text-amber-400 mt-1">${stats.avgCost.toFixed(2)}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Avg Cost</p>
+                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">${stats.avgCost.toFixed(2)}</p>
                 </div>
-                <DollarSign className="w-8 h-8 text-amber-400" />
+                <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
             </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Avg Ingredients</p>
-                    <p className="text-2xl font-bold text-blue-400 mt-1">{stats.avgIngredients}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Avg Ingredients</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.avgIngredients}</p>
                 </div>
-                <FileText className="w-8 h-8 text-blue-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
             </div>
         </div>
     </div>
@@ -71,9 +79,7 @@ export default function Recipes() {
     const [menuItemFilter, setMenuItemFilter] = useState('all');
     const [openCreate, setOpenCreate] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
-    const [openView, setOpenView] = useState(false);
     const [openCosting, setOpenCosting] = useState(false);
-    const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
     const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
     const [costingData, setCostingData] = useState<any>(null);
 
@@ -216,11 +222,11 @@ export default function Recipes() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-slate-900 p-6">
+            <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Recipes</h1>
-                        <p className="text-slate-400 mt-1">Menu items preparation and costing</p>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Recipes</h1>
+                        <p className="text-gray-600 dark:text-slate-400 mt-1">Menu items preparation and costing</p>
                     </div>
                     <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
                         <Plus className="w-4 h-4 mr-2" /> Create Recipe
@@ -229,29 +235,31 @@ export default function Recipes() {
 
                 <RecipeStatsRibbon stats={stats} />
 
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
-                    <div className="flex gap-4">
-                        <div className="relative flex-1">
+                {/* Filters */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
+                    <div className="flex flex-wrap gap-4">
+                        <div className="relative flex-1 min-w-[200px]">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input placeholder="Search recipes..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+                                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
                         </div>
                         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
                             <option value="all">All Status</option>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
                         <select value={menuItemFilter} onChange={(e) => setMenuItemFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
                             <option value="all">All Menu Items</option>
                             {menuItems?.data?.map((item: MenuItem) => <option key={item.id} value={item.id}>{item.name}</option>)}
                         </select>
                     </div>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
+                {/* Table */}
+                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                         <div className="col-span-3">Recipe Name</div>
                         <div className="col-span-2">Menu Item</div>
                         <div className="col-span-2">Cost / Serving</div>
@@ -259,13 +267,13 @@ export default function Recipes() {
                         <div className="col-span-1">Status</div>
                         <div className="col-span-2 text-right">Actions</div>
                     </div>
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-gray-100 dark:divide-white/5">
                         {isLoading ? (
                             <div className="p-8 text-center text-gray-500">Loading...</div>
                         ) : recipeList.length === 0 ? (
                             <div className="p-12 text-center">
-                                <ChefHat className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium text-gray-400 mb-2">No recipes found</h3>
+                                <ChefHat className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">No recipes found</h3>
                                 <p className="text-gray-500 text-sm mb-4">Create your first recipe to get started with menu costing</p>
                                 <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
                                     <Plus className="w-4 h-4 mr-2" /> Create Recipe
@@ -279,31 +287,31 @@ export default function Recipes() {
 
                             return (
                                 <motion.div key={recipe.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                    className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
+                                    className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
                                     <div className="col-span-3">
-                                        <div className="font-medium text-white flex items-center gap-2">
-                                            <ChefHat size={14} className="text-purple-400" /> {recipeName}
+                                        <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                            <ChefHat size={14} className="text-purple-600 dark:text-purple-400" /> {recipeName}
                                         </div>
                                         <div className="text-xs text-gray-500">{recipe.ingredients?.length || 0} ingredients • {servings} servings</div>
                                     </div>
-                                    <div className="col-span-2 text-sm text-gray-300">{recipe.menu_item?.name || '-'}</div>
+                                    <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300">{recipe.menu_item?.name || '-'}</div>
                                     <div className="col-span-2">
-                                        <div className="text-white font-medium">${costPerServing.toFixed(2)}</div>
+                                        <div className="text-gray-900 dark:text-white font-medium">${costPerServing.toFixed(2)}</div>
                                         <div className="text-gray-500 text-xs">Total: ${totalCost.toFixed(2)}</div>
                                     </div>
-                                    <div className="col-span-2 text-sm text-gray-400 flex items-center gap-1">
+                                    <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                                         <Clock size={12} /> {(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)}m
                                     </div>
                                     <div className="col-span-1">
                                         <button onClick={() => toggleStatusMutation.mutate({ id: recipe.id, is_active: !recipe.is_active })}>
-                                            {recipe.is_active ? <ToggleRight className="text-emerald-400 w-6 h-6" /> : <ToggleLeft className="text-gray-500 w-6 h-6" />}
+                                            {recipe.is_active ? <ToggleRight className="text-emerald-600 dark:text-emerald-400 w-6 h-6" /> : <ToggleLeft className="text-gray-400 dark:text-gray-500 w-6 h-6" />}
                                         </button>
                                     </div>
                                     <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button size="sm" variant="secondary" onClick={() => handleViewCosting(recipe)} className="h-8 w-8 p-0 border-white/10" title="Costing"><TrendingUp size={14} /></Button>
-                                        <Button size="sm" variant="secondary" onClick={() => duplicateMutation.mutate(recipe.id)} className="h-8 w-8 p-0 border-white/10" title="Duplicate"><Copy size={14} /></Button>
-                                        <Button size="sm" variant="secondary" onClick={() => handleEdit(recipe)} className="h-8 w-8 p-0 border-white/10"><Edit size={14} /></Button>
-                                        <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(recipe.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
+                                        <Button size="sm" variant="secondary" onClick={() => handleViewCosting(recipe)} className="h-8 w-8 p-0" title="Costing"><TrendingUp size={14} /></Button>
+                                        <Button size="sm" variant="secondary" onClick={() => duplicateMutation.mutate(recipe.id)} className="h-8 w-8 p-0" title="Duplicate"><Copy size={14} /></Button>
+                                        <Button size="sm" variant="secondary" onClick={() => handleEdit(recipe)} className="h-8 w-8 p-0"><Edit size={14} /></Button>
+                                        <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(recipe.id)} className="h-8 w-8 p-0"><Trash2 size={14} /></Button>
                                     </div>
                                 </motion.div>
                             );
@@ -314,54 +322,12 @@ export default function Recipes() {
                 {/* Pagination */}
                 {recipes?.last_page > 1 && (
                     <div className="flex items-center justify-between mt-4 px-2">
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                             Showing {((recipes.current_page - 1) * perPage) + 1} - {Math.min(recipes.current_page * perPage, recipes.total)} of {recipes.total} recipes
                         </div>
                         <div className="flex gap-2">
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => setPage(p => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                                className="border-white/10"
-                            >
-                                Previous
-                            </Button>
-                            <div className="flex items-center gap-1">
-                                {Array.from({ length: Math.min(5, recipes.last_page) }, (_, i) => {
-                                    let pageNum;
-                                    if (recipes.last_page <= 5) {
-                                        pageNum = i + 1;
-                                    } else if (page <= 3) {
-                                        pageNum = i + 1;
-                                    } else if (page >= recipes.last_page - 2) {
-                                        pageNum = recipes.last_page - 4 + i;
-                                    } else {
-                                        pageNum = page - 2 + i;
-                                    }
-                                    return (
-                                        <button
-                                            key={pageNum}
-                                            onClick={() => setPage(pageNum)}
-                                            className={`w-8 h-8 rounded text-sm ${page === pageNum
-                                                ? 'bg-purple-600 text-white'
-                                                : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                                                }`}
-                                        >
-                                            {pageNum}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => setPage(p => Math.min(recipes.last_page, p + 1))}
-                                disabled={page === recipes.last_page}
-                                className="border-white/10"
-                            >
-                                Next
-                            </Button>
+                            <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
+                            <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.min(recipes.last_page, p + 1))} disabled={page === recipes.last_page}>Next</Button>
                         </div>
                     </div>
                 )}
@@ -370,40 +336,40 @@ export default function Recipes() {
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRecipe ? 'Edit Recipe' : 'New Recipe'} size="xl">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="bg-slate-950 border-white/10" />
+                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Menu Item</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Menu Item</label>
                             <select value={formData.menu_item_id} onChange={(e) => setFormData({ ...formData, menu_item_id: e.target.value })}
-                                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                                className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
                                 <option value="">None</option>
                                 {menuItems?.data?.map((item: MenuItem) => <option key={item.id} value={item.id}>{item.name}</option>)}
                             </select>
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                        <Input label="Servings" type="number" min="1" value={formData.servings} onChange={(e) => setFormData({ ...formData, servings: e.target.value })} required className="bg-slate-950 border-white/10" />
-                        <Input label="Prep Time (m)" type="number" min="0" value={formData.prep_time_minutes} onChange={(e) => setFormData({ ...formData, prep_time_minutes: e.target.value })} className="bg-slate-950 border-white/10" />
-                        <Input label="Cook Time (m)" type="number" min="0" value={formData.cook_time_minutes} onChange={(e) => setFormData({ ...formData, cook_time_minutes: e.target.value })} className="bg-slate-950 border-white/10" />
+                        <Input label="Servings" type="number" min="1" value={formData.servings} onChange={(e) => setFormData({ ...formData, servings: e.target.value })} required />
+                        <Input label="Prep Time (m)" type="number" min="0" value={formData.prep_time_minutes} onChange={(e) => setFormData({ ...formData, prep_time_minutes: e.target.value })} />
+                        <Input label="Cook Time (m)" type="number" min="0" value={formData.cook_time_minutes} onChange={(e) => setFormData({ ...formData, cook_time_minutes: e.target.value })} />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Ingredients</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Ingredients</label>
                         <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
                             {formData.ingredients.map((ing, i) => (
                                 <div key={i} className="flex gap-2 items-center">
                                     <select value={ing.ingredient_id} onChange={(e) => updateIngredient(i, 'ingredient_id', parseInt(e.target.value))}
-                                        className="flex-1 bg-slate-950 border border-white/10 rounded px-2 py-1 text-white text-sm">
+                                        className="flex-1 bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded px-2 py-1 text-gray-900 dark:text-white text-sm">
                                         <option value={0}>Select Ingredient</option>
                                         {ingredients?.data?.map((ingItem: any) => <option key={ingItem.id} value={ingItem.id}>{ingItem.name} ({typeof ingItem.unit === 'object' ? ingItem.unit?.name || ingItem.unit?.code : ingItem.unit})</option>)}
                                     </select>
-                                    <Input type="number" step="0.01" value={ing.quantity} onChange={(e) => updateIngredient(i, 'quantity', parseFloat(e.target.value))} className="w-20 bg-slate-950 border-white/10 text-sm" placeholder="Qty" />
+                                    <Input type="number" step="0.01" value={ing.quantity} onChange={(e) => updateIngredient(i, 'quantity', parseFloat(e.target.value))} className="w-20 text-sm" placeholder="Qty" />
                                     <Button type="button" size="sm" variant="danger" onClick={() => removeIngredient(i)} className="h-8 w-8 p-0"><Trash2 size={14} /></Button>
                                 </div>
                             ))}
                         </div>
-                        <Button type="button" size="sm" onClick={addIngredient} className="w-full border-dashed border-white/20 hover:bg-white/5 mt-2">+ Add Ingredient</Button>
-                        <div className="flex justify-between text-sm pt-2 border-t border-white/10">
-                            <span className="text-gray-400">Total Cost: <span className="text-white font-bold">${calculateTotalCost().toFixed(2)}</span></span>
-                            <span className="text-gray-400">Per Serving: <span className="text-green-400 font-bold">${(calculateTotalCost() / parseInt(formData.servings || '1')).toFixed(2)}</span></span>
+                        <Button type="button" size="sm" onClick={addIngredient} variant="secondary" className="w-full border-dashed mt-2">+ Add Ingredient</Button>
+                        <div className="flex justify-between text-sm pt-2 border-t border-gray-200 dark:border-white/10">
+                            <span className="text-gray-500 dark:text-gray-400">Total Cost: <span className="text-gray-900 dark:text-white font-bold">${calculateTotalCost().toFixed(2)}</span></span>
+                            <span className="text-gray-500 dark:text-gray-400">Per Serving: <span className="text-green-600 dark:text-green-400 font-bold">${(calculateTotalCost() / parseInt(formData.servings || '1')).toFixed(2)}</span></span>
                         </div>
                     </div>
                     <div className="flex gap-3 pt-4">
@@ -417,19 +383,19 @@ export default function Recipes() {
                 {costingData && (
                     <div className="space-y-4">
                         <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div className="bg-white/5 p-3 rounded text-center"><div className="text-xs text-gray-400">Total</div><div className="text-xl font-bold text-white">${costingData.total_cost?.toFixed(2)}</div></div>
-                            <div className="bg-white/5 p-3 rounded text-center"><div className="text-xs text-gray-400">Servings</div><div className="text-xl font-bold text-white">{costingData.servings}</div></div>
-                            <div className="bg-white/5 p-3 rounded text-center"><div className="text-xs text-gray-400">Per Serving</div><div className="text-xl font-bold text-green-400">${costingData.cost_per_serving?.toFixed(2)}</div></div>
+                            <div className="bg-gray-100 dark:bg-white/5 p-3 rounded text-center"><div className="text-xs text-gray-500 dark:text-gray-400">Total</div><div className="text-xl font-bold text-gray-900 dark:text-white">${costingData.total_cost?.toFixed(2)}</div></div>
+                            <div className="bg-gray-100 dark:bg-white/5 p-3 rounded text-center"><div className="text-xs text-gray-500 dark:text-gray-400">Servings</div><div className="text-xl font-bold text-gray-900 dark:text-white">{costingData.servings}</div></div>
+                            <div className="bg-gray-100 dark:bg-white/5 p-3 rounded text-center"><div className="text-xs text-gray-500 dark:text-gray-400">Per Serving</div><div className="text-xl font-bold text-green-600 dark:text-green-400">${costingData.cost_per_serving?.toFixed(2)}</div></div>
                         </div>
                         <div className="space-y-2 max-h-96 overflow-y-auto">
                             {costingData.breakdown?.map((item: any, i: number) => (
-                                <div key={i} className="flex justify-between items-center p-2 border-b border-white/5 text-sm">
+                                <div key={i} className="flex justify-between items-center p-2 border-b border-gray-200 dark:border-white/5 text-sm">
                                     <div>
-                                        <div className="text-white">{item.ingredient_name}</div>
+                                        <div className="text-gray-900 dark:text-white">{item.ingredient_name}</div>
                                         <div className="text-xs text-gray-500">{item.quantity} {item.unit} × ${item.cost_per_unit}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-white font-medium">${item.total_cost.toFixed(2)}</div>
+                                        <div className="text-gray-900 dark:text-white font-medium">${item.total_cost.toFixed(2)}</div>
                                         <div className="text-xs text-gray-500">{item.percentage.toFixed(1)}%</div>
                                     </div>
                                 </div>

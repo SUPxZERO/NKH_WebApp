@@ -14,43 +14,51 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { ImageUploader } from '@/app/components/ui/ImageUploader';
 
-// Stats Ribbon
+// Stats Ribbon with Dark/Light Mode
 const CategoryStatsRibbon = ({ stats }: { stats: any }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Categories</p>
-          <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Categories</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
         </div>
-        <Folder className="w-8 h-8 text-purple-400" />
+        <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+          <Folder className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        </div>
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.active}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.active}</p>
         </div>
-        <CheckCircle className="w-8 h-8 text-emerald-400" />
+        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+          <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+        </div>
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Sub-Categories</p>
-          <p className="text-2xl font-bold text-blue-400 mt-1">{stats.sub}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Sub-Categories</p>
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.sub}</p>
         </div>
-        <Layers className="w-8 h-8 text-blue-400" />
+        <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+          <Layers className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        </div>
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Menu Items</p>
-          <p className="text-2xl font-bold text-amber-400 mt-1">{stats.items}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Menu Items</p>
+          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{stats.items}</p>
         </div>
-        <FolderOpen className="w-8 h-8 text-amber-400" />
+        <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+          <FolderOpen className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+        </div>
       </div>
     </div>
   </div>
@@ -173,41 +181,43 @@ export default function Categories() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className={cn(
-              "grid grid-cols-12 gap-4 p-3 items-center hover:bg-white/5 transition-colors group border-b border-white/5",
-              level > 0 && "bg-white/[0.02]"
+              "grid grid-cols-12 gap-4 p-3 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border-b border-gray-100 dark:border-white/5",
+              level > 0 && "bg-gray-50/50 dark:bg-white/[0.02]"
             )}
           >
             <div className="col-span-5 flex items-center gap-2" style={{ paddingLeft: `${level * 24}px` }}>
               {hasChildren ? (
-                <button onClick={() => toggleExpand(cat.id)} className="p-1 hover:bg-white/10 rounded text-gray-400">
+                <button onClick={() => toggleExpand(cat.id)} className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded text-gray-500 dark:text-gray-400">
                   {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </button>
               ) : (
                 <span className="w-6" />
               )}
               {cat.image ? (
-                <img src={cat.image} alt="" className="w-8 h-8 rounded object-cover bg-slate-800" />
+                <img src={cat.image} alt="" className="w-8 h-8 rounded object-cover bg-gray-100 dark:bg-slate-800" />
               ) : (
-                <div className="w-8 h-8 rounded bg-slate-800 flex items-center justify-center text-gray-500">
+                <div className="w-8 h-8 rounded bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-400 dark:text-gray-500">
                   <Folder size={14} />
                 </div>
               )}
-              <span className="font-medium text-white">{cat.name}</span>
+              <span className="font-medium text-gray-900 dark:text-white">{cat.name}</span>
             </div>
-            <div className="col-span-3 text-sm text-gray-400 font-mono">/{cat.slug}</div>
-            <div className="col-span-2 text-sm text-gray-400">
+            <div className="col-span-3 text-sm text-gray-500 dark:text-gray-400 font-mono">/{cat.slug}</div>
+            <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
               {cat.menu_items?.length || 0} items
             </div>
             <div className="col-span-1">
               <span className={cn("px-2 py-0.5 rounded text-[10px] font-medium border",
-                cat.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20")}>
+                cat.is_active
+                  ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
+                  : "bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20")}>
                 {cat.is_active ? 'Active' : 'Inactive'}
               </span>
             </div>
             <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button size="sm" variant="secondary" onClick={() => handleCreate(cat)} className="h-7 w-7 p-0 border-white/10" title="Add Sub-category"><Plus size={12} /></Button>
-              <Button size="sm" variant="secondary" onClick={() => handleEdit(cat)} className="h-7 w-7 p-0 border-white/10"><Edit size={12} /></Button>
-              <Button size="sm" variant="danger" onClick={() => handleDelete(cat)} className="h-7 w-7 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={12} /></Button>
+              <Button size="sm" variant="secondary" onClick={() => handleCreate(cat)} className="h-7 w-7 p-0" title="Add Sub-category"><Plus size={12} /></Button>
+              <Button size="sm" variant="secondary" onClick={() => handleEdit(cat)} className="h-7 w-7 p-0"><Edit size={12} /></Button>
+              <Button size="sm" variant="danger" onClick={() => handleDelete(cat)} className="h-7 w-7 p-0"><Trash2 size={12} /></Button>
             </div>
           </motion.div>
           {hasChildren && isExpanded && renderTree(cat.children, level + 1)}
@@ -218,11 +228,11 @@ export default function Categories() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-slate-900 p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Categories</h1>
-            <p className="text-slate-400 mt-1">Manage menu hierarchy</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Categories</h1>
+            <p className="text-gray-600 dark:text-slate-400 mt-1">Manage menu hierarchy</p>
           </div>
           <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
             <Plus className="w-4 h-4 mr-2" /> Add Category
@@ -231,15 +241,16 @@ export default function Categories() {
 
         <CategoryStatsRibbon stats={stats} />
 
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
+        {/* Filters */}
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
+          <div className="flex flex-wrap gap-4">
+            <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input placeholder="Search categories..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
             </div>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
+              className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
               <option value="all">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -247,17 +258,23 @@ export default function Categories() {
           </div>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
+        {/* Table */}
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
             <div className="col-span-5">Category Name</div>
             <div className="col-span-3">Slug</div>
             <div className="col-span-2">Items</div>
             <div className="col-span-1">Status</div>
             <div className="col-span-1 text-right">Actions</div>
           </div>
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-gray-100 dark:divide-white/5">
             {isLoading ? (
               <div className="p-8 text-center text-gray-500">Loading...</div>
+            ) : categories.length === 0 ? (
+              <div className="p-12 text-center">
+                <Folder className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400">No categories found</p>
+              </div>
             ) : renderTree(categories)}
           </div>
         </div>
@@ -266,29 +283,31 @@ export default function Categories() {
       <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCategory ? 'Edit Category' : 'New Category'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           {creatingUnder && !editingCategory && (
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm text-blue-300">
-              Adding sub-category to: <span className="font-bold text-white">{creatingUnder.name}</span>
+            <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-300">
+              Adding sub-category to: <span className="font-bold text-blue-900 dark:text-white">{creatingUnder.name}</span>
             </div>
           )}
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="bg-slate-950 border-white/10" />
-            <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} className="bg-slate-950 border-white/10" placeholder="Auto-generated" />
+            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+            <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="Auto-generated" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
-            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white" />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3}
+              className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Image</label>
-            <ImageUploader onChange={(file) => setFormData({ ...formData, image: file })} className="bg-slate-950 border-white/10" />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image</label>
+            <ImageUploader onChange={(file) => setFormData({ ...formData, image: file })} />
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-slate-950 border-white/20" />
-              <span className="text-sm text-gray-300">Active</span>
+              <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20" />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
             </div>
             <div className="w-24">
-              <Input label="Order" type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} className="bg-slate-950 border-white/10" />
+              <Input label="Order" type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
             </div>
           </div>
           <div className="flex gap-3 pt-4">

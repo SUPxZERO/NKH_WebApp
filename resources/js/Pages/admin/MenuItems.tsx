@@ -12,43 +12,51 @@ import { Plus, Search, Edit, Trash2, Star, Eye, EyeOff, ChevronLeft, ChevronRigh
 import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
 
-// Stats Ribbon
+// Stats Ribbon with Dark/Light Mode
 const MenuStatsRibbon = ({ stats }: { stats: any }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Items</p>
-          <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Items</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
         </div>
-        <Package className="w-8 h-8 text-purple-400" />
+        <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+          <Package className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        </div>
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.active}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.active}</p>
         </div>
-        <Eye className="w-8 h-8 text-emerald-400" />
+        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+          <Eye className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+        </div>
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Inactive</p>
-          <p className="text-2xl font-bold text-red-400 mt-1">{stats.inactive}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Inactive</p>
+          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{stats.inactive}</p>
         </div>
-        <EyeOff className="w-8 h-8 text-red-400" />
+        <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
+          <EyeOff className="w-6 h-6 text-red-600 dark:text-red-400" />
+        </div>
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Popular</p>
-          <p className="text-2xl font-bold text-yellow-400 mt-1">{stats.popular}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Popular</p>
+          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{stats.popular}</p>
         </div>
-        <Star className="w-8 h-8 text-yellow-400" />
+        <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
+          <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+        </div>
       </div>
     </div>
   </div>
@@ -140,10 +148,10 @@ export default function MenuItems() {
     const data = new FormData();
     Object.entries(formData).forEach(([key, val]) => {
       if (key === 'is_popular' || key === 'is_active') data.append(key, val ? '1' : '0');
-      else if (key === 'category_id' && (val === '' || val === 'null' || val === undefined)) return; // Skip empty category_id
+      else if (key === 'category_id' && (val === '' || val === 'null' || val === undefined)) return;
       else data.append(key, String(val));
     });
-    data.append('location_id', '1'); // Default location ID
+    data.append('location_id', '1');
     if (image) data.append('image', image);
 
     if (editingItem) updateMutation.mutate({ id: editingItem.id, data });
@@ -198,12 +206,12 @@ export default function MenuItems() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-slate-900 p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Menu Items</h1>
-            <p className="text-slate-400 mt-1">Manage products and pricing</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Menu Items</h1>
+            <p className="text-gray-600 dark:text-slate-400 mt-1">Manage products and pricing</p>
           </div>
           <Button onClick={() => { resetForm(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
             <Plus className="w-4 h-4 mr-2" /> Add Item
@@ -214,15 +222,15 @@ export default function MenuItems() {
         <MenuStatsRibbon stats={stats} />
 
         {/* Filters */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input placeholder="Search items..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
             </div>
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm min-w-[180px]">
+              className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm min-w-[180px]">
               <option value="all">All Categories</option>
               {(categories as any)?.data?.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>{cat.name || cat.translations?.[0]?.name}</option>
@@ -243,17 +251,18 @@ export default function MenuItems() {
               <Button size="sm" onClick={handleBulkDisable} className="bg-red-600 hover:bg-red-700 text-white">
                 <EyeOff className="w-4 h-4 mr-2" /> Disable
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => setSelectedItems(new Set())}
-                className="border-white/20 hover:bg-white/10">Clear</Button>
+              <Button size="sm" variant="secondary" onClick={() => setSelectedItems(new Set())}>Clear</Button>
             </div>
           </motion.div>
         )}
 
         {/* Table */}
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
-            <div className="col-span-1"><input type="checkbox" checked={selectedItems.size === itemList.length && itemList.length > 0}
-              onChange={toggleSelectAll} className="w-4 h-4 rounded border-white/20 bg-slate-900" /></div>
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+            <div className="col-span-1">
+              <input type="checkbox" checked={selectedItems.size === itemList.length && itemList.length > 0}
+                onChange={toggleSelectAll} className="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
+            </div>
             <div className="col-span-3">Item</div>
             <div className="col-span-2">Category</div>
             <div className="col-span-1">Price</div>
@@ -262,53 +271,52 @@ export default function MenuItems() {
             <div className="col-span-2 text-right">Actions</div>
           </div>
 
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-gray-100 dark:divide-white/5">
             {isLoading ? (
-              <div className="p-12 text-center text-gray-400">Loading items...</div>
+              <div className="p-12 text-center text-gray-500">Loading items...</div>
             ) : itemList.length === 0 ? (
               <div className="p-12 text-center">
-                <Package className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <h3 className="text-white font-medium">No items found</h3>
+                <Package className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
+                <h3 className="text-gray-900 dark:text-white font-medium">No items found</h3>
               </div>
             ) : (
               itemList.map((item) => (
                 <motion.div key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
+                  className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
                   <div className="col-span-1">
                     <input type="checkbox" checked={selectedItems.has(item.id)} onChange={() => toggleSelectItem(item.id)}
-                      className="w-4 h-4 rounded border-white/20 bg-slate-900" />
+                      className="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
                   </div>
                   <div className="col-span-3 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex-shrink-0">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-100 dark:from-purple-500/20 to-pink-100 dark:to-pink-500/20 flex-shrink-0">
                       {item.image_path ? (
                         <img src={item.image_path} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">No img</div>
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs">No img</div>
                       )}
                     </div>
                     <div>
-                      <div className="font-medium text-white truncate">{item.name || 'Untitled'}</div>
+                      <div className="font-medium text-gray-900 dark:text-white truncate">{item.name || 'Untitled'}</div>
                       <div className="text-xs text-gray-500">SKU: {item.sku || 'N/A'}</div>
                     </div>
                   </div>
-                  <div className="col-span-2 text-gray-300 text-sm">{item.category?.name || 'Uncategorized'}</div>
-                  <div className="col-span-1 font-semibold text-emerald-400">${item.price}</div>
+                  <div className="col-span-2 text-gray-600 dark:text-gray-300 text-sm">{item.category?.name || 'Uncategorized'}</div>
+                  <div className="col-span-1 font-semibold text-emerald-600 dark:text-emerald-400">${item.price}</div>
                   <div className="col-span-1">
-                    {item.is_popular && <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />}
+                    {item.is_popular && <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-400 fill-yellow-500 dark:fill-yellow-400" />}
                   </div>
                   <div className="col-span-2">
                     <button onClick={() => toggleActiveMutation.mutate({ id: item.id, is_active: !item.is_active })}
                       className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-all",
-                        item.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
-                          : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20")}>
+                        item.is_active
+                          ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-200 dark:hover:bg-emerald-500/20"
+                          : "bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20 hover:bg-red-200 dark:hover:bg-red-500/20")}>
                       {item.is_active ? <><Eye className="w-3 h-3" /> Active</> : <><EyeOff className="w-3 h-3" /> Inactive</>}
                     </button>
                   </div>
                   <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="secondary" onClick={() => handleEdit(item)}
-                      className="h-8 w-8 p-0 border-white/10"><Edit className="w-3 h-3" /></Button>
-                    <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)}
-                      className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="secondary" onClick={() => handleEdit(item)} className="h-8 w-8 p-0"><Edit className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)} className="h-8 w-8 p-0"><Trash2 className="w-3 h-3" /></Button>
                   </div>
                 </motion.div>
               ))
@@ -317,13 +325,13 @@ export default function MenuItems() {
 
           {/* Pagination */}
           {(menuItems as any)?.meta && (
-            <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/5">
-              <div className="text-sm text-gray-400">
+            <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
                 Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, (menuItems as any).meta.total)} of {(menuItems as any).meta.total}
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   Page {page} of {Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
                 </span>
                 <Button variant="secondary" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}>Next</Button>
@@ -338,25 +346,22 @@ export default function MenuItems() {
         title={editingItem ? 'Edit Menu Item' : 'Create Menu Item'} className="max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required className="bg-white/5 border-white/10 text-white" />
-            <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              required className="bg-white/5 border-white/10 text-white" />
+            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+            <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input label="SKU" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-              className="bg-white/5 border-white/10 text-white" />
+            <Input label="SKU" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
               <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
+                className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
                 <option value="">Select Category</option>
                 {(() => {
                   const renderCategoryOptions = (cats: any[], level = 0) => {
                     return cats.map(cat => (
                       <React.Fragment key={cat.id}>
-                        <option value={cat.id} className="bg-gray-800">
+                        <option value={cat.id}>
                           {'\u00A0'.repeat(level * 4)}{cat.name || cat.translations?.[0]?.name}
                         </option>
                         {cat.children && cat.children.length > 0 && renderCategoryOptions(cat.children, level + 1)}
@@ -371,48 +376,43 @@ export default function MenuItems() {
 
           <div className="grid grid-cols-2 gap-4">
             <Input label="Price" type="number" step="0.01" value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              required className="bg-white/5 border-white/10 text-white" />
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
             <Input label="Cost" type="number" step="0.01" value={formData.cost}
-              onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-              className="bg-white/5 border-white/10 text-white" />
+              onChange={(e) => setFormData({ ...formData, cost: e.target.value })} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" />
+              rows={3} className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Image</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
             <ImageUploader onChange={(file) => setImage(file)}
               value={editingItem?.image_path ? `/storage/${editingItem.image_path}` : null} />
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <Input label="Display Order" type="number" value={formData.display_order}
-              onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-              className="bg-white/5 border-white/10 text-white" />
+              onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
             <div className="flex items-center space-x-2">
               <input type="checkbox" id="is_popular" checked={formData.is_popular}
                 onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })}
-                className="rounded border-white/20 bg-white/5" />
-              <label htmlFor="is_popular" className="text-sm text-gray-300">Popular</label>
+                className="rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
+              <label htmlFor="is_popular" className="text-sm text-gray-700 dark:text-gray-300">Popular</label>
             </div>
             <div className="flex items-center space-x-2">
               <input type="checkbox" id="is_active" checked={formData.is_active}
                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="rounded border-white/20 bg-white/5" />
-              <label htmlFor="is_active" className="text-sm text-gray-300">Active</label>
+                className="rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
+              <label htmlFor="is_active" className="text-sm text-gray-700 dark:text-gray-300">Active</label>
             </div>
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => { setOpenCreate(false); setOpenEdit(false); }}
-              className="flex-1 border-white/20 hover:bg-white/10">Cancel</Button>
-            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
-              className="flex-1 bg-purple-600 hover:bg-purple-700">
+            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1">Cancel</Button>
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 bg-purple-600 hover:bg-purple-700">
               {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingItem ? 'Update' : 'Create')}
             </Button>
           </div>

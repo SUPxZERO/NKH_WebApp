@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingCart,
   User,
+  UserCircle,
   Menu as MenuIcon,
   X,
   Home,
@@ -18,6 +19,9 @@ import {
   LogOut
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import CartIcon from '@/app/components/ui/CartIcon';
+import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
+import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 
 type Props = {
   children: React.ReactNode;
@@ -28,6 +32,7 @@ const navigation = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Menu', href: '/menu', icon: Utensils },
   { name: 'Dashboard', href: '/dashboard', icon: User },
+  { name: 'Profile', href: '/customer/profile', icon: UserCircle },
   { name: 'Cart', href: '/cart', icon: ShoppingCart },
   { name: 'Order', href: '/customer/orders', icon: ClipboardList },
   // { name: 'Favorites', href: '/customer/favorites', icon: Heart },
@@ -159,32 +164,13 @@ export default function CustomerLayout({ children, className }: Props) {
             {/* Actions */}
             <div className="flex items-center gap-3">
               {/* Cart Button */}
-              <Link
-                href="/cart"
-                className="relative p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </Link>
+              <CartIcon />
 
-              {/* User Menu */}
-              <Link
-                href="/dashboard"
-                className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-              >
-                <User className="w-5 h-5" />
-              </Link>
+              {/* Notification Dropdown */}
+              <NotificationDropdown variant="customer" />
 
-              {/* Logout Button - Desktop */}
-              <button
-                onClick={handleLogout}
-                className="hidden lg:flex p-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
-                title="Logout"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
+              {/* User Profile */}
+              <UserProfileDropdown variant="customer" />
 
               {/* Mobile Menu Toggle */}
               <button

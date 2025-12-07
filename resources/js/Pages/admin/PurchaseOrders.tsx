@@ -23,15 +23,15 @@ const POStatsRibbon = ({ stats }: { stats: any }) => (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-amber-500/20 to-orange-600/10 border border-amber-500/30 rounded-2xl p-5 backdrop-blur-sm"
+            className="bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-5 shadow-sm"
         >
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-amber-300/80 text-xs uppercase tracking-wider font-semibold">Pending Approval</p>
-                    <p className="text-3xl font-bold text-amber-400 mt-2">{stats.pendingApproval}</p>
+                    <p className="text-amber-600 dark:text-amber-400 text-xs uppercase tracking-wider font-semibold">Pending Approval</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.pendingApproval}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-amber-400" />
+                <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
             </div>
         </motion.div>
@@ -40,15 +40,15 @@ const POStatsRibbon = ({ stats }: { stats: any }) => (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-gradient-to-br from-purple-500/20 to-violet-600/10 border border-purple-500/30 rounded-2xl p-5 backdrop-blur-sm"
+            className="bg-white dark:bg-slate-800 border border-purple-200 dark:border-purple-500/30 rounded-2xl p-5 shadow-sm"
         >
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-purple-300/80 text-xs uppercase tracking-wider font-semibold">Awaiting Receipt</p>
-                    <p className="text-3xl font-bold text-purple-400 mt-2">{stats.awaitingReceipt}</p>
+                    <p className="text-purple-600 dark:text-purple-400 text-xs uppercase tracking-wider font-semibold">Awaiting Receipt</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.awaitingReceipt}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                    <Truck className="w-6 h-6 text-purple-400" />
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+                    <Truck className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
             </div>
         </motion.div>
@@ -57,15 +57,15 @@ const POStatsRibbon = ({ stats }: { stats: any }) => (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-blue-500/20 to-cyan-600/10 border border-blue-500/30 rounded-2xl p-5 backdrop-blur-sm"
+            className="bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-500/30 rounded-2xl p-5 shadow-sm"
         >
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-blue-300/80 text-xs uppercase tracking-wider font-semibold">This Month</p>
-                    <p className="text-3xl font-bold text-blue-400 mt-2">{stats.thisMonth}</p>
+                    <p className="text-blue-600 dark:text-blue-400 text-xs uppercase tracking-wider font-semibold">This Month</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.thisMonth}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-blue-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
             </div>
         </motion.div>
@@ -74,15 +74,15 @@ const POStatsRibbon = ({ stats }: { stats: any }) => (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="bg-gradient-to-br from-emerald-500/20 to-green-600/10 border border-emerald-500/30 rounded-2xl p-5 backdrop-blur-sm"
+            className="bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-5 shadow-sm"
         >
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-emerald-300/80 text-xs uppercase tracking-wider font-semibold">Total Value</p>
-                    <p className="text-3xl font-bold text-emerald-400 mt-2">${parseFloat(String(stats.totalValue || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="text-emerald-600 dark:text-emerald-400 text-xs uppercase tracking-wider font-semibold">Total Value</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">${parseFloat(String(stats.totalValue || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-emerald-400" />
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
             </div>
         </motion.div>
@@ -91,15 +91,15 @@ const POStatsRibbon = ({ stats }: { stats: any }) => (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-br from-slate-500/20 to-gray-600/10 border border-slate-500/30 rounded-2xl p-5 backdrop-blur-sm"
+            className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-2xl p-5 shadow-sm"
         >
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-slate-300/80 text-xs uppercase tracking-wider font-semibold">Total POs</p>
-                    <p className="text-3xl font-bold text-white mt-2">{stats.total}</p>
+                    <p className="text-gray-600 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">Total POs</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats.total}</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-slate-500/20 flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-slate-400" />
+                <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-slate-700/50 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-gray-600 dark:text-slate-400" />
                 </div>
             </div>
         </motion.div>
@@ -430,12 +430,12 @@ export default function PurchaseOrders() {
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-800/50 border border-white/10 rounded-xl p-4 hover:border-purple-500/30 transition-all"
+            className="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-white/10 rounded-xl p-4 hover:border-purple-500/30 transition-all shadow-sm"
         >
             <div className="flex items-start justify-between mb-3">
                 <div>
-                    <p className="font-mono text-sm font-semibold text-white">{po.po_number}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{new Date(po.order_date).toLocaleDateString()}</p>
+                    <p className="font-mono text-sm font-semibold text-gray-900 dark:text-white">{po.po_number}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{new Date(po.order_date).toLocaleDateString()}</p>
                 </div>
                 {getStatusDisplay(po.status)}
             </div>
@@ -541,7 +541,7 @@ export default function PurchaseOrders() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-6">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -549,13 +549,13 @@ export default function PurchaseOrders() {
                     className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
                 >
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
                                 <ShoppingCart className="w-5 h-5 text-white" />
                             </div>
                             Purchase Orders
                         </h1>
-                        <p className="text-slate-400 mt-1 ml-13">Manage supplier orders and receiving</p>
+                        <p className="text-gray-500 dark:text-slate-400 mt-1 ml-13">Manage supplier orders and receiving</p>
                     </div>
                     <Button
                         onClick={handleCreate}
@@ -573,7 +573,7 @@ export default function PurchaseOrders() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-slate-800/50 border border-white/10 rounded-2xl p-4 mb-6 backdrop-blur-sm"
+                    className="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-white/10 rounded-2xl p-4 mb-6 backdrop-blur-sm"
                 >
                     <div className="flex flex-wrap gap-4">
                         <div className="relative flex-1 min-w-[200px]">
@@ -582,13 +582,13 @@ export default function PurchaseOrders() {
                                 placeholder="Search PO number, supplier..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500/50"
+                                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-purple-500/50"
                             />
                         </div>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-purple-500/50 outline-none min-w-[140px]"
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:border-purple-500/50 outline-none min-w-[140px]"
                         >
                             <option value="all">All Status</option>
                             {Object.entries(statusConfig).map(([key, config]) => (
@@ -598,7 +598,7 @@ export default function PurchaseOrders() {
                         <select
                             value={supplierFilter}
                             onChange={(e) => setSupplierFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-purple-500/50 outline-none min-w-[160px]"
+                            className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:border-purple-500/50 outline-none min-w-[160px]"
                         >
                             <option value="all">All Suppliers</option>
                             {supplierList.map((s: any) => (
@@ -632,8 +632,8 @@ export default function PurchaseOrders() {
                     ) : (
                         <>
                             {/* Desktop Table View */}
-                            <div className="hidden lg:block bg-slate-800/30 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
-                                <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-slate-800/50 text-xs font-semibold text-gray-400 uppercase">
+                            <div className="hidden lg:block bg-white dark:bg-slate-800/30 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm shadow-sm">
+                                <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-slate-800/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                                     <div className="col-span-2">PO Number</div>
                                     <div className="col-span-2">Supplier</div>
                                     <div className="col-span-2">Location</div>
@@ -650,12 +650,12 @@ export default function PurchaseOrders() {
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
-                                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-all group"
+                                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-all group border-b border-gray-100 dark:border-white/5 last:border-0"
                                             >
-                                                <div className="col-span-2 font-mono text-sm text-white font-medium">{po.po_number}</div>
-                                                <div className="col-span-2 text-sm text-gray-300">{po.supplier?.name || '-'}</div>
-                                                <div className="col-span-2 text-sm text-gray-400">{po.location?.name || '-'}</div>
-                                                <div className="col-span-2 text-sm text-gray-300">{new Date(po.order_date).toLocaleDateString()}</div>
+                                                <div className="col-span-2 font-mono text-sm text-gray-900 dark:text-white font-medium">{po.po_number}</div>
+                                                <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300">{po.supplier?.name || '-'}</div>
+                                                <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">{po.location?.name || '-'}</div>
+                                                <div className="col-span-2 text-sm text-gray-500 dark:text-gray-300">{new Date(po.order_date).toLocaleDateString()}</div>
                                                 <div className="col-span-2">{getStatusDisplay(po.status)}</div>
                                                 <div className="col-span-1 text-sm font-bold text-emerald-400">
                                                     ${parseFloat(String(po.total_amount || 0)).toFixed(2)}
@@ -775,14 +775,14 @@ export default function PurchaseOrders() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Supplier <span className="text-red-400">*</span>
                             </label>
                             <select
                                 value={formData.supplier_id}
                                 onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
                                 required
-                                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 outline-none"
+                                className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:border-purple-500/50 outline-none"
                             >
                                 <option value="">Select Supplier</option>
                                 {supplierList.map((s: any) => (
@@ -796,11 +796,11 @@ export default function PurchaseOrders() {
                             )}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
                             <select
                                 value={formData.location_id}
                                 onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
-                                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 outline-none"
+                                className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:border-purple-500/50 outline-none"
                             >
                                 <option value="">None</option>
                                 {locationList.map((l: any) => (
@@ -812,7 +812,7 @@ export default function PurchaseOrders() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Order Date <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -820,35 +820,35 @@ export default function PurchaseOrders() {
                                 value={formData.order_date}
                                 onChange={(e) => setFormData({ ...formData, order_date: e.target.value })}
                                 required
-                                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 outline-none"
+                                className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:border-purple-500/50 outline-none"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Expected Delivery</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expected Delivery</label>
                             <input
                                 type="date"
                                 value={formData.expected_delivery_date}
                                 onChange={(e) => setFormData({ ...formData, expected_delivery_date: e.target.value })}
-                                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 outline-none"
+                                className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:border-purple-500/50 outline-none"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes</label>
                         <textarea
                             value={formData.notes}
                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                             rows={2}
                             placeholder="Optional notes for this purchase order..."
-                            className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:border-purple-500/50 outline-none resize-none"
+                            className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-purple-500/50 outline-none resize-none"
                         />
                     </div>
 
                     {/* Order Items */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium text-gray-300">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Order Items <span className="text-red-400">*</span>
                             </label>
                             {ingredientList.length === 0 && (
@@ -878,12 +878,12 @@ export default function PurchaseOrders() {
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
-                                            className="grid grid-cols-12 gap-2 items-center bg-slate-800/50 p-3 rounded-xl border border-white/10"
+                                            className="grid grid-cols-12 gap-2 items-center bg-gray-50 dark:bg-slate-800/50 p-3 rounded-xl border border-gray-200 dark:border-white/10"
                                         >
                                             <select
                                                 value={item.ingredient_id}
                                                 onChange={(e) => updateLineItem(i, 'ingredient_id', parseInt(e.target.value))}
-                                                className="col-span-5 bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-purple-500/50 outline-none"
+                                                className="col-span-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-purple-500/50 outline-none"
                                             >
                                                 <option value={0}>Select Ingredient</option>
                                                 {ingredientList.map((ing: any) => (
@@ -1002,26 +1002,26 @@ export default function PurchaseOrders() {
                         </div>
 
                         {selectedPO.notes && (
-                            <div className="bg-slate-800/50 rounded-xl p-4">
-                                <p className="text-gray-400 text-xs uppercase tracking-wider font-semibold mb-2">Notes</p>
-                                <p className="text-gray-300">{selectedPO.notes}</p>
+                            <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4">
+                                <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-semibold mb-2">Notes</p>
+                                <p className="text-gray-700 dark:text-gray-300">{selectedPO.notes}</p>
                             </div>
                         )}
 
-                        <div className="border-t border-white/10 pt-4">
-                            <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                        <div className="border-t border-gray-200 dark:border-white/10 pt-4">
+                            <h3 className="text-gray-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
                                 <Package className="w-4 h-4" /> Order Items
                             </h3>
                             <div className="space-y-2">
                                 {selectedPO.items?.map((item, i) => (
-                                    <div key={i} className="flex justify-between items-center text-sm bg-slate-800/50 p-3 rounded-xl">
+                                    <div key={i} className="flex justify-between items-center text-sm bg-gray-50 dark:bg-slate-800/50 p-3 rounded-xl">
                                         <div>
-                                            <span className="text-white font-medium">{item.ingredient?.name || 'Unknown Item'}</span>
-                                            <p className="text-gray-400 text-xs mt-0.5">
+                                            <span className="text-gray-900 dark:text-white font-medium">{item.ingredient?.name || 'Unknown Item'}</span>
+                                            <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">
                                                 Qty: {item.quantity_ordered || item.quantity} × ${parseFloat(String(item.unit_price || 0)).toFixed(2)}
                                             </p>
                                         </div>
-                                        <span className="text-emerald-400 font-semibold">
+                                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
                                             ${((item.quantity_ordered || item.quantity || 0) * parseFloat(String(item.unit_price || 0))).toFixed(2)}
                                         </span>
                                     </div>
@@ -1040,8 +1040,8 @@ export default function PurchaseOrders() {
             <Modal open={openReceive} onClose={() => setOpenReceive(false)} title="Receive Items" size="lg">
                 {selectedPO && (
                     <div className="space-y-4">
-                        <div className="bg-slate-800/50 rounded-xl p-4 mb-4">
-                            <p className="text-gray-400 text-sm">Receiving items for <span className="text-white font-mono font-medium">{selectedPO.po_number}</span></p>
+                        <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4">
+                            <p className="text-gray-500 dark:text-gray-400 text-sm">Receiving items for <span className="text-gray-900 dark:text-white font-mono font-medium">{selectedPO.po_number}</span></p>
                         </div>
 
                         <div className="space-y-3">
@@ -1051,17 +1051,17 @@ export default function PurchaseOrders() {
                                 const remaining = ordered - received;
 
                                 return (
-                                    <div key={i} className="bg-slate-800/50 p-4 rounded-xl border border-white/10">
+                                    <div key={i} className="bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl border border-gray-200 dark:border-white/10">
                                         <div className="flex justify-between mb-3">
-                                            <span className="text-white font-medium">{item.ingredient?.name || 'Unknown Item'}</span>
+                                            <span className="text-gray-900 dark:text-white font-medium">{item.ingredient?.name || 'Unknown Item'}</span>
                                             <div className="text-right">
-                                                <p className="text-xs text-gray-400">Ordered: {ordered}</p>
-                                                <p className="text-xs text-gray-400">Already Received: {received}</p>
-                                                <p className="text-xs text-emerald-400 font-medium">Remaining: {remaining}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">Ordered: {ordered}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">Already Received: {received}</p>
+                                                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Remaining: {remaining}</p>
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="text-gray-400 text-xs font-medium mb-1 block">Quantity to Receive</label>
+                                            <label className="text-gray-500 dark:text-gray-400 text-xs font-medium mb-1 block">Quantity to Receive</label>
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -1073,7 +1073,7 @@ export default function PurchaseOrders() {
                                                     newItems[i] = { ...newItems[i], quantity_received: parseFloat(e.target.value) || 0 };
                                                     setReceiveItems(newItems);
                                                 }}
-                                                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-purple-500/50 outline-none"
+                                                className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:border-purple-500/50 outline-none"
                                             />
                                         </div>
                                     </div>

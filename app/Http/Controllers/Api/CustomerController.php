@@ -144,6 +144,51 @@ class CustomerController extends Controller
         return new CustomerResource($customer->load(['user']));
     }
 
+    // PUT /api/customer/profile (auth, role:customer) - Update own profile
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $customer = $request->user()->customer;
+        abort_if(!$customer, 404, 'Customer profile not found.');
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|max:255|unique:users,email,' . $request->user()->id,
+            'phone' => 'nullable|string|max:20',
+            'birth_date' => 'nullable|date',
+            'gender' => 'nullable|string|in:male,female,other',
+            'preferred_language' => 'nullable|string|in:en,km',
+            'marketing_consent' => 'nullable|boolean',
+        ]);
+
+        DB::transaction(function () use ($customer, $validated) {
+            // Update user table fields
+            $userUpdate = [];
+            if (isset($validated['name'])) $userUpdate['name'] = $validated['name'];
+            if (isset($validated['email'])) $userUpdate['email'] = $validated['email'];
+            if (isset($validated['phone'])) $userUpdate['phone'] = $validated['phone'];
+
+            if (!empty($userUpdate)) {
+                $customer->user()->update($userUpdate);
+            }
+
+            // Update customer table fields
+            $customerUpdate = [];
+            if (isset($validated['birth_date'])) $customerUpdate['birth_date'] = $validated['birth_date'];
+            if (isset($validated['gender'])) $customerUpdate['gender'] = $validated['gender'];
+            if (isset($validated['preferred_language'])) $customerUpdate['preferred_language'] = $validated['preferred_language'];
+            if (isset($validated['marketing_consent'])) $customerUpdate['marketing_consent'] = $validated['marketing_consent'];
+
+            if (!empty($customerUpdate)) {
+                $customer->update($customerUpdate);
+            }
+        });
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'data' => new CustomerResource($customer->fresh(['user']))
+        ]);
+    }
+
     // GET /api/customer/orders (auth:sanctum, role:customer)
     public function orders(Request $request): AnonymousResourceCollection
     {

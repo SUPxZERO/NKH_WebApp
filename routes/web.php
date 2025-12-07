@@ -103,9 +103,12 @@ Route::prefix('admin')
 // Customer Routes (authenticated)
 Route::prefix('customer')->middleware('auth')->group(function () {
     Route::get('/profile', fn() => Inertia::render('Customer/Profile'))->name('customer.profile');
+    Route::get('/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');
     Route::get('/loyalty', fn() => Inertia::render('Customer/Loyalty'))->name('customer.loyalty');
     Route::get('/reservations', fn() => Inertia::render('Customer/Reservations'))->name('customer.reservations');
     Route::get('/feedback', fn() => Inertia::render('Customer/Feedback'))->name('customer.feedback');
+    Route::get('/settings', fn() => Inertia::render('Customer/Settings'))->name('customer.settings');
+    Route::get('/help', fn() => Inertia::render('Customer/HelpSupport'))->name('customer.help');
 });
 
 Route::get('/test-auth', function() {
@@ -120,6 +123,7 @@ Route::get('/test-auth', function() {
 Route::prefix('api/customer')->middleware('auth')->group(function () {
     // Dashboard endpoints
     Route::get('profile', [App\Http\Controllers\Api\CustomerDashboardController::class, 'profile']);
+    Route::put('profile', [App\Http\Controllers\Api\CustomerController::class, 'updateProfile']);
     Route::get('dashboard/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'dashboardStats']);
     Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
     Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);
@@ -156,6 +160,12 @@ Route::prefix('api/customer')->middleware('auth')->group(function () {
     Route::get('rewards', [App\Http\Controllers\Api\RewardController::class, 'index']);
     Route::post('rewards/redeem', [App\Http\Controllers\Api\RewardController::class, 'redeem']);
     Route::get('rewards/history', [App\Http\Controllers\Api\RewardController::class, 'history']);
+});
+
+// User Profile API Routes (for all authenticated users - admin, employee)
+Route::prefix('api/user')->middleware('auth')->group(function () {
+    Route::put('profile', [App\Http\Controllers\Api\UserProfileController::class, 'update']);
+    Route::post('change-password', [App\Http\Controllers\Api\UserProfileController::class, 'changePassword']);
 });
 
 // Test time slots seeder
