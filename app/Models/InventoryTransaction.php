@@ -24,6 +24,9 @@ class InventoryTransaction extends Model
         'user_id',
         'movement_type',
         'order_item_id',
+        'unit',
+        'reference_type',
+        'reference_id',
     ];
 
     protected $casts = [

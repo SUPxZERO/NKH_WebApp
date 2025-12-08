@@ -21,6 +21,7 @@ Route::middleware(['auth', 'role:Customer'])->group(function () {
         Route::get('/track/{orderId}', fn() => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
         Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
         Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
+        Route::get('/payment', fn() => Inertia::render('Customer/Payment'))->name('customer.payment');
         // Route::get('reservation', fn() => Inertia::render('Customer/Reservation'))->name('customer.reservation');
     });
 

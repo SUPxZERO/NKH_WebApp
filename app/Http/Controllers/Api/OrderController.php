@@ -465,16 +465,16 @@ class OrderController extends Controller
         ]);
         $newStatus = $request->status;
 
-        // Prevent marking order as completed while items are not in a terminal state
+        // Automatically serve all items if completing the order
         if ($newStatus === 'completed') {
-            $order->loadMissing('items');
-            $hasOpenItems = $order->items
-                ->whereNotIn('status', ['served', 'cancelled'])
-                ->isNotEmpty();
+            DB::transaction(function () use ($order) {
+                $order->loadMissing('items');
+                $openItems = $order->items->whereNotIn('status', ['served', 'cancelled']);
 
-            if ($hasOpenItems) {
-                abort(409, 'Cannot complete order while some items are not served or cancelled.');
-            }
+                foreach ($openItems as $item) {
+                    $item->update(['status' => 'served']);
+                }
+            });
         }
 
         $order->update(['status' => $newStatus]);

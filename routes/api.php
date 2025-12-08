@@ -83,6 +83,21 @@ Route::get('/menu', [MenuItemController::class, 'index']);
 
 // Payment webhooks (secure with signature verification in production)
 Route::post('/payments/webhook/success', [PaymentWebhookController::class, 'handleSuccess']);
+Route::post('/webhooks/payment', [PaymentWebhookController::class, 'handle']);
+
+// Payment endpoints
+Route::prefix('payments')->group(function () {
+    Route::post('/initiate', [\App\Http\Controllers\Api\PaymentController::class, 'initiate']);
+    Route::get('/{payment}/status', [\App\Http\Controllers\Api\PaymentController::class, 'status']);
+    Route::get('/uuid/{uuid}', [\App\Http\Controllers\Api\PaymentController::class, 'showByUuid']);
+    Route::get('/{payment}/qr', [\App\Http\Controllers\Api\PaymentController::class, 'getQrCode']);
+    Route::post('/{payment}/cancel', [\App\Http\Controllers\Api\PaymentController::class, 'cancel']);
+    Route::post('/{payment}/retry', [\App\Http\Controllers\Api\PaymentController::class, 'retry']);
+    
+    // Development/testing only routes
+    Route::post('/{payment}/simulate-success', [\App\Http\Controllers\Api\PaymentController::class, 'simulateSuccess']);
+    Route::post('/{payment}/simulate-failure', [\App\Http\Controllers\Api\PaymentController::class, 'simulateFailure']);
+});
 
 // Public reference data
 Route::get('/positions', [PositionController::class, 'index']);

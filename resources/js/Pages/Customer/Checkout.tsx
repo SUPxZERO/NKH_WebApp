@@ -64,15 +64,16 @@ export default function Checkout() {
       console.log('✅ Order placed successfully:', result);
 
       // Show success toast
-      toastSuccess('Order placed successfully!');
+      toastSuccess('Order placed successfully! Redirecting to payment...');
 
       // Clear cart ONLY on success
       cart.clear();
 
-      // Redirect to order history
+      // Redirect to payment page with order ID
+      const orderId = (result as any)?.data?.id || (result as any)?.id || result?.id;
       setTimeout(() => {
-        window.location.href = '/customer/orders';
-      }, 1000);
+        window.location.href = `/payment?order_id=${orderId}`;
+      }, 500);
 
     } catch (error: any) {
       console.error('❌ Order placement error:', error);

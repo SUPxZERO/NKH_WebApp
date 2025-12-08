@@ -24,7 +24,7 @@ class InventoryConsumptionService
             return;
         }
 
-        $orderItem->loadMissing('menuItem.recipe.ingredients.ingredient', 'order');
+        $orderItem->loadMissing('menuItem.recipe.ingredients.ingredient.unit', 'order');
         $menuItem = $orderItem->menuItem;
         $recipe   = $menuItem?->recipe;
 
@@ -55,7 +55,7 @@ class InventoryConsumptionService
                 'type'            => 'out',
                 'movement_type'   => 'usage',
                 'quantity'        => $totalQty,
-                'unit'            => $ingredient->unit,
+                'unit'            => $ingredient->unit?->code ?? 'unit',
                 'reference_type'  => 'order',
                 'reference_id'    => $orderItem->order_id,
                 'order_item_id'   => $orderItem->id,
