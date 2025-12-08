@@ -307,7 +307,7 @@ class CustomerDashboardController extends Controller
                 $previewImage = null;
                 if ($firstItem = $order->items->first()) {
                     if ($menuItem = $firstItem->menuItem) {
-                        $previewImage = $menuItem->image_path ? asset(str_replace('\\', '/', $menuItem->image_path)) : null;
+                        $previewImage = $menuItem->image_path ? asset(ltrim(str_replace('\\', '/', $menuItem->image_path), '/')) : null;
                     }
                 }
 
@@ -367,7 +367,7 @@ class CustomerDashboardController extends Controller
                             'unit_price' => (float) $item->unit_price,
                             'total_price' => (float) $item->total_price,
                             'special_instructions' => $item->special_instructions,
-                            'image_path' => $item->menuItem?->image_path ? asset(str_replace('\\', '/', $item->menuItem->image_path)) : null,
+                            'image_path' => $item->menuItem?->image_path ? asset(ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/')) : null,
                         ];
                     })->toArray(),
                     

@@ -22,7 +22,7 @@ class PaymentService
         PaymentReferenceGenerator $referenceGenerator,
         QrCodeGenerator $qrGenerator,
         InvoiceService $invoiceService,
-        InvoiceService $invoiceService,
+
         FraudDetectionService $fraudDetection,
         protected LoyaltyService $loyaltyService
     ) {
@@ -326,7 +326,7 @@ class PaymentService
         // Update invoice
         $invoice = $payment->invoice;
         $invoice->loadMissing('payments', 'order');
-        $invoice->loadMissing('payments', 'order');
+
         $this->invoiceService->reconcileStatus($invoice);
 
         // Award loyalty points

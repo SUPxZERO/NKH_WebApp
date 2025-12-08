@@ -109,7 +109,7 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: 'cart-storage', // unique name
+      name: 'cart-storage-v2', // unique name
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
     }
   )

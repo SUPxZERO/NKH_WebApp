@@ -41,7 +41,7 @@ class CartController extends Controller
                     'quantity' => $item->quantity,
                     'notes' => $item->notes,
                     'customizations' => $item->customizations,
-                    'image_path' => $menuItem->image_path ? asset(str_replace('\\', '/', $menuItem->image_path)) : null,
+                    'image_path' => $menuItem->image_path ? asset(ltrim(str_replace('\\', '/', $menuItem->image_path), '/')) : null,
                 ];
             });
 
