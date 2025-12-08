@@ -83,20 +83,30 @@ Route::get('/menu', [MenuItemController::class, 'index']);
 
 // Payment webhooks (secure with signature verification in production)
 Route::post('/payments/webhook/success', [PaymentWebhookController::class, 'handleSuccess']);
+    // ->middleware('payment.rate:webhook');
 Route::post('/webhooks/payment', [PaymentWebhookController::class, 'handle']);
+    // ->middleware('payment.rate:webhook');
 
 // Payment endpoints
 Route::prefix('payments')->group(function () {
     Route::post('/initiate', [\App\Http\Controllers\Api\PaymentController::class, 'initiate']);
+        // ->middleware('payment.rate:initiate');
     Route::get('/{payment}/status', [\App\Http\Controllers\Api\PaymentController::class, 'status']);
+        // ->middleware('payment.rate:status');
     Route::get('/uuid/{uuid}', [\App\Http\Controllers\Api\PaymentController::class, 'showByUuid']);
+        // ->middleware('payment.rate:status');
     Route::get('/{payment}/qr', [\App\Http\Controllers\Api\PaymentController::class, 'getQrCode']);
+        // ->middleware('payment.rate:status');
     Route::post('/{payment}/cancel', [\App\Http\Controllers\Api\PaymentController::class, 'cancel']);
+        // ->middleware('payment.rate:default');
     Route::post('/{payment}/retry', [\App\Http\Controllers\Api\PaymentController::class, 'retry']);
+        // ->middleware('payment.rate:initiate');
     
     // Development/testing only routes
     Route::post('/{payment}/simulate-success', [\App\Http\Controllers\Api\PaymentController::class, 'simulateSuccess']);
+        // ->middleware('payment.rate:simulate');
     Route::post('/{payment}/simulate-failure', [\App\Http\Controllers\Api\PaymentController::class, 'simulateFailure']);
+        // ->middleware('payment.rate:simulate');
 });
 
 // Public reference data
@@ -475,6 +485,29 @@ Route::prefix('admin')
     Route::get('notifications/stats', [NotificationController::class, 'stats']);
     Route::put('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::apiResource('notifications', NotificationController::class);
+    
+    // Payment Management (Sprint 5)
+    Route::prefix('payments')->group(function () {
+        Route::get('stats', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'stats']);
+        Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'index']);
+        Route::get('{payment}', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'show']);
+        Route::get('{payment}/audit-log', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'auditLog']);
+        Route::get('revenue/chart', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'revenueChart']);
+    });
+    
+    // Refund Management
+    Route::prefix('refunds')->group(function () {
+        Route::get('stats', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'refundStats']);
+        Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'refunds']);
+        Route::post('{refund}/approve', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'approveRefund']);
+        Route::post('{refund}/reject', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'rejectRefund']);
+    });
+    
+    // Settlement Management
+    Route::prefix('settlements')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'settlements']);
+        Route::post('{settlement}/reconcile', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'reconcileSettlement']);
+    });
 });
 
 // In-store operations for staff (Employee)

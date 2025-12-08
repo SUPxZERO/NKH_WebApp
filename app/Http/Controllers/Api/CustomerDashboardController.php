@@ -10,8 +10,82 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
+
 class CustomerDashboardController extends Controller
 {
+    /**
+     * Toggle favorite status for a menu item
+     */
+    public function toggleFavorite(Request $request)
+    {
+        $request->validate([
+            'menu_item_id' => 'required|exists:menu_items,id',
+        ]);
+
+        $user = $request->user();
+        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+        $menuItemId = $request->input('menu_item_id');
+
+        $exists = DB::table('customer_favorites')
+            ->where('customer_id', $customer->id)
+            ->where('menu_item_id', $menuItemId)
+            ->exists();
+
+        if ($exists) {
+            DB::table('customer_favorites')
+                ->where('customer_id', $customer->id)
+                ->where('menu_item_id', $menuItemId)
+                ->delete();
+            $status = 'removed';
+        } else {
+            DB::table('customer_favorites')->insert([
+                'customer_id' => $customer->id,
+                'menu_item_id' => $menuItemId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $status = 'added';
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'action' => $status,
+            'message' => $status === 'added' ? 'Added to favorites' : 'Removed from favorites'
+        ]);
+    }
+
+    /**
+     * Get list of favorite menu item Ids
+     */
+    public function getExplicitFavorites(Request $request)
+    {
+        $user = $request->user();
+        $customer = Customer::where('user_id', $user->id)->first();
+
+        if (!$customer) return response()->json(['data' => []]);
+
+        $ids = DB::table('customer_favorites')
+            ->where('customer_id', $customer->id)
+            ->pluck('menu_item_id');
+
+        return response()->json(['data' => $ids]);
+    }
+
+    /**
+     * Get customer notifications
+     */
+    public function notifications(Request $request)
+    {
+        $user = $request->user();
+        
+        $notifications = $user->notifications()
+            ->latest()
+            ->paginate($request->per_page ?? 20);
+
+        return response()->json($notifications);
+    }
+
     /**
      * Get customer profile data
      */
@@ -230,7 +304,12 @@ class CustomerDashboardController extends Controller
             'status' => 'success',
             'data' => $orders->map(function ($order) {
                 // Get first item image for preview
-                $previewImage = $order->items->first()?->menuItem?->image_path;
+                $previewImage = null;
+                if ($firstItem = $order->items->first()) {
+                    if ($menuItem = $firstItem->menuItem) {
+                        $previewImage = $menuItem->image_path ? asset(str_replace('\\', '/', $menuItem->image_path)) : null;
+                    }
+                }
 
                 return [
                     'id' => $order->id,
@@ -288,7 +367,7 @@ class CustomerDashboardController extends Controller
                             'unit_price' => (float) $item->unit_price,
                             'total_price' => (float) $item->total_price,
                             'special_instructions' => $item->special_instructions,
-                            'image_path' => $item->menuItem?->image_path,
+                            'image_path' => $item->menuItem?->image_path ? asset(str_replace('\\', '/', $item->menuItem->image_path)) : null,
                         ];
                     })->toArray(),
                     

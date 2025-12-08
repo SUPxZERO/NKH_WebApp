@@ -459,14 +459,13 @@ export default function Dashboard() {
                           </div>
                           <div className="text-right">
                             <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                              ${(order.total ?? 0).toFixed(2)}
+                              ${(order.total_amount ?? 0).toFixed(2)}
                             </div>
-                            <div className={`text-xs font-medium mt-0.5 ${
-                              order.status === 'completed' ? 'text-green-500' :
-                              order.status === 'pending' ? 'text-yellow-500' :
-                              order.status === 'cancelled' ? 'text-red-500' :
-                              'text-blue-500'
-                            }`}>
+                            <div className={`text-xs font-medium mt-0.5 ${order.status === 'completed' ? 'text-green-500' :
+                                order.status === 'pending' ? 'text-yellow-500' :
+                                  order.status === 'cancelled' ? 'text-red-500' :
+                                    'text-blue-500'
+                              }`}>
                               {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
                             </div>
                           </div>
@@ -759,4 +758,5 @@ export default function Dashboard() {
         )}
       </motion.div>
     </CustomerLayout>
-  );}
+  );
+}

@@ -16,15 +16,21 @@ class PaymentService
     protected PaymentReferenceGenerator $referenceGenerator;
     protected QrCodeGenerator $qrGenerator;
     protected InvoiceService $invoiceService;
+    protected FraudDetectionService $fraudDetection;
 
     public function __construct(
         PaymentReferenceGenerator $referenceGenerator,
         QrCodeGenerator $qrGenerator,
-        InvoiceService $invoiceService
+        InvoiceService $invoiceService,
+        InvoiceService $invoiceService,
+        FraudDetectionService $fraudDetection,
+        protected LoyaltyService $loyaltyService
     ) {
         $this->referenceGenerator = $referenceGenerator;
         $this->qrGenerator = $qrGenerator;
         $this->invoiceService = $invoiceService;
+        $this->fraudDetection = $fraudDetection;
+        $this->loyaltyService = $loyaltyService;
     }
 
     /**
@@ -76,12 +82,31 @@ class PaymentService
                 'expires_at' => now()->addMinutes(config('payment.expiry_minutes', 15)),
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
+                'device_fingerprint' => request()->header('X-Device-Fingerprint'),
             ]);
+
+            // Run fraud detection check
+            $fraudCheck = $this->fraudDetection->checkPayment($payment, [
+                'ip' => request()->ip(),
+                'fingerprint' => request()->header('X-Device-Fingerprint'),
+            ]);
+
+            if (!$fraudCheck['passed']) {
+                $payment->update([
+                    'status' => Payment::STATUS_FAILED,
+                    'failure_reason' => 'Fraud detection: ' . implode(', ', $fraudCheck['reasons']),
+                ]);
+
+                PaymentAuditLog::log($payment, 'fraud_blocked', Payment::STATUS_PENDING, Payment::STATUS_FAILED, null, $fraudCheck);
+
+                throw new \Exception('Payment blocked by security check. Please contact support.');
+            }
 
             // Log payment initiation
             PaymentAuditLog::log($payment, 'initiated', null, Payment::STATUS_PENDING, null, [
                 'order_id' => $order->id,
                 'payment_method' => $paymentMethodCode,
+                'fraud_score' => $fraudCheck['score'],
             ]);
 
             return $this->formatPaymentResponse($payment, $order);
@@ -301,7 +326,13 @@ class PaymentService
         // Update invoice
         $invoice = $payment->invoice;
         $invoice->loadMissing('payments', 'order');
+        $invoice->loadMissing('payments', 'order');
         $this->invoiceService->reconcileStatus($invoice);
+
+        // Award loyalty points
+        if ($invoice->order) {
+            $this->loyaltyService->awardPoints($invoice->order);
+        }
     }
 
     private function handleFailedPayment(Payment $payment, array $webhookData): void

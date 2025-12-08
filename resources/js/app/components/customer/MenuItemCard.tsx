@@ -10,6 +10,8 @@ interface MenuItemCardProps {
     onAddToCart?: (item: MenuItem) => void;
     onQuickView?: (item: MenuItem) => void;
     layout?: 'grid' | 'list';
+    isFavorite?: boolean;
+    onToggleFavorite?: () => void;
 }
 
 const dietaryIcons: Record<string, React.ReactNode> = {
@@ -19,9 +21,10 @@ const dietaryIcons: Record<string, React.ReactNode> = {
     spicy: <Flame className="w-3 h-3" />,
 };
 
-export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }: MenuItemCardProps) {
-    const [isFavorite, setIsFavorite] = React.useState(false);
+export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', isFavorite = false, onToggleFavorite }: MenuItemCardProps) {
+    // const [isFavorite, setIsFavorite] = React.useState(false); // Removed local state
     const hasDiscount = item.original_price && item.original_price > item.price;
+
     const discountPercent = hasDiscount
         ? Math.round(((item.original_price! - item.price) / item.original_price!) * 100)
         : 0;
@@ -67,7 +70,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            setIsFavorite(!isFavorite);
+                            onToggleFavorite?.();
                         }}
                         className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform"
                     >
@@ -206,7 +209,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid' }
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
-                        setIsFavorite(!isFavorite);
+                        onToggleFavorite?.();
                     }}
                     className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform shadow-lg z-10"
                 >

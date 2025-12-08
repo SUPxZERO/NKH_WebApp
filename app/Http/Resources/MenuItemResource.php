@@ -13,16 +13,13 @@ class MenuItemResource extends JsonResource
         // Handle image URL
         $imagePath = $this->image_path;
         if ($imagePath) {
-            // Normalize slashes
+            // Normalize slashes and remove leading slash/backslash
             $imagePath = str_replace('\\', '/', $imagePath);
+            $imagePath = ltrim($imagePath, '/');
             
-            // If it's not a full URL and doesn't start with /, add /storage or /
+            // If not absolute URL, wrap with asset() helper
             if (!str_starts_with($imagePath, 'http')) {
-                if (str_starts_with($imagePath, 'images/')) {
-                    $imagePath = '/' . $imagePath;
-                } elseif (!str_starts_with($imagePath, '/')) {
-                    $imagePath = '/storage/' . $imagePath;
-                }
+                $imagePath = asset($imagePath);
             }
         }
 

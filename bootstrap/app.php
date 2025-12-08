@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // API / Route middleware aliases
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'payment.rate' => \App\Http\Middleware\PaymentRateLimiter::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

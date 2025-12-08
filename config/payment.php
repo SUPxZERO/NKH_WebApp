@@ -54,6 +54,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Bakong API Configuration (NBC)
+    |--------------------------------------------------------------------------
+    */
+    'bakong' => [
+        'enabled' => env('BAKONG_ENABLED', false),
+        'api_url' => env('BAKONG_API_URL', 'https://sit-api-bakong.nbc.gov.kh'),
+        'token' => env('BAKONG_TOKEN', ''),
+        'email' => env('BAKONG_EMAIL', ''),
+        // Polling configuration for transaction checks
+        'poll_max_attempts' => env('BAKONG_POLL_ATTEMPTS', 30),
+        'poll_interval_seconds' => env('BAKONG_POLL_INTERVAL', 2),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Webhook Security
     |--------------------------------------------------------------------------
     */
@@ -79,6 +94,9 @@ return [
         
         // Block duration in minutes
         'block_duration' => env('FRAUD_BLOCK_DURATION', 30),
+        
+        // Fraud score threshold (0-100, higher = more risk)
+        'score_threshold' => env('FRAUD_SCORE_THRESHOLD', 50),
     ],
 
     /*

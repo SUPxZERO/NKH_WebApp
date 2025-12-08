@@ -134,6 +134,7 @@ export interface OrderItem {
   quantity: number;
   notes?: string;
   customizations?: OrderItemCustomization[];
+  image_path?: string;
 }
 
 
@@ -155,6 +156,7 @@ export interface Order {
   service_charge: number;
   delivery_fee?: number;
   total: number;
+  total_amount?: number; // Added to match backend response
   currency: string;
   placed_at?: string | null;
   closed_at?: string | null;

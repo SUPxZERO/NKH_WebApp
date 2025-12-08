@@ -8,6 +8,8 @@ use App\Models\Customer;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
 
 class CartController extends Controller
 {
@@ -39,7 +41,7 @@ class CartController extends Controller
                     'quantity' => $item->quantity,
                     'notes' => $item->notes,
                     'customizations' => $item->customizations,
-                    'image_path' => $menuItem->image_path ? asset($menuItem->image_path) : null,
+                    'image_path' => $menuItem->image_path ? asset(str_replace('\\', '/', $menuItem->image_path)) : null,
                 ];
             });
 

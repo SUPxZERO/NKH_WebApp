@@ -62,18 +62,19 @@ class QrCodeGenerator
     }
 
     /**
-     * Generate QR code as base64 encoded PNG for embedding in HTML.
+     * Generate QR code as base64 encoded SVG for embedding in HTML.
      */
     public function generateBase64(string $data, int $size = 300): string
     {
         try {
             if (class_exists('SimpleSoftwareIO\QrCode\Facades\QrCode')) {
-                $png = QrCode::format('png')
+                // Use SVG format since it doesn't require imagick extension
+                $svg = QrCode::format('svg')
                     ->size($size)
                     ->margin(2)
                     ->generate($data);
                     
-                return 'data:image/png;base64,' . base64_encode($png);
+                return 'data:image/svg+xml;base64,' . base64_encode($svg);
             }
         } catch (\Exception $e) {
             Log::warning('QR code base64 generation failed', [

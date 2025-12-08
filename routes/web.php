@@ -98,6 +98,9 @@ Route::prefix('admin')
         Route::get('operating-hours', fn() => Inertia::render('admin/OperatingHours'))->name('admin.operating-hours');
         Route::get('translations', fn() => Inertia::render('admin/Translations'))->name('admin.translations');
         
+        // Payment Management
+        Route::get('payments', fn() => Inertia::render('admin/PaymentsDashboard'))->name('admin.payments');
+        
         // Approval managed within main Orders page - no separate route needed
     });
 
@@ -128,6 +131,9 @@ Route::prefix('api/customer')->middleware('auth')->group(function () {
     Route::get('dashboard/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'dashboardStats']);
     Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
     Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);
+    Route::post('favorites/toggle', [App\Http\Controllers\Api\CustomerDashboardController::class, 'toggleFavorite']);
+    Route::get('favorites/ids', [App\Http\Controllers\Api\CustomerDashboardController::class, 'getExplicitFavorites']);
+    Route::get('notifications', [App\Http\Controllers\Api\CustomerDashboardController::class, 'notifications']);
     
     // CRM endpoints
     Route::get('stats', [App\Http\Controllers\Api\CustomerController::class, 'customerStats']);

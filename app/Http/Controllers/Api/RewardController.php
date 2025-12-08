@@ -171,7 +171,7 @@ class RewardController extends Controller
             // Create redemption record (negative points)
             $redemption = LoyaltyPoint::create([
                 'customer_id' => $customer->id,
-                'location_id' => $customer->preferred_location_id,
+                'location_id' => $customer->preferred_location_id ?? 1,
                 'type' => 'redeem',
                 'points' => -$validated['points_required'], // Negative for redemption
                 'balance_after' => $previousBalance - $validated['points_required'],

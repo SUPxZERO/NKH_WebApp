@@ -28,7 +28,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class MenuItem extends Model
 {
     use HasFactory, SoftDeletes;
-
+    
+    protected $appends = ['name'];
     protected $with = ['translations'];
 
     protected $fillable = [
@@ -102,5 +103,28 @@ class MenuItem extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Get the name attribute from translations.
+     *
+     * @return string
+     */
+    public function getNameAttribute(): string
+    {
+        // Try to get translation for current locale
+        $translation = $this->translations->firstWhere('locale', app()->getLocale());
+        
+        // Fallback to English
+        if (!$translation) {
+            $translation = $this->translations->firstWhere('locale', 'en');
+        }
+        
+        // Fallback to any translation
+        if (!$translation) {
+            $translation = $this->translations->first();
+        }
+        
+        return $translation ? $translation->name : ($this->slug ?? 'Unknown Item');
     }
 }

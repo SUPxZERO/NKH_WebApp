@@ -3,12 +3,13 @@ import { Head } from '@inertiajs/react';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useCategories, useMenuItems } from '@/app/hooks/useMenu';
+import { useFavorites } from '@/app/hooks/useFavorites';
 import { MenuItem } from '@/app/types/domain';
 import MenuItemCard from '@/app/components/customer/MenuItemCard';
 import CategoryFilter from '@/app/components/customer/CategoryFilter';
 import MenuSkeleton from '@/app/components/customer/MenuSkeleton';
 import { useCartStore } from '@/app/store/cart';
-import { toastSuccess } from '@/app/utils/toast';
+import { toastSuccess, toastError } from '@/app/utils/toast';
 import {
   Search,
   SlidersHorizontal,
@@ -68,58 +69,72 @@ export default function Menu() {
     search: searchQuery || undefined
   });
 
+
+  const { favoriteIds, toggleFavorite } = useFavorites();
   const cart = useCartStore();
+
+  const handleToggleFavorite = async (itemId: number) => {
+    try {
+      await toggleFavorite(itemId);
+      // Success is handled by hook invalidation, but we can toast
+      // const isFav = favoriteIds.includes(itemId);
+      // toastSuccess(isFav ? 'Removed from favorites' : 'Added to favorites'); // Hook handles state update
+    } catch (error) {
+      console.error('Favorite toggle failed:', error);
+      toastError('Failed to update favorites'); 
+    }
+  };
 
   // Filtered and sorted items
   const processedItems = useMemo(() => {
-      if (!menuItems) return [];
+    if (!menuItems) return [];
 
-      let filtered = [...menuItems];
+    let filtered = [...menuItems];
 
-      // 👉 FILTER BY CATEGORY
-      if (selectedCategory) {
-          filtered = filtered.filter(
-              (item) => item.category_id === selectedCategory
-          );
-      }
+    // 👉 FILTER BY CATEGORY
+    if (selectedCategory) {
+      filtered = filtered.filter(
+        (item) => item.category_id === selectedCategory
+      );
+    }
 
-      // 👉 FILTER BY SEARCH
-      if (searchQuery.trim() !== "") {
-          filtered = filtered.filter((item) =>
-              (item.name ?? "").toLowerCase().includes(searchQuery.toLowerCase())
-          );
-      }
+    // 👉 FILTER BY SEARCH
+    if (searchQuery.trim() !== "") {
+      filtered = filtered.filter((item) =>
+        (item.name ?? "").toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-      // 👉 SORT
-      switch (sortBy) {
-          case 'popular':
-              filtered.sort((a, b) => {
-                  if (a.is_popular && !b.is_popular) return -1;
-                  if (!a.is_popular && b.is_popular) return 1;
-                  return (b.rating || 0) - (a.rating || 0);
-              });
-              break;
-          case 'price-low':
-              filtered.sort((a, b) => a.price - b.price);
-              break;
-          case 'price-high':
-              filtered.sort((a, b) => b.price - a.price);
-              break;
-          case 'name':
-              filtered.sort((a, b) =>
-                  (a.name || '').localeCompare(b.name || '')
-              );
-              break;
-          case 'newest':
-              filtered.sort(
-                  (a, b) =>
-                      new Date(b.created_at).getTime() -
-                      new Date(a.created_at).getTime()
-              );
-              break;
-      }
+    // 👉 SORT
+    switch (sortBy) {
+      case 'popular':
+        filtered.sort((a, b) => {
+          if (a.is_popular && !b.is_popular) return -1;
+          if (!a.is_popular && b.is_popular) return 1;
+          return (b.rating || 0) - (a.rating || 0);
+        });
+        break;
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'name':
+        filtered.sort((a, b) =>
+          (a.name || '').localeCompare(b.name || '')
+        );
+        break;
+      case 'newest':
+        filtered.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+        );
+        break;
+    }
 
-      return filtered;
+    return filtered;
   }, [menuItems, selectedCategory, searchQuery, sortBy]);
 
   const handleAddToCart = (item: MenuItem) => {
@@ -336,6 +351,8 @@ export default function Menu() {
                     onAddToCart={handleAddToCart}
                     onQuickView={handleQuickView}
                     layout={layout}
+                    isFavorite={favoriteIds.includes(item.id)}
+                    onToggleFavorite={() => handleToggleFavorite(item.id)}
                   />
                 </motion.div>
               ))}

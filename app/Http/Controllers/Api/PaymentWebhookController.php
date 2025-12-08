@@ -7,6 +7,8 @@ use App\Models\Payment;
 use App\Models\PaymentAuditLog;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
+use App\Services\WebhookSecurityService;
+use App\Services\FraudDetectionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -16,10 +18,17 @@ use Illuminate\Support\Facades\Log;
 class PaymentWebhookController extends Controller
 {
     protected PaymentService $paymentService;
+    protected WebhookSecurityService $webhookSecurity;
+    protected FraudDetectionService $fraudDetection;
 
-    public function __construct(PaymentService $paymentService)
-    {
+    public function __construct(
+        PaymentService $paymentService,
+        WebhookSecurityService $webhookSecurity,
+        FraudDetectionService $fraudDetection
+    ) {
         $this->paymentService = $paymentService;
+        $this->webhookSecurity = $webhookSecurity;
+        $this->fraudDetection = $fraudDetection;
     }
 
     /**
@@ -56,9 +65,21 @@ class PaymentWebhookController extends Controller
                 'timestamp' => 'nullable|integer',
             ]);
 
-            // Security checks (only in production)
-            if (app()->environment('production')) {
-                $this->verifyWebhookSecurity($request);
+            // Security checks (in production or when configured)
+            if (app()->environment('production') || config('payment.webhook_secret')) {
+                $securityResult = $this->webhookSecurity->verify($request);
+                
+                if (!$securityResult['valid']) {
+                    Log::warning('Webhook security verification failed', [
+                        'errors' => $securityResult['errors'],
+                        'ip' => $request->ip(),
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Security verification failed',
+                    ], 403);
+                }
             }
 
             // Process the webhook
