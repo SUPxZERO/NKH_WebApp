@@ -13,6 +13,7 @@ import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import SendNotificationPanel from '@/app/components/admin/SendNotificationPanel';
 
 // Stats Ribbon
 const NotificationStatsRibbon = ({ stats }: { stats: any }) => (
@@ -154,14 +155,16 @@ export default function Notifications() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white tracking-tight">Notifications</h1>
-            <p className="text-slate-400 mt-1">System alerts and user messaging</p>
+            <p className="text-slate-400 mt-1">System alerts, user messaging, and broadcast notifications</p>
           </div>
-          <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
-            <Bell className="w-4 h-4 mr-2" /> Send Notification
-          </Button>
         </div>
 
         <NotificationStatsRibbon stats={stats} />
+
+        {/* Targeted Send Panel */}
+        <div className="mb-6">
+          <SendNotificationPanel />
+        </div>
 
         <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
           <div className="flex gap-4">

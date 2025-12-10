@@ -17,11 +17,11 @@ class LoyaltyPointTransactionSeeder extends Seeder
         $locations = Location::all();
         if ($customers->isEmpty() || $locations->isEmpty()) return;
 
-        // Generate historical transactions (last 60 days)
-        for ($i = 0; $i < 150; $i++) {
+        // Generate historical transactions (last 7 days)
+        for ($i = 0; $i < 80; $i++) {
             $customer = $customers->random();
             $location = $locations->random();
-            $occurredAt = Carbon::now()->subDays(rand(0, 60))->subMinutes(rand(0, 1440));
+            $occurredAt = Carbon::now()->subDays(rand(0, 7))->subMinutes(rand(0, 1440));
 
             $type = ['earn','earn','earn','redeem','adjust'][array_rand(['earn','earn','earn','redeem','adjust'])];
             $points = match ($type) {

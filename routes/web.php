@@ -168,6 +168,13 @@ Route::prefix('api/customer')->middleware('auth')->group(function () {
     Route::get('rewards', [App\Http\Controllers\Api\RewardController::class, 'index']);
     Route::post('rewards/redeem', [App\Http\Controllers\Api\RewardController::class, 'redeem']);
     Route::get('rewards/history', [App\Http\Controllers\Api\RewardController::class, 'history']);
+    
+    // Notification Preferences
+    Route::get('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
+    Route::put('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
+    Route::post('notification-preferences/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
+    Route::post('notification-preferences/disable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'disableAll']);
+    Route::post('notification-preferences/enable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'enableAll']);
 });
 
 // User Profile API Routes (moved from api.php to share web session)

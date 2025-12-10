@@ -502,6 +502,16 @@ Route::prefix('admin')
     Route::put('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::apiResource('notifications', NotificationController::class);
     
+    // Targeted Notifications (Admin UI for sending)
+    Route::prefix('notifications/targeted')->group(function () {
+        Route::get('options', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'options']);
+        Route::post('preview', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'preview']);
+        Route::post('send', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'send']);
+        Route::post('send-to-roles', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'sendToRoles']);
+        Route::post('send-to-users', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'sendToUsers']);
+        Route::get('search-users', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'searchUsers']);
+    });
+    
     // Payment Management (Sprint 5)
     Route::prefix('payments')->group(function () {
         Route::get('stats', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'stats']);

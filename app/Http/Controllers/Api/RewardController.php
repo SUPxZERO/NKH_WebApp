@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\LoyaltyPoint;
 use App\Models\Reward;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -184,6 +185,19 @@ class RewardController extends Controller
             $customer->save();
 
             DB::commit();
+
+            // Send notification about reward redemption
+            try {
+                $notificationService = app(NotificationService::class);
+                $notificationService->sendRewardNotification(
+                    $user,
+                    -$validated['points_required'],
+                    "You redeemed: {$validated['reward_title']}! Use code: " . strtoupper(substr(md5($redemption->id . time()), 0, 8)),
+                    '/customer/loyalty'
+                );
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send reward redemption notification: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'message' => 'Reward redeemed successfully!',

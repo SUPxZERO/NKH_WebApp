@@ -12,11 +12,17 @@ class CustomerResource extends JsonResource
         return [
             'id' => $this->id,
             'user' => new UserResource($this->whenLoaded('user')),
+            'customer_code' => $this->customer_code,
             'preferred_location_id' => $this->preferred_location_id,
             'birth_date' => optional($this->birth_date)->toDateString(),
             'gender' => $this->gender,
+            'preferred_language' => $this->preferred_language ?? 'en',
+            'marketing_consent' => (bool) $this->marketing_consent,
             'preferences' => $this->preferences,
             'points_balance' => $this->points_balance,
+            'loyalty_points' => $this->loyalty_points,
+            'total_spent' => $this->total_spent,
+            'customer_tier' => $this->customer_tier,
             'notes' => $this->notes,
         ];
     }

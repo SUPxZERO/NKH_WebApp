@@ -20,18 +20,20 @@ class CustomerSeeder extends Seeder
         foreach ($customerUsers as $user) {
             $preferredLocation = $locations->random();
             
-            Customer::create([
-                'user_id' => $user->id,
-                'preferred_location_id' => $preferredLocation->id,
-                'customer_code' => $this->generateCustomerCode(),
-                'birth_date' => $this->generateBirthDate(),
-                'gender' => $this->getRandomGender(),
-                'loyalty_points' => rand(0, 500),
-                'total_spent' => $this->generateTotalSpent(),
-                'preferred_language' => $this->getPreferredLanguage(),
-                'dietary_preferences' => $this->getDietaryPreferences(),
-                'marketing_consent' => rand(0, 1) === 1,
-            ]);
+            Customer::updateOrCreate(
+                ['user_id' => $user->id], // Unique key
+                [
+                    'preferred_location_id' => $preferredLocation->id,
+                    'customer_code' => $this->generateCustomerCode(),
+                    'birth_date' => $this->generateBirthDate(),
+                    'gender' => $this->getRandomGender(),
+                    'loyalty_points' => rand(0, 500),
+                    'total_spent' => $this->generateTotalSpent(),
+                    'preferred_language' => $this->getPreferredLanguage(),
+                    'dietary_preferences' => $this->getDietaryPreferences(),
+                    'marketing_consent' => rand(0, 1) === 1,
+                ]
+            );
         }
     }
 

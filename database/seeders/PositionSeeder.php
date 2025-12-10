@@ -78,7 +78,13 @@ class PositionSeeder extends Seeder
         ];
 
         foreach ($positions as $position) {
-            Position::create($position);
+            Position::updateOrCreate(
+                ['title' => $position['title']], // Unique key
+                [
+                    'description' => $position['description'],
+                    'is_active' => $position['is_active'],
+                ]
+            );
         }
     }
 }

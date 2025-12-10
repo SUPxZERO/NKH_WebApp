@@ -17,6 +17,7 @@ use App\Models\OrderItem;
 use App\Models\OrderTimeSlot;
 use App\Models\Promotion;
 use App\Models\Setting;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -404,6 +405,16 @@ class OnlineOrderController extends Controller
         });
 
         \Log::info('🎉 Transaction committed successfully');
+
+        // Send order placed notification to customer
+        try {
+            $notificationService = app(NotificationService::class);
+            $notificationService->sendOrderNotification($order, 'placed');
+            \Log::info('📧 Order confirmation notification sent');
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send order placed notification: ' . $e->getMessage());
+        }
+
         return new OrderResource($order->load(['items.menuItem', 'customerAddress', 'timeSlot']));
 
     } catch (\Exception $e) {

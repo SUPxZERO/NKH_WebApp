@@ -73,7 +73,10 @@ class IngredientSeeder extends Seeder
         ];
 
         foreach ($ingredients as $ingredient) {
-            Ingredient::create($ingredient);
+            Ingredient::updateOrCreate(
+                ['code' => $ingredient['code']], // Unique key
+                array_diff_key($ingredient, ['code' => '']) // All other fields
+            );
         }
 
         $this->command->info('Created ' . count($ingredients) . ' ingredients!');

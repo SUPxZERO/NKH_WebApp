@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Promotion;
+use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\PromotionResource;
@@ -88,6 +90,17 @@ class PromotionController extends Controller
             'end_at' => $data['end_date'] ?? null,
             'is_active' => $data['is_active'] ?? true,
         ]);
+
+        // Send notification to all customers about new promotion
+        if ($promotion->is_active) {
+            try {
+                $notificationService = app(NotificationService::class);
+                $notificationService->sendPromotionNotification($promotion);
+                \Log::info('Promotion notification sent to all customers', ['promotion_id' => $promotion->id]);
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send promotion notification: ' . $e->getMessage());
+            }
+        }
 
         return new PromotionResource($promotion);
     }

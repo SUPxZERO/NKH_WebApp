@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Sparkles, 
-  TrendingUp, 
-  Clock, 
-  Star, 
-  Users, 
+import {
+  Sparkles,
+  TrendingUp,
+  Clock,
+  Star,
+  Users,
   Zap,
   ChevronRight,
   Plus
@@ -53,11 +53,11 @@ interface SmartRecommendationsProps {
   onItemSelect: (item: MenuItem) => void;
 }
 
-export function SmartOrderRecommendations({ 
-  customerId, 
-  currentTime, 
+export function SmartOrderRecommendations({
+  customerId,
+  currentTime,
   weather,
-  onItemSelect 
+  onItemSelect
 }: SmartRecommendationsProps) {
   const [activeCategory, setActiveCategory] = useState<string>('trending');
   const { addItem } = useCartStore();
@@ -65,10 +65,10 @@ export function SmartOrderRecommendations({
   const { data: recommendations = [], isLoading } = useQuery({
     queryKey: ['recommendations', customerId, currentTime, weather],
     queryFn: () => apiGet<ApiResponse<RecommendationCategory[]>>('/recommendations', {
-      params: { 
+      params: {
         customer_id: customerId,
         time: currentTime,
-        weather 
+        weather
       }
     }).then(r => r.data),
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -148,7 +148,8 @@ export function SmartOrderRecommendations({
       menu_item_id: item.id,
       name: item.name || item.slug,
       unit_price: item.price,
-      quantity: 1
+      quantity: 1,
+      image_path: item.image_path || undefined,
     });
     onItemSelect(item);
   };
@@ -173,11 +174,10 @@ export function SmartOrderRecommendations({
               <motion.button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-                  activeCategory === category.id
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeCategory === category.id
                     ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -210,7 +210,7 @@ export function SmartOrderRecommendations({
                     <p className="text-sm text-gray-400">{activeData.description}</p>
                   </div>
                 </div>
-                
+
                 <EnhancedButton
                   variant="ghost"
                   size="sm"
@@ -250,7 +250,7 @@ export function SmartOrderRecommendations({
                               </div>
                             </div>
                           )}
-                          
+
                           {/* Badges */}
                           <div className="absolute top-2 left-2 flex gap-2">
                             {activeCategory === 'trending' && (
@@ -259,7 +259,7 @@ export function SmartOrderRecommendations({
                                 <span className="text-xs font-medium text-white">Hot</span>
                               </div>
                             )}
-                            
+
                             {activeCategory === 'quick' && item.prep_time && item.prep_time <= 10 && (
                               <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/90 backdrop-blur-sm">
                                 <Zap className="w-3 h-3 text-white" />
@@ -282,12 +282,12 @@ export function SmartOrderRecommendations({
                         {/* Item Details */}
                         <div className="p-4">
                           <h5 className="font-medium mb-2 line-clamp-1">{item.name}</h5>
-                          
+
                           <div className="flex items-center justify-between mb-3">
                             <span className="text-lg font-bold text-fuchsia-400">
                               ${item.price.toFixed(2)}
                             </span>
-                            
+
                             <div className="flex items-center gap-3 text-xs text-gray-400">
                               {item.prep_time && (
                                 <div className="flex items-center gap-1">
@@ -295,7 +295,7 @@ export function SmartOrderRecommendations({
                                   <span>{item.prep_time}min</span>
                                 </div>
                               )}
-                              
+
                               {item.orders_count && (
                                 <div className="flex items-center gap-1">
                                   <Users className="w-3 h-3" />

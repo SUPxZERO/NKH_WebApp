@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\LoyaltyPoint;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -74,6 +76,26 @@ class LoyaltyPointController extends Controller
             'occurred_at' => $data['occurred_at'],
             'notes' => $data['notes'] ?? null,
         ]);
+
+        // Send notification to customer about points change
+        try {
+            $customer = Customer::with('user')->find($data['customer_id']);
+            if ($customer && $customer->user) {
+                $notificationService = app(NotificationService::class);
+                $points = abs($data['points']);
+                $action = $data['type'] === 'earn' ? 'earned' : ($data['type'] === 'redeem' ? 'redeemed' : 'received');
+                $emoji = $data['points'] > 0 ? '⭐' : '🔄';
+                
+                $notificationService->sendRewardNotification(
+                    $customer->user,
+                    $data['points'],
+                    $data['notes'] ?? "You {$action} {$points} points! {$emoji}",
+                    '/customer/loyalty'
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send loyalty points notification: ' . $e->getMessage());
+        }
 
         return $lp->fresh(['customer.user']);
     }

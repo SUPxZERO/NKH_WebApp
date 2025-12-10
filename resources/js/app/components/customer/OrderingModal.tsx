@@ -31,22 +31,22 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
 
   const filteredMenu = useMemo(() => {
     if (!menu) return [];
-    
+
     let filtered = menu;
-    
+
     // Filter by category if selected
     if (categoryId) {
       filtered = filtered.filter(item => item.category_id === categoryId);
     }
-    
+
     // Filter by search term if present
     if (search.trim()) {
       const searchLower = search.toLowerCase().trim();
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name?.toLowerCase().includes(searchLower) ?? false
       );
     }
-    
+
     return filtered;
   }, [menu, categoryId, search]); // Add search to dependencies
 
@@ -56,6 +56,7 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
       name: item.name,
       unit_price: item.price,
       quantity: 1,
+      image_path: item.image_path || undefined,
     };
     cart.addItem(orderItem);
     toastSuccess(`${item.name} added to cart`);

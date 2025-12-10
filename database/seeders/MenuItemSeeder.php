@@ -352,9 +352,20 @@ class MenuItemSeeder extends Seeder
 
             foreach ($menuItems as $item) {
                 if ($item['category_id']) {
-                    MenuItem::create(array_merge($item, [
-                        'location_id' => $location->id,
-                    ]));
+                    MenuItem::updateOrCreate(
+                        [
+                            'location_id' => $location->id,
+                            'slug' => $item['slug'],
+                        ],
+                        [
+                            'category_id' => $item['category_id'],
+                            'price' => $item['price'],
+                            'cost' => $item['cost'],
+                            'is_popular' => $item['is_popular'],
+                            'is_active' => $item['is_active'],
+                            'image_path' => $item['image_path'],
+                        ]
+                    );
                 }
             }
         }

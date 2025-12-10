@@ -22,6 +22,7 @@ import { cn } from '@/app/utils/cn';
 import CartIcon from '@/app/components/ui/CartIcon';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
+import { useAutoCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
 
 type Props = {
   children: React.ReactNode;
@@ -42,6 +43,9 @@ const navigation = [
 export default function CustomerLayout({ children, className }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
+
+  // Subscribe to real-time customer notifications
+  useAutoCustomerNotifications({ showToast: true });
 
   const handleLogout = () => {
     router.post('/logout');

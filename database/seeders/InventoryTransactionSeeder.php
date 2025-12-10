@@ -19,8 +19,8 @@ class InventoryTransactionSeeder extends Seeder
             $query->where('slug', 'manager');
         })->get();
         
-        // Generate stock movements for the last 30 days
-        $startDate = Carbon::now()->subDays(30);
+        // Generate stock movements for the last 7 days
+        $startDate = Carbon::now()->subDays(7);
         $endDate = Carbon::now();
         
         while ($startDate->lte($endDate)) {

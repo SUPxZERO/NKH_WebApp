@@ -29,7 +29,8 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
       menu_item_id: item.id,
       name: item.name || item.slug,
       unit_price: item.price,
-      quantity
+      quantity,
+      image_path: item.image_path || undefined,
     });
     setQuantities(prev => ({ ...prev, [item.id]: 0 }));
   };
@@ -87,7 +88,7 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
                               </div>
                             </div>
                           )}
-                          
+
                           {/* Popular Badge */}
                           <div className="absolute top-2 left-2">
                             <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/90 backdrop-blur-sm">
@@ -150,7 +151,7 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
                                 >
                                   <Minus className="w-4 h-4" />
                                 </EnhancedButton>
-                                
+
                                 <div className="flex-1 text-center">
                                   <motion.span
                                     key={quantity}
@@ -161,7 +162,7 @@ export function QuickOrderPanel({ popularItems, onItemSelect, className }: Quick
                                     {quantity}
                                   </motion.span>
                                 </div>
-                                
+
                                 <EnhancedButton
                                   variant="secondary"
                                   size="sm"

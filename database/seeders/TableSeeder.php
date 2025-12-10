@@ -22,12 +22,16 @@ class TableSeeder extends Seeder
                 $capacity = $capacities[array_rand($capacities)];
                 $status = $this->getTableStatus($i, $tableCount);
                 
-                DiningTable::create([
-                    'floor_id' => $floor->id,
-                    'code' => $this->generateTableCode($floor, $i),
-                    'capacity' => $capacity,
-                    'status' => $status,
-                ]);
+                DiningTable::updateOrCreate(
+                    [
+                        'floor_id' => $floor->id,
+                        'code' => $this->generateTableCode($floor, $i),
+                    ],
+                    [
+                        'capacity' => $capacity,
+                        'status' => $status,
+                    ]
+                );
             }
         }
     }

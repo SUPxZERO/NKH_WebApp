@@ -79,7 +79,8 @@ export default function POS() {
       menu_item_id: item.id,
       name: item.name,
       unit_price: item.price,
-      quantity: qty
+      quantity: qty,
+      image_path: item.image_path || undefined,
     });
     toastSuccess(`${item.name} x${qty} added`);
     setQuantity('1');
@@ -284,16 +285,16 @@ export default function POS() {
           {/* RIGHT SIDEBAR - ORDER & NUMPAD */}
           <div className="lg:col-span-4 space-y-4">
 
-          {/* HELD ORDERS PANEL */}
-          <Card className="bg-gradient-to-br from-gray-800/30 to-gray-900/30 border-gray-600/30\">
-            <CardHeader>
-              <h3 className="text-lg font-semibold text-white\">Held Orders</h3>
-            </CardHeader>
-            <CardContent>
-              {/* Placeholder – real UI will read from localStorage */}
-              <div className="text-sm text-gray-400\">No held orders</div>
-            </CardContent>
-          </Card>
+            {/* HELD ORDERS PANEL */}
+            <Card className="bg-gradient-to-br from-gray-800/30 to-gray-900/30 border-gray-600/30\">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-white\">Held Orders</h3>
+              </CardHeader>
+              <CardContent>
+                {/* Placeholder – real UI will read from localStorage */}
+                <div className="text-sm text-gray-400\">No held orders</div>
+              </CardContent>
+            </Card>
             {/* TABLE SELECTOR */}
             <Card>
               <CardHeader>

@@ -41,9 +41,16 @@ class FloorSeeder extends Seeder
             }
 
             foreach ($floors as $floor) {
-                Floor::create(array_merge($floor, [
-                    'location_id' => $location->id,
-                ]));
+                Floor::updateOrCreate(
+                    [
+                        'location_id' => $location->id,
+                        'name' => $floor['name'],
+                    ],
+                    [
+                        'display_order' => $floor['display_order'],
+                        'is_active' => $floor['is_active'],
+                    ]
+                );
             }
         }
     }

@@ -7,6 +7,7 @@ use App\Http\Resources\ReservationResource;
 use App\Models\Reservation;
 use App\Models\DiningTable;
 use App\Models\Customer;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -204,6 +205,22 @@ class CustomerReservationController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
         });
+
+        // Send reservation confirmation notification
+        try {
+            if ($customer->user) {
+                $notificationService = app(NotificationService::class);
+                $reservedAt = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
+                $notificationService->sendSystemNotification(
+                    'Reservation Confirmed! 🍽️',
+                    "Your table for {$reservation->guest_count} is reserved on {$reservedAt->format('M d, Y')} at {$reservedAt->format('g:i A')}. Code: {$reservation->code}",
+                    $customer->user,
+                    '/customer/reservations'
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send reservation notification: ' . $e->getMessage());
+        }
 
         return new ReservationResource($reservation->load(['table', 'customer.user', 'location']));
     }

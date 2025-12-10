@@ -7,6 +7,7 @@ use App\Http\Resources\ReservationResource;
 use App\Models\Reservation;
 use App\Models\DiningTable;
 use App\Models\Customer;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -220,10 +221,13 @@ class ReservationController extends Controller
                 $reservation->notes = $validated['notes'];
             }
 
-            $reservation->save();
-
             return $reservation;
         });
+
+        // Send notification if status changed
+        if (isset($validated['status'])) {
+            $this->sendReservationStatusNotification($reservation, $validated['status']);
+        }
 
         return new ReservationResource($reservation->load(['table', 'customer.user', 'location']));
     }
@@ -233,9 +237,62 @@ class ReservationController extends Controller
         if ($reservation->status !== 'cancelled') {
             $reservation->status = 'cancelled';
             $reservation->save();
+            
+            // Notify customer of cancellation
+            $this->sendReservationStatusNotification($reservation, 'cancelled');
         }
 
         return response()->json(['message' => 'Reservation cancelled']);
+    }
+
+    /**
+     * Send notification about reservation status change
+     */
+    private function sendReservationStatusNotification(Reservation $reservation, string $status): void
+    {
+        try {
+            $customer = $reservation->customer;
+            if (!$customer || !$customer->user) {
+                return;
+            }
+
+            $notificationService = app(NotificationService::class);
+            $reservedAt = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
+            
+            $messages = [
+                'confirmed' => [
+                    'title' => 'Reservation Confirmed! ✅',
+                    'message' => "Your reservation on {$reservedAt->format('M d')} at {$reservedAt->format('g:i A')} has been confirmed!",
+                ],
+                'cancelled' => [
+                    'title' => 'Reservation Cancelled ❌',
+                    'message' => "Your reservation on {$reservedAt->format('M d')} at {$reservedAt->format('g:i A')} has been cancelled.",
+                ],
+                'seated' => [
+                    'title' => 'Welcome! 👋',
+                    'message' => "Enjoy your dining experience! Your table is ready.",
+                ],
+                'completed' => [
+                    'title' => 'Thanks for Dining! ⭐',
+                    'message' => "We hope you enjoyed your visit. See you again soon!",
+                ],
+                'no_show' => [
+                    'title' => 'Missed Reservation',
+                    'message' => "We missed you! Your reservation on {$reservedAt->format('M d')} was marked as no-show.",
+                ],
+            ];
+
+            if (isset($messages[$status])) {
+                $notificationService->sendSystemNotification(
+                    $messages[$status]['title'],
+                    $messages[$status]['message'],
+                    $customer->user,
+                    '/customer/reservations'
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send reservation status notification: ' . $e->getMessage());
+        }
     }
 
     private function generateReservationNumber(int $locationId, Carbon $date): string

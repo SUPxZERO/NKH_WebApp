@@ -13,18 +13,18 @@ class LeaveRequestSeeder extends Seeder
     {
         $employees = Employee::all();
         
-        // Generate leave requests for the next 90 days
-        $startDate = Carbon::now();
-        $endDate = Carbon::now()->addDays(90);
+        // Generate leave requests for the next 7 days
+        $startDate = Carbon::now()->subDays(7);
+        $endDate = Carbon::now()->addDays(7);
         
         $employees->each(function ($employee) use ($startDate, $endDate) {
-            // Create 1-3 leave requests per employee
-            $requestCount = rand(1, 3);
+            // Create 1-2 leave requests per employee
+            $requestCount = rand(0, 2);
             
             for ($i = 0; $i < $requestCount; $i++) {
-                // Generate random start date between now and 90 days
-                $requestStartDate = Carbon::now()->addDays(rand(1, 85));
-                $duration = rand(1, 5); // 1-5 days off
+                // Generate random start date between -7 and +7 days
+                $requestStartDate = Carbon::now()->addDays(rand(-5, 5));
+                $duration = rand(1, 3); // 1-3 days off
                 
                 LeaveRequest::create([
                     'employee_id' => $employee->id,

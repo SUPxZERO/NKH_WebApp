@@ -81,7 +81,7 @@ export default function Menu() {
       // toastSuccess(isFav ? 'Removed from favorites' : 'Added to favorites'); // Hook handles state update
     } catch (error) {
       console.error('Favorite toggle failed:', error);
-      toastError('Failed to update favorites'); 
+      toastError('Failed to update favorites');
     }
   };
 
@@ -142,7 +142,8 @@ export default function Menu() {
       menu_item_id: item.id,
       name: item.name,
       unit_price: item.price,
-      quantity: 1
+      quantity: 1,
+      image_path: item.image_path || undefined,
     });
     toastSuccess(`${item.name} added to cart`);
   };

@@ -56,8 +56,23 @@ class InventorySeeder extends Seeder
             ];
         }
 
-        Inventory::insert($inventoryRecords);
+        // Insert or update each inventory record
+        $count = 0;
+        foreach ($inventoryRecords as $record) {
+            Inventory::updateOrCreate(
+                [
+                    'ingredient_id' => $record['ingredient_id'],
+                    'location_id' => $record['location_id'],
+                    'batch_number' => $record['batch_number'],
+                ],
+                [
+                    'quantity' => $record['quantity'],
+                    'expiration_date' => $record['expiration_date'],
+                ]
+            );
+            $count++;
+        }
 
-        $this->command->info('Created ' . count($inventoryRecords) . ' inventory records!');
+        $this->command->info('Created or updated ' . $count . ' inventory records!');
     }
 }

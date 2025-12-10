@@ -23,12 +23,18 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
             layout
         >
             <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-                <img
-                    src={item.image_path}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                />
+                {item.image_path ? (
+                    <img
+                        src={item.image_path}
+                        alt={item.name || 'Menu item'}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-fuchsia-600/30 to-pink-500/30">
+                        <span className="text-3xl">🍽️</span>
+                    </div>
+                )}
             </div>
 
             <div className="flex-1 flex flex-col justify-between min-w-0">

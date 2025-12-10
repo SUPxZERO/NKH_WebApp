@@ -17,6 +17,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Services\InvoiceService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -396,6 +397,14 @@ class OrderController extends Controller
             'approved_by_name' => $request->user() ? $request->user()->name : 'System',
         ]);
 
+        // Send notification to customer
+        try {
+            $notificationService = app(NotificationService::class);
+            $notificationService->sendOrderNotification($order, 'approved');
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send order approval notification: ' . $e->getMessage());
+        }
+
         return new OrderResource($order->fresh(['items.menuItem', 'customerAddress', 'approvedBy']));
     }
 
@@ -430,6 +439,18 @@ class OrderController extends Controller
             'rejected_by' => $request->user()?->id,
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+
+        // Send notification to customer with rejection reason
+        try {
+            $notificationService = app(NotificationService::class);
+            $notificationService->sendOrderNotification(
+                $order, 
+                'rejected', 
+                "Your order was declined: {$validated['rejection_reason']}"
+            );
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send order rejection notification: ' . $e->getMessage());
+        }
 
         return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));
     }
@@ -478,6 +499,24 @@ class OrderController extends Controller
         }
 
         $order->update(['status' => $newStatus]);
+
+        // Send status update notification to customer
+        try {
+            $statusMap = [
+                'preparing' => 'preparing',
+                'ready' => 'ready',
+                'completed' => 'completed',
+                'cancelled' => 'cancelled',
+            ];
+            
+            if (isset($statusMap[$newStatus])) {
+                $notificationService = app(NotificationService::class);
+                $notificationService->sendOrderNotification($order, $statusMap[$newStatus]);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send order status notification: ' . $e->getMessage());
+        }
+
         return new OrderResource($order->fresh(['items.menuItem', 'table']));
     }
 

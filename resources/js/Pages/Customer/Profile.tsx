@@ -25,6 +25,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import Map from '@/app/components/ui/Map';
 import ProfilePictureUpload from '@/app/components/ui/ProfilePictureUpload';
+import NotificationPreferencesSettings from '@/app/components/customer/NotificationPreferencesSettings';
 
 interface Address {
     id: number;
@@ -504,6 +505,13 @@ export default function Profile() {
                                 </div>
                             )}
                         </div>
+                    </CardContent>
+                </Card>
+
+                {/* Notification Preferences */}
+                <Card>
+                    <CardContent className="p-6">
+                        <NotificationPreferencesSettings />
                     </CardContent>
                 </Card>
 

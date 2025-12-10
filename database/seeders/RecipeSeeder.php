@@ -24,17 +24,23 @@ class RecipeSeeder extends Seeder
         ];
 
         $menuItems->each(function ($menuItem) use ($ingredients, $commonIngredients) {
-            // Create main recipe
-            $recipe = Recipe::create([
-                'menu_item_id' => $menuItem->id,
-                'yield_portions' => rand(1, 4),
-                'instructions' => $this->generateInstructions(),
-            ]);
+            // Create or update main recipe
+            $recipe = Recipe::updateOrCreate(
+                ['menu_item_id' => $menuItem->id], // Unique key
+                [
+                    'name' => $menuItem->translations->first()?->name ?? $menuItem->slug ?? 'Recipe ' . $menuItem->id,
+                    'yield_portions' => rand(1, 4),
+                    'instructions' => $this->generateInstructions(),
+                ]
+            );
+
+            // Clear existing ingredients and add new ones
+            $recipe->ingredients()->delete();
 
             // Add 3-7 random ingredients plus common ingredients
             $recipeIngredients = [];
             $usedIngredientIds = [];
-            $randomIngredients = $ingredients->random(rand(3, 7));
+            $randomIngredients = $ingredients->random(min(rand(3, 7), $ingredients->count()));
             
             foreach ($randomIngredients as $ingredient) {
                 $recipeIngredients[] = [

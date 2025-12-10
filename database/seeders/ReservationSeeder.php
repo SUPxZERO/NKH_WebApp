@@ -27,10 +27,11 @@ class ReservationSeeder extends Seeder
 
     private function createPastReservations($customers, $tables, $locations): void
     {
-        $startDate = Carbon::now()->subMonths(2);
+        // Last week only
+        $startDate = Carbon::now()->subDays(7);
         $endDate = Carbon::now()->subDays(1);
         
-        for ($i = 0; $i < 80; $i++) {
+        for ($i = 0; $i < 30; $i++) {
             $location = $locations->random();
             $customer = $customers->random();
             $locationTables = $tables->where('floor.location_id', $location->id);
@@ -102,10 +103,11 @@ class ReservationSeeder extends Seeder
 
     private function createFutureReservations($customers, $tables, $locations): void
     {
+        // Next week only
         $startDate = Carbon::now()->addDay();
-        $endDate = Carbon::now()->addMonths(2);
+        $endDate = Carbon::now()->addDays(7);
         
-        for ($i = 0; $i < 60; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             $location = $locations->random();
             $customer = $customers->random();
             $locationTables = $tables->where('floor.location_id', $location->id);

@@ -20,11 +20,11 @@ class OrderSeeder extends Seeder
         $orderStatuses = ['pending', 'received', 'preparing', 'ready', 'completed', 'cancelled'];
         $orderTypes = ['dine-in', 'pickup', 'delivery'];
         
-        // Generate orders for the last 3 months
-        $startDate = Carbon::now()->subMonths(3);
-        $endDate = Carbon::now();
+        // Generate orders for the last week to next week (2 weeks total)
+        $startDate = Carbon::now()->subDays(7);
+        $endDate = Carbon::now()->addDays(7);
         
-        for ($i = 0; $i < 250; $i++) {
+        for ($i = 0; $i < 100; $i++) {
             $location = $locations->random();
             $customer = $customers->random();
             $orderType = $orderTypes[array_rand($orderTypes)];
@@ -71,7 +71,14 @@ class OrderSeeder extends Seeder
 
     private function getOrderStatus(Carbon $orderDate): string
     {
-        $hoursAgo = Carbon::now()->diffInHours($orderDate);
+        $now = Carbon::now();
+        
+        // Future orders
+        if ($orderDate->isAfter($now)) {
+            return ['pending', 'received'][array_rand(['pending', 'received'])];
+        }
+        
+        $hoursAgo = $now->diffInHours($orderDate);
         
         if ($hoursAgo > 24) {
             return rand(0, 10) < 9 ? 'completed' : 'cancelled';

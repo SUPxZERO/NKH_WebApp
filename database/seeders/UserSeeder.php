@@ -42,9 +42,12 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($admins as $adminData) {
-            $admin = User::create($adminData);
+            $admin = User::updateOrCreate(
+                ['email' => $adminData['email']], // Unique key
+                $adminData
+            );
             if ($adminRole) {
-                $admin->roles()->attach($adminRole->id);
+                $admin->roles()->syncWithoutDetaching([$adminRole->id]);
             }
         }
 
@@ -73,9 +76,12 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($managers as $managerData) {
-            $manager = User::create($managerData);
+            $manager = User::updateOrCreate(
+                ['email' => $managerData['email']], // Unique key
+                $managerData
+            );
             if ($managerRole) {
-                $manager->roles()->attach($managerRole->id);
+                $manager->roles()->syncWithoutDetaching([$managerRole->id]);
             }
         }
 
@@ -102,17 +108,19 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($employees as $employeeData) {
-            $employee = User::create([
-                'name' => $employeeData['name'],
-                'email' => $employeeData['email'],
-                'phone' => '+855-' . rand(10, 99) . '-' . rand(100, 999) . '-' . rand(100, 999),
-                'password' => Hash::make('demo123'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-                'default_location_id' => $employeeData['location'],
-            ]);
+            $employee = User::updateOrCreate(
+                ['email' => $employeeData['email']], // Unique key
+                [
+                    'name' => $employeeData['name'],
+                    'phone' => '+855-' . rand(10, 99) . '-' . rand(100, 999) . '-' . rand(100, 999),
+                    'password' => Hash::make('demo123'),
+                    'email_verified_at' => now(),
+                    'is_active' => true,
+                    'default_location_id' => $employeeData['location'],
+                ]
+            );
             if ($employeeRole) {
-                $employee->roles()->attach($employeeRole->id);
+                $employee->roles()->syncWithoutDetaching([$employeeRole->id]);
             }
         }
 
@@ -123,27 +131,29 @@ class UserSeeder extends Seeder
             ['name' => 'Chantha Lim', 'email' => 'demo@customer.com', 'location' => 1],
             ['name' => 'David Kim', 'email' => 'david.kim@yahoo.com', 'location' => 2],
             ['name' => 'Sophea Chhun', 'email' => 'sophea.chhun@hotmail.com', 'location' => 1],
-            ['name' => 'Linda Martinez', 'email' => 'linda.martinez@gmail.com', 'location' => 3],
+            ['name' => 'Linda Martinez', 'email' => 'linda.martinez@gmail.com', 'location' => 2],
             ['name' => 'Narong Sok', 'email' => 'narong.sok@gmail.com', 'location' => 2],
             ['name' => 'Sokny Phan', 'email' => 'sokny.phan@gmail.com', 'location' => 1],
-            ['name' => 'Sothy Chan', 'email' => 'sothy.chan@gmail.com', 'location' => 3],
+            ['name' => 'Sothy Chan', 'email' => 'sothy.chan@gmail.com', 'location' => 1],
             ['name' => 'Nita Heng', 'email' => 'nita.heng@gmail.com', 'location' => 1],
             ['name' => 'Alex Johnson', 'email' => 'alex.johnson@gmail.com', 'location' => 2],
             ['name' => 'Vanna Oum', 'email' => 'vanna.oum@gmail.com', 'location' => 1],
         ];
 
         foreach ($customers as $customerData) {
-            $customer = User::create([
-                'name' => $customerData['name'],
-                'email' => $customerData['email'],
-                'phone' => '+855-' . rand(10, 99) . '-' . rand(100, 999) . '-' . rand(100, 999),
-                'password' => Hash::make('demo123'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-                'default_location_id' => $customerData['location'],
-            ]);
+            $customer = User::updateOrCreate(
+                ['email' => $customerData['email']], // Unique key
+                [
+                    'name' => $customerData['name'],
+                    'phone' => '+855-' . rand(10, 99) . '-' . rand(100, 999) . '-' . rand(100, 999),
+                    'password' => Hash::make('demo123'),
+                    'email_verified_at' => now(),
+                    'is_active' => true,
+                    'default_location_id' => $customerData['location'],
+                ]
+            );
             if ($customerRole) {
-                $customer->roles()->attach($customerRole->id);
+                $customer->roles()->syncWithoutDetaching([$customerRole->id]);
             }
         }
     }
