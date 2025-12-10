@@ -44,6 +44,12 @@ function createClient(): AxiosInstance {
     if (method !== 'get' && method !== 'head' && method !== 'options') {
       await ensureCsrfCookie();
     }
+
+    // For FormData, remove Content-Type header so browser can set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     // Preserve legacy token-based flows if a token exists in localStorage
     try {
       if (typeof window !== 'undefined') {

@@ -24,9 +24,10 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
         >
             <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
                 <img
-                    src={item.image_path || item.menu_item?.image_path || ""}
-                    alt={item.menu_item?.name || item.name || `Item #${item.menu_item_id}`}
+                    src={item.image_path}
+                    alt={item.name}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                 />
             </div>
 

@@ -62,6 +62,7 @@ const navigationTree = [
     type: 'group',
     children: [
       { name: 'Employees', href: '/admin/employees' },
+      { name: 'Admins', href: '/admin/admins' },
       { name: 'Customers', href: '/admin/customers' },
       { name: 'Positions', href: '/admin/positions' },
       { name: 'Loyalty Points', href: '/admin/loyalty-points' },

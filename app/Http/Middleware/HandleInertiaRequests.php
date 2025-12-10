@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'role' => $request->user()->role ?? null,
+                    'avatar' => $request->user()->avatar ? \Illuminate\Support\Facades\Storage::url($request->user()->avatar) : null,
                 ] : null,
             ],
             'csrf_token' => csrf_token(),

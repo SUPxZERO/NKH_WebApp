@@ -24,6 +24,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import Map from '@/app/components/ui/Map';
+import ProfilePictureUpload from '@/app/components/ui/ProfilePictureUpload';
 
 interface Address {
     id: number;
@@ -284,6 +285,15 @@ export default function Profile() {
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                             Personal Information
                         </h2>
+
+                        <div className="flex justify-center mb-6">
+                            <ProfilePictureUpload
+                                name={profile?.user?.name || ''}
+                                currentAvatar={profile?.user?.avatar}
+                                size="xl"
+                            />
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

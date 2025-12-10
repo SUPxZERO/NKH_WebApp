@@ -49,6 +49,7 @@ use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\TimeSlotController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\UserProfileController;
 use Illuminate\Http\Request;
 
 // Health check endpoint for Docker/Render
@@ -59,6 +60,17 @@ Route::get('/health', function () {
         'database' => DB::connection()->getDatabaseName()
     ]);
 });
+
+// User Profile Routes - MOVED TO web.php to share session properly
+// Route::prefix('user')
+//     ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
+//     ->group(function () {
+//     Route::put('profile', [UserProfileController::class, 'update']);
+//     Route::post('profile/avatar', [UserProfileController::class, 'uploadAvatar']);
+//     Route::delete('profile/avatar', [UserProfileController::class, 'deleteAvatar']);
+//     Route::get('profile/avatar', [UserProfileController::class, 'getAvatarUrl']);
+//     Route::post('change-password', [UserProfileController::class, 'changePassword']);
+// });
 
 // Public endpoints
 Route::post('/register', [AuthController::class, 'register']);
@@ -451,6 +463,10 @@ Route::prefix('admin')
     // Sprint 6: Access Control
     Route::apiResource('roles', RoleController::class);
     Route::get('permissions/all', [RoleController::class, 'getAllPermissions']);
+    
+    // Admin User Management
+    Route::get('admin-users/stats', [\App\Http\Controllers\Api\AdminUserController::class, 'stats']);
+    Route::apiResource('admin-users', \App\Http\Controllers\Api\AdminUserController::class);
     
     // Sprint 6: Operating Hours
     Route::get('operating-hours/location/{location}', [OperatingHoursController::class, 'getByLocation']);

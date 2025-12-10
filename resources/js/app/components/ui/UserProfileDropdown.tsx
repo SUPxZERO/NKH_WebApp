@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { useThemeStore } from '@/app/store/theme';
+import Avatar from '@/app/components/ui/Avatar';
 
 type UserRole = 'admin' | 'employee' | 'customer';
 
@@ -162,32 +163,17 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
 
     return (
         <div className={cn('relative', className)} ref={dropdownRef}>
-            {/* Trigger Button - User Avatar */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={cn(
-                    'flex items-center justify-center w-10 h-10 rounded-full transition-all',
-                    `bg-gradient-to-r ${getRoleGradient()} text-white font-medium`,
-                    'hover:shadow-lg hover:scale-105',
-                    'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                    userRole === 'admin' && 'focus:ring-purple-500/50 hover:shadow-purple-500/30',
-                    userRole === 'employee' && 'focus:ring-blue-500/50 hover:shadow-blue-500/30',
-                    userRole === 'customer' && 'focus:ring-fuchsia-500/50 hover:shadow-fuchsia-500/30',
-                    isOpen && 'ring-2 ring-offset-2',
-                    isOpen && userRole === 'admin' && 'ring-purple-500/50',
-                    isOpen && userRole === 'employee' && 'ring-blue-500/50',
-                    isOpen && userRole === 'customer' && 'ring-fuchsia-500/50'
-                )}
+                className="rounded-full hover:shadow-lg hover:scale-105 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
-                {user.avatar ? (
-                    <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="w-full h-full rounded-full object-cover"
-                    />
-                ) : (
-                    <span className="text-sm font-bold">{getInitials(user.name)}</span>
-                )}
+                <Avatar
+                    src={user.avatar}
+                    name={user.name}
+                    size="md"
+                    fallbackColor={userRole === 'admin' ? 'purple' : userRole === 'employee' ? 'blue' : 'rose'}
+                    className={cn(isOpen && 'ring-2 ring-offset-2 ring-purple-500/50')}
+                />
             </button>
 
             {/* Dropdown Menu */}
@@ -225,20 +211,12 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                             )}>
                                 <div className="flex items-start gap-4">
                                     {/* Avatar */}
-                                    <div className={cn(
-                                        'w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0',
-                                        `bg-gradient-to-r ${getRoleGradient()}`
-                                    )}>
-                                        {user.avatar ? (
-                                            <img
-                                                src={user.avatar}
-                                                alt={user.name}
-                                                className="w-full h-full rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            getInitials(user.name)
-                                        )}
-                                    </div>
+                                    <Avatar
+                                        src={user.avatar}
+                                        name={user.name}
+                                        size="lg"
+                                        fallbackColor={userRole === 'admin' ? 'purple' : userRole === 'employee' ? 'blue' : 'rose'}
+                                    />
 
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">

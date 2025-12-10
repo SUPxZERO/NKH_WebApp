@@ -27,6 +27,7 @@ class User extends Authenticatable
         'latitude',
         'longitude',
         'avatar',
+        'image_path',
         'default_location_id',
         'is_active',
         'role',
@@ -54,6 +55,30 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the full URL for the user's avatar (uses image_path or avatar)
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        // Prefer image_path, then fall back to avatar
+        $path = $this->image_path ?: $this->avatar;
+        if (!$path) {
+            return null;
+        }
+        return \Illuminate\Support\Facades\Storage::url($path);
+    }
+
+    /**
+     * Get the full URL for image_path specifically
+     */
+    public function getImagePathUrlAttribute(): ?string
+    {
+        if (!$this->image_path) {
+            return null;
+        }
+        return \Illuminate\Support\Facades\Storage::url($this->image_path);
     }
 
     /**

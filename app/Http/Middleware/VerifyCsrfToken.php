@@ -14,5 +14,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         // Exclude API routes that don't need CSRF (handled by Sanctum)
         'api/*',
+        // Exclude logout to prevent 419 errors when session expires
+        'logout',
     ];
 }

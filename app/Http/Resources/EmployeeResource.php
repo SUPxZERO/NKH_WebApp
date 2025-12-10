@@ -27,6 +27,8 @@ class EmployeeResource extends JsonResource
                 'email' => $this->user->email,
                 'phone' => $this->user->phone,
                 'is_active' => $this->user->is_active,
+                'avatar' => $this->user->avatar_url,
+                'image_path' => $this->user->image_path_url,
                 'roles' => $this->user->roles->pluck('slug'),
             ],
             

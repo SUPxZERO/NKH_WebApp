@@ -95,6 +95,7 @@ Route::prefix('admin')
         
         // Sprint 6: Configuration & Access Control
         Route::get('roles', fn() => Inertia::render('admin/Roles'))->name('admin.roles');
+        Route::get('admins', fn() => Inertia::render('admin/Admins'))->name('admin.admins');
         Route::get('operating-hours', fn() => Inertia::render('admin/OperatingHours'))->name('admin.operating-hours');
         Route::get('translations', fn() => Inertia::render('admin/Translations'))->name('admin.translations');
         
@@ -169,9 +170,12 @@ Route::prefix('api/customer')->middleware('auth')->group(function () {
     Route::get('rewards/history', [App\Http\Controllers\Api\RewardController::class, 'history']);
 });
 
-// User Profile API Routes (for all authenticated users - admin, employee)
+// User Profile API Routes (moved from api.php to share web session)
 Route::prefix('api/user')->middleware('auth')->group(function () {
     Route::put('profile', [App\Http\Controllers\Api\UserProfileController::class, 'update']);
+    Route::post('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar']);
+    Route::delete('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
+    Route::get('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
     Route::post('change-password', [App\Http\Controllers\Api\UserProfileController::class, 'changePassword']);
 });
 

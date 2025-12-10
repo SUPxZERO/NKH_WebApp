@@ -10,6 +10,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Customer, Location } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
+import Avatar from '@/app/components/ui/Avatar';
 
 // Stats Ribbon
 const CustomerStatsRibbon = ({ stats }: { stats: any }) => (
@@ -222,13 +223,21 @@ export default function Customers() {
                     <input type="checkbox" checked={selectedCustomers.has(customer.id)} onChange={() => toggleSelectCustomer(customer.id)}
                       className="w-4 h-4 rounded border-white/20 bg-slate-900" />
                   </div>
-                  <div className="col-span-3">
-                    <div className="font-medium text-white">{customer.user?.name || 'Unknown'}</div>
-                    <div className="text-xs text-gray-500">
-                      <span className={cn("inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold",
-                        customer.user?.is_active ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400")}>
-                        {customer.user?.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                  <div className="col-span-3 flex items-center gap-3">
+                    <Avatar
+                      src={customer.user?.avatar}
+                      name={customer.user?.name}
+                      size="md"
+                      fallbackColor="rose"
+                    />
+                    <div>
+                      <div className="font-medium text-white">{customer.user?.name || 'Unknown'}</div>
+                      <div className="text-xs text-gray-500">
+                        <span className={cn("inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold",
+                          customer.user?.is_active ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400")}>
+                          {customer.user?.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="col-span-2">

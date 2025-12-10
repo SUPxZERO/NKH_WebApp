@@ -29,6 +29,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import Map from '@/app/components/ui/Map';
+import ProfilePictureUpload from '@/app/components/ui/ProfilePictureUpload';
 
 interface Setting {
   id: number;
@@ -297,14 +298,11 @@ export default function Settings() {
 
                 <div className="flex items-center gap-6 mb-6">
                   {/* Avatar */}
-                  <div className="relative">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold">
-                      {getInitials(profileForm.name || 'AD')}
-                    </div>
-                    <button className="absolute bottom-0 right-0 w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center border-2 border-slate-900 hover:bg-purple-700 transition-colors">
-                      <Camera className="w-3.5 h-3.5 text-white" />
-                    </button>
-                  </div>
+                  <ProfilePictureUpload
+                    name={profileForm.name}
+                    currentAvatar={user?.avatar}
+                    size="lg"
+                  />
                   <div>
                     <h3 className="text-xl font-semibold text-white">{profileForm.name}</h3>
                     <p className="text-gray-400">{profileForm.email}</p>

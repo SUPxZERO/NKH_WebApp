@@ -10,6 +10,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Plus, Search, Edit, Trash2, User, Phone, Mail, Calendar, DollarSign, MapPin, Badge as BadgeIcon, ChevronLeft, ChevronRight, Users, UserCheck, UserX, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
+import Avatar from '@/app/components/ui/Avatar';
 
 // Stats Ribbon
 const EmployeeStatsRibbon = ({ stats }: { stats: any }) => (
@@ -217,9 +218,12 @@ export default function Employees() {
                 <motion.div key={employee.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
                   <div className="col-span-3 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                      <User className="w-5 h-5 text-white" />
-                    </div>
+                    <Avatar
+                      src={employee.user?.avatar}
+                      name={employee.user?.name}
+                      size="md"
+                      fallbackColor="blue"
+                    />
                     <div>
                       <div className="font-medium text-white">{employee.user?.name || 'Unknown'}</div>
                       <div className="text-xs text-gray-500">{employee.employee_code}</div>

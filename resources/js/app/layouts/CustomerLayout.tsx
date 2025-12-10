@@ -32,7 +32,7 @@ const navigation = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Menu', href: '/menu', icon: Utensils },
   { name: 'Dashboard', href: '/dashboard', icon: User },
-  { name: 'Profile', href: '/customer/profile', icon: UserCircle },
+  // { name: 'Profile', href: '/customer/profile', icon: UserCircle },
   { name: 'Cart', href: '/cart', icon: ShoppingCart },
   { name: 'Order', href: '/customer/orders', icon: ClipboardList },
   // { name: 'Favorites', href: '/customer/favorites', icon: Heart },

@@ -208,6 +208,8 @@ export interface User {
   phone?: string | null;
   is_active: boolean;
   roles: string[];
+  avatar?: string | null;
+  image_path?: string | null;
 }
 
 export interface Employee {
