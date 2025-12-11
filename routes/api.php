@@ -78,6 +78,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
+Route::get('/locations', [LocationController::class, 'index']);
 
 // Menu Items CRUD routes
 Route::controller(MenuItemController::class)->group(function () {
@@ -111,8 +112,19 @@ Route::prefix('payments')->group(function () {
         // ->middleware('payment.rate:status');
     Route::post('/{payment}/cancel', [\App\Http\Controllers\Api\PaymentController::class, 'cancel']);
         // ->middleware('payment.rate:default');
-    Route::post('/{payment}/retry', [\App\Http\Controllers\Api\PaymentController::class, 'retry']);
-        // ->middleware('payment.rate:initiate');
+    
+    // Split Payment Routes (Sprint P7)
+    Route::prefix('split')->group(function () {
+        Route::get('/{order}/status', [\App\Http\Controllers\Api\SplitPaymentController::class, 'status']);
+        Route::get('orders/payment-modes/{orderType}', [\App\Http\Controllers\Api\OrderPaymentController::class, 'getPaymentModes']);
+    Route::get('orders/pending-collection', [\App\Http\Controllers\Api\OrderPaymentController::class, 'pendingCollection']);
+    Route::get('orders/pos/active', [\App\Http\Controllers\Api\OrderPaymentController::class, 'activeOrders']);
+    Route::post('pos/orders/{order}/quick-pay', [\App\Http\Controllers\Api\OrderPaymentController::class, 'quickPay']);
+        Route::post('/{order}/add', [\App\Http\Controllers\Api\SplitPaymentController::class, 'addPayment']);
+        Route::get('/{order}/suggestions', [\App\Http\Controllers\Api\SplitPaymentController::class, 'suggestions']);
+        Route::post('/{order}/cancel/{payment}', [\App\Http\Controllers\Api\SplitPaymentController::class, 'cancelPayment']);
+        Route::post('/{order}/complete', [\App\Http\Controllers\Api\SplitPaymentController::class, 'complete']);
+    });
     
     // Development/testing only routes
     Route::post('/{payment}/simulate-success', [\App\Http\Controllers\Api\PaymentController::class, 'simulateSuccess']);
@@ -121,9 +133,51 @@ Route::prefix('payments')->group(function () {
         // ->middleware('payment.rate:simulate');
 });
 
+// Receipt Routes (Sprint P8)
+Route::prefix('receipts')->group(function () {
+    Route::get('/{payment}', [\App\Http\Controllers\Api\ReceiptController::class, 'show']);
+    Route::get('/{payment}/pdf', [\App\Http\Controllers\Api\ReceiptController::class, 'downloadPdf']);
+    Route::get('/{payment}/html', [\App\Http\Controllers\Api\ReceiptController::class, 'viewHtml']);
+    Route::get('/{payment}/thermal', [\App\Http\Controllers\Api\ReceiptController::class, 'thermal']);
+    Route::get('/{payment}/print', [\App\Http\Controllers\Api\ReceiptController::class, 'print']);
+    Route::post('/{payment}/email', [\App\Http\Controllers\Api\ReceiptController::class, 'sendEmail']);
+    Route::get('/uuid/{uuid}', [\App\Http\Controllers\Api\ReceiptController::class, 'showByUuid']);
+});
+
+// Order Payment Routes (Sprint P11)
+Route::prefix('orders')->group(function () {
+    // Public - available payment modes by order type
+    Route::get('/payment-modes/{orderType}', [\App\Http\Controllers\Api\OrderPaymentController::class, 'availablePaymentModes']);
+});
+
+Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
+    // Get order payment status
+    Route::get('/{order}/payment-status', [\App\Http\Controllers\Api\OrderPaymentController::class, 'paymentStatus']);
+    
+    // Update payment mode for an order
+    Route::post('/{order}/payment-mode', [\App\Http\Controllers\Api\OrderPaymentController::class, 'updatePaymentMode']);
+    
+    // Collect payment (for delivery drivers/staff)
+    Route::post('/{order}/collect-payment', [\App\Http\Controllers\Api\OrderPaymentController::class, 'collectPayment']);
+    
+    // Orders pending payment collection
+    Route::get('/pending-collection', [\App\Http\Controllers\Api\OrderPaymentController::class, 'pendingCollection']);
+});
+
+// POS Quick Pay (for employees)
+Route::middleware(['auth:sanctum'])->prefix('pos')->group(function () {
+    Route::post('/orders/{order}/quick-pay', [\App\Http\Controllers\Api\OrderPaymentController::class, 'quickPay']);
+});
+
 // Public reference data
 Route::get('/positions', [PositionController::class, 'index']);
 Route::get('/locations', [LocationController::class, 'index']);
+Route::get('/payment-methods', [\App\Http\Controllers\Api\PaymentController::class, 'availableMethods']);
+
+// Webhooks (no auth required, verified by signature)
+Route::prefix('webhooks')->group(function () {
+    Route::post('/stripe', [\App\Http\Controllers\Api\StripeWebhookController::class, 'handle']);
+});
 
 // Time slots
 Route::get('/timeslots', [TimeSlotController::class, 'index']);
@@ -519,15 +573,40 @@ Route::prefix('admin')
         Route::get('{payment}', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'show']);
         Route::get('{payment}/audit-log', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'auditLog']);
         Route::get('revenue/chart', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'revenueChart']);
+        
+        // Payment Health & Monitoring (Sprint P9)
+        Route::get('health', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'status']);
+        Route::get('metrics', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'metrics']);
+        Route::get('integrity-check', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'integrityCheck']);
+        Route::get('stuck', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'stuckPayments']);
+        Route::get('reconciliation', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'reconciliation']);
+        
+        // Payment Analytics (Sprint P10)
+        Route::prefix('analytics')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'index']);
+            Route::get('revenue', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'revenue']);
+            Route::get('methods', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'methods']);
+            Route::get('success-rate', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'successRate']);
+            Route::get('peaks', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'peaks']);
+            Route::get('refunds', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'refunds']);
+            Route::get('top-customers', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'topCustomers']);
+            Route::get('report', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'report']);
+        });
     });
     
-    // Refund Management
+    // Refund Management (Sprint P6)
     Route::prefix('refunds')->group(function () {
-        Route::get('stats', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'refundStats']);
-        Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'refunds']);
-        Route::post('{refund}/approve', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'approveRefund']);
-        Route::post('{refund}/reject', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'rejectRefund']);
+        Route::get('stats', [\App\Http\Controllers\Api\Admin\RefundController::class, 'stats']);
+        Route::get('/', [\App\Http\Controllers\Api\Admin\RefundController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\Admin\RefundController::class, 'store']);
+        Route::get('{refund}', [\App\Http\Controllers\Api\Admin\RefundController::class, 'show']);
+        Route::post('{refund}/approve', [\App\Http\Controllers\Api\Admin\RefundController::class, 'approve']);
+        Route::post('{refund}/reject', [\App\Http\Controllers\Api\Admin\RefundController::class, 'reject']);
+        Route::post('{refund}/process', [\App\Http\Controllers\Api\Admin\RefundController::class, 'process']);
     });
+    
+    // Payment refund history endpoint
+    Route::get('payments/{payment}/refunds', [\App\Http\Controllers\Api\Admin\RefundController::class, 'paymentRefunds']);
     
     // Settlement Management
     Route::prefix('settlements')->group(function () {
@@ -535,6 +614,15 @@ Route::prefix('admin')
         Route::post('{settlement}/reconcile', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'reconcileSettlement']);
     });
 });
+
+
+// Kitchen Display System Routes
+Route::prefix('kitchen')
+    // ->middleware(['auth:sanctum']) // Uncomment to enforce auth
+    ->group(function () {
+        Route::get('orders', [\App\Http\Controllers\Api\KitchenController::class, 'index']);
+        Route::put('orders/{order}/status', [\App\Http\Controllers\Api\KitchenController::class, 'updateStatus']);
+    });
 
 // In-store operations for staff (Employee)
 Route::prefix('employee')
@@ -556,6 +644,12 @@ Route::prefix('employee')
     Route::get('time-off-requests', [EmployeeTimeOffController::class, 'index']);
     Route::post('time-off-requests', [EmployeeTimeOffController::class, 'store']);
     Route::delete('time-off-requests/{id}', [EmployeeTimeOffController::class, 'destroy']);
+    
+    // Cash Payment Management
+    Route::get('payments/pending-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'pendingCashPayments']);
+    Route::post('payments/{payment}/confirm-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'confirmCashPayment']);
+    Route::post('payments/{payment}/reject-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'rejectCashPayment']);
+    Route::get('payments/cash-stats', [\App\Http\Controllers\Api\CashPaymentController::class, 'cashStats']);
 });
 
 // Customer Dashboard Routes - MOVED TO WEB.PHP to share session state

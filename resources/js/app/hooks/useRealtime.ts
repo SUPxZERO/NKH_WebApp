@@ -18,6 +18,7 @@ export function useOrderUpdates() {
       qc.invalidateQueries({ queryKey: ['admin.dashboard'] });
       qc.invalidateQueries({ queryKey: ['admin.orders'] });
       qc.invalidateQueries({ queryKey: ['employee.orders'] });
+      qc.invalidateQueries({ queryKey: ['kitchen.orders'] });
 
       toastInfo(`Order #${e.order.id} status: ${e.order.status}`);
     });
@@ -25,6 +26,7 @@ export function useOrderUpdates() {
     channel.listen('NewOrderPlaced', (e: any) => {
       qc.invalidateQueries({ queryKey: ['admin.dashboard'] });
       qc.invalidateQueries({ queryKey: ['employee.orders'] });
+      qc.invalidateQueries({ queryKey: ['kitchen.orders'] });
 
       toastInfo(`New order #${e.order.id} received!`);
     });

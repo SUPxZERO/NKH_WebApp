@@ -23,6 +23,10 @@ class Payment extends Model
         'invoice_id',
         'payment_method_id',
         'amount',
+        'cash_received',
+        'change_given',
+        'confirmed_by',
+        'confirmed_at',
         'currency',
         'exchange_rate',
         'amount_in_base_currency',
@@ -45,10 +49,13 @@ class Payment extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'cash_received' => 'decimal:2',
+        'change_given' => 'decimal:2',
         'exchange_rate' => 'decimal:4',
         'amount_in_base_currency' => 'decimal:2',
         'initiated_at' => 'datetime',
         'processed_at' => 'datetime',
+        'confirmed_at' => 'datetime',
         'expires_at' => 'datetime',
         'metadata' => 'array',
         'retry_count' => 'integer',
@@ -93,6 +100,11 @@ class Payment extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function confirmedBy()
+    {
+        return $this->belongsTo(User::class, 'confirmed_by');
     }
 
     public function refunds()

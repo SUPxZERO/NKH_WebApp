@@ -127,6 +127,15 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Payment-specific logging channel for monitoring and compliance
+        'payment' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/payments.log'),
+            'level' => env('PAYMENT_LOG_LEVEL', 'info'),
+            'days' => 90, // Keep payment logs for 90 days
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

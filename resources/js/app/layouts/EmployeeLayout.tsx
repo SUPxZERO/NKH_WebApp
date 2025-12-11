@@ -7,6 +7,8 @@ import {
   ChefHat,    // For Kitchen/Order Prep
   CalendarDays, // For Schedule/Shifts
   Settings,   // Standard
+  Truck,      // For Delivery/Pickup
+  Banknote,   // For Cash Payments
 
   // Other necessary icons
   ShoppingBag, Users, Utensils, Calendar,
@@ -23,10 +25,16 @@ const navigation = [
   // 2. Kitchen/Order Mgmt: Changed from Utensils to ChefHat (focus on preparation/role)
   { name: 'Kitchen', href: '/employee/kitchen', icon: ChefHat },
 
-  // 3. Schedule: Changed from Calendar to CalendarDays (focus on daily shifts)
+  // 3. Delivery/Pickup
+  { name: 'Delivery', href: '/employee/delivery-orders', icon: Truck },
+
+  // 4. Cash Payments
+  { name: 'Payments', href: '/employee/cash-payments', icon: Banknote },
+
+  // 5. Schedule: Changed from Calendar to CalendarDays (focus on daily shifts)
   { name: 'Schedule', href: '/employee/schedule', icon: CalendarDays },
 
-  // 4. Settings: Kept as Settings (Universal icon)
+  // 6. Settings: Kept as Settings (Universal icon)
   { name: 'Settings', href: '/employee/settings', icon: Settings },
 ];
 

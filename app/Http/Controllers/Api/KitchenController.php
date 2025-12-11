@@ -5,80 +5,94 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class KitchenController extends Controller
 {
     /**
-     * Get orders for kitchen display
-     * Only shows orders that need kitchen attention
+     * Get active orders for the Kitchen Display System (KDS).
+     * Returns orders with pending, received, preparing, or ready status.
      */
-    public function orders(Request $request)
+    public function index(): JsonResponse
     {
-        // Get orders that are NOT completed or cancelled
-        $orders = Order::with(['items.menuItem.translations', 'table'])
-            ->whereIn('status', ['pending', 'received', 'preparing', 'ready'])
-            ->whereIn('type', ['dine-in', 'pickup', 'delivery'])
-            ->orderByRaw("FIELD(status, 'pending', 'received', 'preparing', 'ready')")
-            ->orderBy('created_at', 'asc')
-            ->get();
+        try {
+            // statuses to fetch
+            $statuses = ['pending', 'received', 'preparing', 'ready'];
 
-        $kitchenOrders = $orders->map(function ($order) {
-            return [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'table_number' => $order->table?->number,
-                'type' => $order->type,
-                'status' => $order->status,
-                'items' => $order->items->map(function ($item) {
-                    $translation = $item->menuItem->translations->firstWhere('locale', app()->getLocale())
-                        ?? $item->menuItem->translations->first();
+            $orders = Order::with(['items.menuItem', 'table'])
+                ->whereIn('status', $statuses)
+                ->orderBy('created_at', 'asc') // Oldest first for kitchen
+                ->get();
 
-                    return [
-                        'id' => $item->id,
-                        'name' => $translation ? $translation->name : $item->menuItem->slug,
-                        'quantity' => $item->quantity,
-                        'notes' => $item->notes,
-                    ];
-                }),
-                'created_at' => $order->created_at->toISOString(),
-                'notes' => $order->notes,
-            ];
-        });
+            $formattedOrders = $orders->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'table_number' => $order->table ? $order->table->table_number : null,
+                    'type' => $order->order_type ?? 'dine-in', // Default to dine-in if null
+                    'status' => $order->status,
+                    'created_at' => $order->created_at->toIso8601String(),
+                    'notes' => $order->special_instructions,
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'name' => $item->menuItem ? $item->menuItem->name : 'Unknown Item',
+                            'quantity' => $item->quantity,
+                            'notes' => $item->special_instructions,
+                        ];
+                    }),
+                ];
+            });
 
-        return response()->json([
-            'data' => $kitchenOrders
-        ]);
+            return response()->json([
+                'data' => $formattedOrders
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Kitchen API Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch kitchen orders', 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
-     * Update order status from kitchen
+     * Update the status of an order.
      */
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, Order $order): JsonResponse
     {
-        $validated = $request->validate([
-            'status' => 'required|in:received,preparing,ready,completed',
-        ]);
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string|in:preparing,ready,completed,cancelled'
+            ]);
 
-        $order = Order::findOrFail($id);
-        $order->status = $validated['status'];
-        
-        // Update preparation_status based on status
-        if ($validated['status'] === 'preparing') {
-            $order->preparation_status = 'in_progress';
-        } elseif ($validated['status'] === 'ready') {
-            $order->preparation_status = 'completed';
+            $newStatus = $validated['status'];
+            $oldStatus = $order->status;
+
+            // Update order status
+            $order->update([
+                'status' => $newStatus,
+                'updated_at' => now(), // Touch timestamp
+            ]);
+
+            // If completed, we might want to record completion time or perform other actions
+            // But for now, simple status update is sufficient for KDS
+
+            // Log transition
+            Log::info("Order #{$order->order_number} status updated from {$oldStatus} to {$newStatus} by Kitchen");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order status updated successfully',
+                'data' => [
+                    'id' => $order->id,
+                    'status' => $newStatus
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Kitchen Update Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to update status'], 500);
         }
-
-        $order->save();
-
-        return response()->json([
-            'message' => 'Order status updated successfully',
-            'data' => [
-                'id' => $order->id,
-                'status' => $order->status,
-                'preparation_status' => $order->preparation_status,
-            ]
-        ]);
     }
 }

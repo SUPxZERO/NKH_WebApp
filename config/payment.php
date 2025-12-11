@@ -3,128 +3,153 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Payment Gateway Configuration
+    | KHQR Configuration (General)
     |--------------------------------------------------------------------------
     |
-    | This file contains all configuration for payment processing.
+    | Standard KHQR settings used across all Bakong-compatible payment methods.
     |
-    */
-
-    // Payment expiry time in minutes
-    'expiry_minutes' => env('PAYMENT_EXPIRY_MINUTES', 15),
-
-    // Maximum retry attempts for failed payments
-    'max_retries' => env('PAYMENT_MAX_RETRIES', 3),
-
-    // Default currency
-    'default_currency' => env('PAYMENT_DEFAULT_CURRENCY', 'USD'),
-
-    // Supported currencies
-    'supported_currencies' => ['USD', 'KHR'],
-
-    // Exchange rate (KHR per USD)
-    'exchange_rate' => env('PAYMENT_EXCHANGE_RATE', 4100),
-
-    /*
-    |--------------------------------------------------------------------------
-    | QRKH Configuration (Cambodia QR Standard)
-    |--------------------------------------------------------------------------
     */
     'qrkh' => [
-        'enabled' => env('QRKH_ENABLED', true),
-        'merchant_id' => env('QRKH_MERCHANT_ID', 'NKH001'),
-        'merchant_name' => env('QRKH_MERCHANT_NAME', 'NKH Restaurant'),
-        'merchant_city' => env('QRKH_MERCHANT_CITY', 'Phnom Penh'),
-        'merchant_category_code' => '5812', // Restaurant/Eating places
+        'merchant_id' => env('KHQR_MERCHANT_ID', 'NKH001'),
+        'merchant_name' => env('KHQR_MERCHANT_NAME', 'NKH Restaurant'),
+        'merchant_city' => env('KHQR_MERCHANT_CITY', 'Phnom Penh'),
+        'category_code' => env('KHQR_CATEGORY_CODE', '5812'), // Restaurant/Eating Places
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | ABA Bank Configuration
+    | Bakong API Configuration
     |--------------------------------------------------------------------------
-    */
-    'aba' => [
-        'enabled' => env('ABA_ENABLED', false),
-        'merchant_id' => env('ABA_MERCHANT_ID', ''),
-        'api_key' => env('ABA_API_KEY', ''),
-        'api_secret' => env('ABA_API_SECRET', ''),
-        'api_url' => env('ABA_API_URL', 'https://api.payway.com.kh'),
-        'sandbox_mode' => env('ABA_SANDBOX_MODE', true),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Bakong API Configuration (NBC)
-    |--------------------------------------------------------------------------
+    |
+    | National Bank of Cambodia's Bakong API for KHQR payment notifications.
+    | Register at: https://bakong.nbc.gov.kh/merchant
+    |
     */
     'bakong' => [
         'enabled' => env('BAKONG_ENABLED', false),
-        'api_url' => env('BAKONG_API_URL', 'https://sit-api-bakong.nbc.gov.kh'),
-        'token' => env('BAKONG_TOKEN', ''),
-        'email' => env('BAKONG_EMAIL', ''),
-        // Polling configuration for transaction checks
-        'poll_max_attempts' => env('BAKONG_POLL_ATTEMPTS', 30),
-        'poll_interval_seconds' => env('BAKONG_POLL_INTERVAL', 2),
+        'api_url' => env('BAKONG_API_URL', 'https://api.bakong.nbc.gov.kh/v1'),
+        'token' => env('BAKONG_TOKEN'),
+        'email' => env('BAKONG_EMAIL'),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Webhook Security
+    | ABA Pay Configuration
+    |--------------------------------------------------------------------------
+    |
+    | ABA Bank merchant settings. Contact ABA Bank for merchant registration.
+    | Website: https://www.ababank.com/merchant
+    |
+    */
+    'aba' => [
+        'merchant_id' => env('ABA_MERCHANT_ID'),
+        'merchant_name' => env('ABA_MERCHANT_NAME', 'NKH Restaurant'),
+        'merchant_city' => env('ABA_MERCHANT_CITY', 'Phnom Penh'),
+        'api_url' => env('ABA_API_URL', 'https://checkout.payway.com.kh/api'),
+        'api_key' => env('ABA_API_KEY'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Wing Money Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Wing (Cambodia) Limited merchant settings.
+    | Website: https://www.wingmoney.com/merchant
+    |
+    */
+    'wing' => [
+        'merchant_id' => env('WING_MERCHANT_ID'),
+        'merchant_name' => env('WING_MERCHANT_NAME', 'NKH Restaurant'),
+        'merchant_city' => env('WING_MERCHANT_CITY', 'Phnom Penh'),
+        'api_url' => env('WING_API_URL'),
+        'api_key' => env('WING_API_KEY'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | General Payment Settings
     |--------------------------------------------------------------------------
     */
-    'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET', ''),
+    'default_currency' => env('PAYMENT_DEFAULT_CURRENCY', 'USD'),
+    'supported_currencies' => ['USD', 'KHR'],
+    'khr_exchange_rate' => env('PAYMENT_KHR_EXCHANGE_RATE', 4100), // USD to KHR
     
-    // IP addresses allowed to send webhooks (empty = allow all in development)
-    'webhook_allowed_ips' => array_filter(explode(',', env('PAYMENT_WEBHOOK_IPS', ''))),
+    // QR Code expiration in minutes
+    'qr_expiration_minutes' => env('PAYMENT_QR_EXPIRATION_MINUTES', 15),
+    
+    // Webhook secret for verifying payment callbacks
+    'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET'),
+
+    // Tax rate for receipts (percentage)
+    'tax_rate' => env('PAYMENT_TAX_RATE', 10),
 
     /*
     |--------------------------------------------------------------------------
-    | Fraud Prevention
+    | Receipt Configuration
     |--------------------------------------------------------------------------
+    |
+    | Settings for receipt generation and email.
+    |
     */
-    'fraud' => [
-        // Max orders per customer in 10 minutes
-        'velocity_limit' => env('FRAUD_VELOCITY_LIMIT', 5),
+    'receipt' => [
+        'address' => env('RECEIPT_ADDRESS', 'Phnom Penh, Cambodia'),
+        'phone' => env('RECEIPT_PHONE', ''),
+        'thank_you' => env('RECEIPT_THANK_YOU', 'Thank you for dining with us!'),
+        'footer' => env('RECEIPT_FOOTER', 'Please come again'),
         
-        // Amount threshold requiring additional verification (USD)
-        'high_value_threshold' => env('FRAUD_HIGH_VALUE_THRESHOLD', 500),
-        
-        // Maximum failed payment attempts before temporary block
-        'max_failed_attempts' => env('FRAUD_MAX_FAILED_ATTEMPTS', 3),
-        
-        // Block duration in minutes
-        'block_duration' => env('FRAUD_BLOCK_DURATION', 30),
-        
-        // Fraud score threshold (0-100, higher = more risk)
-        'score_threshold' => env('FRAUD_SCORE_THRESHOLD', 50),
+        // Auto-send email receipt on payment complete
+        'auto_email' => env('RECEIPT_AUTO_EMAIL', false),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Daily Settlement
+    | Rate Limiting Configuration
     |--------------------------------------------------------------------------
+    |
+    | Rate limits for different payment operations (attempts per decay window).
+    |
     */
-    'settlement' => [
-        // Time to run daily settlement job (in 24h format)
-        'time' => env('SETTLEMENT_TIME', '23:59'),
-        
-        // Auto-close settlements after X days
-        'auto_close_days' => env('SETTLEMENT_AUTO_CLOSE_DAYS', 7),
+    'rate_limits' => [
+        'initiate' => ['attempts' => 10, 'decay' => 60],     // 10 per minute
+        'status' => ['attempts' => 60, 'decay' => 60],       // 60 per minute
+        'webhook' => ['attempts' => 100, 'decay' => 60],     // 100 per minute
+        'refund' => ['attempts' => 5, 'decay' => 60],        // 5 per minute
+        'receipt' => ['attempts' => 30, 'decay' => 60],      // 30 per minute
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Notification Settings
+    | Monitoring Configuration
     |--------------------------------------------------------------------------
+    |
+    | Settings for payment monitoring and alerting.
+    |
     */
-    'notifications' => [
-        // Email notifications for payments
-        'email_enabled' => env('PAYMENT_EMAIL_NOTIFICATIONS', true),
+    'monitoring' => [
+        // Failure rate threshold to trigger alerts (percentage)
+        'failure_threshold' => env('PAYMENT_FAILURE_THRESHOLD', 10),
         
-        // Admin email for payment alerts
-        'admin_email' => env('PAYMENT_ADMIN_EMAIL', ''),
+        // Minimum payments before monitoring kicks in
+        'min_payments_for_alert' => 10,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Security Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Security settings for payment processing.
+    |
+    */
+    'security' => [
+        // Enforce webhook signature verification (auto-enabled in production)
+        'enforce_webhook_verification' => env('PAYMENT_ENFORCE_WEBHOOK_VERIFICATION', false),
         
-        // Alert threshold for failed payments
-        'failed_payment_alert_threshold' => env('PAYMENT_FAILED_ALERT_THRESHOLD', 10),
+        // Enable idempotency key checking
+        'idempotency_enabled' => env('PAYMENT_IDEMPOTENCY_ENABLED', true),
+        
+        // Max payment age before considered suspicious (hours)
+        'max_pending_age_hours' => 24,
     ],
 ];

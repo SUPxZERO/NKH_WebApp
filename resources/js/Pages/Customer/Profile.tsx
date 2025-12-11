@@ -292,6 +292,7 @@ export default function Profile() {
                                 name={profile?.user?.name || ''}
                                 currentAvatar={profile?.user?.avatar}
                                 size="xl"
+                                onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['customer', 'profile'] })}
                             />
                         </div>
 

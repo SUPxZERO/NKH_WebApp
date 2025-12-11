@@ -16,6 +16,8 @@ import {
     Flame,
     Bell,
 } from 'lucide-react';
+import { useOrderUpdates } from '@/app/hooks/useRealtime';
+
 
 interface KitchenOrder {
     id: number;
@@ -35,7 +37,9 @@ interface KitchenOrder {
 
 export default function KitchenDisplay() {
     const [soundEnabled, setSoundEnabled] = useState(true);
+    useOrderUpdates();
     const qc = useQueryClient();
+
 
     // Fetch orders every 5 seconds
     const { data: orders, isLoading } = useQuery<{ data: KitchenOrder[] }>({

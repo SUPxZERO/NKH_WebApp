@@ -7,6 +7,13 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentAuditLog;
 use App\Models\PaymentMethod;
+use App\Services\Payment\PaymentStrategyInterface;
+use App\Services\Payment\Strategies\QrPaymentStrategy;
+use App\Services\Payment\Strategies\CashPaymentStrategy;
+use App\Services\Payment\Strategies\CardPaymentStrategy;
+use App\Services\Payment\Strategies\StripePaymentStrategy;
+use App\Services\Payment\Strategies\AbaPaymentStrategy;
+use App\Services\Payment\Strategies\WingPaymentStrategy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -14,23 +21,45 @@ use Illuminate\Support\Facades\Cache;
 class PaymentService
 {
     protected PaymentReferenceGenerator $referenceGenerator;
-    protected QrCodeGenerator $qrGenerator;
     protected InvoiceService $invoiceService;
     protected FraudDetectionService $fraudDetection;
+    protected LoyaltyService $loyaltyService;
+
+    // Strategy cache
+    protected array $strategies = [];
 
     public function __construct(
         PaymentReferenceGenerator $referenceGenerator,
-        QrCodeGenerator $qrGenerator,
         InvoiceService $invoiceService,
-
         FraudDetectionService $fraudDetection,
-        protected LoyaltyService $loyaltyService
+        LoyaltyService $loyaltyService
     ) {
         $this->referenceGenerator = $referenceGenerator;
-        $this->qrGenerator = $qrGenerator;
         $this->invoiceService = $invoiceService;
         $this->fraudDetection = $fraudDetection;
         $this->loyaltyService = $loyaltyService;
+    }
+
+    /**
+     * Get the strategy for a specific payment method code.
+     */
+    protected function getStrategy(string $code): PaymentStrategyInterface
+    {
+        if (isset($this->strategies[$code])) {
+            return $this->strategies[$code];
+        }
+
+        $strategy = match ($code) {
+            'qr' => app(QrPaymentStrategy::class),
+            'cash' => app(CashPaymentStrategy::class),
+            'card' => config('services.stripe.secret') ? app(StripePaymentStrategy::class) : app(CardPaymentStrategy::class),
+            'aba_pay' => app(AbaPaymentStrategy::class),
+            'wing' => app(WingPaymentStrategy::class),
+            default => throw new \Exception("Payment strategy for '{$code}' not implemented"),
+        };
+
+        $this->strategies[$code] = $strategy;
+        return $strategy;
     }
 
     /**
@@ -51,7 +80,18 @@ class PaymentService
                 ->first();
 
             if (!$paymentMethod) {
-                throw new \Exception("Payment method '{$paymentMethodCode}' not available");
+                // Fallback: If 'qr' was requested but not found, try to auto-create generic QR method
+                if ($paymentMethodCode === 'qr') {
+                    $paymentMethod = PaymentMethod::create([
+                        'name' => 'KHQR',
+                        'code' => 'qr',
+                        'type' => 'digital_wallet',
+                        'is_active' => true,
+                        'display_order' => 1
+                    ]);
+                } else {
+                    throw new \Exception("Payment method '{$paymentMethodCode}' not available or inactive");
+                }
             }
 
             // Check for duplicate pending payment
@@ -61,7 +101,13 @@ class PaymentService
                 ->first();
 
             if ($existingPayment) {
-                return $this->formatPaymentResponse($existingPayment, $order);
+                 // Check if existing payment method matches requested
+                if ($existingPayment->paymentMethod->code === $paymentMethodCode) {
+                    return $this->formatPaymentResponse($existingPayment, $order);
+                }
+                 // If different method, cancel old one (or just let user create new one)
+                 // For now, let's create a new one if user explicitly switches method
+                 $existingPayment->markAsCancelled();
             }
 
             // Generate references
@@ -109,7 +155,11 @@ class PaymentService
                 'fraud_score' => $fraudCheck['score'],
             ]);
 
-            return $this->formatPaymentResponse($payment, $order);
+            // Delegate initiation logic to strategy
+            $strategy = $this->getStrategy($paymentMethodCode);
+            $strategy->initiate($order, $payment);
+
+            return $strategy->formatResponse($payment, $order);
         });
     }
 
@@ -119,30 +169,24 @@ class PaymentService
     public function getPaymentStatus(Payment $payment): array
     {
         $payment->load(['invoice.order', 'paymentMethod']);
-        
-        $response = [
-            'payment_id' => $payment->id,
-            'uuid' => $payment->uuid,
-            'status' => $payment->status,
-            'amount' => (float) $payment->amount,
-            'currency' => $payment->currency,
-            'reference_number' => $payment->reference_number,
-            'transaction_id' => $payment->transaction_id,
-            'created_at' => $payment->created_at->toIso8601String(),
-            'expires_at' => $payment->expires_at?->toIso8601String(),
-            'is_expired' => $payment->isExpired(),
-        ];
+        $order = $payment->invoice->order;
+        $methodCode = $payment->paymentMethod->code ?? 'qr';
 
-        if ($payment->isCompleted()) {
-            $response['processed_at'] = $payment->processed_at?->toIso8601String();
+        try {
+            $strategy = $this->getStrategy($methodCode);
+            return $strategy->formatResponse($payment, $order);
+        } catch (\Exception $e) {
+            // Fallback generic response if strategy fails
+             return [
+                'success' => true,
+                'payment' => [
+                    'id' => $payment->id,
+                    'status' => $payment->status,
+                    'amount' => (float) $payment->amount,
+                ],
+                'error' => 'Could not format full response: ' . $e->getMessage()
+            ];
         }
-
-        if ($payment->isFailed()) {
-            $response['failure_reason'] = $payment->failure_reason;
-            $response['can_retry'] = $payment->canRetry();
-        }
-
-        return $response;
     }
 
     /**
@@ -272,33 +316,9 @@ class PaymentService
 
     private function formatPaymentResponse(Payment $payment, Order $order): array
     {
-        $qrData = $this->qrGenerator->generateQrkhData($payment, $order);
-        
-        return [
-            'success' => true,
-            'payment' => [
-                'id' => $payment->id,
-                'uuid' => $payment->uuid,
-                'status' => $payment->status,
-                'amount' => (float) $payment->amount,
-                'currency' => $payment->currency,
-                'reference_number' => $payment->reference_number,
-                'transaction_id' => $payment->transaction_id,
-                'expires_at' => $payment->expires_at?->toIso8601String(),
-                'expires_in_seconds' => $payment->expires_at ? now()->diffInSeconds($payment->expires_at, false) : null,
-            ],
-            'qr_code' => [
-                'data' => $qrData['qr_data'],
-                'reference' => $qrData['qr_reference'],
-                'image_svg' => $this->qrGenerator->generateSvg($qrData['qr_data']),
-                'image_base64' => $this->qrGenerator->generateBase64($qrData['qr_data']),
-            ],
-            'order' => [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'total' => (float) $order->total_amount,
-            ],
-        ];
+        // Wrapper to call the strategy's formatter, ensuring consistent interface usage
+        $strategy = $this->getStrategy($payment->paymentMethod->code ?? 'qr');
+        return $strategy->formatResponse($payment, $order);
     }
 
     private function findPaymentByWebhook(array $webhookData): ?Payment

@@ -22,22 +22,19 @@ Route::middleware(['auth', 'role:Customer'])->group(function () {
         Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
         Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
         Route::get('/payment', fn() => Inertia::render('Customer/Payment'))->name('customer.payment');
-        // Route::get('reservation', fn() => Inertia::render('Customer/Reservation'))->name('customer.reservation');
+        Route::get('reservation', fn() => Inertia::render('Customer/Reservation'))->name('customer.reservation');
     });
 
-// Route::get('/dashboard', fn () => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
-// Route::get('/menu', fn () => Inertia::render('Customer/Menu'))->name('customer.menu');
-// Route::get('/cart', fn () => Inertia::render('Customer/Cart'))->name('customer.cart');
-// Route::get('/checkout', fn () => Inertia::render('Customer/Checkout'))->name('customer.checkout');
-// Route::get('/orders/{order}', fn () => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
-// Route::get('/track/{orderId}', fn () => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
-
 // Employee routes
-Route::prefix('employee')->middleware(['auth', 'role:employee'])->group(function () {
-    Route::get('pos', fn() => Inertia::render('Employee/POS'))->name('employee.pos');
-    Route::get('schedule', fn() => Inertia::render('Employee/Schedule'))->name('employee.schedule');
-    Route::get('kitchen', fn() => Inertia::render('Employee/KitchenDisplay'))->name('employee.kitchen');
-});
+Route::prefix('employee')
+    // ->middleware(['auth', 'role:employee,admin,manager'])
+    ->group(function () {
+        Route::get('pos', fn() => Inertia::render('Employee/POS'))->name('employee.pos');
+        Route::get('cash-payments', fn() => Inertia::render('Employee/CashPayments'))->name('employee.cash-payments');
+        Route::get('delivery-orders', fn() => Inertia::render('Employee/DeliveryOrders'))->name('employee.delivery-orders');
+        Route::get('schedule', fn() => Inertia::render('Employee/Schedule'))->name('employee.schedule');
+        Route::get('kitchen', fn() => Inertia::render('Employee/KitchenDisplay'))->name('employee.kitchen');
+    });
 
 // Admin routes
 Route::prefix('admin')
@@ -109,6 +106,7 @@ Route::prefix('admin')
 Route::prefix('customer')->middleware('auth')->group(function () {
     Route::get('/profile', fn() => Inertia::render('Customer/Profile'))->name('customer.profile');
     Route::get('/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');
+    Route::get('/orders/{orderId}', fn($orderId) => Inertia::render('Customer/OrderDetails', ['orderId' => $orderId]))->name('customer.orders.show');
     Route::get('/loyalty', fn() => Inertia::render('Customer/Loyalty'))->name('customer.loyalty');
     Route::get('/reservations', fn() => Inertia::render('Customer/Reservations'))->name('customer.reservations');
     Route::get('/feedback', fn() => Inertia::render('Customer/Feedback'))->name('customer.feedback');
@@ -131,6 +129,7 @@ Route::prefix('api/customer')->middleware('auth')->group(function () {
     Route::put('profile', [App\Http\Controllers\Api\CustomerController::class, 'updateProfile']);
     Route::get('dashboard/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'dashboardStats']);
     Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
+    Route::get('orders/{order}', [App\Http\Controllers\Api\CustomerDashboardController::class, 'show']);
     Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);
     Route::post('favorites/toggle', [App\Http\Controllers\Api\CustomerDashboardController::class, 'toggleFavorite']);
     Route::get('favorites/ids', [App\Http\Controllers\Api\CustomerDashboardController::class, 'getExplicitFavorites']);

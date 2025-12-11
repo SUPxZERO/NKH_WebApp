@@ -20,6 +20,7 @@ class StoreOnlineOrderRequest extends FormRequest
             'slot_time' => ['required_without:time_slot_id','date_format:H:i,H:i:s'], // Accept both formats
             'notes' => ['nullable','string'],
             'promotion_code' => ['nullable','string'],
+            'payment_mode' => ['nullable', 'string', 'in:pay_now,pay_on_delivery,pay_on_pickup'],
             'order_items' => ['required','array','min:1'],
             'order_items.*.menu_item_id' => ['required','exists:menu_items,id'],
             'order_items.*.quantity' => ['required','integer','min:1'],

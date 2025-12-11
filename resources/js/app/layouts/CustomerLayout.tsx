@@ -16,7 +16,8 @@ import {
   Phone,
   Mail,
   Clock, ClipboardList,
-  LogOut
+  LogOut,
+  Calendar
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import CartIcon from '@/app/components/ui/CartIcon';
@@ -38,6 +39,7 @@ const navigation = [
   { name: 'Order', href: '/customer/orders', icon: ClipboardList },
   // { name: 'Favorites', href: '/customer/favorites', icon: Heart },
   // { name: 'Rewards', href: '/customer/rewards', icon: Star },
+  { name: 'Book Table', href: '/reservation', icon: Calendar },
 ];
 
 export default function CustomerLayout({ children, className }: Props) {

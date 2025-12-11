@@ -16,6 +16,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "simplesoftwareio/simple-qrcode": "^4.2",
+        "stripe/stripe-php": "^19.0",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

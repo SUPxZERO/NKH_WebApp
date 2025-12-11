@@ -8,7 +8,7 @@ interface QRPaymentDisplayProps {
     amount: number;
     currency: string;
     expiresAt: string | null;
-    status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+    status?: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | string;
     onExpired?: () => void;
     onRetry?: () => void;
     isDevMode?: boolean;
@@ -22,7 +22,7 @@ export default function QRPaymentDisplay({
     amount,
     currency,
     expiresAt,
-    status,
+    status = 'pending',
     onExpired,
     onRetry,
     isDevMode = false,

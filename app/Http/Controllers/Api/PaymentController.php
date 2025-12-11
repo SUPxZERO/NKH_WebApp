@@ -20,6 +20,47 @@ class PaymentController extends Controller
     }
 
     /**
+     * Get available payment methods.
+     * 
+     * GET /api/payment-methods
+     */
+    public function availableMethods(): JsonResponse
+    {
+        $methods = \App\Models\PaymentMethod::where('is_active', true)
+            ->orderBy('display_order')
+            ->get()
+            ->map(function ($method) {
+                return [
+                    'id' => $method->id,
+                    'code' => $method->code,
+                    'name' => $method->name,
+                    'type' => $method->type,
+                    'description' => $method->description,
+                    'processing_fee' => (float) ($method->processing_fee ?? 0),
+                    'icon' => $this->getPaymentMethodIcon($method->code),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $methods,
+        ]);
+    }
+
+    /**
+     * Get icon identifier for payment method
+     */
+    private function getPaymentMethodIcon(string $code): string
+    {
+        return match ($code) {
+            'qr', 'aba_pay', 'wing' => 'qr-code',
+            'cash' => 'banknotes',
+            'card' => 'credit-card',
+            default => 'currency-dollar',
+        };
+    }
+
+    /**
      * Initiate a payment for an order.
      * 
      * POST /api/payments/initiate
@@ -28,7 +69,7 @@ class PaymentController extends Controller
     {
         $validated = $request->validate([
             'order_id' => 'required|exists:orders,id',
-            'payment_method' => 'nullable|string|in:qr,cash,card',
+            'payment_method' => 'nullable|string|exists:payment_methods,code',
         ]);
 
         try {

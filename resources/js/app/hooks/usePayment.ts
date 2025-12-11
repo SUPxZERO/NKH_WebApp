@@ -3,25 +3,37 @@ import { apiGet, apiPost } from '@/app/utils/api';
 
 // ==================== TYPES ====================
 
+export interface PaymentMethod {
+    id: number;
+    code: string;
+    name: string;
+    type: string;
+    description: string;
+    processing_fee: number;
+    icon: string;
+}
+
 export interface PaymentInitResponse {
     success: boolean;
+    type?: 'qr' | 'cash' | 'card';
     payment: {
         id: number;
         uuid: string;
         status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
         amount: number;
         currency: string;
-        reference_number: string;
-        transaction_id: string;
-        expires_at: string;
-        expires_in_seconds: number | null;
+        reference_number?: string;
+        transaction_id?: string;
+        expires_at?: string;
+        expires_in_seconds?: number | null;
     };
-    qr_code: {
+    qr_code?: {
         data: string;
         reference: string;
         image_svg: string;
         image_base64: string;
     };
+    instructions?: string;
     order: {
         id: number;
         order_number: string;
@@ -46,6 +58,20 @@ export interface PaymentStatus {
 }
 
 // ==================== HOOKS ====================
+
+/**
+ * Fetch available payment methods.
+ */
+export function usePaymentMethods() {
+    return useQuery({
+        queryKey: ['payment-methods'],
+        queryFn: async () => {
+            const response = await apiGet('/api/payment-methods');
+            return (response as { data: PaymentMethod[] }).data;
+        },
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    });
+}
 
 /**
  * Initiate a payment for an order.
@@ -74,8 +100,8 @@ export function usePaymentStatus(paymentId: number | null, options?: { refetchIn
             return (response as { data: PaymentStatus }).data;
         },
         enabled: !!paymentId,
-        refetchInterval: options?.refetchInterval ?? 3000, // Poll every 3 seconds by default
-        refetchIntervalInBackground: true,
+        refetchInterval: options?.refetchInterval, // Use undefined to disable polling
+        refetchIntervalInBackground: !!options?.refetchInterval,
     });
 }
 
@@ -143,3 +169,91 @@ export function useSimulatePaymentFailure() {
         },
     });
 }
+
+// ==================== EMPLOYEE CASH PAYMENT HOOKS ====================
+
+export interface PendingCashPayment {
+    id: number;
+    uuid: string;
+    amount: number;
+    currency: string;
+    reference_number: string;
+    created_at: string;
+    waiting_time: string;
+    order: {
+        id: number;
+        order_number: string;
+        customer_name: string;
+        items_count: number;
+    };
+}
+
+export interface CashPaymentStats {
+    total_confirmed: number;
+    total_amount: number;
+    total_cash_received: number;
+    total_change_given: number;
+    pending_count: number;
+}
+
+/**
+ * Fetch pending cash payments for employee confirmation.
+ */
+export function usePendingCashPayments() {
+    return useQuery({
+        queryKey: ['pending-cash-payments'],
+        queryFn: async () => {
+            const response = await apiGet('/api/employee/payments/pending-cash');
+            return (response as { data: PendingCashPayment[] }).data;
+        },
+        refetchInterval: 5000, // Poll every 5 seconds
+    });
+}
+
+/**
+ * Confirm a cash payment.
+ */
+export function useConfirmCashPayment() {
+    return useMutation({
+        mutationFn: async ({ paymentId, cashReceived, notes }: {
+            paymentId: number;
+            cashReceived: number;
+            notes?: string;
+        }) => {
+            const response = await apiPost(`/api/employee/payments/${paymentId}/confirm-cash`, {
+                cash_received: cashReceived,
+                notes,
+            });
+            return response;
+        },
+    });
+}
+
+/**
+ * Reject a cash payment.
+ */
+export function useRejectCashPayment() {
+    return useMutation({
+        mutationFn: async ({ paymentId, reason }: { paymentId: number; reason: string }) => {
+            const response = await apiPost(`/api/employee/payments/${paymentId}/reject-cash`, {
+                reason,
+            });
+            return response;
+        },
+    });
+}
+
+/**
+ * Get cash payment statistics for the current employee.
+ */
+export function useCashPaymentStats() {
+    return useQuery({
+        queryKey: ['cash-payment-stats'],
+        queryFn: async () => {
+            const response = await apiGet('/api/employee/payments/cash-stats');
+            return (response as { data: CashPaymentStats }).data;
+        },
+        refetchInterval: 30000, // Refresh every 30 seconds
+    });
+}
+

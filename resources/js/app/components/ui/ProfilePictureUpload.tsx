@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import { Camera, X, Loader2, Trash2 } from 'lucide-react';
 import { apiPost, apiDelete } from '@/app/libs/apiClient';
@@ -29,6 +29,10 @@ export default function ProfilePictureUpload({
     const [isDeleting, setIsDeleting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(currentAvatar || null);
+
+    useEffect(() => {
+        setPreviewUrl(currentAvatar || null);
+    }, [currentAvatar]);
 
     const sizeClasses = {
         sm: 'w-10 h-10',

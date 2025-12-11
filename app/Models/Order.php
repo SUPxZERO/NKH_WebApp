@@ -14,6 +14,18 @@ class Order extends Model
     const APPROVAL_STATUS_APPROVED = 'approved';
     const APPROVAL_STATUS_REJECTED = 'rejected';
 
+    // Payment modes
+    const PAYMENT_MODE_PAY_NOW = 'pay_now';
+    const PAYMENT_MODE_PAY_ON_DELIVERY = 'pay_on_delivery';
+    const PAYMENT_MODE_PAY_ON_PICKUP = 'pay_on_pickup';
+    const PAYMENT_MODE_PAY_AT_COUNTER = 'pay_at_counter';
+
+    // Payment statuses
+    const PAYMENT_STATUS_UNPAID = 'unpaid';
+    const PAYMENT_STATUS_PAID = 'paid';
+    const PAYMENT_STATUS_PARTIAL = 'partial';
+    const PAYMENT_STATUS_REFUNDED = 'refunded';
+
     // Removed is_customer_request accessor - no longer needed
 
     protected $fillable = [
@@ -25,6 +37,10 @@ class Order extends Model
         'order_type',
         'status',
         'payment_status',
+        'payment_mode',
+        'payment_collected_by',
+        'payment_collected_at',
+        'payment_collection_notes',
         'subtotal',
         'tax_amount',
         'discount_amount',
@@ -62,6 +78,7 @@ class Order extends Model
         'completed_at' => 'datetime',
         'estimated_ready_time' => 'datetime',
         'is_auto_approved' => 'boolean',
+        'payment_collected_at' => 'datetime',
     ];
 
     public function location()
@@ -181,5 +198,102 @@ class Order extends Model
             'approval_status' => self::APPROVAL_STATUS_REJECTED,
             'rejection_reason' => $reason,
         ]);
+    }
+
+    // ==================== PAYMENT HELPERS ====================
+
+    /**
+     * Check if order is paid
+     */
+    public function isPaid(): bool
+    {
+        return $this->payment_status === self::PAYMENT_STATUS_PAID;
+    }
+
+    /**
+     * Check if order is unpaid
+     */
+    public function isUnpaid(): bool
+    {
+        return $this->payment_status === self::PAYMENT_STATUS_UNPAID;
+    }
+
+    /**
+     * Check if order is partially paid
+     */
+    public function isPartiallyPaid(): bool
+    {
+        return $this->payment_status === self::PAYMENT_STATUS_PARTIAL;
+    }
+
+    /**
+     * Check if payment is required on delivery
+     */
+    public function isPayOnDelivery(): bool
+    {
+        return $this->payment_mode === self::PAYMENT_MODE_PAY_ON_DELIVERY;
+    }
+
+    /**
+     * Check if payment is required on pickup
+     */
+    public function isPayOnPickup(): bool
+    {
+        return $this->payment_mode === self::PAYMENT_MODE_PAY_ON_PICKUP;
+    }
+
+    /**
+     * Check if payment needs to be collected (on delivery/pickup and not yet paid)
+     */
+    public function needsPaymentCollection(): bool
+    {
+        return in_array($this->payment_mode, [
+            self::PAYMENT_MODE_PAY_ON_DELIVERY,
+            self::PAYMENT_MODE_PAY_ON_PICKUP,
+            self::PAYMENT_MODE_PAY_AT_COUNTER,
+        ]) && !$this->isPaid();
+    }
+
+    /**
+     * Mark payment as collected (by delivery/staff)
+     */
+    public function collectPayment(int $userId, ?string $notes = null): bool
+    {
+        return $this->update([
+            'payment_status' => self::PAYMENT_STATUS_PAID,
+            'payment_collected_by' => $userId,
+            'payment_collected_at' => now(),
+            'payment_collection_notes' => $notes,
+        ]);
+    }
+
+    /**
+     * User who collected the payment
+     */
+    public function paymentCollector()
+    {
+        return $this->belongsTo(User::class, 'payment_collected_by');
+    }
+
+    /**
+     * Get available payment modes for this order type
+     */
+    public static function getPaymentModesForOrderType(string $orderType): array
+    {
+        return match ($orderType) {
+            'delivery' => [
+                self::PAYMENT_MODE_PAY_NOW,
+                self::PAYMENT_MODE_PAY_ON_DELIVERY,
+            ],
+            'pickup' => [
+                self::PAYMENT_MODE_PAY_NOW,
+                self::PAYMENT_MODE_PAY_ON_PICKUP,
+            ],
+            'dine_in', 'dine-in' => [
+                self::PAYMENT_MODE_PAY_NOW,
+                self::PAYMENT_MODE_PAY_AT_COUNTER,
+            ],
+            default => [self::PAYMENT_MODE_PAY_NOW],
+        };
     }
 }

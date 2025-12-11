@@ -3,74 +3,74 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use App\Models\PaymentMethod;
 
 class PaymentMethodSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $paymentMethods = [
+        // Deactivate old/legacy payment methods that aren't in our main list
+        PaymentMethod::whereNotIn('code', ['qr', 'cash', 'card', 'aba_pay', 'wing', 'pi_pay'])
+            ->update(['is_active' => false]);
+
+        $methods = [
+            [
+                'name' => 'KHQR',
+                'code' => 'qr',
+                'type' => 'digital_wallet',
+                'description' => 'Scan to pay with any KHQR-compatible app',
+                'is_active' => true,
+                'display_order' => 1,
+                'processing_fee' => 0.00,
+            ],
+            [
+                'name' => 'ABA Pay',
+                'code' => 'aba_pay',
+                'type' => 'digital_wallet',
+                'description' => 'Pay directly with ABA Mobile app',
+                'is_active' => true,
+                'display_order' => 2,
+                'processing_fee' => 0.00,
+            ],
+            [
+                'name' => 'Wing Money',
+                'code' => 'wing',
+                'type' => 'digital_wallet',
+                'description' => 'Pay with Wing Money app',
+                'is_active' => true,
+                'display_order' => 3,
+                'processing_fee' => 0.00,
+            ],
+            [
+                'name' => 'Credit/Debit Card',
+                'code' => 'card',
+                'type' => 'card',
+                'description' => 'Pay with Visa or Mastercard',
+                'is_active' => true,
+                'display_order' => 4,
+                'processing_fee' => 2.50, // Card processing fee
+            ],
             [
                 'name' => 'Cash',
-                'code' => 'CASH',
+                'code' => 'cash',
                 'type' => 'cash',
+                'description' => 'Pay with cash at the counter',
                 'is_active' => true,
+                'display_order' => 5,
                 'processing_fee' => 0.00,
-                'description' => 'Cash payment',
-            ],
-            [
-                'name' => 'Credit Card',
-                'code' => 'CREDIT',
-                'type' => 'card',
-                'is_active' => true,
-                'processing_fee' => 2.50,
-                'description' => 'Visa, MasterCard, American Express',
-            ],
-            [
-                'name' => 'Debit Card',
-                'code' => 'DEBIT',
-                'type' => 'card',
-                'is_active' => true,
-                'processing_fee' => 1.50,
-                'description' => 'Bank debit cards',
-            ],
-            [
-                'name' => 'Mobile Payment',
-                'code' => 'MOBILE',
-                'type' => 'digital',
-                'is_active' => true,
-                'processing_fee' => 1.00,
-                'description' => 'ABA Mobile, Wing, Pi Pay',
-            ],
-            [
-                'name' => 'Bank Transfer',
-                'code' => 'TRANSFER',
-                'type' => 'transfer',
-                'is_active' => true,
-                'processing_fee' => 0.50,
-                'description' => 'Direct bank transfer',
-            ],
-            [
-                'name' => 'Gift Card',
-                'code' => 'GIFT',
-                'type' => 'voucher',
-                'is_active' => true,
-                'processing_fee' => 0.00,
-                'description' => 'Restaurant gift cards',
             ],
         ];
 
-        foreach ($paymentMethods as $method) {
+        foreach ($methods as $method) {
             PaymentMethod::updateOrCreate(
-                ['name' => $method['name']], // Unique key
-                [
-                    'code' => $method['code'],
-                    'type' => $method['type'],
-                    'is_active' => $method['is_active'],
-                    'processing_fee' => $method['processing_fee'],
-                    'description' => $method['description'],
-                ]
+                ['code' => $method['code']],
+                $method
             );
         }
     }
 }
+

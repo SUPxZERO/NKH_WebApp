@@ -153,14 +153,28 @@ class CustomerDashboardController extends Controller
         return response()->json([
             'data' => [
                 'id' => $customer->id,
-                'name' => $user->name,
-                'email' => $user->email,
+                'customer_code' => $customer->customer_code,
+                // Include full user object for profile page
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'avatar' => $user->avatar_url ?? $user->image_path_url,
+                ],
+                // Profile-specific fields
+                'birth_date' => $customer->birth_date?->format('Y-m-d'),
+                'gender' => $customer->gender,
+                'preferred_language' => $customer->preferred_language ?? 'en',
+                'marketing_consent' => (bool) $customer->marketing_consent,
+                // Stats
                 'loyalty_points' => $customer->points_balance,
                 'total_orders' => $totalOrders,
                 'total_spent' => (float) $totalSpent,
                 'favorite_items' => $favoriteItems,
                 'member_since' => $customer->created_at->toISOString(),
                 'next_reward_points' => 100, // Next milestone
+                'customer_tier' => $customer->customer_tier,
             ],
         ]);
     }
@@ -434,4 +448,111 @@ class CustomerDashboardController extends Controller
 
         return response()->json(['data' => $favorites]);
     }
+    /**
+     * Get single order details
+     */
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+
+        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+
+        $order = Order::where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->with([
+                'items.menuItem.translations',
+                'location',
+                'timeSlot',
+                'customerAddress',
+                'invoice',
+                'paymentCollector'
+            ])
+            ->firstOrFail();
+
+        // reuse basic mapping logic or simple response
+        // for simplicity, returning mostly raw model with relations or mapped similar to orders list
+        
+        $previewImage = null;
+        if ($firstItem = $order->items->first()) {
+            if ($menuItem = $firstItem->menuItem) {
+                $previewImage = $menuItem->image_path ? asset(ltrim(str_replace('\\', '/', $menuItem->image_path), '/')) : null;
+            }
+        }
+
+        $data = [
+            'id' => $order->id,
+            'order_number' => $order->order_number,
+            'order_type' => $order->order_type,
+            'status' => $order->status,
+            'approval_status' => $order->approval_status,
+            'payment_status' => $order->payment_status,
+            'payment_mode' => $order->payment_mode,
+            
+            // Amounts
+            'subtotal' => (float) $order->subtotal,
+            'tax_amount' => (float) ($order->tax_amount ?? 0),
+            'delivery_fee' => (float) ($order->delivery_fee ?? 0),
+            'discount_amount' => (float) ($order->discount_amount ?? 0),
+            'total_amount' => (float) $order->total_amount,
+            'service_charge' => (float) ($order->service_charge ?? 0),
+            
+            // Dates
+            'ordered_at' => $order->ordered_at?->toISOString(),
+            'pickup_time' => $order->pickup_time?->toISOString(),
+            'completed_at' => $order->completed_at?->toISOString(),
+            'created_at' => $order->created_at->toISOString(),
+            
+            // Location
+            'location' => [
+                'id' => $order->location->id,
+                'name' => $order->location->name,
+                'address' => $order->location->address ?? null,
+                'phone' => $order->location->phone ?? null,
+                'email' => $order->location->email ?? null,
+            ],
+            
+            // Time slot
+            'time_slot' => $order->timeSlot ? [
+                'id' => $order->timeSlot->id,
+                'date' => $order->timeSlot->slot_date->format('Y-m-d'),
+                'time' => $order->timeSlot->slot_start_time,
+                'type' => $order->timeSlot->slot_type,
+            ] : null,
+            
+            // Delivery address
+            'delivery_address' => ($order->order_type === 'delivery' && $order->customerAddress) ? [
+                'id' => $order->customerAddress->id,
+                'address_line_1' => $order->customerAddress->address_line_1,
+                'address_line_2' => $order->customerAddress->address_line_2,
+                'city' => $order->customerAddress->city,
+                'postal_code' => $order->customerAddress->postal_code,
+                'label' => $order->customerAddress->label,
+            ] : null,
+            
+            // Items
+            'items_count' => $order->items->count(),
+            'items' => $order->items->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'menu_item_id' => $item->menu_item_id,
+                    'name' => $item->name ?? $item->menuItem?->name ?? 'Unknown Item',
+                    'quantity' => $item->quantity,
+                    'unit_price' => (float) $item->unit_price,
+                    'total_price' => (float) $item->total_price,
+                    'special_instructions' => $item->special_instructions,
+                    'image_path' => $item->menuItem?->image_path ? asset(ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/')) : null,
+                    'customizations' => $item->customizations ?? [], // Assuming customizations might be stored
+                ];
+            }),
+            
+            'preview_image' => $previewImage,
+            'special_instructions' => $order->special_instructions,
+            'is_paid' => $order->payment_status === 'paid',
+            'can_cancel' => $order->status === 'pending' && $order->approval_status === 'pending',
+        ];
+
+        return response()->json(['data' => $data]);
+    }
 }
+

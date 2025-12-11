@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardFooter } from '@/app/components/ui/C
 import Button from '@/app/components/ui/Button';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { usePlaceOnlineOrder } from '@/app/hooks/useOrders';
+import { usePaymentModes } from '@/app/hooks/useOrderPayment';
 import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
+import { Banknote, CreditCard, ShoppingBag, Truck } from 'lucide-react';
 
 export default function Checkout() {
   const cart = useCartStore();
@@ -16,7 +18,15 @@ export default function Checkout() {
     cart.mode === 'delivery' ? 'delivery' : 'pickup',
     cart.location_id // Pass location_id from cart
   );
+  const { data: paymentModes, isLoading: modesLoading } = usePaymentModes(cart.mode || 'pickup');
+  const [selectedPaymentMode, setSelectedPaymentMode] = React.useState<string>('pay_now');
+
   const placeOrder = usePlaceOnlineOrder();
+
+  // Reset payment mode when order type changes
+  React.useEffect(() => {
+    setSelectedPaymentMode('pay_now');
+  }, [cart.mode]);
 
   async function onPlaceOrder() {
     // Validation
@@ -42,17 +52,17 @@ export default function Checkout() {
 
     // Build payload matching backend API expectations
     const payload = {
-      order_type: cart.mode as 'delivery' | 'pickup',  // Type assertion to exclude 'dine-in'
+      order_type: cart.mode as 'delivery' | 'pickup',
       location_id: cart.location_id,
       customer_address_id: cart.mode === 'delivery' ? cart.selectedAddress?.id : undefined,
-      // Send slot_date and slot_time for dynamic time slot system
       slot_date: cart.timeSlot?.slot_date,
       slot_time: cart.timeSlot?.slot_start_time,
       notes: cart.notes || undefined,
+      payment_mode: selectedPaymentMode,
       order_items: cart.items.map(item => ({
         menu_item_id: item.menu_item_id,
         quantity: item.quantity,
-        special_instructions: undefined, // Can add per-item notes later
+        special_instructions: undefined,
       })),
     };
 
@@ -63,30 +73,35 @@ export default function Checkout() {
 
       console.log('✅ Order placed successfully:', result);
 
-      // Show success toast
-      toastSuccess('Order placed successfully! Redirecting to payment...');
-
-      // Clear cart ONLY on success
-      cart.clear();
-
-      // Redirect to payment page with order ID
       const orderId = (result as any)?.data?.id || (result as any)?.id || result?.id;
-      setTimeout(() => {
-        window.location.href = `/payment?order_id=${orderId}`;
-      }, 500);
+
+      // Determine next step based on payment mode
+      if (selectedPaymentMode === 'pay_now') {
+        toastSuccess('Order placed! Redirecting to payment...');
+        cart.clear(); // Clear cart immediately for pay_now
+        setTimeout(() => {
+          window.location.href = `/payment?order_id=${orderId}`;
+        }, 500);
+      } else {
+        // For pay later, redirect to order details/success page
+        toastSuccess('Order placed successfully!');
+        cart.clear();
+        setTimeout(() => {
+          window.location.href = `/customer/orders/${orderId}`;
+        }, 1000);
+      }
 
     } catch (error: any) {
+      // ... existing error handling ...
       console.error('❌ Order placement error:', error);
       console.error('Error response:', error?.response);
       console.error('Error data:', error?.response?.data);
 
-      // Extract detailed error message
       let errorMsg = 'Failed to place order. Please try again.';
 
       if (error?.response?.data?.message) {
         errorMsg = error.response.data.message;
       } else if (error?.response?.data?.errors) {
-        // Laravel validation errors
         const errors = error.response.data.errors;
         const firstError = Object.values(errors)[0];
         errorMsg = Array.isArray(firstError) ? firstError[0] : String(firstError);
@@ -94,12 +109,8 @@ export default function Checkout() {
         errorMsg = error.message;
       }
 
-      // DEBUG: Alert the error
       window.alert(`Order Failed: ${errorMsg}`);
-
       toastError(errorMsg);
-
-      // DO NOT clear cart on error - user should be able to retry
     }
   }
 
@@ -155,6 +166,51 @@ export default function Checkout() {
                 )}
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="font-semibold">Payment Option</div>
+              </CardHeader>
+              <CardContent>
+                {modesLoading ? (
+                  <div className="flex gap-4">
+                    <Skeleton className="h-20 w-1/2" />
+                    <Skeleton className="h-20 w-1/2" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {paymentModes?.map((mode) => (
+                      <button
+                        key={mode.code}
+                        onClick={() => setSelectedPaymentMode(mode.code)}
+                        className={`relative p-4 rounded-xl border text-left transition-all ${selectedPaymentMode === mode.code
+                            ? 'border-fuchsia-400 bg-fuchsia-500/10 text-white'
+                            : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10 text-gray-300'
+                          }`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          {mode.code === 'pay_now' ? (
+                            <CreditCard className={`w-5 h-5 ${selectedPaymentMode === mode.code ? 'text-fuchsia-400' : 'text-gray-400'}`} />
+                          ) : (
+                            <Banknote className={`w-5 h-5 ${selectedPaymentMode === mode.code ? 'text-fuchsia-400' : 'text-gray-400'}`} />
+                          )}
+                          <div className="font-semibold">{mode.name}</div>
+                        </div>
+                        <div className="text-xs opacity-70 ml-8">{mode.description}</div>
+
+                        {selectedPaymentMode === mode.code && (
+                          <div className="absolute top-4 right-4 text-fuchsia-400">
+                            <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-current" />
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           <div className="lg:col-span-4 space-y-6">
@@ -183,7 +239,9 @@ export default function Checkout() {
               </CardContent>
               <CardFooter>
                 <Button className="w-full" onClick={onPlaceOrder} disabled={placeOrder.isPending || cart.items.length === 0 || !cart.location_id || !cart.timeSlot}>
-                  {placeOrder.isPending ? 'Placing...' : 'Place Order'}
+                  {placeOrder.isPending ? 'Placing...' : (
+                    selectedPaymentMode === 'pay_now' ? 'Place & Pay Now' : 'Place Order'
+                  )}
                 </Button>
               </CardFooter>
             </Card>

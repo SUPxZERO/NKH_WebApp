@@ -388,6 +388,7 @@ class OnlineOrderController extends Controller
                     'special_instructions' => $data['notes'] ?? null,
                     'customer_address_id' => $data['customer_address_id'] ?? null,
                     'time_slot_id' => $slot->id,
+                    'payment_mode' => $data['payment_mode'] ?? 'pay_now',
                 ]);
 
             // Create order items
