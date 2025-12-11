@@ -28,6 +28,11 @@ Broadcast::channel('admin-notifications', function ($user) {
     return in_array($user->role, ['admin', 'manager']);
 });
 
+// Private channel for reservation updates
+Broadcast::channel('admin-reservations', function ($user) {
+    return in_array($user->role, ['admin', 'manager', 'waiter']);
+});
+
 // Private channel for employee notifications
 Broadcast::channel('employee.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;

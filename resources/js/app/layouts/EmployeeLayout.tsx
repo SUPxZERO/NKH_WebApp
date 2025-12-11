@@ -13,7 +13,7 @@ import {
   // Other necessary icons
   ShoppingBag, Users, Utensils, Calendar,
   Menu as MenuIcon, X, Bell, User, LogOut,
-  HelpCircle, MessageSquare
+  HelpCircle, MessageSquare, Activity
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -41,7 +41,10 @@ const navigation = [
   // 7. Feedback
   { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
 
-  // 8. Settings: Kept as Settings (Universal icon)
+  // 8. Performance (Sprint P17)
+  { name: 'Performance', href: '/employee/performance', icon: Activity },
+
+  // 9. Settings
   { name: 'Settings', href: '/employee/settings', icon: Settings },
 ];
 

@@ -138,9 +138,39 @@ export default function Schedule() {
         return days;
     };
 
+    // Swap feature state
+    const [swapModalOpen, setSwapModalOpen] = useState(false);
+    const [swapType, setSwapType] = useState<'give_away' | 'trade'>('give_away');
+    const [swapReason, setSwapReason] = useState('');
+
     const handleTimeOffSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         timeOffMutation.mutate(timeOffData);
+    };
+
+    // Swap Mutation
+    const swapMutation = useMutation({
+        mutationFn: (data: { shift_id: number, type: string, reason: string }) => apiPost('/api/shift-swaps', data),
+        onSuccess: () => {
+            toastSuccess('Shift swap request created!');
+            setSwapModalOpen(false);
+            setSelectedShift(null);
+            setSwapReason('');
+        },
+        onError: (err: any) => {
+            toastError(err?.response?.data?.message || 'Failed to request swap');
+        }
+    });
+
+    const handleSwapRequest = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedShift) return;
+
+        swapMutation.mutate({
+            shift_id: selectedShift.id,
+            type: swapType,
+            reason: swapReason
+        });
     };
 
     const getStatusIcon = (status: string) => {
@@ -283,8 +313,8 @@ export default function Schedule() {
                                         <div
                                             key={dateStr}
                                             className={`flex items-center gap-4 p-4 rounded-xl border ${isToday
-                                                    ? 'border-fuchsia-500/50 bg-fuchsia-500/10'
-                                                    : 'border-white/10 bg-white/5'
+                                                ? 'border-fuchsia-500/50 bg-fuchsia-500/10'
+                                                : 'border-white/10 bg-white/5'
                                                 }`}
                                         >
                                             <div className="w-24 flex-shrink-0">
@@ -345,10 +375,10 @@ export default function Schedule() {
                                             </div>
                                         </div>
                                         <div className={`px-3 py-1 rounded-full text-sm ${request.status === 'approved'
-                                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                                : request.status === 'denied'
-                                                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                                    : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                            : request.status === 'denied'
+                                                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                                : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                                             }`}>
                                             {request.status.toUpperCase()}
                                         </div>
@@ -455,16 +485,79 @@ export default function Schedule() {
                             </div>
                         )}
 
-                        <Button
-                            onClick={() => setSelectedShift(null)}
-                            className="w-full"
-                            variant="outline"
-                        >
-                            Close
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() => setSwapModalOpen(true)}
+                                className="flex-1 bg-amber-600 hover:bg-amber-700"
+                            >
+                                Request Swap
+                            </Button>
+                            <Button
+                                onClick={() => setSelectedShift(null)}
+                                className="flex-1"
+                                variant="outline"
+                            >
+                                Close
+                            </Button>
+                        </div>
                     </div>
                 </Modal>
             )}
+            {/* Swap Request Modal */}
+            <Modal
+                isOpen={swapModalOpen}
+                onClose={() => setSwapModalOpen(false)}
+                title="Request Shift Swap"
+                className="max-w-md"
+            >
+                <form onSubmit={handleSwapRequest} className="space-y-4">
+                    <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg mb-4">
+                        Requesting to swap/drop shift on: <br />
+                        <strong>{selectedShift && new Date(selectedShift.date).toLocaleDateString()}</strong>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Type</label>
+                        <select
+                            value={swapType}
+                            onChange={(e) => setSwapType(e.target.value as any)}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
+                        >
+                            <option value="give_away">Give Away (Drop)</option>
+                            <option value="trade">Trade Request</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Reason (Optional)</label>
+                        <textarea
+                            value={swapReason}
+                            onChange={(e) => setSwapReason(e.target.value)}
+                            rows={2}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
+                            placeholder="Why do you need to swap?"
+                        />
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setSwapModalOpen(false)}
+                            className="flex-1"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={swapMutation.isPending}
+                            className="flex-1 bg-amber-600 hover:bg-amber-700"
+                        >
+                            {swapMutation.isPending ? 'Submitting...' : 'Confirm Request'}
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
         </EmployeeLayout>
     );
 }

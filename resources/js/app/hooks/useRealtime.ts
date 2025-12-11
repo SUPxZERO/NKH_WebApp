@@ -64,6 +64,31 @@ export function useAdminNotifications() {
   }, [qc]);
 }
 
+export function useReservationUpdates() {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const echo = createEcho();
+    if (!echo) return;
+
+    const channel = echo.private('admin-reservations');
+
+    channel.listen('NewReservationCreated', (e: any) => {
+      qc.invalidateQueries({ queryKey: ['admin/reservations'] });
+      toastInfo(`New reservation for ${e.reservation.party_size} people!`);
+    });
+
+    channel.listen('ReservationStatusUpdated', (e: any) => {
+      qc.invalidateQueries({ queryKey: ['admin/reservations'] });
+      toastInfo(`Reservation #${e.reservation.id} status updated to ${e.reservation.status}`);
+    });
+
+    return () => {
+      echo.leaveChannel('admin-reservations');
+    };
+  }, [qc]);
+}
+
 // Re-export customer notification hooks
 export {
   useCustomerNotifications,

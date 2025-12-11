@@ -126,6 +126,9 @@ class ReservationController extends Controller
             ]);
         });
 
+        // Real-time broadcast
+        event(new \App\Events\NewReservationCreated($reservation));
+
         return new ReservationResource($reservation->load(['table', 'customer.user', 'location']));
     }
 
@@ -228,6 +231,9 @@ class ReservationController extends Controller
         if (isset($validated['status'])) {
             $this->sendReservationStatusNotification($reservation, $validated['status']);
         }
+
+        // Real-time broadcast
+        event(new \App\Events\ReservationStatusUpdated($reservation));
 
         return new ReservationResource($reservation->load(['table', 'customer.user', 'location']));
     }

@@ -38,6 +38,9 @@ Route::prefix('employee')
         // P16 Pages
         Route::get('support', fn() => Inertia::render('Employee/HelpSupport'))->name('employee.support');
         Route::get('feedback', fn() => Inertia::render('Employee/Feedback'))->name('employee.feedback');
+        
+        // P17 Pages
+        Route::get('performance', fn() => Inertia::render('Employee/Performance'))->name('employee.performance');
     });
 
 // Admin routes
@@ -204,6 +207,14 @@ Route::prefix('api/employee')->middleware('auth')->group(function () {
     Route::post('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'store']);
     Route::get('support-tickets/{id}', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'show']);
     Route::post('feedback', [App\Http\Controllers\Api\Employee\EmployeeFeedbackController::class, 'store']);
+    
+    // Performance (Sprint P17)
+    Route::get('performance', [App\Http\Controllers\Api\Employee\EmployeePerformanceController::class, 'stats']);
+    
+    // Shift Swaps (Sprint P17)
+    Route::get('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'index']);
+    Route::post('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'store']);
+    Route::put('shift-swaps/{id}', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'update']);
 });
 
 // Test time slots seeder

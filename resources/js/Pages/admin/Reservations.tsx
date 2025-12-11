@@ -17,6 +17,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Reservation, DiningTable, Customer } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
+import { useReservationUpdates } from '@/app/hooks/useRealtime';
 
 // --- Components ---
 
@@ -99,6 +100,8 @@ export default function Reservations() {
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [error, setError] = useState('');
+
+  useReservationUpdates();
 
   const qc = useQueryClient();
 

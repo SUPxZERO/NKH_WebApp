@@ -1,98 +1,94 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPut } from '@/app/utils/api';
+import { apiGet, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Bell, Loader2 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
-interface NotificationSettings {
-    orderAlerts: boolean;
-    shiftReminders: boolean;
-    announcements: boolean;
-    smsNotifications: boolean;
-    emailNotifications: boolean;
+interface NotificationState {
+    [key: string]: boolean;
 }
 
-const defaultSettings: NotificationSettings = {
-    orderAlerts: true,
-    shiftReminders: true,
-    announcements: true,
-    smsNotifications: false,
-    emailNotifications: true,
-};
-
 export default function NotificationPreferences() {
-    const queryClient = useQueryClient();
-    const [notifications, setNotifications] = useState(defaultSettings);
+    // State to hold local boolean values for the UI switches
+    const [toggles, setToggles] = useState<NotificationState>({
+        orderAlerts: true,
+        shiftReminders: true,
+        announcements: true,
+        emailNotifications: true,
+        smsNotifications: false,
+    });
+
+    // Mappings from UI keys to API params
+    const MAPPING: Record<string, { channel: string; type: string }> = {
+        orderAlerts: { channel: 'in_app', type: 'order' },
+        shiftReminders: { channel: 'in_app', type: 'reservation' }, // Using reservation as proxy for now
+        announcements: { channel: 'in_app', type: 'system' },
+        emailNotifications: { channel: 'email', type: 'order' }, // Primary email setting
+        smsNotifications: { channel: 'push', type: 'order' },   // Primary push setting
+    };
 
     // Fetch settings
-    const { data: settingsData, isLoading } = useQuery({
+    const { data: apiData, isLoading } = useQuery({
         queryKey: ['employeeSettings'],
         queryFn: async () => {
-            const response = await apiGet('/api/employee/settings/notifications') as { success: boolean; data: { preferences: any } };
-            // Transform backend response structure to simpler frontend structure if needed
-            // Backend returns { preferences: { channel: { type: bool } } }
-            // Frontend expects flat NotificationSettings
-
-            // For now we just return defaultSettings combined with response if possible, 
-            // but since structure is different, let's keep it simple or assume backend adaptation.
-            // Given time constraints, I will keep using defaults + partial updates or handle mapping if I see the exact structure.
-            // The backend returns: { data: { preferences: { email: { order_update: true ... } }, channels: ..., types: ... } }
-
-            // Let's implement a quick mapper if needed, or just use the raw response if we update the state to match.
-            // Detailed mapping is complex without type definitions. 
-            // Logic: I will keep defaults for now to avoid breaking UI, as the backend structure `preferences[channel][type]` is complex 
-            // and my frontend expects a simple flat object `orderAlerts: bool`.
-
-            // PROPER FIX: I should return defaultSettings for now to ensure UI renders, 
-            // creating a complete mapping is a larger task (P15.2). 
-            // I will enable the API call to at least verify connectivity, but catch errors.
-
-            try {
-                // We won't use the data yet because of structure mismatch, but we call it to ensure 200 OK
-                await apiGet('/api/employee/settings/notifications');
-                return defaultSettings;
-            } catch (e) {
-                return defaultSettings;
-            }
+            const res = await apiGet('/api/employee/settings/notifications') as { data: { preferences: any } };
+            return res.data; // { preferences: { channel: { type: bool } } }
         },
     });
 
     useEffect(() => {
-        if (settingsData) {
-            setNotifications(settingsData);
+        if (apiData?.preferences) {
+            // Update local state based on backend data
+            const prefs = apiData.preferences;
+
+            setToggles(prev => ({
+                ...prev,
+                orderAlerts: prefs.in_app?.order ?? true,
+                shiftReminders: prefs.in_app?.reservation ?? true,
+                announcements: prefs.in_app?.system ?? true,
+                emailNotifications: prefs.email?.order ?? true,
+                smsNotifications: prefs.push?.order ?? false,
+            }));
         }
-    }, [settingsData]);
+    }, [apiData]);
 
     // Update notifications mutation
-    const updateNotificationsMutation = useMutation({
-        mutationFn: async (key: keyof typeof notifications) => {
-            const newValue = !notifications[key];
-            const newNotifications = { ...notifications, [key]: newValue };
-            setNotifications(newNotifications);
+    const toggleMutation = useMutation({
+        mutationFn: async ({ key, value }: { key: string; value: boolean }) => {
+            const mapping = MAPPING[key];
+            if (!mapping) return;
 
-            // Map frontend key to backend channel/type
-            // Example: orderAlerts -> email + order_update? This mapping is missing.
-            // For this sprint, we will just toggle the UI state and simulate the API call success
-            // to show "Parity" without deep backend integration of complex preference matrix.
+            await apiPost('/api/employee/settings/notifications/toggle', {
+                channel: mapping.channel,
+                type: mapping.type,
+                enabled: value
+            });
 
-            // await apiPut('/api/employee/settings/notifications', newNotifications);
-            return true;
+            return { key, value };
         },
-        onSuccess: () => {
-            toastSuccess('Notification preference updated');
+        onSuccess: (data) => {
+            if (data) {
+                toastSuccess('Preference updated');
+            }
         },
         onError: () => {
             toastError('Failed to update preference');
         },
     });
 
+    const handleToggle = (key: string) => {
+        const newValue = !toggles[key];
+        setToggles(prev => ({ ...prev, [key]: newValue }));
+        toggleMutation.mutate({ key, value: newValue });
+    };
+
     const items = [
-        { key: 'orderAlerts', label: 'Order Alerts', desc: 'Get notified for new orders and status changes (High Priority)' },
+        { key: 'orderAlerts', label: 'Order Alerts', desc: 'Get notified for new orders and status changes' },
         { key: 'shiftReminders', label: 'Shift Reminders', desc: 'Receive reminders 1 hour before your shift starts' },
-        { key: 'announcements', label: 'Announcements', desc: 'Important updates from management' },
-        { key: 'emailNotifications', label: 'Email Notifications', desc: 'Receive summaries and major alerts via email' },
-        { key: 'smsNotifications', label: 'SMS Notifications', desc: 'Receive critical alerts via SMS' },
+        { key: 'announcements', label: 'System Announcements', desc: 'Important updates from management' },
+        { key: 'emailNotifications', label: 'Email Notifications', desc: 'Receive major alerts via email' },
+        { key: 'smsNotifications', label: 'Push Notifications', desc: 'Receive critical alerts on your device' },
     ];
 
     if (isLoading) {
@@ -118,16 +114,16 @@ export default function NotificationPreferences() {
                             <p className="text-sm text-slate-500 dark:text-slate-400">{item.desc}</p>
                         </div>
                         <button
-                            onClick={() => updateNotificationsMutation.mutate(item.key as keyof typeof notifications)}
-                            disabled={updateNotificationsMutation.isPending}
+                            onClick={() => handleToggle(item.key)}
+                            disabled={toggleMutation.isPending}
                             className={cn(
                                 'w-12 h-6 rounded-full transition-colors relative',
-                                notifications[item.key as keyof typeof notifications] ? 'bg-fuchsia-500' : 'bg-slate-300 dark:bg-slate-600'
+                                toggles[item.key] ? 'bg-fuchsia-500' : 'bg-slate-300 dark:bg-slate-600'
                             )}
                         >
                             <div className={cn(
                                 'absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all',
-                                notifications[item.key as keyof typeof notifications] ? 'left-7' : 'left-1'
+                                toggles[item.key] ? 'left-7' : 'left-1'
                             )} />
                         </button>
                     </div>
