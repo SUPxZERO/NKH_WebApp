@@ -12,11 +12,18 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DatabaseNotification::query();
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // Scope to the authenticated user
+        $query = $user->notifications();
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
+                // JSON structure querying depends on DB driver, valid for MySQL/Postgres
                 $q->where('data->title', 'like', "%{$search}%")
                   ->orWhere('data->message', 'like', "%{$search}%");
             });
@@ -34,7 +41,7 @@ class NotificationController extends Controller
             }
         }
 
-        $notifications = $query->with('notifiable')->latest()->paginate($request->per_page ?? 20);
+        $notifications = $query->latest()->paginate($request->per_page ?? 20);
 
         $notifications->getCollection()->transform(function ($n) {
             return [
@@ -43,7 +50,7 @@ class NotificationController extends Controller
                 'message' => $n->data['message'] ?? '',
                 'type' => $n->data['type'] ?? 'info',
                 'user_id' => $n->notifiable_id,
-                'user' => $n->notifiable ? ['name' => $n->notifiable->name] : null,
+                // 'user' => $n->notifiable ? ['name' => $n->notifiable->name] : null, // Redundant for own notifications
                 'read_at' => $n->read_at,
                 'created_at' => $n->created_at,
             ];
@@ -52,8 +59,22 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
+    public function markAllRead(Request $request)
+    {
+        $request->user()->unreadNotifications->markAsRead();
+        return response()->json(['message' => 'All marked as read']);
+    }
+
+    public function unreadCount(Request $request)
+    {
+        return response()->json([
+            'count' => $request->user()->unreadNotifications()->count()
+        ]);
+    }
+
     public function stats()
     {
+        // ... existing stats logic (probably for admin, keep separate or scope)
         return response()->json([
             'total' => DatabaseNotification::count(),
             'unread' => DatabaseNotification::whereNull('read_at')->count(),

@@ -42,12 +42,25 @@ export default function Notifications() {
         },
     });
 
+    // Mark all as read mutation
+    const markAllAsReadMutation = useMutation({
+        mutationFn: async () => {
+            await apiPut('/api/employee/notifications/read-all', {});
+            return true;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['employeeNotifications'] });
+            toastSuccess('All marked as read');
+        },
+    });
+
     const getIcon = (type: string) => {
         switch (type) {
             case 'order': return <Bell className="w-5 h-5 text-blue-500" />;
             case 'shift': return <Calendar className="w-5 h-5 text-purple-500" />;
             case 'announcement': return <Info className="w-5 h-5 text-amber-500" />;
             case 'system': return <AlertTriangle className="w-5 h-5 text-slate-500" />;
+            case 'reservation': return <Calendar className="w-5 h-5 text-emerald-500" />;
             default: return <Bell className="w-5 h-5 text-slate-500" />;
         }
     };
@@ -75,10 +88,11 @@ export default function Notifications() {
                             <p className="text-slate-500 dark:text-slate-400 mt-1">Stay updated with alerts and messages</p>
                         </div>
                         <button
-                            className="text-sm text-fuchsia-600 dark:text-fuchsia-400 hover:underline font-medium"
-                            onClick={() => toastSuccess('All marked as read')}
+                            className="text-sm text-fuchsia-600 dark:text-fuchsia-400 hover:underline font-medium disabled:opacity-50"
+                            onClick={() => markAllAsReadMutation.mutate()}
+                            disabled={markAllAsReadMutation.isPending}
                         >
-                            Mark all as read
+                            {markAllAsReadMutation.isPending ? 'Marking...' : 'Mark all as read'}
                         </button>
                     </div>
 

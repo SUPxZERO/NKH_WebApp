@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
+import { useQuery } from '@tanstack/react-query';
+import { apiGet } from '@/app/utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   // Improved Icons for Core Navigation
@@ -53,6 +55,17 @@ const navigation = [
 export default function EmployeeLayout({ children }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['notifications', 'unread'],
+    queryFn: async () => {
+      const res = await apiGet('/api/employee/notifications/unread-count');
+      return res.data;
+    },
+    refetchInterval: 30000, // Poll every 30s as backup to realtime
+  });
+
+  const unreadCount = unreadData?.count || 0;
 
   const handleLogout = () => {
     router.post('/logout');
@@ -180,9 +193,11 @@ export default function EmployeeLayout({ children }: Props) {
                 )}
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  2
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
 
               {/* User Menu with Logout */}

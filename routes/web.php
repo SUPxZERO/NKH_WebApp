@@ -196,6 +196,8 @@ Route::prefix('api/user')->middleware('auth')->group(function () {
 Route::prefix('api/employee')->middleware('auth')->group(function () {
     // Notifications
     Route::get('notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
+    Route::put('notifications/read-all', [App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
     Route::put('notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
     
     // Settings
