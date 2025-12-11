@@ -34,6 +34,10 @@ Route::prefix('employee')
         Route::get('delivery-orders', fn() => Inertia::render('Employee/DeliveryOrders'))->name('employee.delivery-orders');
         Route::get('schedule', fn() => Inertia::render('Employee/Schedule'))->name('employee.schedule');
         Route::get('kitchen', fn() => Inertia::render('Employee/KitchenDisplay'))->name('employee.kitchen');
+        
+        // P16 Pages
+        Route::get('support', fn() => Inertia::render('Employee/HelpSupport'))->name('employee.support');
+        Route::get('feedback', fn() => Inertia::render('Employee/Feedback'))->name('employee.feedback');
     });
 
 // Admin routes
@@ -183,6 +187,23 @@ Route::prefix('api/user')->middleware('auth')->group(function () {
     Route::delete('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
     Route::get('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
     Route::post('change-password', [App\Http\Controllers\Api\UserProfileController::class, 'changePassword']);
+});
+
+// Employee API Routes (share session)
+Route::prefix('api/employee')->middleware('auth')->group(function () {
+    // Notifications
+    Route::get('notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::put('notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    
+    // Settings
+    Route::get('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
+    Route::put('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
+    
+    // Support & Feedback (Sprint P16)
+    Route::get('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'index']);
+    Route::post('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'store']);
+    Route::get('support-tickets/{id}', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'show']);
+    Route::post('feedback', [App\Http\Controllers\Api\Employee\EmployeeFeedbackController::class, 'store']);
 });
 
 // Test time slots seeder

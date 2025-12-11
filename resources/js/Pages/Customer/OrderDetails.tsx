@@ -28,7 +28,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
     const { data, isLoading, error } = useQuery({
         queryKey: ['customer-order', orderId],
         queryFn: async () => {
-            const res = await apiGet(`/customer/orders/${orderId}`);
+            const res = await apiGet<any>(`/customer/orders/${orderId}`);
             return res.data;
         }
     });

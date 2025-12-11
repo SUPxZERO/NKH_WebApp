@@ -12,7 +12,8 @@ import {
 
   // Other necessary icons
   ShoppingBag, Users, Utensils, Calendar,
-  Menu as MenuIcon, X, Bell, User, LogOut
+  Menu as MenuIcon, X, Bell, User, LogOut,
+  HelpCircle, MessageSquare
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -34,7 +35,13 @@ const navigation = [
   // 5. Schedule: Changed from Calendar to CalendarDays (focus on daily shifts)
   { name: 'Schedule', href: '/employee/schedule', icon: CalendarDays },
 
-  // 6. Settings: Kept as Settings (Universal icon)
+  // 6. Help & Support
+  { name: 'Support', href: '/employee/support', icon: HelpCircle },
+
+  // 7. Feedback
+  { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
+
+  // 8. Settings: Kept as Settings (Universal icon)
   { name: 'Settings', href: '/employee/settings', icon: Settings },
 ];
 
@@ -162,12 +169,18 @@ export default function EmployeeLayout({ children }: Props) {
             {/* Actions */}
             <div className="flex items-center gap-3">
               {/* Notifications */}
-              <button className="relative p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+              <Link
+                href="/employee/notifications"
+                className={cn(
+                  "relative p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors",
+                  url.startsWith('/employee/notifications') && "bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                )}
+              >
                 <Bell className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                   2
                 </span>
-              </button>
+              </Link>
 
               {/* User Menu with Logout */}
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800">

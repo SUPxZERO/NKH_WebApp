@@ -47,7 +47,7 @@ export default function Reservation() {
                 guest_count: guestCount
             };
 
-            const response = await apiGet('/api/customer/reservations/availability', { params });
+            const response = await apiGet<any>('/api/customer/reservations/availability', { params });
             // Since apiGet usually auto-unwraps or returns axios response, explicit typing helps
             // Assuming simplified response logic
             if (response.data.available) {

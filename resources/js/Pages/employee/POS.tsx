@@ -12,6 +12,7 @@ import { MenuItem } from '@/app/types/domain';
 import { toastSuccess } from '@/app/utils/toast';
 import { useActivePOSOrders } from '@/app/hooks/useOrderPayment';
 import POSOrderPaymentPanel from '@/app/components/pos/POSOrderPaymentPanel';
+import { POSMenuGrid } from '@/app/components/pos/POSMenuGrid';
 
 
 export default function POS() {
@@ -290,69 +291,12 @@ export default function POS() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className={viewMode === 'grid'
-                    ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
-                    : "space-y-2"
-                  }>
-                    {menuLoading ? (
-                      Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-40" />)
-                    ) : (
-                      filteredMenu.map((m) => (
-                        viewMode === 'grid' ? (
-                          // GRID VIEW - Larger cards
-                          <div
-                            key={m.id}
-                            className="group rounded-2xl overflow-hidden border-2 border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-xl hover:border-fuchsia-500/30 transition-all hover:scale-102"
-                          >
-                            {m.image_path ? (
-                              <img src={m.image_path} alt={m.name} className="h-32 w-full object-cover" />
-                            ) : (
-                              <div className="h-32 bg-gradient-to-br from-fuchsia-600/30 to-rose-500/30 flex items-center justify-center text-5xl">
-                                🍽️
-                              </div>
-                            )}
-                            <div className="p-4">
-                              <div className="font-medium truncate text-base">{m.name}</div>
-                              <div className="text-sm text-fuchsia-600 dark:text-fuchsia-400 font-bold mt-1">
-                                ${m.price.toFixed(2)}
-                              </div>
-                              <div className="mt-3">
-                                <Button
-                                  size="sm"
-                                  className="w-full h-12 text-base"
-                                  onClick={() => handleQuickAdd(m)}
-                                  leftIcon={<ShoppingCart className="w-5 h-5" />}
-                                >
-                                  Add
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          // LIST VIEW - Compact
-                          <div
-                            key={m.id}
-                            className="flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/60 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 transition-all"
-                          >
-                            {m.image_path && (
-                              <img src={m.image_path} alt={m.name} className="w-16 h-16 rounded-lg object-cover" />
-                            )}
-                            <div className="flex-1">
-                              <div className="font-medium">{m.name}</div>
-                              <div className="text-sm text-gray-500">${m.price.toFixed(2)}</div>
-                            </div>
-                            <Button
-                              size="sm"
-                              onClick={() => handleQuickAdd(m)}
-                              leftIcon={<ShoppingCart className="w-4 h-4" />}
-                            >
-                              Add
-                            </Button>
-                          </div>
-                        )
-                      ))
-                    )}
-                  </div>
+                  <POSMenuGrid
+                    items={filteredMenu}
+                    isLoading={menuLoading}
+                    viewMode={viewMode}
+                    onItemClick={handleQuickAdd}
+                  />
                 </CardContent>
               </Card>
             </div>

@@ -443,6 +443,7 @@ class OrderPaymentController extends Controller
     public function activeOrders(Request $request): JsonResponse
     {
         $orders = Order::with(['customer.user'])
+            ->withCount('items')
             ->whereIn('payment_status', [Order::PAYMENT_STATUS_UNPAID, Order::PAYMENT_STATUS_PARTIAL])
             ->whereNotIn('status', ['cancelled', 'completed', 'refunded'])
             ->orderByDesc('created_at')
@@ -459,7 +460,7 @@ class OrderPaymentController extends Controller
                     'status' => $order->status,
                     'customer_name' => $order->customer?->user?->name ?? 'Guest',
                     'created_at' => $order->created_at->toIso8601String(),
-                    'items_count' => $order->items()->count(),
+                    'items_count' => $order->items_count,
                 ];
             });
 

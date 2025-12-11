@@ -35,7 +35,7 @@ class CashPaymentController extends Controller
         // Get the employee's location if assigned
         $locationId = $user->employee?->location_id;
 
-        $query = Payment::with(['invoice.order.customer.user', 'paymentMethod'])
+        $query = Payment::with(['invoice.order.customer.user', 'invoice.order.items', 'paymentMethod'])
             ->whereHas('paymentMethod', function ($q) {
                 $q->where('code', 'cash');
             })

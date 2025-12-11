@@ -19,6 +19,8 @@ export function useOrderUpdates() {
       qc.invalidateQueries({ queryKey: ['admin.orders'] });
       qc.invalidateQueries({ queryKey: ['employee.orders'] });
       qc.invalidateQueries({ queryKey: ['kitchen.orders'] });
+      qc.invalidateQueries({ queryKey: ['pos.active-orders'] });
+      qc.invalidateQueries({ queryKey: ['pending-collection'] });
 
       toastInfo(`Order #${e.order.id} status: ${e.order.status}`);
     });
@@ -27,6 +29,7 @@ export function useOrderUpdates() {
       qc.invalidateQueries({ queryKey: ['admin.dashboard'] });
       qc.invalidateQueries({ queryKey: ['employee.orders'] });
       qc.invalidateQueries({ queryKey: ['kitchen.orders'] });
+      qc.invalidateQueries({ queryKey: ['pos.active-orders'] });
 
       toastInfo(`New order #${e.order.id} received!`);
     });

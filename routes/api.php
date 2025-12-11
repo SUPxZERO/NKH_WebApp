@@ -636,6 +636,9 @@ Route::prefix('employee')
     Route::post('orders/{order}/items', [OrderController::class, 'addItem']);
     Route::put('order-items/{orderItem}', [OrderController::class, 'updateItem']);
     
+    // Employee Dashboard
+    Route::get('dashboard/stats', [\App\Http\Controllers\Api\EmployeeDashboardController::class, 'stats']);
+
     // Employee Schedule
     Route::get('shifts', [EmployeeScheduleController::class, 'shifts']);
     Route::get('shifts/{id}', [EmployeeScheduleController::class, 'showShift']);

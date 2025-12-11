@@ -15,7 +15,7 @@ export default function TimeClock() {
     const { data: statusData, isLoading } = useQuery<any>({
         queryKey: ['attendance.today'],
         queryFn: () => apiGet('/api/attendance/today'),
-        refetchInterval: 30000, // Refresh every 30 seconds
+        refetchInterval: 60000, // Refresh every 60 seconds
     });
 
     const clockInMutation = useMutation({
@@ -51,14 +51,37 @@ export default function TimeClock() {
     });
 
     // Timer effect
+    // Sync elapsed time with server data
     useEffect(() => {
-        const interval = setInterval(() => {
-            if ((statusData as any)?.current_status === 'clocked_in') {
-                setElapsedTime((prev: number) => prev + 1);
-            }
-        }, 1000);
+        const currentStatus = (statusData as any)?.current_status;
+        const clockInAt = (statusData as any)?.current_attendance?.clock_in_at;
 
-        return () => clearInterval(interval);
+        if (currentStatus === 'clocked_in' && clockInAt) {
+            // Handle SQL datetime format "YYYY-MM-DD HH:MM:SS" by replacing space with T
+            const safeTimeStr = clockInAt.replace(' ', 'T');
+            const startTime = new Date(safeTimeStr).getTime();
+            const now = new Date().getTime();
+            const diff = Math.floor((now - startTime) / 1000);
+            setElapsedTime(diff > 0 ? diff : 0);
+        } else {
+            setElapsedTime(0);
+        }
+    }, [statusData]);
+
+    // Timer effect
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        const currentStatus = (statusData as any)?.current_status;
+
+        if (currentStatus === 'clocked_in') {
+            interval = setInterval(() => {
+                setElapsedTime((prev) => prev + 1);
+            }, 1000);
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
     }, [(statusData as any)?.current_status]);
 
     const formatTime = (seconds: number) => {

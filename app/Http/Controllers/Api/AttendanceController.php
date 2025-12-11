@@ -200,7 +200,7 @@ class AttendanceController extends Controller
 
         try {
             $query = Attendance::where('employee_id', $validated['employee_id'])
-                ->with('employee.user');
+                ->with(['employee.user', 'attendanceMetrics', 'location']);
 
             if ($validated['from'] ?? null) {
                 $query->whereDate('clock_in_at', '>=', $validated['from']);

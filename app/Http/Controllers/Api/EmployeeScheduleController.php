@@ -30,25 +30,21 @@ class EmployeeScheduleController extends Controller
         // Get shifts from the past 30 days and future
         $startDate = now()->subDays(30)->toDateString();
         
-        $shifts = DB::table('shifts')
+        $shifts = Shift::with(['position', 'location'])
             ->where('employee_id', $employee->id)
             ->where('date', '>=', $startDate)
             ->orderBy('date', 'asc')
             ->orderBy('start_time', 'asc')
             ->get()
             ->map(function ($shift) {
-                // Get position and location names
-                $position = DB::table('positions')->where('id', $shift->position_id)->first();
-                $location = DB::table('locations')->where('id', $shift->location_id)->first();
-
                 return [
                     'id' => $shift->id,
                     'employee_id' => $shift->employee_id,
                     'date' => $shift->date,
                     'start_time' => $shift->start_time,
                     'end_time' => $shift->end_time,
-                    'position' => $position->title ?? 'Staff',
-                    'location_name' => $location->name ?? 'Main Location',
+                    'position' => $shift->position->title ?? 'Staff',
+                    'location_name' => $shift->location->name ?? 'Main Location',
                     'status' => $shift->status ?? 'scheduled',
                     'notes' => $shift->notes,
                 ];
@@ -71,7 +67,7 @@ class EmployeeScheduleController extends Controller
             return response()->json(['message' => 'Employee profile not found'], 404);
         }
 
-        $shift = DB::table('shifts')
+        $shift = Shift::with(['position', 'location'])
             ->where('id', $id)
             ->where('employee_id', $employee->id)
             ->first();
@@ -80,10 +76,6 @@ class EmployeeScheduleController extends Controller
             return response()->json(['message' => 'Shift not found'], 404);
         }
 
-        // Get position and location
-        $position = DB::table('positions')->where('id', $shift->position_id)->first();
-        $location = DB::table('locations')->where('id', $shift->location_id)->first();
-
         return response()->json([
             'data' => [
                 'id' => $shift->id,
@@ -91,8 +83,8 @@ class EmployeeScheduleController extends Controller
                 'date' => $shift->date,
                 'start_time' => $shift->start_time,
                 'end_time' => $shift->end_time,
-                'position' => $position->title ?? 'Staff',
-                'location_name' => $location->name ?? 'Main Location',
+                'position' => $shift->position->title ?? 'Staff',
+                'location_name' => $shift->location->name ?? 'Main Location',
                 'status' => $shift->status ?? 'scheduled',
                 'notes' => $shift->notes,
             ]

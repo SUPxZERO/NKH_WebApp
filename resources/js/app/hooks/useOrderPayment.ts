@@ -175,7 +175,7 @@ export function usePendingCollection() {
             const response = await apiGet('/api/orders/pending-collection');
             return response.data as PendingCollectionOrder[];
         },
-        refetchInterval: 30000, // Refresh every 30 seconds
+        refetchInterval: 60000, // Fallback refresh every 60 seconds
     });
 }
 
@@ -189,6 +189,6 @@ export function useActivePOSOrders() {
             const response = await apiGet('/api/orders/pos/active');
             return response.data as any[];
         },
-        refetchInterval: 15000, // Poll every 15s
+        refetchInterval: 60000, // Fallback poll every 60s
     });
 }

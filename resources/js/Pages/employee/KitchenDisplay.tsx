@@ -45,7 +45,7 @@ export default function KitchenDisplay() {
     const { data: orders, isLoading } = useQuery<{ data: KitchenOrder[] }>({
         queryKey: ['kitchen.orders'],
         queryFn: () => apiGet('/kitchen/orders'),
-        refetchInterval: 5000, // Auto-refresh every 5 seconds
+        refetchInterval: 60000, // Fallback refresh every minute
         staleTime: 0,
     });
 

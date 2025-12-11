@@ -140,7 +140,7 @@ export default function Reservations() {
             const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
             url += `&date=${tomorrow.toISOString().split('T')[0]}`;
             break;
-          case 'week':
+          case 'next week':
             const weekEnd = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
             url += `&start_date=${today.toISOString().split('T')[0]}&end_date=${weekEnd.toISOString().split('T')[0]}`;
             break;
@@ -319,7 +319,7 @@ export default function Reservations() {
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-              {['today', 'tomorrow', 'week', 'all'].map((filter) => (
+              {['today', 'tomorrow', 'next week', 'all'].map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setDateFilter(filter)}
