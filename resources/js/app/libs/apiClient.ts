@@ -4,7 +4,10 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 // - Uses /sanctum/csrf-cookie for CSRF protection on state-changing requests
 // - Retries once on 419 (CSRF token mismatch) after refreshing the cookie
 
-const BACKEND_BASE = (import.meta.env.VITE_API_BASE_URL as string) || '';
+// In development with Vite proxy, use relative URLs so requests go through the proxy
+// In production, use the full backend URL
+const isDev = import.meta.env.DEV;
+const BACKEND_BASE = isDev ? '' : ((import.meta.env.VITE_API_BASE_URL as string) || '');
 const API_BASE_URL = BACKEND_BASE
   ? `${BACKEND_BASE.replace(/\/$/, '')}/api/`
   : '/api/';

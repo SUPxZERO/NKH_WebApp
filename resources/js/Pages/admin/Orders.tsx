@@ -541,13 +541,13 @@ export default function Orders() {
                         </Button>
                         <Button
                           size="sm"
-                          variant={order.payment_status === 'paid' ? 'secondary' : 'default'}
+                          variant="ghost"
                           onClick={() => handleTogglePayment(order)}
                           className={cn(
-                            "h-8 w-8 p-0 border-white/10",
+                            "h-8 w-8 p-0 border",
                             order.payment_status === 'paid'
                               ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20"
-                              : "bg-white/10 hover:bg-emerald-600 text-gray-400 hover:text-white"
+                              : "border-white/10 bg-white/10 hover:bg-emerald-600 text-gray-400 hover:text-white"
                           )}
                           title={order.payment_status === 'paid' ? "Mark as Unpaid" : "Mark as Paid"}
                         >

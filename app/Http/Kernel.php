@@ -42,11 +42,8 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\LogSessionDebug::class,
         ],
 
+        // API middleware is configured in bootstrap/app.php for Laravel 11
         'api' => [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \App\Http\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],

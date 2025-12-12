@@ -61,6 +61,15 @@ Route::get('/health', function () {
     ]);
 });
 
+// DEBUG: Session and Auth diagnostic endpoint (can be removed in production)
+Route::get('/debug-auth', function (\Illuminate\Http\Request $request) {
+    return response()->json([
+        'auth_check' => auth()->check(),
+        'user_id' => auth()->id(),
+        'session_id' => session()->getId(),
+    ]);
+});
+
 // Public endpoints
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -84,23 +93,23 @@ Route::get('/time-slots', [OnlineOrderController::class, 'timeSlots']);
 Route::get('/menu', [MenuItemController::class, 'index']);
 
 // Payment webhooks (secure with signature verification in production)
-Route::post('/payments/webhook/success', [PaymentWebhookController::class, 'handleSuccess']);
-    // ->middleware('payment.rate:webhook');
-Route::post('/webhooks/payment', [PaymentWebhookController::class, 'handle']);
-    // ->middleware('payment.rate:webhook');
+Route::post('/payments/webhook/success', [PaymentWebhookController::class, 'handleSuccess'])
+    ->middleware('payment.rate:webhook');
+Route::post('/webhooks/payment', [PaymentWebhookController::class, 'handle'])
+    ->middleware('payment.rate:webhook');
 
 // Payment endpoints
 Route::prefix('payments')->group(function () {
-    Route::post('/initiate', [\App\Http\Controllers\Api\PaymentController::class, 'initiate']);
-        // ->middleware('payment.rate:initiate');
-    Route::get('/{payment}/status', [\App\Http\Controllers\Api\PaymentController::class, 'status']);
-        // ->middleware('payment.rate:status');
-    Route::get('/uuid/{uuid}', [\App\Http\Controllers\Api\PaymentController::class, 'showByUuid']);
-        // ->middleware('payment.rate:status');
-    Route::get('/{payment}/qr', [\App\Http\Controllers\Api\PaymentController::class, 'getQrCode']);
-        // ->middleware('payment.rate:status');
-    Route::post('/{payment}/cancel', [\App\Http\Controllers\Api\PaymentController::class, 'cancel']);
-        // ->middleware('payment.rate:default');
+    Route::post('/initiate', [\App\Http\Controllers\Api\PaymentController::class, 'initiate'])
+        ->middleware('payment.rate:initiate');
+    Route::get('/{payment}/status', [\App\Http\Controllers\Api\PaymentController::class, 'status'])
+        ->middleware('payment.rate:status');
+    Route::get('/uuid/{uuid}', [\App\Http\Controllers\Api\PaymentController::class, 'showByUuid'])
+        ->middleware('payment.rate:status');
+    Route::get('/{payment}/qr', [\App\Http\Controllers\Api\PaymentController::class, 'getQrCode'])
+        ->middleware('payment.rate:status');
+    Route::post('/{payment}/cancel', [\App\Http\Controllers\Api\PaymentController::class, 'cancel'])
+        ->middleware('payment.rate:default');
     
     // Split Payment Routes (Sprint P7)
     Route::prefix('split')->group(function () {
@@ -116,10 +125,10 @@ Route::prefix('payments')->group(function () {
     });
     
     // Development/testing only routes
-    Route::post('/{payment}/simulate-success', [\App\Http\Controllers\Api\PaymentController::class, 'simulateSuccess']);
-        // ->middleware('payment.rate:simulate');
-    Route::post('/{payment}/simulate-failure', [\App\Http\Controllers\Api\PaymentController::class, 'simulateFailure']);
-        // ->middleware('payment.rate:simulate');
+    Route::post('/{payment}/simulate-success', [\App\Http\Controllers\Api\PaymentController::class, 'simulateSuccess'])
+        ->middleware('payment.rate:simulate');
+    Route::post('/{payment}/simulate-failure', [\App\Http\Controllers\Api\PaymentController::class, 'simulateFailure'])
+        ->middleware('payment.rate:simulate');
 });
 
 // Receipt Routes (Sprint P8)
@@ -139,7 +148,7 @@ Route::prefix('orders')->group(function () {
     Route::get('/payment-modes/{orderType}', [\App\Http\Controllers\Api\OrderPaymentController::class, 'availablePaymentModes']);
 });
 
-Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
+Route::prefix('orders')->group(function () {
     // Get order payment status
     Route::get('/{order}/payment-status', [\App\Http\Controllers\Api\OrderPaymentController::class, 'paymentStatus']);
     
@@ -173,10 +182,10 @@ Route::prefix('webhooks')->group(function () {
 // Time slots
 Route::get('/timeslots', [TimeSlotController::class, 'index']);
 Route::get('/timeslots/stats', [TimeSlotController::class, 'stats']);
-Route::post('/timeslots/regenerate', [TimeSlotController::class, 'regenerate']);
-// ->middleware('auth');
-Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup']);
-// ->middleware('auth');
+Route::post('/timeslots/regenerate', [TimeSlotController::class, 'regenerate'])
+->middleware('auth');
+Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup'])
+->middleware('auth');
 
 // Sprint 1: Suppliers & Units (CRUD accessible to all for now)
 Route::apiResource('suppliers', SupplierController::class);
@@ -205,8 +214,10 @@ Route::get('/_debug/auth', function (Request $request) {
 });
 
 
-Route::get('/user', [AuthController::class, 'me'])->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
+Route::get('/user', [AuthController::class, 'me'])
+->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
+Route::post('/logout', [AuthController::class, 'logout'])
+->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 
 // Admin routes - always need session for user() to work, auth is optional in local
 $adminMiddleware = [
@@ -222,7 +233,7 @@ if (config('app.enforce_admin_auth') || app()->environment('production')) {
 
 // Admin/Manager management endpoints
 Route::prefix('admin')
-    // ->middleware($adminMiddleware)
+    ->middleware($adminMiddleware)
     ->group(function () {
         Route::get('/category-stats', [CategoryController::class, 'stats']);
         // Alias to match frontend caller
@@ -508,7 +519,7 @@ Route::prefix('admin')
 
 // Kitchen Display System Routes
 Route::prefix('kitchen')
-    // ->middleware(['auth:sanctum']) // Uncomment to enforce auth
+    ->middleware(['auth:sanctum']) // Uncomment to enforce auth
     ->group(function () {
         Route::get('orders', [\App\Http\Controllers\Api\KitchenController::class, 'index']);
         Route::put('orders/{order}/status', [\App\Http\Controllers\Api\KitchenController::class, 'updateStatus']);
@@ -516,7 +527,7 @@ Route::prefix('kitchen')
 
 // In-store operations for staff (Employee)
 Route::prefix('employee')
-// ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter'])
+->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter'])
 ->group(function () {
     // POS menu
     Route::get('menu', [MenuItemController::class, 'index']);
@@ -550,7 +561,7 @@ Route::prefix('employee')
 
 // Order Holds
 Route::prefix('order-holds')
-    // ->middleware(['auth:sanctum'])
+    ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/', [OrderHoldController::class, 'index']);
         Route::post('/', [OrderHoldController::class, 'store']);
@@ -562,7 +573,7 @@ Route::prefix('order-holds')
 
 // CUSTOMER API ROUTES
 Route::prefix('customer')
-    ->middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])
+    ->middleware(['auth:sanctum'])
     ->group(function () {
     // Profile & Dashboard
     Route::get('profile', [App\Http\Controllers\Api\CustomerDashboardController::class, 'profile']);
@@ -622,7 +633,7 @@ Route::prefix('customer')
 
 // USER API ROUTES
 Route::prefix('user')
-    ->middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])
+    ->middleware(['auth:sanctum'])
     ->group(function () {
     Route::put('profile', [App\Http\Controllers\Api\UserProfileController::class, 'update']);
     Route::post('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar']);
@@ -633,7 +644,7 @@ Route::prefix('user')
 
 // EMPLOYEE API ROUTES
 Route::prefix('employee')
-    ->middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])
+    ->middleware(['auth:sanctum'])
     ->group(function () {
     // Dashboard
     Route::get('dashboard/stats', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'stats']);

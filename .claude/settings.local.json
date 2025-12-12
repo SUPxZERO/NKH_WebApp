@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(php artisan:*)",
+      "Bash(findstr:*)",
+      "Bash(dir storagelogs)",
+      "Bash(dir:*)",
+      "Bash(echo.:*)",
+      "Bash(php -r \"file_put_contents(''storage/logs/laravel.log'', '''');\")",
+      "Bash(php -r:*)"
+    ]
+  }
+}
