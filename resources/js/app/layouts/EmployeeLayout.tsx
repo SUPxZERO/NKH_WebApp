@@ -4,57 +4,49 @@ import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  // Improved Icons for Core Navigation
-  CreditCard, // For POS/Transactions
-  ChefHat,    // For Kitchen/Order Prep
-  CalendarDays, // For Schedule/Shifts
-  Settings,   // Standard
-  Truck,      // For Delivery/Pickup
-  Banknote,   // For Cash Payments
-
-  // Other necessary icons
-  ShoppingBag, Users, Utensils, Calendar,
-  Menu as MenuIcon, X, Bell, User, LogOut,
-  HelpCircle, MessageSquare, Activity
+  CreditCard,
+  ChefHat,
+  CalendarDays,
+  Settings,
+  Truck,
+  Banknote,
+  Menu as MenuIcon,
+  X,
+  Bell,
+  User,
+  LogOut,
+  HelpCircle,
+  MessageSquare,
+  Activity,
+  Home,
+  Clock,
+  TrendingUp,
+  Briefcase,
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
+import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 
 type Props = { children: React.ReactNode };
 
 const navigation = [
-  // 1. POS: Changed from ShoppingBag to CreditCard (focus on transaction)
+  { name: 'Dashboard', href: '/employee/dashboard', icon: Home },
   { name: 'POS', href: '/employee/pos', icon: CreditCard },
-
-  // 2. Kitchen/Order Mgmt: Changed from Utensils to ChefHat (focus on preparation/role)
   { name: 'Kitchen', href: '/employee/kitchen', icon: ChefHat },
-
-  // 3. Delivery/Pickup
   { name: 'Delivery', href: '/employee/delivery-orders', icon: Truck },
-
-  // 4. Cash Payments
-  { name: 'Payments', href: '/employee/cash-payments', icon: Banknote },
-
-  // 5. Schedule: Changed from Calendar to CalendarDays (focus on daily shifts)
   { name: 'Schedule', href: '/employee/schedule', icon: CalendarDays },
-
-  // 6. Help & Support
-  { name: 'Support', href: '/employee/support', icon: HelpCircle },
-
-  // 7. Feedback
-  { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
-
-  // 8. Performance (Sprint P17)
   { name: 'Performance', href: '/employee/performance', icon: Activity },
-
-  // 9. Settings
-  { name: 'Settings', href: '/employee/settings', icon: Settings },
 ];
 
-// ... rest of your component
+const secondaryNav = [
+  { name: 'Support', href: '/employee/support', icon: HelpCircle },
+  { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
+];
 
 export default function EmployeeLayout({ children }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { url } = usePage();
+  const { url, props } = usePage<{ auth: { user: any } }>();
+  const user = props.auth?.user;
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread'],
@@ -62,7 +54,7 @@ export default function EmployeeLayout({ children }: Props) {
       const res = await apiGet('/api/employee/notifications/unread-count');
       return res.data;
     },
-    refetchInterval: 30000, // Poll every 30s as backup to realtime
+    refetchInterval: 30000,
   });
 
   const unreadCount = unreadData?.count || 0;
@@ -71,13 +63,21 @@ export default function EmployeeLayout({ children }: Props) {
     router.post('/logout');
   };
 
+  // Get current time for greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950">
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -90,77 +90,120 @@ export default function EmployeeLayout({ children }: Props) {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="fixed top-0 right-0 h-full w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-l border-white/20 z-50 lg:hidden"
+            className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 lg:hidden"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-bold">Employee Menu</h2>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+            <div className="flex flex-col h-full">
+              {/* Mobile Menu Header */}
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
+                      <Briefcase className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-gray-900 dark:text-white">Employee Portal</h2>
+                      <p className="text-xs text-gray-500">NKH Restaurant</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              <nav className="space-y-2">
-                {navigation.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = url.startsWith(item.href);
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={cn(
-                        'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
-                        isActive
-                          ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
 
-                {/* Logout Button in Mobile Menu */}
+              {/* Mobile Navigation */}
+              <nav className="flex-1 p-4 overflow-y-auto">
+                <div className="space-y-1">
+                  {navigation.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = url.startsWith(item.href);
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={cn(
+                          'flex items-center gap-3 px-4 py-3 rounded-xl transition-all',
+                          isActive
+                            ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                        )}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span className="font-medium">{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">More</p>
+                  <div className="space-y-1">
+                    {secondaryNav.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = url.startsWith(item.href);
+                      return (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className={cn(
+                            'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
+                            isActive
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          )}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span>{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </nav>
+
+              {/* Mobile Menu Footer */}
+              <div className="p-4 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 w-full"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 font-medium transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
-                  Logout
+                  Sign Out
                 </button>
-              </nav>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-white/20">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-700/50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/employee/pos" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
-                <ChefHat className="w-6 h-6 text-white" />
+            <Link href="/employee/dashboard" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <Briefcase className="w-5 h-5 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   NKH Restaurant
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Employee Portal</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">Employee Portal</p>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center bg-gray-100/80 dark:bg-gray-800/80 p-1 rounded-xl">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = url.startsWith(item.href);
@@ -169,61 +212,37 @@ export default function EmployeeLayout({ children }: Props) {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2 px-4 py-2 rounded-xl transition-colors',
+                      'flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium',
                       isActive
-                        ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                        : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300'
                     )}
                   >
                     <Icon className="w-4 h-4" />
-                    <span className="font-medium">{item.name}</span>
+                    <span>{item.name}</span>
                   </Link>
                 );
               })}
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
-              {/* Notifications */}
-              <Link
-                href="/employee/notifications"
-                className={cn(
-                  "relative p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors",
-                  url.startsWith('/employee/notifications') && "bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                )}
-              >
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Link>
-
-              {/* User Menu with Logout */}
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-medium">Employee</p>
-                  <p className="text-xs text-gray-500">On Duty</p>
-                </div>
+            <div className="flex items-center gap-2">
+              {/* Quick Stats Badge (Desktop Only) */}
+              <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full border border-emerald-500/20">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">On Duty</span>
               </div>
 
-              {/* Logout Button - Desktop */}
-              <button
-                onClick={handleLogout}
-                className="hidden lg:flex p-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
-                title="Logout"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
+              {/* Notifications */}
+              <NotificationDropdown variant="employee" />
+
+              {/* User Profile Dropdown */}
+              <UserProfileDropdown variant="employee" />
 
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <MenuIcon className="w-5 h-5" />
               </button>
@@ -233,15 +252,37 @@ export default function EmployeeLayout({ children }: Props) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         >
           {children}
         </motion.div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm mt-auto">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              © 2024 NKH Restaurant. Employee Portal v2.0
+            </p>
+            <div className="flex items-center gap-4">
+              {secondaryNav.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -47,6 +47,9 @@ export default function Schedule() {
     const [showTimeOffModal, setShowTimeOffModal] = useState(false);
     const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
     const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+    const [swapModalOpen, setSwapModalOpen] = useState(false);
+    const [swapType, setSwapType] = useState<'give_away' | 'trade'>('give_away');
+    const [swapReason, setSwapReason] = useState('');
     const [timeOffData, setTimeOffData] = useState({
         start_date: '',
         end_date: '',

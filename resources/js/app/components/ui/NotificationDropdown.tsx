@@ -68,7 +68,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
     const queryClient = useQueryClient();
 
     // Determine API prefix based on variant
-    const apiPrefix = variant === 'admin' ? '/api/admin' : '/api/customer';
+    const apiPrefix = variant === 'admin' ? '/api/admin' : variant === 'employee' ? '/api/employee' : '/api/customer';
 
     // Fetch notifications
     const { data: notificationsData, isLoading } = useQuery({
@@ -289,7 +289,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                             {notifications.length > 0 && (
                                 <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                                     <Link
-                                        href={variant === 'admin' ? '/admin/notifications' : '/customer/notifications'}
+                                        href={variant === 'admin' ? '/admin/notifications' : variant === 'employee' ? '/employee/notifications' : '/customer/notifications'}
                                         onClick={() => setIsOpen(false)}
                                         className={cn(
                                             'block w-full text-center py-2 text-sm font-medium rounded-xl transition-colors',

@@ -69,13 +69,14 @@ const menuConfigs: Record<UserRole, { items: MenuItem[]; bottomItems: MenuItem[]
     },
     employee: {
         items: [
-            { label: 'POS', href: '/employee/pos', icon: ShoppingBag },
+            { label: 'My Profile', href: '/employee/settings', icon: User },
             { label: 'My Schedule', href: '/employee/schedule', icon: Clock },
-            { label: 'Orders', href: '/employee/orders', icon: ClipboardList },
+            { label: 'Performance', href: '/employee/performance', icon: Star },
+            { label: 'Notifications', href: '/employee/notifications', icon: Bell },
         ],
         bottomItems: [
             { label: 'Settings', href: '/employee/settings', icon: Settings },
-            { label: 'Help', href: '/', icon: HelpCircle },
+            { label: 'Help & Support', href: '/employee/support', icon: HelpCircle },
         ],
     },
 };
