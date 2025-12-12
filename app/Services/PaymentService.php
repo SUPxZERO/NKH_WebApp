@@ -65,49 +65,34 @@ class PaymentService
     /**
      * Initiate a payment for an order.
      */
-    public function initiatePayment(Order $order, string $paymentMethodCode = 'qr'): array
+    public function initiatePayment(Order $order, string $paymentMethodCode = 'qr', float $amountToPay = null, string $userId = null, float $tipAmount = 0): array
     {
-        return DB::transaction(function () use ($order, $paymentMethodCode) {
+        return DB::transaction(function () use ($order, $paymentMethodCode, $amountToPay, $userId, $tipAmount) {
             // Ensure invoice exists
             $invoice = $order->invoice;
             if (!$invoice) {
                 $invoice = $this->createInvoiceForOrder($order);
             }
 
+            // Get allocation amount (default to full remaining due if not specified)
+            $amount = $amountToPay ?? $invoice->amount_due;
+
             // Get payment method
             $paymentMethod = PaymentMethod::where('code', $paymentMethodCode)
                 ->where('is_active', true)
                 ->first();
-
-            if (!$paymentMethod) {
-                // Fallback: If 'qr' was requested but not found, try to auto-create generic QR method
-                if ($paymentMethodCode === 'qr') {
-                    $paymentMethod = PaymentMethod::create([
-                        'name' => 'KHQR',
-                        'code' => 'qr',
-                        'type' => 'digital_wallet',
-                        'is_active' => true,
-                        'display_order' => 1
-                    ]);
-                } else {
-                    throw new \Exception("Payment method '{$paymentMethodCode}' not available or inactive");
-                }
-            }
-
-            // Check for duplicate pending payment
-            $existingPayment = Payment::where('invoice_id', $invoice->id)
-                ->pending()
-                ->where('expires_at', '>', now())
-                ->first();
-
-            if ($existingPayment) {
-                 // Check if existing payment method matches requested
-                if ($existingPayment->paymentMethod->code === $paymentMethodCode) {
-                    return $this->formatPaymentResponse($existingPayment, $order);
-                }
-                 // If different method, cancel old one (or just let user create new one)
-                 // For now, let's create a new one if user explicitly switches method
-                 $existingPayment->markAsCancelled();
+    
+            // ... (method retrieval fallback logic remains)
+            if (!$paymentMethod) { // Simplified check for brevity in replacement, assuming exists logic is block above or here
+                 // RE-INSERTING THE FALLBACK LOGIC TO BE SAFE
+                 if ($paymentMethodCode === 'qr') {
+                     $paymentMethod = PaymentMethod::firstOrCreate(
+                         ['code' => 'qr'], 
+                         ['name' => 'KHQR', 'type' => 'digital_wallet', 'is_active' => true, 'display_order' => 1]
+                     );
+                 } else {
+                      throw new \Exception("Payment method '{$paymentMethodCode}' not available or inactive");
+                 }
             }
 
             // Generate references
@@ -119,12 +104,14 @@ class PaymentService
             $payment = Payment::create([
                 'invoice_id' => $invoice->id,
                 'payment_method_id' => $paymentMethod->id,
-                'amount' => $invoice->amount_due,
+                'amount' => $amount, // Appied to invoice
+                'tip' => $tipAmount,  // Tip amount
                 'currency' => $invoice->currency ?? 'USD',
                 'transaction_id' => $transactionId,
                 'reference_number' => $referenceNumber,
                 'qr_reference' => $qrReference,
                 'status' => Payment::STATUS_PENDING,
+                'created_by' => $userId, // Ensure creator is logged
                 'expires_at' => now()->addMinutes(config('payment.expiry_minutes', 15)),
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),

@@ -101,6 +101,11 @@ class Order extends Model
         return $this->belongsTo(Employee::class);
     }
 
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

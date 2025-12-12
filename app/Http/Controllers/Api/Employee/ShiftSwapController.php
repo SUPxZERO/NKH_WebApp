@@ -10,31 +10,40 @@ use Illuminate\Support\Facades\DB;
 class ShiftSwapController extends Controller
 {
     /**
-     * List all swaps available to me or created by me
+     * List swaps with filtering
      */
     public function index(Request $request)
     {
         $userId = $request->user()->id;
+        $view = $request->query('view', 'all'); // 'my_requests', 'available', 'all'
         
-        $swaps = ShiftSwap::with(['requester', 'shift.location', 'shift.position'])
-            ->where(function($q) use ($userId) {
-                // My requests
-                $q->where('requester_id', $userId);
-                
-                // OR incoming requests specific to me
-                $q->orWhere('recipient_id', $userId);
-                
-                // OR open requests (give_away) where I am NOT the requester
-                $q->orWhere(function($sub) use ($userId) {
-                    $sub->whereNull('recipient_id')
-                        ->where('type', 'give_away')
-                        ->where('requester_id', '!=', $userId);
-                });
-            })
-            ->latest()
-            ->get();
+        $query = ShiftSwap::with(['requester.user', 'shift.location', 'shift.position'])
+            ->latest();
+
+        if ($view === 'my_requests') {
+            $query->where('requester_id', $userId);
+        } elseif ($view === 'available') {
+            $query->where('type', 'give_away')
+                  ->where('status', 'pending')
+                  ->where('requester_id', '!=', $userId)
+                  ->where(function($q) use ($userId) {
+                      $q->whereNull('recipient_id')
+                        ->orWhere('recipient_id', $userId);
+                  });
+        } else {
+             // Fallback: show everything relevant to me
+             $query->where(function($q) use ($userId) {
+                $q->where('requester_id', $userId)
+                  ->orWhere('recipient_id', $userId)
+                  ->orWhere(function($sub) use ($userId) {
+                      $sub->whereNull('recipient_id')
+                          ->where('type', 'give_away')
+                          ->where('requester_id', '!=', $userId);
+                  });
+            });
+        }
             
-        return response()->json($swaps);
+        return response()->json($query->get());
     }
 
     /**
@@ -69,13 +78,13 @@ class ShiftSwapController extends Controller
     }
     
     /**
-     * Cancel or Interact with swap
+     * Interact with swap (cancel, claim/accept)
      */
     public function update(Request $request, $id)
     {
         $swap = ShiftSwap::findOrFail($id);
         $user = $request->user();
-        $action = $request->input('action'); // 'cancel', 'accept'
+        $action = $request->input('action'); // 'cancel', 'claim'
         
         if ($action === 'cancel') {
             if ($swap->requester_id !== $user->id) {
@@ -85,24 +94,24 @@ class ShiftSwapController extends Controller
             return response()->json($swap);
         }
         
-        if ($action === 'accept') {
-            // Logic for a peer accepting a giveaway
-            // If it's a giveaway, peer accepting moves it to "accepted_by_peer" (waiting manager approval)
-            // Or if auto-approve is on? Let's assume manager approval is always needed for now.
-            
+        if ($action === 'claim') {
             if ($swap->requester_id === $user->id) {
-                 return response()->json(['message' => 'Cannot accept your own request'], 422);
+                 return response()->json(['message' => 'Cannot claim your own request'], 422);
             }
             
-            // If specific recipient, only they can accept
+            // If specific recipient was set, only they can claim
             if ($swap->recipient_id && $swap->recipient_id !== $user->id) {
                  return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            if ($swap->status !== 'pending') {
+                 return response()->json(['message' => 'Swap is no longer available'], 422);
             }
             
             // Lock it in for this user
             $swap->update([
-                'status' => 'accepted_by_peer',
-                'recipient_id' => $user->id // If it was null (open), now it's claimed by this user
+                'status' => 'accepted_by_peer', // Pending manager approval
+                'recipient_id' => $user->id
             ]);
             
             return response()->json($swap);

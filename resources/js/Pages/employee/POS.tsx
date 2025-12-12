@@ -13,7 +13,22 @@ import { toastSuccess } from '@/app/utils/toast';
 import { useActivePOSOrders } from '@/app/hooks/useOrderPayment';
 import POSOrderPaymentPanel from '@/app/components/pos/POSOrderPaymentPanel';
 import { POSMenuGrid } from '@/app/components/pos/POSMenuGrid';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { apiPost, apiGet } from '@/app/utils/api';
+import { toastError } from '@/app/utils/toast';
+import { cn } from '@/app/utils/cn';
 
+interface Floor {
+  id: number;
+  name: string;
+  tables: Table[];
+}
+
+interface Table {
+  id: number;
+  code: string;
+  status: 'available' | 'occupied' | 'reserved';
+}
 
 export default function POS() {
   const [categoryId, setCategoryId] = React.useState<number | undefined>();
@@ -25,6 +40,34 @@ export default function POS() {
   const [paymentOrder, setPaymentOrder] = useState<any>(null);
   const [quantity, setQuantity] = useState('1');
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // --- New Logic State ---
+  const [activeFloorId, setActiveFloorId] = useState<number | undefined>();
+  const [selectedTable, setSelectedTable] = useState<number | undefined>();
+  const [heldOrders, setHeldOrders] = useState<any[]>([]);
+
+  // Fetch Tables & Floors
+  const { data: floorsData } = useQuery({
+    queryKey: ['pos-tables'],
+    queryFn: async () => {
+      const res = await apiGet('/api/employee/pos/tables');
+      // The controller returns { floors: [...] }, and apiGet returns the response body directly.
+      // If the controller wrapped it in 'data', it would be res.data.floors.
+      // But it doesn't.
+      return (res.floors || res.data?.floors || []) as Floor[];
+    }
+  });
+
+  // Auto-select first floor
+  useEffect(() => {
+    if (floorsData && floorsData.length > 0 && !activeFloorId) {
+      setActiveFloorId(floorsData[0].id);
+    }
+  }, [floorsData, activeFloorId]);
+
+  const activeFloor = useMemo(() =>
+    floorsData?.find(f => f.id === activeFloorId),
+    [floorsData, activeFloorId]);
 
   const { data: categories, isLoading: catsLoading } = useCategories();
   const { data: menu, isLoading: menuLoading } = useMenuItems({ category_id: categoryId });
@@ -103,6 +146,90 @@ export default function POS() {
     } else {
       setQuantity(prev => (prev === '1' ? value : prev + value));
     }
+  };
+
+  // Load held orders
+  useEffect(() => {
+    const saved = localStorage.getItem('pos_held_orders');
+    if (saved) {
+      try {
+        setHeldOrders(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load held orders', e);
+      }
+    }
+  }, []);
+
+  const handleHoldOrder = () => {
+    if (cart.items.length === 0) return;
+
+    const newHold = {
+      id: Date.now(),
+      items: [...cart.items],
+      tableId: selectedTable,
+      timestamp: new Date().toISOString(),
+      total: cart.total
+    };
+
+    const updated = [...heldOrders, newHold];
+    setHeldOrders(updated);
+    localStorage.setItem('pos_held_orders', JSON.stringify(updated));
+
+    cart.clear();
+    setSelectedTable(undefined);
+    toastSuccess('Order held');
+  };
+
+  const restoreHeldOrder = (holdId: number) => {
+    const order = heldOrders.find(h => h.id === holdId);
+    if (!order) return;
+
+    if (cart.items.length > 0) {
+      if (!confirm('This will replace your current cart. Continue?')) return;
+    }
+
+    cart.clear();
+    order.items.forEach((item: any) => {
+      cart.addItem(item);
+    });
+    setSelectedTable(order.tableId);
+
+    // Remove from held
+    const updated = heldOrders.filter(h => h.id !== holdId);
+    setHeldOrders(updated);
+    localStorage.setItem('pos_held_orders', JSON.stringify(updated));
+    toastSuccess('Held order restored');
+  };
+
+  // Charge Mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        table_id: selectedTable,
+        items: cart.items.map(i => ({
+          menu_item_id: i.menu_item_id,
+          quantity: i.quantity,
+          notes: i.notes
+        })),
+        notes: cart.notes
+      };
+      const res = await apiPost('/api/employee/pos/orders', payload);
+      return res.data;
+    },
+    onSuccess: (order) => {
+      cart.clear();
+      setSelectedTable(undefined);
+      setPaymentOrder(order); // Open payment modal
+    },
+    onError: (err) => {
+      toastError('Failed to create order');
+      console.error(err);
+    }
+  });
+
+  const handleChargeOrder = () => {
+    if (cart.items.length === 0) return;
+    createOrderMutation.mutate();
   };
 
   return (
@@ -305,29 +432,92 @@ export default function POS() {
             <div className="lg:col-span-4 space-y-4">
 
               {/* HELD ORDERS PANEL */}
-              <Card className="bg-gradient-to-br from-gray-800/30 to-gray-900/30 border-gray-600/30\">
+              <Card className="bg-gradient-to-br from-gray-800/30 to-gray-900/30 border-gray-600/30">
                 <CardHeader>
-                  <h3 className="text-lg font-semibold text-white\">Held Orders</h3>
+                  <h3 className="text-lg font-semibold text-white">Held Orders</h3>
                 </CardHeader>
                 <CardContent>
-                  {/* Placeholder – real UI will read from localStorage */}
-                  <div className="text-sm text-gray-400\">No held orders</div>
+                  {heldOrders.length === 0 ? (
+                    <div className="text-sm text-gray-400">No held orders</div>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {heldOrders.map((h) => (
+                        <div key={h.id} className="flex justify-between items-center p-2 rounded bg-white/5 border border-white/10 text-sm">
+                          <div>
+                            <div className="font-medium text-white">Table {h.tableId || 'Walk-in'}</div>
+                            <div className="text-xs text-gray-400">
+                              {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • ${h.total.toFixed(2)}
+                            </div>
+                          </div>
+                          <Button size="sm" variant="secondary" onClick={() => restoreHeldOrder(h.id)}>
+                            Restore
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-              {/* TABLE SELECTOR */}
               <Card>
                 <CardHeader>
                   <div className="font-semibold">Table & Customer</div>
                 </CardHeader>
-                <CardContent>
-                  <select className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/5 text-gray-900 dark:text-white text-base">
-                    <option value="" className='text-gray-400'>Walk-in</option>
-                    <option value="1" className='text-gray-400'>Table 1</option>
-                    <option value="2" className='text-gray-400'>Table 2</option>
-                    <option value="3" className='text-gray-400'>Table 3</option>
-                    <option value="4" className='text-gray-400'>Table 4</option>
-                    <option value="5" className='text-gray-400'>Table 5</option>
-                  </select>
+                <CardContent className="space-y-4">
+                  {/* Floor Selector */}
+                  {floorsData && floorsData.length > 0 ? (
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                      {floorsData.map((floor) => (
+                        <div
+                          key={floor.id}
+                          className={cn(
+                            "cursor-pointer px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
+                            activeFloorId === floor.id
+                              ? "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 border border-fuchsia-200 dark:border-fuchsia-800"
+                              : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-transparent hover:bg-gray-200 dark:hover:bg-gray-700"
+                          )}
+                          onClick={() => setActiveFloorId(floor.id)}
+                        >
+                          {floor.name}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 italic">No floors found</div>
+                  )}
+
+                  {/* Table Selector */}
+                  <div className="grid grid-cols-4 gap-2">
+                    {/* <button
+                      onClick={() => setSelectedTable(undefined)}
+                      className={cn(
+                        "h-12 rounded-lg border text-xs font-semibold transition-all flex items-center justify-center",
+                        selectedTable === undefined
+                          ? "bg-blue-600 text-white border-blue-600 shadow-md transform scale-105"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
+                      )}
+                    >
+                      Walk-in
+                    </button> */}
+
+                    {activeFloor?.tables?.map((table) => (
+                      <button
+                        key={table.id}
+                        onClick={() => setSelectedTable(table.id)}
+                        // disabled={table.status === 'occupied'} // Allow selecting occupied for now (e.g. adding items)
+                        className={cn(
+                          "h-12 rounded-lg border text-xs font-semibold transition-all flex flex-col items-center justify-center",
+                          selectedTable === table.id
+                            ? "bg-blue-600 text-white border-blue-600 shadow-md transform scale-105"
+                            : table.status === 'occupied'
+                              ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
+                              : "bg-white text-gray-800 border-gray-200 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+                        )}
+                      >
+                        <span>{table.code}</span>
+                        {table.status === 'occupied' && <span className="text-[10px] opacity-75">Occupied</span>}
+                      </button>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -423,8 +613,22 @@ export default function POS() {
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-3">
-                    <Button variant="secondary" className="h-12 text-base">Hold</Button>
-                    <Button className="h-12 text-base bg-green-600 hover:bg-green-700">💳 Charge</Button>
+                    <Button
+                      variant="secondary"
+                      className="h-12 text-base"
+                      onClick={handleHoldOrder}
+                      disabled={cart.items.length === 0}
+                    >
+                      Hold
+                    </Button>
+                    <Button
+                      className="h-12 text-base bg-green-600 hover:bg-green-700"
+                      onClick={handleChargeOrder}
+                      disabled={cart.items.length === 0 || createOrderMutation.isPending}
+                      loading={createOrderMutation.isPending}
+                    >
+                      💳 Charge
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

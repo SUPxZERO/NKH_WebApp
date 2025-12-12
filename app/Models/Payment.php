@@ -23,6 +23,7 @@ class Payment extends Model
         'invoice_id',
         'payment_method_id',
         'amount',
+        'tip',
         'cash_received',
         'change_given',
         'confirmed_by',

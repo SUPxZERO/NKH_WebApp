@@ -120,12 +120,13 @@ class SplitPaymentController extends Controller
         }
 
         try {
-            // Initiate the payment with the specified amount
+            // Initiate the payment with the specified amount and tip
             $result = $this->paymentService->initiatePayment(
-                $order->id,
+                $order,
                 $validated['payment_method'],
                 $amount,
-                $request->user()?->id
+                $request->user()?->id,
+                $validated['tip'] ?? 0 // Pass tip
             );
 
             return response()->json(array_merge($result, [

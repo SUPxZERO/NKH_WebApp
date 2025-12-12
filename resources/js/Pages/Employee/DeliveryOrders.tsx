@@ -195,8 +195,170 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
     );
 }
 
+// ... (imports remain similar, will need to ensure apiGet/apiPost/apiPut are imported)
+import { apiGet, apiPost, apiPut } from '@/app/libs/apiClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+// ... (Existing CollectionModal ...)
+
+// Driver Mode Component
+function DriverMode() {
+    const qc = useQueryClient();
+    const [subTab, setSubTab] = useState<'my_deliveries' | 'available'>('my_deliveries');
+
+    const { data, isLoading } = useQuery<{ my_deliveries: any[], available_deliveries: any[] }>({
+        queryKey: ['driver.orders'],
+        queryFn: () => apiGet('/api/employee/driver/orders'),
+        refetchInterval: 15000 // Poll every 15s for new orders
+    });
+
+    const claimMutation = useMutation({
+        mutationFn: (orderId: number) => apiPost(`/api/employee/driver/orders/${orderId}/claim`, {}),
+        onSuccess: () => {
+            toastSuccess('Order claimed!');
+            qc.invalidateQueries({ queryKey: ['driver.orders'] });
+        },
+        onError: (err: any) => toastError(err?.response?.data?.message || 'Failed to claim')
+    });
+
+    const statusMutation = useMutation({
+        mutationFn: (vars: { id: number, status: string }) => apiPut(`/api/employee/driver/orders/${vars.id}/status`, { status: vars.status }),
+        onSuccess: () => {
+            toastSuccess('Status updated!');
+            qc.invalidateQueries({ queryKey: ['driver.orders'] });
+        },
+        onError: (err: any) => toastError(err?.response?.data?.message || 'Failed to update status')
+    });
+
+    const openMap = (address: string) => {
+        const encoded = encodeURIComponent(address);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
+    };
+
+    const handleClaim = (id: number) => {
+        if (confirm('Claim this delivery order?')) {
+            claimMutation.mutate(id);
+        }
+    };
+
+    const orders = subTab === 'my_deliveries' ? data?.my_deliveries : data?.available_deliveries;
+
+    return (
+        <div className="space-y-4">
+            <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 w-fit">
+                <button
+                    onClick={() => setSubTab('my_deliveries')}
+                    className={cn(
+                        "px-4 py-2 rounded-md text-sm font-medium transition-all",
+                        subTab === 'my_deliveries' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
+                    )}
+                >
+                    My Active Deliveries
+                </button>
+                <button
+                    onClick={() => setSubTab('available')}
+                    className={cn(
+                        "px-4 py-2 rounded-md text-sm font-medium transition-all",
+                        subTab === 'available' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
+                    )}
+                >
+                    Available to Claim
+                </button>
+            </div>
+
+            {isLoading ? (
+                <div className="text-center py-10"><RefreshCw className="animate-spin inline-block" /> Loading...</div>
+            ) : !orders || orders.length === 0 ? (
+                <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+                    <Truck className="w-12 h-12 mx-auto mb-3 text-gray-500" />
+                    <p className="text-gray-400">No orders found in this category.</p>
+                </div>
+            ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                    {orders.map((order: any) => (
+                        <Card key={order.id} className="bg-white/5 border-white/10">
+                            <CardContent className="p-5">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <div className="font-bold text-lg text-white">#{order.order_number}</div>
+                                        <div className="text-sm text-gray-400">{order.customer?.user?.name}</div>
+                                    </div>
+                                    <div className={cn(
+                                        "px-2 py-1 rounded text-xs font-medium uppercase",
+                                        order.status === 'out_for_delivery' ? "bg-yellow-500/20 text-yellow-500" :
+                                            order.status === 'delivered' ? "bg-green-500/20 text-green-500" :
+                                                "bg-blue-500/20 text-blue-500"
+                                    )}>
+                                        {order.status.replace(/_/g, ' ')}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 mb-4 text-sm">
+                                    <div className="flex items-start gap-2 text-gray-300">
+                                        <MapPin className="w-4 h-4 mt-0.5 text-gray-500" />
+                                        <span
+                                            className="underline decoration-dotted hover:text-blue-400 cursor-pointer"
+                                            onClick={() => order.delivery_address && openMap(order.delivery_address)}
+                                        >
+                                            {order.delivery_address || "No address provided"}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-gray-300">
+                                        <Phone className="w-4 h-4 text-gray-500" />
+                                        <span>{order.customer_phone || "No phone"}</span>
+                                    </div>
+                                </div>
+
+                                {subTab === 'available' ? (
+                                    <Button
+                                        onClick={() => handleClaim(order.id)}
+                                        className="w-full bg-blue-600 hover:bg-blue-500"
+                                        disabled={claimMutation.isPending}
+                                    >
+                                        Claim Order
+                                    </Button>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => order.delivery_address && openMap(order.delivery_address)}
+                                            className="flex-1"
+                                        >
+                                            Map
+                                        </Button>
+                                        {order.status === 'ready' || order.status === 'preparing' ? (
+                                            <Button
+                                                className="flex-1 bg-yellow-600 hover:bg-yellow-500"
+                                                onClick={() => statusMutation.mutate({ id: order.id, status: 'out_for_delivery' })}
+                                                disabled={statusMutation.isPending}
+                                            >
+                                                Start Delivery
+                                            </Button>
+                                        ) : order.status === 'out_for_delivery' ? (
+                                            <Button
+                                                className="flex-1 bg-green-600 hover:bg-green-500"
+                                                onClick={() => statusMutation.mutate({ id: order.id, status: 'delivered' })}
+                                                disabled={statusMutation.isPending}
+                                            >
+                                                Complete
+                                            </Button>
+                                        ) : null}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function DeliveryOrders() {
-    const { data: orders, isLoading, refetch } = usePendingCollection();
+    const [viewMode, setViewMode] = useState<'collection' | 'driver'>('collection');
+
+    // Existing collection logic
+    const { data: collectionOrders, isLoading: collectionLoading, refetch } = usePendingCollection();
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
     const handleSuccess = () => {
@@ -210,113 +372,146 @@ export default function DeliveryOrders() {
 
             <div className="max-w-6xl mx-auto space-y-6 p-4">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-white">Delivery & Pickup</h1>
                         <p className="text-sm text-gray-400">
-                            Collect payments for delivery and pickup orders
+                            {viewMode === 'collection' ? 'Collect payments for orders' : 'Manage your delivery assignments'}
                         </p>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => refetch()}>
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Refresh
-                    </Button>
+
+                    <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 self-start">
+                        <button
+                            onClick={() => setViewMode('collection')}
+                            className={cn(
+                                "px-4 py-2 rounded-md text-sm font-medium transition-all",
+                                viewMode === 'collection' ? "bg-fuchsia-600 text-white shadow-lg shadow-fuchsia-900/50" : "text-gray-400 hover:text-white hover:bg-white/5"
+                            )}
+                        >
+                            <Banknote className="w-4 h-4 inline-block mr-2" />
+                            Payments
+                        </button>
+                        <button
+                            onClick={() => setViewMode('driver')}
+                            className={cn(
+                                "px-4 py-2 rounded-md text-sm font-medium transition-all",
+                                viewMode === 'driver' ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-gray-400 hover:text-white hover:bg-white/5"
+                            )}
+                        >
+                            <Truck className="w-4 h-4 inline-block mr-2" />
+                            Driver Mode
+                        </button>
+                    </div>
                 </div>
 
-                {/* Orders Grid */}
-                {isLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <RefreshCw className="w-8 h-8 text-fuchsia-400 animate-spin" />
-                    </div>
-                ) : orders?.length === 0 ? (
-                    <Card className="bg-white/5 border-dashed border-white/20">
-                        <CardContent className="py-12 text-center">
-                            <Truck className="w-12 h-12 mx-auto mb-4 text-emerald-400" />
-                            <p className="text-lg font-medium text-white">No Pending Collections</p>
-                            <p className="text-sm text-gray-400">There are no orders waiting for payment collection</p>
-                        </CardContent>
-                    </Card>
+                {viewMode === 'driver' ? (
+                    <DriverMode />
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <AnimatePresence mode="popLayout">
-                            {orders?.map((order, index) => (
-                                <motion.div
-                                    key={order.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ delay: index * 0.05 }}
-                                >
-                                    <Card className="h-full hover:border-white/20 transition-colors">
-                                        <CardContent className="p-5 flex flex-col h-full">
-                                            {/* Top Row: Type & ID */}
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={cn(
-                                                        "w-10 h-10 rounded-xl flex items-center justify-center",
-                                                        order.order_type === 'delivery'
-                                                            ? "bg-blue-500/20 text-blue-400"
-                                                            : "bg-orange-500/20 text-orange-400"
-                                                    )}>
-                                                        {order.order_type === 'delivery' ? <Truck className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
+                    <>
+                        {/* Existing Collection Grid */}
+                        <div className="flex justify-end">
+                            <Button variant="ghost" size="sm" onClick={() => refetch()}>
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                Refresh
+                            </Button>
+                        </div>
+
+                        {collectionLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <RefreshCw className="w-8 h-8 text-fuchsia-400 animate-spin" />
+                            </div>
+                        ) : collectionOrders?.length === 0 ? (
+                            <Card className="bg-white/5 border-dashed border-white/20">
+                                <CardContent className="py-12 text-center">
+                                    <Truck className="w-12 h-12 mx-auto mb-4 text-emerald-400" />
+                                    <p className="text-lg font-medium text-white">No Pending Collections</p>
+                                    <p className="text-sm text-gray-400">All set! No orders waiting for payment.</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            // ... (Existing list code)
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <AnimatePresence mode="popLayout">
+                                    {collectionOrders?.map((order, index) => (
+                                        <motion.div
+                                            key={order.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ delay: index * 0.05 }}
+                                        >
+                                            <Card className="h-full hover:border-white/20 transition-colors">
+                                                <CardContent className="p-5 flex flex-col h-full">
+                                                    {/* Top Row: Type & ID */}
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={cn(
+                                                                "w-10 h-10 rounded-xl flex items-center justify-center",
+                                                                order.order_type === 'delivery'
+                                                                    ? "bg-blue-500/20 text-blue-400"
+                                                                    : "bg-orange-500/20 text-orange-400"
+                                                            )}>
+                                                                {order.order_type === 'delivery' ? <Truck className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="font-bold text-white">#{order.order_number}</h3>
+                                                                <p className="text-xs text-gray-400 capitalize">{order.order_type}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 text-xs font-medium">
+                                                                Unpaid
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h3 className="font-bold text-white">#{order.order_number}</h3>
-                                                        <p className="text-xs text-gray-400 capitalize">{order.order_type}</p>
+
+                                                    {/* Details */}
+                                                    <div className="space-y-3 flex-1">
+                                                        <div className="flex items-start gap-2 text-sm text-gray-300">
+                                                            <User className="w-4 h-4 mt-0.5 text-gray-500" />
+                                                            <span>{order.customer_name}</span>
+                                                        </div>
+
+                                                        {order.customer_phone && (
+                                                            <div className="flex items-center gap-2 text-sm text-gray-300">
+                                                                <Phone className="w-4 h-4 text-gray-500" />
+                                                                <span>{order.customer_phone}</span>
+                                                            </div>
+                                                        )}
+
+                                                        {order.order_type === 'delivery' && order.delivery_address && (
+                                                            <div className="flex items-start gap-2 text-sm text-gray-300">
+                                                                <MapPin className="w-4 h-4 mt-0.5 text-gray-500" />
+                                                                <span className="line-clamp-2">{order.delivery_address}</span>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                                                            <Clock className="w-4 h-4 text-gray-500" />
+                                                            <span>Placed {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 text-xs font-medium">
-                                                        Unpaid
-                                                    </span>
-                                                </div>
-                                            </div>
 
-                                            {/* Details */}
-                                            <div className="space-y-3 flex-1">
-                                                <div className="flex items-start gap-2 text-sm text-gray-300">
-                                                    <User className="w-4 h-4 mt-0.5 text-gray-500" />
-                                                    <span>{order.customer_name}</span>
-                                                </div>
-
-                                                {order.customer_phone && (
-                                                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                                                        <Phone className="w-4 h-4 text-gray-500" />
-                                                        <span>{order.customer_phone}</span>
+                                                    {/* Footer Amount & Action */}
+                                                    <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                                                        <div className="text-2xl font-bold text-white">
+                                                            ${order.total_amount.toFixed(2)}
+                                                        </div>
+                                                        <Button
+                                                            onClick={() => setSelectedOrder(order)}
+                                                            className="bg-blue-600 hover:bg-blue-700"
+                                                        >
+                                                            Collection
+                                                        </Button>
                                                     </div>
-                                                )}
-
-                                                {order.order_type === 'delivery' && order.delivery_address && (
-                                                    <div className="flex items-start gap-2 text-sm text-gray-300">
-                                                        <MapPin className="w-4 h-4 mt-0.5 text-gray-500" />
-                                                        <span className="line-clamp-2">{order.delivery_address}</span>
-                                                    </div>
-                                                )}
-
-                                                <div className="flex items-center gap-2 text-sm text-gray-300">
-                                                    <Clock className="w-4 h-4 text-gray-500" />
-                                                    <span>Placed {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Footer Amount & Action */}
-                                            <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                                                <div className="text-2xl font-bold text-white">
-                                                    ${order.total_amount.toFixed(2)}
-                                                </div>
-                                                <Button
-                                                    onClick={() => setSelectedOrder(order)}
-                                                    className="bg-blue-600 hover:bg-blue-700"
-                                                >
-                                                    Collection
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
