@@ -32,11 +32,25 @@ class Employee extends Model
         'salary',
         'address',
         'status',
+        'employment_status',
+        // Work preferences
+        'preferred_stations',
+        'preferred_shifts',
+        'available_days',
+        'max_hours_per_week',
+        // Emergency contact
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relation',
     ];
 
     protected $casts = [
         'hire_date' => 'date',
         'salary' => 'decimal:2',
+        'preferred_stations' => 'array',
+        'preferred_shifts' => 'array',
+        'available_days' => 'array',
+        'max_hours_per_week' => 'integer',
     ];
 
     public function user()

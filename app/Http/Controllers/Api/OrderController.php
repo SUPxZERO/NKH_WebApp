@@ -526,4 +526,123 @@ class OrderController extends Controller
         $order->delete();
         return response()->json(['message' => 'Order deleted successfully.']);
     }
+
+    // PATCH /api/admin/orders/{order}/payment-status
+    public function updatePaymentStatus(Request $request, Order $order): OrderResource
+    {
+        $request->validate([
+            'payment_status' => 'required|in:paid,unpaid',
+        ]);
+
+        $newStatus = $request->payment_status;
+
+        if ($newStatus === 'paid') {
+            if ($order->isPaid()) {
+                abort(409, 'Order is already paid.');
+            }
+
+            DB::transaction(function () use ($order, $request) {
+                // 1. Mark order as paid
+                $order->collectPayment($request->user()->id, 'Admin manually marked as paid');
+
+                // 2. Manage Invoice
+                $invoice = $order->invoice;
+                if (!$invoice) {
+                    $invoice = new Invoice([
+                        'order_id' => $order->id,
+                        'location_id' => $order->location_id,
+                        'invoice_number' => $this->generateInvoiceNumber($order->location_id, 'INV'),
+                        'subtotal' => $order->subtotal,
+                        'tax_amount' => $order->tax_amount,
+                        'discount_amount' => $order->discount_amount,
+                        'service_charge' => $order->service_charge,
+                        'total_amount' => $order->total_amount,
+                        'amount_paid' => $order->total_amount,
+                        'amount_due' => 0,
+                        'currency' => $order->currency,
+                        'issued_at' => now(),
+                        'status' => 'paid',
+                    ]);
+                    $order->invoice()->save($invoice);
+                } else {
+                    $invoice->update([
+                        'amount_paid' => $order->total_amount,
+                        'amount_due' => 0,
+                        'status' => 'paid',
+                    ]);
+                }
+
+                // 3. Create a placeholder payment if none exists to justify the "paid" status
+                // We assume "Cash" as the default method for manual admin override if not specified
+                // But we check if successful payments already sum up to total
+                $existingPaid = $invoice->payments()->where('status', 'completed')->sum('amount');
+                
+                if ($existingPaid < $order->total_amount) {
+                    $diff = $order->total_amount - $existingPaid;
+                    $payment = new Payment([
+                        'invoice_id' => $invoice->id,
+                        'payment_method_id' => null, // null = Manual/Cash generic
+                        'amount' => $diff,
+                        'transaction_id' => 'MANUAL-ADMIN-' . Str::upper(Str::random(8)),
+                        'status' => 'completed',
+                        'processed_at' => now(),
+                        'notes' => 'Admin manually marked as paid',
+                    ]);
+                    $invoice->payments()->save($payment);
+                    
+                    // Log the manual payment
+                    \App\Models\PaymentAuditLog::log(
+                        $payment,
+                        'admin_manual_pay',
+                        null,
+                        'completed',
+                        $request->user()->id,
+                        ['note' => 'Admin marked as paid']
+                    );
+                }
+            });
+        } elseif ($newStatus === 'unpaid') {
+            if ($order->isUnpaid()) {
+                abort(409, 'Order is already unpaid.');
+            }
+
+            DB::transaction(function () use ($order, $request) {
+                 // 1. Revert order status
+                 $order->update([
+                     'payment_status' => 'unpaid',
+                     'payment_collected_by' => null,
+                     'payment_collected_at' => null,
+                     'payment_collection_notes' => null,
+                 ]);
+
+                 // 2. Revert Invoice
+                 $invoice = $order->invoice;
+                 if ($invoice) {
+                     $invoice->update([
+                         'amount_paid' => 0,
+                         'amount_due' => $invoice->total_amount,
+                         'status' => 'issued',
+                     ]);
+
+                     // 3. Void/Cancel existing completed payments
+                     foreach ($invoice->payments as $payment) {
+                         if ($payment->status === 'completed') {
+                             $payment->update(['status' => 'cancelled']);
+                             
+                             \App\Models\PaymentAuditLog::log(
+                                $payment,
+                                'admin_manual_unpay',
+                                'completed',
+                                'cancelled',
+                                $request->user()->id,
+                                ['note' => 'Admin marked as unpaid']
+                            );
+                         }
+                     }
+                 }
+            });
+        }
+
+        return new OrderResource($order->fresh(['items.menuItem', 'invoice', 'customer', 'table']));
+    }
 }

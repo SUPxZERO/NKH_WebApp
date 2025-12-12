@@ -61,17 +61,6 @@ Route::get('/health', function () {
     ]);
 });
 
-// User Profile Routes - MOVED TO web.php to share session properly
-// Route::prefix('user')
-//     ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum'])
-//     ->group(function () {
-//     Route::put('profile', [UserProfileController::class, 'update']);
-//     Route::post('profile/avatar', [UserProfileController::class, 'uploadAvatar']);
-//     Route::delete('profile/avatar', [UserProfileController::class, 'deleteAvatar']);
-//     Route::get('profile/avatar', [UserProfileController::class, 'getAvatarUrl']);
-//     Route::post('change-password', [UserProfileController::class, 'changePassword']);
-// });
-
 // Public endpoints
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -165,9 +154,11 @@ Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
 });
 
 // POS Quick Pay (for employees)
-Route::middleware(['auth:sanctum'])->prefix('pos')->group(function () {
+Route::prefix('pos')
+    ->group(function () {
     Route::post('/orders/{order}/quick-pay', [\App\Http\Controllers\Api\OrderPaymentController::class, 'quickPay']);
 });
+
 
 // Public reference data
 Route::get('/positions', [PositionController::class, 'index']);
@@ -212,108 +203,6 @@ Route::get('/_debug/auth', function (Request $request) {
         'headers' => $request->headers->all(),
     ]);
 });
-
-
-// Authenticated routes
-// NOTE: authentication is required for these routes. Enable Sanctum guard so
-// $request->user() is available for controllers that rely on the authenticated user.
-// Route::group([
-//     'middleware' => ['auth:sanctum']
-// ], function () {
-//     Route::get('/user', [AuthController::class, 'me']);
-//     Route::post('/logout', [AuthController::class, 'logout']);
-
-//     // Admin/Manager management endpoints
-//     Route::prefix('admin')
-//     // Apply role-based restriction to admin endpoints (requires auth:sanctum on outer group)
-//     ->middleware(['role:admin,manager'])
-//     ->group(function () {
-//             Route::get('/category-stats', [CategoryController::class, 'stats']);
-//             Route::get('/categories/hierarchy', [CategoryController::class, 'hierarchy']);
-//             Route::get('/categories', [CategoryController::class, 'index']);
-//             Route::post('/categories', [CategoryController::class, 'store']);
-//             Route::get('/categories/{category}', [CategoryController::class, 'show']);
-//             Route::put('/categories/{category}', [CategoryController::class, 'update']);
-//             Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
-//         Route::put('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus']);
-//         // Menu Items
-//         Route::apiResource('menu-items', MenuItemController::class);
-//         // Employees
-//         Route::apiResource('employees', EmployeeController::class);
-//         // Customers
-//         Route::apiResource('customers', CustomerController::class);
-//         // Expenses
-//         Route::apiResource('expenses', ExpenseController::class);
-//         // Floors
-//         Route::apiResource('floors', FloorController::class);
-//         // Tables
-//         Route::apiResource('tables', TableController::class);
-//         Route::patch('tables/{table}/status', [TableController::class, 'updateStatus']);
-//         // Invoices
-//         Route::get('invoices', [InvoiceController::class, 'index']);
-//         Route::get('invoices/{invoice}', [InvoiceController::class, 'show']);
-//         // Reservations
-//         Route::apiResource('reservations', ReservationController::class);
-//         // Settings
-//         Route::get('settings', [SettingController::class, 'index']);
-//         Route::put('settings', [SettingController::class, 'update']);
-//         // Customer Requests
-//         Route::get('customer-requests', [CustomerRequestController::class, 'index']);
-//         Route::get('customer-requests/{customerRequest}', [CustomerRequestController::class, 'show']);
-//         Route::patch('customer-requests/{customerRequest}', [CustomerRequestController::class, 'update']);
-
-//         // Dashboard
-//         Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
-//         Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
-//         Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
-
-//         // Order oversight and approvals
-//         Route::get('orders', [OrderController::class, 'index']); // Assuming an index method for admin
-//         Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
-//         // ->middleware('auth','role:admin,manager');
-//         Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
-//         // ->middleware('auth','role:admin,manager');
-//     });
-
-    
-
-
-//     // In-store operations for staff (Employee)
-//     Route::prefix('employee')
-//     ->middleware('role:admin,manager,waiter')
-//     ->group(function () {
-//         // POS menu
-//         Route::get('menu', [MenuItemController::class, 'index']);
-//         // POS Orders (dine-in, auto-approved)
-//         Route::post('orders', [OrderController::class, 'store']);
-//         Route::get('orders/{order}', [OrderController::class, 'show']);
-//         Route::post('orders/{order}/items', [OrderController::class, 'addItem']);
-//         Route::put('order-items/{orderItem}', [OrderController::class, 'updateItem']);
-//         Route::delete('order-items/{orderItem}', [OrderController::class, 'removeItem']);
-//         Route::post('orders/{order}/submit', [OrderController::class, 'submitToKitchen']);
-//     });
-
-//     // Customer self-service
-//     Route::
-//         middleware('role:customer')
-//         ->group(function () {
-//         Route::get('/customer/profile', [CustomerController::class, 'profile']);
-//         Route::get('/customer/orders', [CustomerController::class, 'orders']);
-//         Route::get('/customer/orders/{order}', [OnlineOrderController::class, 'show']); // Customer can view their own order
-//         Route::get('/customer/loyalty-points', [CustomerController::class, 'loyaltyPoints']);
-
-//         Route::get('/customer/addresses', [OnlineOrderController::class, 'addressesIndex']);
-//         Route::post('/customer/addresses', [OnlineOrderController::class, 'addressesStore']);
-
-//         // Customer online orders (pickup/delivery, requires approval)
-//         Route::post('/online-orders', [OnlineOrderController::class, 'store']);
-//     });
-
-//     // Customer online orders (pickup/delivery, requires approval)
-//     Route::post('/online-orders', [OnlineOrderController::class, 'store']);
-
-
-// });
 
 
 Route::get('/user', [AuthController::class, 'me'])->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
@@ -394,6 +283,7 @@ Route::prefix('admin')
     Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
 
     Route::put('orders/{order}/status', [OrderController::class, 'updateStatus']);
+    Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus']);
     Route::delete('orders/{order}', [OrderController::class, 'destroy']);
     Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
     Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
@@ -666,3 +556,125 @@ Route::prefix('order-holds')
         Route::post('/', [OrderHoldController::class, 'store']);
         Route::delete('{id}', [OrderHoldController::class, 'destroy']);
     });
+// ============================================================================
+// MOVED ROUTES (Consolidated from web.php)
+// ============================================================================
+
+// CUSTOMER API ROUTES
+Route::prefix('customer')
+    ->middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])
+    ->group(function () {
+    // Profile & Dashboard
+    Route::get('profile', [App\Http\Controllers\Api\CustomerDashboardController::class, 'profile']);
+    Route::put('profile', [App\Http\Controllers\Api\CustomerController::class, 'updateProfile']);
+    Route::get('dashboard/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'dashboardStats']);
+    
+    // Orders
+    Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
+    Route::get('orders/{order}', [App\Http\Controllers\Api\CustomerDashboardController::class, 'show']);
+    Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store']);
+    
+    // Favorites
+    Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);
+    Route::get('favorites/ids', [App\Http\Controllers\Api\CustomerDashboardController::class, 'getExplicitFavorites']);
+    Route::post('favorites/toggle', [App\Http\Controllers\Api\CustomerDashboardController::class, 'toggleFavorite']);
+    
+    // Notifications
+    Route::get('notifications', [App\Http\Controllers\Api\CustomerDashboardController::class, 'notifications']);
+    
+    // CRM Data
+    Route::get('stats', [App\Http\Controllers\Api\CustomerController::class, 'customerStats']);
+    Route::get('history', [App\Http\Controllers\Api\CustomerController::class, 'customerHistory']);
+    
+    // Address Management
+    Route::get('addresses', [App\Http\Controllers\Api\CustomerController::class, 'getAddresses']);
+    Route::post('addresses', [App\Http\Controllers\Api\CustomerController::class, 'storeAddress']);
+    Route::put('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'updateAddress']);
+    Route::delete('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'destroyAddress']);
+    Route::post('addresses/{address}/set-default', [App\Http\Controllers\Api\CustomerController::class, 'setDefaultAddress']);
+    
+    // Cart
+    Route::get('cart', [App\Http\Controllers\Api\CartController::class, 'index']);
+    Route::post('cart', [App\Http\Controllers\Api\CartController::class, 'store']);
+    Route::put('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'update']);
+    Route::delete('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
+    Route::delete('cart', [App\Http\Controllers\Api\CartController::class, 'clear']);
+    Route::post('cart/sync', [App\Http\Controllers\Api\CartController::class, 'sync']);
+    
+    // Reservations
+    Route::get('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'index']);
+    Route::post('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'store']);
+    Route::get('reservations/availability', [App\Http\Controllers\Api\CustomerReservationController::class, 'availability']);
+    Route::delete('reservations/{reservation}', [App\Http\Controllers\Api\CustomerReservationController::class, 'destroy']);
+    
+    // Rewards
+    Route::get('rewards', [App\Http\Controllers\Api\RewardController::class, 'index']);
+    Route::post('rewards/redeem', [App\Http\Controllers\Api\RewardController::class, 'redeem']);
+    Route::get('rewards/history', [App\Http\Controllers\Api\RewardController::class, 'history']);
+    
+    // Notification Preferences
+    Route::get('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
+    Route::put('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
+    Route::post('notification-preferences/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
+    Route::post('notification-preferences/disable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'disableAll']);
+    Route::post('notification-preferences/enable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'enableAll']);
+});
+
+// USER API ROUTES
+Route::prefix('user')
+    ->middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])
+    ->group(function () {
+    Route::put('profile', [App\Http\Controllers\Api\UserProfileController::class, 'update']);
+    Route::post('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar']);
+    Route::delete('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
+    Route::get('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
+    Route::post('change-password', [App\Http\Controllers\Api\UserProfileController::class, 'changePassword']);
+});
+
+// EMPLOYEE API ROUTES
+Route::prefix('employee')
+    ->middleware(['auth:sanctum', \Illuminate\Session\Middleware\StartSession::class])
+    ->group(function () {
+    // Dashboard
+    Route::get('dashboard/stats', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'stats']);
+    Route::get('dashboard/shifts', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'upcomingShifts']);
+    Route::get('dashboard/announcements', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'announcements']);
+    
+    // Notifications
+    Route::get('notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
+    Route::put('notifications/read-all', [App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
+    Route::put('notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    
+    // Settings
+    Route::get('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
+    Route::put('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
+    Route::post('settings/notifications/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
+    Route::get('settings/work-preferences', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'getWorkPreferences']);
+    Route::put('settings/work-preferences', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'updateWorkPreferences']);
+    Route::get('settings/emergency-contact', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'getEmergencyContact']);
+    Route::put('settings/emergency-contact', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'updateEmergencyContact']);
+    
+    // Support & Feedback
+    Route::get('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'index']);
+    Route::post('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'store']);
+    Route::get('support-tickets/{id}', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'show']);
+    Route::post('feedback', [App\Http\Controllers\Api\Employee\EmployeeFeedbackController::class, 'store']);
+    
+    // Performance
+    Route::get('performance', [App\Http\Controllers\Api\Employee\EmployeePerformanceController::class, 'stats']);
+    
+    // Schedule & Shifts
+    Route::get('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'index']);
+    Route::post('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'store']);
+    Route::put('shift-swaps/{id}', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'update']);
+    
+    // POS Operations
+    Route::get('pos/tables', [App\Http\Controllers\Api\Employee\EmployeePOSController::class, 'getTables']);
+    Route::post('pos/orders', [App\Http\Controllers\Api\Employee\EmployeePOSController::class, 'store']);
+    
+    // Delivery Driver
+    Route::get('driver/orders', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'index']);
+    Route::post('driver/orders/{order}/claim', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'claim']);
+    Route::put('driver/orders/{order}/status', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'updateStatus']);
+});

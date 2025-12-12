@@ -179,6 +179,20 @@ export default function Orders() {
     onError: (error: any) => toastError(error.response?.data?.message || 'Failed to update')
   });
 
+  const updatePaymentStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number, status: 'paid' | 'unpaid' }) =>
+      apiPatch(`/api/admin/orders/${id}/payment-status`, { payment_status: status }),
+    onSuccess: (_, variables) => {
+      toastSuccess(`Order marked as ${variables.status}`);
+      qc.invalidateQueries({ queryKey: ['admin/orders'] });
+      // Also close view modal if open
+      if (selectedOrder && selectedOrder.id === variables.id) {
+        setOpenView(false);
+      }
+    },
+    onError: (error: any) => toastError(error.response?.data?.message || 'Failed to update payment status')
+  });
+
   const handleApprove = async (order: Order) => {
     try {
       await apiPatch(`/api/admin/orders/${order.id}/approve`, {});
@@ -234,6 +248,15 @@ export default function Orders() {
 
   const handleQuickStatus = (id: number, status: string) => {
     updateStatusMutation.mutate({ id, status });
+  };
+
+  const handleTogglePayment = (order: Order) => {
+    const isPaid = order.payment_status === 'paid';
+    const newStatus = isPaid ? 'unpaid' : 'paid';
+
+    if (confirm(`Mark order #${order.order_number} as ${newStatus.toUpperCase()}?`)) {
+      updatePaymentStatusMutation.mutate({ id: order.id, status: newStatus });
+    }
   };
 
   const toggleSelectOrder = (id: number) => {
@@ -433,9 +456,22 @@ export default function Orders() {
                     )}
                   </div>
 
-                  {/* Total */}
-                  <div className="col-span-1 font-semibold text-white">
-                    ${getAmount(order.total).toFixed(2)}
+                  {/* Total & Payment */}
+                  <div className="col-span-1">
+                    <div className="font-semibold text-white">
+                      ${getAmount(order.total).toFixed(2)}
+                    </div>
+                    <div className="mt-1">
+                      {order.payment_status === 'paid' ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          Paid
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                          Unpaid
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Actions */}
@@ -502,6 +538,20 @@ export default function Orders() {
                           className="h-8 w-8 p-0 border-white/10"
                         >
                           <Eye className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={order.payment_status === 'paid' ? 'secondary' : 'default'}
+                          onClick={() => handleTogglePayment(order)}
+                          className={cn(
+                            "h-8 w-8 p-0 border-white/10",
+                            order.payment_status === 'paid'
+                              ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20"
+                              : "bg-white/10 hover:bg-emerald-600 text-gray-400 hover:text-white"
+                          )}
+                          title={order.payment_status === 'paid' ? "Mark as Unpaid" : "Mark as Paid"}
+                        >
+                          <DollarSign className="w-3 h-3" />
                         </Button>
                       </>
                     )}
@@ -611,6 +661,25 @@ export default function Orders() {
                     <span className="text-gray-400">Total:</span>
                     <span className="text-white font-semibold">${getAmount(selectedOrder.total).toFixed(2)}</span>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Payment:</span>
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        "text-sm font-medium",
+                        selectedOrder.payment_status === 'paid' ? "text-emerald-400" : "text-red-400"
+                      )}>
+                        {selectedOrder.payment_status === 'paid' ? 'Paid' : 'Unpaid'}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleTogglePayment(selectedOrder)}
+                        className="h-6 text-xs px-2 py-0 ml-2 border-white/20"
+                      >
+                        {selectedOrder.payment_status === 'paid' ? 'Mark Unpaid' : 'Mark Paid'}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -648,6 +717,6 @@ export default function Orders() {
           </div>
         )}
       </Modal>
-    </AdminLayout>
+    </AdminLayout >
   );
 }

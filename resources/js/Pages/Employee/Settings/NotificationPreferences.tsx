@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Bell, Loader2 } from 'lucide-react';
+import { Bell, Loader2, Clock, Mail, Smartphone, MessageSquare, AlertCircle } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
 interface NotificationState {
@@ -10,45 +10,49 @@ interface NotificationState {
 }
 
 export default function NotificationPreferences() {
+    const queryClient = useQueryClient();
+
     // State to hold local boolean values for the UI switches
     const [toggles, setToggles] = useState<NotificationState>({
         orderAlerts: true,
         shiftReminders: true,
         announcements: true,
         emailNotifications: true,
-        smsNotifications: false,
+        pushNotifications: false,
     });
 
     // Mappings from UI keys to API params
     const MAPPING: Record<string, { channel: string; type: string }> = {
         orderAlerts: { channel: 'in_app', type: 'order' },
-        shiftReminders: { channel: 'in_app', type: 'reservation' }, // Using reservation as proxy for now
+        shiftReminders: { channel: 'in_app', type: 'reservation' },
         announcements: { channel: 'in_app', type: 'system' },
-        emailNotifications: { channel: 'email', type: 'order' }, // Primary email setting
-        smsNotifications: { channel: 'push', type: 'order' },   // Primary push setting
+        emailNotifications: { channel: 'email', type: 'order' },
+        pushNotifications: { channel: 'push', type: 'order' },
     };
 
     // Fetch settings
     const { data: apiData, isLoading } = useQuery({
         queryKey: ['employeeSettings'],
         queryFn: async () => {
-            const res = await apiGet('/api/employee/settings/notifications') as { data: { preferences: any } };
-            return res.data; // { preferences: { channel: { type: bool } } }
+            try {
+                const res = await apiGet('/api/employee/settings/notifications') as { data: { preferences: any } };
+                return res.data;
+            } catch (e) {
+                return { preferences: null };
+            }
         },
     });
 
     useEffect(() => {
         if (apiData?.preferences) {
-            // Update local state based on backend data
             const prefs = apiData.preferences;
-
             setToggles(prev => ({
                 ...prev,
                 orderAlerts: prefs.in_app?.order ?? true,
                 shiftReminders: prefs.in_app?.reservation ?? true,
                 announcements: prefs.in_app?.system ?? true,
                 emailNotifications: prefs.email?.order ?? true,
-                smsNotifications: prefs.push?.order ?? false,
+                pushNotifications: prefs.push?.order ?? false,
             }));
         }
     }, [apiData]);
@@ -70,6 +74,7 @@ export default function NotificationPreferences() {
         onSuccess: (data) => {
             if (data) {
                 toastSuccess('Preference updated');
+                queryClient.invalidateQueries({ queryKey: ['employeeSettings'] });
             }
         },
         onError: () => {
@@ -83,51 +88,115 @@ export default function NotificationPreferences() {
         toggleMutation.mutate({ key, value: newValue });
     };
 
-    const items = [
-        { key: 'orderAlerts', label: 'Order Alerts', desc: 'Get notified for new orders and status changes' },
-        { key: 'shiftReminders', label: 'Shift Reminders', desc: 'Receive reminders 1 hour before your shift starts' },
-        { key: 'announcements', label: 'System Announcements', desc: 'Important updates from management' },
-        { key: 'emailNotifications', label: 'Email Notifications', desc: 'Receive major alerts via email' },
-        { key: 'smsNotifications', label: 'Push Notifications', desc: 'Receive critical alerts on your device' },
+    const notificationGroups = [
+        {
+            title: 'In-App Notifications',
+            description: 'Notifications shown within the application',
+            items: [
+                { key: 'orderAlerts', icon: Bell, label: 'Order Alerts', desc: 'Get notified for new orders and status changes' },
+                { key: 'shiftReminders', icon: Clock, label: 'Shift Reminders', desc: 'Receive reminders before your shift starts' },
+                { key: 'announcements', icon: MessageSquare, label: 'System Announcements', desc: 'Important updates from management' },
+            ]
+        },
+        {
+            title: 'External Notifications',
+            description: 'Notifications sent outside the app',
+            items: [
+                { key: 'emailNotifications', icon: Mail, label: 'Email Notifications', desc: 'Receive important updates via email' },
+                { key: 'pushNotifications', icon: Smartphone, label: 'Push Notifications', desc: 'Receive alerts on your mobile device' },
+            ]
+        }
     ];
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center p-12">
-                <Loader2 className="w-8 h-8 animate-spin text-fuchsia-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Notification Preferences</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-                Choose what notifications you'd like to receive
-            </p>
+        <div className="space-y-6">
+            <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-blue-500" />
+                    Notification Preferences
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Choose what notifications you'd like to receive
+                </p>
+            </div>
 
-            <div className="space-y-3 mt-6">
-                {items.map((item) => (
-                    <div key={item.key} className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <div>
-                            <p className="font-medium text-slate-900 dark:text-white">{item.label}</p>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">{item.desc}</p>
-                        </div>
-                        <button
-                            onClick={() => handleToggle(item.key)}
-                            disabled={toggleMutation.isPending}
-                            className={cn(
-                                'w-12 h-6 rounded-full transition-colors relative',
-                                toggles[item.key] ? 'bg-fuchsia-500' : 'bg-slate-300 dark:bg-slate-600'
-                            )}
-                        >
-                            <div className={cn(
-                                'absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all',
-                                toggles[item.key] ? 'left-7' : 'left-1'
-                            )} />
-                        </button>
+            {notificationGroups.map((group, groupIdx) => (
+                <div key={groupIdx} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{group.title}</h4>
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                     </div>
-                ))}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">{group.description}</p>
+
+                    <div className="space-y-2">
+                        {group.items.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                                <div
+                                    key={item.key}
+                                    className={cn(
+                                        "flex items-center justify-between p-4 rounded-xl border transition-all",
+                                        toggles[item.key]
+                                            ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                                            : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={cn(
+                                            "w-10 h-10 rounded-xl flex items-center justify-center",
+                                            toggles[item.key]
+                                                ? "bg-blue-100 dark:bg-blue-900/40"
+                                                : "bg-gray-100 dark:bg-gray-700"
+                                        )}>
+                                            <Icon className={cn(
+                                                "w-5 h-5",
+                                                toggles[item.key]
+                                                    ? "text-blue-600 dark:text-blue-400"
+                                                    : "text-gray-500"
+                                            )} />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900 dark:text-white">{item.label}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleToggle(item.key)}
+                                        disabled={toggleMutation.isPending}
+                                        className={cn(
+                                            'w-12 h-6 rounded-full transition-colors relative flex-shrink-0',
+                                            toggles[item.key] ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            'absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all',
+                                            toggles[item.key] ? 'left-7' : 'left-1'
+                                        )} />
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+
+            {/* Info Note */}
+            <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Important</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-400">
+                        Critical shift and order notifications will always be sent regardless of your preferences to ensure you don't miss important work updates.
+                    </p>
+                </div>
             </div>
         </div>
     );
