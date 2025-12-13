@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
-import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
-import { Clock, Package, CheckCircle, XCircle, MapPin, Calendar, DollarSign, ChevronDown, Filter } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiGet, apiPost } from '@/app/libs/apiClient';
+import { Clock, Package, CheckCircle, XCircle, MapPin, Calendar, DollarSign, ChevronDown, Filter, AlertTriangle } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
 
@@ -93,6 +93,11 @@ export default function Orders() {
     const [currentPage, setCurrentPage] = useState(1);
     const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
     const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+    const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+
+    const queryClient = useQueryClient();
 
     const { data, isLoading, error } = useQuery<OrdersResponse>({
         queryKey: ['customer-orders', currentPage, filterStatus],
@@ -111,6 +116,34 @@ export default function Orders() {
         },
         staleTime: 1000 * 30,
     });
+
+    const cancelOrderMutation = useMutation({
+        mutationFn: async (orderId: number) => {
+            return apiPost(`/customer/orders/${orderId}/cancel`);
+        },
+        onMutate: (orderId) => {
+            setCancellingOrderId(orderId);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['customer-orders'] });
+            setShowCancelModal(false);
+            setOrderToCancel(null);
+        },
+        onSettled: () => {
+            setCancellingOrderId(null);
+        },
+    });
+
+    const handleCancelClick = (order: Order) => {
+        setOrderToCancel(order);
+        setShowCancelModal(true);
+    };
+
+    const confirmCancel = () => {
+        if (orderToCancel) {
+            cancelOrderMutation.mutate(orderToCancel.id);
+        }
+    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -224,6 +257,18 @@ export default function Orders() {
                         >
                             {isExpanded ? 'Hide' : 'View'} Details
                         </Button>
+                        {order.can_cancel && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/20"
+                                onClick={() => handleCancelClick(order)}
+                                disabled={cancellingOrderId === order.id}
+                                leftIcon={<XCircle className="w-4 h-4" />}
+                            >
+                                {cancellingOrderId === order.id ? 'Cancelling...' : 'Cancel Order'}
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -443,6 +488,70 @@ export default function Orders() {
                     </div>
                 )}
             </div>
+
+            {/* Cancel Order Confirmation Modal */}
+            <AnimatePresence>
+                {showCancelModal && orderToCancel && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                        onClick={() => setShowCancelModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-3 rounded-full bg-red-100 dark:bg-red-900/30">
+                                    <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                        Cancel Order
+                                    </h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        {orderToCancel.order_number}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <p className="text-gray-600 dark:text-gray-300 mb-6">
+                                Are you sure you want to cancel this order? This action cannot be undone.
+                            </p>
+
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={() => setShowCancelModal(false)}
+                                    disabled={cancelOrderMutation.isPending}
+                                >
+                                    Keep Order
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    className="flex-1 bg-red-600 hover:bg-red-700"
+                                    onClick={confirmCancel}
+                                    disabled={cancelOrderMutation.isPending}
+                                >
+                                    {cancelOrderMutation.isPending ? 'Cancelling...' : 'Yes, Cancel Order'}
+                                </Button>
+                            </div>
+
+                            {cancelOrderMutation.isError && (
+                                <p className="mt-4 text-sm text-red-600 dark:text-red-400 text-center">
+                                    Failed to cancel order. Please try again.
+                                </p>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </CustomerLayout>
     );
 }

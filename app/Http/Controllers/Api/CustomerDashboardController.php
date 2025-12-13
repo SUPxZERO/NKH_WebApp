@@ -396,7 +396,8 @@ class CustomerDashboardController extends Controller
                     'invoice_id' => $order->invoice?->id,
                     
                     // Flags for action buttons
-                    'can_cancel' => $order->status === 'pending' && $order->approval_status === 'pending',
+                    // Can cancel if status is NOT preparing, ready, completed, or delivered
+                    'can_cancel' => !in_array($order->status, ['preparing', 'ready', 'completed', 'delivered', 'cancelled']),
                     'can_reorder' => in_array($order->status, ['completed', 'delivered']),
                 ];
             }),
@@ -549,10 +550,56 @@ class CustomerDashboardController extends Controller
             'preview_image' => $previewImage,
             'special_instructions' => $order->special_instructions,
             'is_paid' => $order->payment_status === 'paid',
-            'can_cancel' => $order->status === 'pending' && $order->approval_status === 'pending',
+            // Can cancel if status is NOT preparing, ready, completed, or delivered
+            'can_cancel' => !in_array($order->status, ['preparing', 'ready', 'completed', 'delivered', 'cancelled']),
         ];
 
         return response()->json(['data' => $data]);
+    }
+
+    /**
+     * Cancel an order (customer-initiated)
+     */
+    public function cancel(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+
+        $order = Order::where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Check if order can be cancelled
+        // Cannot cancel if status is preparing, ready, completed, delivered, or already cancelled
+        $nonCancellableStatuses = ['preparing', 'ready', 'completed', 'delivered', 'cancelled'];
+
+        if (in_array($order->status, $nonCancellableStatuses)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This order cannot be cancelled. Orders that are being prepared, ready for pickup, completed, or delivered cannot be cancelled.',
+            ], 422);
+        }
+
+        // Update order status to cancelled
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => $request->input('reason', 'Cancelled by customer'),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Order has been cancelled successfully.',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+            ]
+        ]);
     }
 }
 

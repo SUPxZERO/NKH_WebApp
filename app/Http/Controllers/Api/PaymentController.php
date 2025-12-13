@@ -249,11 +249,36 @@ class PaymentController extends Controller
         }
 
         try {
-            $result = $this->paymentService->processWebhook([
-                'qr_reference' => $payment->qr_reference,
-                'status' => 'success',
-                'gateway_reference' => 'SIM-' . now()->format('YmdHis'),
-            ]);
+            // Check if payment is still pending
+            if (!$payment->isPending()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Payment is not in pending status',
+                ], 400);
+            }
+
+            // For payments with qr_reference, use the webhook flow
+            if ($payment->qr_reference) {
+                $result = $this->paymentService->processWebhook([
+                    'qr_reference' => $payment->qr_reference,
+                    'status' => 'success',
+                    'gateway_reference' => 'SIM-' . now()->format('YmdHis'),
+                ]);
+            } else {
+                // For non-QR payments (cash, card without gateway), directly update
+                $payment->markAsCompleted('SIM-' . now()->format('YmdHis'));
+                
+                // Update associated invoice and order
+                if ($payment->invoice) {
+                    $payment->invoice->update(['status' => 'paid', 'paid_at' => now()]);
+                    
+                    if ($payment->invoice->order) {
+                        $payment->invoice->order->update(['payment_status' => 'paid']);
+                    }
+                }
+                
+                $result = $payment->fresh();
+            }
 
             return response()->json([
                 'success' => true,
@@ -262,6 +287,11 @@ class PaymentController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Payment simulation failed', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -286,11 +316,26 @@ class PaymentController extends Controller
         $reason = $request->input('reason', 'Simulated payment failure');
 
         try {
-            $result = $this->paymentService->processWebhook([
-                'qr_reference' => $payment->qr_reference,
-                'status' => 'failed',
-                'failure_reason' => $reason,
-            ]);
+            // Check if payment is still pending
+            if (!$payment->isPending()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Payment is not in pending status',
+                ], 400);
+            }
+
+            // For payments with qr_reference, use the webhook flow
+            if ($payment->qr_reference) {
+                $result = $this->paymentService->processWebhook([
+                    'qr_reference' => $payment->qr_reference,
+                    'status' => 'failed',
+                    'failure_reason' => $reason,
+                ]);
+            } else {
+                // For non-QR payments, directly update the status
+                $payment->markAsFailed($reason);
+                $result = $payment->fresh();
+            }
 
             return response()->json([
                 'success' => true,
@@ -299,6 +344,11 @@ class PaymentController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Payment failure simulation failed', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),

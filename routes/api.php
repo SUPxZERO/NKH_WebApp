@@ -583,6 +583,7 @@ Route::prefix('customer')
     // Orders
     Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
     Route::get('orders/{order}', [App\Http\Controllers\Api\CustomerDashboardController::class, 'show']);
+    Route::post('orders/{order}/cancel', [App\Http\Controllers\Api\CustomerDashboardController::class, 'cancel']);
     Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store']);
     
     // Favorites
