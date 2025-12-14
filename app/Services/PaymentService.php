@@ -334,6 +334,14 @@ class PaymentService
         $invoice = $payment->invoice;
         $invoice->loadMissing('payments', 'order');
 
+        // If this invoice's order is not yet linked to a customer but we have an
+        // authenticated customer, attach it so it appears in /customer/orders.
+        if ($invoice->order && !$invoice->order->customer_id && auth()->check() && auth()->user()->customer) {
+            $order = $invoice->order;
+            $order->customer_id = auth()->user()->customer->id;
+            $order->save();
+        }
+
         $this->invoiceService->reconcileStatus($invoice);
 
         // Award loyalty points

@@ -22,10 +22,12 @@ import {
   Clock,
   TrendingUp,
   Briefcase,
+  Search,
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
+import { GlobalSearch, useGlobalSearch } from '@/app/components/ui/GlobalSearch';
 
 type Props = { children: React.ReactNode };
 
@@ -47,6 +49,7 @@ export default function EmployeeLayout({ children }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url, props } = usePage<{ auth: { user: any } }>();
   const user = props.auth?.user;
+  const search = useGlobalSearch();
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread'],
@@ -227,6 +230,15 @@ export default function EmployeeLayout({ children }: Props) {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
+              {/* Search Button */}
+              <button
+                onClick={search.open}
+                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
+                title="Search (Ctrl+K)"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
               {/* Quick Stats Badge (Desktop Only) */}
               <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full border border-emerald-500/20">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -283,6 +295,9 @@ export default function EmployeeLayout({ children }: Props) {
           </div>
         </div>
       </footer>
+
+      {/* Global Search Modal */}
+      <GlobalSearch variant="employee" isOpen={search.isOpen} onClose={search.close} />
     </div>
   );
 }

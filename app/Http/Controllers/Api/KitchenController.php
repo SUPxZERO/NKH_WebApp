@@ -21,12 +21,31 @@ class KitchenController extends Controller
             // statuses to fetch
             $statuses = ['pending', 'received', 'preparing', 'ready'];
 
-            $orders = Order::with(['items.menuItem', 'table'])
+            $orders = Order::with(['items.menuItem', 'table', 'customer.user', 'customerAddress'])
                 ->whereIn('status', $statuses)
                 ->orderBy('created_at', 'asc') // Oldest first for kitchen
                 ->get();
 
             $formattedOrders = $orders->map(function ($order) {
+                // Get customer info for delivery/pickup orders
+                $customerName = null;
+                $customerPhone = null;
+                $deliveryAddress = null;
+
+                if ($order->customer && $order->customer->user) {
+                    $customerName = $order->customer->user->name;
+                    $customerPhone = $order->customer->phone ?? $order->customer->user->phone ?? null;
+                }
+
+                if ($order->customerAddress) {
+                    $deliveryAddress = implode(', ', array_filter([
+                        $order->customerAddress->street_address,
+                        $order->customerAddress->city,
+                        $order->customerAddress->state,
+                        $order->customerAddress->postal_code,
+                    ]));
+                }
+
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
@@ -35,12 +54,20 @@ class KitchenController extends Controller
                     'status' => $order->status,
                     'created_at' => $order->created_at->toIso8601String(),
                     'notes' => $order->special_instructions,
+                    'customer_name' => $customerName,
+                    'customer_phone' => $customerPhone,
+                    'delivery_address' => $deliveryAddress,
+                    'subtotal' => (float) $order->subtotal,
+                    'total_amount' => (float) $order->total_amount,
                     'items' => $order->items->map(function ($item) {
                         return [
                             'id' => $item->id,
                             'name' => $item->menuItem ? $item->menuItem->name : 'Unknown Item',
                             'quantity' => $item->quantity,
                             'notes' => $item->special_instructions,
+                            'unit_price' => (float) $item->unit_price,
+                            'total_price' => (float) $item->total_price,
+                            'status' => $item->status,
                         ];
                     }),
                 ];

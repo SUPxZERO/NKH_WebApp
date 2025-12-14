@@ -193,7 +193,7 @@ class OrderController extends Controller
                 'payment_method_id' => $data['payment_method_id'],
                 'amount' => $data['amount_paid'],
                 'transaction_id' => 'TXN-'.Str::upper(Str::random(12)),
-                'reference_number' => null,
+                'reference_number' => 'INV-MANUAL-' . Str::upper(Str::random(8)),
                 'status' => 'completed',
                 'processed_at' => now(),
                 'notes' => null,
@@ -576,20 +576,35 @@ class OrderController extends Controller
                 // We assume "Cash" as the default method for manual admin override if not specified
                 // But we check if successful payments already sum up to total
                 $existingPaid = $invoice->payments()->where('status', 'completed')->sum('amount');
-                
+
                 if ($existingPaid < $order->total_amount) {
                     $diff = $order->total_amount - $existingPaid;
+
+                    // Resolve a concrete payment method for manual admin payments
+                    $paymentMethod = \App\Models\PaymentMethod::where('code', 'cash')
+                        ->where('is_active', true)
+                        ->first();
+
+                    if (!$paymentMethod) {
+                        $paymentMethod = \App\Models\PaymentMethod::where('is_active', true)->first();
+                    }
+
+                    if (!$paymentMethod) {
+                        throw new \RuntimeException('No active payment method available for manual admin payment.');
+                    }
+
                     $payment = new Payment([
                         'invoice_id' => $invoice->id,
-                        'payment_method_id' => null, // null = Manual/Cash generic
+                        'payment_method_id' => $paymentMethod->id,
                         'amount' => $diff,
                         'transaction_id' => 'MANUAL-ADMIN-' . Str::upper(Str::random(8)),
+                        'reference_number' => 'MANUAL-ADMIN-' . Str::upper(Str::random(8)),
                         'status' => 'completed',
                         'processed_at' => now(),
                         'notes' => 'Admin manually marked as paid',
                     ]);
                     $invoice->payments()->save($payment);
-                    
+
                     // Log the manual payment
                     \App\Models\PaymentAuditLog::log(
                         $payment,

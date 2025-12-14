@@ -61,18 +61,37 @@ Route::get('/health', function () {
     ]);
 });
 
-// DEBUG: Session and Auth diagnostic endpoint (can be removed in production)
-Route::get('/debug-auth', function (\Illuminate\Http\Request $request) {
-    return response()->json([
-        'auth_check' => auth()->check(),
-        'user_id' => auth()->id(),
-        'session_id' => session()->getId(),
-    ]);
+// DEBUG: Session and Auth diagnostic endpoint (only available in local/testing)
+if (app()->environment(['local', 'testing'])) {
+    Route::get('/debug-auth', function (\Illuminate\Http\Request $request) {
+        return response()->json([
+            'auth_check' => auth()->check(),
+            'user_id' => auth()->id(),
+            'session_id' => session()->getId(),
+        ]);
+    });
+}
+
+// Public endpoints with rate limiting and lockout protection
+Route::middleware(['throttle.api:auth', 'account.lockout'])->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
-// Public endpoints
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Token refresh endpoint (requires valid token)
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/auth/refresh', [\App\Http\Controllers\Api\RefreshTokenController::class, 'refresh']);
+    Route::post('/auth/revoke-all', [\App\Http\Controllers\Api\RefreshTokenController::class, 'revokeAll']);
+    
+    // MFA endpoints
+    Route::prefix('auth/mfa')->group(function () {
+        Route::get('/status', [\App\Http\Controllers\Api\MfaController::class, 'status']);
+        Route::post('/setup', [\App\Http\Controllers\Api\MfaController::class, 'setup']);
+        Route::post('/verify', [\App\Http\Controllers\Api\MfaController::class, 'verify']);
+        Route::post('/disable', [\App\Http\Controllers\Api\MfaController::class, 'disable']);
+        Route::post('/validate', [\App\Http\Controllers\Api\MfaController::class, 'validate']);
+    });
+});
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
@@ -194,24 +213,26 @@ Route::get('/supplier-stats', [SupplierController::class, 'stats']);
 Route::apiResource('units', UnitController::class);
 Route::get('/units/base-units', [UnitController::class, 'baseUnits']);
 
-// Debug endpoint to inspect auth in API context (remove after troubleshooting)
-Route::get('/_debug/auth', function (Request $request) {
-    return response()->json([
-        'guard_default' => config('auth.defaults.guard'),
-        'guards' => [
-            'web' => auth('web')->check(),
-            'sanctum' => auth('sanctum')->check(),
-        ],
-        'auth_check' => auth()->check(),
-        'user_id' => optional($request->user())->id,
-        'session_id' => session()->getId(),
-        'session_cookie_name' => config('session.cookie'),
-        'session_domain' => config('session.domain'),
-        'stateful' => config('sanctum.stateful'),
-        'cookies' => $request->cookies->all(),
-        'headers' => $request->headers->all(),
-    ]);
-});
+// Debug endpoint to inspect auth in API context (only in local/testing)
+if (app()->environment(['local', 'testing'])) {
+    Route::get('/_debug/auth', function (Request $request) {
+        return response()->json([
+            'guard_default' => config('auth.defaults.guard'),
+            'guards' => [
+                'web' => auth('web')->check(),
+                'sanctum' => auth('sanctum')->check(),
+            ],
+            'auth_check' => auth()->check(),
+            'user_id' => optional($request->user())->id,
+            'session_id' => session()->getId(),
+            'session_cookie_name' => config('session.cookie'),
+            'session_domain' => config('session.domain'),
+            'stateful' => config('sanctum.stateful'),
+            'cookies' => $request->cookies->all(),
+            'headers' => $request->headers->all(),
+        ]);
+    });
+}
 
 
 Route::get('/user', [AuthController::class, 'me'])
@@ -231,290 +252,13 @@ if (config('app.enforce_admin_auth') || app()->environment('production')) {
     $adminMiddleware[] = 'role:admin,manager';
 }
 
-// Admin/Manager management endpoints
+// Admin/Manager management endpoints with permission middleware
+// These routes now use granular permission checks - see routes/admin-secure.php
 Route::prefix('admin')
     ->middleware($adminMiddleware)
-    ->group(function () {
-        Route::get('/category-stats', [CategoryController::class, 'stats']);
-        // Alias to match frontend caller
-        Route::get('/categories/stats', [CategoryController::class, 'stats']);
-        Route::get('/categories/hierarchy', [CategoryController::class, 'hierarchy']);
-        Route::get('/categories', [CategoryController::class, 'index']);
-        Route::post('/categories', [CategoryController::class, 'store']);
-        Route::get('/categories/{category}', [CategoryController::class, 'show']);
-        Route::put('/categories/{category}', [CategoryController::class, 'update']);
-        Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
-    Route::put('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus']);
-    // Menu Items
-    Route::apiResource('menu-items', MenuItemController::class);
-    // Employees
-    Route::get('employee-stats', [EmployeeController::class, 'stats']);
-    Route::apiResource('employees', EmployeeController::class);
-    // Customers
-    Route::get('customer-stats', [CustomerController::class, 'aggregateStats']);
-    Route::get('customers/{customer}/history', [CustomerController::class, 'history']);
-    Route::get('customers/{customer}/stats', [CustomerController::class, 'stats']);
-    Route::post('customers/{customer}/update-tier', [CustomerController::class, 'updateTier']);
-    Route::apiResource('customers', CustomerController::class);
-    // Expenses
-    Route::apiResource('expenses', ExpenseController::class);
-    Route::get('expense-categories', [ExpenseCategoryController::class, 'index']);
-    // Floors
-    Route::apiResource('floors', FloorController::class);
-    // Promotions
-    Route::get('promotion-stats', [PromotionController::class, 'stats']);
-    Route::apiResource('promotions', PromotionController::class);
-    // Loyalty Points
-    Route::get('loyalty-stats', [LoyaltyPointController::class, 'stats']);
-    Route::apiResource('loyalty-points', LoyaltyPointController::class);
-    // Ingredients (Inventory) - Moved to Sprint 4 section to avoid route conflict
-    // Route::apiResource('ingredients', IngredientController::class);
-    // Tables
-    Route::get('tables/grouped', [\App\Http\Controllers\Admin\TableController::class, 'index']);
-    Route::apiResource('tables', TableController::class);
-    Route::patch('tables/{table}/status', [TableController::class, 'updateStatus']);
-    // Audit Logs
-    Route::get('audit-logs', [AuditLogController::class, 'index']);
-    Route::get('audit-stats', [AuditLogController::class, 'stats']);
-    // Invoices
-    Route::get('invoices', [InvoiceController::class, 'index']);
-    Route::get('invoices/{invoice}', [InvoiceController::class, 'show']);
-    // Reservations
-    Route::apiResource('reservations', ReservationController::class);
-    // Settings
-    Route::get('settings', [SettingController::class, 'index']);
-    Route::put('settings', [SettingController::class, 'update']);
-    // Order oversight and approvals
-    Route::get('orders', [OrderController::class, 'index']);
-    Route::get('orders/pending-approval', [OrderController::class, 'pendingApproval']); // Replaces customer-requests
-
-    // Dashboard
-    Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
-    Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
-    Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
-
-    Route::put('orders/{order}/status', [OrderController::class, 'updateStatus']);
-    Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus']);
-    Route::delete('orders/{order}', [OrderController::class, 'destroy']);
-    Route::patch('orders/{order}/approve', [OrderController::class, 'approve']);
-    Route::patch('orders/{order}/reject', [OrderController::class, 'reject']);
-    
-    // Sprint 1: Foundation Modules
-    // Locations (full CRUD for admin)
-    Route::get('locations', [LocationController::class, 'adminIndex']);
-    Route::post('locations', [LocationController::class, 'store']);
-    Route::get('locations/{location}', [LocationController::class, 'show']);
-    Route::put('locations/{location}', [LocationController::class, 'update']);
-    Route::delete('locations/{location}', [LocationController::class, 'destroy']);
-    
-    // Positions (enhanced admin endpoint)
-    Route::get('positions', [PositionController::class, 'adminIndex']);
-    
-    // Sprint 2: Inventory & Procurement
-    // Purchase Orders
-    Route::apiResource('purchase-orders', PurchaseOrderController::class);
-    Route::post('purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve']);
-    Route::post('purchase-orders/{purchaseOrder}/mark-ordered', [PurchaseOrderController::class, 'markOrdered']);
-    Route::post('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive']);
-    Route::post('purchase-orders/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel']);
-    Route::get('purchase-orders-stats', [PurchaseOrderController::class, 'stats']);
-    
-    // Recipes
-    Route::apiResource('recipes', RecipeController::class);
-    Route::post('recipes/{recipe}/duplicate', [RecipeController::class, 'duplicate']);
-    Route::get('recipes/{recipe}/costing', [RecipeController::class, 'costing']);
-    Route::get('recipes-stats', [RecipeController::class, 'stats']);
-    
-    // Sprint 3: Employee Scheduling & Time Management
-    // Shifts
-    Route::apiResource('shifts', ShiftController::class);
-    Route::get('schedule', [ShiftController::class, 'schedule']);
-    Route::post('shifts/publish', [ShiftController::class, 'publish']);
-    Route::post('shifts/conflicts', [ShiftController::class, 'conflicts']);
-    Route::get('shifts/stats', [ShiftController::class, 'stats']);
-    Route::post('shifts/copy', [ShiftController::class, 'copy']);
-    
-    // Time Off Requests
-    Route::apiResource('time-off-requests', TimeOffRequestController::class);
-    Route::post('time-off-requests/{timeOffRequest}/approve', [TimeOffRequestController::class, 'approve']);
-    Route::post('time-off-requests/{timeOffRequest}/reject', [TimeOffRequestController::class, 'reject']);
-    Route::get('time-off-balance/{employee}', [TimeOffRequestController::class, 'balance']);
-    Route::get('time-off-requests/stats', [TimeOffRequestController::class, 'stats']);
-    Route::get('time-off-calendar', [TimeOffRequestController::class, 'calendar']);
-    
-    // Sprint 4: Ingredients & Inventory Management
-    // Ingredients
-    Route::get('ingredients/categories', [IngredientController::class, 'categories']);
-    Route::get('ingredients/stats', [IngredientController::class, 'stats']);
-    Route::get('ingredients/low-stock', [IngredientController::class, 'lowStock']);
-    Route::get('ingredients/{ingredient}/cost-history', [IngredientController::class, 'costHistory']);
-    Route::apiResource('ingredients', IngredientController::class);
-    
-    // Inventory
-    // Inventory
-    Route::get('inventory', [InventoryController::class, 'index']);
-    Route::post('inventory/transfer', [InventoryController::class, 'transfer']);
-    Route::post('inventory/wastage', [InventoryController::class, 'recordWastage']);
-    Route::get('inventory/valuation', [InventoryController::class, 'valuation']);
-    Route::get('inventory/stats', [InventoryController::class, 'stats']);
-    Route::get('inventory/movements/{ingredient}', [InventoryController::class, 'movements']);
-    Route::get('inventory/{ingredient}', [InventoryController::class, 'show']);
-    
-    // Inventory Adjustments
-    Route::get('inventory-adjustments/stats', [InventoryAdjustmentController::class, 'stats']);
-    Route::apiResource('inventory-adjustments', InventoryAdjustmentController::class);
-    Route::post('inventory-adjustments/{adjustment}/approve', [InventoryAdjustmentController::class, 'approve']);
-    Route::post('inventory-adjustments/{adjustment}/reject', [InventoryAdjustmentController::class, 'reject']);
-    
-    // Stock Alerts
-    Route::get('stock-alerts', [StockAlertController::class, 'index']);
-    Route::post('stock-alerts/{alert}/acknowledge', [StockAlertController::class, 'acknowledge']);
-    Route::get('stock-alerts/reorder-recommendations', [StockAlertController::class, 'reorderRecommendations']);
-    Route::put('stock-alerts/thresholds/{ingredient}', [StockAlertController::class, 'updateThresholds']);
-    Route::get('stock-alerts/stats', [StockAlertController::class, 'stats']);
-    
-    // Sprint 5: Analytics & Reporting
-    Route::prefix('analytics')->group(function () {
-        Route::get('sales/overview', [AnalyticsController::class, 'salesOverview']);
-        Route::get('sales/trends', [AnalyticsController::class, 'salesTrends']);
-        Route::get('sales/top-items', [AnalyticsController::class, 'topSellingItems']);
-        Route::get('sales/by-category', [AnalyticsController::class, 'salesByCategory']);
-        Route::get('sales/peak-hours', [AnalyticsController::class, 'peakHours']);
-        Route::get('sales/by-payment-method', [AnalyticsController::class, 'salesByPaymentMethod']);
-        Route::get('sales/customer-metrics', [AnalyticsController::class, 'customerMetrics']);
-        Route::get('sales/daily-summary', [AnalyticsController::class, 'dailySummary']);
-        
-        // Export routes
-        Route::get('sales/export/pdf', [AnalyticsController::class, 'exportSalesPDF']);
-        Route::get('sales/export/excel', [AnalyticsController::class, 'exportSalesExcel']);
-    });
-    
-    // Reports
-    Route::prefix('reports')->group(function () {
-        // Inventory Reports
-        Route::get('inventory/valuation', [ReportsController::class, 'inventoryValuation']);
-        Route::get('inventory/usage-rates', [ReportsController::class, 'usageRates']);
-        Route::get('inventory/waste-tracking', [ReportsController::class, 'wasteTracking']);
-        Route::get('inventory/cost-analysis', [ReportsController::class, 'costAnalysis']);
-        Route::get('inventory/turnover', [ReportsController::class, 'inventoryTurnover']);
-        Route::get('inventory/export/pdf', [AnalyticsController::class, 'exportInventoryPDF']);
-        Route::get('inventory/export/csv', [AnalyticsController::class, 'exportInventoryCSV']);
-        
-        // Financial Reports
-        Route::get('financial/profit-loss', [ReportsController::class, 'profitLoss']);
-        Route::get('financial/revenue-expenses', [ReportsController::class, 'revenueExpenses']);
-        Route::get('financial/cogs', [ReportsController::class, 'cogs']);
-        Route::get('financial/margins', [ReportsController::class, 'margins']);
-        Route::get('financial/export/pdf', [AnalyticsController::class, 'exportFinancialPDF']);
-        Route::get('financial/export/csv', [AnalyticsController::class, 'exportFinancialCSV']);
-    });
+    ->group(base_path('routes/admin-secure.php'));
 
 
-    // Attendance & Time Clock (NEW)
-    Route::post('attendance/clock-in', [AttendanceController::class, 'clockIn']);
-    Route::post('attendance/clock-out', [AttendanceController::class, 'clockOut']);
-    Route::get('attendance/today', [AttendanceController::class, 'today']);
-
-    // Sprint 6: Access Control
-    Route::apiResource('roles', RoleController::class);
-    Route::get('permissions/all', [RoleController::class, 'getAllPermissions']);
-    
-    // Admin User Management
-    Route::get('admin-users/stats', [\App\Http\Controllers\Api\AdminUserController::class, 'stats']);
-    Route::apiResource('admin-users', \App\Http\Controllers\Api\AdminUserController::class);
-    
-    // Sprint 6: Operating Hours
-    Route::get('operating-hours/location/{location}', [OperatingHoursController::class, 'getByLocation']);
-    Route::post('operating-hours/bulk-update', [OperatingHoursController::class, 'bulkUpdate']);
-    Route::post('operating-hours/copy-to-all-days', [OperatingHoursController::class, 'copyToAllDays']);
-    Route::apiResource('operating-hours', OperatingHoursController::class);
-    
-    // Sprint 6: Settings
-    Route::get('settings/key/{key}', [SettingsController::class, 'getByKey']);
-    Route::post('settings/bulk-update', [SettingsController::class, 'bulkUpdate']);
-    Route::apiResource('settings', SettingsController::class);
-    
-    // Sprint 6: Translations
-    Route::get('translations/categories', [TranslationController::class, 'getCategoryTranslations']);
-    Route::get('translations/menu-items', [TranslationController::class, 'getMenuItemTranslations']);
-    Route::get('translations/missing', [TranslationController::class, 'getMissingTranslations']);
-    Route::put('translations/category/{category}', [TranslationController::class, 'updateCategoryTranslation']);
-    Route::put('translations/menu-item/{menuItem}', [TranslationController::class, 'updateMenuItemTranslation']);
-    Route::post('translations/bulk-update', [TranslationController::class, 'bulkUpdateTranslations']);
-    Route::get('attendance/history', [AttendanceController::class, 'history']);
-    Route::post('attendance/{attendance}/adjust', [AttendanceController::class, 'adjust']);
-
-    // Payroll Management (NEW)
-    Route::post('payroll/generate', [PayrollController::class, 'generate']);
-    Route::post('payroll/{payroll}/finalize', [PayrollController::class, 'finalize']);
-    Route::get('payroll/history', [PayrollController::class, 'history']);
-    Route::get('payroll/{payroll}/details', [PayrollController::class, 'details']);
-    Route::post('payroll/{payroll}/add-detail', [PayrollController::class, 'addDetail']);
-    Route::delete('payroll-details/{detail}', [PayrollController::class, 'removeDetail']);
-
-    // Notifications
-    Route::get('notifications/stats', [NotificationController::class, 'stats']);
-    Route::put('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-    Route::apiResource('notifications', NotificationController::class);
-    
-    // Targeted Notifications (Admin UI for sending)
-    Route::prefix('notifications/targeted')->group(function () {
-        Route::get('options', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'options']);
-        Route::post('preview', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'preview']);
-        Route::post('send', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'send']);
-        Route::post('send-to-roles', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'sendToRoles']);
-        Route::post('send-to-users', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'sendToUsers']);
-        Route::get('search-users', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'searchUsers']);
-    });
-    
-    // Payment Management (Sprint 5)
-    Route::prefix('payments')->group(function () {
-        Route::get('stats', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'stats']);
-        Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'index']);
-        Route::get('{payment}', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'show']);
-        Route::get('{payment}/audit-log', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'auditLog']);
-        Route::get('revenue/chart', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'revenueChart']);
-        
-        // Payment Health & Monitoring (Sprint P9)
-        Route::get('health', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'status']);
-        Route::get('metrics', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'metrics']);
-        Route::get('integrity-check', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'integrityCheck']);
-        Route::get('stuck', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'stuckPayments']);
-        Route::get('reconciliation', [\App\Http\Controllers\Api\Admin\PaymentHealthController::class, 'reconciliation']);
-        
-        // Payment Analytics (Sprint P10)
-        Route::prefix('analytics')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'index']);
-            Route::get('revenue', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'revenue']);
-            Route::get('methods', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'methods']);
-            Route::get('success-rate', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'successRate']);
-            Route::get('peaks', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'peaks']);
-            Route::get('refunds', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'refunds']);
-            Route::get('top-customers', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'topCustomers']);
-            Route::get('report', [\App\Http\Controllers\Api\Admin\PaymentAnalyticsController::class, 'report']);
-        });
-    });
-    
-    // Refund Management (Sprint P6)
-    Route::prefix('refunds')->group(function () {
-        Route::get('stats', [\App\Http\Controllers\Api\Admin\RefundController::class, 'stats']);
-        Route::get('/', [\App\Http\Controllers\Api\Admin\RefundController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\Admin\RefundController::class, 'store']);
-        Route::get('{refund}', [\App\Http\Controllers\Api\Admin\RefundController::class, 'show']);
-        Route::post('{refund}/approve', [\App\Http\Controllers\Api\Admin\RefundController::class, 'approve']);
-        Route::post('{refund}/reject', [\App\Http\Controllers\Api\Admin\RefundController::class, 'reject']);
-        Route::post('{refund}/process', [\App\Http\Controllers\Api\Admin\RefundController::class, 'process']);
-    });
-    
-    // Payment refund history endpoint
-    Route::get('payments/{payment}/refunds', [\App\Http\Controllers\Api\Admin\RefundController::class, 'paymentRefunds']);
-    
-    // Settlement Management
-    Route::prefix('settlements')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'settlements']);
-        Route::post('{settlement}/reconcile', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'reconcileSettlement']);
-    });
-});
 
 
 // Kitchen Display System Routes

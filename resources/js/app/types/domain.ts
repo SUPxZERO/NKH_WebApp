@@ -50,6 +50,24 @@ export interface MenuItemTranslation {
   description?: string | null;
 }
 
+export interface MenuItemNutrition {
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  fiber?: number;
+  sodium?: number;
+  sugar?: number;
+}
+
+export interface MenuItemRecipe {
+  id: number;
+  instructions?: string;
+  prep_time_minutes?: number;
+  cook_time_minutes?: number;
+  servings?: number;
+}
+
 export interface MenuItem {
   id: number;
   location_id: number;
@@ -71,21 +89,38 @@ export interface MenuItem {
   display_order: number;
   rating?: number | null; // Average rating
   reviews_count?: number; // Number of reviews
+
+  // Time information
   prep_time?: number | null; // Preparation time in minutes
+  cook_time?: number | null; // Cooking time in minutes
+  total_time?: number | null; // Total prep + cook time
+
+  // Nutrition & ingredients
+  calories?: number | null;
+  nutrition?: MenuItemNutrition | null;
   ingredients?: string[]; // List of ingredients
-  dietary_restrictions?: string[]; // e.g., ["vegetarian", "gluten-free"]
-  nutrition?: {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  created_at: string;
-  updated_at: string;
+  allergens?: string[]; // e.g., ["nuts", "dairy", "gluten"]
+  dietary_tags?: string[]; // e.g., ["vegetarian", "vegan", "gluten-free", "keto"]
+  dietary_restrictions?: string[]; // Alias for dietary_tags (backwards compat)
+
+  // Additional info
+  serving_size?: string | null; // e.g., "1 plate", "250g"
+  spice_level?: number; // 0-5 scale
+
+  // Availability
+  availability_status?: 'available' | 'low_stock' | 'out_of_stock' | 'seasonal';
+  availability_note?: string | null;
+  is_available?: boolean;
+
+  // Relations
+  recipe?: MenuItemRecipe | null;
   translations?: MenuItemTranslation[];
   category?: Category;
   location?: Location;
   options?: MenuItemOption[];
+
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CustomerAddress {

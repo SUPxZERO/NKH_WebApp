@@ -27,6 +27,7 @@ class PromotionResource extends JsonResource
             'end_date' => optional($this->end_at)->toISOString(),
             'applicable_to' => $this->applicable_to ?? null,
             'terms_conditions' => $this->terms_conditions ?? null,
+            'usage_count' => $this->usage_count ?? 0,
             'created_at' => optional($this->created_at)->toISOString(),
             'updated_at' => optional($this->updated_at)->toISOString(),
         ];

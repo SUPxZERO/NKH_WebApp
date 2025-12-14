@@ -72,9 +72,10 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
             toastSuccess('Payment successful! Redirecting...');
             // Redirect to orders page after showing success
             setTimeout(() => {
-                window.location.href = '/customer/orders?payment=success';
+                window.location.href = '/customer/orders';
             }, 1500);
         } else if (statusData.status === 'failed') {
+            // On failure, do not redirect anywhere. Just stop polling and show error.
             setIsPolling(false);
             toastError('Payment failed: ' + (statusData.failure_reason || 'Unknown error'));
         } else if (statusData.status === 'cancelled') {

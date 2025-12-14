@@ -1,28 +1,31 @@
 /**
  * 🍽️ FoodCard - Revolutionary Food Presentation Component
  * Appetite-inducing food cards that make users hungry just by looking at them
+ * Integrated with global FoodDetailModal via useFoodDetailSafe hook
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Heart, 
-  Star, 
-  Clock, 
-  Flame, 
-  Leaf, 
+import {
+  Heart,
+  Star,
+  Clock,
+  Flame,
+  Leaf,
   Award,
   Plus,
   Minus,
   ShoppingCart,
   Info,
   ChefHat,
-  Zap
+  Zap,
+  Eye
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { MenuItem } from '@/app/types/domain';
 import { RestaurantButton } from '@/Components/ui/RestaurantButton';
 import { animationVariants } from '@/design-system/animations';
+import { useFoodDetailSafe } from '@/app/providers/FoodDetailProvider';
 
 export type FoodCardVariant = 'grid' | 'list' | 'featured' | 'special' | 'compact';
 
@@ -88,6 +91,28 @@ export function FoodCard({
   const [isHovered, setIsHovered] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Get global food detail modal context (safe version returns null if not in provider)
+  const foodDetailContext = useFoodDetailSafe();
+
+  // Handle card click - open detail modal
+  const handleCardClick = useCallback(() => {
+    // If custom handler provided, use it
+    if (onViewDetails) {
+      onViewDetails(item);
+      return;
+    }
+
+    // Otherwise use global modal if available
+    if (foodDetailContext) {
+      foodDetailContext.openFoodDetail(item.id, {
+        onAddToCart,
+        onToggleFavorite,
+        isFavorite,
+        initialQuantity: quantity > 0 ? quantity : 1,
+      });
+    }
+  }, [item, onViewDetails, foodDetailContext, onAddToCart, onToggleFavorite, isFavorite, quantity]);
 
   // 🎭 Animation variants based on variant
   const cardAnimation = variant === 'featured' || variant === 'special' 
@@ -430,7 +455,16 @@ export function FoodCard({
       {/* 🎭 Click Handler for Details */}
       <div
         className="absolute inset-0 cursor-pointer"
-        onClick={() => onViewDetails?.(item)}
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        aria-label={`View details for ${item.name}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
       />
     </motion.div>
   );

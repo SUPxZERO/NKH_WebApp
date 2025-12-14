@@ -3,14 +3,14 @@
  * Appetite-inducing dashboard that makes users hungry and engaged
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShoppingBag, 
-  Heart, 
-  Star, 
-  Clock, 
-  MapPin, 
+import {
+  ShoppingBag,
+  Heart,
+  Star,
+  Clock,
+  MapPin,
   Gift,
   Zap,
   TrendingUp,
@@ -30,6 +30,8 @@ import { RestaurantButton } from '@/Components/ui/RestaurantButton';
 import FoodCard from '@/Components/food/FoodCard';
 import { animationVariants, createStaggerAnimation } from '@/design-system/animations';
 import { cn } from '@/app/utils/cn';
+import { useCartStore } from '@/app/store/cart';
+import { toastSuccess } from '@/app/utils/toast';
 
 interface CustomerStats {
   total_orders: number;
@@ -62,6 +64,20 @@ const rarityColors = {
 
 export default function RestaurantDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'favorites' | 'rewards'>('overview');
+  const cart = useCartStore();
+
+  // Handle adding items to cart
+  const handleAddToCart = useCallback((item: MenuItem, quantity: number) => {
+    cart.addItem({
+      menu_item_id: item.id,
+      menu_item: item,
+      name: item.name || 'Unknown Item',
+      unit_price: item.price,
+      quantity,
+      image_path: item.image_path || undefined,
+    });
+    toastSuccess(`${item.name} added to cart`);
+  }, [cart]);
 
   const { data: customerStats, isLoading } = useQuery({
     queryKey: ['customer.dashboard'],
@@ -255,12 +271,7 @@ export default function RestaurantDashboard() {
                 variant="featured"
                 chefRecommended
                 appetiteMode
-                onAddToCart={(item: MenuItem, quantity: number) => {
-                  console.log('Add to cart:', item, quantity);
-                }}
-                onToggleFavorite={(item: MenuItem) => {
-                  console.log('Toggle favorite:', item);
-                }}
+                onAddToCart={handleAddToCart}
               />
             ))}
           </div>
@@ -290,12 +301,7 @@ export default function RestaurantDashboard() {
                 variant="grid"
                 isPopular
                 appetiteMode
-                onAddToCart={(item: MenuItem, quantity: number) => {
-                  console.log('Add to cart:', item, quantity);
-                }}
-                onToggleFavorite={(item: MenuItem) => {
-                  console.log('Toggle favorite:', item);
-                }}
+                onAddToCart={handleAddToCart}
               />
             ))}
           </div>

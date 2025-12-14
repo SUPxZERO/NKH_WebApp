@@ -268,6 +268,17 @@ class CustomerDashboardController extends Controller
 
         // Build query with eager loading to prevent N+1
         $query = Order::where('customer_id', $customer->id)
+            // For pay_now orders, only show them once payment has been at least partially
+            // completed. This prevents failed or abandoned immediate-payment attempts
+            // from appearing in the customer's order history.
+            ->where(function ($q) {
+                $q->where('payment_mode', '!=', 'pay_now')
+                  ->orWhereIn('payment_status', [
+                      Order::PAYMENT_STATUS_PAID,
+                      Order::PAYMENT_STATUS_PARTIAL,
+                      Order::PAYMENT_STATUS_REFUNDED,
+                  ]);
+            })
             ->with([
                 'items.menuItem.translations',
                 'location',

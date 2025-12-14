@@ -16,7 +16,7 @@ class MenuItemResource extends JsonResource
             // Normalize slashes and remove leading slash/backslash
             $imagePath = str_replace('\\', '/', $imagePath);
             $imagePath = ltrim($imagePath, '/');
-            
+
             // If not absolute URL, wrap with asset() helper
             if (!str_starts_with($imagePath, 'http')) {
                 $imagePath = asset($imagePath);
@@ -24,7 +24,7 @@ class MenuItemResource extends JsonResource
         }
 
         // Get current translation
-        $translation = $this->translations->firstWhere('locale', app()->getLocale()) 
+        $translation = $this->translations->firstWhere('locale', app()->getLocale())
             ?? $this->translations->first();
 
         return [
@@ -47,11 +47,42 @@ class MenuItemResource extends JsonResource
             'display_order' => (int) $this->display_order,
             'rating' => $this->rating ? (float) $this->rating : null,
             'reviews_count' => (int) ($this->reviews_count ?? 0),
+
+            // Time information
             'prep_time' => $this->prep_time ? (int) $this->prep_time : null,
+            'cook_time' => $this->cook_time ? (int) $this->cook_time : null,
+            'total_time' => $this->total_time,
+
+            // Nutrition & ingredients
+            'calories' => $this->calories ? (int) $this->calories : null,
+            'nutrition' => $this->nutrition,
+            'ingredients' => $this->ingredients ?? [],
+            'allergens' => $this->allergens ?? [],
+            'dietary_tags' => $this->dietary_tags ?? [],
+
+            // Additional info
+            'serving_size' => $this->serving_size,
+            'spice_level' => (int) ($this->spice_level ?? 0),
+
+            // Availability
+            'availability_status' => $this->availability_status ?? 'available',
+            'availability_note' => $this->availability_note,
+            'is_available' => $this->isAvailable(),
+
+            // Relations
             'category' => new CategoryResource($this->whenLoaded('category')),
+            'recipe' => $this->when($this->relationLoaded('recipe') && $this->recipe, function () {
+                return [
+                    'id' => $this->recipe->id,
+                    'instructions' => $this->recipe->instructions,
+                    'prep_time_minutes' => $this->recipe->prep_time_minutes,
+                    'cook_time_minutes' => $this->recipe->cook_time_minutes,
+                    'servings' => $this->recipe->servings,
+                ];
+            }),
+
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
-
     }
 }

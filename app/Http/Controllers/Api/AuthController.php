@@ -39,12 +39,19 @@ class AuthController extends Controller
             return $user;
         });
 
-        $token = $user->createToken('api')->plainTextToken;
+        // Create access token (expires per sanctum config, default 60 min)
+        $accessToken = $user->createToken('api', ['*'])->plainTextToken;
+        
+        // Create refresh token (7 day expiry)
+        $refreshToken = $user->createToken('refresh', ['refresh'], now()->addDays(7))->plainTextToken;
 
         return response()->json([
             'message' => 'Registration successful.',
             'user' => (new UserResource($user->load('roles')))->resolve(request()),
-            'token' => $token,
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'expires_in' => config('sanctum.expiration', 60) * 60,
+            'token' => $accessToken, // backwards compatibility
         ], 201);
     }
 
@@ -53,17 +60,30 @@ class AuthController extends Controller
         $credentials = $request->validated();
 
         if (! Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+            // Record failed attempt for lockout tracking
+            \App\Http\Middleware\AccountLockout::recordFailedAttempt($credentials['email']);
             return response()->json(['message' => 'Invalid credentials.'], 401);
         }
 
         /** @var User $user */
         $user = Auth::user();
-        $token = $user->createToken('api')->plainTextToken;
+        
+        // Clear lockout counters on successful login
+        \App\Http\Middleware\AccountLockout::clearAttempts($user);
+        
+        // Create access token (expires per sanctum config, default 60 min)
+        $accessToken = $user->createToken('api', ['*'])->plainTextToken;
+        
+        // Create refresh token (7 day expiry)
+        $refreshToken = $user->createToken('refresh', ['refresh'], now()->addDays(7))->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful.',
             'user' => (new UserResource($user->load('roles')))->resolve(request()),
-            'token' => $token,
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'expires_in' => config('sanctum.expiration', 60) * 60, // seconds
+            'token' => $accessToken, // backwards compatibility
         ]);
     }
 

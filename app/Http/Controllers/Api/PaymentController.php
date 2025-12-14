@@ -107,17 +107,35 @@ class PaymentController extends Controller
 
     /**
      * Get payment status.
-     * 
+     *
      * GET /api/payments/{payment}/status
+     *
+     * Returns a flattened status payload that matches the frontend PaymentStatus type.
      */
     public function status(Payment $payment): JsonResponse
     {
         try {
-            $status = $this->paymentService->getPaymentStatus($payment);
+            $payment->refresh();
+
+            $data = [
+                'payment_id' => $payment->id,
+                'uuid' => $payment->uuid,
+                'status' => $payment->status,
+                'amount' => (float) $payment->amount,
+                'currency' => $payment->currency,
+                'reference_number' => $payment->reference_number,
+                'transaction_id' => $payment->transaction_id,
+                'created_at' => $payment->created_at?->toIso8601String(),
+                'expires_at' => $payment->expires_at?->toIso8601String(),
+                'is_expired' => $payment->isExpired(),
+                'processed_at' => $payment->processed_at?->toIso8601String(),
+                'failure_reason' => $payment->failure_reason,
+                'can_retry' => $payment->canRetry(),
+            ];
 
             return response()->json([
                 'success' => true,
-                'data' => $status,
+                'data' => $data,
             ]);
 
         } catch (\Exception $e) {
@@ -251,6 +269,15 @@ class PaymentController extends Controller
         try {
             // Check if payment is still pending
             if (!$payment->isPending()) {
+                // If already completed, treat simulation as idempotent success
+                if ($payment->isCompleted()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Payment already completed; no simulation needed',
+                        'payment' => $this->paymentService->getPaymentStatus($payment),
+                    ]);
+                }
+
                 return response()->json([
                     'success' => false,
                     'error' => 'Payment is not in pending status',
@@ -265,19 +292,14 @@ class PaymentController extends Controller
                     'gateway_reference' => 'SIM-' . now()->format('YmdHis'),
                 ]);
             } else {
-                // For non-QR payments (cash, card without gateway), directly update
-                $payment->markAsCompleted('SIM-' . now()->format('YmdHis'));
-                
-                // Update associated invoice and order
-                if ($payment->invoice) {
-                    $payment->invoice->update(['status' => 'paid', 'paid_at' => now()]);
-                    
-                    if ($payment->invoice->order) {
-                        $payment->invoice->order->update(['payment_status' => 'paid']);
-                    }
-                }
-                
-                $result = $payment->fresh();
+                // For non-QR payments (cash, card without gateway), also go through the
+                // webhook-style processing so invoice/order logic stays consistent.
+                $result = $this->paymentService->processWebhook([
+                    'transaction_id' => $payment->transaction_id,
+                    'reference_number' => $payment->reference_number,
+                    'status' => 'success',
+                    'gateway_reference' => 'SIM-' . now()->format('YmdHis'),
+                ]);
             }
 
             return response()->json([
@@ -318,6 +340,15 @@ class PaymentController extends Controller
         try {
             // Check if payment is still pending
             if (!$payment->isPending()) {
+                // If already failed or cancelled, treat simulation as idempotent
+                if ($payment->isFailed() || $payment->isCancelled()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Payment already failed/cancelled; no simulation needed',
+                        'payment' => $this->paymentService->getPaymentStatus($payment),
+                    ]);
+                }
+
                 return response()->json([
                     'success' => false,
                     'error' => 'Payment is not in pending status',

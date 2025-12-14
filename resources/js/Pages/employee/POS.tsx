@@ -6,7 +6,7 @@ import Button from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { useCartStore } from '@/app/store/cart';
-import { ShoppingCart, XCircle, Star, Grid3x3, List, Calculator } from 'lucide-react';
+import { ShoppingCart, XCircle, Star, Grid3x3, List, Calculator, Info } from 'lucide-react';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { MenuItem } from '@/app/types/domain';
 import { toastSuccess } from '@/app/utils/toast';
@@ -17,6 +17,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiPost, apiGet } from '@/app/utils/api';
 import { toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
 
 interface Floor {
   id: number;
@@ -40,6 +41,28 @@ export default function POS() {
   const [paymentOrder, setPaymentOrder] = useState<any>(null);
   const [quantity, setQuantity] = useState('1');
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Food detail modal state
+  const [detailItemId, setDetailItemId] = useState<number | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  const handleViewItemDetail = (item: MenuItem) => {
+    setDetailItemId(item.id);
+    setIsDetailOpen(true);
+  };
+
+  const handleAddFromDetail = (item: MenuItem, qty: number) => {
+    cart.addItem({
+      menu_item_id: item.id,
+      name: item.name,
+      unit_price: item.price,
+      quantity: qty,
+      image_path: item.image_path || undefined,
+    });
+    toastSuccess(`${item.name} x${qty} added`);
+    setIsDetailOpen(false);
+    setDetailItemId(null);
+  };
 
   // --- New Logic State ---
   const [activeFloorId, setActiveFloorId] = useState<number | undefined>();
@@ -423,6 +446,7 @@ export default function POS() {
                     isLoading={menuLoading}
                     viewMode={viewMode}
                     onItemClick={handleQuickAdd}
+                    onViewDetails={handleViewItemDetail}
                   />
                 </CardContent>
               </Card>
@@ -432,20 +456,20 @@ export default function POS() {
             <div className="lg:col-span-4 space-y-4">
 
               {/* HELD ORDERS PANEL */}
-              <Card className="bg-gradient-to-br from-gray-800/30 to-gray-900/30 border-gray-600/30">
+              <Card className="bg-warning-muted dark:bg-warning/5 border-warning/20">
                 <CardHeader>
-                  <h3 className="text-lg font-semibold text-white">Held Orders</h3>
+                  <h3 className="text-lg font-semibold text-foreground">Held Orders</h3>
                 </CardHeader>
                 <CardContent>
                   {heldOrders.length === 0 ? (
-                    <div className="text-sm text-gray-400">No held orders</div>
+                    <div className="text-sm text-muted-foreground">No held orders</div>
                   ) : (
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {heldOrders.map((h) => (
-                        <div key={h.id} className="flex justify-between items-center p-2 rounded bg-white/5 border border-white/10 text-sm">
+                        <div key={h.id} className="flex justify-between items-center p-2 rounded bg-card border border-border text-sm">
                           <div>
-                            <div className="font-medium text-white">Table {h.tableId || 'Walk-in'}</div>
-                            <div className="text-xs text-gray-400">
+                            <div className="font-medium text-foreground">Table {h.tableId || 'Walk-in'}</div>
+                            <div className="text-xs text-muted-foreground">
                               {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • ${h.total.toFixed(2)}
                             </div>
                           </div>
@@ -523,11 +547,11 @@ export default function POS() {
 
               {/* NUMBER PAD */}
               {showNumpad && (
-                <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
+                <Card className="bg-info-muted dark:bg-info/5 border-info/20">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">Quantity</span>
-                      <span className="text-3xl font-bold text-blue-600">{quantity}</span>
+                      <span className="font-semibold text-foreground">Quantity</span>
+                      <span className="text-3xl font-bold text-info">{quantity}</span>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -536,7 +560,7 @@ export default function POS() {
                         <button
                           key={num}
                           onClick={() => handleNumpadClick(num)}
-                          className="h-14 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 font-bold text-xl transition-all active:scale-95"
+                          className="h-14 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold text-xl transition-all active:scale-95"
                         >
                           {num}
                         </button>
@@ -544,7 +568,8 @@ export default function POS() {
                     </div>
                     {selectedItem && (
                       <Button
-                        className="w-full mt-2 h-12 bg-green-600 hover:bg-green-700"
+                        className="w-full mt-2 h-12"
+                        variant="success"
                         onClick={() => handleNumpadClick('✓')}
                       >
                         ✓ Add {selectedItem.name}
@@ -562,34 +587,34 @@ export default function POS() {
                 <CardContent>
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {cart.items.length === 0 ? (
-                      <div className="text-sm text-gray-500 text-center py-8">
+                      <div className="text-sm text-muted-foreground text-center py-8">
                         <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-30" />
                         No items yet
                       </div>
                     ) : (
                       cart.items.map((it) => (
-                        <div key={it.menu_item_id} className="flex items-start justify-between gap-2 pb-3 border-b border-white/10">
+                        <div key={it.menu_item_id} className="flex items-start justify-between gap-2 pb-3 border-b border-border">
                           <div className="flex-1">
-                            <div className="font-medium">{it.name}</div>
-                            <div className="text-xs text-gray-500">${it.unit_price.toFixed(2)} × {it.quantity}</div>
+                            <div className="font-medium text-foreground">{it.name}</div>
+                            <div className="text-xs text-muted-foreground">${it.unit_price.toFixed(2)} × {it.quantity}</div>
                           </div>
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => cart.updateQty(it.menu_item_id, Math.max(1, it.quantity - 1))}
-                              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 font-bold"
+                              className="w-8 h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold"
                             >
                               -
                             </button>
-                            <span className="w-8 text-center font-bold">{it.quantity}</span>
+                            <span className="w-8 text-center font-bold text-foreground">{it.quantity}</span>
                             <button
                               onClick={() => cart.updateQty(it.menu_item_id, it.quantity + 1)}
-                              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 font-bold"
+                              className="w-8 h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold"
                             >
                               +
                             </button>
                             <button
                               onClick={() => cart.removeItem(it.menu_item_id)}
-                              className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                              className="p-2 rounded-lg bg-destructive-muted text-destructive hover:bg-destructive/20"
                             >
                               <XCircle className="w-5 h-5" />
                             </button>
@@ -598,18 +623,18 @@ export default function POS() {
                       ))
                     )}
                   </div>
-                  <div className="mt-4 space-y-2 text-base border-t border-white/20 pt-4">
+                  <div className="mt-4 space-y-2 text-base border-t border-border pt-4">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
-                      <span className="font-semibold">${cart.subtotal.toFixed(2)}</span>
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-semibold text-foreground">${cart.subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Tax</span>
-                      <span className="font-semibold">${cart.tax.toFixed(2)}</span>
+                      <span className="text-muted-foreground">Tax</span>
+                      <span className="font-semibold text-foreground">${cart.tax.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between font-bold text-xl mt-3 pt-3 border-t border-white/20">
-                      <span>Total</span>
-                      <span className="text-fuchsia-600">${cart.total.toFixed(2)}</span>
+                    <div className="flex justify-between font-bold text-xl mt-3 pt-3 border-t border-border">
+                      <span className="text-foreground">Total</span>
+                      <span className="text-primary">${cart.total.toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-3">
@@ -622,7 +647,8 @@ export default function POS() {
                       Hold
                     </Button>
                     <Button
-                      className="h-12 text-base bg-green-600 hover:bg-green-700"
+                      className="h-12 text-base"
+                      variant="success"
                       onClick={handleChargeOrder}
                       disabled={cart.items.length === 0 || createOrderMutation.isPending}
                       loading={createOrderMutation.isPending}
@@ -650,6 +676,19 @@ export default function POS() {
           />
         )
       }
+
+      {/* Food Detail Modal - View item details before adding */}
+      <FoodDetailModal
+        foodId={detailItemId}
+        isOpen={isDetailOpen}
+        onClose={() => {
+          setIsDetailOpen(false);
+          setDetailItemId(null);
+        }}
+        onAddToCart={handleAddFromDetail}
+        showAddToCart={true}
+        initialQuantity={parseInt(quantity) || 1}
+      />
     </EmployeeLayout >
   );
 }

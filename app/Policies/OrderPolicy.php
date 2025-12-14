@@ -4,9 +4,12 @@ namespace App\Policies;
 
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class OrderPolicy
 {
+    use HandlesAuthorization;
+
     public function viewAny(User $user): bool
     {
         return $user->hasPermission('orders.view') || $user->hasRole('customer');
@@ -37,5 +40,29 @@ class OrderPolicy
     public function delete(User $user, Order $order): bool
     {
         return $user->hasPermission('orders.delete');
+    }
+
+    /**
+     * Determine whether the user can approve the order.
+     */
+    public function approve(User $user, Order $order): bool
+    {
+        return $user->hasPermission('orders.approve');
+    }
+
+    /**
+     * Determine whether the user can cancel the order.
+     */
+    public function cancel(User $user, Order $order): bool
+    {
+        // Admins/managers can cancel any order
+        if ($user->hasPermission('orders.cancel')) {
+            return true;
+        }
+        // Customers can cancel their own pending orders
+        if ($user->customer && $order->customer_id === optional($user->customer)->id) {
+            return $order->status === 'pending';
+        }
+        return false;
     }
 }

@@ -30,6 +30,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'payment.rate' => \App\Http\Middleware\PaymentRateLimiter::class,
+            'throttle.api' => \App\Http\Middleware\GlobalApiRateLimiter::class,
+            'account.lockout' => \App\Http\Middleware\AccountLockout::class,
+            'permission' => \App\Http\Middleware\PermissionMiddleware::class,
+            'mfa.verify' => \App\Http\Middleware\VerifyMfa::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

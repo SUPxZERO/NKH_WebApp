@@ -17,12 +17,14 @@ import {
   Mail,
   Clock, ClipboardList,
   LogOut,
-  Calendar
+  Calendar,
+  Search
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import CartIcon from '@/app/components/ui/CartIcon';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
+import { GlobalSearch, useGlobalSearch, SearchTrigger } from '@/app/components/ui/GlobalSearch';
 import { useAutoCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
 
 type Props = {
@@ -45,6 +47,7 @@ const navigation = [
 export default function CustomerLayout({ children, className }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
+  const search = useGlobalSearch();
 
   // Subscribe to real-time customer notifications
   useAutoCustomerNotifications({ showToast: true });
@@ -168,7 +171,16 @@ export default function CustomerLayout({ children, className }: Props) {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Search Button */}
+              <button
+                onClick={search.open}
+                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
+                title="Search (Ctrl+K)"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
               {/* Cart Button */}
               <CartIcon />
 
@@ -276,6 +288,9 @@ export default function CustomerLayout({ children, className }: Props) {
           </div>
         </div>
       </footer>
+
+      {/* Global Search Modal */}
+      <GlobalSearch variant="customer" isOpen={search.isOpen} onClose={search.close} />
     </div>
   );
 }

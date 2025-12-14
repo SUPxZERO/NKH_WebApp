@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Star, Heart, Clock, TrendingUp, Flame, Leaf } from 'lucide-react';
 import { MenuItem } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
+import { useFoodDetailSafe } from '@/app/providers/FoodDetailProvider';
 
 interface MenuItemCardProps {
     item: MenuItem;
@@ -22,8 +23,28 @@ const dietaryIcons: Record<string, React.ReactNode> = {
 };
 
 export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', isFavorite = false, onToggleFavorite }: MenuItemCardProps) {
-    // const [isFavorite, setIsFavorite] = React.useState(false); // Removed local state
     const hasDiscount = item.original_price && item.original_price > item.price;
+
+    // Get global food detail modal context (safe version returns null if not in provider)
+    const foodDetailContext = useFoodDetailSafe();
+
+    // Handle card click - open detail modal
+    const handleCardClick = useCallback(() => {
+        // If custom handler provided, use it
+        if (onQuickView) {
+            onQuickView(item);
+            return;
+        }
+
+        // Otherwise use global modal if available
+        if (foodDetailContext) {
+            foodDetailContext.openFoodDetail(item.id, {
+                onAddToCart: onAddToCart ? (menuItem, qty) => onAddToCart(menuItem) : undefined,
+                onToggleFavorite: onToggleFavorite ? () => onToggleFavorite() : undefined,
+                isFavorite,
+            });
+        }
+    }, [item, onQuickView, foodDetailContext, onAddToCart, onToggleFavorite, isFavorite]);
 
     const discountPercent = hasDiscount
         ? Math.round(((item.original_price! - item.price) / item.original_price!) * 100)
@@ -32,8 +53,9 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
     if (layout === 'list') {
         return (
             <motion.div
-                className="group relative flex flex-col md:flex-row gap-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 p-4 transition-all duration-300 hover:shadow-xl hover:shadow-fuchsia-500/10"
+                className="group relative flex flex-col md:flex-row gap-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 p-4 transition-all duration-300 hover:shadow-xl hover:shadow-fuchsia-500/10 cursor-pointer"
                 whileHover={{ y: -2 }}
+                onClick={handleCardClick}
                 layout
             >
                 {/* Image */}
@@ -169,7 +191,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
         <motion.div
             className="group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-fuchsia-500/10 cursor-pointer"
             whileHover={{ y: -8 }}
-            onClick={() => onQuickView?.(item)}
+            onClick={handleCardClick}
             layout
         >
             {/* Image */}

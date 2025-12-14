@@ -21,15 +21,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property bool $is_active
  * @property int $display_order
  * @property int $prep_time
+ * @property int $cook_time
  * @property int $calories
+ * @property array|null $nutrition
+ * @property array|null $ingredients
+ * @property array|null $allergens
+ * @property array|null $dietary_tags
+ * @property string|null $serving_size
+ * @property int $spice_level
+ * @property string $availability_status
+ * @property string|null $availability_note
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
 class MenuItem extends Model
 {
     use HasFactory, SoftDeletes;
-    
-    protected $appends = ['name'];
+
+    protected $appends = ['name', 'description'];
     protected $with = ['translations'];
 
     protected $fillable = [
@@ -48,9 +57,18 @@ class MenuItem extends Model
         'is_active',
         'display_order',
         'prep_time',
+        'cook_time',
         'calories',
         'rating',
         'reviews_count',
+        'nutrition',
+        'ingredients',
+        'allergens',
+        'dietary_tags',
+        'serving_size',
+        'spice_level',
+        'availability_status',
+        'availability_note',
     ];
     
     protected static function boot()
@@ -78,6 +96,14 @@ class MenuItem extends Model
         'reviews_count' => 'integer',
         'featured_order' => 'integer',
         'display_order' => 'integer',
+        'prep_time' => 'integer',
+        'cook_time' => 'integer',
+        'calories' => 'integer',
+        'spice_level' => 'integer',
+        'nutrition' => 'array',
+        'ingredients' => 'array',
+        'allergens' => 'array',
+        'dietary_tags' => 'array',
     ];
 
     public function location()
@@ -112,19 +138,63 @@ class MenuItem extends Model
      */
     public function getNameAttribute(): string
     {
+        $translation = $this->getTranslation();
+        return $translation ? $translation->name : ($this->slug ?? 'Unknown Item');
+    }
+
+    /**
+     * Get the description attribute from translations.
+     *
+     * @return string|null
+     */
+    public function getDescriptionAttribute(): ?string
+    {
+        $translation = $this->getTranslation();
+        return $translation ? $translation->description : null;
+    }
+
+    /**
+     * Get the best available translation.
+     *
+     * @return \App\Models\MenuItemTranslation|null
+     */
+    protected function getTranslation(): ?MenuItemTranslation
+    {
         // Try to get translation for current locale
         $translation = $this->translations->firstWhere('locale', app()->getLocale());
-        
+
         // Fallback to English
         if (!$translation) {
             $translation = $this->translations->firstWhere('locale', 'en');
         }
-        
+
         // Fallback to any translation
         if (!$translation) {
             $translation = $this->translations->first();
         }
-        
-        return $translation ? $translation->name : ($this->slug ?? 'Unknown Item');
+
+        return $translation;
+    }
+
+    /**
+     * Get total prep + cook time.
+     *
+     * @return int|null
+     */
+    public function getTotalTimeAttribute(): ?int
+    {
+        $prep = $this->prep_time ?? 0;
+        $cook = $this->cook_time ?? 0;
+        return ($prep + $cook) > 0 ? ($prep + $cook) : null;
+    }
+
+    /**
+     * Check if item is available for ordering.
+     *
+     * @return bool
+     */
+    public function isAvailable(): bool
+    {
+        return $this->is_active && $this->availability_status === 'available';
     }
 }

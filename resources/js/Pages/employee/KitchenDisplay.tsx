@@ -15,9 +15,25 @@ import {
     ChefHat,
     Flame,
     Bell,
+    X,
+    User,
+    MapPin,
+    Phone,
+    FileText,
+    UtensilsCrossed,
 } from 'lucide-react';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 
+
+interface OrderItem {
+    id: number;
+    name: string;
+    quantity: number;
+    notes?: string;
+    unit_price?: number;
+    total_price?: number;
+    status?: string;
+}
 
 interface KitchenOrder {
     id: number;
@@ -25,18 +41,19 @@ interface KitchenOrder {
     table_number?: string;
     type: 'dine-in' | 'pickup' | 'delivery';
     status: 'pending' | 'received' | 'preparing' | 'ready' | 'completed';
-    items: Array<{
-        id: number;
-        name: string;
-        quantity: number;
-        notes?: string;
-    }>;
+    items: OrderItem[];
     created_at: string;
     notes?: string;
+    customer_name?: string;
+    customer_phone?: string;
+    delivery_address?: string;
+    subtotal?: number;
+    total_amount?: number;
 }
 
 export default function KitchenDisplay() {
     const [soundEnabled, setSoundEnabled] = useState(true);
+    const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
     useOrderUpdates();
     const qc = useQueryClient();
 
@@ -105,9 +122,233 @@ export default function KitchenDisplay() {
         updateStatusMutation.mutate({ id: orderId, status: 'completed' });
     };
 
+    // Order Detail Modal Component
+    const OrderDetailModal = ({ order, onClose }: { order: KitchenOrder; onClose: () => void }) => {
+        const age = getOrderAge(order.created_at);
+        const isUrgent = age >= 15;
+
+        const getStatusColor = () => {
+            switch (order.status) {
+                case 'pending':
+                case 'received':
+                    return 'bg-red-500';
+                case 'preparing':
+                    return 'bg-yellow-500';
+                case 'ready':
+                    return 'bg-green-500';
+                default:
+                    return 'bg-gray-500';
+            }
+        };
+
+        const getStatusLabel = () => {
+            switch (order.status) {
+                case 'pending':
+                case 'received':
+                    return 'NEW';
+                case 'preparing':
+                    return 'PREPARING';
+                case 'ready':
+                    return 'READY';
+                default:
+                    return order.status.toUpperCase();
+            }
+        };
+
+        const getNextAction = () => {
+            switch (order.status) {
+                case 'pending':
+                case 'received':
+                    return { label: 'START PREP', action: () => handleStartPrep(order.id) };
+                case 'preparing':
+                    return { label: 'MARK READY', action: () => handleMarkReady(order.id) };
+                case 'ready':
+                    return { label: 'DELIVERED', action: () => handleMarkCompleted(order.id) };
+                default:
+                    return null;
+            }
+        };
+
+        const nextAction = getNextAction();
+
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                onClick={onClose}
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {/* Modal Header */}
+                    <div className={`${getStatusColor()} p-4 text-white`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <UtensilsCrossed className="w-8 h-8" />
+                                <div>
+                                    <h2 className="text-2xl font-bold">Order #{order.order_number}</h2>
+                                    <div className="flex items-center gap-2 text-sm opacity-90">
+                                        <span className="capitalize">{order.type.replace('-', ' ')}</span>
+                                        {order.table_number && <span>• Table {order.table_number}</span>}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                    <div className={`text-xl font-bold ${isUrgent ? 'animate-pulse' : ''}`}>
+                                        ⏱ {age} min
+                                    </div>
+                                    <div className="text-sm font-semibold px-2 py-0.5 bg-white/20 rounded">
+                                        {getStatusLabel()}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={onClose}
+                                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Modal Content */}
+                    <div className="p-6 overflow-y-auto max-h-[60vh]">
+                        {/* Customer Info (for delivery/pickup) */}
+                        {(order.type === 'delivery' || order.type === 'pickup') && (
+                            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                                    <User className="w-5 h-5" />
+                                    Customer Information
+                                </h3>
+                                <div className="space-y-1 text-sm">
+                                    {order.customer_name && (
+                                        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                            <User className="w-4 h-4 text-gray-400" />
+                                            {order.customer_name}
+                                        </div>
+                                    )}
+                                    {order.customer_phone && (
+                                        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                            <Phone className="w-4 h-4 text-gray-400" />
+                                            {order.customer_phone}
+                                        </div>
+                                    )}
+                                    {order.delivery_address && order.type === 'delivery' && (
+                                        <div className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                                            <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                                            {order.delivery_address}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Order Notes */}
+                        {order.notes && (
+                            <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                                <h3 className="font-bold text-yellow-800 dark:text-yellow-300 mb-2 flex items-center gap-2">
+                                    <FileText className="w-5 h-5" />
+                                    Order Notes
+                                </h3>
+                                <p className="text-yellow-700 dark:text-yellow-200">{order.notes}</p>
+                            </div>
+                        )}
+
+                        {/* Items List */}
+                        <div>
+                            <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                                <ChefHat className="w-5 h-5" />
+                                Order Items ({order.items.length})
+                            </h3>
+                            <div className="space-y-3">
+                                {order.items.map((item, index) => (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+                                    >
+                                        <div className="w-12 h-12 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-xl flex-shrink-0">
+                                            {item.quantity}x
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="font-semibold text-lg text-gray-900 dark:text-white">
+                                                    {item.name}
+                                                </div>
+                                                {item.status && (
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                                        item.status === 'served' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                                        item.status === 'preparing' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                                        'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
+                                                    }`}>
+                                                        {item.status}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {item.notes && (
+                                                <div className="mt-2 p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm text-orange-700 dark:text-orange-300">
+                                                    <strong>Special Request:</strong> {item.notes}
+                                                </div>
+                                            )}
+                                            {item.unit_price && (
+                                                <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                    ${item.unit_price.toFixed(2)} each
+                                                    {item.total_price && (
+                                                        <span className="ml-2 font-medium">
+                                                            • Total: ${item.total_price.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Order Summary */}
+                        {(order.subtotal || order.total_amount) && (
+                            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
+                                    <span>Total Amount</span>
+                                    <span>${(order.total_amount || order.subtotal || 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Modal Footer - Action Button */}
+                    {nextAction && (
+                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                            <Button
+                                onClick={() => {
+                                    nextAction.action();
+                                    onClose();
+                                }}
+                                className="w-full h-14 text-xl font-bold"
+                                disabled={updateStatusMutation.isPending}
+                            >
+                                {updateStatusMutation.isPending ? 'Updating...' : nextAction.label}
+                            </Button>
+                        </div>
+                    )}
+                </motion.div>
+            </motion.div>
+        );
+    };
+
     const OrderCard = ({ order, showAction, actionLabel, onAction, statusColor }: any) => {
         const age = getOrderAge(order.created_at);
         const isUrgent = age >= 15;
+        const itemCount = order.items.length;
+        const displayItems = order.items.slice(0, 3);
+        const hasMoreItems = itemCount > 3;
 
         return (
             <motion.div
@@ -115,7 +356,8 @@ export default function KitchenDisplay() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className={`p-4 rounded-xl border-l-4 ${statusColor} bg-white dark:bg-gray-800 shadow-lg`}
+                className={`p-4 rounded-xl border-l-4 ${statusColor} bg-white dark:bg-gray-800 shadow-lg cursor-pointer hover:shadow-xl transition-shadow`}
+                onClick={() => setSelectedOrder(order)}
             >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
@@ -141,34 +383,42 @@ export default function KitchenDisplay() {
                     </div>
                 </div>
 
-                {/* Items */}
-                <div className="space-y-2 mb-3 max-h-40 overflow-y-auto">
-                    {order.items.map((item: any) => (
-                        <div key={item.id} className="flex items-center gap-2 py-1 border-b border-gray-200 dark:border-gray-700">
-                            <div className="w-8 h-8 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold">
+                {/* Items Preview */}
+                <div className="space-y-2 mb-3">
+                    {displayItems.map((item: OrderItem) => (
+                        <div key={item.id} className="flex items-center gap-2 py-1 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                            <div className="w-8 h-8 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">
                                 {item.quantity}
                             </div>
-                            <div className="flex-1">
-                                <div className="font-medium text-gray-900 dark:text-white">{item.name}</div>
+                            <div className="flex-1 min-w-0">
+                                <div className="font-medium text-gray-900 dark:text-white truncate">{item.name}</div>
                                 {item.notes && (
-                                    <div className="text-xs text-orange-600 dark:text-orange-400 italic">Note: {item.notes}</div>
+                                    <div className="text-xs text-orange-600 dark:text-orange-400 italic truncate">Note: {item.notes}</div>
                                 )}
                             </div>
                         </div>
                     ))}
+                    {hasMoreItems && (
+                        <div className="text-center py-2 text-sm text-fuchsia-600 dark:text-fuchsia-400 font-medium">
+                            + {itemCount - 3} more items (tap to view all)
+                        </div>
+                    )}
                 </div>
 
-                {/* Order Notes */}
+                {/* Order Notes Preview */}
                 {order.notes && (
-                    <div className="mb-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg text-sm text-yellow-800 dark:text-yellow-200">
-                        <strong>Order Note:</strong> {order.notes}
+                    <div className="mb-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 truncate">
+                        <strong>Note:</strong> {order.notes}
                     </div>
                 )}
 
                 {/* Action Button */}
                 {showAction && (
                     <Button
-                        onClick={() => onAction(order.id)}
+                        onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            onAction(order.id);
+                        }}
                         className="w-full h-12 text-lg font-bold"
                         disabled={updateStatusMutation.isPending}
                     >
@@ -328,6 +578,16 @@ export default function KitchenDisplay() {
                     </div>
                 </div>
             </div>
+
+            {/* Order Detail Modal */}
+            <AnimatePresence>
+                {selectedOrder && (
+                    <OrderDetailModal
+                        order={selectedOrder}
+                        onClose={() => setSelectedOrder(null)}
+                    />
+                )}
+            </AnimatePresence>
         </EmployeeLayout>
     );
 }

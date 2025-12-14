@@ -8,9 +8,10 @@ import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
 import ImageUploader from '@/app/components/ui/ImageUploader';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Plus, Search, Edit, Trash2, Star, Eye, EyeOff, ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Star, Eye, EyeOff, ChevronLeft, ChevronRight, Package, Maximize2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
+import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
 
 // Stats Ribbon with Dark/Light Mode
 const MenuStatsRibbon = ({ stats }: { stats: any }) => (
@@ -75,6 +76,15 @@ export default function MenuItems() {
   });
   const [image, setImage] = useState<File | null>(null);
   const qc = useQueryClient();
+
+  // Preview modal state
+  const [previewItemId, setPreviewItemId] = useState<number | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const handlePreview = (item: MenuItem) => {
+    setPreviewItemId(item.id);
+    setIsPreviewOpen(true);
+  };
 
   const [page, setPage] = useState(1);
   const [perPage] = useState(20);
@@ -167,6 +177,7 @@ export default function MenuItems() {
       cost: item.cost?.toString() || '', category_id: item.category_id?.toString() || '',
       is_popular: item.is_popular, is_active: item.is_active, display_order: item.display_order
     });
+    setImage(null);
     setOpenEdit(true);
   };
 
@@ -315,8 +326,9 @@ export default function MenuItems() {
                     </button>
                   </div>
                   <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="secondary" onClick={() => handleEdit(item)} className="h-8 w-8 p-0"><Edit className="w-3 h-3" /></Button>
-                    <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)} className="h-8 w-8 p-0"><Trash2 className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="ghost" onClick={() => handlePreview(item)} className="h-8 w-8 p-0" title="Preview"><Maximize2 className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="secondary" onClick={() => handleEdit(item)} className="h-8 w-8 p-0" title="Edit"><Edit className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)} className="h-8 w-8 p-0" title="Delete"><Trash2 className="w-3 h-3" /></Button>
                   </div>
                 </motion.div>
               ))
@@ -390,9 +402,8 @@ export default function MenuItems() {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
             <ImageUploader onChange={(file) => setImage(file)}
-              value={editingItem?.image_path ? `/storage/${editingItem.image_path}` : null} />
+              value={editingItem?.image_path || null} />
           </div>
-
           <div className="grid grid-cols-3 gap-4">
             <Input label="Display Order" type="number" value={formData.display_order}
               onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
@@ -418,6 +429,17 @@ export default function MenuItems() {
           </div>
         </form>
       </Modal>
+
+      {/* Preview Modal - Shows how item looks to customers */}
+      <FoodDetailModal
+        foodId={previewItemId}
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setPreviewItemId(null);
+        }}
+        showAddToCart={false}
+      />
     </AdminLayout>
   );
 }

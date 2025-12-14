@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\Auth;
 
+use App\Security\PasswordPolicy;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegisterRequest extends FormRequest
@@ -18,7 +19,14 @@ class RegisterRequest extends FormRequest
             'email' => ['required','email','max:255','unique:users,email'],
             // Phone is stored on users.phone, must be unique
             'phone_number' => ['required','string','max:30','unique:users,phone'],
-            'password' => ['required','string','min:8','confirmed'],
+            'password' => ['required','string','confirmed', PasswordPolicy::rules()],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'password.min' => 'Password must be at least 12 characters.',
         ];
     }
 }

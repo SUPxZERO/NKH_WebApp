@@ -86,7 +86,7 @@ export default function Suppliers() {
     const { data: suppliers, isLoading } = useQuery({
         queryKey: ['suppliers', page, search, statusFilter, typeFilter],
         queryFn: () => {
-            let url = `/api/suppliers?page=${page}&per_page=${perPage}&search=${search}`;
+            let url = `/api/admin/suppliers?page=${page}&per_page=${perPage}&search=${search}`;
             if (statusFilter !== 'all') url += `&is_active=${statusFilter === 'active' ? '1' : '0'}`;
             if (typeFilter !== 'all') url += `&type=${typeFilter}`;
             return apiGet(url);
@@ -95,12 +95,12 @@ export default function Suppliers() {
 
     const { data: locations } = useQuery({
         queryKey: ['locations'],
-        queryFn: () => apiGet('/api/locations')
+        queryFn: () => apiGet('/api/admin/locations')
     });
 
     const { data: statsData } = useQuery({
         queryKey: ['supplier-stats'],
-        queryFn: () => apiGet('/api/supplier-stats')
+        queryFn: () => apiGet('/api/admin/suppliers-stats')
     });
 
     const supplierList = useMemo(() => suppliers?.data || [], [suppliers]);
@@ -127,20 +127,20 @@ export default function Suppliers() {
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/suppliers', data),
-        onSuccess: () => { toastSuccess('Supplier created'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); },
+        mutationFn: (data: any) => apiPost('/api/admin/suppliers', data),
+        onSuccess: () => { toastSuccess('Supplier created'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/suppliers/${id}`, data),
-        onSuccess: () => { toastSuccess('Supplier updated'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); },
+        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/suppliers/${id}`, data),
+        onSuccess: () => { toastSuccess('Supplier updated'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/suppliers/${id}`),
-        onSuccess: () => { toastSuccess('Supplier deleted'); qc.invalidateQueries({ queryKey: ['suppliers'] }); },
+        mutationFn: (id: number) => apiDelete(`/api/admin/suppliers/${id}`),
+        onSuccess: () => { toastSuccess('Supplier deleted'); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
@@ -258,7 +258,7 @@ export default function Suppliers() {
                                 </div>
                                 <div className="col-span-3">
                                     <span className="px-2 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded text-xs border border-blue-200 dark:border-blue-500/20">
-                                        {supplierTypes[supplier.type as keyof typeof supplierTypes]}
+                                        {supplierTypes[supplier.type as keyof typeof supplierTypes] || supplier.type || 'Unknown'}
                                     </span>
                                 </div>
                                 <div className="col-span-2">

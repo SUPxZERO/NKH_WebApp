@@ -5,37 +5,6 @@ import animate from 'tailwindcss-animate';
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: 'class',
-    theme: {
-        extend: {
-            saturate: {
-                125: '1.25',
-            },
-        },
-    },
-    variants: {
-        extend: {
-            backgroundColor: ['selection'],
-            textColor: ['selection'],
-        },
-    },
-    plugins: [
-        require('@tailwindcss/forms'),
-        require('tailwindcss-animate'),
-        function({ addUtilities, theme, variants }) {
-            const saturateUtilities = {};
-            Object.entries(theme('saturate')).forEach(([key, value]) => {
-                saturateUtilities[`.saturate-${key}`] = {
-                    '--tw-saturate': value,
-                    filter: 'var(--tw-saturate)',
-                };
-            });
-            addUtilities(saturateUtilities, ['responsive', 'hover', 'group-hover']);
-        },
-    ],
-    safelist: [
-        'group-hover:saturate-125',
-        'group-hover:scale-110'
-    ],
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
@@ -46,7 +15,7 @@ export default {
 
     theme: {
         extend: {
-            // 🍽️ Restaurant-Focused Typography
+            // Typography
             fontFamily: {
                 display: ['Playfair Display', 'serif'],
                 body: ['Inter', ...defaultTheme.fontFamily.sans],
@@ -55,186 +24,264 @@ export default {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
 
-            // 🌈 Revolutionary Restaurant Color Palette
+            // Colors using CSS variables for theme support
             colors: {
+                // Core semantic colors
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
                 background: "hsl(var(--background))",
                 foreground: "hsl(var(--foreground))",
+
+                // Primary brand color
                 primary: {
-                    '50': '#fff7ed',
-                    '100': '#ffedd5',
-                    '200': '#fed7aa',
-                    '300': '#fdba74',
-                    '400': '#fb923c',
-                    '500': '#f97316',
-                    '600': '#ea580c',
-                    '700': '#c2410c',
-                    '800': '#9a3412',
-                    '900': '#7c2d12',
                     DEFAULT: "hsl(var(--primary))",
                     foreground: "hsl(var(--primary-foreground))",
+                    hover: "hsl(var(--primary-hover))",
+                    muted: "hsl(var(--primary-muted))",
+                    // Static shades for gradients
+                    50: '#fdf4ff',
+                    100: '#fae8ff',
+                    200: '#f5d0fe',
+                    300: '#f0abfc',
+                    400: '#e879f9',
+                    500: '#d946ef',
+                    600: '#c026d3',
+                    700: '#a21caf',
+                    800: '#86198f',
+                    900: '#701a75',
+                    950: '#4a044e',
                 },
+
+                // Secondary color
                 secondary: {
-                    '50': '#f8fafc',
-                    '100': '#f1f5f9',
-                    '200': '#e2e8f0',
-                    '300': '#cbd5e1',
-                    '400': '#94a3b8',
-                    '500': '#64748b',
-                    '600': '#475569',
-                    '700': '#334155',
-                    '800': '#1e293b',
-                    '900': '#0f172a',
                     DEFAULT: "hsl(var(--secondary))",
                     foreground: "hsl(var(--secondary-foreground))",
+                    hover: "hsl(var(--secondary-hover))",
+                    // Static shades
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    200: '#e2e8f0',
+                    300: '#cbd5e1',
+                    400: '#94a3b8',
+                    500: '#64748b',
+                    600: '#475569',
+                    700: '#334155',
+                    800: '#1e293b',
+                    900: '#0f172a',
+                    950: '#020617',
                 },
 
-                // Accent Colors - Fresh Ingredients
+                // Muted colors
+                muted: {
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
+                },
+
+                // Accent colors
                 accent: {
-                    green: '#059669',
-                    red: '#dc2626',
-                    purple: '#7c3aed',
-                    orange: '#ea580c',
-                    blue: '#0284c7',
-                    yellow: '#eab308',
-                    pink: '#ec4899',
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
                 },
 
-                // Neutral Palette - Natural Textures
-                neutral: {
-                    50: '#fafaf9',
-                    100: '#f5f5f4',
-                    200: '#e7e5e4',
-                    300: '#d6d3d1',
-                    400: '#a8a29e',
-                    500: '#78716c',
-                    600: '#57534e',
-                    700: '#44403c',
-                    800: '#292524',
-                    900: '#1c1917',
+                // Destructive/Error
+                destructive: {
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
+                    muted: "hsl(var(--destructive-muted))",
                 },
 
-                // Semantic Colors
-                success: '#10b981',
-                warning: '#f59e0b',
-                error: '#ef4444',
-                info: '#3b82f6',
+                // Success
+                success: {
+                    DEFAULT: "hsl(var(--success))",
+                    foreground: "hsl(var(--success-foreground))",
+                    muted: "hsl(var(--success-muted))",
+                },
 
-                // Special Food Colors
+                // Warning
+                warning: {
+                    DEFAULT: "hsl(var(--warning))",
+                    foreground: "hsl(var(--warning-foreground))",
+                    muted: "hsl(var(--warning-muted))",
+                },
+
+                // Info
+                info: {
+                    DEFAULT: "hsl(var(--info))",
+                    foreground: "hsl(var(--info-foreground))",
+                    muted: "hsl(var(--info-muted))",
+                },
+
+                // Card
+                card: {
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))",
+                    hover: "hsl(var(--card-hover))",
+                },
+
+                // Popover
+                popover: {
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
+                },
+
+                // Sidebar
+                sidebar: {
+                    DEFAULT: "hsl(var(--sidebar))",
+                    foreground: "hsl(var(--sidebar-foreground))",
+                    border: "hsl(var(--sidebar-border))",
+                    accent: "hsl(var(--sidebar-accent))",
+                    'accent-foreground': "hsl(var(--sidebar-accent-foreground))",
+                },
+
+                // Header
+                header: {
+                    DEFAULT: "hsl(var(--header))",
+                    foreground: "hsl(var(--header-foreground))",
+                },
+
+                // Table
+                table: {
+                    header: "hsl(var(--table-header))",
+                    'header-foreground': "hsl(var(--table-header-foreground))",
+                    row: "hsl(var(--table-row))",
+                    'row-hover': "hsl(var(--table-row-hover))",
+                    border: "hsl(var(--table-border))",
+                },
+
+                // Chart colors
+                chart: {
+                    1: "hsl(var(--chart-1))",
+                    2: "hsl(var(--chart-2))",
+                    3: "hsl(var(--chart-3))",
+                    4: "hsl(var(--chart-4))",
+                    5: "hsl(var(--chart-5))",
+                },
+
+                // Status colors
+                status: {
+                    pending: "hsl(var(--status-pending))",
+                    'pending-bg': "hsl(var(--status-pending-bg))",
+                    preparing: "hsl(var(--status-preparing))",
+                    'preparing-bg': "hsl(var(--status-preparing-bg))",
+                    ready: "hsl(var(--status-ready))",
+                    'ready-bg': "hsl(var(--status-ready-bg))",
+                    completed: "hsl(var(--status-completed))",
+                    'completed-bg': "hsl(var(--status-completed-bg))",
+                    cancelled: "hsl(var(--status-cancelled))",
+                    'cancelled-bg': "hsl(var(--status-cancelled-bg))",
+                },
+
+                // Food category colors
                 food: {
-                    appetizer: '#fbbf24',
-                    main: '#dc2626',
-                    dessert: '#ec4899',
-                    beverage: '#3b82f6',
-                    special: '#8b5cf6',
-                },
-
-                // Background Colors
-                background: {
-                    light: '#fafaf9',
-                    dark: '#1c1917',
-                    warm: '#fefdf8',
+                    appetizer: "hsl(var(--food-appetizer))",
+                    main: "hsl(var(--food-main))",
+                    dessert: "hsl(var(--food-dessert))",
+                    beverage: "hsl(var(--food-beverage))",
+                    special: "hsl(var(--food-special))",
                 },
             },
 
-            // 🎭 Enhanced Spacing Scale
+            // Border radius using CSS variables
+            borderRadius: {
+                lg: "var(--radius)",
+                md: "calc(var(--radius) - 2px)",
+                sm: "calc(var(--radius) - 4px)",
+                xl: "var(--radius-lg)",
+                '2xl': "var(--radius-xl)",
+                '3xl': '1.5rem',
+                '4xl': '2rem',
+            },
+
+            // Spacing
             spacing: {
                 '18': '4.5rem',
                 '88': '22rem',
                 '128': '32rem',
             },
 
-            // 🔲 Organic Border Radius
-            borderRadius: {
-                '4xl': '2rem',
-                '5xl': '2.5rem',
-            },
-
-            // 🌫️ Appetite-Inducing Shadows
+            // Box shadows
             boxShadow: {
+                'theme-sm': 'var(--shadow-sm)',
+                'theme-md': 'var(--shadow-md)',
+                'theme-lg': 'var(--shadow-lg)',
+                'theme-xl': 'var(--shadow-xl)',
                 'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
                 'medium': '0 4px 16px rgba(0, 0, 0, 0.08)',
                 'strong': '0 8px 32px rgba(0, 0, 0, 0.12)',
-                'glow': '0 0 24px rgba(245, 158, 11, 0.3)',
-                'food': '0 8px 32px rgba(245, 158, 11, 0.15)',
-                'appetite': '0 12px 40px rgba(245, 158, 11, 0.2)',
-                'premium': '0 20px 60px rgba(139, 90, 43, 0.25)',
-                'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                'glow-primary': '0 0 24px hsl(var(--primary) / 0.3)',
+                'glow-success': '0 0 24px hsl(var(--success) / 0.3)',
+                'glow-warning': '0 0 24px hsl(var(--warning) / 0.3)',
+                'glow-destructive': '0 0 24px hsl(var(--destructive) / 0.3)',
             },
 
-            // 🎨 Background Gradients
+            // Background images and gradients
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                 'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-                'food-warm': 'linear-gradient(135deg, #fef7e6 0%, #fdecc4 100%)',
-                'appetite-glow': 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%)',
-                'premium-gold': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                'cozy-brown': 'linear-gradient(135deg, #8b5a2b 0%, #693c17 100%)',
             },
 
-            // 🎭 Animation Enhancements
+            // Animations
             animation: {
                 'fade-in': 'fadeIn 0.3s ease-out',
+                'fade-in-up': 'fadeInUp 0.4s ease-out',
                 'slide-in': 'slideIn 0.4s ease-out',
+                'slide-in-right': 'slideInRight 0.3s ease-out',
                 'scale-in': 'scaleIn 0.3s ease-out',
-                'appetite-glow': 'appetiteGlow 2s ease-in-out infinite',
-                'order-pulse': 'orderPulse 1.5s ease-in-out infinite',
-                'kitchen-urgent': 'kitchenUrgent 1s ease-in-out infinite',
-                'success-bounce': 'successBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-                'float': 'float 3s ease-in-out infinite',
+                'spin-slow': 'spin 3s linear infinite',
+                'pulse-subtle': 'pulseSubtle 2s ease-in-out infinite',
+                'bounce-subtle': 'bounceSubtle 1s ease-in-out infinite',
                 'shimmer': 'shimmer 2s linear infinite',
+                'float': 'float 3s ease-in-out infinite',
             },
 
-            // 🎯 Custom Keyframes
+            // Keyframes
             keyframes: {
                 fadeIn: {
-                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' },
+                },
+                fadeInUp: {
+                    '0%': { opacity: '0', transform: 'translateY(10px)' },
                     '100%': { opacity: '1', transform: 'translateY(0)' },
                 },
                 slideIn: {
-                    '0%': { opacity: '0', transform: 'translateX(-100px)' },
+                    '0%': { opacity: '0', transform: 'translateX(-20px)' },
+                    '100%': { opacity: '1', transform: 'translateX(0)' },
+                },
+                slideInRight: {
+                    '0%': { opacity: '0', transform: 'translateX(20px)' },
                     '100%': { opacity: '1', transform: 'translateX(0)' },
                 },
                 scaleIn: {
-                    '0%': { opacity: '0', transform: 'scale(0.8)' },
+                    '0%': { opacity: '0', transform: 'scale(0.95)' },
                     '100%': { opacity: '1', transform: 'scale(1)' },
                 },
-                appetiteGlow: {
-                    '0%, 100%': { boxShadow: '0 0 20px rgba(245, 158, 11, 0.3)' },
-                    '50%': { boxShadow: '0 0 30px rgba(245, 158, 11, 0.5)' },
+                pulseSubtle: {
+                    '0%, 100%': { opacity: '1' },
+                    '50%': { opacity: '0.85' },
                 },
-                orderPulse: {
-                    '0%, 100%': { transform: 'scale(1)' },
-                    '50%': { transform: 'scale(1.02)' },
-                },
-                kitchenUrgent: {
-                    '0%, 100%': { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
-                    '50%': { backgroundColor: 'rgba(239, 68, 68, 0.2)' },
-                },
-                successBounce: {
-                    '0%': { transform: 'scale(0)' },
-                    '60%': { transform: 'scale(1.2)' },
-                    '100%': { transform: 'scale(1)' },
-                },
-                float: {
-                    '0%, 100%': { transform: 'translateY(0px)' },
-                    '50%': { transform: 'translateY(-10px)' },
+                bounceSubtle: {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-5px)' },
                 },
                 shimmer: {
                     '0%': { transform: 'translateX(-100%)' },
                     '100%': { transform: 'translateX(100%)' },
                 },
+                float: {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-10px)' },
+                },
             },
 
-            // 📱 Enhanced Breakpoints
+            // Breakpoints
             screens: {
                 'xs': '320px',
                 '3xl': '1600px',
             },
 
-            // 🎯 Z-Index Scale
+            // Z-Index
             zIndex: {
                 '60': '60',
                 '70': '70',
@@ -243,30 +290,29 @@ export default {
                 '100': '100',
             },
 
-            // 🎨 Backdrop Filters
+            // Backdrop filters
             backdropBlur: {
                 'xs': '2px',
                 '4xl': '72px',
             },
 
-            // 📏 Line Heights
+            // Line height
             lineHeight: {
                 'extra-loose': '2.5',
-                '12': '3rem',
             },
 
-            // 🔤 Letter Spacing
+            // Letter spacing
             letterSpacing: {
                 'extra-wide': '0.1em',
             },
 
-            // 🎭 Transform Scale
+            // Scale
             scale: {
                 '102': '1.02',
                 '103': '1.03',
             },
 
-            // 🌡️ Opacity
+            // Opacity
             opacity: {
                 '15': '0.15',
                 '35': '0.35',
@@ -278,61 +324,54 @@ export default {
     plugins: [
         forms,
         animate,
-        // Custom plugin for restaurant-specific utilities
-        function({ addUtilities, theme }) {
-            const newUtilities = {
-                '.glass-food': {
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(20px) saturate(180%)',
-                    border: '1px solid rgba(245, 158, 11, 0.2)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+        // Custom utilities plugin
+        function({ addUtilities }) {
+            addUtilities({
+                // Glass morphism effects
+                '.glass': {
+                    'background': 'hsl(var(--card) / 0.8)',
+                    'backdrop-filter': 'blur(12px) saturate(180%)',
+                    'border': '1px solid hsl(var(--border) / 0.5)',
                 },
-                '.food-image': {
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: '0',
-                        left: '0',
-                        right: '0',
-                        bottom: '0',
-                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%)',
-                        pointerEvents: 'none',
-                    },
-                    '& img': {
-                        transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                        filter: 'saturate(1.1) contrast(1.05)',
-                    },
-                    '&:hover img': {
-                        transform: 'scale(1.1)',
-                        filter: 'saturate(1.3) contrast(1.1)',
-                    },
+                '.glass-strong': {
+                    'background': 'hsl(var(--card) / 0.95)',
+                    'backdrop-filter': 'blur(20px) saturate(180%)',
+                    'border': '1px solid hsl(var(--border))',
                 },
-                '.appetite-button': {
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        width: '0',
-                        height: '0',
-                        background: 'radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%)',
-                        transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                        transform: 'translate(-50%, -50%)',
-                    },
-                    '&:hover::before': {
-                        width: '300px',
-                        height: '300px',
-                    },
-                    '&:active': {
-                        transform: 'scale(0.98)',
-                    },
+                // Food card styling
+                '.food-card': {
+                    'position': 'relative',
+                    'overflow': 'hidden',
+                    'border-radius': '1.5rem',
+                    'background': 'hsl(var(--card))',
+                    'border': '1px solid hsl(var(--border))',
+                    'transition': 'all 0.3s ease',
                 },
-            };
-            addUtilities(newUtilities);
+                '.food-card:hover': {
+                    'transform': 'translateY(-4px)',
+                    'box-shadow': '0 12px 40px hsl(var(--primary) / 0.15)',
+                },
+                // Theme-aware text utilities
+                '.text-theme-primary': {
+                    'color': 'hsl(var(--foreground))',
+                },
+                '.text-theme-secondary': {
+                    'color': 'hsl(var(--muted-foreground))',
+                },
+                '.text-theme-muted': {
+                    'color': 'hsl(var(--muted-foreground) / 0.7)',
+                },
+                // Background utilities
+                '.bg-theme-primary': {
+                    'background': 'hsl(var(--background))',
+                },
+                '.bg-theme-secondary': {
+                    'background': 'hsl(var(--card))',
+                },
+                '.bg-theme-tertiary': {
+                    'background': 'hsl(var(--muted))',
+                },
+            });
         },
     ],
 };

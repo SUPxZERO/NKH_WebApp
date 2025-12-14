@@ -86,7 +86,8 @@ export default function Promotions() {
     queryKey: ['admin/promotions', page, search, statusFilter, typeFilter],
     queryFn: () => {
       let url = `/api/admin/promotions?page=${page}&per_page=${perPage}&search=${search}`;
-      if (statusFilter !== 'all') url += `&status=${statusFilter}`; // API might need adjustment or use is_active/expired logic
+      if (statusFilter === 'active') url += `&is_active=1`;
+      else if (statusFilter === 'inactive') url += `&is_active=0`;
       if (typeFilter !== 'all') url += `&type=${typeFilter}`;
       return apiGet(url);
     }
@@ -228,6 +229,11 @@ export default function Promotions() {
           <div className="divide-y divide-white/5">
             {isLoading ? (
               <div className="p-8 text-center text-gray-500">Loading...</div>
+            ) : promotionList.length === 0 ? (
+              <div className="p-12 text-center">
+                <Tag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-400">No promotions found</p>
+              </div>
             ) : promotionList.map((promo: any) => (
               <motion.div key={promo.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">

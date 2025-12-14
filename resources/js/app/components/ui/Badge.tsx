@@ -1,30 +1,38 @@
 import React from 'react';
 import { cn } from '@/app/utils/cn';
+import { CheckCircle, Clock, AlertCircle, XCircle, Loader2, Flame, Star, Zap } from 'lucide-react';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info' | 'outline' | 'gradient';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  icon?: React.ReactNode;
+  pulse?: boolean;
   children: React.ReactNode;
 }
 
 const badgeVariants = {
-  default: 'bg-primary/20 text-primary border-primary/30',
-  secondary: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  success: 'bg-green-500/20 text-green-400 border-green-500/30',
-  warning: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  error: 'bg-red-500/20 text-red-400 border-red-500/30',
-  info: 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+  default: 'bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/30',
+  secondary: 'bg-secondary text-secondary-foreground border-border',
+  success: 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+  warning: 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30',
+  destructive: 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border-red-500/30',
+  info: 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
+  outline: 'bg-transparent text-foreground border-border hover:bg-secondary/50',
+  gradient: 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border-transparent',
 };
 
 const badgeSizes = {
-  sm: 'px-2 py-1 text-xs',
-  md: 'px-3 py-1 text-sm',
-  lg: 'px-4 py-2 text-base'
+  xs: 'px-1.5 py-0.5 text-[10px] gap-1',
+  sm: 'px-2 py-0.5 text-xs gap-1',
+  md: 'px-2.5 py-1 text-sm gap-1.5',
+  lg: 'px-3 py-1.5 text-base gap-2',
 };
 
 export const Badge: React.FC<BadgeProps> = ({
   variant = 'default',
   size = 'md',
+  icon,
+  pulse,
   className,
   children,
   ...props
@@ -32,14 +40,188 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       className={cn(
-        'inline-flex items-center justify-center rounded-full border font-medium transition-colors',
+        'inline-flex items-center justify-center rounded-full border font-semibold transition-all',
         badgeVariants[variant],
         badgeSizes[size],
+        pulse && 'animate-pulse',
         className
       )}
       {...props}
     >
+      {icon && <span className="flex-shrink-0">{icon}</span>}
       {children}
+    </span>
+  );
+};
+
+// Status Badge with automatic icon and styling
+export type OrderStatus = 'pending' | 'received' | 'preparing' | 'ready' | 'completed' | 'cancelled' | 'delivered';
+
+interface StatusBadgeProps {
+  status: OrderStatus;
+  showIcon?: boolean;
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  className?: string;
+  children?: React.ReactNode;
+}
+
+const statusConfig: Record<OrderStatus, {
+  label: string;
+  icon: React.ReactNode;
+  classes: string;
+}> = {
+  pending: {
+    label: 'Pending',
+    icon: <Clock className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30',
+  },
+  received: {
+    label: 'Received',
+    icon: <CheckCircle className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
+  },
+  preparing: {
+    label: 'Preparing',
+    icon: <Loader2 className="w-3 h-3 animate-spin" />,
+    classes: 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
+  },
+  ready: {
+    label: 'Ready',
+    icon: <Zap className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+  },
+  completed: {
+    label: 'Completed',
+    icon: <CheckCircle className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-green-500/20 to-teal-500/20 text-green-600 dark:text-green-400 border-green-500/30',
+  },
+  delivered: {
+    label: 'Delivered',
+    icon: <CheckCircle className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-600 dark:text-teal-400 border-teal-500/30',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    icon: <XCircle className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border-red-500/30',
+  },
+};
+
+export const StatusBadge: React.FC<StatusBadgeProps> = ({
+  status,
+  showIcon = true,
+  size = 'md',
+  className,
+  children,
+}) => {
+  const config = statusConfig[status] || statusConfig.pending;
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center justify-center rounded-full border font-semibold transition-all',
+        config.classes,
+        badgeSizes[size],
+        className
+      )}
+    >
+      {showIcon && <span className="flex-shrink-0">{config.icon}</span>}
+      {children || config.label}
+    </span>
+  );
+};
+
+// Special Badges for food items
+interface FoodBadgeProps {
+  type: 'popular' | 'new' | 'spicy' | 'chef' | 'vegan' | 'discount';
+  size?: 'xs' | 'sm' | 'md';
+  className?: string;
+}
+
+const foodBadgeConfig: Record<string, { label: string; icon: React.ReactNode; classes: string }> = {
+  popular: {
+    label: 'Popular',
+    icon: <Flame className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent shadow-sm shadow-orange-500/25',
+  },
+  new: {
+    label: 'New',
+    icon: <Star className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-transparent shadow-sm shadow-emerald-500/25',
+  },
+  spicy: {
+    label: 'Spicy',
+    icon: <Flame className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-red-500 to-rose-500 text-white border-transparent shadow-sm shadow-red-500/25',
+  },
+  chef: {
+    label: "Chef's Pick",
+    icon: <Star className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white border-transparent shadow-sm shadow-fuchsia-500/25',
+  },
+  vegan: {
+    label: 'Vegan',
+    icon: null,
+    classes: 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 dark:text-green-400 border-green-500/30',
+  },
+  discount: {
+    label: 'Sale',
+    icon: <Zap className="w-3 h-3" />,
+    classes: 'bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-transparent shadow-sm shadow-yellow-500/25',
+  },
+};
+
+export const FoodBadge: React.FC<FoodBadgeProps> = ({ type, size = 'sm', className }) => {
+  const config = foodBadgeConfig[type];
+  if (!config) return null;
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center justify-center rounded-full border font-bold transition-all',
+        config.classes,
+        badgeSizes[size],
+        className
+      )}
+    >
+      {config.icon && <span className="flex-shrink-0">{config.icon}</span>}
+      {config.label}
+    </span>
+  );
+};
+
+// Notification Badge (for counts)
+interface NotificationBadgeProps {
+  count: number;
+  max?: number;
+  color?: 'primary' | 'destructive' | 'success';
+  className?: string;
+}
+
+export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
+  count,
+  max = 99,
+  color = 'destructive',
+  className,
+}) => {
+  if (count === 0) return null;
+
+  const colors = {
+    primary: 'bg-gradient-to-r from-fuchsia-600 to-purple-600',
+    destructive: 'bg-gradient-to-r from-red-600 to-rose-600',
+    success: 'bg-gradient-to-r from-emerald-600 to-green-600',
+  };
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold text-white',
+        colors[color],
+        'shadow-lg',
+        className
+      )}
+    >
+      {count > max ? `${max}+` : count}
     </span>
   );
 };

@@ -8,6 +8,7 @@ export interface ModalProps {
   isOpen?: boolean; // Backward compatibility
   onClose: () => void;
   title?: React.ReactNode;
+  description?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   hideClose?: boolean;
   className?: string;
@@ -18,12 +19,22 @@ const sizeMap = {
   md: 'max-w-lg',
   lg: 'max-w-2xl',
   xl: 'max-w-4xl',
-  full: 'max-w-[96vw] h-[92vh]'
+  full: 'max-w-[96vw] h-[92vh]',
 };
 
-export function Modal({ open, isOpen, onClose, title, size = 'md', hideClose, children, className }: PropsWithChildren<ModalProps>) {
+export function Modal({
+  open,
+  isOpen,
+  onClose,
+  title,
+  description,
+  size = 'md',
+  hideClose,
+  children,
+  className
+}: PropsWithChildren<ModalProps>) {
   const isModalOpen = open ?? isOpen ?? false;
-  
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape' && isModalOpen) onClose();
@@ -31,6 +42,18 @@ export function Modal({ open, isOpen, onClose, title, size = 'md', hideClose, ch
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isModalOpen, onClose]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isModalOpen]);
 
   return (
     <AnimatePresence>
@@ -41,30 +64,55 @@ export function Modal({ open, isOpen, onClose, title, size = 'md', hideClose, ch
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+          {/* Backdrop */}
+          <motion.div
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
 
+          {/* Modal Content */}
           <motion.div
             role="dialog"
             aria-modal="true"
+            aria-labelledby={title ? 'modal-title' : undefined}
+            aria-describedby={description ? 'modal-description' : undefined}
             className={cn(
-              'relative w-full rounded-3xl border border-white/10 bg-white/80 dark:bg-[#0b0b0b]/80 backdrop-blur-xl text-gray-900 dark:text-gray-100 shadow-2xl',
+              'relative w-full rounded-2xl',
+              'bg-card text-card-foreground',
+              'border border-border',
+              'shadow-theme-xl',
               'overflow-hidden',
               sizeMap[size],
               className,
             )}
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 30, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 24 }}
+            initial={{ y: 20, opacity: 0, scale: 0.95 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 20, opacity: 0, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
+            {/* Header */}
             {(title || !hideClose) && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                <div className="font-semibold text-lg">{title}</div>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <div className="flex-1 pr-4">
+                  {title && (
+                    <h2 id="modal-title" className="font-semibold text-lg text-foreground">
+                      {title}
+                    </h2>
+                  )}
+                  {description && (
+                    <p id="modal-description" className="text-sm text-muted-foreground mt-1">
+                      {description}
+                    </p>
+                  )}
+                </div>
                 {!hideClose && (
                   <button
-                    aria-label="Close"
+                    aria-label="Close modal"
                     onClick={onClose}
-                    className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"
+                    className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -72,11 +120,29 @@ export function Modal({ open, isOpen, onClose, title, size = 'md', hideClose, ch
               </div>
             )}
 
-            <div className="p-6">{children}</div>
+            {/* Body */}
+            <div className={cn('p-6', size === 'full' && 'overflow-y-auto flex-1')}>
+              {children}
+            </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+// Modal footer component for action buttons
+export function ModalFooter({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-secondary/30',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
   );
 }
 

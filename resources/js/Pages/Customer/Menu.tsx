@@ -148,10 +148,8 @@ export default function Menu() {
     toastSuccess(`${item.name} added to cart`);
   };
 
-  const handleQuickView = (item: MenuItem) => {
-    // TODO: Implement quick view modal
-    console.log('Quick view:', item);
-  };
+  // Quick view is now handled automatically by MenuItemCard via FoodDetailProvider
+  // The global FoodDetailModal opens when clicking on any food card
 
   const isLoading = catsLoading || itemsLoading;
   const hasItems = processedItems && processedItems.length > 0;
@@ -350,7 +348,6 @@ export default function Menu() {
                   <MenuItemCard
                     item={item}
                     onAddToCart={handleAddToCart}
-                    onQuickView={handleQuickView}
                     layout={layout}
                     isFavorite={favoriteIds.includes(item.id)}
                     onToggleFavorite={() => handleToggleFavorite(item.id)}

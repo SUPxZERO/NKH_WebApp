@@ -105,7 +105,10 @@ class MenuItemController extends Controller
     // GET /api/menu-items/{item}
     public function show(MenuItem $menuItem): MenuItemResource
     {
-        return new MenuItemResource($menuItem->load(['translations', 'category']));
+        // Load all related data for the detail view
+        $menuItem->load(['translations', 'category.translations', 'recipe']);
+
+        return new MenuItemResource($menuItem);
     }
 
     // POST /api/menu-items/{item} with _method=PUT (role:admin,manager)

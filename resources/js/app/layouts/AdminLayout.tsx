@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,11 +6,14 @@ import {
   BarChart3, Calendar, MapPin, FileText, Menu as MenuIcon,
   X, Bell, User, LogOut, ChefHat, Building, Grid3X3,
   Tag, Star, Package, Shield, DollarSign, ClipboardList,
-  AlertTriangle, Beaker, TrendingUp, ChevronRight, ChevronDown, Circle
+  AlertTriangle, Beaker, TrendingUp, ChevronRight, ChevronDown, Circle,
+  Sun, Moon, Search, Command
 } from 'lucide-react';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
-import { cn } from '@/app/utils/cn'; // Ensure this path matches your project
+import { GlobalSearch, useGlobalSearch, SearchTrigger } from '@/app/components/ui/GlobalSearch';
+import { cn } from '@/app/utils/cn';
+import { useThemeStore } from '@/app/store/theme';
 
 // --- 1. New Hierarchical Navigation Structure ---
 const navigationTree = [
@@ -121,11 +124,19 @@ const handleLogout = () => {
 // --- 2. Sub-Component: Sidebar Item (Recursive) ---
 const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup }: any) => {
   const Icon = item.icon;
+
+  // Helper function to check if URL matches (handles query params and trailing slashes)
+  const isUrlMatch = (href: string, url: string) => {
+    const normalizedUrl = url.split('?')[0].replace(/\/$/, '');
+    const normalizedHref = href.replace(/\/$/, '');
+    return normalizedUrl === normalizedHref;
+  };
+
   // Check if this specific item is active
-  const isLinkActive = item.type === 'link' && currentUrl.startsWith(item.href);
+  const isLinkActive = item.type === 'link' && isUrlMatch(item.href, currentUrl);
 
   // Check if any child of this group is active
-  const isGroupActive = item.type === 'group' && item.children?.some((child: any) => currentUrl.startsWith(child.href));
+  const isGroupActive = item.type === 'group' && item.children?.some((child: any) => isUrlMatch(child.href, currentUrl));
 
   // Is this group currently expanded?
   const isExpanded = expandedGroups.includes(item.name);
@@ -159,7 +170,7 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
             {item.type === 'group' ? (
               <div className="flex flex-col gap-1">
                 {item.children.map((child: any) => {
-                  const isChildActive = currentUrl.startsWith(child.href);
+                  const isChildActive = isUrlMatch(child.href, currentUrl);
                   return (
                     <Link
                       key={child.href}
@@ -244,7 +255,7 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
           >
             <div className="pl-4 pr-2 py-2 space-y-1">
               {item.children.map((child: any) => {
-                const isChildActive = currentUrl.startsWith(child.href);
+                const isChildActive = isUrlMatch(child.href, currentUrl);
                 return (
                   <Link key={child.href} href={child.href} className="block">
                     <motion.div
@@ -287,16 +298,40 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
 // --- 3. Main Layout Component ---
 type Props = { children: React.ReactNode };
 
+// Helper function to check if URL matches (handles query params and trailing slashes)
+const isUrlMatchFn = (href: string, url: string) => {
+  const normalizedUrl = url.split('?')[0].replace(/\/$/, '');
+  const normalizedHref = href.replace(/\/$/, '');
+  return normalizedUrl === normalizedHref;
+};
+
 export default function AdminLayout({ children }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const { isDark, toggle: toggleTheme } = useThemeStore();
+  const search = useGlobalSearch();
+
+  // Get current page title from URL
+  const pageTitle = useMemo(() => {
+    // Find the active item in navigation tree
+    for (const item of navigationTree) {
+      if (item.type === 'link' && item.href && isUrlMatchFn(item.href, url)) {
+        return item.name;
+      }
+      if (item.type === 'group' && item.children) {
+        const child = item.children.find((c: any) => c.href && isUrlMatchFn(c.href, url));
+        if (child) return child.name;
+      }
+    }
+    return 'Dashboard';
+  }, [url]);
 
   // Auto-expand groups based on active URL
   useEffect(() => {
     const activeGroup = navigationTree.find(item =>
-      item.type === 'group' && item.children?.some(child => url.startsWith(child.href))
+      item.type === 'group' && item.children?.some(child => isUrlMatchFn(child.href, url))
     );
     if (activeGroup) {
       setExpandedGroups(prev => Array.from(new Set([...prev, activeGroup.name])));
@@ -328,7 +363,8 @@ export default function AdminLayout({ children }: Props) {
       <motion.aside
         className={cn(
           'fixed left-0 top-0 h-full z-50 lg:relative lg:z-auto',
-          'bg-white dark:bg-gray-800 shadow-xl border-r border-gray-200 dark:border-gray-700',
+          'bg-gradient-to-b from-white via-white to-gray-50/50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900/50',
+          'shadow-2xl shadow-gray-200/50 dark:shadow-black/20 border-r border-gray-100 dark:border-gray-700/50',
           'flex flex-col',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
@@ -337,7 +373,7 @@ export default function AdminLayout({ children }: Props) {
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700 h-[72px]">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700/50 h-[72px] bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
           <AnimatePresence mode="wait">
             {!sidebarCollapsed ? (
               <motion.div
@@ -347,14 +383,14 @@ export default function AdminLayout({ children }: Props) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-purple-500/30 ring-2 ring-purple-500/20">
                   <ChefHat className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                  <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent leading-tight">
                     NKH Resto
                   </h1>
-                  <p className="text-xs text-gray-500 font-medium">Admin Portal</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold tracking-wide">Admin Portal</p>
                 </div>
               </motion.div>
             ) : (
@@ -364,7 +400,7 @@ export default function AdminLayout({ children }: Props) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-purple-500/30 ring-2 ring-purple-500/20">
                   <ChefHat className="w-5 h-5 text-white" />
                 </div>
               </motion.div>
@@ -373,14 +409,14 @@ export default function AdminLayout({ children }: Props) {
 
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden lg:flex w-7 h-7 items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+            className="hidden lg:flex w-8 h-8 items-center justify-center rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200"
           >
             <MenuIcon className="w-4 h-4" />
           </button>
 
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
           >
             <X className="w-5 h-5" />
           </button>
@@ -406,13 +442,13 @@ export default function AdminLayout({ children }: Props) {
         </div>
 
         {/* User Footer - Simplified */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="p-4 border-t border-gray-100 dark:border-gray-700/50 bg-gradient-to-t from-gray-50/80 to-transparent dark:from-gray-900/30 dark:to-transparent">
           <div className={cn(
-            'flex items-center gap-3 p-2 rounded-xl transition-colors',
+            'flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 hover:bg-white dark:hover:bg-gray-700/50 cursor-pointer group',
             sidebarCollapsed && 'justify-center'
           )}>
-            <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center border-2 border-white dark:border-gray-600 shadow-sm flex-shrink-0">
-              <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-800/20 flex items-center justify-center border-2 border-purple-200/50 dark:border-purple-700/30 shadow-sm flex-shrink-0 group-hover:shadow-md group-hover:border-purple-300 dark:group-hover:border-purple-600/50 transition-all">
+              <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
 
             <AnimatePresence>
@@ -426,8 +462,9 @@ export default function AdminLayout({ children }: Props) {
                   <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
                     Admin User
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    admin@nkh.com
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    Online
                   </p>
                 </motion.div>
               )}
@@ -439,38 +476,59 @@ export default function AdminLayout({ children }: Props) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Top Bar */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-6 h-[72px] flex items-center z-10">
+        <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm border-b border-gray-200/50 dark:border-gray-700/50 px-6 h-[72px] flex items-center z-10 sticky top-0">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600"
+                className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
               >
                 <MenuIcon className="w-6 h-6" />
               </button>
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Dashboard</h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">{pageTitle}</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Search Button */}
+              <SearchTrigger onClick={search.open} variant="admin" className="hidden md:flex" />
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all duration-200"
+                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
+              <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+
               <NotificationDropdown variant="admin" />
               <UserProfileDropdown variant="admin" />
             </div>
           </div>
         </header>
 
-        {/* Content Area */}
         {/* Main Content Area */}
-        <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-6">
+        <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950/50">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="w-full min-h-full" /* CHANGED: max-w-7xl mx-auto -> w-full min-h-full */
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full min-h-full"
           >
             {children}
           </motion.div>
         </main>
       </div>
+
+      {/* Global Search Modal */}
+      <GlobalSearch variant="admin" isOpen={search.isOpen} onClose={search.close} />
     </div>
   );
 }
