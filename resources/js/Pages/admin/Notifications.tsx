@@ -18,40 +18,40 @@ import SendNotificationPanel from '@/app/components/admin/SendNotificationPanel'
 // Stats Ribbon
 const NotificationStatsRibbon = ({ stats }: { stats: any }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Notifications</p>
-          <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
+          <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Total Notifications</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{stats.total}</p>
         </div>
-        <Bell className="w-8 h-8 text-purple-400" />
+        <Bell className="w-8 h-8 text-purple-500 dark:text-purple-400" />
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Unread</p>
-          <p className="text-2xl font-bold text-amber-400 mt-1">{stats.unread}</p>
+          <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Unread</p>
+          <p className="text-2xl font-bold text-amber-500 dark:text-amber-400 mt-1">{stats.unread}</p>
         </div>
-        <MessageSquare className="w-8 h-8 text-amber-400" />
+        <MessageSquare className="w-8 h-8 text-amber-500 dark:text-amber-400" />
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">System Alerts</p>
-          <p className="text-2xl font-bold text-red-400 mt-1">{stats.systemAlerts}</p>
+          <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">System Alerts</p>
+          <p className="text-2xl font-bold text-red-500 dark:text-red-400 mt-1">{stats.systemAlerts}</p>
         </div>
-        <AlertTriangle className="w-8 h-8 text-red-400" />
+        <AlertTriangle className="w-8 h-8 text-red-500 dark:text-red-400" />
       </div>
     </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">User Messages</p>
-          <p className="text-2xl font-bold text-blue-400 mt-1">{stats.userMessages}</p>
+          <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">User Messages</p>
+          <p className="text-2xl font-bold text-blue-500 dark:text-blue-400 mt-1">{stats.userMessages}</p>
         </div>
-        <Users className="w-8 h-8 text-blue-400" />
+        <Users className="w-8 h-8 text-blue-500 dark:text-blue-400" />
       </div>
     </div>
   </div>
@@ -142,112 +142,120 @@ export default function Notifications() {
   };
 
   const getTypeColor = (type: string) => {
-    if (type === 'success') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
-    if (type === 'warning') return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
-    if (type === 'error') return 'text-red-400 bg-red-500/10 border-red-500/20';
-    if (type === 'system') return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
-    return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+    if (type === 'success') return 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+    if (type === 'warning') return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
+    if (type === 'error') return 'text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20';
+    if (type === 'system') return 'text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20';
+    return 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20';
   };
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-slate-900 p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Notifications</h1>
-            <p className="text-slate-400 mt-1">System alerts, user messaging, and broadcast notifications</p>
-          </div>
+      <div className="relative min-h-screen bg-background p-6">
+        {/* Decorative Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         </div>
 
-        <NotificationStatsRibbon stats={stats} />
-
-        {/* Targeted Send Panel */}
-        <div className="mb-6">
-          <SendNotificationPanel />
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search notifications..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent tracking-tight">Notifications</h1>
+              <p className="text-muted-foreground mt-1">System alerts, user messaging, and broadcast notifications</p>
             </div>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-              className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
-              <option value="all">All Types</option>
-              <option value="info">Info</option>
-              <option value="success">Success</option>
-              <option value="warning">Warning</option>
-              <option value="error">Error</option>
-              <option value="system">System</option>
-            </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
-              <option value="all">All Status</option>
-              <option value="read">Read</option>
-              <option value="unread">Unread</option>
-            </select>
           </div>
-        </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
-            <div className="col-span-4">Title / Message</div>
-            <div className="col-span-2">Type</div>
-            <div className="col-span-2">User</div>
-            <div className="col-span-2">Date</div>
-            <div className="col-span-1">Status</div>
-            <div className="col-span-1 text-right">Actions</div>
+          <NotificationStatsRibbon stats={stats} />
+
+          {/* Targeted Send Panel */}
+          <div className="mb-6">
+            <SendNotificationPanel />
           </div>
-          <div className="divide-y divide-white/5">
-            {isLoading ? (
-              <div className="p-8 text-center text-gray-500">Loading...</div>
-            ) : notificationList.map((notification: Notification) => (
-              <motion.div key={notification.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className={cn("grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group", !notification.read_at && "bg-white/5")}>
-                <div className="col-span-4">
-                  <div className={cn("font-medium text-white", !notification.read_at && "font-bold")}>{notification.title}</div>
-                  <div className="text-xs text-gray-500 truncate">{notification.message}</div>
-                </div>
-                <div className="col-span-2">
-                  <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getTypeColor(notification.type))}>
-                    {getTypeIcon(notification.type)} {notification.type.toUpperCase()}
-                  </span>
-                </div>
-                <div className="col-span-2 text-sm text-gray-300">
-                  {notification.user ? notification.user.name : <span className="text-purple-400 italic">All Users</span>}
-                </div>
-                <div className="col-span-2 text-sm text-gray-400">
-                  {new Date(notification.created_at).toLocaleString()}
-                </div>
-                <div className="col-span-1">
-                  {notification.read_at ? <span className="text-gray-500 text-xs flex items-center gap-1"><Check size={12} /> Read</span> : <span className="text-emerald-400 text-xs font-bold">New</span>}
-                </div>
-                <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {!notification.read_at && <Button size="sm" variant="secondary" onClick={() => markAsReadMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-white/10" title="Mark as Read"><Check size={14} /></Button>}
-                  <Button size="sm" variant="secondary" onClick={() => { setSelectedNotification(notification); setOpenView(true); }} className="h-8 w-8 p-0 border-white/10"><Eye size={14} /></Button>
-                  <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
-                </div>
-              </motion.div>
-            ))}
+
+          <div className="bg-card border border-border rounded-xl p-4 mb-6 backdrop-blur-sm">
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input placeholder="Search notifications..." value={search} onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground" />
+              </div>
+              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
+                className="bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:border-purple-500 outline-none">
+                <option value="all">All Types</option>
+                <option value="info">Info</option>
+                <option value="success">Success</option>
+                <option value="warning">Warning</option>
+                <option value="error">Error</option>
+                <option value="system">System</option>
+              </select>
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:border-purple-500 outline-none">
+                <option value="all">All Status</option>
+                <option value="read">Read</option>
+                <option value="unread">Unread</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl overflow-hidden backdrop-blur-sm">
+            <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-muted/50 text-xs font-semibold text-muted-foreground uppercase">
+              <div className="col-span-4">Title / Message</div>
+              <div className="col-span-2">Type</div>
+              <div className="col-span-2">User</div>
+              <div className="col-span-2">Date</div>
+              <div className="col-span-1">Status</div>
+              <div className="col-span-1 text-right">Actions</div>
+            </div>
+            <div className="divide-y divide-border">
+              {isLoading ? (
+                <div className="p-8 text-center text-muted-foreground">Loading...</div>
+              ) : notificationList.map((notification: Notification) => (
+                <motion.div key={notification.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className={cn("grid grid-cols-12 gap-4 p-4 items-center hover:bg-muted/50 transition-colors group", !notification.read_at && "bg-muted/30")}>
+                  <div className="col-span-4">
+                    <div className={cn("font-medium text-foreground", !notification.read_at && "font-bold")}>{notification.title}</div>
+                    <div className="text-xs text-muted-foreground truncate">{notification.message}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getTypeColor(notification.type))}>
+                      {getTypeIcon(notification.type)} {notification.type.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="col-span-2 text-sm text-foreground/80">
+                    {notification.user ? notification.user.name : <span className="text-purple-600 dark:text-purple-400 italic">All Users</span>}
+                  </div>
+                  <div className="col-span-2 text-sm text-muted-foreground">
+                    {new Date(notification.created_at).toLocaleString()}
+                  </div>
+                  <div className="col-span-1">
+                    {notification.read_at ? <span className="text-muted-foreground text-xs flex items-center gap-1"><Check size={12} /> Read</span> : <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold">New</span>}
+                  </div>
+                  <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {!notification.read_at && <Button size="sm" variant="secondary" onClick={() => markAsReadMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-border" title="Mark as Read"><Check size={14} /></Button>}
+                    <Button size="sm" variant="secondary" onClick={() => { setSelectedNotification(notification); setOpenView(true); }} className="h-8 w-8 p-0 border-border"><Eye size={14} /></Button>
+                    <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-600 dark:text-red-400"><Trash2 size={14} /></Button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       <Modal open={openCreate} onClose={closeModal} title="Send Notification" size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="bg-slate-950 border-white/10" />
+          <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="bg-background border-border" />
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Message</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Message</label>
             <textarea value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required rows={4}
-              className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-500" />
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Type</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Type</label>
               <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground">
                 <option value="info">Info</option>
                 <option value="success">Success</option>
                 <option value="warning">Warning</option>
@@ -256,12 +264,12 @@ export default function Notifications() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Recipient</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Recipient</label>
               <select value={formData.send_to_all ? 'all' : formData.user_id} onChange={(e) => {
                 if (e.target.value === 'all') setFormData({ ...formData, send_to_all: true, user_id: '' });
                 else setFormData({ ...formData, send_to_all: false, user_id: e.target.value });
               }}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white">
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground">
                 <option value="all">All Users</option>
                 {users?.data?.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
@@ -278,13 +286,13 @@ export default function Notifications() {
         {selectedNotification && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">{selectedNotification.title}</h3>
+              <h3 className="text-lg font-bold text-foreground">{selectedNotification.title}</h3>
               <Badge className={getTypeColor(selectedNotification.type)}>{selectedNotification.type.toUpperCase()}</Badge>
             </div>
-            <div className="bg-white/5 p-4 rounded-lg border border-white/10 text-gray-300 text-sm whitespace-pre-wrap">
+            <div className="bg-muted/50 p-4 rounded-lg border border-border text-foreground/80 text-sm whitespace-pre-wrap">
               {selectedNotification.message}
             </div>
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>To: {selectedNotification.user ? selectedNotification.user.name : 'All Users'}</span>
               <span>{new Date(selectedNotification.created_at).toLocaleString()}</span>
             </div>

@@ -210,345 +210,354 @@ export default function TimeOffRequests() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'pending': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-            case 'approved': return 'bg-green-500/20 text-green-400 border-green-500/30';
-            case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
-            default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+            case 'pending': return 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30';
+            case 'approved': return 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30';
+            case 'rejected': return 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30';
+            default: return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30';
         }
     };
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-                {/* Header */}
-                <div className="mb-8">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-                    >
-                        <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                                Time Off Requests
-                            </h1>
-                            <p className="text-gray-400 mt-1">Manage employee leave and vacation requests</p>
-                        </div>
-
-                        <div className="flex gap-4">
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Pending</div>
-                                <div className="text-xl font-bold text-yellow-400">{stats?.pending || 0}</div>
-                            </div>
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Approved</div>
-                                <div className="text-xl font-bold text-green-400">{stats?.approved || 0}</div>
-                            </div>
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Total Days</div>
-                                <div className="text-xl font-bold text-blue-400">{stats?.total_days_approved || 0}</div>
-                            </div>
-                        </div>
-
-                        <Button
-                            onClick={() => { resetForm(); setOpenCreate(true); }}
-                            className="bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            New Request
-                        </Button>
-                    </motion.div>
+            <div className="min-h-screen bg-background p-6 relative overflow-hidden">
+                {/* Decorative Background Elements */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-500/10 to-pink-500/10 dark:from-purple-500/20 dark:to-pink-500/20 rounded-full blur-3xl" />
+                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 rounded-full blur-3xl" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-fuchsia-500/5 to-purple-500/5 dark:from-fuchsia-500/10 dark:to-purple-500/10 rounded-full blur-3xl" />
                 </div>
 
-                {/* Filters */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4"
-                >
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <Input
-                            placeholder="Search requests..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-                        />
+                <div className="relative z-10">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                        >
+                            <div>
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                                    Time Off Requests
+                                </h1>
+                                <p className="text-muted-foreground mt-1">Manage employee leave and vacation requests</p>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <div className="bg-card backdrop-blur-md rounded-xl p-4 border border-border">
+                                    <div className="text-sm text-muted-foreground">Pending</div>
+                                    <div className="text-xl font-bold text-yellow-600 dark:text-yellow-400">{stats?.pending || 0}</div>
+                                </div>
+                                <div className="bg-card backdrop-blur-md rounded-xl p-4 border border-border">
+                                    <div className="text-sm text-muted-foreground">Approved</div>
+                                    <div className="text-xl font-bold text-green-600 dark:text-green-400">{stats?.approved || 0}</div>
+                                </div>
+                                <div className="bg-card backdrop-blur-md rounded-xl p-4 border border-border">
+                                    <div className="text-sm text-muted-foreground">Total Days</div>
+                                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{stats?.total_days_approved || 0}</div>
+                                </div>
+                            </div>
+
+                            <Button
+                                onClick={() => { resetForm(); setOpenCreate(true); }}
+                                className="bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                New Request
+                            </Button>
+                        </motion.div>
                     </div>
 
-                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                        <option value="all" className="text-black">All Status</option>
-                        <option value="pending" className="text-black">Pending</option>
-                        <option value="approved" className="text-black">Approved</option>
-                        <option value="rejected" className="text-black">Rejected</option>
-                    </select>
+                    {/* Filters */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4"
+                    >
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                            <Input
+                                placeholder="Search requests..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground"
+                            />
+                        </div>
 
-                    <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                        <option value="all" className="text-black">All Types</option>
-                        {Object.entries(requestTypes).map(([key, label]) => (
-                            <option key={key} value={key} className="text-black">{label}</option>
-                        ))}
-                    </select>
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
 
-                    <select value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                        <option value="all" className="text-black">All Employees</option>
-                        {employees?.data?.map((emp: Employee) => (
-                            <option key={emp.id} value={emp.id} className="text-black">{emp.name}</option>
-                        ))}
-                    </select>
+                        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
+                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground">
+                            <option value="all">All Types</option>
+                            {Object.entries(requestTypes).map(([key, label]) => (
+                                <option key={key} value={key}>{label}</option>
+                            ))}
+                        </select>
 
-                    <Button variant="secondary" onClick={() => { setSearch(''); setStatusFilter('all'); setTypeFilter('all'); setEmployeeFilter('all'); }}
-                        className="border-white/20 hover:bg-white/10">Clear</Button>
-                </motion.div>
+                        <select value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)}
+                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground">
+                            <option value="all">All Employees</option>
+                            {employees?.data?.map((emp: Employee) => (
+                                <option key={emp.id} value={emp.id}>{emp.name}</option>
+                            ))}
+                        </select>
 
-                {/* Requests Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {isLoading ? (
-                        Array.from({ length: 6 }).map((_, i) => (
-                            <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-md">
-                                <CardContent className="p-6">
-                                    <div className="animate-pulse space-y-4">
-                                        <div className="h-4 bg-white/10 rounded w-3/4"></div>
-                                        <div className="h-3 bg-white/10 rounded w-1/2"></div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))
-                    ) : (
-                        requests?.data?.map((request: TimeOffRequest, index: number) => (
-                            <motion.div key={request.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.05 }}>
-                                <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
+                        <Button variant="secondary" onClick={() => { setSearch(''); setStatusFilter('all'); setTypeFilter('all'); setEmployeeFilter('all'); }}
+                            className="border-border hover:bg-accent">Clear</Button>
+                    </motion.div>
+
+                    {/* Requests Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {isLoading ? (
+                            Array.from({ length: 6 }).map((_, i) => (
+                                <Card key={i} className="bg-card border-border backdrop-blur-md">
                                     <CardContent className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 className="font-semibold text-white text-lg flex items-center gap-2">
-                                                    <User className="w-4 h-4" />
-                                                    {request.employee?.name}
-                                                </h3>
-                                                <Badge className="mt-1 bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                                    {requestTypes[request.type as keyof typeof requestTypes]}
-                                                </Badge>
-                                            </div>
-                                            <Badge className={getStatusColor(request.status)}>
-                                                {request.status.toUpperCase()}
-                                            </Badge>
+                                        <div className="animate-pulse space-y-4">
+                                            <div className="h-4 bg-muted rounded w-3/4"></div>
+                                            <div className="h-3 bg-muted rounded w-1/2"></div>
                                         </div>
-
-                                        <div className="space-y-2 mb-4">
-                                            <div className="flex items-center text-sm text-gray-300">
-                                                <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                                                {new Date(request.start_date).toLocaleDateString()} - {new Date(request.end_date).toLocaleDateString()}
-                                            </div>
-                                            <div className="flex items-center text-sm text-gray-300">
-                                                <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                                                {request.days_requested} day{request.days_requested > 1 ? 's' : ''}
-                                            </div>
-                                            <div className="flex items-center text-sm text-gray-300">
-                                                <FileText className="w-4 h-4 mr-2 text-gray-400" />
-                                                {request.reason.substring(0, 50)}{request.reason.length > 50 ? '...' : ''}
-                                            </div>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        {request.status === 'pending' && (
-                                            <div className="flex gap-2 mb-2">
-                                                <Button size="sm" variant="primary"
-                                                    onClick={() => { setSelectedRequest(request); setOpenApprove(true); }}
-                                                    className="flex-1 bg-green-600 hover:bg-green-700">
-                                                    <CheckCircle className="w-3 h-3 mr-1" />Approve
-                                                </Button>
-                                                <Button size="sm" variant="danger"
-                                                    onClick={() => { setSelectedRequest(request); setOpenReject(true); }}
-                                                    className="flex-1 bg-red-600 hover:bg-red-700">
-                                                    <XCircle className="w-3 h-3 mr-1" />Reject
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        <Button size="sm" variant="secondary" onClick={() => { setSelectedRequest(request); setOpenView(true); }}
-                                            className="w-full border-white/20 hover:bg-white/10">
-                                            <Eye className="w-3 h-3 mr-1" />View Details
-                                        </Button>
                                     </CardContent>
                                 </Card>
-                            </motion.div>
-                        ))
-                    )}
+                            ))
+                        ) : (
+                            requests?.data?.map((request: TimeOffRequest, index: number) => (
+                                <motion.div key={request.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: index * 0.05 }}>
+                                    <Card className="bg-card border-border backdrop-blur-md hover:bg-accent/50 transition-all duration-300">
+                                        <CardContent className="p-6">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="font-semibold text-foreground text-lg flex items-center gap-2">
+                                                        <User className="w-4 h-4" />
+                                                        {request.employee?.name}
+                                                    </h3>
+                                                    <Badge className="mt-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30">
+                                                        {requestTypes[request.type as keyof typeof requestTypes]}
+                                                    </Badge>
+                                                </div>
+                                                <Badge className={getStatusColor(request.status)}>
+                                                    {request.status.toUpperCase()}
+                                                </Badge>
+                                            </div>
+
+                                            <div className="space-y-2 mb-4">
+                                                <div className="flex items-center text-sm text-muted-foreground">
+                                                    <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
+                                                    {new Date(request.start_date).toLocaleDateString()} - {new Date(request.end_date).toLocaleDateString()}
+                                                </div>
+                                                <div className="flex items-center text-sm text-muted-foreground">
+                                                    <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
+                                                    {request.days_requested} day{request.days_requested > 1 ? 's' : ''}
+                                                </div>
+                                                <div className="flex items-center text-sm text-muted-foreground">
+                                                    <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
+                                                    {request.reason.substring(0, 50)}{request.reason.length > 50 ? '...' : ''}
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            {request.status === 'pending' && (
+                                                <div className="flex gap-2 mb-2">
+                                                    <Button size="sm" variant="primary"
+                                                        onClick={() => { setSelectedRequest(request); setOpenApprove(true); }}
+                                                        className="flex-1 bg-green-600 hover:bg-green-700">
+                                                        <CheckCircle className="w-3 h-3 mr-1" />Approve
+                                                    </Button>
+                                                    <Button size="sm" variant="danger"
+                                                        onClick={() => { setSelectedRequest(request); setOpenReject(true); }}
+                                                        className="flex-1 bg-red-600 hover:bg-red-700">
+                                                        <XCircle className="w-3 h-3 mr-1" />Reject
+                                                    </Button>
+                                                </div>
+                                            )}
+
+                                            <Button size="sm" variant="secondary" onClick={() => { setSelectedRequest(request); setOpenView(true); }}
+                                                className="w-full border-border hover:bg-accent">
+                                                <Eye className="w-3 h-3 mr-1" />View Details
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                </motion.div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Create Modal */}
+                    <Modal open={openCreate} onClose={() => { setOpenCreate(false); resetForm(); }}
+                        title="New Time Off Request" size="lg">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-600 dark:text-red-400 text-sm">{error}</div>}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Employee *</label>
+                                    <select required value={formData.employee_id} onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground">
+                                        <option value="">Select Employee</option>
+                                        {employees?.data?.map((emp: Employee) => (
+                                            <option key={emp.id} value={emp.id}>{emp.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Type *</label>
+                                    <select required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground">
+                                        {Object.entries(requestTypes).map(([key, label]) => (
+                                            <option key={key} value={key}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Start Date *</label>
+                                    <Input type="date" required value={formData.start_date}
+                                        onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                                        className="bg-card border-border text-foreground" />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">End Date *</label>
+                                    <Input type="date" required value={formData.end_date}
+                                        onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                                        className="bg-card border-border text-foreground" />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Reason *</label>
+                                    <textarea required value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground" rows={3}
+                                        maxLength={500} />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Additional Notes</label>
+                                    <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground" rows={2} />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); resetForm(); }}
+                                    className="flex-1 border-border hover:bg-accent">Cancel</Button>
+                                <Button type="submit" variant="primary" disabled={createMutation.isPending}
+                                    className="flex-1">Submit Request</Button>
+                            </div>
+                        </form>
+                    </Modal>
+
+                    {/* View Modal */}
+                    <Modal open={openView} onClose={() => { setOpenView(false); setSelectedRequest(null); }}
+                        title="Request Details" size="lg">
+                        {selectedRequest && (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground">Employee</h3>
+                                        <p className="text-foreground font-semibold">{selectedRequest.employee?.name}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground">Type</h3>
+                                        <Badge className="bg-blue-500/20 text-blue-600 dark:text-blue-400">
+                                            {requestTypes[selectedRequest.type as keyof typeof requestTypes]}
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground">Start Date</h3>
+                                        <p className="text-foreground">{new Date(selectedRequest.start_date).toLocaleDateString()}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground">End Date</h3>
+                                        <p className="text-foreground">{new Date(selectedRequest.end_date).toLocaleDateString()}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground">Days Requested</h3>
+                                        <p className="text-foreground font-semibold">{selectedRequest.days_requested}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground">Status</h3>
+                                        <Badge className={getStatusColor(selectedRequest.status)}>
+                                            {selectedRequest.status.toUpperCase()}
+                                        </Badge>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-sm text-muted-foreground mb-2">Reason</h3>
+                                    <p className="text-foreground text-sm">{selectedRequest.reason}</p>
+                                </div>
+
+                                {selectedRequest.notes && (
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground mb-2">Additional Notes</h3>
+                                        <p className="text-foreground text-sm">{selectedRequest.notes}</p>
+                                    </div>
+                                )}
+
+                                {selectedRequest.approval_notes && (
+                                    <div>
+                                        <h3 className="text-sm text-muted-foreground mb-2">Approval Notes</h3>
+                                        <p className="text-foreground text-sm">{selectedRequest.approval_notes}</p>
+                                    </div>
+                                )}
+
+                                <Button variant="secondary" onClick={() => { setOpenView(false); setSelectedRequest(null); }}
+                                    className="w-full border-border hover:bg-accent">Close</Button>
+                            </div>
+                        )}
+                    </Modal>
+
+                    {/* Approve Modal */}
+                    <Modal open={openApprove} onClose={() => { setOpenApprove(false); setSelectedRequest(null); setApprovalNotes(''); }}
+                        title="Approve Request" size="md">
+                        <div className="space-y-4">
+                            <p className="text-muted-foreground">
+                                Approve time-off request for <span className="font-semibold text-foreground">{selectedRequest?.employee?.name}</span>?
+                            </p>
+                            <div>
+                                <label className="block text-sm font-medium text-muted-foreground mb-2">Approval Notes (optional)</label>
+                                <textarea value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)}
+                                    className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground" rows={3}
+                                    placeholder="Add any comments..." />
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <Button variant="secondary" onClick={() => { setOpenApprove(false); setApprovalNotes(''); }}
+                                    className="flex-1 border-border hover:bg-accent">Cancel</Button>
+                                <Button variant="primary" onClick={handleApprove} disabled={approveMutation.isPending}
+                                    className="flex-1 bg-green-600 hover:bg-green-700">Approve</Button>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    {/* Reject Modal */}
+                    <Modal open={openReject} onClose={() => { setOpenReject(false); setSelectedRequest(null); setApprovalNotes(''); setError(''); }}
+                        title="Reject Request" size="md">
+                        <div className="space-y-4">
+                            {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-600 dark:text-red-400 text-sm">{error}</div>}
+                            <p className="text-muted-foreground">
+                                Reject time-off request for <span className="font-semibold text-foreground">{selectedRequest?.employee?.name}</span>?
+                            </p>
+                            <div>
+                                <label className="block text-sm font-medium text-muted-foreground mb-2">Rejection Reason *</label>
+                                <textarea required value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)}
+                                    className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground" rows={3}
+                                    placeholder="Please provide a reason..." />
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <Button variant="secondary" onClick={() => { setOpenReject(false); setApprovalNotes(''); setError(''); }}
+                                    className="flex-1 border-border hover:bg-accent">Cancel</Button>
+                                <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending}
+                                    className="flex-1 bg-red-600 hover:bg-red-700">Reject</Button>
+                            </div>
+                        </div>
+                    </Modal>
                 </div>
-
-                {/* Create Modal */}
-                <Modal open={openCreate} onClose={() => { setOpenCreate(false); resetForm(); }}
-                    title="New Time Off Request" size="lg">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">{error}</div>}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Employee *</label>
-                                <select required value={formData.employee_id} onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    <option value="">Select Employee</option>
-                                    {employees?.data?.map((emp: Employee) => (
-                                        <option key={emp.id} value={emp.id} className="bg-gray-800">{emp.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Type *</label>
-                                <select required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    {Object.entries(requestTypes).map(([key, label]) => (
-                                        <option key={key} value={key} className="bg-gray-800">{label}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Start Date *</label>
-                                <Input type="date" required value={formData.start_date}
-                                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">End Date *</label>
-                                <Input type="date" required value={formData.end_date}
-                                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Reason *</label>
-                                <textarea required value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" rows={3}
-                                    maxLength={500} />
-                            </div>
-
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Additional Notes</label>
-                                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" rows={2} />
-                            </div>
-                        </div>
-
-                        <div className="flex gap-3 pt-4">
-                            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); resetForm(); }}
-                                className="flex-1 border-white/20 hover:bg-white/10">Cancel</Button>
-                            <Button type="submit" variant="primary" disabled={createMutation.isPending}
-                                className="flex-1">Submit Request</Button>
-                        </div>
-                    </form>
-                </Modal>
-
-                {/* View Modal */}
-                <Modal open={openView} onClose={() => { setOpenView(false); setSelectedRequest(null); }}
-                    title="Request Details" size="lg">
-                    {selectedRequest && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h3 className="text-sm text-gray-400">Employee</h3>
-                                    <p className="text-white font-semibold">{selectedRequest.employee?.name}</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm text-gray-400">Type</h3>
-                                    <Badge className="bg-blue-500/20 text-blue-400">
-                                        {requestTypes[selectedRequest.type as keyof typeof requestTypes]}
-                                    </Badge>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm text-gray-400">Start Date</h3>
-                                    <p className="text-white">{new Date(selectedRequest.start_date).toLocaleDateString()}</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm text-gray-400">End Date</h3>
-                                    <p className="text-white">{new Date(selectedRequest.end_date).toLocaleDateString()}</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm text-gray-400">Days Requested</h3>
-                                    <p className="text-white font-semibold">{selectedRequest.days_requested}</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm text-gray-400">Status</h3>
-                                    <Badge className={getStatusColor(selectedRequest.status)}>
-                                        {selectedRequest.status.toUpperCase()}
-                                    </Badge>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="text-sm text-gray-400 mb-2">Reason</h3>
-                                <p className="text-white text-sm">{selectedRequest.reason}</p>
-                            </div>
-
-                            {selectedRequest.notes && (
-                                <div>
-                                    <h3 className="text-sm text-gray-400 mb-2">Additional Notes</h3>
-                                    <p className="text-white text-sm">{selectedRequest.notes}</p>
-                                </div>
-                            )}
-
-                            {selectedRequest.approval_notes && (
-                                <div>
-                                    <h3 className="text-sm text-gray-400 mb-2">Approval Notes</h3>
-                                    <p className="text-white text-sm">{selectedRequest.approval_notes}</p>
-                                </div>
-                            )}
-
-                            <Button variant="secondary" onClick={() => { setOpenView(false); setSelectedRequest(null); }}
-                                className="w-full border-white/20 hover:bg-white/10">Close</Button>
-                        </div>
-                    )}
-                </Modal>
-
-                {/* Approve Modal */}
-                <Modal open={openApprove} onClose={() => { setOpenApprove(false); setSelectedRequest(null); setApprovalNotes(''); }}
-                    title="Approve Request" size="md">
-                    <div className="space-y-4">
-                        <p className="text-gray-300">
-                            Approve time-off request for <span className="font-semibold text-white">{selectedRequest?.employee?.name}</span>?
-                        </p>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Approval Notes (optional)</label>
-                            <textarea value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" rows={3}
-                                placeholder="Add any comments..." />
-                        </div>
-                        <div className="flex gap-3 pt-4">
-                            <Button variant="secondary" onClick={() => { setOpenApprove(false); setApprovalNotes(''); }}
-                                className="flex-1 border-white/20 hover:bg-white/10">Cancel</Button>
-                            <Button variant="primary" onClick={handleApprove} disabled={approveMutation.isPending}
-                                className="flex-1 bg-green-600 hover:bg-green-700">Approve</Button>
-                        </div>
-                    </div>
-                </Modal>
-
-                {/* Reject Modal */}
-                <Modal open={openReject} onClose={() => { setOpenReject(false); setSelectedRequest(null); setApprovalNotes(''); setError(''); }}
-                    title="Reject Request" size="md">
-                    <div className="space-y-4">
-                        {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">{error}</div>}
-                        <p className="text-gray-300">
-                            Reject time-off request for <span className="font-semibold text-white">{selectedRequest?.employee?.name}</span>?
-                        </p>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Rejection Reason *</label>
-                            <textarea required value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" rows={3}
-                                placeholder="Please provide a reason..." />
-                        </div>
-                        <div className="flex gap-3 pt-4">
-                            <Button variant="secondary" onClick={() => { setOpenReject(false); setApprovalNotes(''); setError(''); }}
-                                className="flex-1 border-white/20 hover:bg-white/10">Cancel</Button>
-                            <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending}
-                                className="flex-1 bg-red-600 hover:bg-red-700">Reject</Button>
-                        </div>
-                    </div>
-                </Modal>
             </div>
         </AdminLayout>
     );

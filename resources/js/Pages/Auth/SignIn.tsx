@@ -3,10 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, router, usePage } from '@inertiajs/react';
-import { Eye, EyeOff, Mail, Lock, User, Shield, Coffee } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Shield, Coffee, Sparkles, ArrowRight } from 'lucide-react';
 import { PageProps } from '@/types';
 import { Button } from '@/app/components/ui/Button';
-import { Input } from '@/app/components/ui/Input';
 import { cn } from '@/app/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -24,23 +23,29 @@ const roleConfig = {
   customer: {
     icon: Coffee,
     label: 'Customer',
-    description: 'Order food and track deliveries',
-    gradient: 'from-emerald-500 to-teal-600',
-    bgGradient: 'from-emerald-500/20 to-teal-600/20',
+    description: 'Order food & track deliveries',
+    gradient: 'from-emerald-400 via-teal-500 to-cyan-500',
+    bgGlow: 'bg-emerald-500/30',
+    borderColor: 'border-emerald-400/50',
+    shadowColor: 'shadow-emerald-500/20',
   },
   employee: {
     icon: User,
     label: 'Employee',
-    description: 'Access POS and manage orders',
-    gradient: 'from-blue-500 to-indigo-600',
-    bgGradient: 'from-blue-500/20 to-indigo-600/20',
+    description: 'POS & order management',
+    gradient: 'from-blue-400 via-indigo-500 to-purple-500',
+    bgGlow: 'bg-blue-500/30',
+    borderColor: 'border-blue-400/50',
+    shadowColor: 'shadow-blue-500/20',
   },
   admin: {
     icon: Shield,
     label: 'Admin',
-    description: 'Full system management access',
-    gradient: 'from-purple-500 to-pink-600',
-    bgGradient: 'from-purple-500/20 to-pink-600/20',
+    description: 'Full system control',
+    gradient: 'from-fuchsia-400 via-pink-500 to-rose-500',
+    bgGlow: 'bg-fuchsia-500/30',
+    borderColor: 'border-fuchsia-400/50',
+    shadowColor: 'shadow-fuchsia-500/20',
   },
 };
 
@@ -87,213 +92,288 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000" />
-        <div className="absolute top-40 left-40 w-80 h-80 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-500" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Premium animated gradient background */}
+      <div className="absolute inset-0 bg-[#0a0a0f]">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-transparent to-fuchsia-900/40" />
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-blue-600/30 to-cyan-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+          <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-gradient-to-br from-emerald-600/20 to-teal-600/10 rounded-full blur-[100px] animate-pulse delay-500" />
+        </div>
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative w-full max-w-md"
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative w-full max-w-md z-10"
       >
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-pink-500 shadow-lg shadow-fuchsia-500/25"
+            className="relative inline-flex items-center justify-center w-20 h-20 mb-6"
           >
-            <Coffee className="w-8 h-8 text-white" />
+            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-2xl rotate-6 blur-sm opacity-70" />
+            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-2xl" />
+            <Coffee className="relative w-10 h-10 text-white" />
+            <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-400 animate-pulse" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to your NKH Restaurant account</p>
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-4xl font-black text-white mb-3 tracking-tight"
+          >
+            Welcome Back
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-gray-400 text-lg"
+          >
+            Sign in to your <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">NKH Restaurant</span> account
+          </motion.p>
         </div>
 
         {/* Main Form Card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl"
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="relative"
         >
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-3">
-                I am signing in as:
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {Object.entries(roleConfig).map(([role, config]) => {
-                  const Icon = config.icon;
-                  const isSelected = selectedRole === role;
-                  return (
-                    <motion.button
-                      key={role}
-                      type="button"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setValue('role', role as any)}
-                      className={cn(
-                        'relative p-3 rounded-2xl border transition-all duration-200 text-center',
-                        isSelected
-                          ? `bg-gradient-to-r ${config.bgGradient} border-white/30 shadow-lg`
-                          : 'bg-white/5 border-white/10 hover:bg-white/10'
-                      )}
-                    >
-                      <Icon className={cn('w-5 h-5 mx-auto mb-1', isSelected ? 'text-white' : 'text-gray-400')} />
-                      <div className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-gray-400')}>
-                        {config.label}
-                      </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={selectedRole}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="text-xs text-gray-400 mt-2 text-center"
-                >
-                  {currentRoleConfig.description}
-                </motion.p>
-              </AnimatePresence>
-            </div>
+          {/* Card glow effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-fuchsia-500/20 via-purple-500/20 to-pink-500/20 rounded-[28px] blur-xl" />
 
-            {/* Email Input */}
-            <div>
-              <Input
-                {...register('email')}
-                type="email"
-                label="Email Address"
-                placeholder="Enter your email"
-                leftIcon={<Mail className="w-4 h-4" />}
-                error={errors.email?.message}
-                className="text-white placeholder:text-gray-400"
-              />
-            </div>
-
-            {/* Password Input */}
-            <div>
-              <Input
-                {...register('password')}
-                type={showPassword ? 'text' : 'password'}
-                label="Password"
-                placeholder="Enter your password"
-                leftIcon={<Lock className="w-4 h-4" />}
-                rightIcon={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-white transition-colors"
+          <div className="relative backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-[24px] p-8 shadow-2xl">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Role Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-4">
+                  Sign in as
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {Object.entries(roleConfig).map(([role, config]) => {
+                    const Icon = config.icon;
+                    const isSelected = selectedRole === role;
+                    return (
+                      <motion.button
+                        key={role}
+                        type="button"
+                        whileHover={{ scale: 1.03, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setValue('role', role as any)}
+                        className={cn(
+                          'relative p-4 rounded-2xl border transition-all duration-300 text-center overflow-hidden group',
+                          isSelected
+                            ? `${config.borderColor} bg-gradient-to-br ${config.gradient}/20 shadow-lg ${config.shadowColor}`
+                            : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20'
+                        )}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            layoutId="roleGlow"
+                            className={cn("absolute inset-0 rounded-2xl", config.bgGlow, "blur-xl opacity-50")}
+                          />
+                        )}
+                        <div className="relative">
+                          <Icon className={cn(
+                            'w-6 h-6 mx-auto mb-2 transition-all',
+                            isSelected ? 'text-white' : 'text-gray-400 group-hover:text-white'
+                          )} />
+                          <div className={cn(
+                            'text-sm font-semibold transition-all',
+                            isSelected ? 'text-white' : 'text-gray-400 group-hover:text-white'
+                          )}>
+                            {config.label}
+                          </div>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={selectedRole}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="text-xs text-gray-500 mt-3 text-center"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                }
-                error={errors.password?.message}
-                className="text-white placeholder:text-gray-400"
-              />
-            </div>
+                    {currentRoleConfig.description}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  {...register('remember')}
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-gray-300 text-fuchsia-600 focus:ring-fuchsia-500 focus:ring-offset-0"
-                />
-                <span className="text-sm text-gray-300">Remember me</span>
-              </label>
-              <Link
-                href="/forgot-password"
-                className="text-sm text-fuchsia-400 hover:text-fuchsia-300 transition-colors"
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Email Address
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                  <div className="relative flex items-center">
+                    <Mail className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-fuchsia-400 transition-colors" />
+                    <input
+                      {...register('email')}
+                      type="email"
+                      placeholder="Enter your email"
+                      className="w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
+                    />
+                  </div>
+                </div>
+                {errors.email && (
+                  <p className="text-xs text-rose-400">{errors.email.message}</p>
+                )}
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Password
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                  <div className="relative flex items-center">
+                    <Lock className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-fuchsia-400 transition-colors" />
+                    <input
+                      {...register('password')}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 text-gray-500 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-rose-400">{errors.password.message}</p>
+                )}
+              </div>
+
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center space-x-2 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      {...register('remember')}
+                      type="checkbox"
+                      className="sr-only peer"
+                    />
+                    <div className="w-5 h-5 rounded-md border border-white/20 bg-white/[0.03] peer-checked:bg-gradient-to-br peer-checked:from-fuchsia-500 peer-checked:to-pink-500 peer-checked:border-transparent transition-all peer-focus:ring-2 peer-focus:ring-fuchsia-500/30">
+                      <svg className="w-5 h-5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Remember me</span>
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-fuchsia-400 hover:text-fuchsia-300 transition-colors font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={isLoading}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className={cn(
+                  "relative w-full h-14 rounded-xl font-semibold text-white overflow-hidden group transition-all",
+                  "bg-gradient-to-r from-fuchsia-600 via-purple-600 to-pink-600",
+                  "hover:shadow-xl hover:shadow-fuchsia-500/25",
+                  isLoading && "opacity-70 cursor-not-allowed"
+                )}
               >
-                Forgot password?
-              </Link>
+                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="relative flex items-center justify-center gap-2">
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      Sign in as {currentRoleConfig.label}
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </span>
+              </motion.button>
+            </form>
+
+            {/* Register Link */}
+            <div className="mt-8 text-center">
+              <p className="text-gray-400 text-sm">
+                Don't have an account?{' '}
+                <Link
+                  href="/register"
+                  className="text-fuchsia-400 hover:text-fuchsia-300 font-semibold transition-colors"
+                >
+                  Create one here
+                </Link>
+              </p>
             </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              loading={isLoading}
-              className="w-full h-12 text-base font-semibold"
-              variant="primary"
-            >
-              {isLoading ? 'Signing in...' : `Sign in as ${currentRoleConfig.label}`}
-            </Button>
-          </form>
-
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
-              Don't have an account?{' '}
-              <Link
-                href="/register"
-                className="text-fuchsia-400 hover:text-fuchsia-300 font-medium transition-colors"
-              >
-                Create one here
-              </Link>
-            </p>
           </div>
         </motion.div>
 
-        {/* Demo Credentials - Auto Fill Buttons */}
+        {/* Demo Credentials */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-6 p-4 rounded-2xl bg-white/5 border border-white/10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mt-6 p-5 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl"
         >
-          <p className="text-xs text-gray-400 text-center mb-3">Auto Fill Demo Credentials:</p>
+          <p className="text-xs text-gray-500 text-center mb-4 font-medium uppercase tracking-wider">Quick Demo Access</p>
           <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setValue('role', 'customer');
-                setValue('email', 'demo@customer.com');
-                setValue('password', 'demo123');
-              }}
-              className="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors group"
-            >
-              <p className="text-emerald-400 font-medium text-xs group-hover:text-emerald-300">Customer</p>
-              <p className="text-gray-500 text-[10px] group-hover:text-gray-400">Auto Fill</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setValue('role', 'employee');
-                setValue('email', 'demo@employee.com');
-                setValue('password', 'demo123');
-              }}
-              className="p-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 transition-colors group"
-            >
-              <p className="text-blue-400 font-medium text-xs group-hover:text-blue-300">Employee</p>
-              <p className="text-gray-500 text-[10px] group-hover:text-gray-400">Auto Fill</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setValue('role', 'admin');
-                setValue('email', 'demo@admin.com');
-                setValue('password', 'demo123');
-              }}
-              className="p-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-colors group"
-            >
-              <p className="text-purple-400 font-medium text-xs group-hover:text-purple-300">Admin</p>
-              <p className="text-gray-500 text-[10px] group-hover:text-gray-400">Auto Fill</p>
-            </button>
+            {[
+              { role: 'customer', email: 'demo@customer.com', color: 'emerald' },
+              { role: 'employee', email: 'demo@employee.com', color: 'blue' },
+              { role: 'admin', email: 'demo@admin.com', color: 'purple' },
+            ].map(({ role, email, color }) => (
+              <motion.button
+                key={role}
+                type="button"
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  setValue('role', role as any);
+                  setValue('email', email);
+                  setValue('password', 'demo123');
+                }}
+                className={cn(
+                  `p-3 rounded-xl border transition-all group`,
+                  `bg-${color}-500/5 hover:bg-${color}-500/15 border-${color}-500/20 hover:border-${color}-400/40`
+                )}
+                style={{
+                  backgroundColor: color === 'emerald' ? 'rgba(16, 185, 129, 0.05)' : color === 'blue' ? 'rgba(59, 130, 246, 0.05)' : 'rgba(168, 85, 247, 0.05)',
+                  borderColor: color === 'emerald' ? 'rgba(16, 185, 129, 0.2)' : color === 'blue' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                }}
+              >
+                <p className={cn(
+                  "font-semibold text-sm capitalize",
+                  color === 'emerald' ? 'text-emerald-400' : color === 'blue' ? 'text-blue-400' : 'text-purple-400'
+                )}>{role}</p>
+              </motion.button>
+            ))}
           </div>
-          <p className="text-center text-gray-500 text-[10px] mt-3">Password: demo123</p>
+          <p className="text-center text-gray-600 text-[10px] mt-3">Password: demo123</p>
         </motion.div>
       </motion.div>
     </div>

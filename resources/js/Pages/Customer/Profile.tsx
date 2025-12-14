@@ -298,7 +298,7 @@ export default function Profile() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     <User className="w-4 h-4 inline mr-2" />
                                     Full Name
                                 </label>
@@ -307,12 +307,12 @@ export default function Profile() {
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     <Mail className="w-4 h-4 inline mr-2" />
                                     Email
                                 </label>
@@ -321,12 +321,12 @@ export default function Profile() {
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     <Phone className="w-4 h-4 inline mr-2" />
                                     Phone
                                 </label>
@@ -335,12 +335,12 @@ export default function Profile() {
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     <Calendar className="w-4 h-4 inline mr-2" />
                                     Birth Date
                                 </label>
@@ -349,19 +349,19 @@ export default function Profile() {
                                     value={formData.birth_date}
                                     onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
                                     disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     Gender
                                 </label>
                                 <select
                                     value={formData.gender}
                                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                     disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
                                 >
                                     <option value="">Prefer not to say</option>
                                     <option value="male">Male</option>
@@ -371,14 +371,14 @@ export default function Profile() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     Preferred Language
                                 </label>
                                 <select
                                     value={formData.preferred_language}
                                     onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value })}
                                     disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
                                 >
                                     <option value="en">English</option>
                                     <option value="km">ខ្មែរ (Khmer)</option>
@@ -395,7 +395,7 @@ export default function Profile() {
                                     disabled={!editMode}
                                     className="w-5 h-5 rounded text-purple-600"
                                 />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                <span className="text-sm text-muted-foreground">
                                     I want to receive promotional emails and offers
                                 </span>
                             </label>
@@ -583,7 +583,7 @@ export default function Profile() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Label *</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">Label *</label>
                                             <input
                                                 type="text"
                                                 value={addressForm.label}
@@ -594,7 +594,7 @@ export default function Profile() {
                                         </div>
 
                                         <div className="col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Address Line 1 *</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">Address Line 1 *</label>
                                             <input
                                                 type="text"
                                                 value={addressForm.address_line_1}
@@ -604,7 +604,7 @@ export default function Profile() {
                                         </div>
 
                                         <div className="col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Address Line 2</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">Address Line 2</label>
                                             <input
                                                 type="text"
                                                 value={addressForm.address_line_2}
@@ -614,7 +614,7 @@ export default function Profile() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">City *</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">City *</label>
                                             <input
                                                 type="text"
                                                 value={addressForm.city}
@@ -623,7 +623,7 @@ export default function Profile() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Province *</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">Province *</label>
                                             <input
                                                 type="text"
                                                 value={addressForm.province}
@@ -633,7 +633,7 @@ export default function Profile() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Postal Code</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">Postal Code</label>
                                             <input
                                                 type="text"
                                                 value={addressForm.postal_code}
@@ -642,7 +642,7 @@ export default function Profile() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Country</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">Country</label>
                                             <input
                                                 type="text"
                                                 value={addressForm.country}
@@ -652,7 +652,7 @@ export default function Profile() {
                                         </div>
 
                                         <div className="col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Delivery Instructions</label>
+                                            <label className="block text-sm font-medium mb-1 text-foreground">Delivery Instructions</label>
                                             <textarea
                                                 value={addressForm.delivery_instructions}
                                                 onChange={(e) => setAddressForm({ ...addressForm, delivery_instructions: e.target.value })}
@@ -670,7 +670,7 @@ export default function Profile() {
                                             onChange={(e) => setAddressForm({ ...addressForm, is_default: e.target.checked })}
                                             className="w-5 h-5 rounded text-purple-600"
                                         />
-                                        <span className="text-sm text-gray-700 dark:text-gray-300">Set as default address</span>
+                                        <span className="text-sm text-muted-foreground">Set as default address</span>
                                     </label>
 
                                     <div className="flex gap-3 pt-4">

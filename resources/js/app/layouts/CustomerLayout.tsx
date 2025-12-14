@@ -214,29 +214,31 @@ export default function CustomerLayout({ children, className }: Props) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 mt-20">
+      <footer className="bg-card dark:bg-gray-900 border-t border-border py-12 mt-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Brand */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-r from-fuchsia-600 to-pink-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-r from-fuchsia-600 to-pink-600 flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
                   <Utensils className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold">NKH Restaurant</h3>
+                <h3 className="text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
+                  NKH Restaurant
+                </h3>
               </div>
-              <p className="text-gray-400 mb-4">
+              <p className="text-muted-foreground mb-4">
                 Serving delicious, fresh meals with love and passion since 2020.
               </p>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <h4 className="font-semibold text-foreground mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 {navigation.map((item) => (
                   <li key={item.name}>
-                    <Link href={item.href} className="text-gray-400 hover:text-white transition-colors">
+                    <Link href={item.href} className="text-muted-foreground hover:text-fuchsia-500 transition-colors">
                       {item.name}
                     </Link>
                   </li>
@@ -246,18 +248,18 @@ export default function CustomerLayout({ children, className }: Props) {
 
             {/* Contact */}
             <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
+              <h4 className="font-semibold text-foreground mb-4">Contact</h4>
               <ul className="space-y-2">
-                <li className="flex items-center gap-2 text-gray-400">
-                  <Phone className="w-4 h-4" />
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="w-4 h-4 text-fuchsia-500" />
                   <span>+1 (555) 123-4567</span>
                 </li>
-                <li className="flex items-center gap-2 text-gray-400">
-                  <Mail className="w-4 h-4" />
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="w-4 h-4 text-fuchsia-500" />
                   <span>hello@nkhrestaurant.com</span>
                 </li>
-                <li className="flex items-center gap-2 text-gray-400">
-                  <MapPin className="w-4 h-4" />
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin className="w-4 h-4 text-fuchsia-500" />
                   <span>123 Food Street, City</span>
                 </li>
               </ul>
@@ -265,25 +267,25 @@ export default function CustomerLayout({ children, className }: Props) {
 
             {/* Hours */}
             <div>
-              <h4 className="font-semibold mb-4">Hours</h4>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-semibold text-foreground mb-4">Hours</h4>
+              <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4 text-fuchsia-500" />
                   <span>Mon-Thu: 11AM-10PM</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4 text-fuchsia-500" />
                   <span>Fri-Sat: 11AM-11PM</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4 text-fuchsia-500" />
                   <span>Sunday: 12PM-9PM</span>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
             <p>&copy; 2024 NKH Restaurant. All rights reserved.</p>
           </div>
         </div>

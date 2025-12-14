@@ -146,7 +146,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
     };
 
     return (
-        <div className={cn('relative', className)} ref={dropdownRef}>
+        <div className={cn('relative z-[9999]', className)} ref={dropdownRef}>
             {/* Bell Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -177,7 +177,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+                            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998] lg:hidden"
                             onClick={() => setIsOpen(false)}
                         />
 
@@ -187,7 +187,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                             exit={{ opacity: 0, scale: 0.95, y: -10 }}
                             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                             className={cn(
-                                'absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] z-50',
+                                'absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] z-[9999]',
                                 'bg-white dark:bg-gray-900 rounded-2xl shadow-2xl',
                                 'border border-gray-100 dark:border-gray-800',
                                 'overflow-hidden'

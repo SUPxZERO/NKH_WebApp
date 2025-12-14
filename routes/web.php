@@ -139,6 +139,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Analytics
     Route::get('sales-analytics', fn() => Inertia::render('admin/SalesAnalytics'))->name('admin.sales-analytics');
     Route::get('inventory-reports', fn() => Inertia::render('admin/InventoryReports'))->name('admin.inventory-reports');
+    Route::get('reports/sales', fn() => Inertia::render('admin/Reports/SalesReport'))->name('admin.reports.sales');
     
     // System Settings
     Route::get('locations', fn() => Inertia::render('admin/Locations'))->name('admin.locations');

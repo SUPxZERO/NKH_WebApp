@@ -476,7 +476,7 @@ export default function AdminLayout({ children }: Props) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Top Bar */}
-        <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm border-b border-gray-200/50 dark:border-gray-700/50 px-6 h-[72px] flex items-center z-10 sticky top-0">
+        <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm border-b border-gray-200/50 dark:border-gray-700/50 px-6 h-[72px] flex items-center z-[100] sticky top-0">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <button
@@ -515,7 +515,7 @@ export default function AdminLayout({ children }: Props) {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950/50">
+        <main className="flex-1 overflow-auto relative z-0 bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950/50">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

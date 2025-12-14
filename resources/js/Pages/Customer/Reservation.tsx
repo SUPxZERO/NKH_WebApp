@@ -112,7 +112,7 @@ export default function Reservation() {
                         <CardContent className="p-6 space-y-6">
                             {/* Location */}
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                                <label className="block text-sm font-medium text-foreground">Location</label>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                     <select
@@ -135,7 +135,7 @@ export default function Reservation() {
                             {/* Date & Time */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                                    <label className="block text-sm font-medium text-foreground">Date</label>
                                     <div className="relative">
                                         <div className="absolute left-3 top-3 z-10 pointer-events-none">
                                             <Calendar className="h-5 w-5 text-gray-400" />
@@ -153,7 +153,7 @@ export default function Reservation() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
+                                    <label className="block text-sm font-medium text-foreground">Time</label>
                                     <div className="relative">
                                         <div className="absolute left-3 top-3 z-10 pointer-events-none">
                                             <Clock className="h-5 w-5 text-gray-400" />
@@ -177,7 +177,7 @@ export default function Reservation() {
 
                             {/* Guests */}
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Number of Guests</label>
+                                <label className="block text-sm font-medium text-foreground">Number of Guests</label>
                                 <div className="relative">
                                     <Users className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                     <input

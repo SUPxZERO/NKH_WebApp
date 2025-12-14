@@ -12,36 +12,76 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
+// StatCard Component with vibrant gradients
+const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
+    const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
+        purple: {
+            gradient: 'from-purple-500/20 to-fuchsia-500/10',
+            iconBg: 'bg-gradient-to-br from-purple-500 to-fuchsia-600',
+            text: 'text-purple-600 dark:text-purple-400',
+            border: 'border-purple-500/30',
+            shadow: 'shadow-purple-500/20'
+        },
+        emerald: {
+            gradient: 'from-emerald-500/20 to-green-500/10',
+            iconBg: 'bg-gradient-to-br from-emerald-500 to-green-600',
+            text: 'text-emerald-600 dark:text-emerald-400',
+            border: 'border-emerald-500/30',
+            shadow: 'shadow-emerald-500/20'
+        },
+        blue: {
+            gradient: 'from-blue-500/20 to-cyan-500/10',
+            iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-600',
+            text: 'text-blue-600 dark:text-blue-400',
+            border: 'border-blue-500/30',
+            shadow: 'shadow-blue-500/20'
+        },
+        amber: {
+            gradient: 'from-amber-500/20 to-orange-500/10',
+            iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
+            text: 'text-amber-600 dark:text-amber-400',
+            border: 'border-amber-500/30',
+            shadow: 'shadow-amber-500/20'
+        }
+    };
+    const styles = colorStyles[color] || colorStyles.purple;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className={cn(
+                "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+                `bg-gradient-to-br ${styles.gradient}`,
+                styles.border,
+                `shadow-lg ${styles.shadow}`
+            )}
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+                <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
+            </div>
+            <div className="relative p-5">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
+                        <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
+                    </div>
+                    <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
+                        <Icon className="w-6 h-6 text-white" />
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
 // Stats Ribbon
 const PositionStatsRibbon = ({ stats }: { stats: any }) => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Positions</p>
-                    <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
-                </div>
-                <Briefcase className="w-8 h-8 text-purple-400" />
-            </div>
-        </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
-                    <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.active}</p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-emerald-400" />
-            </div>
-        </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Staff</p>
-                    <p className="text-2xl font-bold text-blue-400 mt-1">{stats.staff}</p>
-                </div>
-                <Users className="w-8 h-8 text-blue-400" />
-            </div>
-        </div>
+        <StatCard title="Total Positions" value={stats.total} icon={Briefcase} color="purple" index={0} />
+        <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+        <StatCard title="Total Staff" value={stats.staff} icon={Users} color="blue" index={2} />
     </div>
 );
 
@@ -122,89 +162,159 @@ export default function Positions() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-slate-900 p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div className="min-h-screen bg-background p-6">
+                {/* Decorative Background Elements */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" />
+                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl" />
+                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
+                </div>
+
+                {/* Header */}
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Positions</h1>
-                        <p className="text-slate-400 mt-1">Manage job titles</p>
+                        <motion.h1
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent"
+                        >
+                            Positions
+                        </motion.h1>
+                        <p className="text-muted-foreground mt-1">Manage job titles</p>
                     </div>
-                    <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
+                    <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary">
                         <Plus className="w-4 h-4 mr-2" /> Add Position
                     </Button>
                 </div>
 
                 <PositionStatsRibbon stats={stats} />
 
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
-                    <div className="flex gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                {/* Filters */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="relative bg-card/50 border border-border/50 rounded-2xl p-4 mb-6 backdrop-blur-sm shadow-lg"
+                >
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="relative flex-1 min-w-[200px]">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                             <Input placeholder="Search positions..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+                                className="pl-10" variant="filled" />
                         </div>
-                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none">
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
+                        <div className="flex gap-2 flex-wrap">
+                            {[
+                                { key: 'all', label: 'All Status' },
+                                { key: 'active', label: 'Active' },
+                                { key: 'inactive', label: 'Inactive' }
+                            ].map(({ key, label }) => (
+                                <button
+                                    key={key}
+                                    onClick={() => setStatusFilter(key)}
+                                    className={cn(
+                                        "px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
+                                        statusFilter === key
+                                            ? "bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30"
+                                            : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                                    )}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </motion.div>
 
-                <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
-                        <div className="col-span-4">Title</div>
-                        <div className="col-span-4">Description</div>
-                        <div className="col-span-2">Staff</div>
-                        <div className="col-span-1">Status</div>
-                        <div className="col-span-1 text-right">Actions</div>
+                {/* Table */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+                >
+                    {/* Table Header with Gradient */}
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
+                        <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">Title</div>
+                        <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">Description</div>
+                        <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Staff</div>
+                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
+                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
                     </div>
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-border/30">
                         {isLoading ? (
-                            <div className="p-8 text-center text-gray-500">Loading...</div>
-                        ) : positionList.map((pos: any) => (
-                            <motion.div key={pos.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
-                                <div className="col-span-4 font-medium text-white">{pos.title}</div>
-                                <div className="col-span-4 text-sm text-gray-400 truncate">{pos.description || '-'}</div>
-                                <div className="col-span-2 text-sm text-gray-300 flex items-center gap-2">
-                                    <Users size={14} className="text-gray-500" /> {pos.employees_count || 0}
+                            <div className="p-12 text-center">
+                                <div className="inline-flex items-center gap-3 text-muted-foreground">
+                                    <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                                    Loading positions...
+                                </div>
+                            </div>
+                        ) : positionList.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
+                                    <Briefcase className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <h3 className="text-foreground font-semibold">No positions found</h3>
+                                <p className="text-muted-foreground text-sm mt-1">Create your first position to get started</p>
+                            </div>
+                        ) : positionList.map((pos: any, idx: number) => (
+                            <motion.div
+                                key={pos.id}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.03 }}
+                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-purple-500/5 hover:to-transparent transition-all group"
+                            >
+                                <div className="col-span-4 flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                        <Briefcase size={14} />
+                                    </div>
+                                    <span className="font-semibold text-foreground">{pos.title}</span>
+                                </div>
+                                <div className="col-span-4 text-sm text-muted-foreground truncate">{pos.description || '-'}</div>
+                                <div className="col-span-2 text-sm text-muted-foreground flex items-center gap-2">
+                                    <Users size={14} className="text-blue-600 dark:text-blue-400" />
+                                    <span className="font-semibold text-foreground">{pos.employees_count || 0}</span>
                                 </div>
                                 <div className="col-span-1">
-                                    <span className={cn("px-2 py-1 rounded-md text-xs font-medium border",
-                                        pos.is_active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20")}>
+                                    <span className={cn(
+                                        "px-2 py-0.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1",
+                                        pos.is_active
+                                            ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                                            : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
+                                    )}>
+                                        <span className={cn("w-1.5 h-1.5 rounded-full", pos.is_active ? "bg-emerald-500" : "bg-red-500")} />
                                         {pos.is_active ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
-                                <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button size="sm" variant="secondary" onClick={() => handleEdit(pos)} className="h-8 w-8 p-0 border-white/10"><Edit size={14} /></Button>
-                                    <Button size="sm" variant="danger" onClick={() => handleDelete(pos.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 size={14} /></Button>
+                                <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                    <Button size="sm" variant="ghost" onClick={() => handleEdit(pos)} className="h-7 w-7 p-0 hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400"><Edit size={12} /></Button>
+                                    <Button size="sm" variant="ghost" onClick={() => handleDelete(pos.id)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400"><Trash2 size={12} /></Button>
                                 </div>
                             </motion.div>
                         ))}
                     </div>
-                </div>
+                </motion.div>
             </div>
 
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingPosition ? 'Edit Position' : 'New Position'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="bg-slate-950 border-white/10" />
+                    <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={3}
-                            className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white"
+                            className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-slate-950 border-white/20" />
-                        <span className="text-sm text-gray-300">Active</span>
+                        <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20 text-purple-600 focus:ring-purple-500" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
                     </div>
                     <div className="flex gap-3 pt-4">
                         <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-                        <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">Save</Button>
+                        <Button type="submit" variant="primary" className="flex-1">Save</Button>
                     </div>
                 </form>
             </Modal>

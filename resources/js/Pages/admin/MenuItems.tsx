@@ -8,58 +8,77 @@ import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
 import ImageUploader from '@/app/components/ui/ImageUploader';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Plus, Search, Edit, Trash2, Star, Eye, EyeOff, ChevronLeft, ChevronRight, Package, Maximize2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import {
+  Plus, Search, Edit, Trash2, Star, Eye, EyeOff, ChevronLeft, ChevronRight,
+  Package, Maximize2, Utensils, DollarSign, Tag, Sparkles, Filter, X, Grid, List
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
 
-// Stats Ribbon with Dark/Light Mode
+// Enhanced Stats Card with Gradients
+const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
+  const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string }> = {
+    purple: {
+      gradient: 'from-fuchsia-500/20 to-purple-500/10',
+      iconBg: 'bg-gradient-to-br from-fuchsia-500 to-purple-600',
+      text: 'text-fuchsia-600 dark:text-fuchsia-400',
+      border: 'border-fuchsia-500/30',
+    },
+    emerald: {
+      gradient: 'from-emerald-500/20 to-green-500/10',
+      iconBg: 'bg-gradient-to-br from-emerald-500 to-green-600',
+      text: 'text-emerald-600 dark:text-emerald-400',
+      border: 'border-emerald-500/30',
+    },
+    red: {
+      gradient: 'from-red-500/20 to-rose-500/10',
+      iconBg: 'bg-gradient-to-br from-red-500 to-rose-600',
+      text: 'text-red-600 dark:text-red-400',
+      border: 'border-red-500/30',
+    },
+    amber: {
+      gradient: 'from-amber-500/20 to-orange-500/10',
+      iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
+      text: 'text-amber-600 dark:text-amber-400',
+      border: 'border-amber-500/30',
+    },
+  };
+
+  const styles = colorStyles[color] || colorStyles.purple;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className={cn(
+        "relative overflow-hidden bg-card border rounded-2xl p-5",
+        "hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5",
+        styles.border
+      )}
+    >
+      <div className={cn("absolute inset-0 opacity-50", `bg-gradient-to-br ${styles.gradient}`)} />
+      <div className="relative z-10 flex items-center justify-between">
+        <div>
+          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">{title}</p>
+          <p className={cn("text-3xl font-extrabold mt-1", styles.text)}>{value}</p>
+        </div>
+        <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-lg", styles.iconBg)}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Stats Ribbon
 const MenuStatsRibbon = ({ stats }: { stats: any }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Items</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
-          <Package className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-        </div>
-      </div>
-    </div>
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.active}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-          <Eye className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-        </div>
-      </div>
-    </div>
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Inactive</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{stats.inactive}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
-          <EyeOff className="w-6 h-6 text-red-600 dark:text-red-400" />
-        </div>
-      </div>
-    </div>
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Popular</p>
-          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{stats.popular}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
-          <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-        </div>
-      </div>
-    </div>
+    <StatCard title="Total Items" value={stats.total} icon={Package} color="purple" index={0} />
+    <StatCard title="Active" value={stats.active} icon={Eye} color="emerald" index={1} />
+    <StatCard title="Inactive" value={stats.inactive} icon={EyeOff} color="red" index={2} />
+    <StatCard title="Popular" value={stats.popular} icon={Star} color="amber" index={3} />
   </div>
 );
 
@@ -217,118 +236,262 @@ export default function MenuItems() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
+      <div className="min-h-screen bg-background p-6 lg:p-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+        >
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Menu Items</h1>
-            <p className="text-gray-600 dark:text-slate-400 mt-1">Manage products and pricing</p>
+            <h1 className="text-4xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Menu Items
+              </span>
+            </h1>
+            <p className="text-muted-foreground mt-2 flex items-center gap-2">
+              <Utensils className="w-4 h-4 text-fuchsia-500" />
+              Manage your restaurant's menu and pricing
+            </p>
           </div>
-          <Button onClick={() => { resetForm(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="w-4 h-4 mr-2" /> Add Item
+          <Button
+            onClick={() => { resetForm(); setOpenCreate(true); }}
+            variant="primary"
+            size="lg"
+            leftIcon={<Plus className="w-5 h-5" />}
+          >
+            Add Item
           </Button>
-        </div>
+        </motion.div>
 
         {/* Stats */}
         <MenuStatsRibbon stats={stats} />
 
         {/* Filters */}
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-card border border-border rounded-2xl p-5 mb-6 shadow-sm"
+        >
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search items..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search menu items..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full h-12 pl-12 pr-4 bg-secondary/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
             </div>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-sm min-w-[180px]">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="h-12 px-4 pr-10 bg-secondary/50 border border-border rounded-xl text-foreground text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none min-w-[200px]"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+            >
               <option value="all">All Categories</option>
               {(categories as any)?.data?.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>{cat.name || cat.translations?.[0]?.name}</option>
               ))}
             </select>
           </div>
-        </div>
+        </motion.div>
 
         {/* Bulk Actions */}
-        {selectedItems.size > 0 && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-purple-600 border border-purple-500 rounded-xl p-4 mb-6 flex items-center justify-between">
-            <span className="text-white font-medium">{selectedItems.size} selected</span>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={handleBulkEnable} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Eye className="w-4 h-4 mr-2" /> Enable
-              </Button>
-              <Button size="sm" onClick={handleBulkDisable} className="bg-red-600 hover:bg-red-700 text-white">
-                <EyeOff className="w-4 h-4 mr-2" /> Disable
-              </Button>
-              <Button size="sm" variant="secondary" onClick={() => setSelectedItems(new Set())}>Clear</Button>
-            </div>
-          </motion.div>
-        )}
+        <AnimatePresence>
+          {selectedItems.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-2xl p-5 mb-6 shadow-xl shadow-fuchsia-500/20"
+            >
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
+                    <Package className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-lg">{selectedItems.size} item{selectedItems.size === 1 ? '' : 's'} selected</p>
+                    <p className="text-white/70 text-sm">Ready for bulk actions</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button size="md" onClick={handleBulkEnable} variant="success" className="shadow-lg">
+                    <Eye className="w-4 h-4 mr-2" /> Enable
+                  </Button>
+                  <Button size="md" onClick={handleBulkDisable} variant="danger" className="shadow-lg">
+                    <EyeOff className="w-4 h-4 mr-2" /> Disable
+                  </Button>
+                  <Button size="md" onClick={() => setSelectedItems(new Set())} className="bg-white/20 text-white hover:bg-white/30 border-0">
+                    <X className="w-4 h-4 mr-2" /> Clear
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Table */}
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
-            <div className="col-span-1">
-              <input type="checkbox" checked={selectedItems.size === itemList.length && itemList.length > 0}
-                onChange={toggleSelectAll} className="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm"
+        >
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
+            <div className="col-span-1 flex items-center">
+              <input
+                type="checkbox"
+                checked={selectedItems.size === itemList.length && itemList.length > 0}
+                onChange={toggleSelectAll}
+                className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
+              />
             </div>
-            <div className="col-span-3">Item</div>
-            <div className="col-span-2">Category</div>
-            <div className="col-span-1">Price</div>
-            <div className="col-span-1">Pop</div>
-            <div className="col-span-2">Status</div>
-            <div className="col-span-2 text-right">Actions</div>
+            <div className="col-span-3 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Item</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Category</div>
+            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Price</div>
+            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Popular</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Status</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">Actions</div>
           </div>
 
-          <div className="divide-y divide-gray-100 dark:divide-white/5">
+          {/* Table Body */}
+          <div className="divide-y divide-border/50">
             {isLoading ? (
-              <div className="p-12 text-center text-gray-500">Loading items...</div>
+              <div className="p-16 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
+                  <div className="w-8 h-8 border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+                <p className="text-muted-foreground font-medium">Loading menu items...</p>
+              </div>
             ) : itemList.length === 0 ? (
-              <div className="p-12 text-center">
-                <Package className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
-                <h3 className="text-gray-900 dark:text-white font-medium">No items found</h3>
+              <div className="p-16 text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-muted mb-4">
+                  <Package className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-foreground font-bold text-lg mb-1">No items found</h3>
+                <p className="text-muted-foreground text-sm">Try adjusting your filters or add a new item</p>
               </div>
             ) : (
-              itemList.map((item) => (
-                <motion.div key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                  <div className="col-span-1">
-                    <input type="checkbox" checked={selectedItems.has(item.id)} onChange={() => toggleSelectItem(item.id)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
+              itemList.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.02 }}
+                  className={cn(
+                    "grid grid-cols-12 gap-4 px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
+                    "hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent",
+                    selectedItems.has(item.id) && "bg-primary/5 border-l-2 border-l-primary"
+                  )}
+                >
+                  {/* Checkbox */}
+                  <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.has(item.id)}
+                      onChange={() => toggleSelectItem(item.id)}
+                      className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all hover:border-primary/50"
+                    />
                   </div>
+
+                  {/* Item Info */}
                   <div className="col-span-3 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-100 dark:from-purple-500/20 to-pink-100 dark:to-pink-500/20 flex-shrink-0">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex-shrink-0 border border-border">
                       {item.image_path ? (
                         <img src={item.image_path} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs">No img</div>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Utensils className="w-6 h-6 text-fuchsia-500/50" />
+                        </div>
                       )}
                     </div>
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white truncate">{item.name || 'Untitled'}</div>
-                      <div className="text-xs text-gray-500">SKU: {item.sku || 'N/A'}</div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                        {item.name || 'Untitled'}
+                      </div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        SKU: {item.sku || 'N/A'}
+                      </div>
                     </div>
                   </div>
-                  <div className="col-span-2 text-gray-600 dark:text-gray-300 text-sm">{item.category?.name || 'Uncategorized'}</div>
-                  <div className="col-span-1 font-semibold text-emerald-600 dark:text-emerald-400">${item.price}</div>
-                  <div className="col-span-1">
-                    {item.is_popular && <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-400 fill-yellow-500 dark:fill-yellow-400" />}
-                  </div>
+
+                  {/* Category */}
                   <div className="col-span-2">
-                    <button onClick={() => toggleActiveMutation.mutate({ id: item.id, is_active: !item.is_active })}
-                      className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-all",
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
+                      {item.category?.name || 'Uncategorized'}
+                    </span>
+                  </div>
+
+                  {/* Price */}
+                  <div className="col-span-1">
+                    <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                      ${item.price}
+                    </span>
+                  </div>
+
+                  {/* Popular */}
+                  <div className="col-span-1">
+                    {item.is_popular ? (
+                      <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30">
+                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center">
+                        <Star className="w-4 h-4 text-muted-foreground/30" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-span-2">
+                    <button
+                      onClick={() => toggleActiveMutation.mutate({ id: item.id, is_active: !item.is_active })}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all",
                         item.is_active
-                          ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-200 dark:hover:bg-emerald-500/20"
-                          : "bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20 hover:bg-red-200 dark:hover:bg-red-500/20")}>
-                      {item.is_active ? <><Eye className="w-3 h-3" /> Active</> : <><EyeOff className="w-3 h-3" /> Inactive</>}
+                          ? "bg-gradient-to-r from-emerald-500/20 to-green-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:from-emerald-500/30 hover:to-green-500/20"
+                          : "bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-600 dark:text-red-400 border-red-500/30 hover:from-red-500/30 hover:to-rose-500/20"
+                      )}
+                    >
+                      {item.is_active ? <><Eye className="w-3.5 h-3.5" /> Active</> : <><EyeOff className="w-3.5 h-3.5" /> Inactive</>}
                     </button>
                   </div>
-                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="ghost" onClick={() => handlePreview(item)} className="h-8 w-8 p-0" title="Preview"><Maximize2 className="w-3 h-3" /></Button>
-                    <Button size="sm" variant="secondary" onClick={() => handleEdit(item)} className="h-8 w-8 p-0" title="Edit"><Edit className="w-3 h-3" /></Button>
-                    <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)} className="h-8 w-8 p-0" title="Delete"><Trash2 className="w-3 h-3" /></Button>
+
+                  {/* Actions */}
+                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handlePreview(item)}
+                      className="h-9 w-9 p-0 hover:bg-blue-500/10 hover:text-blue-500"
+                      title="Preview"
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleEdit(item)}
+                      className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                      title="Edit"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => handleDelete(item.id)}
+                      className="h-9 w-9 p-0"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </motion.div>
               ))
@@ -337,20 +500,71 @@ export default function MenuItems() {
 
           {/* Pagination */}
           {(menuItems as any)?.meta && (
-            <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, (menuItems as any).meta.total)} of {(menuItems as any).meta.total}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 border-t border-border bg-gradient-to-r from-secondary/30 to-transparent">
+              <div className="flex items-center gap-3">
+                <div className="h-9 px-4 rounded-lg bg-secondary border border-border flex items-center gap-2">
+                  <Package className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">{(menuItems as any).meta.total}</span>
+                  <span className="text-sm text-muted-foreground">items</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-foreground">{Math.min(page * perPage, (menuItems as any).meta.total)}</span>
+                </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Page {page} of {Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
-                </span>
-                <Button variant="secondary" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}>Next</Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className="h-10 px-4 gap-2"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline">Previous</span>
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)) }, (_, i) => {
+                    const totalPages = Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage);
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (page <= 3) {
+                      pageNum = i + 1;
+                    } else if (page >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={cn(
+                          "h-10 w-10 rounded-xl text-sm font-semibold transition-all",
+                          page === pageNum
+                            ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
+                            : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover hover:text-foreground"
+                        )}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page >= Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
+                  onClick={() => setPage(p => p + 1)}
+                  className="h-10 px-4 gap-2"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* Create/Edit Modal */}
@@ -365,9 +579,9 @@ export default function MenuItems() {
           <div className="grid grid-cols-2 gap-4">
             <Input label="SKU" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+              <label className="block text-sm font-semibold text-foreground mb-2">Category</label>
               <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
+                className="w-full h-11 bg-secondary/50 border border-border rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                 <option value="">Select Category</option>
                 {(() => {
                   const renderCategoryOptions = (cats: any[], level = 0) => {
@@ -394,36 +608,36 @@ export default function MenuItems() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+            <label className="block text-sm font-semibold text-foreground mb-2">Description</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3} className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white" />
+              rows={3} className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
+            <label className="block text-sm font-semibold text-foreground mb-2">Image</label>
             <ImageUploader onChange={(file) => setImage(file)}
               value={editingItem?.image_path || null} />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <Input label="Display Order" type="number" value={formData.display_order}
               onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 pt-6">
               <input type="checkbox" id="is_popular" checked={formData.is_popular}
                 onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })}
-                className="rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
-              <label htmlFor="is_popular" className="text-sm text-gray-700 dark:text-gray-300">Popular</label>
+                className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" />
+              <label htmlFor="is_popular" className="text-sm font-medium text-foreground cursor-pointer">Popular</label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 pt-6">
               <input type="checkbox" id="is_active" checked={formData.is_active}
                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="rounded border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900" />
-              <label htmlFor="is_active" className="text-sm text-gray-700 dark:text-gray-300">Active</label>
+                className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" />
+              <label htmlFor="is_active" className="text-sm font-medium text-foreground cursor-pointer">Active</label>
             </div>
           </div>
 
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1">Cancel</Button>
-            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 bg-purple-600 hover:bg-purple-700">
+            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1">
               {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingItem ? 'Update' : 'Create')}
             </Button>
           </div>

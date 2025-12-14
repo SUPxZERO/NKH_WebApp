@@ -21,56 +21,97 @@ import { useReservationUpdates } from '@/app/hooks/useRealtime';
 
 // --- Components ---
 
+// StatCard Component with vibrant gradients
+const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
+  const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
+    purple: {
+      gradient: 'from-fuchsia-500/20 to-purple-500/10',
+      iconBg: 'bg-gradient-to-br from-fuchsia-500 to-purple-600',
+      text: 'text-fuchsia-600 dark:text-fuchsia-400',
+      border: 'border-fuchsia-500/30',
+      shadow: 'shadow-fuchsia-500/20'
+    },
+    emerald: {
+      gradient: 'from-emerald-500/20 to-green-500/10',
+      iconBg: 'bg-gradient-to-br from-emerald-500 to-green-600',
+      text: 'text-emerald-600 dark:text-emerald-400',
+      border: 'border-emerald-500/30',
+      shadow: 'shadow-emerald-500/20'
+    },
+    blue: {
+      gradient: 'from-blue-500/20 to-cyan-500/10',
+      iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-600',
+      text: 'text-blue-600 dark:text-blue-400',
+      border: 'border-blue-500/30',
+      shadow: 'shadow-blue-500/20'
+    },
+    amber: {
+      gradient: 'from-amber-500/20 to-orange-500/10',
+      iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
+      text: 'text-amber-600 dark:text-amber-400',
+      border: 'border-amber-500/30',
+      shadow: 'shadow-amber-500/20'
+    }
+  };
+  const styles = colorStyles[color] || colorStyles.purple;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className={cn(
+        "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+        `bg-gradient-to-br ${styles.gradient}`,
+        styles.border,
+        `shadow-lg ${styles.shadow}`
+      )}
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+        <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
+      </div>
+      <div className="relative p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
+            <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
+          </div>
+          <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 const StatsRibbon = ({ stats }: { stats: any }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
-      <div>
-        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Bookings</p>
-        <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
-      </div>
-      <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
-        <Calendar className="w-5 h-5 text-purple-400" />
-      </div>
-    </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
-      <div>
-        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Seated Now</p>
-        <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.seated}</p>
-      </div>
-      <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-        <Utensils className="w-5 h-5 text-emerald-400" />
-      </div>
-    </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
-      <div>
-        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Pending</p>
-        <p className="text-2xl font-bold text-blue-400 mt-1">{stats.pending}</p>
-      </div>
-      <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-        <Clock className="w-5 h-5 text-blue-400" />
-      </div>
-    </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
-      <div>
-        <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Needs Action</p>
-        <p className="text-2xl font-bold text-amber-400 mt-1">{stats.late}</p>
-      </div>
-      <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
-        <AlertTriangle className="w-5 h-5 text-amber-400" />
-      </div>
-    </div>
+    <StatCard title="Total Bookings" value={stats.total} icon={Calendar} color="purple" index={0} />
+    <StatCard title="Seated Now" value={stats.seated} icon={Utensils} color="emerald" index={1} />
+    <StatCard title="Pending" value={stats.pending} icon={Clock} color="blue" index={2} />
+    <StatCard title="Needs Action" value={stats.late} icon={AlertTriangle} color="amber" index={3} />
   </div>
 );
 
 const StatusPill = ({ status }: { status: string }) => {
   const styles = {
-    pending: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    confirmed: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    seated: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
-    completed: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-    no_show: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  }[status] || 'bg-gray-500/10 text-gray-400';
+    pending: 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
+    confirmed: 'bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/30',
+    seated: 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    cancelled: 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border-red-500/30',
+    completed: 'bg-gradient-to-r from-slate-500/20 to-gray-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30',
+    no_show: 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
+  }[status] || 'bg-gradient-to-r from-slate-500/20 to-gray-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
+
+  const dotColor = {
+    pending: 'bg-blue-500',
+    confirmed: 'bg-fuchsia-500',
+    seated: 'bg-emerald-500',
+    cancelled: 'bg-red-500',
+    completed: 'bg-slate-500',
+    no_show: 'bg-orange-500',
+  }[status] || 'bg-slate-500';
 
   const icon = {
     pending: Clock,
@@ -84,7 +125,8 @@ const StatusPill = ({ status }: { status: string }) => {
   const Icon = icon;
 
   return (
-    <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium w-fit", styles)}>
+    <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold w-fit", styles)}>
+      <span className={cn("w-1.5 h-1.5 rounded-full", dotColor)} />
       <Icon className="w-3 h-3" />
       <span className="capitalize">{status.replace('_', ' ')}</span>
     </div>
@@ -290,17 +332,27 @@ export default function Reservations() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-slate-900 p-6">
+      <div className="min-h-screen bg-background p-6">
+        {/* Decorative Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
+        </div>
+
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Reservations</h1>
-            <p className="text-slate-400 mt-1">Manage bookings and seating flow</p>
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent"
+            >
+              Reservations
+            </motion.h1>
+            <p className="text-muted-foreground mt-1">Manage bookings and seating flow</p>
           </div>
-          <Button
-            onClick={() => { resetForm(); setOpenCreate(true); }}
-            className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-900/20"
-          >
+          <Button onClick={() => { resetForm(); setOpenCreate(true); }} variant="primary">
             <Plus className="w-4 h-4 mr-2" />
             New Booking
           </Button>
@@ -310,37 +362,51 @@ export default function Reservations() {
         <StatsRibbon stats={stats} />
 
         {/* Filters */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="relative bg-card/50 border border-border/50 rounded-2xl p-4 mb-6 backdrop-blur-sm shadow-lg"
+        >
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search by name, code, or phone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500"
+                className="pl-10"
+                variant="filled"
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-              {['today', 'tomorrow', 'next week', 'all'].map((filter) => (
+              {[
+                { key: 'today', label: 'Today', color: 'fuchsia' },
+                { key: 'tomorrow', label: 'Tomorrow', color: 'purple' },
+                { key: 'next week', label: 'Next Week', color: 'blue' },
+                { key: 'all', label: 'All', color: 'slate' }
+              ].map(({ key, label, color }) => (
                 <button
-                  key={filter}
-                  onClick={() => setDateFilter(filter)}
+                  key={key}
+                  onClick={() => setDateFilter(key)}
                   className={cn(
-                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap",
-                    dateFilter === filter
-                      ? "bg-purple-600 text-white"
-                      : "bg-slate-800 text-gray-400 hover:bg-slate-700 hover:text-white"
+                    "px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
+                    dateFilter === key
+                      ? color === 'fuchsia' ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/30"
+                        : color === 'purple' ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/30"
+                        : color === 'blue' ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                        : "bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-lg shadow-slate-500/30"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                   )}
                 >
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  {label}
                 </button>
               ))}
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm min-w-[140px]"
+              className="bg-secondary border border-border rounded-xl px-4 py-2.5 text-foreground text-sm min-w-[140px] focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -349,69 +415,80 @@ export default function Reservations() {
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
-        </div>
+        </motion.div>
 
         {/* Main List */}
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            <div className="col-span-2 md:col-span-1">Time</div>
-            <div className="col-span-4 md:col-span-3">Customer</div>
-            <div className="col-span-3 md:col-span-2">Table</div>
-            <div className="col-span-3 md:col-span-2">Status</div>
-            <div className="col-span-12 md:col-span-4 text-right hidden md:block">Actions</div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+        >
+          {/* Table Header with Gradient */}
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
+            <div className="col-span-2 md:col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Time</div>
+            <div className="col-span-4 md:col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Customer</div>
+            <div className="col-span-3 md:col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Table</div>
+            <div className="col-span-3 md:col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
+            <div className="col-span-12 md:col-span-4 text-xs font-bold text-foreground uppercase tracking-wider text-right hidden md:block">Actions</div>
           </div>
 
           {/* Table Body */}
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-border/30">
             {isLoading ? (
-              <div className="p-8 text-center text-gray-400">Loading reservations...</div>
+              <div className="p-12 text-center">
+                <div className="inline-flex items-center gap-3 text-muted-foreground">
+                  <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+                  Loading reservations...
+                </div>
+              </div>
             ) : reservationList.length === 0 ? (
               <div className="p-12 text-center">
-                <div className="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-8 h-8 text-gray-500" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
+                  <Calendar className="w-8 h-8 text-fuchsia-500" />
                 </div>
-                <h3 className="text-white font-medium">No reservations found</h3>
-                <p className="text-gray-400 text-sm mt-1">Try adjusting your filters or create a new booking.</p>
+                <h3 className="text-foreground font-semibold">No reservations found</h3>
+                <p className="text-muted-foreground text-sm mt-1">Try adjusting your filters or create a new booking.</p>
               </div>
             ) : (
-              reservationList.map((res) => {
+              reservationList.map((res, idx) => {
                 const late = isLate(res);
                 return (
                   <motion.div
                     key={res.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.03 }}
                     className={cn(
-                      "grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group relative",
-                      late && "bg-amber-500/5 border-l-2 border-amber-500"
+                      "grid grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group relative",
+                      late && "bg-gradient-to-r from-amber-500/10 to-transparent border-l-3 border-amber-500"
                     )}
                   >
                     {/* Time */}
                     <div className="col-span-2 md:col-span-1">
                       {res.reserved_for && !isNaN(new Date(res.reserved_for).getTime()) ? (
                         <>
-                          <div className="font-bold text-white text-lg">
+                          <div className="font-bold text-foreground text-lg">
                             {new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-muted-foreground">
                             {new Date(res.reserved_for).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                           </div>
                         </>
                       ) : (
-                        <div className="text-xs text-gray-500 italic">Invalid Date</div>
+                        <div className="text-xs text-muted-foreground italic">Invalid Date</div>
                       )}
                     </div>
 
                     {/* Customer */}
                     <div className="col-span-4 md:col-span-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-fuchsia-500/30">
                           {res.customer?.user?.name?.charAt(0) || 'G'}
                         </div>
                         <div>
-                          <div className="font-medium text-white truncate">{res.customer?.user?.name}</div>
-                          <div className="text-xs text-gray-400 flex items-center gap-1">
+                          <div className="font-semibold text-foreground truncate">{res.customer?.user?.name}</div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <Users className="w-3 h-3" /> {res.guest_count} guests
                           </div>
                         </div>
@@ -420,9 +497,9 @@ export default function Reservations() {
 
                     {/* Table */}
                     <div className="col-span-3 md:col-span-2">
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <Armchair className="w-4 h-4 text-gray-500" />
-                        <span>Table {res.table?.code || 'Unassigned'}</span>
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                        <Armchair className="w-4 h-4" />
+                        <span className="font-medium">Table {res.table?.code || 'N/A'}</span>
                       </div>
                     </div>
 
@@ -430,19 +507,20 @@ export default function Reservations() {
                     <div className="col-span-3 md:col-span-2">
                       <StatusPill status={res.status} />
                       {late && (
-                        <div className="text-xs text-amber-500 mt-1 font-medium flex items-center gap-1">
+                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 font-semibold flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" /> Late Arrival
                         </div>
                       )}
                     </div>
 
                     {/* Actions (Desktop) */}
-                    <div className="col-span-12 md:col-span-4 flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="col-span-12 md:col-span-4 flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all">
                       {res.status === 'confirmed' || res.status === 'pending' ? (
                         <Button
                           size="sm"
+                          variant="success"
                           onClick={() => handleQuickStatus(res.id, 'seated')}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 text-xs"
+                          className="h-8 text-xs"
                         >
                           <Utensils className="w-3 h-3 mr-1.5" /> Seat Now
                         </Button>
@@ -451,8 +529,9 @@ export default function Reservations() {
                       {res.status === 'seated' ? (
                         <Button
                           size="sm"
+                          variant="info"
                           onClick={() => handleQuickStatus(res.id, 'completed')}
-                          className="bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs"
+                          className="h-8 text-xs"
                         >
                           <CheckCircle className="w-3 h-3 mr-1.5" /> Finish
                         </Button>
@@ -460,22 +539,22 @@ export default function Reservations() {
 
                       <Button
                         size="sm"
-                        variant="secondary"
+                        variant="ghost"
                         onClick={() => handleEdit(res)}
-                        className="h-8 w-8 p-0 border-white/10 hover:bg-white/10"
+                        className="h-8 w-8 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"
                       >
-                        <Edit className="w-3 h-3" />
+                        <Edit className="w-3.5 h-3.5" />
                       </Button>
 
                       <Button
                         size="sm"
-                        variant="danger"
+                        variant="ghost"
                         onClick={() => {
                           if (confirm('Cancel this reservation?')) deleteMutation.mutate(res.id);
                         }}
-                        className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"
+                        className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-500"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </motion.div>
@@ -484,11 +563,13 @@ export default function Reservations() {
             )}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination with Gradient Active Page */}
           {reservations?.meta && (
-            <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/5">
-              <div className="text-sm text-gray-400">
-                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, reservations.meta.total)} of {reservations.meta.total}
+            <div className="flex items-center justify-between p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
+              <div className="text-sm text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to{' '}
+                <span className="font-semibold text-foreground">{Math.min(page * perPage, reservations.meta.total)}</span> of{' '}
+                <span className="font-semibold text-fuchsia-500">{reservations.meta.total}</span>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -496,23 +577,41 @@ export default function Reservations() {
                   size="sm"
                   disabled={page === 1}
                   onClick={() => setPage(p => p - 1)}
-                  className="border-white/10 hover:bg-white/10"
+                  className="hover:bg-fuchsia-500/20 hover:text-fuchsia-500 hover:border-fuchsia-500/30"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
+                {/* Page Numbers */}
+                {Array.from({ length: Math.min(reservations.meta.last_page, 5) }, (_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={page === pageNum ? "primary" : "secondary"}
+                      size="sm"
+                      onClick={() => setPage(pageNum)}
+                      className={cn(
+                        "min-w-[36px]",
+                        page === pageNum && "shadow-lg shadow-fuchsia-500/30"
+                      )}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
                 <Button
                   variant="secondary"
                   size="sm"
                   disabled={page === reservations.meta.last_page}
                   onClick={() => setPage(p => p + 1)}
-                  className="border-white/10 hover:bg-white/10"
+                  className="hover:bg-fuchsia-500/20 hover:text-fuchsia-500 hover:border-fuchsia-500/30"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* Create/Edit Modal */}
@@ -524,20 +623,22 @@ export default function Reservations() {
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" /> {error}
+            <div className="bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/30 rounded-xl p-4 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Customer</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Customer <span className="text-destructive">*</span>
+                </label>
                 <select
                   required
                   value={formData.customer_id}
                   onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                  className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all"
                 >
                   <option value="">Select Customer</option>
                   {customers?.data?.map((c: Customer) => (
@@ -546,36 +647,36 @@ export default function Reservations() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Date & Time</label>
-                <Input
-                  type="datetime-local"
-                  required
-                  value={formData.reserved_for}
-                  onChange={(e) => setFormData({ ...formData, reserved_for: e.target.value })}
-                  className="bg-slate-900 border-white/10 text-white"
-                />
-              </div>
+              <Input
+                label="Date & Time"
+                type="datetime-local"
+                required
+                value={formData.reserved_for}
+                onChange={(e) => setFormData({ ...formData, reserved_for: e.target.value })}
+                leftIcon={<Calendar className="w-4 h-4" />}
+                variant="filled"
+              />
 
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Duration (min)</label>
-                <Input
-                  type="number"
-                  value={formData.duration_minutes}
-                  onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
-                  className="bg-slate-900 border-white/10 text-white"
-                />
-              </div>
+              <Input
+                label="Duration (minutes)"
+                type="number"
+                value={formData.duration_minutes}
+                onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
+                leftIcon={<Clock className="w-4 h-4" />}
+                variant="filled"
+              />
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Table</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Table <span className="text-destructive">*</span>
+                </label>
                 <select
                   required
                   value={formData.table_id}
                   onChange={(e) => setFormData({ ...formData, table_id: e.target.value })}
-                  className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all"
                 >
                   <option value="">Select Table</option>
                   {tables?.data?.map((t: DiningTable) => (
@@ -584,23 +685,22 @@ export default function Reservations() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Guests</label>
-                <Input
-                  type="number"
-                  required
-                  value={formData.guest_count}
-                  onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
-                  className="bg-slate-900 border-white/10 text-white"
-                />
-              </div>
+              <Input
+                label="Number of Guests"
+                type="number"
+                required
+                value={formData.guest_count}
+                onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
+                leftIcon={<Users className="w-4 h-4" />}
+                variant="filled"
+              />
 
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                  className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all"
                 >
                   <option value="pending">Pending</option>
                   <option value="confirmed">Confirmed</option>
@@ -614,31 +714,39 @@ export default function Reservations() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Notes</label>
+            <label className="block text-sm font-semibold text-foreground mb-2">Notes</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all resize-none"
               placeholder="Allergies, special requests, etc."
             />
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-white/10">
+          <div className="flex gap-3 pt-4 border-t border-border">
             <Button
               type="button"
               variant="secondary"
               onClick={() => { setOpenCreate(false); setOpenEdit(false); }}
-              className="flex-1 border-white/10 hover:bg-white/10"
+              className="flex-1"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              variant="primary"
               disabled={createMutation.isPending || updateMutation.isPending}
+              className="flex-1"
             >
-              {editingReservation ? 'Save Changes' : 'Create Booking'}
+              {createMutation.isPending || updateMutation.isPending ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                editingReservation ? 'Save Changes' : 'Create Booking'
+              )}
             </Button>
           </div>
         </form>

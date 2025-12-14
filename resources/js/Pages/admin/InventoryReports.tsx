@@ -103,7 +103,7 @@ export default function InventoryReports() {
             label: 'Total Inventory Value',
             value: `$${Number(valuation?.total_value || 0).toLocaleString()}`,
             icon: DollarSign,
-            color: 'text-green-400',
+            color: 'text-green-600 dark:text-green-400',
             bgColor: 'bg-green-500/20',
             change: `${(valuation?.change_percent || 0).toFixed(1)}%`
         },
@@ -111,14 +111,14 @@ export default function InventoryReports() {
             label: 'Items in Stock',
             value: valuation?.items_count || 0,
             icon: Package,
-            color: 'text-blue-400',
+            color: 'text-blue-600 dark:text-blue-400',
             bgColor: 'bg-blue-500/20'
         },
         {
             label: 'Waste Value',
             value: `$${Number(wasteData?.total_waste_value || 0).toLocaleString()}`,
             icon: Trash2,
-            color: 'text-red-400',
+            color: 'text-red-600 dark:text-red-400',
             bgColor: 'bg-red-500/20',
             change: `-${wasteData?.waste_percent || 0}%`
         },
@@ -126,16 +126,22 @@ export default function InventoryReports() {
             label: 'Avg Turnover Rate',
             value: `${Number(turnover?.avg_turnover || 0).toFixed(1)}x`,
             icon: TrendingDown,
-            color: 'text-purple-400',
+            color: 'text-purple-600 dark:text-purple-400',
             bgColor: 'bg-purple-500/20'
         }
     ];
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+            <div className="min-h-screen bg-background p-6 relative">
+                {/* Decorative Background Elements */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
+                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+                </div>
+
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-8 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -143,10 +149,10 @@ export default function InventoryReports() {
                     >
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
-                                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                                     Inventory Reports
                                 </h1>
-                                <p className="text-gray-400 mt-1">Track usage, costs, and waste analytics</p>
+                                <p className="text-muted-foreground mt-1">Track usage, costs, and waste analytics</p>
                             </div>
 
                             <div className="flex gap-2">
@@ -178,19 +184,19 @@ export default function InventoryReports() {
                             <div className="flex gap-2 flex-wrap">
                                 <button
                                     onClick={() => setQuickDate(7)}
-                                    className="px-3 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors"
+                                    className="px-3 py-1 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
                                     7 Days
                                 </button>
                                 <button
                                     onClick={() => setQuickDate(30)}
-                                    className="px-3 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors"
+                                    className="px-3 py-1 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
                                     30 Days
                                 </button>
                                 <button
                                     onClick={() => setQuickDate(90)}
-                                    className="px-3 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors"
+                                    className="px-3 py-1 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
                                     90 Days
                                 </button>
@@ -200,7 +206,7 @@ export default function InventoryReports() {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 relative z-10">
                     {stats.map((stat, index) => (
                         <motion.div
                             key={stat.label}
@@ -208,14 +214,14 @@ export default function InventoryReports() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
                         >
-                            <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                            <Card className="bg-card border-border backdrop-blur-md">
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm text-gray-400">{stat.label}</p>
-                                            <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
+                                            <p className="text-sm text-muted-foreground">{stat.label}</p>
+                                            <h3 className="text-2xl font-bold text-foreground mt-1">{stat.value}</h3>
                                             {stat.change && (
-                                                <p className={`text-xs mt-1 ${String(stat.change).startsWith('-') ? 'text-red-400' : 'text-green-400'}`}>
+                                                <p className={`text-xs mt-1 ${String(stat.change).startsWith('-') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
                                                     {stat.change}
                                                 </p>
                                             )}
@@ -231,12 +237,12 @@ export default function InventoryReports() {
                 </div>
 
                 {/* Charts Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-10">
                     {/* Usage Trends */}
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                    <Card className="bg-card border-border backdrop-blur-md">
                         <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <BarChart3 className="w-5 h-5 text-blue-400" />
+                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                                <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                 Usage Trends
                             </h3>
                             <ResponsiveContainer width="100%" height={300}>
@@ -258,10 +264,10 @@ export default function InventoryReports() {
                     </Card>
 
                     {/* Cost Breakdown */}
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                    <Card className="bg-card border-border backdrop-blur-md">
                         <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <PieChartIcon className="w-5 h-5 text-purple-400" />
+                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                                <PieChartIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                 Cost by Category
                             </h3>
                             <ResponsiveContainer width="100%" height={300}>
@@ -287,10 +293,10 @@ export default function InventoryReports() {
                     </Card>
 
                     {/* Waste Tracking */}
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                    <Card className="bg-card border-border backdrop-blur-md">
                         <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <Trash2 className="w-5 h-5 text-red-400" />
+                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                                <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
                                 Waste by Reason
                             </h3>
                             <ResponsiveContainer width="100%" height={300}>
@@ -306,27 +312,27 @@ export default function InventoryReports() {
                     </Card>
 
                     {/* Top Cost Items */}
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                    <Card className="bg-card border-border backdrop-blur-md">
                         <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <DollarSign className="w-5 h-5 text-green-400" />
+                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                                <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
                                 Highest Cost Items
                             </h3>
                             <div className="space-y-3">
                                 {(costAnalysis?.top_items || []).slice(0, 5).map((item: any, index: number) => (
-                                    <div key={item.id} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
+                                    <div key={item.id} className="flex items-center justify-between bg-card rounded-lg p-3 border border-border">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
                                                 {index + 1}
                                             </div>
                                             <div>
-                                                <h4 className="text-white font-semibold">{item.name}</h4>
-                                                <p className="text-sm text-gray-400">{item.quantity} {item.unit}</p>
+                                                <h4 className="text-foreground font-semibold">{item.name}</h4>
+                                                <p className="text-sm text-muted-foreground">{item.quantity} {item.unit}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-green-400 font-bold">${Number(item.total_cost).toLocaleString()}</p>
-                                            <p className="text-xs text-gray-400">${Number(item.cost_per_unit).toFixed(2)}/unit</p>
+                                            <p className="text-green-600 dark:text-green-400 font-bold">${Number(item.total_cost).toLocaleString()}</p>
+                                            <p className="text-xs text-muted-foreground">${Number(item.cost_per_unit).toFixed(2)}/unit</p>
                                         </div>
                                     </div>
                                 ))}
@@ -336,26 +342,26 @@ export default function InventoryReports() {
                 </div>
 
                 {/* Turnover Analysis */}
-                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <Card className="bg-card border-border backdrop-blur-md relative z-10">
                     <CardContent className="p-6">
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                            <ShoppingCart className="w-5 h-5 text-orange-400" />
+                        <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                            <ShoppingCart className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                             Inventory Turnover by Category
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {(turnover?.by_category || []).map((cat: any) => (
-                                <div key={cat.category} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                <div key={cat.category} className="bg-card rounded-lg p-4 border border-border">
                                     <div className="flex items-center justify-between mb-2">
-                                        <h4 className="text-white font-semibold">{cat.category}</h4>
+                                        <h4 className="text-foreground font-semibold">{cat.category}</h4>
                                         <Badge className={
-                                            Number(cat.turnover_rate || 0) > 10 ? 'bg-green-500/20 text-green-400' :
-                                                Number(cat.turnover_rate || 0) > 5 ? 'bg-yellow-500/20 text-yellow-400' :
-                                                    'bg-red-500/20 text-red-400'
+                                            Number(cat.turnover_rate || 0) > 10 ? 'bg-green-500/20 text-green-600 dark:text-green-400' :
+                                                Number(cat.turnover_rate || 0) > 5 ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400' :
+                                                    'bg-red-500/20 text-red-600 dark:text-red-400'
                                         }>
                                             {Number(cat.turnover_rate || 0).toFixed(1)}x
                                         </Badge>
                                     </div>
-                                    <p className="text-sm text-gray-400">
+                                    <p className="text-sm text-muted-foreground">
                                         {Number(cat.turnover_rate || 0) > 10 ? 'Excellent' : Number(cat.turnover_rate || 0) > 5 ? 'Good' : 'Needs Attention'}
                                     </p>
                                 </div>

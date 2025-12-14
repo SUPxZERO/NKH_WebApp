@@ -14,7 +14,8 @@ import {
     Trash2,
     Copy,
     CheckCircle,
-    XCircle
+    XCircle,
+    Sparkles
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { Card, CardContent } from '@/app/components/ui/Card';
@@ -24,6 +25,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
+import { cn } from '@/app/utils/cn';
 
 interface Employee {
     id: number;
@@ -55,6 +57,50 @@ interface Shift {
     status: 'draft' | 'published' | 'completed' | 'cancelled';
     notes?: string;
 }
+
+// Stats Card Component
+const StatCard = ({ title, value, color, index = 0 }: { title: string; value: number | string; color: string; index?: number }) => {
+    const colorStyles: Record<string, { gradient: string; text: string; border: string; shadow: string }> = {
+        purple: {
+            gradient: 'from-fuchsia-500/20 to-purple-500/10',
+            text: 'text-fuchsia-600 dark:text-fuchsia-400',
+            border: 'border-fuchsia-500/30',
+            shadow: 'shadow-fuchsia-500/20'
+        },
+        blue: {
+            gradient: 'from-blue-500/20 to-cyan-500/10',
+            text: 'text-blue-600 dark:text-blue-400',
+            border: 'border-blue-500/30',
+            shadow: 'shadow-blue-500/20'
+        },
+        amber: {
+            gradient: 'from-amber-500/20 to-orange-500/10',
+            text: 'text-amber-600 dark:text-amber-400',
+            border: 'border-amber-500/30',
+            shadow: 'shadow-amber-500/20'
+        }
+    };
+    const styles = colorStyles[color] || colorStyles.purple;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className={cn(
+                "relative overflow-hidden bg-card border rounded-2xl p-4",
+                "hover:shadow-lg transition-all duration-300",
+                styles.border
+            )}
+        >
+            <div className={cn("absolute inset-0 opacity-50", `bg-gradient-to-br ${styles.gradient}`)} />
+            <div className="relative z-10">
+                <div className="text-sm text-muted-foreground">{title}</div>
+                <div className={cn("text-xl font-bold mt-1", styles.text)}>{value}</div>
+            </div>
+        </motion.div>
+    );
+};
 
 export default function Shifts() {
     const [currentDate, setCurrentDate] = React.useState(new Date());
@@ -214,11 +260,11 @@ export default function Shifts() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'draft': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-            case 'published': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-            case 'completed': return 'bg-green-500/20 text-green-400 border-green-500/30';
-            case 'cancelled': return 'bg-red-500/20 text-red-400 border-red-500/30';
-            default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+            case 'draft': return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30';
+            case 'published': return 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30';
+            case 'completed': return 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30';
+            case 'cancelled': return 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30';
+            default: return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30';
         }
     };
 
@@ -234,256 +280,264 @@ export default function Shifts() {
 
     return (
         <AdminLayout>
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="mb-8">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-                    >
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                                Shift Management
-                            </h1>
-                            <p className="text-gray-600 dark:text-gray-400 mt-1">Schedule and manage employee shifts</p>
-                        </div>
+            <div className="min-h-screen bg-background p-6">
+                {/* Decorative Background Elements */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
+                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+                </div>
 
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Total Shifts</div>
-                                <div className="text-xl font-bold text-gray-900 dark:text-white">{stats?.total_shifts || 0}</div>
+                <div className="relative z-10 space-y-6">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                        >
+                            <div>
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                    Shift Management
+                                </h1>
+                                <p className="text-muted-foreground mt-1 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-amber-500" />
+                                    Schedule and manage employee shifts
+                                </p>
                             </div>
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Published</div>
-                                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{stats?.published || 0}</div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <StatCard title="Total Shifts" value={stats?.total_shifts || 0} color="purple" index={0} />
+                                <StatCard title="Published" value={stats?.published || 0} color="blue" index={1} />
+                                <StatCard title="Draft" value={stats?.draft || 0} color="amber" index={2} />
                             </div>
-                            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                                <div className="text-sm text-gray-400">Draft</div>
-                                <div className="text-xl font-bold text-yellow-600 dark:text-yellow-400">{stats?.draft || 0}</div>
+
+                            <div className="flex gap-2">
+                                <Button onClick={publishDraftShifts} variant="secondary"
+                                    className="border-green-500/20 hover:bg-green-500/10 text-green-600 dark:text-green-400">
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Publish Drafts
+                                </Button>
+                                <Button
+                                    onClick={() => { resetForm(); setOpenCreate(true); }}
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Shift
+                                </Button>
                             </div>
+                        </motion.div>
+                    </div>
+
+                    {/* Calendar Navigation */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-6 flex items-center justify-between bg-card rounded-xl p-4 border border-border"
+                    >
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => navigateDate('prev')}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors">
+                                <ChevronLeft className="w-5 h-5 text-foreground" />
+                            </button>
+                            <div className="text-foreground font-semibold text-lg">
+                                {view === 'week'
+                                    ? `Week of ${currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                                    : currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                            </div>
+                            <button onClick={() => navigateDate('next')}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors">
+                                <ChevronRight className="w-5 h-5 text-foreground" />
+                            </button>
+                            <Button size="sm" onClick={() => setCurrentDate(new Date())}
+                                variant="secondary">
+                                Today
+                            </Button>
                         </div>
 
                         <div className="flex gap-2">
-                            <Button onClick={publishDraftShifts} variant="secondary"
-                                className="border-green-500/20 hover:bg-green-500/10 text-green-400">
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Publish Drafts
-                            </Button>
-                            <Button
-                                onClick={() => { resetForm(); setOpenCreate(true); }}
+                            <button
+                                onClick={() => setView('week')}
+                                className={cn(
+                                    'px-4 py-2 rounded-lg transition-colors',
+                                    view === 'week'
+                                        ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white'
+                                        : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                                )}
                             >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add Shift
-                            </Button>
+                                Week
+                            </button>
+                            <button
+                                onClick={() => setView('month')}
+                                className={cn(
+                                    'px-4 py-2 rounded-lg transition-colors',
+                                    view === 'month'
+                                        ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white'
+                                        : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                                )}
+                            >
+                                Month
+                            </button>
                         </div>
                     </motion.div>
-                </div>
 
-                {/* Calendar Navigation */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 flex items-center justify-between bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10"
-                >
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => navigateDate('prev')}
-                            className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-                            <ChevronLeft className="w-5 h-5 text-white" />
-                        </button>
-                        <div className="text-white font-semibold text-lg">
-                            {view === 'week'
-                                ? `Week of ${currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-                                : currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                        </div>
-                        <button onClick={() => navigateDate('next')}
-                            className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-                            <ChevronRight className="w-5 h-5 text-white" />
-                        </button>
-                        <Button size="sm" onClick={() => setCurrentDate(new Date())}
-                            className="bg-white/10 hover:bg-white/20">
-                            Today
-                        </Button>
-                    </div>
-
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setView('week')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${view === 'week' ? 'bg-purple-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                                }`}
-                        >
-                            Week
-                        </button>
-                        <button
-                            onClick={() => setView('month')}
-                            className={`px-4 py-2 rounded-lg transition-colors ${view === 'month' ? 'bg-purple-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                                }`}
-                        >
-                            Month
-                        </button>
-                    </div>
-                </motion.div>
-
-                {/* Shifts List */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {isLoading ? (
-                        Array.from({ length: 6 }).map((_, i) => (
-                            <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-md">
-                                <CardContent className="p-6">
-                                    <div className="animate-pulse space-y-4">
-                                        <div className="h-4 bg-white/10 rounded w-3/4"></div>
-                                        <div className="h-3 bg-white/10 rounded w-1/2"></div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))
-                    ) : (
-                        scheduleData?.shifts?.map((shift: Shift, index: number) => (
-                            <motion.div key={shift.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.05 }}>
-                                <Card className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
+                    {/* Shifts List */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {isLoading ? (
+                            Array.from({ length: 6 }).map((_, i) => (
+                                <Card key={i} className="bg-card border-border">
                                     <CardContent className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 className="font-semibold text-white text-lg flex items-center gap-2">
-                                                    <User className="w-4 h-4" />
-                                                    {shift.employee?.name}
-                                                </h3>
-                                                <p className="text-sm text-gray-400">{shift.position?.name || 'No position'}</p>
-                                            </div>
-                                            <Badge className={getStatusColor(shift.status)}>
-                                                {shift.status.toUpperCase()}
-                                            </Badge>
-                                        </div>
-
-                                        <div className="space-y-2 mb-4">
-                                            <div className="flex items-center text-sm text-gray-300">
-                                                <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                                                {new Date(shift.start_time).toLocaleDateString()} at {new Date(shift.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
-                                            <div className="flex items-center text-sm text-gray-300">
-                                                <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                                                Ends: {new Date(shift.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
-                                            {shift.location && (
-                                                <div className="flex items-center text-sm text-gray-300">
-                                                    <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                                                    {shift.location.name}
-                                                </div>
-                                            )}
-                                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                                                {shift.shift_type}
-                                            </Badge>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <Button size="sm" variant="secondary" onClick={() => handleEdit(shift)}
-                                                className="flex-1 border-white/20 hover:bg-white/10">
-                                                <Edit className="w-3 h-3 mr-1" />Edit
-                                            </Button>
-                                            <Button size="sm" variant="danger"
-                                                onClick={() => window.confirm('Delete this shift?') && deleteMutation.mutate(shift.id)}
-                                                className="border-red-500/20 hover:bg-red-500/10 text-red-400">
-                                                <Trash2 className="w-3 h-3" />
-                                            </Button>
+                                        <div className="animate-pulse space-y-4">
+                                            <div className="h-4 bg-secondary rounded w-3/4"></div>
+                                            <div className="h-3 bg-secondary rounded w-1/2"></div>
                                         </div>
                                     </CardContent>
                                 </Card>
-                            </motion.div>
-                        ))
-                    )}
+                            ))
+                        ) : (
+                            scheduleData?.shifts?.map((shift: Shift, index: number) => (
+                                <motion.div key={shift.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: index * 0.05 }}>
+                                    <Card className="bg-card border-border hover:shadow-lg transition-all duration-300">
+                                        <CardContent className="p-6">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="font-semibold text-foreground text-lg flex items-center gap-2">
+                                                        <User className="w-4 h-4" />
+                                                        {shift.employee?.name}
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground">{shift.position?.name || 'No position'}</p>
+                                                </div>
+                                                <Badge className={getStatusColor(shift.status)}>
+                                                    {shift.status.toUpperCase()}
+                                                </Badge>
+                                            </div>
+
+                                            <div className="space-y-2 mb-4">
+                                                <div className="flex items-center text-sm text-muted-foreground">
+                                                    <Clock className="w-4 h-4 mr-2" />
+                                                    {new Date(shift.start_time).toLocaleDateString()} at {new Date(shift.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                                <div className="flex items-center text-sm text-muted-foreground">
+                                                    <Clock className="w-4 h-4 mr-2" />
+                                                    Ends: {new Date(shift.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                                {shift.location && (
+                                                    <div className="flex items-center text-sm text-muted-foreground">
+                                                        <MapPin className="w-4 h-4 mr-2" />
+                                                        {shift.location.name}
+                                                    </div>
+                                                )}
+                                                <Badge className="bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/30">
+                                                    {shift.shift_type}
+                                                </Badge>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <Button size="sm" variant="secondary" onClick={() => handleEdit(shift)}
+                                                    className="flex-1">
+                                                    <Edit className="w-3 h-3 mr-1" />Edit
+                                                </Button>
+                                                <Button size="sm" variant="danger"
+                                                    onClick={() => window.confirm('Delete this shift?') && deleteMutation.mutate(shift.id)}
+                                                    className="border-red-500/20 hover:bg-red-500/10 text-red-600 dark:text-red-400">
+                                                    <Trash2 className="w-3 h-3" />
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </motion.div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Create/Edit Modal */}
+                    <Modal open={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
+                        title={selectedShift ? 'Edit Shift' : 'Create Shift'} size="lg">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-600 dark:text-red-400 text-sm">{error}</div>}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Employee *</label>
+                                    <select required value={formData.employee_id} onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground">
+                                        <option value="">Select Employee</option>
+                                        {employees?.data?.map((emp: Employee) => (
+                                            <option key={emp.id} value={emp.id}>{emp.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Location</label>
+                                    <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground">
+                                        <option value="">No specific location</option>
+                                        {locations?.data?.map((loc: Location) => (
+                                            <option key={loc.id} value={loc.id}>{loc.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Position</label>
+                                    <select value={formData.position_id} onChange={(e) => setFormData({ ...formData, position_id: e.target.value })}
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground">
+                                        <option value="">Use employee's position</option>
+                                        {positions?.data?.map((pos: Position) => (
+                                            <option key={pos.id} value={pos.id}>{pos.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Shift Type *</label>
+                                    <select required value={formData.shift_type} onChange={(e) => setFormData({ ...formData, shift_type: e.target.value })}
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground">
+                                        <option value="morning">Morning</option>
+                                        <option value="afternoon">Afternoon</option>
+                                        <option value="evening">Evening</option>
+                                        <option value="night">Night</option>
+                                        <option value="split">Split</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Start Time *</label>
+                                    <Input type="datetime-local" required value={formData.start_time}
+                                        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })} />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">End Time *</label>
+                                    <Input type="datetime-local" required value={formData.end_time}
+                                        onChange={(e) => setFormData({ ...formData, end_time: e.target.value })} />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Notes</label>
+                                    <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground" rows={3} />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-2">Status *</label>
+                                    <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground">
+                                        <option value="draft">Draft</option>
+                                        <option value="published">Published</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
+                                    className="flex-1">Cancel</Button>
+                                <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending}
+                                    className="flex-1">{selectedShift ? 'Update' : 'Create'} Shift</Button>
+                            </div>
+                        </form>
+                    </Modal>
                 </div>
-
-                {/* Create/Edit Modal */}
-                <Modal open={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
-                    title={selectedShift ? 'Edit Shift' : 'Create Shift'} size="lg">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">{error}</div>}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Employee *</label>
-                                <select required value={formData.employee_id} onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    <option value="">Select Employee</option>
-                                    {employees?.data?.map((emp: Employee) => (
-                                        <option key={emp.id} value={emp.id} className="bg-gray-800">{emp.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
-                                <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    <option value="">No specific location</option>
-                                    {locations?.data?.map((loc: Location) => (
-                                        <option key={loc.id} value={loc.id} className="bg-gray-800">{loc.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Position</label>
-                                <select value={formData.position_id} onChange={(e) => setFormData({ ...formData, position_id: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    <option value="">Use employee's position</option>
-                                    {positions?.data?.map((pos: Position) => (
-                                        <option key={pos.id} value={pos.id} className="bg-gray-800">{pos.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Shift Type *</label>
-                                <select required value={formData.shift_type} onChange={(e) => setFormData({ ...formData, shift_type: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    <option value="morning" className="bg-gray-800">Morning</option>
-                                    <option value="afternoon" className="bg-gray-800">Afternoon</option>
-                                    <option value="evening" className="bg-gray-800">Evening</option>
-                                    <option value="night" className="bg-gray-800">Night</option>
-                                    <option value="split" className="bg-gray-800">Split</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Start Time *</label>
-                                <Input type="datetime-local" required value={formData.start_time}
-                                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">End Time *</label>
-                                <Input type="datetime-local" required value={formData.end_time}
-                                    onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white" />
-                            </div>
-
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-                                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" rows={3} />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Status *</label>
-                                <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
-                                    <option value="draft" className="bg-gray-800">Draft</option>
-                                    <option value="published" className="bg-gray-800">Published</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-3 pt-4">
-                            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
-                                className="flex-1 border-white/20 hover:bg-white/10">Cancel</Button>
-                            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending}
-                                className="flex-1">{selectedShift ? 'Update' : 'Create'} Shift</Button>
-                        </div>
-                    </form>
-                </Modal>
             </div>
         </AdminLayout>
     );

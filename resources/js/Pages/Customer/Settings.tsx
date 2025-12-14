@@ -689,7 +689,7 @@ export default function Settings() {
                             </div>
                             <form onSubmit={(e) => { e.preventDefault(); changePasswordMutation.mutate(); }} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    <label className="block text-sm font-medium text-foreground mb-1">
                                         Current Password
                                     </label>
                                     <div className="relative">
@@ -697,7 +697,7 @@ export default function Settings() {
                                             type={showCurrentPassword ? 'text' : 'password'}
                                             value={passwordForm.current_password}
                                             onChange={(e) => setPasswordForm(prev => ({ ...prev, current_password: e.target.value }))}
-                                            className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                            className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
                                             required
                                         />
                                         <button
@@ -710,7 +710,7 @@ export default function Settings() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    <label className="block text-sm font-medium text-foreground mb-1">
                                         New Password
                                     </label>
                                     <div className="relative">
@@ -718,7 +718,7 @@ export default function Settings() {
                                             type={showNewPassword ? 'text' : 'password'}
                                             value={passwordForm.new_password}
                                             onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password: e.target.value }))}
-                                            className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                            className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
                                             required
                                             minLength={8}
                                         />
@@ -732,14 +732,14 @@ export default function Settings() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    <label className="block text-sm font-medium text-foreground mb-1">
                                         Confirm New Password
                                     </label>
                                     <input
                                         type="password"
                                         value={passwordForm.new_password_confirmation}
                                         onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password_confirmation: e.target.value }))}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                        className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
                                         required
                                     />
                                 </div>
@@ -790,7 +790,7 @@ export default function Settings() {
                             </div>
                             <form onSubmit={(e) => { e.preventDefault(); updatePhoneMutation.mutate(); }} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    <label className="block text-sm font-medium text-foreground mb-1">
                                         Phone Number
                                     </label>
                                     <input

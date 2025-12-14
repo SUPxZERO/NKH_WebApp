@@ -310,7 +310,7 @@ export default function HelpSupport() {
                         </h2>
                         <form onSubmit={handleSubmitContact} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     Subject
                                 </label>
                                 <input
@@ -318,11 +318,11 @@ export default function HelpSupport() {
                                     value={contactForm.subject}
                                     onChange={(e) => setContactForm(prev => ({ ...prev, subject: e.target.value }))}
                                     placeholder="What do you need help with?"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     Message
                                 </label>
                                 <textarea
@@ -330,7 +330,7 @@ export default function HelpSupport() {
                                     onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
                                     placeholder="Describe your issue or question in detail..."
                                     rows={5}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none resize-none"
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none resize-none"
                                 />
                             </div>
                             <Button

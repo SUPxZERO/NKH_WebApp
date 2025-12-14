@@ -340,7 +340,7 @@ export default function Reservations() {
                                         <select
                                             value={selectedLocation || ''}
                                             onChange={(e) => setSelectedLocation(Number(e.target.value))}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            className="w-full px-4 py-3 border border-border rounded-xl bg-card text-foreground"
                                         >
                                             <option value="">Select a location</option>
                                             {locations.map((location: any) => (
@@ -363,7 +363,7 @@ export default function Reservations() {
                                             onChange={(e) => setSelectedDate(e.target.value)}
                                             min={today}
                                             max={maxDateStr}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            className="w-full px-4 py-3 border border-border rounded-xl bg-card text-foreground"
                                         />
                                         {selectedDate && (
                                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -439,7 +439,7 @@ export default function Reservations() {
                                             onChange={(e) => setSpecialRequests(e.target.value)}
                                             rows={3}
                                             placeholder="e.g., Window seat, high chair needed, birthday celebration..."
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            className="w-full px-4 py-3 border border-border rounded-xl bg-card text-foreground"
                                         />
                                     </div>
 

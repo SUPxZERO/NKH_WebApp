@@ -15,21 +15,21 @@ import { cn } from '@/app/utils/cn';
 // Stats Ribbon with Dark/Light Mode Support
 const TranslationStatsRibbon = ({ stats }: { stats: any }) => (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Keys</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Total Keys</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{stats.total}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
                     <Languages className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
             </div>
         </div>
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Missing Categories</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Missing Categories</p>
                     <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{stats.missingCategories}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
@@ -37,10 +37,10 @@ const TranslationStatsRibbon = ({ stats }: { stats: any }) => (
                 </div>
             </div>
         </div>
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Missing Items</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Missing Items</p>
                     <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{stats.missingItems}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
@@ -48,10 +48,10 @@ const TranslationStatsRibbon = ({ stats }: { stats: any }) => (
                 </div>
             </div>
         </div>
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Progress</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Progress</p>
                     <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.progress}%</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
@@ -168,11 +168,11 @@ export default function Translations() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
+            <div className="min-h-screen bg-background p-6 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Translations</h1>
-                        <p className="text-gray-600 dark:text-slate-400 mt-1">Manage multi-language content</p>
+                        <h1 className="text-3xl font-bold text-foreground tracking-tight">Translations</h1>
+                        <p className="text-muted-foreground mt-1">Manage multi-language content</p>
                     </div>
                     {hasChanges && (
                         <Button onClick={handleSave} disabled={saveMutation.isPending} className="bg-emerald-600 hover:bg-emerald-700">
@@ -184,22 +184,22 @@ export default function Translations() {
                 <TranslationStatsRibbon stats={stats} />
 
                 {/* Filters */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
+                <div className="bg-card border border-border rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
                     <div className="flex flex-wrap gap-4">
                         <div className="relative flex-1 min-w-[200px]">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                             <Input placeholder="Search translations..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
+                                className="pl-10 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground" />
                         </div>
-                        <div className="flex bg-gray-100 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg p-1">
+                        <div className="flex bg-secondary border border-border rounded-lg p-1">
                             <button onClick={() => setTranslationType('categories')}
                                 className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
-                                    translationType === 'categories' ? "bg-purple-600 text-white shadow" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white")}>
+                                    translationType === 'categories' ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground")}>
                                 Categories
                             </button>
                             <button onClick={() => setTranslationType('menu_items')}
                                 className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
-                                    translationType === 'menu_items' ? "bg-purple-600 text-white shadow" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white")}>
+                                    translationType === 'menu_items' ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground")}>
                                 Menu Items
                             </button>
                         </div>
@@ -207,19 +207,19 @@ export default function Translations() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
-                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                <div className="bg-card border border-border rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase">
                         <div className="col-span-1">ID</div>
                         <div className="col-span-5">English (Default)</div>
                         <div className="col-span-6">Khmer (Translation)</div>
                     </div>
-                    <div className="divide-y divide-gray-100 dark:divide-white/5">
+                    <div className="divide-y divide-border/50">
                         {isLoading ? (
-                            <div className="p-8 text-center text-gray-500">Loading...</div>
+                            <div className="p-8 text-center text-muted-foreground">Loading...</div>
                         ) : filteredTranslations.length === 0 ? (
                             <div className="p-12 text-center">
-                                <Languages className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                                <p className="text-gray-500 dark:text-gray-400">No translations found</p>
+                                <Languages className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">No translations found</p>
                             </div>
                         ) : filteredTranslations.map((item) => {
                             const enEdited = isEdited(item.id, 'en', 'name') || isEdited(item.id, 'en', 'description');
@@ -227,10 +227,10 @@ export default function Translations() {
 
                             return (
                                 <motion.div key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                    className={cn("grid grid-cols-12 gap-4 p-4 items-start hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group",
-                                        (enEdited || kmEdited) ? "bg-purple-50 dark:bg-purple-500/5" : ""
+                                    className={cn("grid grid-cols-12 gap-4 p-4 items-start hover:bg-secondary/50 transition-colors group",
+                                        (enEdited || kmEdited) ? "bg-primary/5" : ""
                                     )}>
-                                    <div className="col-span-1 text-sm text-gray-500 font-mono pt-2">#{item.id}</div>
+                                    <div className="col-span-1 text-sm text-muted-foreground font-mono pt-2">#{item.id}</div>
 
                                     {/* English Column */}
                                     <div className="col-span-5 space-y-2">
@@ -248,7 +248,7 @@ export default function Translations() {
                                                 value={getValue(item.id, 'en', 'description', item.translations.en?.description || '')}
                                                 onChange={(e) => handleValueChange(item.id, 'en', 'description', e.target.value)}
                                                 rows={2}
-                                                className={cn("w-full pl-2 bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-gray-300 focus:border-purple-500 outline-none p-2", isEdited(item.id, 'en', 'description') && "border-purple-500 dark:border-purple-500/50")}
+                                                className={cn("w-full pl-2 bg-card border border-border rounded-lg text-sm text-foreground focus:border-primary outline-none p-2", isEdited(item.id, 'en', 'description') && "border-primary")}
                                                 placeholder="English Description"
                                             />
                                         </div>
@@ -270,7 +270,7 @@ export default function Translations() {
                                                 value={getValue(item.id, 'km', 'description', item.translations.km?.description || '')}
                                                 onChange={(e) => handleValueChange(item.id, 'km', 'description', e.target.value)}
                                                 rows={2}
-                                                className={cn("w-full pl-2 bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-gray-300 focus:border-purple-500 outline-none p-2 font-khmer", isEdited(item.id, 'km', 'description') && "border-purple-500 dark:border-purple-500/50")}
+                                                className={cn("w-full pl-2 bg-card border border-border rounded-lg text-sm text-foreground focus:border-primary outline-none p-2 font-khmer", isEdited(item.id, 'km', 'description') && "border-primary")}
                                                 placeholder="ពណ៌នាជាភាសាខ្មែរ"
                                             />
                                         </div>

@@ -1,7 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Plus, Eye, Edit, Trash2, Users, ChevronLeft, ChevronRight, Mail, Phone, MapPin, Star, Gift } from 'lucide-react';
+import {
+  Search, Plus, Eye, Edit, Trash2, Users, ChevronLeft, ChevronRight,
+  Mail, Phone, MapPin, Star, Gift, UserPlus, X, Crown, Sparkles
+} from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
@@ -12,45 +15,69 @@ import { Customer, Location } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
 import Avatar from '@/app/components/ui/Avatar';
 
+// Enhanced Stats Card with Gradients
+const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
+  const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string }> = {
+    purple: {
+      gradient: 'from-fuchsia-500/20 to-purple-500/10',
+      iconBg: 'bg-gradient-to-br from-fuchsia-500 to-purple-600',
+      text: 'text-fuchsia-600 dark:text-fuchsia-400',
+      border: 'border-fuchsia-500/30',
+    },
+    emerald: {
+      gradient: 'from-emerald-500/20 to-green-500/10',
+      iconBg: 'bg-gradient-to-br from-emerald-500 to-green-600',
+      text: 'text-emerald-600 dark:text-emerald-400',
+      border: 'border-emerald-500/30',
+    },
+    amber: {
+      gradient: 'from-amber-500/20 to-orange-500/10',
+      iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
+      text: 'text-amber-600 dark:text-amber-400',
+      border: 'border-amber-500/30',
+    },
+    blue: {
+      gradient: 'from-blue-500/20 to-cyan-500/10',
+      iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-600',
+      text: 'text-blue-600 dark:text-blue-400',
+      border: 'border-blue-500/30',
+    },
+  };
+
+  const styles = colorStyles[color] || colorStyles.purple;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className={cn(
+        "relative overflow-hidden bg-card border rounded-2xl p-5",
+        "hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5",
+        styles.border
+      )}
+    >
+      <div className={cn("absolute inset-0 opacity-50", `bg-gradient-to-br ${styles.gradient}`)} />
+      <div className="relative z-10 flex items-center justify-between">
+        <div>
+          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">{title}</p>
+          <p className={cn("text-3xl font-extrabold mt-1", styles.text)}>{value}</p>
+        </div>
+        <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-lg", styles.iconBg)}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 // Stats Ribbon
 const CustomerStatsRibbon = ({ stats }: { stats: any }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total</p>
-          <p className="text-2xl font-bold text-white mt-1">{stats.total}</p>
-        </div>
-        <Users className="w-8 h-8 text-purple-400" />
-      </div>
-    </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Active</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{stats.active}</p>
-        </div>
-        <Users className="w-8 h-8 text-emerald-400" />
-      </div>
-    </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">VIP</p>
-          <p className="text-2xl font-bold text-yellow-400 mt-1">{stats.vip}</p>
-        </div>
-        <Star className="w-8 h-8 text-yellow-400" />
-      </div>
-    </div>
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">Total Points</p>
-          <p className="text-2xl font-bold text-amber-400 mt-1">{stats.totalPoints}</p>
-        </div>
-        <Gift className="w-8 h-8 text-amber-400" />
-      </div>
-    </div>
+    <StatCard title="Total Customers" value={stats.total} icon={Users} color="purple" index={0} />
+    <StatCard title="Active" value={stats.active} icon={UserPlus} color="emerald" index={1} />
+    <StatCard title="VIP Members" value={stats.vip} icon={Crown} color="amber" index={2} />
+    <StatCard title="Total Points" value={stats.totalPoints.toLocaleString()} icon={Gift} color="blue" index={3} />
   </div>
 );
 
@@ -155,74 +182,168 @@ export default function Customers() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-slate-900 p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="min-h-screen bg-background p-6 lg:p-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+        >
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Customers</h1>
-            <p className="text-slate-400 mt-1">Manage customer database</p>
+            <h1 className="text-4xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Customers
+              </span>
+            </h1>
+            <p className="text-muted-foreground mt-2 flex items-center gap-2">
+              <Users className="w-4 h-4 text-fuchsia-500" />
+              Manage your customer database and loyalty points
+            </p>
           </div>
-          <Button onClick={() => { resetForm(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="w-4 h-4 mr-2" /> Add Customer
+          <Button
+            onClick={() => { resetForm(); setOpenCreate(true); }}
+            variant="primary"
+            size="lg"
+            leftIcon={<Plus className="w-5 h-5" />}
+          >
+            Add Customer
           </Button>
-        </div>
+        </motion.div>
 
+        {/* Stats */}
         <CustomerStatsRibbon stats={stats} />
 
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm">
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-card border border-border rounded-2xl p-5 mb-6 shadow-sm"
+        >
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search customers..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-gray-500" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search customers by name, email, phone..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full h-12 pl-12 pr-4 bg-secondary/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1 p-1 bg-secondary/50 rounded-xl">
               {['all', 'active', 'inactive'].map((status) => (
-                <button key={status} onClick={() => setStatusFilter(status)}
-                  className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
-                    statusFilter === status ? "bg-purple-600 text-white" : "bg-slate-800 text-gray-400 hover:bg-slate-700")}>
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={cn(
+                    "px-5 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap",
+                    statusFilter === status
+                      ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
                   {status.charAt(0).toUpperCase() + status.slice(1)}
                 </button>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {selectedCustomers.size > 0 && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-purple-600 border border-purple-500 rounded-xl p-4 mb-6 flex items-center justify-between">
-            <span className="text-white font-medium">{selectedCustomers.size} selected</span>
-            <Button size="sm" variant="secondary" onClick={() => setSelectedCustomers(new Set())}
-              className="border-white/20 hover:bg-white/10">Clear</Button>
-          </motion.div>
-        )}
+        {/* Bulk Actions */}
+        <AnimatePresence>
+          {selectedCustomers.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-2xl p-5 mb-6 shadow-xl shadow-fuchsia-500/20"
+            >
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-lg">{selectedCustomers.size} customer{selectedCustomers.size === 1 ? '' : 's'} selected</p>
+                    <p className="text-white/70 text-sm">Ready for bulk actions</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button size="md" onClick={() => setSelectedCustomers(new Set())} className="bg-white/20 text-white hover:bg-white/30 border-0">
+                    <X className="w-4 h-4 mr-2" /> Clear Selection
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-xs font-semibold text-gray-400 uppercase">
-            <div className="col-span-1"><input type="checkbox" checked={selectedCustomers.size === customerList.length && customerList.length > 0}
-              onChange={toggleSelectAll} className="w-4 h-4 rounded border-white/20 bg-slate-900" /></div>
-            <div className="col-span-3">Customer</div>
-            <div className="col-span-2">Contact</div>
-            <div className="col-span-2">Location</div>
-            <div className="col-span-2">Points</div>
-            <div className="col-span-2 text-right">Actions</div>
+        {/* Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm"
+        >
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
+            <div className="col-span-1 flex items-center">
+              <input
+                type="checkbox"
+                checked={selectedCustomers.size === customerList.length && customerList.length > 0}
+                onChange={toggleSelectAll}
+                className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
+              />
+            </div>
+            <div className="col-span-3 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Customer</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Contact</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Location</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Points</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">Actions</div>
           </div>
 
-          <div className="divide-y divide-white/5">
+          {/* Table Body */}
+          <div className="divide-y divide-border/50">
             {isLoading ? (
-              <div className="p-12 text-center text-gray-400">Loading customers...</div>
+              <div className="p-16 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
+                  <div className="w-8 h-8 border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+                <p className="text-muted-foreground font-medium">Loading customers...</p>
+              </div>
             ) : customerList.length === 0 ? (
-              <div className="p-12 text-center">
-                <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <h3 className="text-white font-medium">No customers found</h3>
+              <div className="p-16 text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-muted mb-4">
+                  <Users className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-foreground font-bold text-lg mb-1">No customers found</h3>
+                <p className="text-muted-foreground text-sm">Try adjusting your search or add a new customer</p>
               </div>
             ) : (
-              customerList.map((customer) => (
-                <motion.div key={customer.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/5 transition-colors group">
-                  <div className="col-span-1">
-                    <input type="checkbox" checked={selectedCustomers.has(customer.id)} onChange={() => toggleSelectCustomer(customer.id)}
-                      className="w-4 h-4 rounded border-white/20 bg-slate-900" />
+              customerList.map((customer, index) => (
+                <motion.div
+                  key={customer.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.02 }}
+                  className={cn(
+                    "grid grid-cols-12 gap-4 px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
+                    "hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent",
+                    selectedCustomers.has(customer.id) && "bg-primary/5 border-l-2 border-l-primary"
+                  )}
+                >
+                  {/* Checkbox */}
+                  <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedCustomers.has(customer.id)}
+                      onChange={() => toggleSelectCustomer(customer.id)}
+                      className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all hover:border-primary/50"
+                    />
                   </div>
+
+                  {/* Customer Info */}
                   <div className="col-span-3 flex items-center gap-3">
                     <Avatar
                       src={customer.user?.avatar}
@@ -230,71 +351,166 @@ export default function Customers() {
                       size="md"
                       fallbackColor="rose"
                     />
-                    <div>
-                      <div className="font-medium text-white">{customer.user?.name || 'Unknown'}</div>
-                      <div className="text-xs text-gray-500">
-                        <span className={cn("inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold",
-                          customer.user?.is_active ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400")}>
+                    <div className="min-w-0">
+                      <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors flex items-center gap-2">
+                        {customer.user?.name || 'Unknown'}
+                        {(customer.points_balance || 0) > 1000 && (
+                          <Crown className="w-4 h-4 text-amber-500" />
+                        )}
+                      </div>
+                      <div className="mt-1">
+                        <span className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                          customer.user?.is_active
+                            ? "bg-gradient-to-r from-emerald-500/20 to-green-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                            : "bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-600 dark:text-red-400 border-red-500/30"
+                        )}>
                           {customer.user?.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Contact */}
                   <div className="col-span-2">
-                    <div className="text-sm text-gray-300 truncate flex items-center gap-2">
-                      <Mail className="w-3 h-3" /> {customer.user?.email || 'N/A'}
+                    <div className="text-sm text-foreground truncate flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{customer.user?.email || 'N/A'}</span>
                     </div>
                     {customer.user?.phone && (
-                      <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
-                        <Phone className="w-3 h-3" /> {customer.user.phone}
+                      <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                        <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                        {customer.user.phone}
                       </div>
                     )}
                   </div>
-                  <div className="col-span-2 text-sm text-gray-300 flex items-center gap-2">
-                    <MapPin className="w-3 h-3" /> {customer.preferred_location?.name || 'None'}
+
+                  {/* Location */}
+                  <div className="col-span-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {customer.preferred_location?.name || 'None'}
+                    </span>
                   </div>
+
+                  {/* Points */}
                   <div className="col-span-2">
                     <div className="flex items-center gap-2">
-                      <Gift className="w-4 h-4 text-amber-400" />
-                      <span className="font-semibold text-amber-400">{customer.points_balance || 0}</span>
+                      <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30">
+                        <Gift className="w-4 h-4 text-amber-500" />
+                      </div>
+                      <div>
+                        <span className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                          {(customer.points_balance || 0).toLocaleString()}
+                        </span>
+                        <p className="text-xs text-muted-foreground">points</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="secondary" onClick={() => handleEdit(customer)}
-                      className="h-8 w-8 p-0 border-white/10"><Edit className="w-3 h-3" /></Button>
-                    <Button size="sm" variant="danger" onClick={() => handleDelete(customer.id)}
-                      className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-400"><Trash2 className="w-3 h-3" /></Button>
+
+                  {/* Actions */}
+                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleEdit(customer)}
+                      className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                      title="Edit"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => handleDelete(customer.id)}
+                      className="h-9 w-9 p-0"
+                      title="Deactivate"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </motion.div>
               ))
             )}
           </div>
 
+          {/* Pagination */}
           {customers?.meta && (
-            <div className="flex items-center justify-between p-4 border-t border-white/10 bg-white/5">
-              <div className="text-sm text-gray-400">
-                Showing {((page - 1) * perPage) + 1} to {Math.min(page * perPage, customers.meta.total)} of {customers.meta.total}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 border-t border-border bg-gradient-to-r from-secondary/30 to-transparent">
+              <div className="flex items-center gap-3">
+                <div className="h-9 px-4 rounded-lg bg-secondary border border-border flex items-center gap-2">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">{customers.meta.total}</span>
+                  <span className="text-sm text-muted-foreground">customers</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-foreground">{Math.min(page * perPage, customers.meta.total)}</span>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}
-                  className="border-white/10"><ChevronLeft className="w-4 h-4" /></Button>
-                <Button variant="secondary" size="sm" disabled={page === customers.meta.last_page} onClick={() => setPage(p => p + 1)}
-                  className="border-white/10"><ChevronRight className="w-4 h-4" /></Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => p - 1)}
+                  className="h-10 px-4 gap-2"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline">Previous</span>
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, customers.meta.last_page) }, (_, i) => {
+                    let pageNum;
+                    if (customers.meta.last_page <= 5) {
+                      pageNum = i + 1;
+                    } else if (page <= 3) {
+                      pageNum = i + 1;
+                    } else if (page >= customers.meta.last_page - 2) {
+                      pageNum = customers.meta.last_page - 4 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={cn(
+                          "h-10 w-10 rounded-xl text-sm font-semibold transition-all",
+                          page === pageNum
+                            ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
+                            : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover hover:text-foreground"
+                        )}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page === customers.meta.last_page}
+                  onClick={() => setPage(p => p + 1)}
+                  className="h-10 px-4 gap-2"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
+      {/* Create/Edit Modal */}
       <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCustomer ? 'Edit Customer' : 'New Customer'} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required className="bg-white/5 border-white/10 text-white" />
+            <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
+              <label className="block text-sm font-semibold text-foreground mb-2">Gender</label>
               <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
+                className="w-full h-11 bg-secondary/50 border border-border rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                 <option value="">Select</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -304,29 +520,24 @@ export default function Customers() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required className="bg-white/5 border-white/10 text-white" />
-            <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="bg-white/5 border-white/10 text-white" />
+            <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+            <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Input label={editingCustomer ? "Password (optional)" : "Password"} type="password" value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })} required={!editingCustomer}
-              className="bg-white/5 border-white/10 text-white" />
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })} required={!editingCustomer} />
             <Input label="Birth Date" type="date" value={formData.birth_date}
-              onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-              className="bg-white/5 border-white/10 text-white" />
+              onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Points" type="number" value={formData.points_balance}
-              onChange={(e) => setFormData({ ...formData, points_balance: parseInt(e.target.value) || 0 })}
-              className="bg-white/5 border-white/10 text-white" />
+            <Input label="Points Balance" type="number" value={formData.points_balance}
+              onChange={(e) => setFormData({ ...formData, points_balance: parseInt(e.target.value) || 0 })} />
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Location</label>
+              <label className="block text-sm font-semibold text-foreground mb-2">Preferred Location</label>
               <select value={formData.preferred_location_id} onChange={(e) => setFormData({ ...formData, preferred_location_id: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white">
+                className="w-full h-11 bg-secondary/50 border border-border rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                 <option value="">Select</option>
                 {(locations as any)?.data?.map((loc: Location) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
@@ -336,22 +547,21 @@ export default function Customers() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+            <label className="block text-sm font-semibold text-foreground mb-2">Notes</label>
             <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white" />
+              className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pt-2">
             <input type="checkbox" id="is_active" checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-4 h-4 rounded border-white/20 bg-white/5" />
-            <label htmlFor="is_active" className="text-sm text-gray-300">Active</label>
+              className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" />
+            <label htmlFor="is_active" className="text-sm font-medium text-foreground cursor-pointer">Active</label>
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 border-white/10">Cancel</Button>
-            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
-              className="flex-1 bg-purple-600 hover:bg-purple-700">
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
+            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1">
               {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingCustomer ? 'Update' : 'Create')}
             </Button>
           </div>

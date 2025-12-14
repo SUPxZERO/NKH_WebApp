@@ -15,21 +15,21 @@ import { cn } from '@/app/utils/cn';
 // Stats Ribbon with Dark/Light Mode Support
 const RoleStatsRibbon = ({ stats }: { stats: any }) => (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Roles</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Total Roles</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">{stats.total}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
                     <Shield className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
             </div>
         </div>
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Assigned Users</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Assigned Users</p>
                     <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.users}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
@@ -37,10 +37,10 @@ const RoleStatsRibbon = ({ stats }: { stats: any }) => (
                 </div>
             </div>
         </div>
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Permissions</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Total Permissions</p>
                     <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.permissions}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
@@ -48,10 +48,10 @@ const RoleStatsRibbon = ({ stats }: { stats: any }) => (
                 </div>
             </div>
         </div>
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Avg Perms/Role</p>
+                    <p className="text-muted-foreground text-xs uppercase tracking-wider font-medium">Avg Perms/Role</p>
                     <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{stats.avgPerms}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
@@ -172,11 +172,11 @@ export default function Roles() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
+            <div className="min-h-screen bg-background p-6 transition-colors">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Roles & Permissions</h1>
-                        <p className="text-gray-600 dark:text-slate-400 mt-1">Manage user access control</p>
+                        <h1 className="text-3xl font-bold text-foreground tracking-tight">Roles & Permissions</h1>
+                        <p className="text-muted-foreground mt-1">Manage user access control</p>
                     </div>
                     <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-purple-600 hover:bg-purple-700">
                         <Plus className="w-4 h-4 mr-2" /> Create Role
@@ -186,44 +186,44 @@ export default function Roles() {
                 <RoleStatsRibbon stats={stats} />
 
                 {/* Search */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
+                <div className="bg-card border border-border rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                         <Input placeholder="Search roles..." value={search} onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
+                            className="pl-10 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground" />
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
-                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                <div className="bg-card border border-border rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-secondary/50 text-xs font-semibold text-muted-foreground uppercase">
                         <div className="col-span-4">Role Name</div>
                         <div className="col-span-3">Slug</div>
                         <div className="col-span-2">Users</div>
                         <div className="col-span-2">Permissions</div>
                         <div className="col-span-1 text-right">Actions</div>
                     </div>
-                    <div className="divide-y divide-gray-100 dark:divide-white/5">
+                    <div className="divide-y divide-border/50">
                         {isLoading ? (
-                            <div className="p-8 text-center text-gray-500">Loading...</div>
+                            <div className="p-8 text-center text-muted-foreground">Loading...</div>
                         ) : roles.length === 0 ? (
                             <div className="p-12 text-center">
-                                <Shield className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                                <p className="text-gray-500 dark:text-gray-400">No roles found</p>
+                                <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">No roles found</p>
                             </div>
                         ) : roles.map((role: any) => (
                             <motion.div key={role.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-secondary/50 transition-colors group">
                                 <div className="col-span-4">
-                                    <div className="font-medium text-gray-900 dark:text-white">{role.name}</div>
-                                    <div className="text-xs text-gray-500 truncate">{role.description}</div>
+                                    <div className="font-medium text-foreground">{role.name}</div>
+                                    <div className="text-xs text-muted-foreground truncate">{role.description}</div>
                                 </div>
-                                <div className="col-span-3 text-sm text-gray-600 dark:text-gray-400 font-mono">{role.slug}</div>
-                                <div className="col-span-2 text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                    <Users size={14} className="text-gray-500" /> {role.users_count}
+                                <div className="col-span-3 text-sm text-muted-foreground font-mono">{role.slug}</div>
+                                <div className="col-span-2 text-sm text-foreground flex items-center gap-2">
+                                    <Users size={14} className="text-muted-foreground" /> {role.users_count}
                                 </div>
-                                <div className="col-span-2 text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                    <Lock size={14} className="text-gray-500" /> {role.permissions_count}
+                                <div className="col-span-2 text-sm text-foreground flex items-center gap-2">
+                                    <Lock size={14} className="text-muted-foreground" /> {role.permissions_count}
                                 </div>
                                 <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Button size="sm" variant="secondary" onClick={() => handleEdit(role)} className="h-8 w-8 p-0"><Edit size={14} /></Button>
@@ -239,28 +239,28 @@ export default function Roles() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input label="Role Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Description</label>
                         <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
-                            className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none" />
+                            className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:ring-2 focus:ring-primary outline-none" />
                     </div>
 
-                    <div className="border-t border-gray-200 dark:border-white/10 pt-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Permissions</label>
+                    <div className="border-t border-border pt-4">
+                        <label className="block text-sm font-medium text-foreground mb-3">Permissions</label>
                         <div className="h-64 overflow-y-auto pr-2 space-y-4">
                             {Object.entries(permissions).map(([group, perms]: [string, any]) => (
                                 <div key={group}>
-                                    <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{group}</h4>
+                                    <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2">{group}</h4>
                                     <div className="grid grid-cols-2 gap-2">
                                         {perms.map((p: any) => (
                                             <label key={p.id} className={cn(
                                                 "flex items-center gap-2 p-2 rounded border cursor-pointer transition-all",
                                                 formData.permissions.includes(p.id)
-                                                    ? "bg-purple-100 dark:bg-purple-500/20 border-purple-300 dark:border-purple-500/50"
-                                                    : "bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20"
+                                                    ? "bg-primary/10 border-primary/30"
+                                                    : "bg-secondary/50 border-border hover:border-border/80"
                                             )}>
                                                 <input type="checkbox" checked={formData.permissions.includes(p.id)} onChange={() => togglePermission(p.id)}
-                                                    className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20 text-purple-500" />
-                                                <span className="text-sm text-gray-700 dark:text-gray-300">{p.name}</span>
+                                                    className="rounded bg-card border-border text-primary" />
+                                                <span className="text-sm text-foreground">{p.name}</span>
                                             </label>
                                         ))}
                                     </div>
