@@ -149,6 +149,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('translations', fn() => Inertia::render('admin/Translations'))->name('admin.translations');
     Route::get('settings', fn() => Inertia::render('admin/Settings'))->name('admin.settings');
 });
+Route::get('forgetPass', fn() => Inertia::render('Auth/ForgotPassword'))->name('auth.forgotpassword');
+Route::get('VerifyEmail', fn() => Inertia::render('Auth/VerifyEmail'))->name('auth.forgotpassword');
+
 
 // ============================================================================
 // PROFILE ROUTES (Laravel Breeze)
