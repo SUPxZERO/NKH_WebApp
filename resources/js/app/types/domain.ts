@@ -245,6 +245,8 @@ export interface User {
   roles: string[];
   avatar?: string | null;
   image_path?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface Employee {

@@ -102,7 +102,7 @@ export default function Suppliers() {
 
     const [formData, setFormData] = useState({
         location_id: '', code: '', name: '', contact_name: '', contact_phone: '',
-        email: '', phone: '', address: '', type: 'food_produce',
+        email: '', phone: '', address: '', type: 'produce',
         payment_terms: '', notes: '', tax_id: '', is_active: true
     });
 

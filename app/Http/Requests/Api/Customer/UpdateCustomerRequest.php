@@ -19,7 +19,7 @@ class UpdateCustomerRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'email', 'max:255', 'unique:users,email,' . $customerId],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30', 'unique:users,phone,' . $customerId],
-            'password' => ['sometimes', 'string', 'min:8'],
+            'password' => ['sometimes', 'nullable', 'string', 'min:8'],
             'is_active' => ['sometimes', 'boolean'],
             'preferred_location_id' => ['sometimes', 'nullable', 'exists:locations,id'],
             'birth_date' => ['sometimes', 'nullable', 'date'],

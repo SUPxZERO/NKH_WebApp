@@ -273,14 +273,14 @@ export default function StockAlerts() {
 
                                 {isLoading ? (
                                     <div className="text-center py-8 text-muted-foreground">Loading alerts...</div>
-                                ) : alerts?.length === 0 ? (
+                                ) : (Array.isArray(alerts) ? alerts : (alerts?.data || []))?.length === 0 ? (
                                     <div className="text-center py-12 text-muted-foreground bg-secondary/20 rounded-xl border border-border/50 border-dashed">
                                         <CheckCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
                                         No active alerts requiring attention
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
-                                        {alerts?.map((alert: Alert, idx: number) => (
+                                        {(Array.isArray(alerts) ? alerts : (alerts?.data || [])).map((alert: Alert, idx: number) => (
                                             <motion.div
                                                 key={alert.id}
                                                 initial={{ opacity: 0, x: -10 }}

@@ -52,8 +52,8 @@ class ReportsController extends Controller
         $dates = $this->getDateRange($range);
         $groupBy = $this->getGroupByFormat($range);
 
-        $usage = InventoryTransaction::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('type', 'usage')
+        $usage = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
+            ->where('inventory_transactions.type', 'usage')
             ->select([
                 DB::raw($groupBy . ' as date'),
                 DB::raw('SUM(quantity) as usage')
@@ -70,8 +70,8 @@ class ReportsController extends Controller
         $range = $request->get('range', '30days');
         $dates = $this->getDateRange($range);
 
-        $wasteByReason = InventoryAdjustment::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->whereIn('reason', ['damaged', 'expired', 'spillage', 'theft'])
+        $wasteByReason = InventoryAdjustment::whereBetween('inventory_adjustments.created_at', [$dates['start'], $dates['end']])
+            ->whereIn('inventory_adjustments.reason', ['damaged', 'expired', 'spillage', 'theft'])
             ->join('ingredients', 'inventory_adjustments.ingredient_id', '=', 'ingredients.id')
             ->select([
                 'inventory_adjustments.reason',
@@ -81,7 +81,7 @@ class ReportsController extends Controller
             ->get();
 
         $totalWaste = $wasteByReason->sum('value');
-        $totalRevenue = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+        $totalRevenue = Order::whereBetween('orders.created_at', [$dates['start'], $dates['end']])
             ->sum('total_amount');
 
         return response()->json([
@@ -163,8 +163,8 @@ class ReportsController extends Controller
             ->sum('amount');
 
         // Calculate COGS
-        $cogs = InventoryTransaction::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('type', 'usage')
+        $cogs = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
+            ->where('inventory_transactions.type', 'usage')
             ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
             ->select(DB::raw('SUM(inventory_transactions.quantity * ingredients.cost_per_unit) as total'))
             ->first();
@@ -238,8 +238,8 @@ class ReportsController extends Controller
         $range = $request->get('range', '30days');
         $dates = $this->getDateRange($range);
 
-        $breakdown = InventoryTransaction::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('type', 'usage')
+        $breakdown = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
+            ->where('inventory_transactions.type', 'usage')
             ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
             ->select([
                 'ingredients.category as name',
@@ -249,8 +249,8 @@ class ReportsController extends Controller
             ->get();
 
         $total = $breakdown->sum('value');
-        $revenue = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
+        $revenue = Order::whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+            ->where('orders.status', '!=', 'cancelled')
             ->sum('total_amount');
 
         return response()->json([

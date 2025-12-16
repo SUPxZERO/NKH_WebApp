@@ -120,19 +120,19 @@ export default function Positions() {
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/positions', data),
+        mutationFn: (data: any) => apiPost('/api/admin/positions', data),
         onSuccess: () => { toastSuccess('Position created'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/positions/${id}`, data),
+        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/positions/${id}`, data),
         onSuccess: () => { toastSuccess('Position updated'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/positions/${id}`),
+        mutationFn: (id: number) => apiDelete(`/api/admin/positions/${id}`),
         onSuccess: () => { toastSuccess('Position deleted'); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });

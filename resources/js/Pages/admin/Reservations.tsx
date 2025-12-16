@@ -155,6 +155,8 @@ export default function Reservations() {
 
   // Form state
   const [formData, setFormData] = useState({
+    location_id: '',
+    floor_id: '',
     table_id: '',
     customer_id: '',
     reserved_for: '',
@@ -223,9 +225,25 @@ export default function Reservations() {
     };
   }, [reservationList, reservations]);
 
-  // Fetch tables & customers
-  const { data: tables } = useQuery({ queryKey: ['tables'], queryFn: () => apiGet('/api/admin/tables') }) as { data: any };
+  // Fetch tables, customers, locations & floors
+  const { data: tables } = useQuery({
+    queryKey: ['tables', formData.floor_id],
+    queryFn: () => {
+      if (!formData.floor_id) return { data: [] };
+      return apiGet(`/api/admin/tables?floor_id=${formData.floor_id}`);
+    },
+    enabled: !!formData.floor_id
+  }) as { data: any };
   const { data: customers } = useQuery({ queryKey: ['customers'], queryFn: () => apiGet('/api/admin/customers') }) as { data: any };
+  const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: () => apiGet('/api/admin/locations') }) as { data: any };
+  const { data: floors } = useQuery({
+    queryKey: ['floors', formData.location_id],
+    queryFn: () => {
+      if (!formData.location_id) return { data: [] };
+      return apiGet(`/api/admin/floors?location_id=${formData.location_id}`);
+    },
+    enabled: !!formData.location_id
+  }) as { data: any };
 
   // Mutations
   const createMutation = useMutation({
@@ -273,6 +291,8 @@ export default function Reservations() {
 
   const resetForm = () => {
     setFormData({
+      location_id: '',
+      floor_id: '',
       table_id: '',
       customer_id: '',
       reserved_for: '',
@@ -300,7 +320,13 @@ export default function Reservations() {
       }
     }
 
+    // Get location and floor from the table
+    const locationId = (reservation as any).location_id?.toString() || '';
+    const floorId = (reservation as any).table?.floor_id?.toString() || '';
+
     setFormData({
+      location_id: locationId,
+      floor_id: floorId,
       table_id: reservation.table_id.toString(),
       customer_id: reservation.customer_id.toString(),
       reserved_for: dateStr,
@@ -690,6 +716,16 @@ export default function Reservations() {
               />
 
               <Input
+                label="Number of Guests"
+                type="number"
+                required
+                value={formData.guest_count}
+                onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
+                leftIcon={<Users className="w-4 h-4" />}
+                variant="filled"
+              />
+
+              <Input
                 label="Duration (minutes)"
                 type="number"
                 value={formData.duration_minutes}
@@ -702,13 +738,62 @@ export default function Reservations() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
+                  Location <span className="text-destructive">*</span>
+                </label>
+                <select
+                  required
+                  value={formData.location_id}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      location_id: e.target.value,
+                      floor_id: '',
+                      table_id: ''
+                    });
+                  }}
+                  className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all"
+                >
+                  <option value="">Select Location</option>
+                  {locations?.data?.map((loc: any) => (
+                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Floor <span className="text-destructive">*</span>
+                </label>
+                <select
+                  required
+                  value={formData.floor_id}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      floor_id: e.target.value,
+                      table_id: ''
+                    });
+                  }}
+                  disabled={!formData.location_id}
+                  className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select Floor</option>
+                  {floors?.data?.map((f: any) => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
                   Table <span className="text-destructive">*</span>
                 </label>
                 <select
                   required
                   value={formData.table_id}
                   onChange={(e) => setFormData({ ...formData, table_id: e.target.value })}
-                  className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all"
+                  disabled={!formData.floor_id}
+                  className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Select Table</option>
                   {tables?.data?.map((t: DiningTable) => (
@@ -716,16 +801,6 @@ export default function Reservations() {
                   ))}
                 </select>
               </div>
-
-              <Input
-                label="Number of Guests"
-                type="number"
-                required
-                value={formData.guest_count}
-                onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
-                leftIcon={<Users className="w-4 h-4" />}
-                variant="filled"
-              />
 
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Status</label>

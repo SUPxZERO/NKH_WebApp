@@ -42,7 +42,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 3.20,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\spring-rolls.jpg',
+                    'image_path' => 'menu_images/spring-rolls.jpg',
                 ],
                 [
                     'category_id' => $appetizers->id,
@@ -51,7 +51,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 4.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\chicken-satay.jpg',
+                    'image_path' => 'menu_images/chicken-satay.jpg',
                 ],
                 [
                     'category_id' => $appetizers->id,
@@ -60,7 +60,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 4.00,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\fish-cakes.jpg',
+                    'image_path' => 'menu_images/fish-cakes.jpg',
                 ],
                 [
                     'category_id' => $appetizers->id,
@@ -69,7 +69,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 2.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\papaya-salad.jpg',
+                    'image_path' => 'menu_images/papaya-salad.jpg',
                 ],
                 [
                     'category_id' => $appetizers->id,
@@ -78,7 +78,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 5.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\beef-salad.jpg',
+                    'image_path' => 'menu_images/beef-salad.jpg',
                 ],
                 [
                     'category_id' => $appetizers->id,
@@ -87,7 +87,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 12.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\mixed-appetizer-platter.jpg',
+                    'image_path' => 'menu_images/mixed-appetizer-platter.jpg',
                 ],
 
                 // Main Dishes
@@ -98,7 +98,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 4.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\khmer-noodle-soup.jpg',
+                    'image_path' => 'menu_images/khmer-noodle-soup.jpg',
                 ],
                 [
                     'category_id' => $mainDishes->id,
@@ -107,7 +107,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 4.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\pad-thai.jpg',
+                    'image_path' => 'menu_images/pad-thai.jpg',
                 ],
                 [
                     'category_id' => $mainDishes->id,
@@ -116,7 +116,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 5.50,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\spaghetti-carbonara.jpg',
+                    'image_path' => 'menu_images/spaghetti-carbonara.jpg',
                 ],
 
                 // Soups & Salads
@@ -127,7 +127,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 5.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\sour-soup-fish.jpg',
+                    'image_path' => 'menu_images/sour-soup-fish.jpg',
                 ],
                 [
                     'category_id' => $soupsSalads->id,
@@ -136,7 +136,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 4.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\chicken-coconut-soup.jpg',
+                    'image_path' => 'menu_images/chicken-coconut-soup.jpg',
                 ],
                 [
                     'category_id' => $soupsSalads->id,
@@ -145,7 +145,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 3.00,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\lotus-stem-salad.jpg',
+                    'image_path' => 'menu_images/lotus-stem-salad.jpg',
                 ],
 
                 // Desserts
@@ -156,7 +156,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 2.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\sticky-rice-mango.jpg',
+                    'image_path' => 'menu_images/sticky-rice-mango.jpg',
                 ],
                 [
                     'category_id' => $desserts->id,
@@ -165,7 +165,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 2.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\coconut-custard.jpg',
+                    'image_path' => 'menu_images/coconut-custard.jpg',
                 ],
                 [
                     'category_id' => $desserts->id,
@@ -174,7 +174,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 1.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\coconut-ice-cream.jpg',
+                    'image_path' => 'menu_images/coconut-ice-cream.jpg',
                 ],
                 [
                     'category_id' => $desserts->id,
@@ -183,7 +183,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 1.80,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\mango-ice-cream.jpg',
+                    'image_path' => 'menu_images/mango-ice-cream.jpg',
                 ],
                 [
                     'category_id' => $desserts->id,
@@ -192,7 +192,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 3.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\chocolate-cake.jpg',
+                    'image_path' => 'menu_images/chocolate-cake.jpg',
                 ],
 
                 // Beverages
@@ -203,7 +203,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 1.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\cambodian-coffee.jpg',
+                    'image_path' => 'menu_images/cambodian-coffee.jpg',
                 ],
                 [
                     'category_id' => $beverages->id,
@@ -212,7 +212,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 0.80,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\jasmine-tea.jpg',
+                    'image_path' => 'menu_images/jasmine-tea.jpg',
                 ],
                 [
                     'category_id' => $beverages->id,
@@ -221,7 +221,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 1.20,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\iced-coffee.jpg',
+                    'image_path' => 'menu_images/iced-coffee.jpg',
                 ],
                 [
                     'category_id' => $beverages->id,
@@ -230,7 +230,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 0.80,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\soft-drinks.jpg',
+                    'image_path' => 'menu_images/soft-drinks.jpg',
                 ],
                 [
                     'category_id' => $beverages->id,
@@ -239,7 +239,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 2.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\fresh-orange-juice.jpg',
+                    'image_path' => 'menu_images/fresh-orange-juice.jpg',
                 ],
                 [
                     'category_id' => $beverages->id,
@@ -248,7 +248,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 1.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\watermelon-juice.jpg',
+                    'image_path' => 'menu_images/watermelon-juice.jpg',
                 ],
                 [
                     'category_id' => $beverages->id,
@@ -257,7 +257,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 1.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\angkor-beer.jpg',
+                    'image_path' => 'menu_images/angkor-beer.jpg',
                 ],
                 [
                     'category_id' => $beverages->id,
@@ -266,7 +266,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 3.50,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\house-wine-red.jpg',
+                    'image_path' => 'menu_images/house-wine-red.jpg',
                 ],
 
                 // Seafood
@@ -277,7 +277,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 10.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\grilled-fish-banana-leaf.jpg',
+                    'image_path' => 'menu_images/grilled-fish-banana-leaf.jpg',
                 ],
                 [
                     'category_id' => $seafood->id,
@@ -286,7 +286,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 12.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\steamed-fish-ginger.jpg',
+                    'image_path' => 'menu_images/steamed-fish-ginger.jpg',
                 ],
                 [
                     'category_id' => $seafood->id,
@@ -295,7 +295,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 14.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\prawns-tamarind-sauce.jpg',
+                    'image_path' => 'menu_images/prawns-tamarind-sauce.jpg',
                 ],
 
                 // Grilled
@@ -306,7 +306,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 7.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\grilled-beef-lolot.jpg',
+                    'image_path' => 'menu_images/grilled-beef-lolot.jpg',
                 ],
                 [
                     'category_id' => $grilled->id,
@@ -315,7 +315,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 9.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\grilled-pork-ribs.jpg',
+                    'image_path' => 'menu_images/grilled-pork-ribs.jpg',
                 ],
                 [
                     'category_id' => $grilled->id,
@@ -324,7 +324,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 5.50,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\grilled-chicken-wings.jpg',
+                    'image_path' => 'menu_images/grilled-chicken-wings.jpg',
                 ],
 
                 // Vegetarian
@@ -335,7 +335,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 2.00,
                     'is_popular' => true,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\stir-fried-morning-glory.jpg',
+                    'image_path' => 'menu_images/stir-fried-morning-glory.jpg',
                 ],
                 [
                     'category_id' => $vegetarian->id,
@@ -344,7 +344,7 @@ class MenuItemSeeder extends Seeder
                     'cost' => 3.50,
                     'is_popular' => false,
                     'is_active' => true,
-                    'image_path' => '\images\menu-items\tofu-curry.jpg',
+                    'image_path' => 'menu_images/tofu-curry.jpg',
                 ],
             ];
 

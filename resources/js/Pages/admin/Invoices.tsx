@@ -90,7 +90,17 @@ export default function Invoices() {
     }
   });
 
-  const invoiceList = useMemo(() => invoices?.data || [], [invoices]);
+  const invoiceList = useMemo(() => {
+    if (!invoices) return [];
+    // Handle direct array
+    if (Array.isArray(invoices)) return invoices;
+    // Handle Laravel legacy Paginator structure { data: [...], ... }
+    if (Array.isArray((invoices as any)?.data)) return (invoices as any).data;
+    // Handle Resource Collection structure { data: [...], meta: ... } which might be nested if axios wraps it
+    if (Array.isArray((invoices as any)?.data?.data)) return (invoices as any).data.data;
+
+    return [];
+  }, [invoices]);
 
   const stats = useMemo(() => ({
     totalRevenue: invoiceList.reduce((sum: number, i: Invoice) => sum + getAmount(i.total), 0),
@@ -105,23 +115,9 @@ export default function Invoices() {
   };
 
   const handleDownload = (invoice: Invoice) => {
-    try {
-      const doc = new jsPDF();
-      const number = invoice.invoice_number || String(invoice.id || 'unknown');
-      const issuedDate = invoice.issued_at ? new Date(invoice.issued_at).toLocaleDateString() : 'N/A';
-
-      doc.setFontSize(18);
-      doc.text(`Invoice #${number}`, 14, 16);
-      doc.setFontSize(11);
-      doc.text(`Date: ${issuedDate}`, 14, 24);
-
-      // ... (rest of PDF generation logic kept simple for brevity)
-
-      doc.save(`invoice_${number}.pdf`);
-      toastSuccess(`Invoice ${number} download started`);
-    } catch (e) {
-      toastError('Failed to generate PDF');
-    }
+    // Open the backend PDF route in a new tab/window which triggers download
+    const url = `/api/admin/invoices/${invoice.id}/pdf`;
+    window.open(url, '_blank');
   };
 
   const getPaymentStatus = (invoice: Invoice) => {
@@ -155,6 +151,24 @@ export default function Invoices() {
               </motion.h1>
               <p className="text-muted-foreground mt-2">Manage customer billing, payments, and history</p>
             </div>
+            <Button
+              onClick={() => {
+                let url = `/api/admin/invoices/export/csv?`;
+                if (statusFilter !== 'all') url += `&status=${statusFilter}`;
+                if (dateFilter !== 'all') {
+                  const today = new Date();
+                  let startDate = '';
+                  if (dateFilter === 'today') startDate = today.toISOString().split('T')[0];
+                  else if (dateFilter === 'week') startDate = new Date(today.getTime() - 7 * 86400000).toISOString().split('T')[0];
+                  else if (dateFilter === 'month') startDate = new Date(today.getTime() - 30 * 86400000).toISOString().split('T')[0];
+                  url += `&start_date=${startDate}`;
+                }
+                window.location.href = url;
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Download className="w-4 h-4 mr-2" /> Export CSV
+            </Button>
           </div>
 
           {/* Stats Ribbon */}
@@ -250,8 +264,9 @@ export default function Invoices() {
                       </span>
                     </div>
                     <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" onClick={() => handleView(invoice)} className="h-8 w-8 p-0 hover:text-blue-500"><Eye size={14} /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDownload(invoice)} className="h-8 w-8 p-0 hover:text-purple-500"><Download size={14} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => handleView(invoice)} className="h-8 w-8 p-0 hover:text-blue-500" title="View Details"><Eye size={14} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => handleDownload(invoice)} className="h-8 w-8 p-0 hover:text-purple-500" title="Download PDF"><Download size={14} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => window.open(`/api/admin/invoices/${invoice.id}/csv`, '_blank')} className="h-8 w-8 p-0 hover:text-green-500" title="Download CSV"><FileText size={14} /></Button>
                     </div>
                   </motion.div>
                 );

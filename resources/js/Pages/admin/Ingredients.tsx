@@ -91,7 +91,7 @@ export default function Ingredients() {
     const [perPage] = useState(20);
 
     const [formData, setFormData] = useState({
-        code: '', name: '', description: '', category: 'vegetable', unit_id: '', supplier_id: '',
+        code: '', name: '', description: '', category: 'vegetables', unit_id: '', supplier_id: '',
         cost_per_unit: '', min_stock_level: '', max_stock_level: '', reorder_point: '',
         storage_requirements: '', allergens: '', shelf_life_days: '', is_active: true
     });
@@ -108,8 +108,8 @@ export default function Ingredients() {
         }
     });
 
-    const { data: suppliers } = useQuery({ queryKey: ['suppliers'], queryFn: () => apiGet('/api/suppliers') });
-    const { data: units } = useQuery({ queryKey: ['units'], queryFn: () => apiGet('/api/units') });
+    const { data: suppliers } = useQuery({ queryKey: ['suppliers'], queryFn: () => apiGet('/api/admin/suppliers') });
+    const { data: units } = useQuery({ queryKey: ['units'], queryFn: () => apiGet('/api/admin/units') });
     const { data: statsData } = useQuery({ queryKey: ['ingredient-stats'], queryFn: () => apiGet('/api/admin/ingredients/stats') });
 
     const ingredientList = useMemo(() => ingredients?.data || [], [ingredients]);

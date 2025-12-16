@@ -329,9 +329,9 @@ export default function Expenses() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Category</label>
               <select value={formData.expense_category_id} onChange={(e) => setFormData({ ...formData, expense_category_id: e.target.value })}
-                required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
+                required className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
                 <option value="">Select Category</option>
                 {categories?.data?.map((c: ExpenseCategory) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -343,9 +343,9 @@ export default function Expenses() {
           <div className="grid grid-cols-2 gap-4">
             <Input label="Amount" type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Status</label>
               <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
+                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
                 <option value="draft">Draft</option>
                 <option value="approved">Approved</option>
                 <option value="paid">Paid</option>
@@ -358,9 +358,9 @@ export default function Expenses() {
             <Input label="Reference" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3}
-              className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors" />
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors" />
           </div>
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>

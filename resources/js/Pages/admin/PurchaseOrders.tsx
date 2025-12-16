@@ -128,7 +128,7 @@ export default function PurchaseOrders() {
     });
 
     const { data: suppliers } = useQuery({ queryKey: ['suppliers'], queryFn: () => apiGet('/api/suppliers') });
-    const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: () => apiGet('/api/locations') });
+    const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: () => apiGet('/api/admin/locations') });
     const { data: ingredients } = useQuery({ queryKey: ['ingredients'], queryFn: () => apiGet('/api/admin/ingredients') });
     const { data: statsData } = useQuery({ queryKey: ['purchase-orders-stats'], queryFn: () => apiGet('/api/admin/purchase-orders-stats') });
 

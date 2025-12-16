@@ -31,6 +31,9 @@ class StoreEmployeeRequest extends FormRequest
             'hire_date' => ['required', 'date'],
             'salary_type' => ['sometimes', 'in:hourly,monthly'],
             'salary' => ['nullable', 'numeric', 'min:0'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'status' => ['sometimes', 'in:active,inactive,terminated,on_leave'],
             'is_active' => ['sometimes', 'boolean'],
         ];

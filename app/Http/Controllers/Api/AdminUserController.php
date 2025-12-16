@@ -17,8 +17,11 @@ class AdminUserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::whereHas('roles', function ($q) {
-            $q->where('slug', 'admin');
+        $query = User::where(function($q) {
+            $q->whereHas('roles', function ($q2) {
+                $q2->whereIn('slug', ['super-admin', 'admin', 'manager']);
+            })
+            ->orWhereIn('role', ['super-admin', 'admin', 'manager']);
         })->with('roles');
 
         if ($request->has('search')) {
@@ -53,6 +56,7 @@ class AdminUserController extends Controller
             'password' => 'required|string|min:8',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
+            'role' => 'required|string|in:admin,manager,super-admin',
         ]);
 
         $admin = DB::transaction(function () use ($validated) {
@@ -62,11 +66,13 @@ class AdminUserController extends Controller
                 'password' => Hash::make($validated['password']),
                 'phone' => $validated['phone'] ?? null,
                 'is_active' => $validated['is_active'] ?? true,
-                'role' => 'admin', // Legacy/Simple column fallback
+                'role' => $validated['role'], // Use selected role
             ]);
 
-            // Ensure 'admin' role exists
-            $role = Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Administrator']);
+            // Ensure role exists and attach
+            $roleSlug = $validated['role'];
+            $roleName = ucfirst($roleSlug);
+            $role = Role::firstOrCreate(['slug' => $roleSlug], ['name' => $roleName]);
             $user->roles()->attach($role);
 
             return $user;
@@ -88,7 +94,7 @@ class AdminUserController extends Controller
             'email' => ['sometimes', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8',
             'phone' => 'nullable|string|max:20',
-            'is_active' => 'boolean',
+            'role' => 'sometimes|string|in:admin,manager,super-admin',
         ]);
 
         $user = DB::transaction(function () use ($validated, $user) {
@@ -97,11 +103,22 @@ class AdminUserController extends Controller
             if (isset($validated['email'])) $updateData['email'] = $validated['email'];
             if (isset($validated['phone'])) $updateData['phone'] = $validated['phone'];
             if (isset($validated['is_active'])) $updateData['is_active'] = $validated['is_active'];
+            if (isset($validated['role'])) $updateData['role'] = $validated['role']; // Update legacy column
+            
             if (!empty($validated['password'])) {
                 $updateData['password'] = Hash::make($validated['password']);
             }
 
             $user->update($updateData);
+
+            // Update Spatie role if provided
+            if (isset($validated['role'])) {
+                $roleSlug = $validated['role'];
+                $roleName = ucfirst($roleSlug);
+                $role = Role::firstOrCreate(['slug' => $roleSlug], ['name' => $roleName]);
+                $user->roles()->sync([$role->id]);
+            }
+
             return $user;
         });
 
@@ -127,7 +144,12 @@ class AdminUserController extends Controller
      */
     public function stats()
     {
-        $query = User::whereHas('roles', fn($q) => $q->where('slug', 'admin'));
+        // Count users with any admin-capable role
+        $adminRoles = ['super-admin', 'admin', 'manager'];
+        $query = User::where(function($q) use ($adminRoles) {
+            $q->whereHas('roles', fn($q2) => $q2->whereIn('slug', $adminRoles))
+              ->orWhereIn('role', $adminRoles);
+        });
         
         return response()->json([
             'total' => (clone $query)->count(),

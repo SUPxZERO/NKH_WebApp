@@ -61,7 +61,17 @@ export default function SalesAnalytics() {
     // Fetch sales overview
     const { data: overview } = useQuery({
         queryKey: ['sales-overview', startDate, endDate],
-        queryFn: () => apiGet(`/api/admin/analytics/sales/overview?${getQueryParams()}`)
+        queryFn: async () => {
+            console.log('Fetching sales overview...');
+            try {
+                const res = await apiGet(`/api/admin/analytics/sales/overview?${getQueryParams()}`);
+                console.log('Sales Overview:', res);
+                return res;
+            } catch (e) {
+                console.error('Sales Overview Error:', e);
+                throw e;
+            }
+        }
     });
 
     // Fetch sales trends
@@ -215,17 +225,26 @@ export default function SalesAnalytics() {
                                     <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
                                     Revenue Trends
                                 </h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <LineChart data={trends?.data || []}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                        <XAxis dataKey="date" stroke="#9ca3af" />
-                                        <YAxis stroke="#9ca3af" />
-                                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
-                                        <Legend />
-                                        <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} />
-                                        <Line type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
-                                    </LineChart>
-                                </ResponsiveContainer>
+                                {trends?.data && trends.data.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <LineChart data={trends.data}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                            <XAxis dataKey="date" stroke="#9ca3af" />
+                                            <YAxis stroke="#9ca3af" />
+                                            <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                            <Legend />
+                                            <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} />
+                                            <Line type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                        <div className="text-center">
+                                            <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                            <p>No revenue data available for the selected period</p>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -236,25 +255,34 @@ export default function SalesAnalytics() {
                                     <PieChartIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                     Sales by Category
                                 </h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={categories?.data || []}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
-                                            outerRadius={100}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
-                                            {(categories?.data || []).map((entry: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                {categories?.data && categories.data.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <PieChart>
+                                            <Pie
+                                                data={categories.data}
+                                                cx="50%"
+                                                cy="50%"
+                                                labelLine={false}
+                                                label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
+                                                outerRadius={100}
+                                                fill="#8884d8"
+                                                dataKey="value"
+                                            >
+                                                {categories.data.map((entry: any, index: number) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                        <div className="text-center">
+                                            <PieChartIcon className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                            <p>No category sales data available</p>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -265,15 +293,24 @@ export default function SalesAnalytics() {
                                     <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                                     Peak Hours
                                 </h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <BarChart data={peakHours?.data || []}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                        <XAxis dataKey="hour" stroke="#9ca3af" />
-                                        <YAxis stroke="#9ca3af" />
-                                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
-                                        <Bar dataKey="orders" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                {peakHours?.data && peakHours.data.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <BarChart data={peakHours.data}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                            <XAxis dataKey="hour" stroke="#9ca3af" />
+                                            <YAxis stroke="#9ca3af" />
+                                            <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                            <Bar dataKey="orders" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                        <div className="text-center">
+                                            <Clock className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                            <p>No peak hours data available</p>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -284,24 +321,33 @@ export default function SalesAnalytics() {
                                     <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                     Top Selling Items
                                 </h3>
-                                <div className="space-y-3">
-                                    {(topItems?.data || []).slice(0, 5).map((item: any, index: number) => (
-                                        <div key={item.id} className="flex items-center justify-between bg-card border border-border rounded-lg p-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                                                    {index + 1}
+                                {topItems?.data && topItems.data.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {topItems.data.slice(0, 5).map((item: any, index: number) => (
+                                            <div key={item.id} className="flex items-center justify-between bg-card border border-border rounded-lg p-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                                        {index + 1}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-foreground font-semibold">{item.name}</h4>
+                                                        <p className="text-sm text-muted-foreground">{item.quantity_sold} sold</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h4 className="text-foreground font-semibold">{item.name}</h4>
-                                                    <p className="text-sm text-muted-foreground">{item.quantity_sold} sold</p>
+                                                <div className="text-right">
+                                                    <p className="text-green-600 dark:text-green-400 font-bold">${Number(item.revenue).toLocaleString()}</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-green-600 dark:text-green-400 font-bold">${Number(item.revenue).toLocaleString()}</p>
-                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                        <div className="text-center">
+                                            <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                            <p>No top selling items data available</p>
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>

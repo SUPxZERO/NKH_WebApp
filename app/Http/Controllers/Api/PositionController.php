@@ -25,7 +25,7 @@ class PositionController extends Controller
         $query = Position::withCount('employees');
 
         // Search
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -34,7 +34,7 @@ class PositionController extends Controller
         }
 
         // Filter by status
-        if ($request->has('is_active')) {
+        if ($request->filled('is_active')) {
             $query->where('is_active', $request->is_active);
         }
 

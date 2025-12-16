@@ -17,7 +17,7 @@ class SupplierController extends Controller
         $query = Supplier::with('location');
 
         // Search
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -28,17 +28,17 @@ class SupplierController extends Controller
         }
 
         // Filter by status
-        if ($request->has('is_active')) {
-            $query->where('is_active', $request->is_active);
+        if ($request->filled('is_active')) {
+            $query->where('is_active', (bool) $request->is_active);
         }
 
         // Filter by location
-        if ($request->has('location_id') && $request->location_id !== 'all') {
+        if ($request->filled('location_id') && $request->location_id !== 'all') {
             $query->where('location_id', $request->location_id);
         }
 
         // Filter by type
-        if ($request->has('type') && $request->type !== 'all') {
+        if ($request->filled('type') && $request->type !== 'all') {
             $query->where('type', $request->type);
         }
 

@@ -64,6 +64,10 @@ class InventoryController extends Controller
         ]);
 
         DB::transaction(function () use ($validated) {
+            // Get ingredient for unit - load unit relationship
+            $ingredient = Ingredient::with('unit')->findOrFail($validated['ingredient_id']);
+            $unitCode = $ingredient->unit?->code ?? 'unit';
+
             // Decrease from source
             $source = Inventory::where('location_id', $validated['from_location_id'])
                 ->where('ingredient_id', $validated['ingredient_id'])
@@ -93,6 +97,7 @@ class InventoryController extends Controller
                 'type' => 'transfer_out',
                 'movement_type' => 'transfer_out',
                 'quantity' => -$validated['quantity'],
+                'unit' => $unitCode,
                 'notes' => "Transfer to location #{$validated['to_location_id']}. " . ($validated['notes'] ?? ''),
                 'transacted_at' => now(),
                 'created_by' => auth()->id() ?? 1,
@@ -105,6 +110,7 @@ class InventoryController extends Controller
                 'type' => 'transfer_in',
                 'movement_type' => 'transfer_in',
                 'quantity' => $validated['quantity'],
+                'unit' => $unitCode,
                 'notes' => "Transfer from location #{$validated['from_location_id']}. " . ($validated['notes'] ?? ''),
                 'transacted_at' => now(),
                 'created_by' => auth()->id() ?? 1,
@@ -136,20 +142,24 @@ class InventoryController extends Controller
 
             $inventory->decrement('quantity', $validated['quantity']);
 
+            // Get ingredient for unit and total stock update - load unit relationship
+            $ingredient = Ingredient::with('unit')->findOrFail($validated['ingredient_id']);
+            $unitCode = $ingredient->unit?->code ?? 'unit';
+
             InventoryTransaction::create([
                 'location_id' => $validated['location_id'],
                 'ingredient_id' => $validated['ingredient_id'],
                 'type' => 'wastage',
                 'movement_type' => 'wastage',
                 'quantity' => -$validated['quantity'],
+                'unit' => $unitCode,
                 'notes' => "Reason: {$validated['reason']}. " . ($validated['notes'] ?? ''),
                 'transacted_at' => now(),
                 'created_by' => auth()->id() ?? 1,
                 'user_id' => auth()->id() ?? 1
             ]);
-            
+
             // Also update ingredient total stock
-            $ingredient = Ingredient::find($validated['ingredient_id']);
             $ingredient->decrement('current_stock', $validated['quantity']);
         });
 

@@ -27,7 +27,7 @@ class StockAlertController extends Controller
             $query->where('severity', $request->severity);
         }
 
-        $alerts = $query->orderBy('created_at', 'desc')->get();
+        $alerts = $query->orderBy('created_at', 'desc')->paginate($request->integer('per_page', 20));
 
         return response()->json($alerts);
     }

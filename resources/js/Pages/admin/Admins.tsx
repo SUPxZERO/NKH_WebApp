@@ -52,7 +52,7 @@ export default function Admins() {
     const [openEdit, setOpenEdit] = useState(false);
     const [editingAdmin, setEditingAdmin] = useState<any>(null);
     const [formData, setFormData] = useState({
-        name: '', email: '', phone: '', password: '', is_active: true
+        name: '', email: '', phone: '', password: '', is_active: true, role: 'admin'
     });
     const qc = useQueryClient();
 
@@ -62,11 +62,19 @@ export default function Admins() {
     // Fetch admins
     const { data: adminsData, isLoading } = useQuery({
         queryKey: ['admin/users', page, search, statusFilter],
-        queryFn: () => {
+        queryFn: async () => {
             let url = `/admin/admin-users?page=${page}&per_page=${perPage}`;
             if (search) url += `&search=${search}`;
             if (statusFilter !== 'all') url += `&status=${statusFilter}`;
-            return apiGet(url);
+            console.log('Fetching admins from:', url);
+            try {
+                const response = await apiGet(url);
+                console.log('Admins API response:', response);
+                return response;
+            } catch (error) {
+                console.error('Admins API error:', error);
+                throw error;
+            }
         }
     });
 
@@ -76,12 +84,21 @@ export default function Admins() {
     });
 
     const adminList = useMemo(() => {
-        return (adminsData as any)?.data || [];
+        if (!adminsData) return [];
+        // Handle direct array (if API unwraps it completely)
+        if (Array.isArray(adminsData)) return adminsData;
+        // Handle Laravel legacy Paginator structure { data: [...], ... }
+        if (Array.isArray((adminsData as any)?.data)) return (adminsData as any).data;
+        // Handle Resource Collection structure { data: [...], meta: ... }
+        if (Array.isArray((adminsData as any)?.data?.data)) return (adminsData as any).data.data;
+
+        console.warn('Unexpected admin data structure:', adminsData);
+        return [];
     }, [adminsData]);
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/admin/admin-users', data),
+        mutationFn: (data: any) => apiPost('/api/admin/admin-users', data),
         onSuccess: () => {
             toastSuccess('Admin created successfully');
             setOpenCreate(false);
@@ -93,7 +110,7 @@ export default function Admins() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`/admin/admin-users/${id}`, data),
+        mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`/api/admin/admin-users/${id}`, data),
         onSuccess: () => {
             toastSuccess('Admin updated successfully');
             setOpenEdit(false);
@@ -105,7 +122,7 @@ export default function Admins() {
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/admin/admin-users/${id}`),
+        mutationFn: (id: number) => apiDelete(`/api/admin/admin-users/${id}`),
         onSuccess: () => {
             toastSuccess('Admin deactivated');
             qc.invalidateQueries({ queryKey: ['admin/users'] });
@@ -115,7 +132,7 @@ export default function Admins() {
     });
 
     const resetForm = () => {
-        setFormData({ name: '', email: '', phone: '', password: '', is_active: true });
+        setFormData({ name: '', email: '', phone: '', password: '', is_active: true, role: 'admin' });
         setEditingAdmin(null);
     };
 
@@ -132,7 +149,8 @@ export default function Admins() {
             email: admin.email,
             phone: admin.phone || '',
             password: '', // Don't fill password
-            is_active: !!admin.is_active
+            is_active: !!admin.is_active,
+            role: admin.roles && admin.roles.length > 0 ? admin.roles[0].slug : (admin.role || 'admin')
         });
         setOpenEdit(true);
     };
@@ -189,9 +207,10 @@ export default function Admins() {
                     {/* Table */}
                     <div className="bg-card border border-border rounded-xl overflow-hidden backdrop-blur-sm">
                         <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-secondary text-xs font-semibold text-muted-foreground uppercase">
-                            <div className="col-span-4">Admin User</div>
+                            <div className="col-span-3">Admin User</div>
                             <div className="col-span-3">Contact</div>
-                            <div className="col-span-3">Status</div>
+                            <div className="col-span-2">Role</div>
+                            <div className="col-span-2">Status</div>
                             <div className="col-span-2 text-right">Actions</div>
                         </div>
 
@@ -207,7 +226,7 @@ export default function Admins() {
                                 adminList.map((admin: any) => (
                                     <motion.div key={admin.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                                         className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-secondary/50 transition-colors group">
-                                        <div className="col-span-4 flex items-center gap-3">
+                                        <div className="col-span-3 flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                                                 <UserCog className="w-5 h-5 text-white" />
                                             </div>
@@ -220,7 +239,12 @@ export default function Admins() {
                                             <div className="text-sm text-foreground/80 flex items-center gap-2"><Mail className="w-3 h-3" /> {admin.email}</div>
                                             {admin.phone && <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1"><Phone className="w-3 h-3" /> {admin.phone}</div>}
                                         </div>
-                                        <div className="col-span-3">
+                                        <div className="col-span-2">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 capitalize">
+                                                {admin.roles && admin.roles.length > 0 ? admin.roles[0].name || admin.roles[0].slug : (admin.role || 'Admin')}
+                                            </span>
+                                        </div>
+                                        <div className="col-span-2">
                                             <span className={cn("px-2.5 py-1 rounded-full border text-xs font-medium",
                                                 admin.is_active ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20")}>
                                                 {admin.is_active ? 'Active' : 'Inactive'}
@@ -263,7 +287,21 @@ export default function Admins() {
                         required className="bg-card border-border text-foreground" />
 
                     <Input label="Phone Number (Optional)" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        required={!editingAdmin}
                         className="bg-card border-border text-foreground" />
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-1">Role</label>
+                        <select
+                            value={formData.role}
+                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                            className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:ring-2 focus:ring-purple-500 outline-none"
+                        >
+                            <option value="admin">Administrator</option>
+                            <option value="manager">Manager</option>
+                            <option value="super-admin">Super Admin</option>
+                        </select>
+                    </div>
 
                     <Input label={editingAdmin ? "New Password (Leave blank to keep current)" : "Password"}
                         type="password" value={formData.password}

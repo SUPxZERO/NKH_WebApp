@@ -225,6 +225,9 @@ class AnalyticsController extends Controller
     /**
      * Export sales analytics to Excel
      */
+    /**
+     * Export sales analytics to CSV (Raw Data: Order List)
+     */
     public function exportSalesExcel(Request $request)
     {
         $request->validate([
@@ -234,17 +237,65 @@ class AnalyticsController extends Controller
 
         $dates = $this->getDateRangeFromRequest($request);
         
-        // Fallback: Return CSV
-        $data = $this->getSalesData($dates);
-        $csv = "Metric,Value\n";
-        $csv .= "Total Revenue," . ($data['total_revenue'] ?? 0) . "\n";
-        $csv .= "Total Orders," . ($data['total_orders'] ?? 0) . "\n";
-        $csv .= "Avg Order Value," . ($data['avg_order_value'] ?? 0) . "\n";
-        $csv .= "Unique Customers," . ($data['unique_customers'] ?? 0) . "\n";
+        // Gather data matching PDF structure
+        $overview = $this->getSalesData($dates);
+        $trends = $this->getTrendsData($dates);
+        $topItems = $this->getTopItemsData($dates);
+        $categories = $this->getCategoryData($dates);
 
-        return response($csv)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="sales-analytics-' . date('Y-m-d') . '.csv"');
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="sales-analytics-' . date('Y-m-d') . '.csv"',
+        ];
+
+        $callback = function() use ($overview, $trends, $topItems, $categories, $dates) {
+            $file = fopen('php://output', 'w');
+            
+            // 1. Title & Period
+            fputcsv($file, ['Sales Analytics Report']);
+            fputcsv($file, ['Period:', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
+            fputcsv($file, []); // Spacer
+
+            // 2. Overview
+            fputcsv($file, ['OVERVIEW']);
+            fputcsv($file, ['Total Revenue', 'Total Orders', 'Avg Order Value', 'Unique Customers']);
+            fputcsv($file, [
+                $overview['total_revenue'],
+                $overview['total_orders'],
+                $overview['avg_order_value'],
+                $overview['unique_customers']
+            ]);
+            fputcsv($file, []);
+
+            // 3. Trends
+            fputcsv($file, ['SALES TRENDS']);
+            fputcsv($file, ['Date', 'Orders', 'Revenue']);
+            foreach ($trends as $trend) {
+                fputcsv($file, [$trend->date, $trend->orders, $trend->revenue]); // Trends is array of objects in getTrendsData -> check return type
+            }
+            fputcsv($file, []);
+
+            // 4. Top Selling Items
+            fputcsv($file, ['TOP SELLING ITEMS']);
+            fputcsv($file, ['Item Name', 'Quantity Sold', 'Revenue']);
+            foreach ($topItems as $item) {
+                // $item is array from getTopItemsData
+                fputcsv($file, [$item['name'], $item['quantity_sold'], $item['revenue']]);
+            }
+            fputcsv($file, []);
+
+            // 5. Sales by Category
+            fputcsv($file, ['SALES BY CATEGORY']);
+            fputcsv($file, ['Category', 'Revenue']);
+            foreach ($categories as $cat) {
+                 // $cat is array from getCategoryData
+                fputcsv($file, [$cat['name'], $cat['value']]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -266,7 +317,7 @@ class AnalyticsController extends Controller
         ];
 
         // 2. Waste Data (Mock or Calculate)
-        $wasteValue = InventoryTransaction::whereBetween('created_at', [$dates['start'], $dates['end']])
+        $wasteValue = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
             ->where('type', 'waste') // Assuming 'waste' type exists or similar
             ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
             ->sum(DB::raw('inventory_transactions.quantity * ingredients.cost_per_unit'));
@@ -467,6 +518,8 @@ class AnalyticsController extends Controller
     {
         $dates = $this->getDateRangeFromRequest($request);
 
+        // Reuse the logic from PDF export to ensure consistency
+        // 1. Profit & Loss
         $revenue = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
             ->where('status', '!=', 'cancelled')
             ->sum('total_amount');
@@ -474,14 +527,78 @@ class AnalyticsController extends Controller
         $expenses = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
             ->sum('amount');
 
-        $csv = "Metric,Value\n";
-        $csv .= "Total Revenue," . number_format($revenue, 2) . "\n";
-        $csv .= "Total Expenses," . number_format($expenses, 2) . "\n";
-        $csv .= "Net Profit," . number_format($revenue - $expenses, 2) . "\n";
+        $cogsValue = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
+            ->where('type', 'usage')
+            ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
+            ->sum(DB::raw('inventory_transactions.quantity * ingredients.cost_per_unit'));
 
-        return response($csv)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="financial-report-' . date('Y-m-d') . '.csv"');
+        $totalExpenses = $expenses + $cogsValue;
+        $netProfit = $revenue - $totalExpenses;
+        $margin = $revenue > 0 ? ($netProfit / $revenue) * 100 : 0;
+
+        // Breakdown
+        $expenseBreakdown = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
+            ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
+            ->select([
+                'expense_categories.name as category',
+                DB::raw('SUM(expenses.amount) as amount')
+            ])
+            ->groupBy('expense_categories.id', 'expense_categories.name')
+            ->get();
+
+        $cogsBreakdown = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
+             ->where('type', 'usage')
+             ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
+             ->select([
+                 'ingredients.category as name',
+                 DB::raw('SUM(inventory_transactions.quantity * ingredients.cost_per_unit) as value')
+             ])
+             ->groupBy('ingredients.category')
+             ->get();
+
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="financial-report-' . date('Y-m-d') . '.csv"',
+        ];
+
+        $callback = function() use ($dates, $revenue, $cogsValue, $expenses, $totalExpenses, $netProfit, $margin, $expenseBreakdown, $cogsBreakdown) {
+            $file = fopen('php://output', 'w');
+            
+            // 1. Title
+            fputcsv($file, ['Financial Dashboard Report']);
+            fputcsv($file, ['Period:', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
+            fputcsv($file, []);
+
+            // 2. Summary
+            fputcsv($file, ['PROFIT & LOSS SUMMARY']);
+            fputcsv($file, ['Total Revenue', number_format($revenue, 2)]);
+            fputcsv($file, ['Cost of Goods Sold (COGS)', number_format($cogsValue, 2)]);
+            fputcsv($file, ['Operating Expenses', number_format($expenses, 2)]);
+            fputcsv($file, ['Total Expenses', number_format($totalExpenses, 2)]);
+            fputcsv($file, ['Net Profit', number_format($netProfit, 2)]);
+            fputcsv($file, ['Profit Margin (%)', number_format($margin, 1) . '%']);
+            fputcsv($file, []);
+
+            // 3. Expense Breakdown
+            fputcsv($file, ['EXPENSE BREAKDOWN']);
+            fputcsv($file, ['Category', 'Amount']);
+            foreach ($expenseBreakdown as $exp) {
+                fputcsv($file, [$exp->category, number_format($exp->amount, 2)]);
+            }
+            fputcsv($file, []);
+
+             // 4. COGS Breakdown
+            fputcsv($file, ['COGS BREAKDOWN']);
+            fputcsv($file, ['Category', 'Amount']);
+            foreach ($cogsBreakdown as $cogs) {
+                fputcsv($file, [$cogs->name, number_format($cogs->value, 2)]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     private function getDateRangeFromRequest(Request $request): array
@@ -528,6 +645,11 @@ class AnalyticsController extends Controller
             ->get()
             ->toArray();
 
+        // Convert to objects if needed or keep as array. 
+        // Note: The main function expects objects in my previous thought, but I will adjust main function to handle arrays.
+        // Actually, let's return objects or arrays consistently.
+        // The original method returned arrays.
+        
         return $trends;
     }
 

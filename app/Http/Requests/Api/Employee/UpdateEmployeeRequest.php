@@ -24,10 +24,17 @@ class UpdateEmployeeRequest extends FormRequest
             'password' => ['sometimes', 'string', 'min:8'],
             'role' => ['sometimes', 'string', 'in:admin,manager,cashier,waiter,chef,employee'],
             'position_id' => ['sometimes', 'exists:positions,id'],
+            'location_id' => ['sometimes', 'exists:locations,id'],
             'salary_type' => ['sometimes', 'in:hourly,monthly'],
             'salary' => ['nullable', 'numeric', 'min:0'],
             'status' => ['sometimes', 'in:active,inactive,terminated,on_leave'],
             'is_active' => ['boolean'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'employee_code' => ['sometimes', 'string', 'max:50', Rule::unique('employees', 'employee_code')->ignore($employeeId)],
+            'hire_date' => ['sometimes', 'date'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 

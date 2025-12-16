@@ -243,18 +243,27 @@ export default function FinancialDashboard() {
                                     <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                     Revenue vs Expenses Trend
                                 </h3>
-                                <ResponsiveContainer width="100%" height={350}>
-                                    <ComposedChart data={revenueExpenses?.data || []}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                        <XAxis dataKey="date" stroke="#9ca3af" />
-                                        <YAxis stroke="#9ca3af" />
-                                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
-                                        <Legend />
-                                        <Area type="monotone" dataKey="revenue" fill="#10b98150" stroke="#10b981" name="Revenue" />
-                                        <Area type="monotone" dataKey="expenses" fill="#ef444450" stroke="#ef4444" name="Expenses" />
-                                        <Line type="monotone" dataKey="profit" stroke="#8b5cf6" strokeWidth={3} name="Profit" />
-                                    </ComposedChart>
-                                </ResponsiveContainer>
+                                {revenueExpenses?.data && revenueExpenses.data.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={350}>
+                                        <ComposedChart data={revenueExpenses.data}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                            <XAxis dataKey="date" stroke="#9ca3af" />
+                                            <YAxis stroke="#9ca3af" />
+                                            <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                            <Legend />
+                                            <Area type="monotone" dataKey="revenue" fill="#10b98150" stroke="#10b981" name="Revenue" />
+                                            <Area type="monotone" dataKey="expenses" fill="#ef444450" stroke="#ef4444" name="Expenses" />
+                                            <Line type="monotone" dataKey="profit" stroke="#8b5cf6" strokeWidth={3} name="Profit" />
+                                        </ComposedChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-[350px] flex items-center justify-center text-muted-foreground">
+                                        <div className="text-center">
+                                            <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                            <p>No revenue vs expenses data available</p>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -265,30 +274,41 @@ export default function FinancialDashboard() {
                                     <PieChartIcon className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                                     Cost of Goods Sold
                                 </h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
-                                        <Pie
-                                            data={cogs?.breakdown || []}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
-                                            outerRadius={100}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
-                                            {(cogs?.breakdown || []).map((entry: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                <div className="mt-4 text-center">
-                                    <p className="text-sm text-muted-foreground">Total COGS</p>
-                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">${Number(cogs?.total || 0).toLocaleString()}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">{cogs?.percentage_of_revenue || 0}% of Revenue</p>
-                                </div>
+                                {cogs?.breakdown && cogs.breakdown.length > 0 ? (
+                                    <>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <PieChart>
+                                                <Pie
+                                                    data={cogs.breakdown}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    labelLine={false}
+                                                    label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
+                                                    outerRadius={100}
+                                                    fill="#8884d8"
+                                                    dataKey="value"
+                                                >
+                                                    {cogs.breakdown.map((entry: any, index: number) => (
+                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                        <div className="mt-4 text-center">
+                                            <p className="text-sm text-muted-foreground">Total COGS</p>
+                                            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">${Number(cogs?.total || 0).toLocaleString()}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">{cogs?.percentage_of_revenue || 0}% of Revenue</p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                        <div className="text-center">
+                                            <PieChartIcon className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                            <p>No COGS data available</p>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -299,22 +319,31 @@ export default function FinancialDashboard() {
                                     <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
                                     Margins by Category
                                 </h3>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <BarChart data={margins?.by_category || []} layout="vertical">
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                        <XAxis type="number" stroke="#9ca3af" />
-                                        <YAxis dataKey="category" type="category" stroke="#9ca3af" width={100} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
-                                        <Bar dataKey="margin" fill="#10b981" radius={[0, 8, 8, 0]}>
-                                            {(margins?.by_category || []).map((entry: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={
-                                                    entry.margin > 30 ? '#10b981' :
-                                                        entry.margin > 15 ? '#f59e0b' : '#ef4444'
-                                                } />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                {margins?.by_category && margins.by_category.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <BarChart data={margins.by_category} layout="vertical">
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                            <XAxis type="number" stroke="#9ca3af" />
+                                            <YAxis dataKey="category" type="category" stroke="#9ca3af" width={100} />
+                                            <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                            <Bar dataKey="margin" fill="#10b981" radius={[0, 8, 8, 0]}>
+                                                {margins.by_category.map((entry: any, index: number) => (
+                                                    <Cell key={`cell-${index}`} fill={
+                                                        entry.margin > 30 ? '#10b981' :
+                                                            entry.margin > 15 ? '#f59e0b' : '#ef4444'
+                                                    } />
+                                                ))}
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                        <div className="text-center">
+                                            <Target className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                            <p>No margin data available</p>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
@@ -326,22 +355,31 @@ export default function FinancialDashboard() {
                                 <CreditCard className="w-5 h-5 text-red-600 dark:text-red-400" />
                                 Expense Breakdown
                             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {(profitLoss?.expense_categories || []).map((exp: any) => (
-                                    <div key={exp.category} className="bg-card rounded-lg p-4 border border-border">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-foreground font-semibold">{exp.category}</h4>
-                                            <Badge className="bg-red-500/20 text-red-600 dark:text-red-400">
-                                                {exp.percentage}%
-                                            </Badge>
+                            {profitLoss?.expense_categories && profitLoss.expense_categories.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {profitLoss.expense_categories.map((exp: any) => (
+                                        <div key={exp.category} className="bg-card rounded-lg p-4 border border-border">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h4 className="text-foreground font-semibold">{exp.category}</h4>
+                                                <Badge className="bg-red-500/20 text-red-600 dark:text-red-400">
+                                                    {exp.percentage}%
+                                                </Badge>
+                                            </div>
+                                            <p className="text-2xl font-bold text-foreground">${Number(exp.amount).toLocaleString()}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {exp.change >= 0 ? '↑' : '↓'} {Math.abs(exp.change).toFixed(1)}% from last period
+                                            </p>
                                         </div>
-                                        <p className="text-2xl font-bold text-foreground">${Number(exp.amount).toLocaleString()}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            {exp.change >= 0 ? '↑' : '↓'} {Math.abs(exp.change).toFixed(1)}% from last period
-                                        </p>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                                    <div className="text-center">
+                                        <CreditCard className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                        <p>No expense breakdown available</p>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

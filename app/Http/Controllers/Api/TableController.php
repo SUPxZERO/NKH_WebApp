@@ -39,6 +39,56 @@ class TableController extends Controller
         return new DiningTableResource($table->load('floor'));
     }
 
+    // GET /api/admin/tables/grouped - Returns tables grouped by floor
+    public function grouped(Request $request): JsonResponse
+    {
+        $query = \App\Models\Floor::query()->with(['tables' => function ($q) use ($request) {
+            if ($request->filled('status')) {
+                $q->where('status', $request->string('status'));
+            }
+            if ($request->filled('search')) {
+                $s = $request->string('search');
+                $q->where('code', 'like', "%{$s}%");
+            }
+        }]);
+
+        if ($request->filled('floor_id')) {
+            $query->where('id', (int) $request->floor_id);
+        }
+
+        $floors = $query->get();
+
+        // Calculate totals
+        $allTables = DiningTable::query();
+        if ($request->filled('status')) {
+            $allTables->where('status', $request->string('status'));
+        }
+        if ($request->filled('floor_id')) {
+            $allTables->where('floor_id', (int) $request->floor_id);
+        }
+        if ($request->filled('search')) {
+            $s = $request->string('search');
+            $allTables->where('code', 'like', "%{$s}%");
+        }
+
+        $tables = $allTables->get();
+
+        return response()->json([
+            'floors' => $floors->map(function ($floor) {
+                return [
+                    'floor' => $floor,
+                    'tables' => $floor->tables
+                ];
+            }),
+            'totals' => [
+                'total' => $tables->count(),
+                'available' => $tables->where('status', 'available')->count(),
+                'occupied' => $tables->where('status', 'occupied')->count(),
+                'reserved' => $tables->where('status', 'reserved')->count(),
+            ]
+        ]);
+    }
+
     public function store(Request $request): DiningTableResource
     {
         $data = $request->validate([

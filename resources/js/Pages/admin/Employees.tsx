@@ -11,6 +11,7 @@ import { Plus, Search, Edit, Trash2, User, Phone, Mail, Calendar, DollarSign, Ma
 import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
 import Avatar from '@/app/components/ui/Avatar';
+import AddressPicker, { AddressData } from '@/app/components/customer/AddressPicker';
 
 // StatCard Component with vibrant gradients
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -95,6 +96,7 @@ export default function Employees() {
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', password: '', employee_code: '', hire_date: '',
     salary_type: 'monthly' as 'hourly' | 'monthly', salary: '', address: '',
+    latitude: null as number | null, longitude: null as number | null,
     position_id: '', location_id: '', status: 'active' as 'active' | 'inactive' | 'terminated' | 'on_leave',
     role: 'employee'
   });
@@ -157,7 +159,7 @@ export default function Employees() {
   });
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', phone: '', password: '', employee_code: '', hire_date: '', salary_type: 'monthly', salary: '', address: '', position_id: '', location_id: '', status: 'active', role: 'employee' });
+    setFormData({ name: '', email: '', phone: '', password: '', employee_code: '', hire_date: '', salary_type: 'monthly', salary: '', address: '', latitude: null, longitude: null, position_id: '', location_id: '', status: 'active', role: 'employee' });
     setEditingEmployee(null);
   };
 
@@ -167,7 +169,9 @@ export default function Employees() {
       ...formData,
       salary: formData.salary ? parseFloat(formData.salary) : null,
       position_id: formData.position_id ? parseInt(formData.position_id) : null,
-      location_id: parseInt(formData.location_id)
+      location_id: parseInt(formData.location_id),
+      latitude: formData.latitude,
+      longitude: formData.longitude
     };
     if (editingEmployee) updateMutation.mutate({ id: editingEmployee.id, data });
     else createMutation.mutate(data);
@@ -178,7 +182,8 @@ export default function Employees() {
     setFormData({
       name: employee.user.name, email: employee.user.email, phone: employee.phone || '', password: '',
       employee_code: employee.employee_code, hire_date: employee.hire_date || '',
-      salary_type: employee.salary_type, salary: employee.salary?.toString() || '', address: employee.address || '',
+      salary_type: employee.salary_type, salary: employee.salary?.toString() || '',
+      address: employee.address || '', latitude: employee.user.latitude || null, longitude: employee.user.longitude || null,
       position_id: employee.position_id?.toString() || '', location_id: employee.location_id?.toString() || '',
       status: employee.status, role: employee.user.roles?.[0] || 'employee'
     });
@@ -188,6 +193,26 @@ export default function Employees() {
   const handleDelete = (id: number) => {
     if (confirm('Deactivate this employee?')) deleteMutation.mutate(id);
   };
+
+  const handleAddressChange = (data: AddressData | null) => {
+    if (data) {
+      setFormData(prev => ({
+        ...prev,
+        address: data.address,
+        latitude: data.lat,
+        longitude: data.lng
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        address: '',
+        latitude: null,
+        longitude: null
+      }));
+    }
+  };
+
+
 
   return (
     <AdminLayout>
@@ -245,8 +270,8 @@ export default function Employees() {
                     statusFilter === key
                       ? color === 'fuchsia' ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/30"
                         : color === 'emerald' ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30"
-                        : color === 'amber' ? "bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/30"
-                        : "bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-lg shadow-slate-500/30"
+                          : color === 'amber' ? "bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/30"
+                            : "bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-lg shadow-slate-500/30"
                       : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                   )}>
                   {label}
@@ -555,17 +580,14 @@ export default function Employees() {
 
           {/* Address */}
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">Address</label>
-            <div className="relative">
-              <MapPin className="absolute left-4 top-3 w-4 h-4 text-muted-foreground" />
-              <textarea
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                rows={2}
-                className="w-full bg-secondary border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all resize-none"
-                placeholder="Enter address..."
-              />
-            </div>
+            <AddressPicker
+              label="Address"
+              initialAddress={formData.address}
+              initialLat={formData.latitude || undefined}
+              initialLng={formData.longitude || undefined}
+              onChange={handleAddressChange}
+              placeholder="Search employee address..."
+            />
           </div>
 
           {/* Action Buttons */}

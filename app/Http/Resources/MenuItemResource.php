@@ -17,9 +17,14 @@ class MenuItemResource extends JsonResource
             $imagePath = str_replace('\\', '/', $imagePath);
             $imagePath = ltrim($imagePath, '/');
 
-            // If not absolute URL, wrap with asset() helper
+            // If not absolute URL, use Storage::url() for files stored in public disk
             if (!str_starts_with($imagePath, 'http')) {
-                $imagePath = asset($imagePath);
+                // Check if it's a storage path (menu_images directory)
+                if (str_contains($imagePath, 'menu_images')) {
+                    $imagePath = Storage::url($imagePath);
+                } else {
+                    $imagePath = asset('storage/' . $imagePath);
+                }
             }
         }
 

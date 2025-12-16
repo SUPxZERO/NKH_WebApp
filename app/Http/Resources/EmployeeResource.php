@@ -17,6 +17,10 @@ class EmployeeResource extends JsonResource
             'salary_type' => $this->salary_type,
             'salary' => $this->salary,
             'status' => $this->status,
+            'address' => $this->address,
+            'phone' => $this->user->phone, // Also at root for convenience
+            'position_id' => $this->position_id,
+            'location_id' => $this->location_id,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             
@@ -30,6 +34,8 @@ class EmployeeResource extends JsonResource
                 'avatar' => $this->user->avatar_url,
                 'image_path' => $this->user->image_path_url,
                 'roles' => $this->user->roles->pluck('slug'),
+                'latitude' => $this->user->latitude,
+                'longitude' => $this->user->longitude,
             ],
             
             // Position information

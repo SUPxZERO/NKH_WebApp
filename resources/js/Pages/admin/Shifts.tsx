@@ -143,7 +143,7 @@ export default function Shifts() {
     // Fetch locations
     const { data: locations } = useQuery({
         queryKey: ['locations'],
-        queryFn: () => apiGet('/api/locations')
+        queryFn: () => apiGet('/api/admin/locations')
     });
 
     // Fetch positions

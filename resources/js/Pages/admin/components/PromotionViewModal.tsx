@@ -44,7 +44,7 @@ export default function PromotionViewModal({
     const now = new Date();
     const startDate = new Date(promotion.start_date);
     const endDate = new Date(promotion.end_date);
-    
+
     if (!promotion.is_active) return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     if (now < startDate) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
     if (now > endDate) return 'bg-red-500/20 text-red-400 border-red-500/30';
@@ -55,7 +55,7 @@ export default function PromotionViewModal({
     const now = new Date();
     const startDate = new Date(promotion.start_date);
     const endDate = new Date(promotion.end_date);
-    
+
     if (!promotion.is_active) return 'Inactive';
     if (now < startDate) return 'Scheduled';
     if (now > endDate) return 'Expired';
@@ -77,8 +77,8 @@ export default function PromotionViewModal({
     }
   };
 
-  const usagePercentage = promotion.usage_limit 
-    ? (promotion.usage_count / promotion.usage_limit) * 100 
+  const usagePercentage = promotion.usage_limit
+    ? (promotion.usage_count / promotion.usage_limit) * 100
     : 0;
 
   return (
@@ -104,7 +104,7 @@ export default function PromotionViewModal({
             <Badge className={getTypeColor(promotion.type)}>
               <div className="flex items-center gap-1">
                 {getTypeIcon(promotion.type)}
-                {promotion.type.replace('_', ' ')}
+                {(promotion.type || 'percentage').replace(/_/g, ' ')}
               </div>
             </Badge>
           </div>
@@ -127,24 +127,24 @@ export default function PromotionViewModal({
                 <span className="text-gray-400">Discount Value:</span>
                 <span className="text-white font-bold text-xl">{formatDiscountValue(promotion)}</span>
               </div>
-              
+
               {promotion.min_order_amount && (
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Minimum Order:</span>
                   <span className="text-white">${promotion.min_order_amount}</span>
                 </div>
               )}
-              
+
               {promotion.max_discount_amount && (
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Maximum Discount:</span>
                   <span className="text-white">${promotion.max_discount_amount}</span>
                 </div>
               )}
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Applies To:</span>
-                <span className="text-white capitalize">{promotion.applicable_to.replace('_', ' ')}</span>
+                <span className="text-white capitalize">{(promotion.applicable_to || 'all').replace(/_/g, ' ')}</span>
               </div>
             </div>
           </div>
@@ -156,21 +156,21 @@ export default function PromotionViewModal({
                 <span className="text-gray-400">Usage Count:</span>
                 <span className="text-white">{promotion.usage_count}</span>
               </div>
-              
+
               {promotion.usage_limit && (
                 <>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Usage Limit:</span>
                     <span className="text-white">{promotion.usage_limit}</span>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-gray-400">Usage Progress:</span>
                       <span className="text-white">{usagePercentage.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${Math.min(usagePercentage, 100)}%` }}
                       />
@@ -178,17 +178,17 @@ export default function PromotionViewModal({
                   </div>
                 </>
               )}
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Start Date:</span>
                 <span className="text-white">{new Date(promotion.start_date).toLocaleString()}</span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">End Date:</span>
                 <span className="text-white">{new Date(promotion.end_date).toLocaleString()}</span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Created:</span>
                 <span className="text-white">{new Date(promotion.created_at).toLocaleDateString()}</span>

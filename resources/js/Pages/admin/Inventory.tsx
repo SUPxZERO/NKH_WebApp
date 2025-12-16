@@ -93,7 +93,7 @@ export default function Inventory() {
     }
   });
 
-  const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: () => apiGet('/api/locations') });
+  const { data: locations } = useQuery({ queryKey: ['locations'], queryFn: () => apiGet('/api/admin/locations') });
   const { data: statsData } = useQuery({ queryKey: ['inventory-stats'], queryFn: () => apiGet('/api/admin/inventory/stats') });
 
   const inventoryList = useMemo(() => inventory?.data || [], [inventory]);
@@ -342,20 +342,20 @@ function MovementsList({ item }: { item: InventoryItem | null }) {
 
   return (
     <div className="space-y-2 max-h-96 overflow-y-auto">
-      {movements?.data?.map((m: any) => (
+      {(movements?.data ?? []).filter((m: any) => m != null).map((m: any) => (
         <div key={m.id} className="bg-gray-50 dark:bg-white/5 p-3 rounded border border-gray-200 dark:border-white/10 flex justify-between items-center">
           <div>
             <div className="text-gray-900 dark:text-white font-medium capitalize flex items-center gap-2">
               {m.type === 'purchase_received' && <Package size={14} className="text-blue-600 dark:text-blue-400" />}
               {m.type === 'wastage' && <Trash2 size={14} className="text-red-600 dark:text-red-400" />}
               {m.type === 'transfer_in' && <ArrowRightLeft size={14} className="text-green-600 dark:text-green-400" />}
-              {m.type.replace('_', ' ')}
+              {String(m.type ?? 'unknown').replace(/_/g, ' ')}
             </div>
-            <div className="text-xs text-gray-500">{new Date(m.transacted_at).toLocaleString()}</div>
+            <div className="text-xs text-gray-500">{m.transacted_at ? new Date(m.transacted_at).toLocaleString() : '-'}</div>
             {m.notes && <div className="text-xs text-gray-400 dark:text-gray-400 mt-1">"{m.notes}"</div>}
           </div>
-          <div className={`font-bold ${m.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-            {m.quantity > 0 ? '+' : ''}{Number(m.quantity).toFixed(3)}
+          <div className={`font-bold ${Number(m.quantity) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+            {Number(m.quantity) > 0 ? '+' : ''}{Number(m.quantity ?? 0).toFixed(3)}
           </div>
         </div>
       ))}

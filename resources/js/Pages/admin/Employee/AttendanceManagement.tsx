@@ -62,7 +62,7 @@ export default function AttendanceManagement() {
     // Fetch locations for filter
     const { data: locations } = useQuery({
         queryKey: ['locations'],
-        queryFn: () => apiGet('/api/locations'),
+        queryFn: () => apiGet('/api/admin/locations'),
     });
 
     // Adjustment mutation

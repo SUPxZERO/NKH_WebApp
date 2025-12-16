@@ -233,12 +233,14 @@ Route::middleware('permission:roles.manage,permissions.manage')
     });
 
 // Users - requires users.* permissions
+// Users - requires users.* permissions
 Route::middleware('permission:users.view')
     ->group(function () {
         Route::get('admin-users/stats', [\App\Http\Controllers\Api\AdminUserController::class, 'stats']);
         Route::get('admin-users', [\App\Http\Controllers\Api\AdminUserController::class, 'index']);
         Route::get('admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'show']);
     });
+
 Route::middleware('permission:users.create')->post('admin-users', [\App\Http\Controllers\Api\AdminUserController::class, 'store']);
 Route::middleware('permission:users.update')->match(['put', 'patch'], 'admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'update']);
 Route::middleware('permission:users.delete')->delete('admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'destroy']);
@@ -249,6 +251,19 @@ Route::middleware('permission:dashboard.view')
         Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
         Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
         Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
+    });
+
+// Sales Analytics - requires reports.view permission
+Route::middleware('permission:reports.view')
+    ->prefix('analytics/sales')
+    ->group(function () {
+        Route::get('overview', [AnalyticsController::class, 'salesOverview']);
+        Route::get('trends', [AnalyticsController::class, 'salesTrends']);
+        Route::get('top-items', [AnalyticsController::class, 'topSellingItems']);
+        Route::get('by-category', [AnalyticsController::class, 'salesByCategory']);
+        Route::get('peak-hours', [AnalyticsController::class, 'peakHours']);
+        Route::get('export/pdf', [AnalyticsController::class, 'exportSalesPDF']);
+        Route::get('export/excel', [AnalyticsController::class, 'exportSalesExcel']);
     });
 
 // Locations - requires locations.* permissions
@@ -262,6 +277,15 @@ Route::middleware('permission:locations.manage')
         Route::post('locations', [LocationController::class, 'store']);
         Route::put('locations/{location}', [LocationController::class, 'update']);
         Route::delete('locations/{location}', [LocationController::class, 'destroy']);
+    });
+
+// Operating Hours - requires locations.manage permission
+Route::middleware('permission:locations.manage')
+    ->prefix('operating-hours')
+    ->group(function () {
+        Route::get('location/{locationId}', [\App\Http\Controllers\Api\OperatingHoursController::class, 'getByLocation']);
+        Route::post('bulk-update', [\App\Http\Controllers\Api\OperatingHoursController::class, 'bulkUpdate']);
+        Route::post('copy-to-all-days', [\App\Http\Controllers\Api\OperatingHoursController::class, 'copyToAllDays']);
     });
 
 // Payments - requires payments.* permissions
@@ -362,3 +386,122 @@ Route::middleware('permission:settings.update')
         Route::put('categories/{categoryId}', [TranslationController::class, 'updateCategoryTranslation']);
         Route::put('menu-items/{menuItemId}', [TranslationController::class, 'updateMenuItemTranslation']);
     });
+
+// Floors - requires locations.* permissions
+Route::middleware('permission:locations.view')
+    ->group(function () {
+        Route::get('floors', [FloorController::class, 'index']);
+        Route::get('floors/{floor}', [FloorController::class, 'show']);
+    });
+Route::middleware('permission:locations.manage')
+    ->group(function () {
+        Route::post('floors', [FloorController::class, 'store']);
+        Route::put('floors/{floor}', [FloorController::class, 'update']);
+        Route::delete('floors/{floor}', [FloorController::class, 'destroy']);
+    });
+
+// Tables - requires locations.* permissions
+Route::middleware('permission:locations.view')
+    ->group(function () {
+        Route::get('tables', [TableController::class, 'index']);
+        Route::get('tables/grouped', [TableController::class, 'grouped']);
+        Route::get('tables/{table}', [TableController::class, 'show']);
+    });
+Route::middleware('permission:locations.manage')
+    ->group(function () {
+        Route::post('tables', [TableController::class, 'store']);
+        Route::put('tables/{table}', [TableController::class, 'update']);
+        Route::delete('tables/{table}', [TableController::class, 'destroy']);
+        Route::put('tables/{table}/status', [TableController::class, 'updateStatus']);
+    });
+
+// Notifications - requires notifications.* permissions
+Route::middleware('permission:notifications.view,notifications.send')
+    ->group(function () {
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::get('notifications/stats', [NotificationController::class, 'stats']);
+    });
+Route::middleware('permission:notifications.send')
+    ->post('notifications', [NotificationController::class, 'store']);
+
+// Targeted Notifications - requires notifications.send permission
+Route::middleware('permission:notifications.view,notifications.send')
+    ->prefix('notifications/targeted')
+    ->group(function () {
+        Route::get('options', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'options']);
+        Route::post('preview', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'preview']);
+        Route::get('search-users', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'searchUsers']);
+    });
+Route::middleware('permission:notifications.send')
+    ->prefix('notifications/targeted')
+    ->group(function () {
+        Route::post('send', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'send']);
+        Route::post('send-to-roles', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'sendToRoles']);
+        Route::post('send-to-users', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'sendToUsers']);
+    });
+
+// Positions - requires employees.* permissions
+Route::middleware('permission:employees.view')
+    ->group(function () {
+        Route::get('positions', [PositionController::class, 'adminIndex']);
+        Route::get('positions/{position}', [PositionController::class, 'show']);
+    });
+Route::middleware('permission:employees.manage')
+    ->group(function () {
+        Route::post('positions', [PositionController::class, 'store']);
+        Route::put('positions/{position}', [PositionController::class, 'update']);
+        Route::delete('positions/{position}', [PositionController::class, 'destroy']);
+    });
+
+// Units - requires inventory.* permissions
+Route::middleware('permission:inventory.view')
+    ->group(function () {
+        Route::get('units/base-units', [UnitController::class, 'baseUnits']); // Must be before resource
+        Route::get('units', [UnitController::class, 'index']);
+        Route::get('units/{unit}', [UnitController::class, 'show']);
+    });
+Route::middleware('permission:inventory.adjust')
+    ->group(function () {
+        Route::post('units', [UnitController::class, 'store']);
+        Route::put('units/{unit}', [UnitController::class, 'update']);
+        Route::delete('units/{unit}', [UnitController::class, 'destroy']);
+    });
+
+// Loyalty Points - requires loyalty.* permissions
+Route::middleware('permission:loyalty.view')
+    ->group(function () {
+        Route::get('loyalty-points', [LoyaltyPointController::class, 'index']);
+        Route::get('loyalty-points/stats', [LoyaltyPointController::class, 'stats']);
+        Route::get('loyalty-points/{loyaltyPoint}', [LoyaltyPointController::class, 'show']);
+    });
+Route::middleware('permission:loyalty.manage')
+    ->group(function () {
+        Route::post('loyalty-points', [LoyaltyPointController::class, 'store']);
+        Route::put('loyalty-points/{loyaltyPoint}', [LoyaltyPointController::class, 'update']);
+        Route::delete('loyalty-points/{loyaltyPoint}', [LoyaltyPointController::class, 'destroy']);
+    });
+
+// Expenses - requires expenses.* permissions
+Route::middleware('permission:expenses.view')
+    ->group(function () {
+        Route::get('expenses', [ExpenseController::class, 'index']);
+        Route::get('expenses/stats', [ExpenseController::class, 'stats']);
+        Route::get('expenses/{expense}', [ExpenseController::class, 'show']);
+        Route::get('expense-categories', [ExpenseCategoryController::class, 'index']);
+    });
+Route::middleware('permission:expenses.create')->post('expenses', [ExpenseController::class, 'store']);
+Route::middleware('permission:expenses.update')->match(['put', 'patch'], 'expenses/{expense}', [ExpenseController::class, 'update']);
+Route::middleware('permission:expenses.delete')->delete('expenses/{expense}', [ExpenseController::class, 'destroy']);
+
+// Invoices - requires invoices.* permissions
+Route::middleware('permission:invoices.view')
+    ->group(function () {
+        Route::get('invoices', [InvoiceController::class, 'index']);
+        Route::get('invoices/export/csv', [InvoiceController::class, 'exportCsv']);
+        Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
+        Route::get('invoices/{invoice}/csv', [InvoiceController::class, 'exportShowCsv']);
+        Route::get('invoices/{invoice}', [InvoiceController::class, 'show']);
+    });
+Route::middleware('permission:invoices.create')->post('invoices', [InvoiceController::class, 'store']);
+Route::middleware('permission:invoices.update')->match(['put', 'patch'], 'invoices/{invoice}', [InvoiceController::class, 'update']);
+Route::middleware('permission:invoices.delete')->delete('invoices/{invoice}', [InvoiceController::class, 'destroy']);

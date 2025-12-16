@@ -106,11 +106,15 @@ export default function Promotions() {
     discount_value: string; min_order_amount: string; max_discount_amount: string;
     usage_limit: string; start_date: string; end_date: string; is_active: boolean;
     applicable_to: 'all' | 'categories' | 'items'; terms_conditions: string;
+    selected_categories: number[]; selected_items: number[];
+    buy_quantity: string; get_quantity: string;
   }>({
     name: '', description: '', code: '', type: 'percentage',
     discount_value: '', min_order_amount: '', max_discount_amount: '',
     usage_limit: '', start_date: '', end_date: '', is_active: true,
-    applicable_to: 'all', terms_conditions: ''
+    applicable_to: 'all', terms_conditions: '',
+    selected_categories: [], selected_items: [],
+    buy_quantity: '', get_quantity: ''
   });
 
   // Fetch Data
@@ -167,7 +171,9 @@ export default function Promotions() {
       name: '', description: '', code: '', type: 'percentage',
       discount_value: '', min_order_amount: '', max_discount_amount: '',
       usage_limit: '', start_date: '', end_date: '', is_active: true,
-      applicable_to: 'all', terms_conditions: ''
+      applicable_to: 'all', terms_conditions: '',
+      selected_categories: [], selected_items: [],
+      buy_quantity: '', get_quantity: ''
     });
   };
 
@@ -180,7 +186,11 @@ export default function Promotions() {
       max_discount_amount: promo.max_discount_amount?.toString() || '',
       usage_limit: promo.usage_limit?.toString() || '',
       start_date: promo.start_date.slice(0, 16),
-      end_date: promo.end_date.slice(0, 16)
+      end_date: promo.end_date.slice(0, 16),
+      selected_categories: promo.category_ids || [],
+      selected_items: promo.menu_item_ids || [],
+      buy_quantity: promo.buy_quantity?.toString() || '',
+      get_quantity: promo.get_quantity?.toString() || ''
     });
     setOpenEdit(true);
   };
@@ -193,10 +203,14 @@ export default function Promotions() {
     e.preventDefault();
     const data = {
       ...formData,
-      discount_value: parseFloat(formData.discount_value),
+      discount_value: parseFloat(formData.discount_value) || 0,
       min_order_amount: formData.min_order_amount ? parseFloat(formData.min_order_amount) : null,
       max_discount_amount: formData.max_discount_amount ? parseFloat(formData.max_discount_amount) : null,
-      usage_limit: formData.usage_limit ? parseInt(formData.usage_limit) : null
+      usage_limit: formData.usage_limit ? parseInt(formData.usage_limit) : null,
+      category_ids: formData.applicable_to === 'categories' ? formData.selected_categories : [],
+      menu_item_ids: formData.applicable_to === 'items' ? formData.selected_items : [],
+      buy_quantity: formData.type === 'buy_x_get_y' ? parseInt(formData.buy_quantity) || 1 : null,
+      get_quantity: formData.type === 'buy_x_get_y' ? parseInt(formData.get_quantity) || 1 : null
     };
     if (editingPromotion) updateMutation.mutate({ id: editingPromotion.id, data });
     else createMutation.mutate(data);
@@ -329,7 +343,7 @@ export default function Promotions() {
                 </div>
                 <div className="col-span-2 flex items-center gap-2 text-sm">
                   <div className="p-1.5 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400">{getTypeIcon(promo.type)}</div>
-                  <span className="capitalize text-foreground">{promo.type.replace(/_/g, ' ')}</span>
+                  <span className="capitalize text-foreground">{(promo.type || 'percentage').replace(/_/g, ' ')}</span>
                 </div>
                 <div className="col-span-2">
                   <span className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-bold border border-emerald-500/30">

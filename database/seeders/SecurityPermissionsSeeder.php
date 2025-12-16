@@ -32,6 +32,14 @@ class SecurityPermissionsSeeder extends Seeder
             'roles.manage', 'permissions.manage',
             'audit.view', 'audit.export',
             'locations.view', 'locations.manage',
+            'notifications.view', 'notifications.send',
+            'dashboard.view',
+            'recipes.view', 'recipes.create', 'recipes.update', 'recipes.delete',
+            'promotions.view', 'promotions.manage',
+            'loyalty.view', 'loyalty.manage',
+            'employees.manage',
+            'expenses.view', 'expenses.create', 'expenses.update', 'expenses.delete',
+            'invoices.view', 'invoices.create', 'invoices.update', 'invoices.delete',
         ];
 
         $created = 0;

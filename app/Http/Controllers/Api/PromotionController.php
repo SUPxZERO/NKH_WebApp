@@ -60,7 +60,7 @@ class PromotionController extends Controller
             'name' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
             'type' => ['required', 'in:percentage,fixed_amount,buy_x_get_y,free_item'],
-            'discount_value' => ['required', 'numeric'],
+            'discount_value' => ['nullable', 'numeric'],
             'min_order_amount' => ['nullable', 'numeric'],
             'max_discount_amount' => ['nullable', 'numeric'],
             'usage_limit' => ['nullable', 'integer', 'min:0'],
@@ -69,13 +69,23 @@ class PromotionController extends Controller
             'is_active' => ['boolean'],
             'applicable_to' => ['nullable', 'in:all,categories,items'],
             'terms_conditions' => ['nullable', 'string'],
+            'buy_quantity' => ['nullable', 'integer', 'min:1'],
+            'get_quantity' => ['nullable', 'integer', 'min:1'],
+            'category_ids' => ['nullable', 'array'],
+            'menu_item_ids' => ['nullable', 'array'],
         ]);
 
+        // Map type to database value
         $dbType = match ($data['type']) {
             'fixed_amount' => 'fixed',
-            'buy_x_get_y', 'free_item' => 'percentage',
             default => $data['type'],
         };
+
+        // For buy_x_get_y, use buy_quantity as the value
+        $value = $data['discount_value'] ?? 0;
+        if ($data['type'] === 'buy_x_get_y') {
+            $value = $data['buy_quantity'] ?? 1;
+        }
 
         $promotion = Promotion::create([
             'location_id' => $data['location_id'] ?? null,
@@ -83,12 +93,17 @@ class PromotionController extends Controller
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'type' => $dbType,
-            'value' => $data['discount_value'],
+            'value' => $value,
             'min_order_amount' => $data['min_order_amount'] ?? null,
+            'max_discount_amount' => $data['max_discount_amount'] ?? null,
             'usage_limit' => $data['usage_limit'] ?? null,
             'start_at' => $data['start_date'] ?? null,
             'end_at' => $data['end_date'] ?? null,
             'is_active' => $data['is_active'] ?? true,
+            'applicable_to' => $data['applicable_to'] ?? 'all',
+            'terms_conditions' => $data['terms_conditions'] ?? null,
+            'buy_quantity' => $data['buy_quantity'] ?? null,
+            'get_quantity' => $data['get_quantity'] ?? null,
         ]);
 
         // Send notification to all customers about new promotion
@@ -122,13 +137,23 @@ class PromotionController extends Controller
             'is_active' => ['boolean'],
             'applicable_to' => ['nullable', 'in:all,categories,items'],
             'terms_conditions' => ['nullable', 'string'],
+            'buy_quantity' => ['nullable', 'integer', 'min:1'],
+            'get_quantity' => ['nullable', 'integer', 'min:1'],
+            'category_ids' => ['nullable', 'array'],
+            'menu_item_ids' => ['nullable', 'array'],
         ]);
 
         $dbType = isset($data['type']) ? match ($data['type']) {
             'fixed_amount' => 'fixed',
-            'buy_x_get_y', 'free_item' => 'percentage',
             default => $data['type'],
         } : $promotion->type;
+
+        // Determine value based on type
+        $type = $data['type'] ?? $promotion->type;
+        $value = $data['discount_value'] ?? $promotion->value;
+        if ($type === 'buy_x_get_y' && isset($data['buy_quantity'])) {
+            $value = $data['buy_quantity'];
+        }
 
         $promotion->update([
             'location_id' => $data['location_id'] ?? $promotion->location_id,
@@ -136,12 +161,17 @@ class PromotionController extends Controller
             'name' => $data['name'] ?? $promotion->name,
             'description' => $data['description'] ?? $promotion->description,
             'type' => $dbType,
-            'value' => $data['discount_value'] ?? $promotion->value,
+            'value' => $value,
             'min_order_amount' => $data['min_order_amount'] ?? $promotion->min_order_amount,
+            'max_discount_amount' => $data['max_discount_amount'] ?? $promotion->max_discount_amount,
             'usage_limit' => $data['usage_limit'] ?? $promotion->usage_limit,
             'start_at' => $data['start_date'] ?? $promotion->start_at,
             'end_at' => $data['end_date'] ?? $promotion->end_at,
             'is_active' => $data['is_active'] ?? $promotion->is_active,
+            'applicable_to' => $data['applicable_to'] ?? $promotion->applicable_to,
+            'terms_conditions' => $data['terms_conditions'] ?? $promotion->terms_conditions,
+            'buy_quantity' => $data['buy_quantity'] ?? $promotion->buy_quantity,
+            'get_quantity' => $data['get_quantity'] ?? $promotion->get_quantity,
         ]);
 
         return new PromotionResource($promotion->fresh());

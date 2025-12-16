@@ -93,7 +93,7 @@ export default function Units() {
     const { data: units, isLoading } = useQuery({
         queryKey: ['units', page, search, typeFilter, baseUnitFilter],
         queryFn: () => {
-            let url = `/api/units?page=${page}&per_page=${perPage}&search=${search}`;
+            let url = `/api/admin/units?page=${page}&per_page=${perPage}&search=${search}`;
             if (typeFilter !== 'all') url += `&${typeFilter}=1`;
             if (baseUnitFilter !== 'all') url += `&is_base_unit=${baseUnitFilter === 'base' ? '1' : '0'}`;
             return apiGet(url);
@@ -102,7 +102,7 @@ export default function Units() {
 
     const { data: baseUnits } = useQuery({
         queryKey: ['units/base-units'],
-        queryFn: () => apiGet('/api/units/base-units')
+        queryFn: () => apiGet('/api/admin/units/base-units')
     });
 
     const unitList = useMemo(() => units?.data || [], [units]);
@@ -115,19 +115,19 @@ export default function Units() {
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/units', data),
+        mutationFn: (data: any) => apiPost('/api/admin/units', data),
         onSuccess: () => { toastSuccess('Unit created'); closeModal(); qc.invalidateQueries({ queryKey: ['units'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/units/${id}`, data),
+        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/units/${id}`, data),
         onSuccess: () => { toastSuccess('Unit updated'); closeModal(); qc.invalidateQueries({ queryKey: ['units'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/units/${id}`),
+        mutationFn: (id: number) => apiDelete(`/api/admin/units/${id}`),
         onSuccess: () => { toastSuccess('Unit deleted'); qc.invalidateQueries({ queryKey: ['units'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
     });

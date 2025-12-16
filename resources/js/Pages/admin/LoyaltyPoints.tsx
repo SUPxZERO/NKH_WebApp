@@ -122,7 +122,7 @@ export default function LoyaltyPoints() {
   });
 
   const { data: customers } = useQuery({ queryKey: ['customers'], queryFn: () => apiGet('/api/admin/customers') });
-  const { data: statsData } = useQuery({ queryKey: ['loyalty-stats'], queryFn: () => apiGet('/api/admin/loyalty-stats') });
+  const { data: statsData } = useQuery({ queryKey: ['loyalty-stats'], queryFn: () => apiGet('/api/admin/loyalty-points/stats') });
 
   const transactionList = useMemo(() => loyaltyPoints?.data || [], [loyaltyPoints]);
 
