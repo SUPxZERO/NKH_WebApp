@@ -206,6 +206,11 @@ Route::post('/timeslots/regenerate', [TimeSlotController::class, 'regenerate'])
 Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup'])
 ->middleware('auth');
 
+
+// Poll Helper for Smart Polling
+Route::get('/poll-helper/sync-state', [\App\Http\Controllers\Api\PollHelperController::class, 'syncState'])
+    ->middleware('auth:sanctum');
+
 // Sprint 1: Suppliers & Units (CRUD accessible to all for now)
 Route::apiResource('suppliers', SupplierController::class);
 Route::get('/suppliers/types', [SupplierController::class, 'types']);

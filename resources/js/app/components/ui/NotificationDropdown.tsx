@@ -86,7 +86,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                 return { data: [], unread_count: 0 };
             }
         },
-        refetchInterval: 30000, // Refetch every 30 seconds
+        staleTime: 0,
     });
 
     const notifications = notificationsData?.data || [];

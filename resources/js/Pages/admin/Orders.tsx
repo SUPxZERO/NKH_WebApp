@@ -157,7 +157,10 @@ const StatusPill = ({ status }: { status: string }) => {
   );
 };
 
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+
 export default function Orders() {
+  useSmartPolling(['orders'], 15000); // 15s for admin
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -851,10 +854,10 @@ export default function Orders() {
               <div className={cn(
                 "p-5 text-white",
                 selectedOrder.status === 'pending' || selectedOrder.status === 'received' ? 'bg-gradient-to-r from-status-pending to-warning' :
-                selectedOrder.status === 'preparing' ? 'bg-gradient-to-r from-warning to-warning/80' :
-                selectedOrder.status === 'ready' ? 'bg-gradient-to-r from-success to-success/80' :
-                selectedOrder.status === 'completed' ? 'bg-gradient-to-r from-success to-info' :
-                'bg-gradient-to-r from-secondary to-muted'
+                  selectedOrder.status === 'preparing' ? 'bg-gradient-to-r from-warning to-warning/80' :
+                    selectedOrder.status === 'ready' ? 'bg-gradient-to-r from-success to-success/80' :
+                      selectedOrder.status === 'completed' ? 'bg-gradient-to-r from-success to-info' :
+                        'bg-gradient-to-r from-secondary to-muted'
               )}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -979,8 +982,8 @@ export default function Orders() {
                             (selectedOrder as any).approval_status === 'approved'
                               ? "bg-success-muted text-success"
                               : (selectedOrder as any).approval_status === 'pending'
-                              ? "bg-warning-muted text-warning"
-                              : "bg-destructive-muted text-destructive"
+                                ? "bg-warning-muted text-warning"
+                                : "bg-destructive-muted text-destructive"
                           )}>
                             {(selectedOrder as any).approval_status}
                           </span>
@@ -1038,9 +1041,9 @@ export default function Orders() {
                               <span className={cn(
                                 "text-xs px-2 py-1 rounded-full font-medium border",
                                 item.status === 'served' ? 'bg-success-muted text-success border-success/30' :
-                                item.status === 'preparing' ? 'bg-warning-muted text-warning border-warning/30' :
-                                item.status === 'cancelled' ? 'bg-destructive-muted text-destructive border-destructive/30' :
-                                'bg-secondary text-muted-foreground border-border'
+                                  item.status === 'preparing' ? 'bg-warning-muted text-warning border-warning/30' :
+                                    item.status === 'cancelled' ? 'bg-destructive-muted text-destructive border-destructive/30' :
+                                      'bg-secondary text-muted-foreground border-border'
                               )}>
                                 {item.status}
                               </span>

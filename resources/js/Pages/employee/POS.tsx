@@ -31,7 +31,13 @@ interface Table {
   status: 'available' | 'occupied' | 'reserved';
 }
 
+
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+
 export default function POS() {
+  // Smart Polling for Orders and Tables
+  useSmartPolling(['orders', 'tables'], 10000);
+
   const [categoryId, setCategoryId] = React.useState<number | undefined>();
   const [search, setSearch] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');

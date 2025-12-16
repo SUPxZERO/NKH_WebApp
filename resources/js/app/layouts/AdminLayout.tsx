@@ -305,6 +305,8 @@ const isUrlMatchFn = (href: string, url: string) => {
   return normalizedUrl === normalizedHref;
 };
 
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+
 export default function AdminLayout({ children }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -312,6 +314,9 @@ export default function AdminLayout({ children }: Props) {
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const { isDark, toggle: toggleTheme } = useThemeStore();
   const search = useGlobalSearch();
+
+  // Smart Polling for Notifications (Global) - 60s
+  useSmartPolling(['admin-notifications'], 60000);
 
   // Get current page title from URL
   const pageTitle = useMemo(() => {

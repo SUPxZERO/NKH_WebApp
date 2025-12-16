@@ -28,6 +28,7 @@ import { cn } from '@/app/utils/cn';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import { GlobalSearch, useGlobalSearch } from '@/app/components/ui/GlobalSearch';
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 
 type Props = { children: React.ReactNode };
 
@@ -51,16 +52,8 @@ export default function EmployeeLayout({ children }: Props) {
   const user = props.auth?.user;
   const search = useGlobalSearch();
 
-  const { data: unreadData } = useQuery({
-    queryKey: ['notifications', 'unread'],
-    queryFn: async () => {
-      const res = await apiGet('/api/employee/notifications/unread-count');
-      return res.data;
-    },
-    refetchInterval: 30000,
-  });
-
-  const unreadCount = unreadData?.count || 0;
+  // Smart Polling for Notifications - 60s
+  useSmartPolling(['admin-notifications'], 60000);
 
   const handleLogout = () => {
     router.post('/logout');

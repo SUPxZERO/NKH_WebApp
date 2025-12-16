@@ -51,18 +51,20 @@ interface KitchenOrder {
     total_amount?: number;
 }
 
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+
 export default function KitchenDisplay() {
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
     useOrderUpdates();
+    useSmartPolling(['kitchen'], 5000); // Poll every 5s for kitchen updates
     const qc = useQueryClient();
 
 
-    // Fetch orders every 5 seconds
+    // Fetch orders
     const { data: orders, isLoading } = useQuery<{ data: KitchenOrder[] }>({
         queryKey: ['kitchen.orders'],
         queryFn: () => apiGet('/kitchen/orders'),
-        refetchInterval: 60000, // Fallback refresh every minute
         staleTime: 0,
     });
 
@@ -282,11 +284,10 @@ export default function KitchenDisplay() {
                                                     {item.name}
                                                 </div>
                                                 {item.status && (
-                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                        item.status === 'served' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                                        item.status === 'preparing' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                                        'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
-                                                    }`}>
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${item.status === 'served' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                                            item.status === 'preparing' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                                                'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
+                                                        }`}>
                                                         {item.status}
                                                     </span>
                                                 )}
