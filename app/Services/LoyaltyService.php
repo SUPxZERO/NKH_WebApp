@@ -29,8 +29,19 @@ class LoyaltyService
             return 0;
         }
 
+        // Prevent duplicate point awards for the same order
+        $existingPoints = LoyaltyPoint::where('customer_id', $customer->id)
+            ->where('order_id', $order->id)
+            ->where('type', 'earn')
+            ->exists();
+
+        if ($existingPoints) {
+            Log::warning("Loyalty points already awarded for order {$order->id}, skipping duplicate award");
+            return 0;
+        }
+
         $amountToProcess = $amount ?? $order->total_amount;
-        
+
         // Calculate points: 1 point per $1 (floor value)
         // This could be configurable in settings
         $points = (int) floor($amountToProcess);
@@ -41,13 +52,19 @@ class LoyaltyService
 
         try {
             DB::transaction(function () use ($customer, $order, $points) {
-                // Create loyalty transaction record
+                // Get current balance before this transaction
+                $currentBalance = $customer->points_balance ?? 0;
+                $newBalance = $currentBalance + $points;
+
+                // Create loyalty transaction record with balance_after
                 LoyaltyPoint::create([
                     'customer_id' => $customer->id,
+                    'order_id' => $order->id,
                     'location_id' => $order->location_id,
                     'points' => $points,
                     'type' => 'earn',
-                    'description' => "Points earned from Order #{$order->order_number}",
+                    'balance_after' => $newBalance,
+                    'notes' => "Points earned from Order #{$order->order_number}",
                     'reference_id' => $order->id,
                     'reference_type' => Order::class,
                     'occurred_at' => now(),
@@ -56,9 +73,10 @@ class LoyaltyService
 
                 // Update customer balance
                 $customer->increment('points_balance', $points);
-                
-                // Update total points earned (if column exists, usually calculated from logs)
-                // But typically referencing points_balance is enough.
+
+                // Update customer tier based on total_spent
+                $customer->calculateTier();
+                $customer->save();
             });
 
             Log::info("Awarded {$points} loyalty points to customer {$customer->id} for order {$order->id}");

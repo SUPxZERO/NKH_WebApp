@@ -53,13 +53,13 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
     if (layout === 'list') {
         return (
             <motion.div
-                className="group relative flex flex-col md:flex-row gap-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 p-4 transition-all duration-300 hover:shadow-xl hover:shadow-fuchsia-500/10 cursor-pointer"
+                className="group relative flex flex-col md:flex-row gap-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 p-4 transition-all duration-300 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 cursor-pointer"
                 whileHover={{ y: -2 }}
                 onClick={handleCardClick}
                 layout
             >
                 {/* Image */}
-                <div className="relative w-full md:w-32 h-40 md:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+                <div className="relative w-full md:w-32 h-40 md:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
                     {item.image_path ? (
                         <img
                             src={item.image_path || ''}
@@ -68,7 +68,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                             loading="lazy"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-5xl">
+                        <div className="w-full h-full flex items-center justify-center text-5xl bg-gray-100 dark:bg-gray-700">
                             🍽️
                         </div>
                     )}
@@ -76,13 +76,13 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                     {/* Badges */}
                     <div className="absolute top-2 left-2 flex flex-col gap-1">
                         {item.is_popular && (
-                            <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold flex items-center gap-1">
+                            <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold flex items-center gap-1 shadow-md">
                                 <TrendingUp className="w-3 h-3" />
                                 Popular
                             </span>
                         )}
                         {hasDiscount && (
-                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-semibold">
+                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-semibold shadow-md">
                                 -{discountPercent}%
                             </span>
                         )}
@@ -94,12 +94,12 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                             e.stopPropagation();
                             onToggleFavorite?.();
                         }}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform"
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
                     >
                         <Heart
                             className={cn(
                                 'w-4 h-4',
-                                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-300'
+                                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-500 dark:text-gray-400'
                             )}
                         />
                     </button>
@@ -127,7 +127,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                             {item.dietary_restrictions.slice(0, 3).map((restriction) => (
                                 <span
                                     key={restriction}
-                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs"
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs border border-green-200 dark:border-green-800"
                                 >
                                     {dietaryIcons[restriction.toLowerCase()]}
                                     {restriction}
@@ -141,7 +141,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                         <div className="flex items-center gap-3">
                             {item.rating && (
                                 <div className="flex items-center gap-1 text-sm">
-                                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                                     <span className="font-semibold text-gray-900 dark:text-white">
                                         {item.rating.toFixed(1)}
                                     </span>
@@ -159,11 +159,11 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                         <div className="flex items-center gap-3">
                             <div className="text-right">
                                 {hasDiscount && (
-                                    <div className="text-sm text-gray-400 line-through">
+                                    <div className="text-sm text-gray-400 dark:text-gray-500 line-through">
                                         ${item.original_price?.toFixed(2)}
                                     </div>
                                 )}
-                                <div className="text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
+                                <div className="text-2xl font-bold text-fuchsia-600 dark:text-fuchsia-400">
                                     ${item.price.toFixed(2)}
                                 </div>
                             </div>
@@ -189,13 +189,13 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
     // Grid layout (default)
     return (
         <motion.div
-            className="group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-fuchsia-500/10 cursor-pointer"
-            whileHover={{ y: -8 }}
+            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 cursor-pointer"
+            whileHover={{ y: -6 }}
             onClick={handleCardClick}
             layout
         >
             {/* Image */}
-            <div className="relative h-56 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+            <div className="relative h-52 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
                 {item.image_path ? (
                     <img
                         src={item.image_path || ''}
@@ -204,24 +204,24 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                         loading="lazy"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-7xl">
+                    <div className="w-full h-full flex items-center justify-center text-6xl bg-gray-100 dark:bg-gray-700">
                         🍽️
                     </div>
                 )}
 
                 {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2">
                     {item.is_popular && (
-                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold shadow-lg flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold shadow-md flex items-center gap-1">
                             <TrendingUp className="w-3 h-3" />
                             Popular
                         </span>
                     )}
                     {hasDiscount && (
-                        <span className="px-3 py-1 rounded-full bg-red-500 text-white text-xs font-semibold shadow-lg">
+                        <span className="px-2.5 py-1 rounded-full bg-red-500 text-white text-xs font-semibold shadow-md">
                             -{discountPercent}% OFF
                         </span>
                     )}
@@ -233,12 +233,12 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                         e.stopPropagation();
                         onToggleFavorite?.();
                     }}
-                    className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform shadow-lg z-10"
+                    className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center hover:scale-110 transition-transform shadow-md z-10"
                 >
                     <Heart
                         className={cn(
                             'w-5 h-5',
-                            isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-300'
+                            isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-500 dark:text-gray-400'
                         )}
                     />
                 </button>
@@ -279,7 +279,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                         {item.dietary_restrictions.slice(0, 2).map((restriction) => (
                             <span
                                 key={restriction}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs border border-green-200 dark:border-green-800"
                             >
                                 {dietaryIcons[restriction.toLowerCase()]}
                                 {restriction}
@@ -289,12 +289,12 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                 )}
 
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex flex-col gap-1">
                         {/* Rating */}
                         {item.rating && (
                             <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                                 <span className="font-semibold text-gray-900 dark:text-white text-sm">
                                     {item.rating.toFixed(1)}
                                 </span>
@@ -313,11 +313,11 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                     {/* Price */}
                     <div className="text-right">
                         {hasDiscount && (
-                            <div className="text-xs text-gray-400 line-through">
+                            <div className="text-xs text-gray-400 dark:text-gray-500 line-through">
                                 ${item.original_price?.toFixed(2)}
                             </div>
                         )}
-                        <div className="text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
+                        <div className="text-xl font-bold text-fuchsia-600 dark:text-fuchsia-400">
                             ${item.price.toFixed(2)}
                         </div>
                     </div>

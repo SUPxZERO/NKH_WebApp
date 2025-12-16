@@ -241,19 +241,18 @@ Route::post('/logout', [AuthController::class, 'logout'])
 ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 
 // Admin routes - always need session for user() to work, auth is optional in local
+// SECURITY: Admin routes ALWAYS require authentication
+// No bypasses for development environments - use proper test credentials instead
 $adminMiddleware = [
     \Illuminate\Session\Middleware\StartSession::class,
     \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    'auth:sanctum',
+    // Support multiple admin roles: super-admin, admin, and specific manager roles
+    'role:super-admin,admin,chief,service-manager,finance-manager,hr-manager,inventory-manager,operations-manager,viewer',
 ];
 
-// In production, enforce authentication
-if (config('app.enforce_admin_auth') || app()->environment('production')) {
-    $adminMiddleware[] = 'auth:sanctum';
-    $adminMiddleware[] = 'role:admin,manager';
-}
-
-// Admin/Manager management endpoints with permission middleware
-// These routes now use granular permission checks - see routes/admin-secure.php
+// Admin/Manager management endpoints with granular permission middleware
+// Each route group in admin-secure.php enforces specific permissions
 Route::prefix('admin')
     ->middleware($adminMiddleware)
     ->group(base_path('routes/admin-secure.php'));
@@ -337,7 +336,11 @@ Route::prefix('customer')
     
     // Notifications
     Route::get('notifications', [App\Http\Controllers\Api\CustomerDashboardController::class, 'notifications']);
-    
+
+    // Loyalty
+    Route::get('loyalty/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'loyaltyStats']);
+    Route::get('loyalty/history', [App\Http\Controllers\Api\CustomerDashboardController::class, 'loyaltyHistory']);
+
     // CRM Data
     Route::get('stats', [App\Http\Controllers\Api\CustomerController::class, 'customerStats']);
     Route::get('history', [App\Http\Controllers\Api\CustomerController::class, 'customerHistory']);
@@ -361,6 +364,8 @@ Route::prefix('customer')
     Route::get('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'index']);
     Route::post('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'store']);
     Route::get('reservations/availability', [App\Http\Controllers\Api\CustomerReservationController::class, 'availability']);
+    Route::get('reservations/floors', [App\Http\Controllers\Api\CustomerReservationController::class, 'floors']);
+    Route::get('reservations/tables', [App\Http\Controllers\Api\CustomerReservationController::class, 'tables']);
     Route::delete('reservations/{reservation}', [App\Http\Controllers\Api\CustomerReservationController::class, 'destroy']);
     
     // Rewards

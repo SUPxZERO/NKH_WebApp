@@ -42,7 +42,7 @@ class HomeController extends Controller
             ->where('is_active', true)
             ->where('is_featured', true)
             ->orderBy('featured_order')
-            ->limit(3)
+            ->limit(4)
             ->get();
 
         return MenuItemResource::collection($items)->resolve();

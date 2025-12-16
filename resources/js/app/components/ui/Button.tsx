@@ -241,7 +241,7 @@ export function Button({
       ) : leftIcon ? (
         <span className="flex-shrink-0">{leftIcon}</span>
       ) : null}
-      {children && <span className={cn(loading && 'opacity-0')}>{children}</span>}
+      {children && <>{children}</>}
       {rightIcon && !loading ? <span className="flex-shrink-0">{rightIcon}</span> : null}
     </button>
   );

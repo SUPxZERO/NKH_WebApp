@@ -30,12 +30,29 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Security: Only 'customer' role is allowed for public registration
+        // Employees, Admins, and Managers must be created via admin panel
+        $submittedRole = strtolower($request->input('role', 'customer'));
+        
+        // Log and reject any attempt to use non-customer roles
+        if ($submittedRole !== 'customer') {
+            \Log::warning('Role escalation attempt detected during public registration', [
+                'attempted_role' => $request->role,
+                'email' => $request->email,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+            
+            return back()->withErrors([
+                'role' => 'Only customer accounts can be created through public registration.',
+            ])->withInput();
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'phone' => 'required|string|max:20',
-            'role' => 'required|string|in:customer,employee,admin',
             'terms' => 'required|accepted',
         ]);
 
@@ -44,7 +61,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
-            'role' => $request->role,
+            'role' => 'customer', // Always customer
             'is_active' => true,
         ]);
 
@@ -52,12 +69,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        $redirects = [
-            'admin' => route('admin.dashboard', absolute: false),
-            'employee' => route('employee.pos', absolute: false),
-            'customer' => route('customer.dashboard', absolute: false),
-        ];
-
-        return redirect()->intended($redirects[$user->role] ?? route('customer.dashboard', absolute: false));
+        return redirect()->intended(route('customer.dashboard', absolute: false));
     }
 }

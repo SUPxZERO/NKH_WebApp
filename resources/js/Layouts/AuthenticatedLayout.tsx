@@ -21,8 +21,20 @@ export default function Authenticated({
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
+                                <Link href="/" className="flex items-center gap-3 group">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300" />
+                                        <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 p-1.5">
+                                            <img
+                                                src="/Nkhlogo.png"
+                                                alt="NKH Restaurant"
+                                                className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(217,70,239,0.4)]"
+                                            />
+                                        </div>
+                                    </div>
+                                    <span className="hidden sm:block font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
+                                        NKH Restaurant
+                                    </span>
                                 </Link>
                             </div>
 

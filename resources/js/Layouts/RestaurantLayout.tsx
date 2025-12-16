@@ -5,12 +5,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Menu as MenuIcon, 
-  X, 
-  Bell, 
-  User, 
-  Settings, 
+import {
+  Menu as MenuIcon,
+  X,
+  Bell,
+  User,
+  Settings,
   LogOut,
   ChefHat,
   Users,
@@ -132,7 +132,7 @@ export function RestaurantLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(initialCollapsed);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
-  
+
   const navigation = navigationConfig[role];
   const themeClass = roleThemes[role];
 
@@ -151,10 +151,10 @@ export function RestaurantLayout({
   }, []);
 
   // 🎯 Navigation item component
-  const NavigationItem = ({ 
-    item, 
-    isActive 
-  }: { 
+  const NavigationItem = ({
+    item,
+    isActive
+  }: {
     item: { icon: React.ReactNode; label: string; href: string; badge?: number };
     isActive: boolean;
   }) => (
@@ -162,8 +162,8 @@ export function RestaurantLayout({
       <motion.div
         className={cn(
           'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group',
-          isActive 
-            ? `bg-gradient-to-r ${navigation.theme} text-white shadow-lg` 
+          isActive
+            ? `bg-gradient-to-r ${navigation.theme} text-white shadow-lg`
             : 'text-neutral-600 dark:text-neutral-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600'
         )}
         whileHover={{ x: 2 }}
@@ -172,7 +172,7 @@ export function RestaurantLayout({
         <span className="flex-shrink-0">
           {item.icon}
         </span>
-        
+
         <AnimatePresence>
           {!sidebarCollapsed && (
             <motion.span
@@ -253,33 +253,35 @@ export function RestaurantLayout({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className={cn(
-                      'w-10 h-10 rounded-2xl bg-gradient-to-r flex items-center justify-center',
-                      navigation.theme
-                    )}>
-                      <ChefHat className="w-6 h-6 text-white" />
+                    <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20">
+                      <img
+                        src="/Nkhlogo.png"
+                        alt="NKH"
+                        className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
+                      />
                     </div>
                     <div>
-                      <h1 className="font-display text-xl font-bold text-neutral-900 dark:text-neutral-100">
+                      <h1 className="font-display text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
                         NKH Restaurant
                       </h1>
-                      <p className="text-sm text-neutral-500 capitalize">
+                      <p className="text-sm text-fuchsia-500 capitalize">
                         {role} Portal
                       </p>
                     </div>
                   </motion.div>
                 ) : (
                   <motion.div
-                    className={cn(
-                      'w-10 h-10 rounded-2xl bg-gradient-to-r flex items-center justify-center mx-auto',
-                      navigation.theme
-                    )}
+                    className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20 mx-auto"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <ChefHat className="w-6 h-6 text-white" />
+                    <img
+                      src="/Nkhlogo.png"
+                      alt="NKH"
+                      className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -342,7 +344,7 @@ export function RestaurantLayout({
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center">
                   <User className="w-4 h-4 text-white" />
                 </div>
-                
+
                 <AnimatePresence>
                   {!sidebarCollapsed && (
                     <motion.div

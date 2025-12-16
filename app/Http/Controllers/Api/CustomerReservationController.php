@@ -7,6 +7,8 @@ use App\Http\Resources\ReservationResource;
 use App\Models\Reservation;
 use App\Models\DiningTable;
 use App\Models\Customer;
+use App\Models\Floor;
+use App\Models\Location;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -63,6 +65,83 @@ class CustomerReservationController extends Controller
             ->get();
 
         return ReservationResource::collection($reservations);
+    }
+
+    /**
+     * Get floors for a specific location
+     */
+    public function floors(Request $request)
+    {
+        $validated = $request->validate([
+            'location_id' => ['required', 'integer', 'exists:locations,id'],
+        ]);
+
+        $floors = Floor::where('location_id', $validated['location_id'])
+            ->where('is_active', true)
+            ->orderBy('display_order')
+            ->get(['id', 'name', 'location_id']);
+
+        return response()->json(['data' => $floors]);
+    }
+
+    /**
+     * Get available tables for a specific floor and time slot
+     */
+    public function tables(Request $request)
+    {
+        $validated = $request->validate([
+            'floor_id' => ['required', 'integer', 'exists:floors,id'],
+            'date' => ['nullable', 'date_format:Y-m-d'],
+            'time' => ['nullable', 'date_format:H:i'],
+            'guest_count' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $floor = Floor::findOrFail($validated['floor_id']);
+
+        $query = DiningTable::where('floor_id', $floor->id)
+            ->where('status', '!=', 'unavailable');
+
+        // Filter by capacity if guest count provided
+        if (!empty($validated['guest_count'])) {
+            $query->where('capacity', '>=', (int) $validated['guest_count']);
+        }
+
+        $tables = $query->orderBy('capacity')->get();
+
+        // If date and time provided, check availability for each table
+        if (!empty($validated['date']) && !empty($validated['time'])) {
+            $date = $validated['date'];
+            $time = $validated['time'] . ':00';
+
+            $tables = $tables->map(function ($table) use ($date, $time, $floor) {
+                $isBooked = Reservation::where('location_id', $floor->location_id)
+                    ->where('table_id', $table->id)
+                    ->where('reservation_date', $date)
+                    ->where('reservation_time', $time)
+                    ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
+                    ->exists();
+
+                return [
+                    'id' => $table->id,
+                    'code' => $table->code,
+                    'capacity' => $table->capacity,
+                    'status' => $table->status,
+                    'is_available' => !$isBooked,
+                ];
+            });
+        } else {
+            $tables = $tables->map(function ($table) {
+                return [
+                    'id' => $table->id,
+                    'code' => $table->code,
+                    'capacity' => $table->capacity,
+                    'status' => $table->status,
+                    'is_available' => $table->status !== 'unavailable',
+                ];
+            });
+        }
+
+        return response()->json(['data' => $tables]);
     }
 
     public function availability(Request $request)
@@ -130,6 +209,8 @@ class CustomerReservationController extends Controller
 
         $validated = $request->validate([
             'location_id' => ['nullable', 'integer', 'exists:locations,id'],
+            'floor_id' => ['nullable', 'integer', 'exists:floors,id'],
+            'table_id' => ['nullable', 'integer', 'exists:tables,id'],
             'reserved_for' => ['required', 'date_format:Y-m-d\\TH:i'],
             'guest_count' => ['required', 'integer', 'min:1'],
             'notes' => ['nullable', 'string'],
@@ -139,7 +220,20 @@ class CustomerReservationController extends Controller
         $reservationDate = $reservedAt->toDateString();
         $reservationTime = $reservedAt->format('H:i:s');
 
-        $locationId = (int) ($validated['location_id'] ?? $customer->preferred_location_id ?? 0);
+        // Determine location from table -> floor -> location chain if table_id provided
+        $locationId = null;
+        if (!empty($validated['table_id'])) {
+            $table = DiningTable::with('floor')->findOrFail($validated['table_id']);
+            if ($table->floor) {
+                $locationId = $table->floor->location_id;
+            }
+        }
+
+        // Fallback to provided location_id or customer preference
+        if (!$locationId) {
+            $locationId = (int) ($validated['location_id'] ?? $customer->preferred_location_id ?? 0);
+        }
+
         if (! $locationId) {
             abort(422, 'Location is required to create a reservation.');
         }
@@ -147,39 +241,62 @@ class CustomerReservationController extends Controller
         $guestCount = (int) $validated['guest_count'];
 
         $reservation = DB::transaction(function () use ($customer, $locationId, $reservationDate, $reservationTime, $guestCount, $validated, $reservedAt) {
-            // Find best-fit table at this location
-            $tables = DiningTable::query()
-                ->whereHas('floor', function ($q) use ($locationId) {
-                    $q->where('location_id', $locationId);
-                })
-                ->where('capacity', '>=', $guestCount)
-                ->where('status', '!=', 'unavailable')
-                ->orderBy('capacity')
-                ->get();
-
             $selectedTable = null;
 
-            foreach ($tables as $table) {
+            // If specific table_id provided, use that table
+            if (!empty($validated['table_id'])) {
+                $selectedTable = DiningTable::with('floor')->findOrFail($validated['table_id']);
+
+                // Verify table capacity
+                if ($guestCount > (int) $selectedTable->capacity) {
+                    abort(422, 'Guest count exceeds table capacity.');
+                }
+
+                // Check if table is available at this time
                 $hasConflict = Reservation::where('location_id', $locationId)
-                    ->where('table_id', $table->id)
+                    ->where('table_id', $selectedTable->id)
                     ->where('reservation_date', $reservationDate)
                     ->where('reservation_time', $reservationTime)
-                    ->where('status', '!=', 'cancelled')
+                    ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
                     ->lockForUpdate()
                     ->exists();
 
-                if (! $hasConflict) {
-                    $selectedTable = $table;
-                    break;
+                if ($hasConflict) {
+                    abort(409, 'This table is already reserved for the selected time.');
                 }
-            }
+            } else {
+                // Find best-fit table at this location (original behavior)
+                $tables = DiningTable::query()
+                    ->whereHas('floor', function ($q) use ($locationId) {
+                        $q->where('location_id', $locationId);
+                    })
+                    ->where('capacity', '>=', $guestCount)
+                    ->where('status', '!=', 'unavailable')
+                    ->orderBy('capacity')
+                    ->get();
 
-            if (! $selectedTable) {
-                abort(409, 'No tables available for the selected time.');
-            }
+                foreach ($tables as $table) {
+                    $hasConflict = Reservation::where('location_id', $locationId)
+                        ->where('table_id', $table->id)
+                        ->where('reservation_date', $reservationDate)
+                        ->where('reservation_time', $reservationTime)
+                        ->where('status', '!=', 'cancelled')
+                        ->lockForUpdate()
+                        ->exists();
 
-            if ($guestCount > (int) $selectedTable->capacity) {
-                abort(422, 'Guest count exceeds table capacity.');
+                    if (! $hasConflict) {
+                        $selectedTable = $table;
+                        break;
+                    }
+                }
+
+                if (! $selectedTable) {
+                    abort(409, 'No tables available for the selected time.');
+                }
+
+                if ($guestCount > (int) $selectedTable->capacity) {
+                    abort(422, 'Guest count exceeds table capacity.');
+                }
             }
 
             $reservationNumber = $this->generateReservationNumber($locationId, $reservedAt);

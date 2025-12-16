@@ -57,9 +57,8 @@ class DatabaseSeeder extends Seeder
         // ══════════════════════════════════════════════════════════════════════
         $this->command->info('📦 PHASE 0: Seeding foundation tables...');
         $this->call([
-            RoleSeeder::class,                    // roles table
-            RolesAndPermissionsSeeder::class,     // permissions, role_permission pivot
-            UnitSeeder::class,                    // units table (measurement units)
+            ComprehensiveRolesPermissionsSeeder::class,  // NEW: Comprehensive roles & permissions with multi-role support
+            UnitSeeder::class,                           // units table (measurement units)
         ]);
         $this->command->info('✅ Foundation tables seeded.');
         $this->command->info('');

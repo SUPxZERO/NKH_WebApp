@@ -17,7 +17,9 @@ import {
   List,
   ArrowUpDown,
   X,
-  ShoppingBag
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
@@ -56,12 +58,15 @@ const itemVariants: Variants = {
   }
 };
 
+const ITEMS_PER_PAGE = 16;
+
 export default function Menu() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('popular');
   const [layout, setLayout] = useState<LayoutOption>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: categories, isLoading: catsLoading } = useCategories();
   const { data: menuItems, isLoading: itemsLoading } = useMenuItems({
@@ -137,6 +142,23 @@ export default function Menu() {
     return filtered;
   }, [menuItems, selectedCategory, searchQuery, sortBy]);
 
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, sortBy]);
+
+  // Pagination calculations
+  const totalItems = processedItems.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedItems = processedItems.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAddToCart = (item: MenuItem) => {
     cart.addItem({
       menu_item_id: item.id,
@@ -161,25 +183,42 @@ export default function Menu() {
         <meta name="description" content="Browse our full menu of delicious dishes. Filter by category, search for your favorites, and order online for delivery or pickup." />
       </Head>
 
-      <div className="space-y-8">
-        {/* Header */}
+      <div className="space-y-6">
+        {/* Header Section */}
         <motion.div
-          className="text-center"
+          className="relative rounded-3xl overflow-hidden"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
-            Our Menu
-          </h1>
-          <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">
-            Discover our delicious selection of freshly prepared dishes
-          </p>
+          {/* Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-pink-600 dark:from-fuchsia-700 dark:via-purple-700 dark:to-pink-700" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_50%)]" />
+
+          {/* Content */}
+          {/* <div className="relative z-10 px-6 py-10 md:py-14 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 mb-4"
+            >
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-sm font-medium text-white">Fresh & Delicious</span>
+            </motion.div>
+
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">
+              Explore Our Menu
+            </h1>
+            <p className="text-base text-white/80 max-w-lg mx-auto">
+              Discover our delicious selection of freshly prepared dishes
+            </p>
+          </div> */}
         </motion.div>
 
         {/* Search & Filters Bar */}
         <motion.div
-          className="sticky top-20 z-30 bg-gradient-to-br from-slate-50/95 via-white/95 to-fuchsia-50/95 dark:from-gray-900/95 dark:via-gray-800/95 dark:to-purple-900/95 backdrop-blur-xl border-b border-white/20 -mx-4 px-4 py-4"
+          className="sticky top-20 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-200/50 dark:shadow-gray-900/50 -mx-2 px-4 py-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
@@ -189,20 +228,20 @@ export default function Menu() {
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Search */}
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   placeholder="Search menu items..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/60 dark:bg-white/5 border border-white/20 focus:border-fuchsia-500/50 focus:ring-2 focus:ring-fuchsia-500/20 transition-all outline-none"
+                  className="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-fuchsia-500 dark:focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all outline-none"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                   </button>
                 )}
               </div>
@@ -213,24 +252,24 @@ export default function Menu() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="px-4 py-3 rounded-xl bg-white/60 dark:bg-white/5 border border-white/20 focus:border-fuchsia-500/50 focus:ring-2 focus:ring-fuchsia-500/20 transition-all outline-none cursor-pointer"
+                  className="px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:border-fuchsia-500 dark:focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all outline-none cursor-pointer"
                 >
                   {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value} className="text-gray-600 dark:text-gray-400">
+                    <option key={option.value} value={option.value} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                       {option.label}
                     </option>
                   ))}
                 </select>
 
                 {/* Layout Toggle */}
-                <div className="flex rounded-xl bg-white/60 dark:bg-white/5 border border-white/20 p-1">
+                <div className="flex rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1">
                   <button
                     onClick={() => setLayout('grid')}
                     className={cn(
                       'p-2 rounded-lg transition-all',
                       layout === 'grid'
                         ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/10'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                     )}
                   >
                     <Grid3x3 className="w-5 h-5" />
@@ -241,7 +280,7 @@ export default function Menu() {
                       'p-2 rounded-lg transition-all',
                       layout === 'list'
                         ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/10'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                     )}
                   >
                     <List className="w-5 h-5" />
@@ -265,7 +304,7 @@ export default function Menu() {
                 {selectedCategory && (
                   <button
                     onClick={() => setSelectedCategory(undefined)}
-                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-400 text-sm hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900/30 transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-400 text-sm font-medium hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900/50 transition-colors border border-fuchsia-200 dark:border-fuchsia-800"
                   >
                     {categories?.find((c) => c.id === selectedCategory)?.name}
                     <X className="w-3 h-3" />
@@ -274,7 +313,7 @@ export default function Menu() {
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-400 text-sm hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900/30 transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-400 text-sm font-medium hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900/50 transition-colors border border-fuchsia-200 dark:border-fuchsia-800"
                   >
                     Search: "{searchQuery}"
                     <X className="w-3 h-3" />
@@ -285,7 +324,7 @@ export default function Menu() {
                     setSelectedCategory(undefined);
                     setSearchQuery('');
                   }}
-                  className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium"
                 >
                   Clear all
                 </button>
@@ -305,7 +344,7 @@ export default function Menu() {
             <p className="text-gray-600 dark:text-gray-400">
               {hasItems ? (
                 <>
-                  Showing <strong className="text-gray-900 dark:text-white">{processedItems.length}</strong> {processedItems.length === 1 ? 'item' : 'items'}
+                  Showing <strong className="text-gray-900 dark:text-white">{startIndex + 1}-{Math.min(endIndex, totalItems)}</strong> of <strong className="text-gray-900 dark:text-white">{totalItems}</strong> {totalItems === 1 ? 'item' : 'items'}
                   {selectedCategory && ` in ${categories?.find((c) => c.id === selectedCategory)?.name}`}
                   {searchQuery && ` matching "${searchQuery}"`}
                 </>
@@ -333,7 +372,7 @@ export default function Menu() {
             <MenuSkeleton count={8} />
           ) : hasItems ? (
             <motion.div
-              key={`${layout}-${sortBy}-${selectedCategory}-${searchQuery}`}
+              key={`${layout}-${sortBy}-${selectedCategory}-${searchQuery}-${currentPage}`}
               className={cn(
                 layout === 'grid'
                   ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
@@ -343,7 +382,7 @@ export default function Menu() {
               initial="hidden"
               animate="visible"
             >
-              {processedItems.map((item) => (
+              {paginatedItems.map((item) => (
                 <motion.div key={item.id} variants={itemVariants} layout>
                   <MenuItemCard
                     item={item}
@@ -357,17 +396,19 @@ export default function Menu() {
             </motion.div>
           ) : (
             <motion.div
-              className="text-center py-20"
-              initial={{ opacity: 0, scale: 0.9 }}
+              className="text-center py-16 px-6 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700"
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="text-6xl mb-4">🔍</div>
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                <Search className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+              </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 No items found
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Try adjusting your filters or search query
+              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                We couldn't find any items matching your criteria. Try adjusting your filters or search query.
               </p>
               <Button
                 variant="outline"
@@ -376,11 +417,143 @@ export default function Menu() {
                   setSearchQuery('');
                 }}
               >
-                Clear filters
+                Clear all filters
               </Button>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Pagination */}
+        {!isLoading && hasItems && totalPages > 1 && (
+          <motion.div
+            className="mt-8 py-6 border-t border-gray-200 dark:border-gray-700"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Previous Page */}
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={cn(
+                  "group flex items-center gap-3 px-5 py-3 rounded-xl border transition-all",
+                  currentPage === 1
+                    ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                    : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20"
+                )}
+              >
+                <ChevronLeft className={cn(
+                  "w-5 h-5 transition-colors",
+                  currentPage === 1
+                    ? "text-gray-400 dark:text-gray-600"
+                    : "text-gray-500 dark:text-gray-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400"
+                )} />
+                <div className="text-left">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Previous</p>
+                  <p className={cn(
+                    "font-semibold transition-colors",
+                    currentPage === 1
+                      ? "text-gray-400 dark:text-gray-600"
+                      : "text-gray-900 dark:text-white group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400"
+                  )}>
+                    Page {currentPage - 1 || 1}
+                  </p>
+                </div>
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-2">
+                {/* First page */}
+                {currentPage > 3 && (
+                  <>
+                    <button
+                      onClick={() => goToPage(1)}
+                      className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 transition-all font-medium"
+                    >
+                      1
+                    </button>
+                    {currentPage > 4 && (
+                      <span className="text-gray-400 dark:text-gray-600 px-1">...</span>
+                    )}
+                  </>
+                )}
+
+                {/* Page numbers around current */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => page >= currentPage - 2 && page <= currentPage + 2)
+                  .map(page => (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={cn(
+                        "w-10 h-10 rounded-lg font-medium transition-all",
+                        page === currentPage
+                          ? "bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/25"
+                          : "bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 hover:text-fuchsia-600 dark:hover:text-fuchsia-400"
+                      )}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                {/* Last page */}
+                {currentPage < totalPages - 2 && (
+                  <>
+                    {currentPage < totalPages - 3 && (
+                      <span className="text-gray-400 dark:text-gray-600 px-1">...</span>
+                    )}
+                    <button
+                      onClick={() => goToPage(totalPages)}
+                      className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 hover:text-fuchsia-600 dark:hover:text-fuchsia-400 transition-all font-medium"
+                    >
+                      {totalPages}
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Next Page */}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={cn(
+                  "group flex items-center gap-3 px-5 py-3 rounded-xl border transition-all",
+                  currentPage === totalPages
+                    ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                    : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20"
+                )}
+              >
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Next</p>
+                  <p className={cn(
+                    "font-semibold transition-colors",
+                    currentPage === totalPages
+                      ? "text-gray-400 dark:text-gray-600"
+                      : "text-gray-900 dark:text-white group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400"
+                  )}>
+                    Page {currentPage + 1 > totalPages ? totalPages : currentPage + 1}
+                  </p>
+                </div>
+                <ChevronRight className={cn(
+                  "w-5 h-5 transition-colors",
+                  currentPage === totalPages
+                    ? "text-gray-400 dark:text-gray-600"
+                    : "text-gray-500 dark:text-gray-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400"
+                )} />
+              </button>
+            </div>
+
+            {/* Page Info */}
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Page <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> of <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                <span className="mx-2">•</span>
+                Showing <span className="font-semibold text-gray-900 dark:text-white">{startIndex + 1}-{Math.min(endIndex, totalItems)}</span> of <span className="font-semibold text-gray-900 dark:text-white">{totalItems}</span> items
+              </p>
+            </div>
+          </motion.div>
+        )}
       </div>
     </CustomerLayout>
   );

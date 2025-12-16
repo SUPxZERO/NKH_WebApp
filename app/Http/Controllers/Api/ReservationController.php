@@ -224,6 +224,8 @@ class ReservationController extends Controller
                 $reservation->notes = $validated['notes'];
             }
 
+            $reservation->save();
+
             return $reservation;
         });
 

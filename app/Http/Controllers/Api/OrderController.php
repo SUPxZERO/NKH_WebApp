@@ -17,6 +17,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Services\InvoiceService;
+use App\Services\LoyaltyService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,12 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
+    protected $loyaltyService;
+
+    public function __construct(LoyaltyService $loyaltyService)
+    {
+        $this->loyaltyService = $loyaltyService;
+    }
     // POST /api/orders (role:admin,manager,waiter)
     public function store(StoreOrderRequest $request): OrderResource|JsonResponse
     {
@@ -614,6 +621,11 @@ class OrderController extends Controller
                         $request->user()->id,
                         ['note' => 'Admin marked as paid']
                     );
+                }
+
+                // Award loyalty points for this order (if customer exists)
+                if ($order->customer_id) {
+                    $this->loyaltyService->awardPoints($order);
                 }
             });
         } elseif ($newStatus === 'unpaid') {

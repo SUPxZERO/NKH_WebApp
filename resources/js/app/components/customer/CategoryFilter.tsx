@@ -30,17 +30,17 @@ export function CategoryFilter({
     }
 
     return (
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-2 sm:px-0">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <motion.button
                 onClick={() => onSelectCategory(undefined)}
                 className={cn(
-                    'px-4 py-2 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all flex-shrink-0',
+                    'px-4 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap transition-all flex-shrink-0',
                     !selectedCategory
-                        ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30'
-                        : 'bg-white/60 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 border border-white/20'
+                        ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/25'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                 )}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
             >
                 All Items
             </motion.button>
@@ -50,18 +50,23 @@ export function CategoryFilter({
                     key={category.id}
                     onClick={() => onSelectCategory(category.id)}
                     className={cn(
-                        'px-4 py-2 rounded-xl font-medium text-sm sm:text-base whitespace-nowrap transition-all flex-shrink-0',
+                        'px-4 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap transition-all flex-shrink-0 flex items-center gap-2',
                         selectedCategory === category.id
-                            ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/30'
-                            : 'bg-white/60 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 border border-white/20'
+                            ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg shadow-fuchsia-500/25'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                     )}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                 >
-                    {category.name}
+                    <span>{category.name}</span>
                     {category.menu_items && (
-                        <span className="ml-2 text-xs sm:text-sm opacity-70">
-                            ({category.menu_items.length})
+                        <span className={cn(
+                            "text-xs px-1.5 py-0.5 rounded-md",
+                            selectedCategory === category.id
+                                ? "bg-white/20"
+                                : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                        )}>
+                            {category.menu_items.length}
                         </span>
                     )}
                 </motion.button>

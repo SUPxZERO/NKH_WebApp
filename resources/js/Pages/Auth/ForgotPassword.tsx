@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, router } from '@inertiajs/react';
-import { Mail, ArrowLeft, Coffee, CheckCircle, Sparkles, Send, ArrowRight, RefreshCw } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, Sparkles, Send, RefreshCw } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { Logo } from '@/Components/brand';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -54,17 +56,12 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Premium animated gradient background */}
-      <div className="absolute inset-0 bg-[#0a0a0f]">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-transparent to-fuchsia-900/40" />
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-blue-600/30 to-cyan-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
-          <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-gradient-to-br from-amber-600/20 to-orange-600/10 rounded-full blur-[100px] animate-pulse delay-500" />
-        </div>
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#0f0f13]">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-fuchsia-900/40 via-[#0f0f13] to-[#0f0f13]" />
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-fuchsia-600/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
       </div>
 
       <motion.div
@@ -73,24 +70,22 @@ export default function ForgotPassword() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative w-full max-w-md z-10"
       >
-        {/* Logo and Title */}
+        {/* Header */}
         <div className="text-center mb-8">
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="relative inline-flex items-center justify-center w-20 h-20 mb-6"
+            className="flex justify-center mb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl rotate-6 blur-sm opacity-70" />
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl" />
-            <Mail className="relative w-10 h-10 text-white" />
-            <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-400 animate-pulse" />
+            <Logo variant="glow" size="2xl" />
           </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl font-black text-white mb-3 tracking-tight"
+            className="text-4xl font-black text-white mb-3 tracking-tight font-display"
           >
             Reset Password
           </motion.h1>
@@ -107,7 +102,7 @@ export default function ForgotPassword() {
           </motion.p>
         </div>
 
-        {/* Main Form Card */}
+        {/* Main Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -115,7 +110,7 @@ export default function ForgotPassword() {
           className="relative"
         >
           {/* Card glow effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-fuchsia-500/20 rounded-[28px] blur-xl" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-fuchsia-500/30 via-purple-500/30 to-pink-500/30 rounded-[28px] blur-xl opacity-75" />
 
           <div className="relative backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-[24px] p-8 shadow-2xl">
             <AnimatePresence mode="wait">
@@ -127,47 +122,45 @@ export default function ForgotPassword() {
                   exit={{ opacity: 0, x: -20 }}
                 >
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    {/* Email Input */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">
+                      <label className="block text-sm font-medium text-gray-300 ml-1">
                         Email Address
                       </label>
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
                         <div className="relative flex items-center">
-                          <Mail className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-amber-400 transition-colors" />
+                          <Mail className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-fuchsia-400 transition-colors" />
                           <input
                             {...register('email')}
                             type="email"
                             placeholder="Enter your email address"
-                            className="w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.05] transition-all"
+                            className="w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                           />
                         </div>
                       </div>
                       {errors.email && (
-                        <p className="text-xs text-rose-400">{errors.email.message}</p>
+                        <p className="text-xs text-rose-400 ml-1">{errors.email.message}</p>
                       )}
                     </div>
 
-                    {/* Submit Button */}
                     <motion.button
                       type="submit"
                       disabled={isLoading}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       className={cn(
-                        "relative w-full h-14 rounded-xl font-semibold text-white overflow-hidden group transition-all",
-                        "bg-gradient-to-r from-amber-600 via-orange-600 to-fuchsia-600",
-                        "hover:shadow-xl hover:shadow-amber-500/25",
+                        "relative w-full h-14 rounded-xl font-semibold text-white overflow-hidden group transition-all shadow-lg shadow-fuchsia-500/20",
+                        "bg-gradient-to-r from-fuchsia-600 via-purple-600 to-pink-600",
+                        "hover:shadow-fuchsia-500/40",
                         isLoading && "opacity-70 cursor-not-allowed"
                       )}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-orange-500 to-fuchsia-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <span className="relative flex items-center justify-center gap-2">
                         {isLoading ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Sending Reset Link...
+                            Sending...
                           </>
                         ) : (
                           <>
@@ -179,7 +172,6 @@ export default function ForgotPassword() {
                     </motion.button>
                   </form>
 
-                  {/* Back to Sign In */}
                   <div className="mt-8 text-center">
                     <Link
                       href="/login"
@@ -198,31 +190,29 @@ export default function ForgotPassword() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="text-center space-y-6"
                 >
-                  {/* Success Icon */}
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                     className="relative inline-flex items-center justify-center w-20 h-20"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full blur-lg opacity-50" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full" />
-                    <CheckCircle className="relative w-10 h-10 text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full blur-lg opacity-50" />
+                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 w-16 h-16 rounded-full flex items-center justify-center relative z-10 shadow-xl">
+                      <CheckCircle className="w-8 h-8 text-white" />
+                    </div>
                   </motion.div>
 
-                  {/* Success Message */}
                   <div>
                     <h3 className="text-2xl font-bold text-white mb-3">Email Sent!</h3>
                     <p className="text-gray-400 leading-relaxed">
                       We've sent a password reset link to{' '}
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400 font-semibold">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">
                         {getValues('email')}
                       </span>
                       . Check your inbox and follow the instructions.
                     </p>
                   </div>
 
-                  {/* Actions */}
                   <div className="space-y-3 pt-2">
                     <motion.button
                       type="button"
@@ -258,7 +248,7 @@ export default function ForgotPassword() {
           </div>
         </motion.div>
 
-        {/* Help Text */}
+        {/* Footer */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -267,7 +257,7 @@ export default function ForgotPassword() {
         >
           <p className="text-xs text-gray-500 text-center">
             💡 Didn't receive the email? Check your spam folder or contact{' '}
-            <a href="mailto:support@nkhrestaurant.com" className="text-fuchsia-400 hover:text-fuchsia-300">
+            <a href="mailto:support@nkhrestaurant.com" className="text-fuchsia-400 hover:text-fuchsia-300 font-medium">
               support@nkhrestaurant.com
             </a>
           </p>

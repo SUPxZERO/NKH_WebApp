@@ -1,4 +1,5 @@
 @import './globals.css';
+@import './brand.css';
 
 @tailwind base;
 @tailwind components;
@@ -22,6 +23,7 @@
    TYPOGRAPHY COMPONENTS
    ============================================ */
 @layer components {
+
   /* Display Typography */
   .text-display {
     @apply font-display font-bold text-foreground;
@@ -158,12 +160,14 @@
    ANIMATION UTILITIES
    ============================================ */
 @layer utilities {
+
   /* Fade In Animation */
   @keyframes fadeInUp {
     from {
       opacity: 0;
       transform: translateY(1rem);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);

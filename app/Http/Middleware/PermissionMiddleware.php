@@ -24,11 +24,8 @@ class PermissionMiddleware
     {
         $user = $request->user();
 
-        // In local development without enforced auth, allow all access
-        if (!$user && !config('app.enforce_admin_auth') && app()->environment('local')) {
-            return $next($request);
-        }
-
+        // SECURITY: Always require authentication - no bypasses
+        // Use proper test credentials in development instead of authentication bypasses
         if (!$user) {
             throw new HttpException(401, 'Unauthenticated.');
         }

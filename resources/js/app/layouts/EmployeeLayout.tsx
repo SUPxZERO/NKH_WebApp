@@ -104,12 +104,16 @@ export default function EmployeeLayout({ children }: Props) {
               <div className="p-6 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
-                      <Briefcase className="w-5 h-5 text-white" />
+                    <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 p-1.5 border border-fuchsia-500/30">
+                      <img
+                        src="/Nkhlogo.png"
+                        alt="NKH"
+                        className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
+                      />
                     </div>
                     <div>
                       <h2 className="font-bold text-gray-900 dark:text-white">Employee Portal</h2>
-                      <p className="text-xs text-gray-500">NKH Restaurant</p>
+                      <p className="text-xs text-fuchsia-500">NKH Restaurant</p>
                     </div>
                   </div>
                   <button
@@ -192,13 +196,22 @@ export default function EmployeeLayout({ children }: Props) {
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/employee/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <Briefcase className="w-5 h-5 text-white" />
+            {/* Logo - Using Actual NKH Logo */}
+            <Link href="/employee/dashboard" className="flex items-center gap-3 group">
+              <div className="relative">
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300" />
+                {/* Logo container */}
+                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 p-1.5 backdrop-blur-sm">
+                  <img
+                    src="/Nkhlogo.png"
+                    alt="NKH Restaurant"
+                    className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.4)]"
+                  />
+                </div>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
                   NKH Restaurant
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">Employee Portal</p>

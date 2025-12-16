@@ -1,5 +1,5 @@
 import React from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useCartStore } from '@/app/store/cart';
@@ -9,8 +9,9 @@ import { CartEmpty } from '@/app/components/cart/CartEmpty';
 import { ModeSelector } from '@/app/components/cart/ModeSelector';
 import { LocationSelector } from '@/app/components/cart/LocationSelector';
 import Button from '@/app/components/ui/Button';
-import { Trash2, ShoppingBag } from 'lucide-react';
-import { toastSuccess, toastError } from '@/app/utils/toast';
+import { Trash2, ShoppingBag, LogIn, ArrowRight } from 'lucide-react';
+import { toastSuccess, toastError, toastInfo } from '@/app/utils/toast';
+import { OrderProgress } from '@/app/components/customer/OrderProgress';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -38,6 +39,10 @@ const itemVariants: Variants = {
 export default function Cart() {
   const cart = useCartStore();
   const [showClearConfirm, setShowClearConfirm] = React.useState(false);
+
+  // Get auth state from Inertia props
+  const { auth } = usePage().props as { auth?: { user?: any } };
+  const isAuthenticated = !!auth?.user;
 
   const handleUpdateQuantity = (menuItemId: number, quantity: number) => {
     if (quantity < 1) {
@@ -71,6 +76,19 @@ export default function Cart() {
       return;
     }
 
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Save pending checkout state
+      localStorage.setItem('pendingCheckout', 'true');
+      localStorage.setItem('checkoutRedirectUrl', '/checkout');
+
+      toastInfo('Please sign in to complete your order');
+
+      // Redirect to login with intended destination
+      window.location.href = '/login?redirect=/checkout';
+      return;
+    }
+
     window.location.href = '/checkout';
   };
 
@@ -89,6 +107,11 @@ export default function Cart() {
         initial="hidden"
         animate="visible"
       >
+        {/* Progress Indicator */}
+        <motion.div variants={itemVariants}>
+          <OrderProgress currentStep="cart" />
+        </motion.div>
+
         {/* Header */}
         <motion.div
           className="flex items-center justify-between"
@@ -252,7 +275,39 @@ export default function Cart() {
             </div>
           </motion.section>
         )}
+
+        {/* Spacer for mobile floating button */}
+        {!isEmpty && <div className="lg:hidden h-24" />}
       </motion.div>
+
+      {/* Floating Checkout Button - Mobile Only */}
+      {!isEmpty && (
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 p-4 bg-gray-950/90 backdrop-blur-xl border-t border-white/10"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-gray-400">Total</p>
+              <p className="text-2xl font-bold text-white">${cart.total.toFixed(2)}</p>
+            </div>
+            <motion.button
+              onClick={handleCheckout}
+              disabled={!cart.location_id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative flex items-center justify-center gap-2 h-14 px-8 rounded-2xl bg-gradient-to-r from-fuchsia-500 via-pink-500 to-rose-500 text-white font-bold text-lg shadow-2xl shadow-fuchsia-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {/* Pulse effect */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-pink-500 animate-pulse opacity-30 blur-md" />
+              <span className="relative">Checkout</span>
+              <ArrowRight className="relative w-5 h-5" />
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
     </CustomerLayout>
   );
 }
+

@@ -86,11 +86,12 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 const StatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
     <StatCard title="Total Bookings" value={stats.total} icon={Calendar} color="purple" index={0} />
-    <StatCard title="Seated Now" value={stats.seated} icon={Utensils} color="emerald" index={1} />
-    <StatCard title="Pending" value={stats.pending} icon={Clock} color="blue" index={2} />
-    <StatCard title="Needs Action" value={stats.late} icon={AlertTriangle} color="amber" index={3} />
+    <StatCard title="Pending" value={stats.pending} icon={Clock} color="blue" index={1} />
+    <StatCard title="Confirmed" value={stats.confirmed} icon={CheckCircle} color="purple" index={2} />
+    <StatCard title="Seated Now" value={stats.seated} icon={Utensils} color="emerald" index={3} />
+    <StatCard title="Needs Action" value={stats.late} icon={AlertTriangle} color="amber" index={4} />
   </div>
 );
 
@@ -136,12 +137,13 @@ const StatusPill = ({ status }: { status: string }) => {
 export default function Reservations() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('today'); // Default to today for better UX
+  const [dateFilter, setDateFilter] = useState('all'); // Default to all to see all reservations
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   useReservationUpdates();
 
@@ -213,6 +215,7 @@ export default function Reservations() {
       total: reservations?.meta?.total || list.length,
       seated: list.filter(r => r.status === 'seated').length,
       pending: list.filter(r => r.status === 'pending').length,
+      confirmed: list.filter(r => r.status === 'confirmed').length,
       late: list.filter(r =>
         (r.status === 'pending' || r.status === 'confirmed') &&
         new Date(r.reserved_for) < lateThreshold
@@ -241,10 +244,16 @@ export default function Reservations() {
     onSuccess: () => {
       toastSuccess('Reservation updated');
       setOpenEdit(false);
+      setUpdatingId(null);
       resetForm();
       qc.invalidateQueries({ queryKey: ['admin/reservations'] });
     },
-    onError: (err: any) => setError(err.response?.data?.message || 'Failed to update')
+    onError: (err: any) => {
+      const message = err.response?.data?.message || 'Failed to update';
+      setError(message);
+      setUpdatingId(null);
+      toastError(message);
+    }
   });
 
   const deleteMutation = useMutation({
@@ -258,6 +267,7 @@ export default function Reservations() {
 
   // Quick Actions
   const handleQuickStatus = (id: number, status: string) => {
+    setUpdatingId(id);
     updateMutation.mutate({ id, data: { status } });
   };
 
@@ -515,32 +525,53 @@ export default function Reservations() {
 
                     {/* Actions (Desktop) */}
                     <div className="col-span-12 md:col-span-4 flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all">
-                      {res.status === 'confirmed' || res.status === 'pending' ? (
+                      {/* Pending → Confirm */}
+                      {res.status === 'pending' && (
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={() => handleQuickStatus(res.id, 'confirmed')}
+                          disabled={updatingId === res.id}
+                          loading={updatingId === res.id}
+                          className="h-8 text-xs"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1.5" /> Confirm
+                        </Button>
+                      )}
+
+                      {/* Confirmed → Seat */}
+                      {res.status === 'confirmed' && (
                         <Button
                           size="sm"
                           variant="success"
                           onClick={() => handleQuickStatus(res.id, 'seated')}
+                          disabled={updatingId === res.id}
+                          loading={updatingId === res.id}
                           className="h-8 text-xs"
                         >
                           <Utensils className="w-3 h-3 mr-1.5" /> Seat Now
                         </Button>
-                      ) : null}
+                      )}
 
-                      {res.status === 'seated' ? (
+                      {/* Seated → Complete */}
+                      {res.status === 'seated' && (
                         <Button
                           size="sm"
                           variant="info"
                           onClick={() => handleQuickStatus(res.id, 'completed')}
+                          disabled={updatingId === res.id}
+                          loading={updatingId === res.id}
                           className="h-8 text-xs"
                         >
                           <CheckCircle className="w-3 h-3 mr-1.5" /> Finish
                         </Button>
-                      ) : null}
+                      )}
 
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => handleEdit(res)}
+                        disabled={updatingId === res.id}
                         className="h-8 w-8 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"
                       >
                         <Edit className="w-3.5 h-3.5" />
@@ -552,6 +583,7 @@ export default function Reservations() {
                         onClick={() => {
                           if (confirm('Cancel this reservation?')) deleteMutation.mutate(res.id);
                         }}
+                        disabled={updatingId === res.id}
                         className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-500"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

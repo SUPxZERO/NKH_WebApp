@@ -128,20 +128,35 @@ class CustomerDashboardController extends Controller
             ->whereIn('status', ['completed', 'open'])
             ->sum('total_amount');
 
-        // Get favorite items (most ordered items)
-        $favoriteItems = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('menu_item_translations', function($join) {
+        // Get favorite items from customer_favorites table (explicit favorites)
+        $locale = app()->getLocale();
+        $favoriteItems = DB::table('customer_favorites')
+            ->join('menu_items', 'customer_favorites.menu_item_id', '=', 'menu_items.id')
+            ->leftJoin('menu_item_translations', function($join) use ($locale) {
                 $join->on('menu_items.id', '=', 'menu_item_translations.menu_item_id')
-                     ->where('menu_item_translations.locale', '=', app()->getLocale());
+                     ->where(function($q) use ($locale) {
+                         $q->where('menu_item_translations.locale', '=', $locale)
+                           ->orWhere('menu_item_translations.locale', '=', 'en');
+                     });
             })
-            ->where('orders.customer_id', $customer->id)
-            ->select('menu_item_translations.name', DB::raw('SUM(order_items.quantity) as total_ordered'))
-            ->groupBy('menu_item_translations.name')
-            ->orderByDesc('total_ordered')
+            ->where('customer_favorites.customer_id', $customer->id)
+            ->select(
+                'menu_items.id',
+                DB::raw('COALESCE(menu_item_translations.name, menu_items.slug) as name'),
+                'menu_items.price',
+                'menu_items.image_path'
+            )
+            ->orderByDesc('customer_favorites.created_at')
             ->limit(5)
-            ->pluck('name')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'price' => (float) $item->price,
+                    'image_path' => $item->image_path ? asset(ltrim(str_replace('\\', '/', $item->image_path), '/')) : null,
+                ];
+            })
             ->toArray();
 
         // Points for next reward (every 100 points = 1 reward)
@@ -435,13 +450,17 @@ class CustomerDashboardController extends Controller
             return response()->json(['data' => []]);
         }
 
-        // Get most frequently ordered items
+        // Get most frequently ordered items with locale fallback
+        $locale = app()->getLocale();
         $favorites = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('menu_item_translations', function($join) {
+            ->leftJoin('menu_item_translations', function($join) use ($locale) {
                 $join->on('menu_items.id', '=', 'menu_item_translations.menu_item_id')
-                     ->where('menu_item_translations.locale', '=', app()->getLocale());
+                     ->where(function($q) use ($locale) {
+                         $q->where('menu_item_translations.locale', '=', $locale)
+                           ->orWhere('menu_item_translations.locale', '=', 'en');
+                     });
             })
             ->where('orders.customer_id', $customer->id)
             ->select(
@@ -449,7 +468,7 @@ class CustomerDashboardController extends Controller
                 'menu_items.slug',
                 'menu_items.price',
                 'menu_items.image_path',
-                'menu_item_translations.name',
+                DB::raw('COALESCE(menu_item_translations.name, menu_items.slug) as name'),
                 DB::raw('SUM(order_items.quantity) as total_ordered'),
                 DB::raw('MAX(orders.created_at) as last_ordered')
             )
@@ -610,6 +629,125 @@ class CustomerDashboardController extends Controller
                 'order_number' => $order->order_number,
                 'status' => $order->status,
             ]
+        ]);
+    }
+
+    /**
+     * Get customer loyalty stats
+     */
+    public function loyaltyStats(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $customer = Customer::where('user_id', $user->id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'message' => 'Customer profile not found'
+            ], 404);
+        }
+
+        // Calculate total orders and lifetime spend
+        $totalOrders = Order::where('customer_id', $customer->id)
+            ->whereIn('status', ['completed', 'ready', 'delivered'])
+            ->count();
+
+        $lifetimeSpend = Order::where('customer_id', $customer->id)
+            ->whereIn('status', ['completed', 'ready', 'delivered'])
+            ->sum('total_amount');
+
+        // Get current tier and calculate next tier
+        $currentTier = $customer->customer_tier ?? 'bronze';
+        $tierThresholds = [
+            'bronze' => 0,
+            'silver' => 2000,
+            'gold' => 5000,
+            'platinum' => 10000,
+        ];
+
+        $nextTier = null;
+        $nextTierThreshold = null;
+        $progressToNextTier = 0;
+
+        switch ($currentTier) {
+            case 'bronze':
+                $nextTier = 'silver';
+                $nextTierThreshold = $tierThresholds['silver'];
+                $progressToNextTier = min(100, ($lifetimeSpend / $nextTierThreshold) * 100);
+                break;
+            case 'silver':
+                $nextTier = 'gold';
+                $nextTierThreshold = $tierThresholds['gold'];
+                $currentTierMin = $tierThresholds['silver'];
+                $progressToNextTier = min(100, (($lifetimeSpend - $currentTierMin) / ($nextTierThreshold - $currentTierMin)) * 100);
+                break;
+            case 'gold':
+                $nextTier = 'platinum';
+                $nextTierThreshold = $tierThresholds['platinum'];
+                $currentTierMin = $tierThresholds['gold'];
+                $progressToNextTier = min(100, (($lifetimeSpend - $currentTierMin) / ($nextTierThreshold - $currentTierMin)) * 100);
+                break;
+            case 'platinum':
+                $nextTier = null;
+                $nextTierThreshold = null;
+                $progressToNextTier = 100;
+                break;
+        }
+
+        return response()->json([
+            'data' => [
+                'points_balance' => (int) $customer->points_balance,
+                'current_tier' => $currentTier,
+                'next_tier' => $nextTier,
+                'next_tier_threshold' => $nextTierThreshold,
+                'progress_to_next_tier' => round($progressToNextTier, 2),
+                'lifetime_spend' => (float) $lifetimeSpend,
+                'total_orders' => $totalOrders,
+            ]
+        ]);
+    }
+
+    /**
+     * Get customer loyalty transaction history
+     */
+    public function loyaltyHistory(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $customer = Customer::where('user_id', $user->id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'message' => 'Customer profile not found'
+            ], 404);
+        }
+
+        // Get last 20 loyalty transactions
+        $transactions = LoyaltyPoint::where('customer_id', $customer->id)
+            ->orderBy('occurred_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'type' => $transaction->type,
+                    'points' => $transaction->points,
+                    'balance_after' => $transaction->balance_after,
+                    'description' => $transaction->notes ?? $transaction->description ?? 'Loyalty transaction',
+                    'occurred_at' => $transaction->occurred_at->toISOString(),
+                ];
+            });
+
+        return response()->json([
+            'data' => $transactions
         ]);
     }
 }

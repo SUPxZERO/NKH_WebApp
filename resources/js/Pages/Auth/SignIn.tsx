@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, router, usePage } from '@inertiajs/react';
-import { Eye, EyeOff, Mail, Lock, User, Shield, Coffee, Sparkles, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Shield, Sparkles, ArrowRight, UtensilsCrossed } from 'lucide-react';
 import { PageProps } from '@/types';
 import { Button } from '@/app/components/ui/Button';
 import { cn } from '@/app/utils/cn';
@@ -21,7 +21,7 @@ type SignInForm = z.infer<typeof signInSchema>;
 
 const roleConfig = {
   customer: {
-    icon: Coffee,
+    icon: UtensilsCrossed,
     label: 'Customer',
     description: 'Order food & track deliveries',
     gradient: 'from-emerald-400 via-teal-500 to-cyan-500',
@@ -79,6 +79,25 @@ export default function SignIn() {
       router.post(route('login'), { ...data, _token: csrfToken }, {
         onSuccess: () => {
           toast.success('Welcome back!');
+
+          // Check for pending checkout redirect
+          const pendingCheckout = localStorage.getItem('pendingCheckout');
+          const redirectUrl = localStorage.getItem('checkoutRedirectUrl');
+
+          if (pendingCheckout === 'true' && redirectUrl) {
+            // Clear the pending state
+            localStorage.removeItem('pendingCheckout');
+            localStorage.removeItem('checkoutRedirectUrl');
+
+            // Show helpful message
+            toast.success('Continuing to checkout...', { duration: 2000 });
+
+            // Redirect to checkout
+            setTimeout(() => {
+              window.location.href = redirectUrl;
+            }, 500);
+          }
+          // Otherwise, default Inertia redirect will happen
         },
         onError: (errors) => {
           toast.error(errors.email || errors.password || 'Invalid credentials');
@@ -111,18 +130,30 @@ export default function SignIn() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative w-full max-w-md z-10"
       >
-        {/* Logo and Title */}
+        {/* Logo and Title - Using Actual NKH Logo */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="relative inline-flex items-center justify-center w-20 h-20 mb-6"
+            className="relative inline-flex items-center justify-center mb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-2xl rotate-6 blur-sm opacity-70" />
-            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-2xl" />
-            <Coffee className="relative w-10 h-10 text-white" />
-            <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-400 animate-pulse" />
+            {/* Outer glow ring */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-fuchsia-500/30 to-pink-500/30 rounded-full blur-2xl animate-pulse" />
+
+            {/* Logo background */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-2xl rotate-3 blur-sm opacity-50" />
+              <div className="relative w-24 h-24 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-fuchsia-500/30">
+                <img
+                  src="/Nkhlogo.png"
+                  alt="NKH Restaurant"
+                  className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]"
+                />
+              </div>
+            </div>
+
+            <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-400 animate-pulse" />
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 10 }}

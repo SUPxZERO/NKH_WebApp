@@ -32,13 +32,17 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 // CUSTOMER WEB ROUTES
 // ============================================================================
 
+// Protected routes - Require authentication with Customer role
 Route::middleware(['auth', 'role:Customer'])->group(function () {
-    Route::get('/dashboard', fn() => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
+    // Menu and Cart (require login)
     Route::get('/menu', fn() => Inertia::render('Customer/Menu'))->name('customer.menu');
     Route::get('/cart', fn() => Inertia::render('Customer/Cart'))->name('customer.cart');
+    
+    // Dashboard and ordering
+    Route::get('/dashboard', fn() => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
     Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
     Route::get('/payment', fn() => Inertia::render('Customer/Payment'))->name('customer.payment');
-    Route::get('/reservation', fn() => Inertia::render('Customer/Reservation'))->name('customer.reservation');
+    Route::get('/reservation', fn() => redirect()->route('customer.reservations'))->name('customer.reservation');
     Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
     Route::get('/orders/{order}', fn() => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
     Route::get('/track/{orderId}', fn() => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
@@ -46,7 +50,7 @@ Route::middleware(['auth', 'role:Customer'])->group(function () {
 
 Route::prefix('customer')->middleware('auth')->group(function () {
     Route::get('/profile', fn() => Inertia::render('Customer/Profile'))->name('customer.profile');
-    Route::get('/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');
+    Route::get('/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');    
     Route::get('/orders/{orderId}', fn($orderId) => Inertia::render('Customer/OrderDetails', ['orderId' => $orderId]))->name('customer.orders.show');
     Route::get('/loyalty', fn() => Inertia::render('Customer/Loyalty'))->name('customer.loyalty');
     Route::get('/reservations', fn() => Inertia::render('Customer/Reservations'))->name('customer.reservations');
@@ -55,7 +59,7 @@ Route::prefix('customer')->middleware('auth')->group(function () {
     Route::get('/help', fn() => Inertia::render('Customer/HelpSupport'))->name('customer.help');
 });
 
-// ============================================================================
+// =========================================================================== =
 // EMPLOYEE WEB ROUTES
 // ============================================================================
 
@@ -87,7 +91,8 @@ Route::prefix('employee')->middleware('auth', 'role:employee')->group(function (
 // ADMIN WEB ROUTES
 // ============================================================================
 
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+// Support multiple admin roles: super-admin, admin, and specific manager roles
+Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,service-manager,finance-manager,hr-manager,inventory-manager,operations-manager,viewer'])->group(function () {
     // Dashboard & Overview
     Route::get('dashboard', fn() => Inertia::render('admin/Dashboard', [
         'analyticsEndpoint' => '/api/admin/dashboard/analytics',

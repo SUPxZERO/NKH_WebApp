@@ -23,28 +23,26 @@ const TIERS = {
 };
 
 export default function Loyalty() {
-    // Fetch customer stats
-    const { data: statsData } = useQuery({
-        queryKey: ['customer', 'stats'],
-        queryFn: () => apiGet('/api/customer/stats')
+    // Fetch loyalty stats
+    const { data: loyaltyStatsData } = useQuery({
+        queryKey: ['customer', 'loyalty', 'stats'],
+        queryFn: () => apiGet('/api/customer/loyalty/stats')
     });
 
-    // Fetch loyalty points history
-    const { data: historyData } = useQuery({
-        queryKey: ['customer', 'history'],
-        queryFn: () => apiGet('/api/customer/history')
+    // Fetch loyalty transaction history
+    const { data: loyaltyHistoryData } = useQuery({
+        queryKey: ['customer', 'loyalty', 'history'],
+        queryFn: () => apiGet('/api/customer/loyalty/history')
     });
 
-    const stats = statsData?.data;
-    const loyaltyTransactions = historyData?.data?.loyalty_transactions || [];
+    const stats = loyaltyStatsData?.data;
+    const loyaltyTransactions = loyaltyHistoryData?.data || [];
 
-    const currentTier = stats?.customer_tier || 'bronze';
+    const currentTier = stats?.current_tier || 'bronze';
     const tierInfo = TIERS[currentTier as keyof typeof TIERS];
-    const nextTier = tierInfo?.next ? TIERS[tierInfo.next as keyof typeof TIERS] : null;
+    const nextTier = stats?.next_tier ? TIERS[stats.next_tier as keyof typeof TIERS] : null;
 
-    const progress = nextTier && nextTier.threshold
-        ? ((parseFloat(stats?.total_spent || 0) / nextTier.threshold) * 100)
-        : 100;
+    const progress = stats?.progress_to_next_tier || 0;
 
     return (
         <CustomerLayout>
@@ -93,7 +91,7 @@ export default function Loyalty() {
                             {/* Lifetime Spend */}
                             <div className="text-center">
                                 <div className="text-5xl font-bold text-green-600 mb-2">
-                                    ${parseFloat(stats?.total_spent || 0).toFixed(0)}
+                                    ${parseFloat(stats?.lifetime_spend || 0).toFixed(0)}
                                 </div>
                                 <p className="text-gray-600 dark:text-gray-400">
                                     <TrendingUp className="w-4 h-4 inline mr-1" />
@@ -106,14 +104,14 @@ export default function Loyalty() {
                         </div>
 
                         {/* Progress to Next Tier */}
-                        {nextTier && (
+                        {nextTier && stats?.next_tier_threshold && (
                             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-gray-600 dark:text-gray-400">
                                         Progress to {nextTier.name}
                                     </span>
                                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                        ${parseFloat(stats?.total_spent || 0).toFixed(0)} / ${nextTier.threshold || 0}
+                                        ${parseFloat(stats?.lifetime_spend || 0).toFixed(0)} / ${stats?.next_tier_threshold || 0}
                                     </span>
                                 </div>
                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
@@ -125,7 +123,7 @@ export default function Loyalty() {
                                     />
                                 </div>
                                 <p className="text-xs text-center text-gray-500 mt-2">
-                                    ${((nextTier.threshold || 0) - parseFloat(stats?.total_spent || 0)).toFixed(0)} more to unlock {nextTier.name} tier!
+                                    ${((stats?.next_tier_threshold || 0) - parseFloat(stats?.lifetime_spend || 0)).toFixed(0)} more to unlock {nextTier.name} tier!
                                 </p>
                             </div>
                         )}
@@ -197,7 +195,7 @@ export default function Loyalty() {
                                             </p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                                 {new Date(transaction.occurred_at).toLocaleDateString()}
-                                                {transaction.notes && ` • ${transaction.notes}`}
+                                                {transaction.description && ` • ${transaction.description}`}
                                             </p>
                                         </div>
                                     </div>

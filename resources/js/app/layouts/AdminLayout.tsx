@@ -383,14 +383,18 @@ export default function AdminLayout({ children }: Props) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-purple-500/30 ring-2 ring-purple-500/20">
-                  <ChefHat className="w-5 h-5 text-white" />
+                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20">
+                  <img
+                    src="/Nkhlogo.png"
+                    alt="NKH"
+                    className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
+                  />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent leading-tight">
+                  <h1 className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent leading-tight">
                     NKH Resto
                   </h1>
-                  <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold tracking-wide">Admin Portal</p>
+                  <p className="text-xs text-fuchsia-600 dark:text-fuchsia-400 font-semibold tracking-wide">Admin Portal</p>
                 </div>
               </motion.div>
             ) : (
@@ -400,8 +404,12 @@ export default function AdminLayout({ children }: Props) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-purple-500/30 ring-2 ring-purple-500/20">
-                  <ChefHat className="w-5 h-5 text-white" />
+                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 p-1.5 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20">
+                  <img
+                    src="/Nkhlogo.png"
+                    alt="NKH"
+                    className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
+                  />
                 </div>
               </motion.div>
             )}

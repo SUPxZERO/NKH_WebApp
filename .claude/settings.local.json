@@ -9,7 +9,11 @@
       "Bash(echo.:*)",
       "Bash(php -r \"file_put_contents(''storage/logs/laravel.log'', '''');\")",
       "Bash(php -r:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(find \"E:\\promgramming\\NKH_WebApp\" -name \"*.php\" -type f -exec grep -l \"completed.*loyalty\\|loyalty.*completed\\|points.*award\" {} ;)",
+      "Bash(grep:*)"
     ]
   }
 }

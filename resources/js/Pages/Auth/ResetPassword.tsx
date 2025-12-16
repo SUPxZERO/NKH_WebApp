@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, router, usePage } from '@inertiajs/react';
-import { Eye, EyeOff, Lock, Coffee, Shield, Sparkles, ArrowRight, Check } from 'lucide-react';
+import { Eye, EyeOff, Lock, Shield, Check } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { Logo } from '@/Components/brand';
 
 const resetPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -74,21 +76,16 @@ export default function ResetPassword() {
 
   const passwordValue = watch('password') || '';
   const passwordStrength = getPasswordStrength(passwordValue);
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-emerald-500'];
+  const strengthColors = ['bg-rose-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-fuchsia-500'];
   const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Premium animated gradient background */}
-      <div className="absolute inset-0 bg-[#0a0a0f]">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-transparent to-fuchsia-900/40" />
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-emerald-600/30 to-green-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
-          <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-gradient-to-br from-blue-600/20 to-cyan-600/10 rounded-full blur-[100px] animate-pulse delay-500" />
-        </div>
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#0f0f13]">
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-fuchsia-900/40 via-[#0f0f13] to-[#0f0f13]" />
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-fuchsia-600/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
       </div>
 
       <motion.div
@@ -97,24 +94,20 @@ export default function ResetPassword() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative w-full max-w-md z-10"
       >
-        {/* Logo and Title */}
         <div className="text-center mb-8">
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="relative inline-flex items-center justify-center w-20 h-20 mb-6"
+            className="flex justify-center mb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl rotate-6 blur-sm opacity-70" />
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl" />
-            <Lock className="relative w-10 h-10 text-white" />
-            <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-400 animate-pulse" />
+            <Logo variant="glow" size="2xl" />
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl font-black text-white mb-3 tracking-tight"
+            className="text-4xl font-black text-white mb-3 tracking-tight font-display"
           >
             New Password
           </motion.h1>
@@ -128,42 +121,39 @@ export default function ResetPassword() {
           </motion.p>
         </div>
 
-        {/* Main Form Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
           className="relative"
         >
-          {/* Card glow effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-fuchsia-500/20 rounded-[28px] blur-xl" />
+          {/* Glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-fuchsia-500/30 via-purple-500/30 to-pink-500/30 rounded-[28px] blur-xl opacity-75" />
 
           <div className="relative backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-[24px] p-8 shadow-2xl">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Hidden fields */}
               <input {...register('token')} type="hidden" />
 
-              {/* Email Display */}
               <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
                 <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-medium">Resetting password for</p>
                 <p className="text-white font-semibold text-lg">{email}</p>
                 <input {...register('email')} type="hidden" />
               </div>
 
-              {/* New Password */}
+              {/* Password Field */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-gray-300 ml-1">
                   New Password
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
                   <div className="relative flex items-center">
-                    <Lock className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-emerald-400 transition-colors" />
+                    <Lock className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-fuchsia-400 transition-colors" />
                     <input
                       {...register('password')}
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Create a strong password"
-                      className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.05] transition-all"
+                      className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                     />
                     <button
                       type="button"
@@ -175,9 +165,9 @@ export default function ResetPassword() {
                   </div>
                 </div>
 
-                {/* Password Strength Indicator */}
+                {/* Strength Meter */}
                 {passwordValue && (
-                  <div className="mt-3">
+                  <div className="mt-3 px-1">
                     <div className="flex gap-1.5 mb-2">
                       {[...Array(5)].map((_, i) => (
                         <motion.div
@@ -194,31 +184,31 @@ export default function ResetPassword() {
                     </div>
                     <p className={cn(
                       "text-xs font-medium",
-                      passwordStrength >= 4 ? 'text-emerald-400' : passwordStrength >= 3 ? 'text-blue-400' : 'text-amber-400'
+                      passwordStrength >= 4 ? 'text-fuchsia-400' : passwordStrength >= 3 ? 'text-blue-400' : 'text-amber-400'
                     )}>
                       {strengthLabels[passwordStrength - 1] || 'Very Weak'} password
                     </p>
                   </div>
                 )}
                 {errors.password && (
-                  <p className="text-xs text-rose-400">{errors.password.message}</p>
+                  <p className="text-xs text-rose-400 ml-1">{errors.password.message}</p>
                 )}
               </div>
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-gray-300 ml-1">
                   Confirm New Password
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
                   <div className="relative flex items-center">
-                    <Lock className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-emerald-400 transition-colors" />
+                    <Lock className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-fuchsia-400 transition-colors" />
                     <input
                       {...register('password_confirmation')}
                       type={showConfirmPassword ? 'text' : 'password'}
                       placeholder="Confirm your new password"
-                      className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.05] transition-all"
+                      className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                     />
                     <button
                       type="button"
@@ -230,24 +220,23 @@ export default function ResetPassword() {
                   </div>
                 </div>
                 {errors.password_confirmation && (
-                  <p className="text-xs text-rose-400">{errors.password_confirmation.message}</p>
+                  <p className="text-xs text-rose-400 ml-1">{errors.password_confirmation.message}</p>
                 )}
               </div>
 
-              {/* Submit Button */}
               <motion.button
                 type="submit"
                 disabled={isLoading}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 className={cn(
-                  "relative w-full h-14 rounded-xl font-semibold text-white overflow-hidden group transition-all",
-                  "bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600",
-                  "hover:shadow-xl hover:shadow-emerald-500/25",
+                  "relative w-full h-14 rounded-xl font-semibold text-white overflow-hidden group transition-all shadow-lg shadow-fuchsia-500/20",
+                  "bg-gradient-to-r from-fuchsia-600 via-purple-600 to-pink-600",
+                  "hover:shadow-fuchsia-500/40",
                   isLoading && "opacity-70 cursor-not-allowed"
                 )}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <span className="relative flex items-center justify-center gap-2">
                   {isLoading ? (
                     <>
@@ -264,7 +253,6 @@ export default function ResetPassword() {
               </motion.button>
             </form>
 
-            {/* Back to Sign In */}
             <div className="mt-6 text-center">
               <Link
                 href="/login"
@@ -297,10 +285,6 @@ export default function ResetPassword() {
                 <li className="flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-gray-500" />
                   Include numbers and special characters
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-gray-500" />
-                  Don't reuse passwords from other accounts
                 </li>
               </ul>
             </div>

@@ -243,10 +243,13 @@ Route::middleware('permission:users.create')->post('admin-users', [\App\Http\Con
 Route::middleware('permission:users.update')->match(['put', 'patch'], 'admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'update']);
 Route::middleware('permission:users.delete')->delete('admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'destroy']);
 
-// Dashboard - general admin access (covered by role middleware)
-Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
-Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
-Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
+// Dashboard - requires dashboard.view permission
+Route::middleware('permission:dashboard.view')
+    ->group(function () {
+        Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
+        Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
+        Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
+    });
 
 // Locations - requires locations.* permissions
 Route::middleware('permission:locations.view')
@@ -277,36 +280,36 @@ Route::middleware('permission:payments.view')
 Route::middleware('permission:payments.refund')
     ->post('payments/{payment}/refund', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'refund']);
 
-// Recipes - requires recipes.* permissions (or inventory for now)
-Route::middleware('permission:inventory.view,menu.view')
+// Recipes - requires recipes.* permissions
+Route::middleware('permission:recipes.view')
     ->group(function () {
         Route::get('recipes', [RecipeController::class, 'index']);
         Route::get('recipes-stats', [RecipeController::class, 'stats']);
         Route::get('recipes/{recipe}', [RecipeController::class, 'show']);
         Route::get('recipes/{recipe}/costing', [RecipeController::class, 'costing']);
     });
-Route::middleware('permission:inventory.adjust,menu.update')
+Route::middleware('permission:recipes.create,recipes.update')
     ->group(function () {
         Route::post('recipes', [RecipeController::class, 'store']);
         Route::put('recipes/{recipe}', [RecipeController::class, 'update']);
         Route::post('recipes/{recipe}/duplicate', [RecipeController::class, 'duplicate']);
     });
-Route::middleware('permission:inventory.adjust,menu.delete')
+Route::middleware('permission:recipes.delete')
     ->delete('recipes/{recipe}', [RecipeController::class, 'destroy']);
 
-// Promotions - requires promotions.* permissions (using menu permissions for now)
-Route::middleware('permission:menu.view')
+// Promotions - requires promotions.* permissions
+Route::middleware('permission:promotions.view')
     ->group(function () {
         Route::get('promotions', [PromotionController::class, 'index']);
         Route::get('promotion-stats', [PromotionController::class, 'stats']);
         Route::get('promotions/{promotion}', [PromotionController::class, 'show']);
     });
-Route::middleware('permission:menu.create')
-    ->post('promotions', [PromotionController::class, 'store']);
-Route::middleware('permission:menu.update')
-    ->match(['put', 'patch'], 'promotions/{promotion}', [PromotionController::class, 'update']);
-Route::middleware('permission:menu.delete')
-    ->delete('promotions/{promotion}', [PromotionController::class, 'destroy']);
+Route::middleware('permission:promotions.manage')
+    ->group(function () {
+        Route::post('promotions', [PromotionController::class, 'store']);
+        Route::match(['put', 'patch'], 'promotions/{promotion}', [PromotionController::class, 'update']);
+        Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy']);
+    });
 
 // Purchase Orders - requires inventory.* permissions
 Route::middleware('permission:inventory.view')
@@ -342,4 +345,20 @@ Route::middleware('permission:inventory.adjust')
         Route::post('suppliers', [SupplierController::class, 'store']);
         Route::match(['put', 'patch'], 'suppliers/{supplier}', [SupplierController::class, 'update']);
         Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy']);
+    });
+
+// Translations - requires settings.* permissions
+Route::middleware('permission:settings.view')
+    ->prefix('translations')
+    ->group(function () {
+        Route::get('categories', [TranslationController::class, 'getCategoryTranslations']);
+        Route::get('menu-items', [TranslationController::class, 'getMenuItemTranslations']);
+        Route::get('missing', [TranslationController::class, 'getMissingTranslations']);
+    });
+Route::middleware('permission:settings.update')
+    ->prefix('translations')
+    ->group(function () {
+        Route::post('bulk-update', [TranslationController::class, 'bulkUpdateTranslations']);
+        Route::put('categories/{categoryId}', [TranslationController::class, 'updateCategoryTranslation']);
+        Route::put('menu-items/{menuItemId}', [TranslationController::class, 'updateMenuItemTranslation']);
     });

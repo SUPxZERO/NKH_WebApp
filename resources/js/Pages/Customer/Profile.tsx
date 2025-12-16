@@ -50,29 +50,30 @@ export default function Profile() {
     const [loadingLocation, setLoadingLocation] = useState(false);
 
     // Fetch profile
-    const { data: profileData } = useQuery({
+    const { data: profileData, isLoading: isProfileLoading } = useQuery({
         queryKey: ['customer', 'profile'],
         queryFn: () => apiGet('/api/customer/profile')
     });
 
     // Fetch addresses
-    const { data: addressesData } = useQuery({
+    const { data: addressesData, isLoading: isAddressesLoading } = useQuery({
         queryKey: ['customer', 'addresses'],
         queryFn: () => apiGet('/api/customer/addresses')
     });
 
-    const profile = profileData?.data;
-    const addresses = addressesData?.data || [];
+    // Handle nested data structure from API - could be { data: ... } or direct object
+    const profile = profileData?.data ?? profileData;
+    const addresses = addressesData?.data || addressesData || [];
 
-    // Profile form state
+    // Profile form state - initialized empty, populated by useEffect
     const [formData, setFormData] = useState({
-        name: profile?.user?.name || '',
-        email: profile?.user?.email || '',
-        phone: profile?.user?.phone || '',
-        birth_date: profile?.birth_date || '',
-        gender: profile?.gender || '',
-        preferred_language: profile?.preferred_language || 'en',
-        marketing_consent: profile?.marketing_consent || false,
+        name: '',
+        email: '',
+        phone: '',
+        birth_date: '',
+        gender: '',
+        preferred_language: 'en',
+        marketing_consent: false,
     });
 
     // Address form state
@@ -93,14 +94,16 @@ export default function Profile() {
     // Update profile when data loads
     React.useEffect(() => {
         if (profile) {
+            // Handle both nested user object and flat structure
+            const userData = profile.user || profile;
             setFormData({
-                name: profile.user?.name || '',
-                email: profile.user?.email || '',
-                phone: profile.user?.phone || '',
-                birth_date: profile.birth_date || '',
-                gender: profile.gender || '',
-                preferred_language: profile.preferred_language || 'en',
-                marketing_consent: profile.marketing_consent || false,
+                name: userData?.name || '',
+                email: userData?.email || '',
+                phone: userData?.phone || profile?.phone || '',
+                birth_date: profile?.birth_date || '',
+                gender: profile?.gender || '',
+                preferred_language: profile?.preferred_language || 'en',
+                marketing_consent: profile?.marketing_consent || false,
             });
         }
     }, [profile]);
@@ -258,6 +261,9 @@ export default function Profile() {
         );
     };
 
+    // Get user data from profile (handles both nested and flat structures)
+    const userData = profile?.user || profile;
+
     return (
         <CustomerLayout>
             <div className="p-6 max-w-4xl mx-auto space-y-6">
@@ -272,7 +278,7 @@ export default function Profile() {
                             Manage your personal information and preferences
                         </p>
                     </div>
-                    {!editMode && (
+                    {!editMode && !isProfileLoading && (
                         <Button onClick={() => setEditMode(true)} variant="outline">
                             <Edit className="w-4 h-4 mr-2" />
                             Edit Profile
@@ -280,140 +286,161 @@ export default function Profile() {
                     )}
                 </div>
 
+                {/* Loading State */}
+                {isProfileLoading && (
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="animate-pulse space-y-4">
+                                <div className="flex justify-center">
+                                    <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700" />
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+                                    <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+                                    <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* Personal Information */}
-                <Card>
-                    <CardContent className="p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                            Personal Information
-                        </h2>
+                {!isProfileLoading && (
+                    <Card>
+                        <CardContent className="p-6">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                                Personal Information
+                            </h2>
 
-                        <div className="flex justify-center mb-6">
-                            <ProfilePictureUpload
-                                name={profile?.user?.name || ''}
-                                currentAvatar={profile?.user?.avatar}
-                                size="xl"
-                                onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['customer', 'profile'] })}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    <User className="w-4 h-4 inline mr-2" />
-                                    Full Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
+                            <div className="flex justify-center mb-6">
+                                <ProfilePictureUpload
+                                    name={userData?.name || formData.name || ''}
+                                    currentAvatar={userData?.avatar || userData?.image_path}
+                                    size="xl"
+                                    onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['customer', 'profile'] })}
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    <Mail className="w-4 h-4 inline mr-2" />
-                                    Email
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        <User className="w-4 h-4 inline mr-2" />
+                                        Full Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        disabled={!editMode}
+                                        className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        <Mail className="w-4 h-4 inline mr-2" />
+                                        Email
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        disabled={!editMode}
+                                        className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        <Phone className="w-4 h-4 inline mr-2" />
+                                        Phone
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        disabled={!editMode}
+                                        className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        <Calendar className="w-4 h-4 inline mr-2" />
+                                        Birth Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={formData.birth_date}
+                                        onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                                        disabled={!editMode}
+                                        className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        Gender
+                                    </label>
+                                    <select
+                                        value={formData.gender}
+                                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                        disabled={!editMode}
+                                        className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
+                                    >
+                                        <option value="">Prefer not to say</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground mb-2">
+                                        Preferred Language
+                                    </label>
+                                    <select
+                                        value={formData.preferred_language}
+                                        onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value })}
+                                        disabled={!editMode}
+                                        className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
+                                    >
+                                        <option value="en">English</option>
+                                        <option value="km">ខ្មែរ (Khmer)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="mt-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.marketing_consent}
+                                        onChange={(e) => setFormData({ ...formData, marketing_consent: e.target.checked })}
+                                        disabled={!editMode}
+                                        className="w-5 h-5 rounded text-purple-600"
+                                    />
+                                    <span className="text-sm text-muted-foreground">
+                                        I want to receive promotional emails and offers
+                                    </span>
                                 </label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
-                                />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    <Phone className="w-4 h-4 inline mr-2" />
-                                    Phone
-                                </label>
-                                <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    <Calendar className="w-4 h-4 inline mr-2" />
-                                    Birth Date
-                                </label>
-                                <input
-                                    type="date"
-                                    value={formData.birth_date}
-                                    onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                                    disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Gender
-                                </label>
-                                <select
-                                    value={formData.gender}
-                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                    disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
-                                >
-                                    <option value="">Prefer not to say</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">
-                                    Preferred Language
-                                </label>
-                                <select
-                                    value={formData.preferred_language}
-                                    onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value })}
-                                    disabled={!editMode}
-                                    className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
-                                >
-                                    <option value="en">English</option>
-                                    <option value="km">ខ្មែរ (Khmer)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="mt-4">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.marketing_consent}
-                                    onChange={(e) => setFormData({ ...formData, marketing_consent: e.target.checked })}
-                                    disabled={!editMode}
-                                    className="w-5 h-5 rounded text-purple-600"
-                                />
-                                <span className="text-sm text-muted-foreground">
-                                    I want to receive promotional emails and offers
-                                </span>
-                            </label>
-                        </div>
-
-                        {editMode && (
-                            <div className="flex gap-3 mt-6">
-                                <Button onClick={handleSaveProfile} disabled={updateProfileMutation.isPending}>
-                                    <Save className="w-4 h-4 mr-2" />
-                                    {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
-                                </Button>
-                                <Button variant="outline" onClick={() => setEditMode(false)}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                            {editMode && (
+                                <div className="flex gap-3 mt-6">
+                                    <Button onClick={handleSaveProfile} disabled={updateProfileMutation.isPending}>
+                                        <Save className="w-4 h-4 mr-2" />
+                                        {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                    <Button variant="outline" onClick={() => setEditMode(false)}>
+                                        Cancel
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Addresses */}
                 <Card>

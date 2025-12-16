@@ -11,6 +11,7 @@ import { usePlaceOnlineOrder } from '@/app/hooks/useOrders';
 import { usePaymentModes } from '@/app/hooks/useOrderPayment';
 import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
 import { Banknote, CreditCard, ShoppingBag, Truck } from 'lucide-react';
+import { OrderProgress } from '@/app/components/customer/OrderProgress';
 
 export default function Checkout() {
   const cart = useCartStore();
@@ -117,6 +118,9 @@ export default function Checkout() {
   return (
     <CustomerLayout>
       <div className="space-y-6">
+        {/* Progress Indicator */}
+        <OrderProgress currentStep="checkout" />
+
         <h1 className="text-2xl font-semibold">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -183,10 +187,27 @@ export default function Checkout() {
                       <button
                         key={mode.code}
                         onClick={() => setSelectedPaymentMode(mode.code)}
-                        className={`relative p-4 rounded-xl border text-left transition-all ${selectedPaymentMode === mode.code
-                            ? 'border-fuchsia-400 bg-fuchsia-500/10 text-white'
-                            : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10 text-gray-300'
-                          }`}
+                        className={`
+                          relative p-4 rounded-xl border text-left
+                          transition-all duration-200 ease-out
+                          focus:outline-none focus:ring-2 focus:ring-fuchsia-400/40
+                          ${
+                            selectedPaymentMode === mode.code
+                              ? `
+                                border-fuchsia-500
+                                bg-fuchsia-50 dark:bg-fuchsia-500/15
+                                text-fuchsia-700 dark:text-white
+                                shadow-md
+                              `
+                              : `
+                                border-gray-200 dark:border-white/10
+                                bg-white dark:bg-white/5
+                                text-gray-700 dark:text-gray-400
+                                hover:border-fuchsia-300 dark:hover:border-white/20
+                                hover:bg-fuchsia-50/50 dark:hover:bg-white/10
+                              `
+                          }
+                        `}
                       >
                         <div className="flex items-center gap-3 mb-2">
                           {mode.code === 'pay_now' ? (
