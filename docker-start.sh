@@ -19,4 +19,10 @@ echo "Running database migrations..."
 php artisan migrate --force || echo "Migration failed, continuing..."
 
 echo "Starting Laravel server..."
+echo "Environment check:"
+echo "APP_ENV: $APP_ENV"
+echo "APP_DEBUG: $APP_DEBUG"
+echo "APP_URL: $APP_URL"
+echo "Asset manifest exists: $([ -f /var/www/public/build/manifest.json ] && echo 'YES' || echo 'NO')"
+
 exec php artisan serve --host=0.0.0.0 --port=8000
