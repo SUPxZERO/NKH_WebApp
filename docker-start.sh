@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Ensure production environment variables are set
+export APP_ENV=production
+export APP_DEBUG=false
+
 echo "Optimizing Laravel..."
 php artisan config:cache
 php artisan route:cache
