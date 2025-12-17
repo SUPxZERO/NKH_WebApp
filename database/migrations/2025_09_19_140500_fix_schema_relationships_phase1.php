@@ -16,15 +16,23 @@ return new class extends Migration
     {
         // 1) users: add unique index on phone if present and not already unique
         if (Schema::hasTable('users') && Schema::hasColumn('users', 'phone')) {
-            Schema::table('users', function (Blueprint $table) {
-                try { 
-                    // Attempt to add unique constraint. If it exists, it will fail and be caught.
-                    // Because $withinTransaction = false, this won't abort the migration.
-                    $table->unique('phone', 'ux_users_phone'); 
-                } catch (\Throwable $e) { 
-                    // Constraint likely already exists or incompatibility
+            // Check if constraint already exists
+            $constraintExists = \DB::select("
+                SELECT constraint_name
+                FROM information_schema.table_constraints
+                WHERE table_name = 'users'
+                AND constraint_name = 'ux_users_phone'
+            ");
+
+            if (empty($constraintExists)) {
+                try {
+                    Schema::table('users', function (Blueprint $table) {
+                        $table->unique('phone', 'ux_users_phone');
+                    });
+                } catch (\Throwable $e) {
+                    // Constraint might have been created concurrently - ignore
                 }
-            });
+            }
         }
 
         // 2) floors: add required columns and FKs

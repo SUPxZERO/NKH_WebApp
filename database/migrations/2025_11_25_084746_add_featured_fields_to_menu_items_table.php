@@ -12,14 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('menu_items', function (Blueprint $table) {
-            // Featured item flag - for homepage display
-            $table->boolean('is_featured')->default(false)->after('is_popular');
-            // Order in which featured items appear
-            $table->unsignedInteger('featured_order')->default(0)->after('is_featured');
-            // Badge text (e.g., "Best Seller", "Chef's Choice", "Trending")
-            $table->string('badge', 50)->nullable()->after('featured_order');
-            // Description text
-            $table->text('description')->nullable()->after('image_path');
+            // Only add columns if they don't already exist
+            if (!Schema::hasColumn('menu_items', 'is_featured')) {
+                $table->boolean('is_featured')->default(false)->after('is_popular');
+            }
+            if (!Schema::hasColumn('menu_items', 'featured_order')) {
+                $table->unsignedInteger('featured_order')->default(0)->after('is_featured');
+            }
+            if (!Schema::hasColumn('menu_items', 'badge')) {
+                $table->string('badge', 50)->nullable()->after('featured_order');
+            }
+            if (!Schema::hasColumn('menu_items', 'description')) {
+                $table->text('description')->nullable()->after('image_path');
+            }
         });
     }
 
