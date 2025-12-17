@@ -162,11 +162,28 @@ return new class extends Migration
                 if (!Schema::hasColumn('reservations', 'notes')) {
                     $table->text('notes')->nullable()->after('status');
                 }
-                // Add unique(code) only if it doesn't already exist
-                try { 
-                    $table->unique('code'); 
-                } catch (\Throwable $e) { /* ignore */ }
             });
+
+            // Add unique(code) constraint separately with proper check
+            if (Schema::hasColumn('reservations', 'code')) {
+                try {
+                    // Check if constraint already exists before adding
+                    $constraintExists = \DB::select("
+                        SELECT constraint_name
+                        FROM information_schema.table_constraints
+                        WHERE table_name = 'reservations'
+                        AND constraint_name = 'reservations_code_unique'
+                    ");
+
+                    if (empty($constraintExists)) {
+                        Schema::table('reservations', function (Blueprint $table) {
+                            $table->unique('code');
+                        });
+                    }
+                } catch (\Throwable $e) {
+                    // Constraint already exists or other issue - ignore
+                }
+            }
         }
 
         // 7) purchase_orders
