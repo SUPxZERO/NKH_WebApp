@@ -6,25 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Disable transaction for this migration to allow proper exception handling
+     * for schema existence checks on Postgres.
+     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         // 1) users: add unique index on phone if present and not already unique
         if (Schema::hasTable('users') && Schema::hasColumn('users', 'phone')) {
-            try {
-                $dbName = \Illuminate\Support\Facades\DB::getDatabaseName();
-                $exists = \Illuminate\Support\Facades\DB::table('information_schema.statistics')
-                    ->where('table_schema', $dbName)
-                    ->where('table_name', 'users')
-                    ->where('column_name', 'phone')
-                    ->where('non_unique', 0) // unique index
-                    ->exists();
-            } catch (\Throwable $e) { $exists = false; }
-
-            if (! $exists) {
-                Schema::table('users', function (Blueprint $table) {
-                    try { $table->unique('phone', 'ux_users_phone'); } catch (\Throwable $e) { /* ignore */ }
-                });
-            }
+            Schema::table('users', function (Blueprint $table) {
+                try { 
+                    // Attempt to add unique constraint. If it exists, it will fail and be caught.
+                    // Because $withinTransaction = false, this won't abort the migration.
+                    $table->unique('phone', 'ux_users_phone'); 
+                } catch (\Throwable $e) { 
+                    // Constraint likely already exists or incompatibility
+                }
+            });
         }
 
         // 2) floors: add required columns and FKs
@@ -163,19 +163,9 @@ return new class extends Migration
                     $table->text('notes')->nullable()->after('status');
                 }
                 // Add unique(code) only if it doesn't already exist
-                try {
-                    $dbName = \Illuminate\Support\Facades\DB::getDatabaseName();
-                    $exists = \Illuminate\Support\Facades\DB::table('information_schema.statistics')
-                        ->where('table_schema', $dbName)
-                        ->where('table_name', 'reservations')
-                        ->where('column_name', 'code')
-                        ->where('non_unique', 0)
-                        ->exists();
-                } catch (\Throwable $e) { $exists = false; }
-
-                if (! $exists) {
-                    try { $table->unique('code'); } catch (\Throwable $e) { /* ignore */ }
-                }
+                try { 
+                    $table->unique('code'); 
+                } catch (\Throwable $e) { /* ignore */ }
             });
         }
 
@@ -332,25 +322,18 @@ return new class extends Migration
             });
         }
 
-        // 11) orders: add missing FK for customer_id using direct SQL (so we can safely try/catch)
+        // 11) orders: add missing FK for customer_id safely
         if (Schema::hasTable('orders') && Schema::hasColumn('orders', 'customer_id')) {
             try {
-                $dbName = \Illuminate\Support\Facades\DB::getDatabaseName();
-                $fkExists = \Illuminate\Support\Facades\DB::table('information_schema.KEY_COLUMN_USAGE')
-                    ->where('TABLE_SCHEMA', $dbName)
-                    ->where('TABLE_NAME', 'orders')
-                    ->where('COLUMN_NAME', 'customer_id')
-                    ->whereNotNull('REFERENCED_TABLE_NAME')
-                    ->exists();
-
-                if (! $fkExists) {
-                    // Use a custom constraint name to avoid collisions with the default
-                    \Illuminate\Support\Facades\DB::statement(
-                        "ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE"
-                    );
-                }
+                Schema::table('orders', function (Blueprint $table) {
+                    // This uses Laravel's schema builder which handles Postgres syntax correctly
+                    $table->foreign('customer_id', 'fk_orders_customer_id')
+                          ->references('id')->on('customers')
+                          ->onDelete('set null')
+                          ->onUpdate('cascade');
+                });
             } catch (\Throwable $e) {
-                // Intentionally ignore to keep migration idempotent across environments
+                // Ignore if FK already exists
             }
         }
 
