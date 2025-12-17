@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies (for Render.com HTTPS support)
+        $middleware->trustProxies(at: '*');
+
         // Web middleware - add Inertia handling
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
