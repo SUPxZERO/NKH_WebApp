@@ -155,7 +155,7 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,servic
     Route::get('settings', fn() => Inertia::render('admin/Settings'))->name('admin.settings');
 });
 Route::get('forgetPass', fn() => Inertia::render('Auth/ForgotPassword'))->name('auth.forgotpassword');
-Route::get('VerifyEmail', fn() => Inertia::render('Auth/VerifyEmail'))->name('auth.forgotpassword');
+Route::get('VerifyEmail', fn() => Inertia::render('Auth/VerifyEmail'))->name('auth.verify_email');
 
 
 // ============================================================================
