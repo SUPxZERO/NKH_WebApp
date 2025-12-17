@@ -18,6 +18,9 @@ fi
 echo "Running database migrations..."
 php artisan migrate --force || echo "Migration failed, continuing..."
 
+echo "Seeding database with initial data..."
+php artisan db:seed --force || echo "Seeding failed, continuing..."
+
 echo "Starting Laravel server..."
 echo "Environment check:"
 echo "APP_ENV: $APP_ENV"

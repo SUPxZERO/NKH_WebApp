@@ -44,7 +44,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Disable foreign key checks for seeding (allows for flexible insertion order)
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // PostgreSQL uses different syntax than MySQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('SET CONSTRAINTS ALL DEFERRED;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        }
 
         $this->command->info('');
         $this->command->info('🍽️  ═══════════════════════════════════════════════════════════════');
@@ -257,7 +262,11 @@ class DatabaseSeeder extends Seeder
         $this->command->info('');
 
         // Re-enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('SET CONSTRAINTS ALL IMMEDIATE;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
 
         $this->command->info('');
         $this->command->info('═══════════════════════════════════════════════════════════════════');
