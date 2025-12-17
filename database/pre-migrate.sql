@@ -1,11 +1,11 @@
 -- Pre-migration script to ensure critical columns exist
 -- This runs before Laravel migrations to handle edge cases
 
--- Ensure menu_items table exists first
+-- Fix menu_items table
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'menu_items') THEN
-        RAISE NOTICE 'menu_items table does not exist yet, skipping column additions';
+        RAISE NOTICE 'menu_items table does not exist yet, skipping';
     ELSE
         -- Add deleted_at column if it doesn't exist (for soft deletes)
         IF NOT EXISTS (
@@ -45,6 +45,30 @@ BEGIN
             WHERE table_name = 'menu_items' AND column_name = 'display_order'
         ) THEN
             ALTER TABLE menu_items ADD COLUMN display_order INTEGER DEFAULT 0;
+        END IF;
+    END IF;
+END $$;
+
+-- Fix categories table
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'categories') THEN
+        RAISE NOTICE 'categories table does not exist yet, skipping';
+    ELSE
+        -- Add deleted_at column if it doesn't exist (for soft deletes)
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'categories' AND column_name = 'deleted_at'
+        ) THEN
+            ALTER TABLE categories ADD COLUMN deleted_at TIMESTAMP NULL;
+        END IF;
+
+        -- Add display_order column if it doesn't exist
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'categories' AND column_name = 'display_order'
+        ) THEN
+            ALTER TABLE categories ADD COLUMN display_order INTEGER DEFAULT 0;
         END IF;
     END IF;
 END $$;
