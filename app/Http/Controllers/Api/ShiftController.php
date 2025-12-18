@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Shift;
 use App\Models\Employee;
+use App\Http\Resources\ShiftResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ class ShiftController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Shift::with(['employee', 'location', 'position']);
+        $query = Shift::with(['employee.user', 'employee.position', 'location', 'position']);
 
         // Filter by date range
         if ($request->has('date_from')) {
@@ -50,7 +51,7 @@ class ShiftController extends Controller
         // Search
         if ($request->has('search')) {
             $search = $request->search;
-            $query->whereHas('employee', function ($q) use ($search) {
+            $query->whereHas('employee.user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
             });
         }
@@ -63,7 +64,7 @@ class ShiftController extends Controller
         $perPage = $request->get('per_page', 50);
         $shifts = $query->paginate($perPage);
 
-        return response()->json($shifts);
+        return ShiftResource::collection($shifts);
     }
 
     /**
@@ -92,7 +93,7 @@ class ShiftController extends Controller
                 $endDate = $startDate->copy()->endOfWeek();
         }
 
-        $shifts = Shift::with(['employee', 'location', 'position'])
+        $shifts = Shift::with(['employee.user', 'employee.position', 'location', 'position'])
             ->whereBetween('start_time', [$startDate, $endDate])
             ->orderBy('start_time')
             ->get();
@@ -101,7 +102,7 @@ class ShiftController extends Controller
             'start_date' => $startDate->toDateString(),
             'end_date' => $endDate->toDateString(),
             'view' => $view,
-            'shifts' => $shifts
+            'shifts' => ShiftResource::collection($shifts)
         ]);
     }
 
@@ -137,28 +138,32 @@ class ShiftController extends Controller
 
         // Check if employee is active
         $employee = Employee::find($validated['employee_id']);
-        if (!$employee || !$employee->is_active) {
-            return response()->json([
-                'message' => 'Cannot assign shifts to inactive employees'
-            ], 422);
+        if (!$employee || $employee->status !== 'active') {
+             return response()->json(['message' => 'Cannot assign shift to inactive employee'], 422);
         }
 
-        $shift = Shift::create([
-            'employee_id' => $validated['employee_id'],
-            'location_id' => $validated['location_id'] ?? null,
+        // Format dates for database
+        $startTime = Carbon::parse($validated['start_time']);
+        $endTime = Carbon::parse($validated['end_time']);
+        
+        $shiftData = array_merge($validated, [
+            'start_time' => $startTime->format('Y-m-d H:i:s'),
+            'end_time' => $endTime->format('Y-m-d H:i:s'),
+            'date' => $startTime->toDateString(),
             'position_id' => $validated['position_id'] ?? $employee->position_id,
-            'start_time' => $validated['start_time'],
-            'end_time' => $validated['end_time'],
             'shift_type' => $validated['shift_type'] ?? 'morning',
+            'status' => $validated['status'] ?? 'draft',
+            'location_id' => $validated['location_id'] ?? null,
             'notes' => $validated['notes'] ?? null,
-            'status' => $validated['status'] ?? 'draft'
         ]);
 
-        $shift->load(['employee', 'location', 'position']);
+        $shift = Shift::create($shiftData);
+
+        $shift->load(['employee.user', 'employee.position', 'location', 'position']);
 
         return response()->json([
             'message' => 'Shift created successfully',
-            'data' => $shift
+            'data' => new ShiftResource($shift)
         ], 201);
     }
 
@@ -167,10 +172,10 @@ class ShiftController extends Controller
      */
     public function show(Shift $shift): JsonResponse
     {
-        $shift->load(['employee', 'location', 'position']);
+        $shift->load(['employee.user', 'employee.position', 'location', 'position']);
         
         return response()->json([
-            'data' => $shift
+            'data' => new ShiftResource($shift)
         ]);
     }
 
@@ -197,6 +202,24 @@ class ShiftController extends Controller
             'status' => 'nullable|in:draft,published,completed,cancelled'
         ]);
 
+        if (isset($validated['employee_id'])) {
+             // Check if employee is active
+            $employee = Employee::find($validated['employee_id']);
+             if (!$employee || $employee->status !== 'active') {
+                 return response()->json(['message' => 'Cannot assign shift to inactive employee'], 422);
+             }
+        }
+
+        // Format dates for database
+        if (isset($validated['start_time'])) {
+            $validated['start_time'] = Carbon::parse($validated['start_time'])->format('Y-m-d H:i:s');
+            // Update date if start_time changes
+            $validated['date'] = Carbon::parse($validated['start_time'])->toDateString();
+        }
+        if (isset($validated['end_time'])) {
+            $validated['end_time'] = Carbon::parse($validated['end_time'])->format('Y-m-d H:i:s');
+        }
+
         // Check for conflicts (excluding current shift)
         $conflicts = $this->checkConflicts(
             $validated['employee_id'],
@@ -213,11 +236,11 @@ class ShiftController extends Controller
         }
 
         $shift->update($validated);
-        $shift->load(['employee', 'location', 'position']);
+        $shift->load(['employee.user', 'employee.position', 'location', 'position']);
 
         return response()->json([
             'message' => 'Shift updated successfully',
-            'data' => $shift
+            'data' => new ShiftResource($shift)
         ]);
     }
 
@@ -311,8 +334,8 @@ class ShiftController extends Controller
      */
     public function stats(Request $request): JsonResponse
     {
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
+        $startDate = $request->get('start_date') ? Carbon::parse($request->start_date)->startOfDay() : now()->startOfMonth();
+        $endDate = $request->get('end_date') ? Carbon::parse($request->end_date)->endOfDay() : now()->endOfMonth();
 
         $stats = [
             'total_shifts' => Shift::whereBetween('start_time', [$startDate, $endDate])->count(),
@@ -328,7 +351,7 @@ class ShiftController extends Controller
             'by_employee' => Shift::whereBetween('start_time', [$startDate, $endDate])
                 ->select('employee_id', DB::raw('count(*) as count'))
                 ->groupBy('employee_id')
-                ->with('employee:id,name')
+                ->with('employee.user')
                 ->get()
         ];
 
@@ -364,6 +387,7 @@ class ShiftController extends Controller
             $newShift = $shift->replicate();
             $newShift->start_time = Carbon::parse($shift->start_time)->addDays($daysDiff);
             $newShift->end_time = Carbon::parse($shift->end_time)->addDays($daysDiff);
+            $newShift->date = Carbon::parse($newShift->start_time)->toDateString(); // Ensure date is set because we replicate
             $newShift->status = 'draft';
             $newShift->save();
             $copiedShifts[] = $newShift;
@@ -372,7 +396,7 @@ class ShiftController extends Controller
         return response()->json([
             'message' => 'Shifts copied successfully',
             'count' => count($copiedShifts),
-            'data' => $copiedShifts
+            'data' => ShiftResource::collection($copiedShifts)
         ]);
     }
 }

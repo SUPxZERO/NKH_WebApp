@@ -30,20 +30,30 @@ class PayrollController extends Controller
         $validated = $request->validate([
             'employee_ids' => 'required|array|min:1',
             'employee_ids.*' => 'exists:employees,id',
-            'period_start' => 'required|date_format:Y-m-d',
-            'period_end' => 'required|date_format:Y-m-d|after:period_start',
+            'month' => 'nullable|date_format:Y-m',
+            'period_start' => 'required_without:month|date_format:Y-m-d',
+            'period_end' => 'required_without:month|date_format:Y-m-d|after:period_start',
             'include_overtime' => 'nullable|boolean',
         ]);
 
         try {
+            if ($request->filled('month')) {
+                $date = Carbon::parse($validated['month']);
+                $startDate = $date->copy()->startOfMonth();
+                $endDate = $date->copy()->endOfMonth();
+            } else {
+                $startDate = Carbon::parse($validated['period_start']);
+                $endDate = Carbon::parse($validated['period_end']);
+            }
+
             $payrolls = [];
 
-            DB::transaction(function () use ($validated, &$payrolls) {
+            DB::transaction(function () use ($validated, &$payrolls, $startDate, $endDate) {
                 foreach ($validated['employee_ids'] as $employeeId) {
                     // Check if payroll already exists for this period
                     $existing = Payroll::where('employee_id', $employeeId)
-                        ->where('period_start', $validated['period_start'])
-                        ->where('period_end', $validated['period_end'])
+                        ->where('period_start', $startDate->format('Y-m-d'))
+                        ->where('period_end', $endDate->format('Y-m-d'))
                         ->first();
 
                     if ($existing) {
@@ -56,8 +66,8 @@ class PayrollController extends Controller
                     // Calculate payroll
                     $payroll = $this->payrollService->generatePayroll(
                         $employee,
-                        Carbon::parse($validated['period_start']),
-                        Carbon::parse($validated['period_end']),
+                        $startDate,
+                        $endDate,
                         $validated['include_overtime'] ?? false
                     );
 
@@ -138,14 +148,31 @@ class PayrollController extends Controller
     public function history(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'employee_id' => 'nullable|exists:employees,id', // Keep for backward compatibility if needed
+            'employee_ids' => 'nullable|array',
+            'employee_ids.*' => 'exists:employees,id',
+            'month' => 'nullable|date_format:Y-m',
             'from' => 'nullable|date_format:Y-m-d',
             'to' => 'nullable|date_format:Y-m-d',
             'per_page' => 'nullable|integer|min:1|max:100',
         ]);
 
         try {
-            $query = Payroll::where('employee_id', $validated['employee_id']);
+            $query = Payroll::with('employee.user');
+
+            if ($request->filled('employee_id')) {
+                $query->where('employee_id', $validated['employee_id']);
+            }
+
+            if ($request->filled('employee_ids')) {
+                $query->whereIn('employee_id', $validated['employee_ids']);
+            }
+
+            if ($request->filled('month')) {
+                $date = Carbon::parse($validated['month']);
+                $query->whereYear('period_start', $date->year)
+                      ->whereMonth('period_start', $date->month);
+            }
 
             if ($validated['from'] ?? null) {
                 $query->where('period_start', '>=', $validated['from']);
@@ -162,13 +189,18 @@ class PayrollController extends Controller
                 'data' => $payrolls->map(function ($payroll) {
                     return [
                         'id' => $payroll->id,
+                        'employee_id' => $payroll->employee_id,
+                        'employee_name' => $payroll->employee->user->name ?? 'Unknown',
                         'period' => $payroll->period_start->format('M Y'),
                         'period_start' => $payroll->period_start->format('Y-m-d'),
                         'period_end' => $payroll->period_end->format('Y-m-d'),
-                        'gross_pay' => $payroll->gross_pay,
-                        'bonuses' => $payroll->bonuses,
-                        'deductions' => $payroll->deductions,
-                        'net_pay' => $payroll->net_pay,
+                        'base_pay' => (float) $payroll->base_pay ?? 0, // Ensure field exists
+                        'overtime_pay' => (float) $payroll->overtime_pay ?? 0, // Ensure field exists
+                        'taxes' => (float) $payroll->taxes ?? 0, // Ensure field exists
+                        'gross_pay' => (float) $payroll->gross_pay,
+                        'bonuses' => (float) $payroll->bonuses,
+                        'deductions' => (float) $payroll->deductions,
+                        'net_pay' => (float) $payroll->net_pay,
                         'status' => $payroll->status,
                         'paid_at' => $payroll->paid_at?->format('Y-m-d'),
                     ];

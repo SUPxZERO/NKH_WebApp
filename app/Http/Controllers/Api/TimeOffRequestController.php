@@ -17,7 +17,7 @@ class TimeOffRequestController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = TimeOffRequest::with(['employee', 'approvedBy']);
+        $query = TimeOffRequest::with(['employee.user', 'approvedBy']);
 
         // Filter by employee
         if ($request->has('employee_id') && $request->employee_id !== 'all') {
@@ -42,12 +42,11 @@ class TimeOffRequestController extends Controller
             $query->where('start_date', '<=', $request->date_to);
         }
 
-        // Search
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->whereHas('employee', function ($eq) use ($search) {
-                    $eq->where('name', 'like', "%{$search}%");
+                $q->whereHas('employee.user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%");
                 })->orWhere('reason', 'like', "%{$search}%");
             });
         }

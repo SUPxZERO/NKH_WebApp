@@ -24,7 +24,10 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 
 interface Employee {
     id: number;
-    name: string;
+    user?: {
+        name: string;
+    };
+    name?: string; // Fallback or if modified
 }
 
 interface TimeOffRequest {
@@ -97,7 +100,7 @@ export default function TimeOffRequests() {
     // Fetch employees
     const { data: employees } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => apiGet('/api/employees')
+        queryFn: () => apiGet('/api/admin/employees')
     });
 
     // Fetch stats
@@ -213,7 +216,7 @@ export default function TimeOffRequests() {
             case 'pending': return 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30';
             case 'approved': return 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30';
             case 'rejected': return 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30';
-            default: return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30';
+            default: return 'bg-secondary text-muted-foreground border-border';
         }
     };
 
@@ -284,26 +287,26 @@ export default function TimeOffRequests() {
                         </div>
 
                         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground">
-                            <option value="all">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
+                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground dark:[color-scheme:dark]">
+                            <option value="all" className="bg-card text-foreground">All Status</option>
+                            <option value="pending" className="bg-card text-foreground">Pending</option>
+                            <option value="approved" className="bg-card text-foreground">Approved</option>
+                            <option value="rejected" className="bg-card text-foreground">Rejected</option>
                         </select>
 
                         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground">
-                            <option value="all">All Types</option>
+                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground dark:[color-scheme:dark]">
+                            <option value="all" className="bg-card text-foreground">All Types</option>
                             {Object.entries(requestTypes).map(([key, label]) => (
-                                <option key={key} value={key}>{label}</option>
+                                <option key={key} value={key} className="bg-card text-foreground">{label}</option>
                             ))}
                         </select>
 
                         <select value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)}
-                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground">
-                            <option value="all">All Employees</option>
+                            className="bg-card border border-border rounded-lg px-3 py-2 text-foreground dark:[color-scheme:dark]">
+                            <option value="all" className="bg-card text-foreground">All Employees</option>
                             {employees?.data?.map((emp: Employee) => (
-                                <option key={emp.id} value={emp.id}>{emp.name}</option>
+                                <option key={emp.id} value={emp.id} className="bg-card text-foreground">{emp.user?.name || emp.name}</option>
                             ))}
                         </select>
 
@@ -334,7 +337,7 @@ export default function TimeOffRequests() {
                                                 <div>
                                                     <h3 className="font-semibold text-foreground text-lg flex items-center gap-2">
                                                         <User className="w-4 h-4" />
-                                                        {request.employee?.name}
+                                                        {request.employee?.user?.name || request.employee?.name || 'Unknown'}
                                                     </h3>
                                                     <Badge className="mt-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30">
                                                         {requestTypes[request.type as keyof typeof requestTypes]}
@@ -356,8 +359,14 @@ export default function TimeOffRequests() {
                                                 </div>
                                                 <div className="flex items-center text-sm text-muted-foreground">
                                                     <FileText className="w-4 h-4 mr-2 text-muted-foreground" />
-                                                    {request.reason.substring(0, 50)}{request.reason.length > 50 ? '...' : ''}
+                                                    {request.reason ? (request.reason.length > 50 ? request.reason.substring(0, 50) + '...' : request.reason) : ''}
                                                 </div>
+                                                {request.approvedBy && (
+                                                    <div className="flex items-center text-sm text-muted-foreground mt-2 pt-2 border-t border-border">
+                                                        <span className="font-semibold mr-1">Approved by:</span>
+                                                        {request.approvedBy.user?.name || request.approvedBy.name}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Action Buttons */}
@@ -397,10 +406,10 @@ export default function TimeOffRequests() {
                                 <div>
                                     <label className="block text-sm font-medium text-muted-foreground mb-2">Employee *</label>
                                     <select required value={formData.employee_id} onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground">
-                                        <option value="">Select Employee</option>
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:ring-2 focus:ring-primary/50 transition-all outline-none dark:[color-scheme:dark]">
+                                        <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Select Employee</option>
                                         {employees?.data?.map((emp: Employee) => (
-                                            <option key={emp.id} value={emp.id}>{emp.name}</option>
+                                            <option key={emp.id} value={emp.id} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">{emp.user?.name || emp.name}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -408,9 +417,9 @@ export default function TimeOffRequests() {
                                 <div>
                                     <label className="block text-sm font-medium text-muted-foreground mb-2">Type *</label>
                                     <select required value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground">
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:ring-2 focus:ring-primary/50 transition-all outline-none dark:[color-scheme:dark]">
                                         {Object.entries(requestTypes).map(([key, label]) => (
-                                            <option key={key} value={key}>{label}</option>
+                                            <option key={key} value={key} className="bg-card text-foreground">{label}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -418,28 +427,41 @@ export default function TimeOffRequests() {
                                 <div>
                                     <label className="block text-sm font-medium text-muted-foreground mb-2">Start Date *</label>
                                     <Input type="date" required value={formData.start_date}
+                                        min={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                                        className="bg-card border-border text-foreground" />
+                                        className="bg-card border-border text-foreground focus:ring-2 focus:ring-primary/50" />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-muted-foreground mb-2">End Date *</label>
                                     <Input type="date" required value={formData.end_date}
+                                        min={formData.start_date || new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                                        className="bg-card border-border text-foreground" />
+                                        className="bg-card border-border text-foreground focus:ring-2 focus:ring-primary/50" />
                                 </div>
+
+                                {/* Duration Preview */}
+                                {formData.start_date && formData.end_date && (
+                                    <div className="md:col-span-2 bg-secondary/20 p-3 rounded-lg flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Clock className="w-4 h-4 text-primary" />
+                                        <span>Duration: <span className="font-semibold text-foreground">
+                                            {Math.max(0, Math.ceil((new Date(formData.end_date).getTime() - new Date(formData.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}
+                                        </span> days</span>
+                                    </div>
+                                )}
 
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-muted-foreground mb-2">Reason *</label>
                                     <textarea required value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground" rows={3}
-                                        maxLength={500} />
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:ring-2 focus:ring-primary/50 transition-all outline-none" rows={3}
+                                        maxLength={500} placeholder="Why are you requesting time off?" />
                                 </div>
 
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-muted-foreground mb-2">Additional Notes</label>
                                     <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground" rows={2} />
+                                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:ring-2 focus:ring-primary/50 transition-all outline-none" rows={2}
+                                        placeholder="Any other details..." />
                                 </div>
                             </div>
 
@@ -447,7 +469,7 @@ export default function TimeOffRequests() {
                                 <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); resetForm(); }}
                                     className="flex-1 border-border hover:bg-accent">Cancel</Button>
                                 <Button type="submit" variant="primary" disabled={createMutation.isPending}
-                                    className="flex-1">Submit Request</Button>
+                                    className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700">Submit Request</Button>
                             </div>
                         </form>
                     </Modal>

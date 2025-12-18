@@ -95,6 +95,7 @@ export default function StockAlerts() {
     const [severityFilter, setSeverityFilter] = React.useState('all');
     const [showAcknowledged, setShowAcknowledged] = React.useState(false);
     const [openReorder, setOpenReorder] = React.useState(false);
+    const [openSettings, setOpenSettings] = React.useState(false);
     const [selectedIngredient, setSelectedIngredient] = React.useState<Ingredient | null>(null);
     const [reorderQuantity, setReorderQuantity] = React.useState('');
 
@@ -107,7 +108,7 @@ export default function StockAlerts() {
             let url = `/api/admin/stock-alerts?`;
             if (typeFilter !== 'all') url += `type=${typeFilter}&`;
             if (severityFilter !== 'all') url += `severity=${severityFilter}&`;
-            if (!showAcknowledged) url += `acknowledged=false&`;
+            url += `acknowledged=${showAcknowledged}&`;
             return apiGet(url);
         }
     });
@@ -122,6 +123,16 @@ export default function StockAlerts() {
     const { data: stats } = useQuery({
         queryKey: ['alert-stats'],
         queryFn: () => apiGet('/api/admin/stock-alerts/stats')
+    });
+
+    // Fetch Settings
+    const { data: settingsData } = useQuery({
+        queryKey: ['settings'],
+        queryFn: async () => {
+            const res = await apiGet('/api/admin/settings');
+            // Flatten the response if needed, assumed structure is { data: { key: value } } based on Controller
+            return res.data || {};
+        }
     });
 
     // Mutations
@@ -143,6 +154,24 @@ export default function StockAlerts() {
         },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed to create PO')
     });
+
+    const updateSettingsMutation = useMutation({
+        mutationFn: (data: any) => apiPost('/api/admin/settings', { ...data, _method: 'PUT' }),
+        onSuccess: () => {
+            toastSuccess('Settings updated');
+            qc.invalidateQueries({ queryKey: ['settings'] });
+        },
+        onError: () => toastError('Failed to update settings')
+    });
+
+    const handleToggleSetting = (key: string, currentValue: boolean) => {
+        const newValue = !currentValue;
+        updateSettingsMutation.mutate({
+            settings: {
+                [key]: newValue
+            }
+        });
+    };
 
     const handleCreatePO = () => {
         if (!selectedIngredient || !reorderQuantity) return;
@@ -344,35 +373,41 @@ export default function StockAlerts() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.4 }}
-                                className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-border/50 rounded-2xl p-6 shadow-lg backdrop-blur-sm"
+                                className="bg-[#0f111a] border border-white/5 rounded-2xl p-5 shadow-xl relative overflow-hidden"
                             >
-                                <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                                    <Package className="w-5 h-5 text-blue-600" />
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl" />
+
+                                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2 relative z-10">
+                                    <Package className="w-5 h-5 text-blue-500" />
                                     Reorder Suggested
                                 </h2>
 
                                 {lowStock?.length === 0 ? (
-                                    <div className="text-center py-6 text-muted-foreground text-sm">
-                                        <CheckCircle className="w-8 h-8 mx-auto mb-2 opacity-50 text-green-500" />
-                                        Stock levels healthy
+                                    <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center">
+                                        <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mb-3">
+                                            <CheckCircle className="w-6 h-6 text-green-500" />
+                                        </div>
+                                        <p>All stock levels healthy</p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-3">
+                                    <div className="space-y-4">
                                         {lowStock?.slice(0, 5).map((ingredient: Ingredient) => (
-                                            <div key={ingredient.id} className="bg-card/80 rounded-xl p-3 border border-border/50 shadow-sm">
-                                                <div className="flex justify-between items-start mb-2">
+                                            <div key={ingredient.id} className="bg-[#181824] rounded-xl p-4 border border-white/5 hover:border-purple-500/20 transition-colors group">
+                                                <div className="flex justify-between items-start mb-4">
                                                     <div>
-                                                        <h4 className="text-sm font-semibold text-foreground">{ingredient.name}</h4>
-                                                        <p className="text-xs text-muted-foreground">{ingredient.supplier?.name || 'No Supplier'}</p>
+                                                        <h4 className="text-base font-bold text-white mb-0.5">{ingredient.name}</h4>
+                                                        <p className="text-xs text-zinc-400">{ingredient.supplier?.name || 'No Supplier'}</p>
                                                     </div>
-                                                    <Badge className="bg-red-500/10 text-red-600 border-red-500/20 text-[10px] px-1.5">
-                                                        Low: {ingredient.current_stock}
-                                                    </Badge>
+                                                    <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] uppercase font-bold px-2 py-1 rounded-full">
+                                                        Low: {Number(ingredient.current_stock || 0).toFixed(3)}
+                                                    </span>
                                                 </div>
-                                                <Button size="sm"
+                                                <Button
                                                     onClick={() => { setSelectedIngredient(ingredient); setOpenReorder(true); }}
-                                                    className="w-full bg-blue-600 hover:bg-blue-700 h-8 text-xs">
-                                                    Create PO <ArrowRight className="w-3 h-3 ml-1" />
+                                                    className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white rounded-full h-10 shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/30 transition-all"
+                                                >
+                                                    <span className="font-semibold">Create PO</span>
+                                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                                 </Button>
                                             </div>
                                         ))}
@@ -385,22 +420,42 @@ export default function StockAlerts() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.5 }}
-                                className="bg-card/50 border border-border/50 rounded-2xl p-6 shadow-sm backdrop-blur-sm"
+                                className="bg-[#0f111a] border border-white/5 rounded-2xl p-5 shadow-xl"
                             >
-                                <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                                    <Settings className="w-5 h-5 text-muted-foreground" />
+                                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+                                    <Settings className="w-5 h-5 text-zinc-400" />
                                     Quick Settings
                                 </h2>
-                                <div className="space-y-4">
+                                <div className="space-y-5">
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-muted-foreground">Notification Email</span>
-                                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">Active</Badge>
+                                        <span className="text-zinc-400 font-medium">Notification Email</span>
+                                        <span className={cn(
+                                            "border rounded-full px-3 py-1 text-xs font-bold",
+                                            settingsData?.stock_notifications_email
+                                                ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                                : "bg-zinc-800 text-zinc-500 border-white/5"
+                                        )}>
+                                            {settingsData?.stock_notifications_email ? 'Active' : 'Disabled'}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-muted-foreground">Auto-Reorder</span>
-                                        <Badge variant="outline" className="bg-secondary text-muted-foreground">Disabled</Badge>
+                                        <span className="text-zinc-400 font-medium">Auto-Reorder</span>
+                                        <span className={cn(
+                                            "border rounded-full px-3 py-1 text-xs font-bold",
+                                            settingsData?.stock_auto_reorder
+                                                ? "bg-purple-500/10 text-purple-500 border-purple-500/20"
+                                                : "bg-zinc-800 text-zinc-500 border-white/5"
+                                        )}>
+                                            {settingsData?.stock_auto_reorder ? 'Active' : 'Disabled'}
+                                        </span>
                                     </div>
-                                    <Button variant="outline" className="w-full mt-2 text-xs">Manage All Settings</Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setOpenSettings(true)}
+                                        className="w-full mt-2 h-11 rounded-xl border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 font-medium"
+                                    >
+                                        Manage All Settings
+                                    </Button>
                                 </div>
                             </motion.div>
                         </div>
@@ -412,43 +467,131 @@ export default function StockAlerts() {
             <Modal open={openReorder} onClose={() => { setOpenReorder(false); setSelectedIngredient(null); setReorderQuantity(''); }}
                 title="Create Purchase Order" size="md">
                 {selectedIngredient && (
-                    <div className="space-y-4 p-1">
-                        <div className="bg-secondary/30 p-4 rounded-xl border border-border/50">
-                            <h3 className="text-sm text-muted-foreground uppercase tracking-wider font-bold mb-1">Item Details</h3>
-                            <div className="flex justify-between items-center">
-                                <p className="text-lg font-bold text-foreground">{selectedIngredient.name}</p>
-                                <Badge variant="outline">{selectedIngredient.code}</Badge>
+                    <div className="space-y-6 p-1">
+                        <div className="bg-secondary/30 p-5 rounded-2xl border border-border/50">
+                            <h3 className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-2">Item Details</h3>
+                            <div className="flex justify-between items-center mb-1">
+                                <p className="text-xl font-bold text-foreground">{selectedIngredient.name}</p>
+                                <Badge variant="outline" className="bg-background text-xs">{selectedIngredient.code}</Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mt-1">Supplier: {selectedIngredient.supplier?.name}</p>
+                            <p className="text-sm text-purple-400 font-medium">{selectedIngredient.supplier?.name}</p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-2">Order Quantity <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-medium text-foreground mb-3">
+                                Reorder Quantity <span className="text-destructive">*</span>
+                            </label>
                             <div className="relative">
                                 <Input type="number" step="0.01" required value={reorderQuantity}
                                     onChange={(e) => setReorderQuantity(e.target.value)}
-                                    className="pl-4 pr-12 text-lg font-semibold"
+                                    className="pl-5 pr-16 text-lg h-14 font-bold bg-background shadow-inner"
                                     placeholder="0.00" />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground font-medium bg-secondary/50 px-2 py-1 rounded">
                                     {selectedIngredient.unit?.code || 'Units'}
                                 </span>
                             </div>
-                            <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
-                                <TrendingDown className="w-3 h-3" />
-                                Suggested Refill: {Math.max(0, (selectedIngredient.max_stock_level || 0) - (selectedIngredient.current_stock || 0))} {selectedIngredient.unit?.code}
-                            </p>
+                            <div className="flex items-center gap-2 mt-3 text-xs">
+                                <span className="px-2 py-1 rounded-md bg-blue-500/10 text-blue-500 font-medium">
+                                    Current: {selectedIngredient.current_stock}
+                                </span>
+                                <span className="px-2 py-1 rounded-md bg-purple-500/10 text-purple-500 font-medium">
+                                    Target: {selectedIngredient.max_stock_level}
+                                </span>
+                                <span className="ml-auto text-muted-foreground">
+                                    Gap: <span className="text-foreground font-bold">{Math.max(0, (selectedIngredient.max_stock_level || 0) - (selectedIngredient.current_stock || 0)).toFixed(2)}</span>
+                                </span>
+                            </div>
                         </div>
 
-                        <div className="flex gap-3 pt-4">
-                            <Button variant="secondary" onClick={() => { setOpenReorder(false); setReorderQuantity(''); }}
-                                className="flex-1 hover:bg-secondary/80">Cancel</Button>
+                        <div className="flex gap-3 pt-2">
+                            <Button variant="ghost" onClick={() => { setOpenReorder(false); setReorderQuantity(''); }}
+                                className="flex-1 h-12 rounded-xl">
+                                Cancel
+                            </Button>
                             <Button onClick={handleCreatePO} disabled={createPOMutation.isPending}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20">
-                                {createPOMutation.isPending ? 'Propcessing...' : 'Confirm Order'}
+                                className="flex-[2] h-12 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-xl shadow-purple-500/20 font-bold tracking-wide">
+                                {createPOMutation.isPending ? (
+                                    <span className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Processing...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        Confirm Reorder <ArrowRight className="w-5 h-5" />
+                                    </span>
+                                )}
                             </Button>
                         </div>
                     </div>
                 )}
+            </Modal>
+            {/* Settings Modal */}
+            <Modal open={openSettings} onClose={() => setOpenSettings(false)} title="Stock Alert Settings" size="md">
+                <div className="space-y-6">
+                    <div className="bg-secondary/30 p-4 rounded-xl border border-border/50">
+                        <p className="text-sm text-muted-foreground">
+                            Configure how you want to be notified about stock levels and automated actions.
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Notification Email Toggle */}
+                        <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-500/10 rounded-lg">
+                                    <Bell className="w-5 h-5 text-blue-500" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-foreground">Email Notifications</p>
+                                    <p className="text-xs text-muted-foreground">Receive alerts when stock is critical</p>
+                                </div>
+                            </div>
+                            <div
+                                onClick={() => handleToggleSetting('stock_notifications_email', settingsData?.stock_notifications_email)}
+                                className={cn(
+                                    "w-12 h-6 rounded-full p-1 cursor-pointer transition-colors duration-300 ease-in-out",
+                                    settingsData?.stock_notifications_email ? "bg-blue-600" : "bg-muted"
+                                )}
+                            >
+                                <div className={cn(
+                                    "w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ease-in-out",
+                                    settingsData?.stock_notifications_email ? "translate-x-6" : "translate-x-0"
+                                )} />
+                            </div>
+                        </div>
+
+                        {/* Auto-Reorder Toggle */}
+                        <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-purple-500/10 rounded-lg">
+                                    <Package className="w-5 h-5 text-purple-500" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-foreground">Auto-Reorder</p>
+                                    <p className="text-xs text-muted-foreground">Automatically create draft POs</p>
+                                </div>
+                            </div>
+                            <div
+                                onClick={() => handleToggleSetting('stock_auto_reorder', settingsData?.stock_auto_reorder)}
+                                className={cn(
+                                    "w-12 h-6 rounded-full p-1 cursor-pointer transition-colors duration-300 ease-in-out",
+                                    settingsData?.stock_auto_reorder ? "bg-purple-600" : "bg-muted"
+                                )}
+                            >
+                                <div className={cn(
+                                    "w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ease-in-out",
+                                    settingsData?.stock_auto_reorder ? "translate-x-6" : "translate-x-0"
+                                )} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-2">
+                        <Button onClick={() => setOpenSettings(false)}>
+                            Close
+                        </Button>
+                    </div>
+                </div>
             </Modal>
         </AdminLayout>
     );

@@ -22,7 +22,8 @@ import {
     CreditCard,
     TrendingDown,
     TrendingUp,
-    Search
+    Search,
+    ChevronDown
 } from 'lucide-react';
 import { Modal } from '@/app/components/ui/Modal';
 
@@ -103,7 +104,7 @@ export default function PayrollManagement() {
     const [editingPayrollId, setEditingPayrollId] = useState<number | null>(null);
     const [newDetail, setNewDetail] = useState({
         type: 'earning',
-        category: 'bonus',
+        description: 'Bonus',
         amount: 0,
         percentage: 0,
     });
@@ -113,14 +114,14 @@ export default function PayrollManagement() {
     // Fetch employees
     const { data: employees, isLoading: employeesLoading } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => apiGet('/api/admin/employees'),
+        queryFn: () => apiGet('admin/employees'),
     });
 
     // Fetch payroll records for month
     const { data: payrollData, isLoading: payrollLoading } = useQuery({
         queryKey: ['payroll.management', selectedMonth, selectedEmployees],
         queryFn: () =>
-            apiGet('/api/admin/payroll/history', {
+            apiGet('admin/payroll/history', {
                 params: {
                     month: selectedMonth,
                     employee_ids: selectedEmployees.length > 0 ? selectedEmployees : undefined,
@@ -132,14 +133,14 @@ export default function PayrollManagement() {
     // Fetch payroll details
     const { data: detailsData } = useQuery({
         queryKey: ['payroll.details', viewingPayrollId],
-        queryFn: () => apiGet(`/api/admin/payroll/${viewingPayrollId}/details`),
+        queryFn: () => apiGet(`admin/payroll/${viewingPayrollId}/details`),
         enabled: !!viewingPayrollId,
     });
 
     // Generate payroll mutation
     const generateMutation = useMutation({
         mutationFn: (employeeIds: number[]) =>
-            apiPost('/api/admin/payroll/generate', {
+            apiPost('admin/payroll/generate', {
                 employee_ids: employeeIds.length > 0 ? employeeIds : undefined,
                 month: selectedMonth,
                 include_overtime: true,
@@ -156,7 +157,7 @@ export default function PayrollManagement() {
     // Finalize payroll mutation
     const finalizeMutation = useMutation({
         mutationFn: (payrollId: number) =>
-            apiPost(`/api/admin/payroll/${payrollId}/finalize`, {}),
+            apiPost(`admin/payroll/${payrollId}/finalize`, {}),
         onSuccess: () => {
             toastSuccess('Payroll finalized successfully');
             qc.invalidateQueries({ queryKey: ['payroll.management'] });
@@ -169,10 +170,10 @@ export default function PayrollManagement() {
     // Add detail mutation
     const addDetailMutation = useMutation({
         mutationFn: (payrollId: number) =>
-            apiPost(`/api/admin/payroll/${payrollId}/add-detail`, newDetail),
+            apiPost(`admin/payroll/${payrollId}/add-detail`, newDetail),
         onSuccess: () => {
             toastSuccess('Detail added successfully');
-            setNewDetail({ type: 'earning', category: 'bonus', amount: 0, percentage: 0 });
+            setNewDetail({ type: 'earning', description: 'Bonus', amount: 0, percentage: 0 });
             setShowAddDetailModal(false);
             qc.invalidateQueries({ queryKey: ['payroll.details'] });
             qc.invalidateQueries({ queryKey: ['payroll.management'] }); // Update globals
@@ -185,7 +186,7 @@ export default function PayrollManagement() {
     // Remove detail mutation
     const removeDetailMutation = useMutation({
         mutationFn: (detailId: number) =>
-            apiDelete(`/api/admin/payroll-details/${detailId}`),
+            apiDelete(`admin/payroll-details/${detailId}`),
         onSuccess: () => {
             toastSuccess('Detail removed successfully');
             qc.invalidateQueries({ queryKey: ['payroll.details'] });
@@ -195,6 +196,8 @@ export default function PayrollManagement() {
             toastError('Failed to remove detail');
         },
     });
+
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const handleSelectAllEmployees = (checked: boolean) => {
         if (checked) {
@@ -211,6 +214,8 @@ export default function PayrollManagement() {
             setSelectedEmployees(selectedEmployees.filter((id) => id !== employeeId));
         }
     };
+
+    const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
     const handleExportPayroll = async () => {
         try {
@@ -326,35 +331,56 @@ export default function PayrollManagement() {
                             </div>
                             <div className="w-full md:w-1/2 space-y-2">
                                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Employee Selection</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-x-0 top-10 z-20 hidden group-hover:block pt-2">
-                                        <div className="bg-card border border-border rounded-xl shadow-xl p-3 max-h-48 overflow-y-auto">
-                                            <label className="flex items-center gap-2 p-2 hover:bg-secondary rounded cursor-pointer font-medium mb-1 border-b border-border/50">
-                                                <input type="checkbox"
-                                                    checked={selectedEmployees.length === (employees as any)?.data?.length}
-                                                    onChange={(e) => handleSelectAllEmployees(e.target.checked)}
-                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                                                Select All
-                                            </label>
-                                            {(employees as any)?.data?.map((employee: any) => (
-                                                <label key={employee.id} className="flex items-center gap-2 p-2 hover:bg-secondary rounded cursor-pointer text-sm">
-                                                    <input type="checkbox"
-                                                        checked={selectedEmployees.includes(employee.id)}
-                                                        onChange={(e) => handleSelectEmployee(employee.id, e.target.checked)}
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                                                    {employee.name}
-                                                </label>
-                                            ))}
+                                <div className="relative">
+                                    <button
+                                        onClick={toggleDropdown}
+                                        className="w-full flex items-center justify-between p-2 pl-3 bg-background border border-border rounded-xl shadow-sm hover:border-blue-500/50 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Users className="w-4 h-4 text-blue-500" />
+                                            <span className="text-sm">
+                                                {selectedEmployees.length === 0
+                                                    ? 'Select Employees'
+                                                    : `${selectedEmployees.length} Employee${selectedEmployees.length !== 1 ? 's' : ''} Selected`}
+                                            </span>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center justify-between w-full px-4 py-2 bg-background/50 border border-border rounded-xl cursor-pointer hover:bg-background/80 transition-colors">
-                                        <span className="text-sm text-foreground">
-                                            {selectedEmployees.length > 0 ? `${selectedEmployees.length} Employees Selected` : 'Select Employees to Generate'}
-                                        </span>
-                                        <Users className="w-4 h-4 text-muted-foreground" />
-                                    </div>
+                                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {isDropdownOpen && (
+                                        <div className="absolute inset-x-0 top-full mt-2 z-20">
+                                            <div className="bg-card border border-border rounded-xl shadow-xl p-2 max-h-60 overflow-y-auto">
+                                                <label className="flex items-center gap-3 p-2.5 hover:bg-secondary/80 rounded-lg cursor-pointer font-medium border-b border-border/50 mb-2 sticky top-0 bg-card z-10">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            !!employees &&
+                                                            selectedEmployees.length === (employees as any)?.data?.length
+                                                        }
+                                                        onChange={(e) => handleSelectAllEmployees(e.target.checked)}
+                                                        className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500 focus:ring-offset-0 bg-background"
+                                                    />
+                                                    <span className="text-sm text-foreground font-semibold">Select All ({(employees as any)?.data?.length || 0})</span>
+                                                </label>
+                                                <div className="space-y-0.5">
+                                                    {(employees as any)?.data?.map((emp: any) => (
+                                                        <label key={emp.id} className="flex items-center gap-3 p-2.5 hover:bg-secondary/80 rounded-lg cursor-pointer transition-colors group">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedEmployees.includes(emp.id)}
+                                                                onChange={(e) => handleSelectEmployee(emp.id, e.target.checked)}
+                                                                className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500 focus:ring-offset-0 bg-background"
+                                                            />
+                                                            <span className="text-sm text-foreground font-medium group-hover:text-blue-600 transition-colors">{emp.user?.name || emp.employee_code}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+
                             <div className="w-full md:w-1/4 flex items-end">
                                 <Button
                                     onClick={() => generateMutation.mutate(selectedEmployees)}
@@ -439,11 +465,12 @@ export default function PayrollManagement() {
                             )}
                         </div>
                     </motion.div>
-                </div>
-            </div>
+                </div >
+            </div >
 
             {/* Details Modal */}
-            <Modal open={showDetailsModal} onClose={() => setShowDetailsModal(false)} title="Payroll Breakdown">
+            < Modal open={showDetailsModal} onClose={() => setShowDetailsModal(false)
+            } title="Payroll Breakdown" >
                 <div className="space-y-4">
                     {(detailsData as any)?.data?.length === 0 ? (
                         <p className="text-center text-muted-foreground py-4">No additional details</p>
@@ -473,10 +500,10 @@ export default function PayrollManagement() {
                     )}
                     <Button onClick={() => setShowDetailsModal(false)} variant="secondary" className="w-full">Close</Button>
                 </div>
-            </Modal>
+            </Modal >
 
             {/* Add Detail Modal */}
-            <Modal open={showAddDetailModal} onClose={() => setShowAddDetailModal(false)} title="Add Adjustment">
+            < Modal open={showAddDetailModal} onClose={() => setShowAddDetailModal(false)} title="Add Adjustment" >
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -491,8 +518,8 @@ export default function PayrollManagement() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Category</label>
-                            <Input value={newDetail.category} onChange={(e) => setNewDetail({ ...newDetail, category: e.target.value })} placeholder="e.g. Bonus" />
+                            <label className="block text-sm font-medium mb-1">Description</label>
+                            <Input value={newDetail.description} onChange={(e) => setNewDetail({ ...newDetail, description: e.target.value })} placeholder="e.g. Bonus" />
                         </div>
                     </div>
                     <div>
@@ -504,7 +531,7 @@ export default function PayrollManagement() {
                         <Button onClick={() => addDetailMutation.mutate(editingPayrollId!)} className="flex-1 bg-blue-600 hover:bg-blue-700">Add Adjustment</Button>
                     </div>
                 </div>
-            </Modal>
-        </AdminLayout>
+            </Modal >
+        </AdminLayout >
     );
 }

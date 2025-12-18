@@ -314,13 +314,19 @@ export default function Orders() {
     updateStatusMutation.mutate({ id, status });
   };
 
+  const [paymentConfirmOrder, setPaymentConfirmOrder] = useState<Order | null>(null);
+
   const handleTogglePayment = (order: Order) => {
-    const isPaid = order.payment_status === 'paid';
+    setPaymentConfirmOrder(order);
+  };
+
+  const processPaymentToggle = () => {
+    if (!paymentConfirmOrder) return;
+    const isPaid = paymentConfirmOrder.payment_status === 'paid';
     const newStatus = isPaid ? 'unpaid' : 'paid';
 
-    if (confirm(`Mark order #${order.order_number} as ${newStatus.toUpperCase()}?`)) {
-      updatePaymentStatusMutation.mutate({ id: order.id, status: newStatus });
-    }
+    updatePaymentStatusMutation.mutate({ id: paymentConfirmOrder.id, status: newStatus });
+    setPaymentConfirmOrder(null);
   };
 
   const toggleSelectOrder = (id: number) => {
@@ -831,6 +837,87 @@ export default function Orders() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Payment Confirmation Modal */}
+      <Modal
+        open={!!paymentConfirmOrder}
+        onClose={() => setPaymentConfirmOrder(null)}
+        title={paymentConfirmOrder?.payment_status === 'paid' ? 'Refund / Mark Unpaid' : 'Confirm Payment'}
+        size="md"
+      >
+        {paymentConfirmOrder && (
+          <div className="space-y-6">
+            <div className={cn(
+              "rounded-xl p-6 border text-center relative overflow-hidden",
+              paymentConfirmOrder.payment_status !== 'paid'
+                ? "bg-emerald-500/10 border-emerald-500/20"
+                : "bg-red-500/10 border-red-500/20"
+            )}>
+              {/* Background Glow */}
+              <div className={cn(
+                "absolute inset-0 opacity-20 blur-3xl",
+                paymentConfirmOrder.payment_status !== 'paid'
+                  ? "bg-gradient-to-br from-emerald-500 to-green-500"
+                  : "bg-gradient-to-br from-red-500 to-rose-500"
+              )} />
+
+              <div className="relative">
+                <div className={cn(
+                  "w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg",
+                  paymentConfirmOrder.payment_status !== 'paid'
+                    ? "bg-gradient-to-br from-emerald-500 to-green-500 text-white"
+                    : "bg-gradient-to-br from-red-500 to-rose-500 text-white"
+                )}>
+                  <DollarSign className="w-8 h-8" />
+                </div>
+
+                <h3 className="text-xl font-bold mb-2">
+                  {paymentConfirmOrder.payment_status !== 'paid'
+                    ? "Mark as Paid?"
+                    : "Mark as Unpaid?"}
+                </h3>
+
+                <p className="text-muted-foreground mb-4">
+                  Order <span className="font-mono font-medium text-foreground">#{paymentConfirmOrder.order_number}</span>
+                </p>
+
+                <div className="flex items-center justify-center gap-2 text-3xl font-bold">
+                  <span>${getAmount(paymentConfirmOrder.total).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-center text-muted-foreground px-4">
+              {paymentConfirmOrder.payment_status !== 'paid'
+                ? "This will mark the order as fully paid. Ensure you have received the payment."
+                : "This will revert the order status to unpaid. This action should be done if the payment was refunded or marked in error."}
+            </p>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="secondary"
+                onClick={() => setPaymentConfirmOrder(null)}
+                className="flex-1 h-11 transition-all hover:bg-secondary-hover"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={processPaymentToggle}
+                className={cn(
+                  "flex-1 h-11 text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]",
+                  paymentConfirmOrder.payment_status !== 'paid'
+                    ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-emerald-500/20"
+                    : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/20"
+                )}
+              >
+                {paymentConfirmOrder.payment_status !== 'paid'
+                  ? "Confirm Payment"
+                  : "Mark Unpaid"}
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Enhanced Order Detail Modal */}

@@ -192,39 +192,61 @@ class AttendanceController extends Controller
     public function history(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'from' => 'nullable|date',
-            'to' => 'nullable|date',
+            'employee_id' => 'nullable|exists:employees,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'employee_search' => 'nullable|string',
+            'location_id' => 'nullable|exists:locations,id',
             'per_page' => 'nullable|integer|min:1|max:100',
         ]);
 
         try {
-            $query = Attendance::where('employee_id', $validated['employee_id'])
-                ->with(['employee.user', 'attendanceMetrics', 'location']);
+            $query = Attendance::with(['employee.user', 'attendanceMetrics', 'location']);
 
-            if ($validated['from'] ?? null) {
-                $query->whereDate('clock_in_at', '>=', $validated['from']);
+            if ($request->filled('employee_id')) {
+                $query->where('employee_id', $validated['employee_id']);
             }
 
-            if ($validated['to'] ?? null) {
-                $query->whereDate('clock_in_at', '<=', $validated['to']);
+            if ($request->filled('start_date')) {
+                $query->whereDate('clock_in_at', '>=', $validated['start_date']);
+            }
+
+            if ($request->filled('end_date')) {
+                $query->whereDate('clock_in_at', '<=', $validated['end_date']);
+            }
+            
+            if ($request->filled('location_id')) {
+                $query->where('location_id', $validated['location_id']);
+            }
+
+            if ($request->filled('employee_search')) {
+                $search = $validated['employee_search'];
+                $query->whereHas('employee.user', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
             }
 
             $records = $query->orderBy('clock_in_at', 'desc')
-                ->paginate($validated['per_page'] ?? 50);
+                ->paginate($validated['per_page'] ?? 20);
 
             return response()->json([
                 'data' => $records->map(function ($record) {
                     return [
                         'id' => $record->id,
-                        'employee_name' => $record->employee->user->name,
+                        'employee_name' => $record->employee->user->name ?? 'Unknown',
+                        'date' => $record->clock_in_at->format('Y-m-d'), // Added date field for frontend
                         'clock_in_at' => $record->clock_in_at->format('Y-m-d H:i:s'),
                         'clock_out_at' => $record->clock_out_at?->format('Y-m-d H:i:s'),
-                        'total_hours' => $record->clock_out_at ? round($record->clock_in_at->diffInHours($record->clock_out_at), 2) : null,
-                        'location' => $record->location->name,
+                        'total_hours' => $record->clock_out_at ? round($record->clock_in_at->diffInHours($record->clock_out_at), 2) : 0,
+                        'is_late' => $record->attendanceMetrics?->is_late ?? false, // Mapped for frontend
+                        'has_overtime' => $record->attendanceMetrics?->overtime_minutes > 0, // Mapped for frontend
+                        'status' => $record->clock_out_at ? 'present' : 'absent', // Basic status mapping
+                        'location_name' => $record->location->name ?? '-',
                         'metrics' => $record->attendanceMetrics()->first(),
                     ];
                 }),
+                'total' => $records->total(), // Add total for frontend
                 'pagination' => [
                     'total' => $records->total(),
                     'per_page' => $records->perPage(),

@@ -13,11 +13,22 @@ class StockAlertController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        // Trigger alert generation (simplified for demo)
+        // Trigger alert generation
         $this->generateAlerts();
 
-        $query = StockAlert::with(['ingredient', 'location'])
-            ->where('acknowledged', false);
+        $query = StockAlert::with(['ingredient', 'location']);
+
+        // Filter by acknowledged status
+        if ($request->has('acknowledged')) {
+            // If strict string 'false' or boolean false
+            $isAcknowledged = filter_var($request->acknowledged, FILTER_VALIDATE_BOOLEAN);
+            $query->where('acknowledged', $isAcknowledged);
+        } else {
+            // Default to showing only unacknowledged if not specified
+            // But if user wants to see all, they might not send this param?
+            // Usually standard practice is default false.
+            $query->where('acknowledged', false);
+        }
 
         if ($request->filled('type') && $request->type !== 'all') {
             $query->where('type', $request->type);
@@ -92,17 +103,34 @@ class StockAlertController extends Controller
 
     private function generateAlerts()
     {
+        // Helper to check if we should create an alert
+        $shouldCreateAlert = function($ingredientId, $type, $locationId = null) {
+            // Check for any unacknowledged alert (Active)
+            $activeExists = StockAlert::where('ingredient_id', $ingredientId)
+                ->where('type', $type)
+                ->where('location_id', $locationId)
+                ->where('acknowledged', false)
+                ->exists();
+            
+            if ($activeExists) return false;
+
+            // Check for recently acknowledged alert (e.g., within last 24 hours)
+            // If we acknowledged it recently, we don't want to receive it again immediately
+            $recentAcknowledged = StockAlert::where('ingredient_id', $ingredientId)
+                ->where('type', $type)
+                ->where('location_id', $locationId)
+                ->where('acknowledged', true)
+                ->where('created_at', '>=', now()->subHours(24))
+                ->exists();
+
+            return !$recentAcknowledged;
+        };
+
         // 1. Check Low Stock (Global)
         $lowStockIngredients = Ingredient::whereRaw('current_stock <= reorder_point')->get();
 
         foreach ($lowStockIngredients as $ingredient) {
-            // Check if alert already exists
-            $exists = StockAlert::where('ingredient_id', $ingredient->id)
-                ->where('type', 'low_stock')
-                ->where('acknowledged', false)
-                ->exists();
-
-            if (!$exists) {
+            if ($shouldCreateAlert($ingredient->id, 'low_stock')) {
                 StockAlert::create([
                     'type' => 'low_stock',
                     'ingredient_id' => $ingredient->id,
@@ -116,12 +144,7 @@ class StockAlertController extends Controller
         $criticalIngredients = Ingredient::whereRaw('current_stock <= min_stock_level')->get();
 
         foreach ($criticalIngredients as $ingredient) {
-            $exists = StockAlert::where('ingredient_id', $ingredient->id)
-                ->where('type', 'critical_stock')
-                ->where('acknowledged', false)
-                ->exists();
-
-            if (!$exists) {
+            if ($shouldCreateAlert($ingredient->id, 'critical_stock')) {
                 StockAlert::create([
                     'type' => 'critical_stock',
                     'ingredient_id' => $ingredient->id,
@@ -132,25 +155,23 @@ class StockAlertController extends Controller
         }
 
         // 3. Check Expiring Inventory (Per Location)
-        $expiringInventory = Inventory::where('expiration_date', '<=', now()->addDays(7))
-            ->where('expiration_date', '>=', now())
-            ->get();
+        // Ensure Inventory model exists, otherwise wrap in try-catch or check existence
+        // Assuming Inventory model is in App\Models\Inventory
+        if (class_exists(\App\Models\Inventory::class)) {
+            $expiringInventory = Inventory::where('expiration_date', '<=', now()->addDays(7))
+                ->where('expiration_date', '>=', now())
+                ->get();
 
-        foreach ($expiringInventory as $inv) {
-            $exists = StockAlert::where('ingredient_id', $inv->ingredient_id)
-                ->where('location_id', $inv->location_id)
-                ->where('type', 'expiring_soon')
-                ->where('acknowledged', false)
-                ->exists();
-
-            if (!$exists) {
-                StockAlert::create([
-                    'type' => 'expiring_soon',
-                    'ingredient_id' => $inv->ingredient_id,
-                    'location_id' => $inv->location_id,
-                    'severity' => 'medium',
-                    'message' => "Batch {$inv->batch_number} expires on {$inv->expiration_date->format('Y-m-d')}"
-                ]);
+            foreach ($expiringInventory as $inv) {
+                if ($shouldCreateAlert($inv->ingredient_id, 'expiring_soon', $inv->location_id)) {
+                    StockAlert::create([
+                        'type' => 'expiring_soon',
+                        'ingredient_id' => $inv->ingredient_id,
+                        'location_id' => $inv->location_id,
+                        'severity' => 'medium',
+                        'message' => "Batch {$inv->batch_number} expires on {$inv->expiration_date->format('Y-m-d')}"
+                    ]);
+                }
             }
         }
     }

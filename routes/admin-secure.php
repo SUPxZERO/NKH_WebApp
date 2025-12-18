@@ -28,6 +28,8 @@ use App\Http\Controllers\Api\{
     PromotionController,
     LoyaltyPointController,
     ExpenseController,
+    ShiftController,
+    TimeOffRequestController,
     ExpenseCategoryController,
     SettingsController,
     OperatingHoursController,
@@ -40,8 +42,6 @@ use App\Http\Controllers\Api\{
     StockAlertController,
     PurchaseOrderController,
     RecipeController,
-    ShiftController,
-    TimeOffRequestController,
     AttendanceController,
     PayrollController,
     NotificationController,
@@ -104,6 +104,52 @@ Route::middleware('permission:employees.view')
 Route::middleware('permission:employees.create')->post('employees', [EmployeeController::class, 'store']);
 Route::middleware('permission:employees.update')->match(['put', 'patch'], 'employees/{employee}', [EmployeeController::class, 'update']);
 Route::middleware('permission:employees.delete')->delete('employees/{employee}', [EmployeeController::class, 'destroy']);
+
+// Shifts - requires employees.* permissions
+Route::middleware('permission:employees.view')
+    ->group(function () {
+        Route::get('schedule', [ShiftController::class, 'schedule']);
+        Route::get('shifts', [ShiftController::class, 'index']);
+        Route::get('shifts/stats', [ShiftController::class, 'stats']);
+        Route::get('shifts/conflicts', [ShiftController::class, 'conflicts']);
+        Route::get('shifts/{shift}', [ShiftController::class, 'show']);
+    });
+Route::middleware('permission:employees.create')
+    ->group(function () {
+        Route::post('shifts', [ShiftController::class, 'store']);
+        Route::post('shifts/publish', [ShiftController::class, 'publish']);
+        Route::post('shifts/copy', [ShiftController::class, 'copy']);
+    });
+Route::middleware('permission:employees.update')
+    ->put('shifts/{shift}', [ShiftController::class, 'update']);
+Route::middleware('permission:employees.delete')
+    ->delete('shifts/{shift}', [ShiftController::class, 'destroy']);
+
+// Time Off Requests - using employees permissions for now
+Route::middleware('permission:employees.view')
+    ->group(function () {
+        Route::get('time-off-requests/stats', [TimeOffRequestController::class, 'stats']);
+        Route::get('time-off-requests/calendar', [TimeOffRequestController::class, 'calendar']); // Add calendar if method exists, yes it does.
+        Route::get('time-off-requests', [TimeOffRequestController::class, 'index']);
+        Route::get('time-off-requests/{timeOffRequest}', [TimeOffRequestController::class, 'show']);
+        Route::get('time-off-requests/balance/{employee}', [TimeOffRequestController::class, 'balance']);
+    });
+
+
+
+Route::middleware('permission:employees.create')
+    ->post('time-off-requests', [TimeOffRequestController::class, 'store']);
+
+Route::middleware('permission:employees.update')
+    ->group(function () {
+        Route::put('time-off-requests/{timeOffRequest}', [TimeOffRequestController::class, 'update']);
+        Route::post('time-off-requests/{timeOffRequest}/approve', [TimeOffRequestController::class, 'approve']);
+        Route::post('time-off-requests/{timeOffRequest}/reject', [TimeOffRequestController::class, 'reject']);
+    });
+
+Route::middleware('permission:employees.delete')
+    ->delete('time-off-requests/{timeOffRequest}', [TimeOffRequestController::class, 'destroy']);
+
 
 // Customers - requires customers.* permissions
 Route::middleware('permission:customers.view')
@@ -451,6 +497,28 @@ Route::middleware('permission:employees.manage')
         Route::post('positions', [PositionController::class, 'store']);
         Route::put('positions/{position}', [PositionController::class, 'update']);
         Route::delete('positions/{position}', [PositionController::class, 'destroy']);
+    });
+
+// Attendance - requires employees.* permissions
+Route::middleware('permission:employees.view')
+    ->group(function () {
+        Route::get('attendance/history', [AttendanceController::class, 'history']);
+    });
+Route::middleware('permission:employees.manage')
+    ->post('attendance/{attendance}/adjust', [AttendanceController::class, 'adjust']);
+
+// Payroll - requires employees permissions
+Route::middleware('permission:employees.view')
+    ->group(function () {
+        Route::get('payroll/history', [PayrollController::class, 'history']);
+        Route::get('payroll/{payroll}/details', [PayrollController::class, 'details']);
+    });
+Route::middleware('permission:employees.manage')
+    ->group(function () {
+        Route::post('payroll/generate', [PayrollController::class, 'generate']);
+        Route::post('payroll/{payroll}/finalize', [PayrollController::class, 'finalize']);
+        Route::post('payroll/{payroll}/add-detail', [PayrollController::class, 'addDetail']);
+        Route::delete('payroll-details/{detail}', [PayrollController::class, 'removeDetail']);
     });
 
 // Units - requires inventory.* permissions

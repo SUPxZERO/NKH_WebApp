@@ -46,7 +46,7 @@ export default function AttendanceManagement() {
     const { data: attendanceData, isLoading } = useQuery({
         queryKey: ['attendance.management', startDate, endDate, searchEmployee, selectedLocation, currentPage],
         queryFn: () =>
-            apiGet('/api/attendance/history', {
+            apiGet('admin/attendance/history', {
                 params: {
                     start_date: startDate,
                     end_date: endDate,
@@ -62,13 +62,13 @@ export default function AttendanceManagement() {
     // Fetch locations for filter
     const { data: locations } = useQuery({
         queryKey: ['locations'],
-        queryFn: () => apiGet('/api/admin/locations'),
+        queryFn: () => apiGet('admin/locations'),
     });
 
     // Adjustment mutation
     const adjustMutation = useMutation({
         mutationFn: (attendanceId: number) =>
-            apiPost(`/api/attendance/${attendanceId}/adjust`, editData),
+            apiPost(`admin/attendance/${attendanceId}/adjust`, editData),
         onSuccess: () => {
             toastSuccess('Attendance adjusted successfully');
             setEditingId(null);
@@ -82,7 +82,7 @@ export default function AttendanceManagement() {
     // Export to CSV
     const handleExport = async () => {
         try {
-            const data = await apiGet('/api/attendance/history', {
+            const data = await apiGet('admin/attendance/history', {
                 params: {
                     start_date: startDate,
                     end_date: endDate,

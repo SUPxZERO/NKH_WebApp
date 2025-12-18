@@ -9,6 +9,8 @@ class EmploymentHistory extends Model
 {
     use HasFactory;
 
+    protected $table = 'employment_history';
+
     public $timestamps = false;
 
     protected $fillable = [
