@@ -58,14 +58,17 @@ const NotificationStatsRibbon = ({ stats }: { stats: any }) => (
 );
 
 interface Notification {
-  id: string; title: string; message: string; type: 'info' | 'success' | 'warning' | 'error' | 'system';
-  user_id?: number; user?: { name: string }; read_at?: string; created_at: string;
+  id: string; title: string; message: string; type: 'info' | 'success' | 'warning' | 'error' | 'system' | 'order' | 'promotion' | 'reward';
+  target_type?: string; target_metadata?: any;
+  recipient_count?: number; read_count?: number; unread_count?: number;
+  created_by?: { id: number; name: string }; created_at: string;
 }
 
 export default function Notifications() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [targetFilter, setTargetFilter] = useState('all');
   const [openCreate, setOpenCreate] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
@@ -80,11 +83,12 @@ export default function Notifications() {
 
   // Fetch Data
   const { data: notifications, isLoading } = useQuery({
-    queryKey: ['notifications', page, search, typeFilter, statusFilter],
+    queryKey: ['notifications', page, search, typeFilter, statusFilter, targetFilter],
     queryFn: () => {
       let url = `/api/admin/notifications?page=${page}&per_page=${perPage}&search=${search}`;
       if (typeFilter !== 'all') url += `&type=${typeFilter}`;
       if (statusFilter !== 'all') url += `&status=${statusFilter}`;
+      if (targetFilter !== 'all') url += `&target_type=${targetFilter}`;
       return apiGet(url);
     }
   });
@@ -174,8 +178,8 @@ export default function Notifications() {
           </div>
 
           <div className="bg-card border border-border rounded-xl p-4 mb-6 backdrop-blur-sm">
-            <div className="flex gap-4">
-              <div className="relative flex-1">
+            <div className="flex gap-4 flex-wrap">
+              <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input placeholder="Search notifications..." value={search} onChange={(e) => setSearch(e.target.value)}
                   className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground" />
@@ -183,10 +187,9 @@ export default function Notifications() {
               <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
                 className="bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:border-purple-500 outline-none">
                 <option value="all">All Types</option>
-                <option value="info">Info</option>
-                <option value="success">Success</option>
-                <option value="warning">Warning</option>
-                <option value="error">Error</option>
+                <option value="order">Order</option>
+                <option value="promotion">Promotion</option>
+                <option value="reward">Reward</option>
                 <option value="system">System</option>
               </select>
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
@@ -195,16 +198,28 @@ export default function Notifications() {
                 <option value="read">Read</option>
                 <option value="unread">Unread</option>
               </select>
+              <select value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)}
+                className="bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:border-purple-500 outline-none">
+                <option value="all">All Targets</option>
+                <option value="all_users">All Users</option>
+                <option value="all_customers">All Customers</option>
+                <option value="all_employees">All Employees</option>
+                <option value="by_role">By Role/Position</option>
+                <option value="by_tier">By Customer Tier</option>
+                <option value="by_location">By Location</option>
+                <option value="specific_users">Specific Users</option>
+                <option value="recent_customers">Recent Customers</option>
+              </select>
             </div>
           </div>
 
           <div className="bg-card border border-border rounded-xl overflow-hidden backdrop-blur-sm">
             <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-muted/50 text-xs font-semibold text-muted-foreground uppercase">
-              <div className="col-span-4">Title / Message</div>
+              <div className="col-span-3">Title / Message</div>
               <div className="col-span-2">Type</div>
-              <div className="col-span-2">User</div>
+              <div className="col-span-2">Target</div>
+              <div className="col-span-2">Recipients</div>
               <div className="col-span-2">Date</div>
-              <div className="col-span-1">Status</div>
               <div className="col-span-1 text-right">Actions</div>
             </div>
             <div className="divide-y divide-border">
@@ -212,9 +227,9 @@ export default function Notifications() {
                 <div className="p-8 text-center text-muted-foreground">Loading...</div>
               ) : notificationList.map((notification: Notification) => (
                 <motion.div key={notification.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className={cn("grid grid-cols-12 gap-4 p-4 items-center hover:bg-muted/50 transition-colors group", !notification.read_at && "bg-muted/30")}>
-                  <div className="col-span-4">
-                    <div className={cn("font-medium text-foreground", !notification.read_at && "font-bold")}>{notification.title}</div>
+                  className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-muted/50 transition-colors group">
+                  <div className="col-span-3">
+                    <div className="font-medium text-foreground">{notification.title}</div>
                     <div className="text-xs text-muted-foreground truncate">{notification.message}</div>
                   </div>
                   <div className="col-span-2">
@@ -222,17 +237,25 @@ export default function Notifications() {
                       {getTypeIcon(notification.type)} {notification.type.toUpperCase()}
                     </span>
                   </div>
-                  <div className="col-span-2 text-sm text-foreground/80">
-                    {notification.user ? notification.user.name : <span className="text-purple-600 dark:text-purple-400 italic">All Users</span>}
+                  <div className="col-span-2">
+                    {notification.target_type ? (
+                      <span className="text-xs px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        {notification.target_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">Legacy</span>
+                    )}
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-sm font-medium text-foreground">{notification.recipient_count || 0} recipients</div>
+                    <div className="text-xs text-muted-foreground">
+                      {notification.read_count || 0} read • {notification.unread_count || 0} unread
+                    </div>
                   </div>
                   <div className="col-span-2 text-sm text-muted-foreground">
                     {new Date(notification.created_at).toLocaleString()}
                   </div>
-                  <div className="col-span-1">
-                    {notification.read_at ? <span className="text-muted-foreground text-xs flex items-center gap-1"><Check size={12} /> Read</span> : <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold">New</span>}
-                  </div>
                   <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {!notification.read_at && <Button size="sm" variant="secondary" onClick={() => markAsReadMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-border" title="Mark as Read"><Check size={14} /></Button>}
                     <Button size="sm" variant="secondary" onClick={() => { setSelectedNotification(notification); setOpenView(true); }} className="h-8 w-8 p-0 border-border"><Eye size={14} /></Button>
                     <Button size="sm" variant="danger" onClick={() => confirm('Delete?') && deleteMutation.mutate(notification.id)} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-600 dark:text-red-400"><Trash2 size={14} /></Button>
                   </div>
@@ -292,8 +315,28 @@ export default function Notifications() {
             <div className="bg-muted/50 p-4 rounded-lg border border-border text-foreground/80 text-sm whitespace-pre-wrap">
               {selectedNotification.message}
             </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>To: {selectedNotification.user ? selectedNotification.user.name : 'All Users'}</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-background p-3 rounded-lg border border-border">
+                <div className="text-xs text-muted-foreground">Target Type</div>
+                <div className="text-sm font-medium text-foreground mt-1">
+                  {selectedNotification.target_type ? selectedNotification.target_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}
+                </div>
+              </div>
+              <div className="bg-background p-3 rounded-lg border border-border">
+                <div className="text-xs text-muted-foreground">Recipients</div>
+                <div className="text-sm font-medium text-foreground mt-1">{selectedNotification.recipient_count || 0} users</div>
+              </div>
+              <div className="bg-background p-3 rounded-lg border border-border">
+                <div className="text-xs text-muted-foreground">Read</div>
+                <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mt-1">{selectedNotification.read_count || 0}</div>
+              </div>
+              <div className="bg-background p-3 rounded-lg border border-border">
+                <div className="text-xs text-muted-foreground">Unread</div>
+                <div className="text-sm font-medium text-amber-600 dark:text-amber-400 mt-1">{selectedNotification.unread_count || 0}</div>
+              </div>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground pt-2 border-t border-border">
+              <span>Created by: {selectedNotification.created_by?.name || 'System'}</span>
               <span>{new Date(selectedNotification.created_at).toLocaleString()}</span>
             </div>
             <Button onClick={() => setOpenView(false)} className="w-full mt-4">Close</Button>

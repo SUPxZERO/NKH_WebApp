@@ -12,10 +12,13 @@ class UserNotification extends Model
 
     protected $fillable = [
         'user_id',
+        'broadcast_notification_id',
         'type',
         'title',
         'message',
         'action_url',
+        'target_type',
+        'target_metadata',
         'read',
         'read_at',
     ];
@@ -23,6 +26,7 @@ class UserNotification extends Model
     protected $casts = [
         'read' => 'boolean',
         'read_at' => 'datetime',
+        'target_metadata' => 'array',
     ];
 
     /**
@@ -31,6 +35,14 @@ class UserNotification extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the broadcast notification if this is part of a broadcast
+     */
+    public function broadcastNotification(): BelongsTo
+    {
+        return $this->belongsTo(BroadcastNotification::class);
     }
 
     /**

@@ -20,8 +20,7 @@ class AdminUserController extends Controller
         $query = User::where(function($q) {
             $q->whereHas('roles', function ($q2) {
                 $q2->whereIn('slug', ['super-admin', 'admin', 'manager']);
-            })
-            ->orWhereIn('role', ['super-admin', 'admin', 'manager']);
+            });
         })->with('roles');
 
         if ($request->has('search')) {
@@ -66,7 +65,7 @@ class AdminUserController extends Controller
                 'password' => Hash::make($validated['password']),
                 'phone' => $validated['phone'] ?? null,
                 'is_active' => $validated['is_active'] ?? true,
-                'role' => $validated['role'], // Use selected role
+                'is_active' => $validated['is_active'] ?? true,
             ]);
 
             // Ensure role exists and attach
@@ -103,7 +102,6 @@ class AdminUserController extends Controller
             if (isset($validated['email'])) $updateData['email'] = $validated['email'];
             if (isset($validated['phone'])) $updateData['phone'] = $validated['phone'];
             if (isset($validated['is_active'])) $updateData['is_active'] = $validated['is_active'];
-            if (isset($validated['role'])) $updateData['role'] = $validated['role']; // Update legacy column
             
             if (!empty($validated['password'])) {
                 $updateData['password'] = Hash::make($validated['password']);
@@ -147,8 +145,7 @@ class AdminUserController extends Controller
         // Count users with any admin-capable role
         $adminRoles = ['super-admin', 'admin', 'manager'];
         $query = User::where(function($q) use ($adminRoles) {
-            $q->whereHas('roles', fn($q2) => $q2->whereIn('slug', $adminRoles))
-              ->orWhereIn('role', $adminRoles);
+            $q->whereHas('roles', fn($q2) => $q2->whereIn('slug', $adminRoles));
         });
         
         return response()->json([

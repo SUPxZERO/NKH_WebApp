@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Promotion;
 use App\Models\UserNotification;
+use App\Models\BroadcastNotification;
 use App\Models\NotificationPreference;
 use App\Events\CustomerNotificationSent;
 use App\Events\AdminNotificationSent;
@@ -40,7 +41,10 @@ class NotificationService
         string $message,
         ?string $actionUrl = null,
         array $channels = ['database', 'broadcast'],
-        bool $respectPreferences = true
+        bool $respectPreferences = true,
+        ?string $targetType = null,
+        ?array $targetMetadata = null,
+        ?int $broadcastNotificationId = null
     ): Collection {
         // Normalize recipients to collection
         if ($recipients instanceof User) {
@@ -68,10 +72,13 @@ class NotificationService
                 if (in_array('database', $channels)) {
                     $notification = UserNotification::create([
                         'user_id' => $user->id,
+                        'broadcast_notification_id' => $broadcastNotificationId,
                         'type' => $type,
                         'title' => $title,
                         'message' => $message,
                         'action_url' => $actionUrl,
+                        'target_type' => $targetType,
+                        'target_metadata' => $targetMetadata,
                         'read' => false,
                     ]);
                     $notifications->push($notification);
@@ -467,7 +474,7 @@ class NotificationService
         ?string $actionUrl = null
     ): Collection {
         $recipients = $this->getRecipientsByTarget($targetType, $targetParams);
-        
+
         Log::info("Sending targeted notification", [
             'target_type' => $targetType,
             'recipient_count' => $recipients->count(),
@@ -475,7 +482,31 @@ class NotificationService
             'title' => $title,
         ]);
 
-        return $this->send($recipients, $type, $title, $message, $actionUrl);
+        // Create broadcast notification record
+        $broadcastNotification = BroadcastNotification::create([
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'target_type' => $targetType,
+            'target_metadata' => $targetParams,
+            'action_url' => $actionUrl,
+            'recipient_count' => $recipients->count(),
+            'created_by' => auth()->id(),
+        ]);
+
+        // Send to all recipients with broadcast_notification_id
+        return $this->send(
+            $recipients,
+            $type,
+            $title,
+            $message,
+            $actionUrl,
+            ['database', 'broadcast'],
+            true,
+            $targetType,
+            $targetParams,
+            $broadcastNotification->id
+        );
     }
 
     /**
@@ -532,7 +563,7 @@ class NotificationService
         }
 
         return User::whereHas('customer', function ($q) use ($tiers) {
-            $q->whereIn('tier', $tiers);
+            $q->whereIn('customer_tier', $tiers);
         })->get();
     }
 

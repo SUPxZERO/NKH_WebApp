@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PayrollController extends Controller
 {
@@ -338,5 +339,134 @@ class PayrollController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Export payroll data as CSV
+     */
+    public function exportCSV(Request $request)
+    {
+        $validated = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+        ]);
+
+        $query = Payroll::with('employee.user');
+
+        if ($request->filled('month')) {
+            $date = Carbon::parse($validated['month']);
+            $query->whereYear('period_start', $date->year)
+                  ->whereMonth('period_start', $date->month);
+        }
+
+        $payrolls = $query->orderBy('period_start', 'desc')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="payroll-report-' . date('Y-m-d') . '.csv"',
+        ];
+
+        $callback = function() use ($payrolls, $validated) {
+            $file = fopen('php://output', 'w');
+            
+            // Title & Period
+            fputcsv($file, ['Payroll Report']);
+            if (isset($validated['month'])) {
+                fputcsv($file, ['Period:', Carbon::parse($validated['month'])->format('F Y')]);
+            } else {
+                fputcsv($file, ['Period:', 'All Records']);
+            }
+            fputcsv($file, []);
+
+            // Summary Stats
+            $totalNetPay = $payrolls->sum('net_pay');
+            $totalGrossPay = $payrolls->sum('gross_pay');
+            $employeeCount = $payrolls->count();
+
+            fputcsv($file, ['SUMMARY']);
+            fputcsv($file, ['Total Employees', $employeeCount]);
+            fputcsv($file, ['Total Gross Pay', '$' . number_format($totalGrossPay, 2)]);
+            fputcsv($file, ['Total Net Pay', '$' . number_format($totalNetPay, 2)]);
+            fputcsv($file, []);
+
+            // Payroll Details
+            fputcsv($file, ['PAYROLL DETAILS']);
+            fputcsv($file, ['Employee', 'Period', 'Base Pay', 'Overtime', 'Bonuses', 'Deductions', 'Net Pay', 'Status']);
+            
+            foreach ($payrolls as $payroll) {
+                fputcsv($file, [
+                    $payroll->employee->user->name ?? 'Unknown',
+                    $payroll->period_start->format('M Y'),
+                    number_format($payroll->base_pay ?? 0, 2),
+                    number_format($payroll->overtime_pay ?? 0, 2),
+                    number_format($payroll->bonuses ?? 0, 2),
+                    number_format($payroll->deductions ?? 0, 2),
+                    number_format($payroll->net_pay ?? 0, 2),
+                    ucfirst($payroll->status),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export payroll data as PDF
+     */
+    public function exportPDF(Request $request)
+    {
+        $validated = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+        ]);
+
+        $query = Payroll::with('employee.user');
+
+        if ($request->filled('month')) {
+            $date = Carbon::parse($validated['month']);
+            $query->whereYear('period_start', $date->year)
+                  ->whereMonth('period_start', $date->month);
+        }
+
+        $payrolls = $query->orderBy('period_start', 'desc')->get();
+
+        // Calculate summary stats
+        $totalNetPay = $payrolls->sum('net_pay');
+        $totalGrossPay = $payrolls->sum('gross_pay');
+        $totalDeductions = $payrolls->sum('deductions');
+        $totalBonuses = $payrolls->sum('bonuses');
+        $employeeCount = $payrolls->count();
+        $avgNetPay = $employeeCount > 0 ? $totalNetPay / $employeeCount : 0;
+
+        $data = [
+            'payrolls' => $payrolls->map(function ($payroll) {
+                return [
+                    'employee_name' => $payroll->employee->user->name ?? 'Unknown',
+                    'period' => $payroll->period_start->format('M Y'),
+                    'base_pay' => $payroll->base_pay ?? 0,
+                    'overtime_pay' => $payroll->overtime_pay ?? 0,
+                    'bonuses' => $payroll->bonuses ?? 0,
+                    'deductions' => $payroll->deductions ?? 0,
+                    'gross_pay' => $payroll->gross_pay ?? 0,
+                    'net_pay' => $payroll->net_pay ?? 0,
+                    'status' => $payroll->status,
+                ];
+            }),
+            'summary' => [
+                'total_employees' => $employeeCount,
+                'total_gross_pay' => $totalGrossPay,
+                'total_net_pay' => $totalNetPay,
+                'total_deductions' => $totalDeductions,
+                'total_bonuses' => $totalBonuses,
+                'avg_net_pay' => $avgNetPay,
+            ],
+            'period' => isset($validated['month']) 
+                ? Carbon::parse($validated['month'])->format('F Y')
+                : 'All Records',
+            'generated_at' => now()->format('F d, Y \a\t H:i'),
+        ];
+
+        $pdf = Pdf::loadView('exports.payroll-report', $data);
+        return $pdf->download('payroll-report-' . date('Y-m-d') . '.pdf');
     }
 }

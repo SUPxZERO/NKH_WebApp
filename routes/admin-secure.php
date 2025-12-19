@@ -282,14 +282,14 @@ Route::middleware('permission:roles.manage,permissions.manage')
 // Users - requires users.* permissions
 Route::middleware('permission:users.view')
     ->group(function () {
-        Route::get('admin-users/stats', [\App\Http\Controllers\Api\AdminUserController::class, 'stats']);
-        Route::get('admin-users', [\App\Http\Controllers\Api\AdminUserController::class, 'index']);
-        Route::get('admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'show']);
+        Route::get('users/stats', [\App\Http\Controllers\Api\AdminUserController::class, 'stats']);
+        Route::get('users', [\App\Http\Controllers\Api\AdminUserController::class, 'index']);
+        Route::get('users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'show']);
     });
 
-Route::middleware('permission:users.create')->post('admin-users', [\App\Http\Controllers\Api\AdminUserController::class, 'store']);
-Route::middleware('permission:users.update')->match(['put', 'patch'], 'admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'update']);
-Route::middleware('permission:users.delete')->delete('admin-users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'destroy']);
+Route::middleware('permission:users.create')->post('users', [\App\Http\Controllers\Api\AdminUserController::class, 'store']);
+Route::middleware('permission:users.update')->match(['put', 'patch'], 'users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'update']);
+Route::middleware('permission:users.delete')->delete('users/{user}', [\App\Http\Controllers\Api\AdminUserController::class, 'destroy']);
 
 // Dashboard - requires dashboard.view permission
 Route::middleware('permission:dashboard.view')
@@ -464,7 +464,7 @@ Route::middleware('permission:locations.manage')
 // Notifications - requires notifications.* permissions
 Route::middleware('permission:notifications.view,notifications.send')
     ->group(function () {
-        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::get('notifications', [NotificationController::class, 'adminIndex']);
         Route::get('notifications/stats', [NotificationController::class, 'stats']);
     });
 Route::middleware('permission:notifications.send')
@@ -512,6 +512,8 @@ Route::middleware('permission:employees.view')
     ->group(function () {
         Route::get('payroll/history', [PayrollController::class, 'history']);
         Route::get('payroll/{payroll}/details', [PayrollController::class, 'details']);
+        Route::get('payroll/export/csv', [PayrollController::class, 'exportCSV']);
+        Route::get('payroll/export/pdf', [PayrollController::class, 'exportPDF']);
     });
 Route::middleware('permission:employees.manage')
     ->group(function () {

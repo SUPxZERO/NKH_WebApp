@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Notifications\DatabaseNotification;
+use App\Models\UserNotification;
+use App\Models\BroadcastNotification;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -17,41 +18,41 @@ class NotificationController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        // Scope to the authenticated user
-        $query = $user->notifications();
+        // Scope to the authenticated user using UserNotification model
+        $query = UserNotification::where('user_id', $user->id);
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                // JSON structure querying depends on DB driver, valid for MySQL/Postgres
-                $q->where('data->title', 'like', "%{$search}%")
-                  ->orWhere('data->message', 'like', "%{$search}%");
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('message', 'like', "%{$search}%");
             });
         }
 
         if ($request->has('type') && $request->type !== 'all') {
-            $query->where('data->type', $request->type);
+            $query->where('type', $request->type);
         }
 
         if ($request->has('status') && $request->status !== 'all') {
             if ($request->status === 'read') {
-                $query->whereNotNull('read_at');
+                $query->where('read', true);
             } else {
-                $query->whereNull('read_at');
+                $query->where('read', false);
             }
         }
 
         $notifications = $query->latest()->paginate($request->per_page ?? 20);
 
+        // Transform if necessary, or return directly since structure is similar
+        // Adjusting structure to match frontend expectations if needed
         $notifications->getCollection()->transform(function ($n) {
             return [
                 'id' => $n->id,
-                'title' => $n->data['title'] ?? 'No Title',
-                'message' => $n->data['message'] ?? '',
-                'type' => $n->data['type'] ?? 'info',
-                'user_id' => $n->notifiable_id,
-                // 'user' => $n->notifiable ? ['name' => $n->notifiable->name] : null, // Redundant for own notifications
-                'read_at' => $n->read_at,
+                'title' => $n->title,
+                'message' => $n->message,
+                'type' => $n->type,
+                'user_id' => $n->user_id,
+                'read_at' => $n->read_at, // or create from 'read' status if read_at is null
                 'created_at' => $n->created_at,
             ];
         });
@@ -59,16 +60,124 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
+
+    /**
+     * Admin specific index to view ALL notifications (grouped by broadcast + legacy)
+     */
+    public function adminIndex(Request $request)
+    {
+        $search = $request->search;
+        $typeFilter = $request->type;
+        $targetFilter = $request->target_type;
+        $perPage = $request->per_page ?? 20;
+
+        // Get broadcast notifications
+        $broadcastQuery = BroadcastNotification::query()->with('creator:id,name');
+
+        if ($search) {
+            $broadcastQuery->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('message', 'like', "%{$search}%");
+            });
+        }
+
+        if ($typeFilter && $typeFilter !== 'all') {
+            $broadcastQuery->where('type', $typeFilter);
+        }
+
+        if ($targetFilter && $targetFilter !== 'all') {
+            $broadcastQuery->where('target_type', $targetFilter);
+        }
+
+        $broadcasts = $broadcastQuery->latest()->get()->map(function ($n) {
+            return [
+                'id' => 'broadcast_' . $n->id,
+                'title' => $n->title,
+                'message' => $n->message,
+                'type' => $n->type,
+                'target_type' => $n->target_type,
+                'target_metadata' => $n->target_metadata,
+                'recipient_count' => $n->recipient_count,
+                'read_count' => $n->read_count,
+                'unread_count' => $n->unread_count,
+                'created_by' => $n->creator ? ['id' => $n->creator->id, 'name' => $n->creator->name] : null,
+                'created_at' => $n->created_at,
+                'is_broadcast' => true,
+            ];
+        });
+
+        // Get legacy notifications (those without broadcast_notification_id) - grouped by title+message+created_at
+        $legacyQuery = UserNotification::query()
+            ->whereNull('broadcast_notification_id')
+            ->select('title', 'message', 'type', 'target_type', 'target_metadata', 'created_at')
+            ->selectRaw('MIN(id) as id')
+            ->selectRaw('COUNT(*) as recipient_count')
+            ->selectRaw('SUM(CASE WHEN `read` = 1 THEN 1 ELSE 0 END) as read_count')
+            ->selectRaw('SUM(CASE WHEN `read` = 0 THEN 1 ELSE 0 END) as unread_count')
+            ->groupBy('title', 'message', 'type', 'target_type', 'target_metadata', 'created_at');
+
+        if ($search) {
+            $legacyQuery->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('message', 'like', "%{$search}%");
+            });
+        }
+
+        if ($typeFilter && $typeFilter !== 'all') {
+            $legacyQuery->where('type', $typeFilter);
+        }
+
+        if ($targetFilter && $targetFilter !== 'all') {
+            $legacyQuery->where('target_type', $targetFilter);
+        }
+
+        $legacy = $legacyQuery->latest('created_at')->get()->map(function ($n) {
+            return [
+                'id' => 'legacy_' . $n->id,
+                'title' => $n->title,
+                'message' => $n->message,
+                'type' => $n->type,
+                'target_type' => $n->target_type,
+                'target_metadata' => $n->target_metadata,
+                'recipient_count' => $n->recipient_count,
+                'read_count' => $n->read_count,
+                'unread_count' => $n->unread_count,
+                'created_by' => null,
+                'created_at' => $n->created_at,
+                'is_broadcast' => false,
+            ];
+        });
+
+        // Merge and sort by created_at
+        $allNotifications = $broadcasts->concat($legacy)->sortByDesc('created_at')->values();
+
+        // Manual pagination
+        $page = $request->page ?? 1;
+        $offset = ($page - 1) * $perPage;
+        $items = $allNotifications->slice($offset, $perPage)->values();
+        $total = $allNotifications->count();
+
+        return response()->json([
+            'data' => $items,
+            'current_page' => (int)$page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'last_page' => (int)ceil($total / $perPage),
+        ]);
+    }
+
     public function markAllRead(Request $request)
     {
-        $request->user()->unreadNotifications->markAsRead();
+        UserNotification::where('user_id', $request->user()->id)
+            ->where('read', false)
+            ->update(['read' => true, 'read_at' => now()]);
         return response()->json(['message' => 'All marked as read']);
     }
 
     public function unreadCount(Request $request)
     {
         return response()->json([
-            'count' => $request->user()->unreadNotifications()->count()
+            'count' => UserNotification::where('user_id', $request->user()->id)->where('read', false)->count()
         ]);
     }
 
@@ -76,10 +185,10 @@ class NotificationController extends Controller
     {
         // ... existing stats logic (probably for admin, keep separate or scope)
         return response()->json([
-            'total' => DatabaseNotification::count(),
-            'unread' => DatabaseNotification::whereNull('read_at')->count(),
-            'system_alerts' => DatabaseNotification::where('data->type', 'system')->count(),
-            'user_messages' => DatabaseNotification::where('data->type', '!=', 'system')->count(),
+            'total' => UserNotification::count(),
+            'unread' => UserNotification::where('read', false)->count(),
+            'system_alerts' => UserNotification::where('type', 'system')->count(),
+            'user_messages' => UserNotification::where('type', '!=', 'system')->count(),
         ]);
     }
 
@@ -100,13 +209,12 @@ class NotificationController extends Controller
         $users = $request->user_id ? User::where('id', $request->user_id)->get() : User::all();
 
         foreach ($users as $user) {
-            $user->notifications()->create([
-                'id' => Str::uuid(),
-                'type' => 'SystemNotification',
-                'data' => $data,
-                'read_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
+            UserNotification::create([
+                'user_id' => $user->id,
+                'type' => $request->type,
+                'title' => $request->title,
+                'message' => $request->message,
+                'read' => false,
             ]);
         }
 
@@ -115,16 +223,16 @@ class NotificationController extends Controller
 
     public function markAsRead($id)
     {
-        $notification = DatabaseNotification::find($id);
+        $notification = UserNotification::find($id);
         if ($notification) {
-            $notification->markAsRead();
+            $notification->update(['read' => true, 'read_at' => now()]);
         }
         return response()->json(['message' => 'Marked as read']);
     }
 
     public function destroy($id)
     {
-        $notification = DatabaseNotification::find($id);
+        $notification = UserNotification::find($id);
         if ($notification) {
             $notification->delete();
         }

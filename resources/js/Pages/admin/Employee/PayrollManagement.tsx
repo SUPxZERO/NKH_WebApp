@@ -23,7 +23,9 @@ import {
     TrendingDown,
     TrendingUp,
     Search,
-    ChevronDown
+    ChevronDown,
+    FileSpreadsheet,
+    FileText
 } from 'lucide-react';
 import { Modal } from '@/app/components/ui/Modal';
 
@@ -217,38 +219,20 @@ export default function PayrollManagement() {
 
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-    const handleExportPayroll = async () => {
-        try {
-            const data = (payrollData as any)?.data || [];
-            if (!data.length) return;
-            const csv = [
-                ['Employee', 'Period', 'Base Pay', 'Overtime', 'Bonuses', 'Gross Pay', 'Deductions', 'Taxes', 'Net Pay', 'Status'].join(','),
-                ...data.map((record: PayrollRecord) =>
-                    [
-                        record.employee_name,
-                        `${record.period_start} to ${record.period_end}`,
-                        record.base_pay.toFixed(2),
-                        record.overtime_pay.toFixed(2),
-                        record.bonuses.toFixed(2),
-                        record.gross_pay.toFixed(2),
-                        record.deductions.toFixed(2),
-                        record.taxes.toFixed(2),
-                        record.net_pay.toFixed(2),
-                        record.status,
-                    ].join(',')
-                ),
-            ].join('\n');
+    const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `payroll_${selectedMonth}.csv`;
-            a.click();
-            toastSuccess('Payroll exported successfully');
-        } catch (error) {
-            toastError('Failed to export payroll');
-        }
+    const handleExportCSV = () => {
+        setIsExportDropdownOpen(false);
+        const url = `/api/admin/payroll/export/csv?month=${selectedMonth}`;
+        window.open(url, '_blank');
+        toastSuccess('CSV export started');
+    };
+
+    const handleExportPDF = () => {
+        setIsExportDropdownOpen(false);
+        const url = `/api/admin/payroll/export/pdf?month=${selectedMonth}`;
+        window.open(url, '_blank');
+        toastSuccess('PDF export started');
     };
 
     const totalGross = (payrollData as any)?.data?.reduce((sum: number, r: PayrollRecord) => sum + r.gross_pay, 0) || 0;
@@ -289,15 +273,41 @@ export default function PayrollManagement() {
                             <p className="text-muted-foreground mt-2">Manage employee compensation, bonuses, and deductions</p>
                         </div>
                         <div className="flex gap-2">
-                            <Button
-                                onClick={handleExportPayroll}
-                                disabled={!(payrollData as any)?.data?.length}
-                                variant="outline"
-                                className="bg-background/50 backdrop-blur-sm border-border"
-                            >
-                                <Download className="w-4 h-4 mr-2" />
-                                Export CSV
-                            </Button>
+                            <div className="relative">
+                                <Button
+                                    onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
+                                    disabled={!(payrollData as any)?.data?.length}
+                                    variant="outline"
+                                    className="bg-background/50 backdrop-blur-sm border-border"
+                                >
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Export
+                                    <ChevronDown className="w-4 h-4 ml-2" />
+                                </Button>
+                                {isExportDropdownOpen && (
+                                    <div className="absolute right-0 top-full mt-2 z-50">
+                                        <div
+                                            className="border rounded-xl shadow-2xl p-2 w-48"
+                                            style={{ backgroundColor: '#18181b' }}
+                                        >
+                                            <button
+                                                onClick={handleExportCSV}
+                                                className="flex items-center gap-3 w-full p-2.5 rounded-lg cursor-pointer transition-colors hover:bg-zinc-800"
+                                            >
+                                                <FileSpreadsheet className="w-4 h-4 text-green-500" />
+                                                <span style={{ color: '#ffffff', fontWeight: 500 }}>Export CSV</span>
+                                            </button>
+                                            <button
+                                                onClick={handleExportPDF}
+                                                className="flex items-center gap-3 w-full p-2.5 rounded-lg cursor-pointer transition-colors hover:bg-zinc-800"
+                                            >
+                                                <FileText className="w-4 h-4 text-red-500" />
+                                                <span style={{ color: '#ffffff', fontWeight: 500 }}>Export PDF</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -314,7 +324,7 @@ export default function PayrollManagement() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl p-6 shadow-lg backdrop-blur-sm"
+                        className="bg-card border border-border/50 rounded-2xl p-6 shadow-lg"
                     >
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="w-full md:w-1/4 space-y-2">
@@ -348,9 +358,15 @@ export default function PayrollManagement() {
                                     </button>
 
                                     {isDropdownOpen && (
-                                        <div className="absolute inset-x-0 top-full mt-2 z-20">
-                                            <div className="bg-card border border-border rounded-xl shadow-xl p-2 max-h-60 overflow-y-auto">
-                                                <label className="flex items-center gap-3 p-2.5 hover:bg-secondary/80 rounded-lg cursor-pointer font-medium border-b border-border/50 mb-2 sticky top-0 bg-card z-10">
+                                        <div className="absolute inset-x-0 top-full mt-2" style={{ zIndex: 9999 }}>
+                                            <div
+                                                className="border rounded-xl shadow-2xl p-2 max-h-60 overflow-y-auto"
+                                                style={{ backgroundColor: '#18181b' }}
+                                            >
+                                                <label
+                                                    className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer font-medium border-b mb-2 sticky top-0"
+                                                    style={{ backgroundColor: '#18181b', borderColor: '#3f3f46' }}
+                                                >
                                                     <input
                                                         type="checkbox"
                                                         checked={
@@ -358,20 +374,26 @@ export default function PayrollManagement() {
                                                             selectedEmployees.length === (employees as any)?.data?.length
                                                         }
                                                         onChange={(e) => handleSelectAllEmployees(e.target.checked)}
-                                                        className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500 focus:ring-offset-0 bg-background"
+                                                        className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                                                        style={{ backgroundColor: '#27272a', borderColor: '#52525b' }}
                                                     />
-                                                    <span className="text-sm text-foreground font-semibold">Select All ({(employees as any)?.data?.length || 0})</span>
+                                                    <span style={{ color: '#ffffff', fontWeight: 600 }}>Select All ({(employees as any)?.data?.length || 0})</span>
                                                 </label>
-                                                <div className="space-y-0.5">
+                                                <div className="space-y-1">
                                                     {(employees as any)?.data?.map((emp: any) => (
-                                                        <label key={emp.id} className="flex items-center gap-3 p-2.5 hover:bg-secondary/80 rounded-lg cursor-pointer transition-colors group">
+                                                        <label
+                                                            key={emp.id}
+                                                            className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors group hover:brightness-125"
+                                                            style={{ backgroundColor: '#18181b' }}
+                                                        >
                                                             <input
                                                                 type="checkbox"
                                                                 checked={selectedEmployees.includes(emp.id)}
                                                                 onChange={(e) => handleSelectEmployee(emp.id, e.target.checked)}
-                                                                className="w-4 h-4 rounded border-border text-blue-600 focus:ring-blue-500 focus:ring-offset-0 bg-background"
+                                                                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                                                                style={{ backgroundColor: '#27272a', borderColor: '#52525b' }}
                                                             />
-                                                            <span className="text-sm text-foreground font-medium group-hover:text-blue-600 transition-colors">{emp.user?.name || emp.employee_code}</span>
+                                                            <span style={{ color: '#ffffff', fontWeight: 500 }}>{emp.user?.name || emp.employee_code}</span>
                                                         </label>
                                                     ))}
                                                 </div>
