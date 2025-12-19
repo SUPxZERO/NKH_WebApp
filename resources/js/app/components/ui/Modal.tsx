@@ -2,6 +2,7 @@ import React, { PropsWithChildren, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useModalHotkeys } from '@/app/hooks/useShortcuts';
 
 export interface ModalProps {
   open?: boolean;
@@ -35,13 +36,16 @@ export function Modal({
 }: PropsWithChildren<ModalProps>) {
   const isModalOpen = open ?? isOpen ?? false;
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isModalOpen) onClose();
+  useModalHotkeys(
+    isModalOpen,
+    {
+      onClose,
+    },
+    {
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isModalOpen, onClose]);
+  );
 
   // Prevent body scroll when modal is open
   useEffect(() => {

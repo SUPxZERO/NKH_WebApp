@@ -124,9 +124,8 @@ class DatabaseSeeder extends Seeder
         // ══════════════════════════════════════════════════════════════════════
         $this->command->info('🍔 PHASE 5: Seeding menu categories and items...');
         $this->call([
-            CategorySeeder::class,                // categories -> locations (parent_id self-ref)
-            MenuItemSeeder::class,                // menu_items -> locations, categories
-            MenuItemTranslationSeeder::class,     // menu_item_translations -> menu_items
+            ImprovedCategorySeeder::class,        // IMPROVED: categories -> locations (parent_id self-ref)
+            ImprovedMenuItemSeeder::class,        // IMPROVED: menu_items ONLY link to sub-categories
         ]);
         $this->command->info('✅ Menu categories and items seeded.');
         $this->command->info('');

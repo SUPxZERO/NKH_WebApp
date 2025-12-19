@@ -68,7 +68,7 @@ export default function Menu() {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: categories, isLoading: catsLoading } = useCategories();
+  const { data: categories, isLoading: catsLoading } = useCategories(true); // Get only sub-categories
   const { data: menuItems, isLoading: itemsLoading } = useMenuItems({
     category_id: selectedCategory,
     search: searchQuery || undefined

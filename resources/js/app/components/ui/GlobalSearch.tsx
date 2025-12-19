@@ -1,7 +1,7 @@
 /**
  * GlobalSearch - Command Palette Style Search Component
  *
- * A reusable search modal that can be triggered with Cmd+K / Ctrl+K
+ * A reusable search modal that can be triggered with Cmd+Shift+K / Ctrl+Shift+K
  * Works across Admin, Employee, and Customer layouts
  */
 
@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import { router } from '@inertiajs/react';
 import { useQuery } from '@tanstack/react-query';
+import { useHotkeys } from 'react-hotkeys-hook';
 import {
   Search,
   Command,
@@ -185,42 +186,60 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
     return searchGroups.flatMap(group => group.results);
   }, [searchGroups]);
 
-  // Handle keyboard navigation
-  useEffect(() => {
-    if (!isOpen) return;
+  useHotkeys(
+    'down',
+    (e) => {
+      if (!isOpen) return;
+      if (flatResults.length === 0) return;
+      e.preventDefault();
+      setSelectedIndex((i) => Math.min(i + 1, flatResults.length - 1));
+    },
+    { enabled: isOpen, enableOnFormTags: true, enableOnContentEditable: true },
+    [isOpen, flatResults.length]
+  );
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          setSelectedIndex(i => Math.min(i + 1, flatResults.length - 1));
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          setSelectedIndex(i => Math.max(i - 1, 0));
-          break;
-        case 'Enter':
-          e.preventDefault();
-          const selected = flatResults[selectedIndex];
-          if (selected) {
-            if (selected.action) {
-              selected.action();
-            } else if (selected.href) {
-              router.visit(selected.href);
-            }
-            onClose();
-          }
-          break;
-        case 'Escape':
-          e.preventDefault();
-          onClose();
-          break;
+  useHotkeys(
+    'up',
+    (e) => {
+      if (!isOpen) return;
+      if (flatResults.length === 0) return;
+      e.preventDefault();
+      setSelectedIndex((i) => Math.max(i - 1, 0));
+    },
+    { enabled: isOpen, enableOnFormTags: true, enableOnContentEditable: true },
+    [isOpen, flatResults.length]
+  );
+
+  useHotkeys(
+    'enter',
+    (e) => {
+      if (!isOpen) return;
+      const selected = flatResults[selectedIndex];
+      if (!selected) return;
+      e.preventDefault();
+
+      if (selected.action) {
+        selected.action();
+      } else if (selected.href) {
+        router.visit(selected.href);
       }
-    };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, flatResults, selectedIndex, onClose]);
+      onClose();
+    },
+    { enabled: isOpen, enableOnFormTags: true, enableOnContentEditable: true },
+    [isOpen, flatResults, selectedIndex, onClose]
+  );
+
+  useHotkeys(
+    'esc',
+    (e) => {
+      if (!isOpen) return;
+      e.preventDefault();
+      onClose();
+    },
+    { enabled: isOpen, enableOnFormTags: true, enableOnContentEditable: true },
+    [isOpen, onClose]
+  );
 
   // Reset selection when query changes
   useEffect(() => {
@@ -411,18 +430,15 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
 export function useGlobalSearch() {
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd+K (Mac) or Ctrl+K (Windows/Linux)
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsOpen(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  useHotkeys(
+    'mod+shift+k',
+    (e) => {
+      e.preventDefault();
+      setIsOpen((prev) => !prev);
+    },
+    {},
+    []
+  );
 
   return {
     isOpen,
@@ -459,7 +475,7 @@ export function SearchTrigger({ onClick, variant = 'admin', className }: SearchT
           ? "bg-white/10 text-white/60"
           : "bg-gray-200 dark:bg-gray-600"
       )}>
-        <Command className="w-3 h-3" />K
+        <Command className="w-3 h-3" />⇧K
       </kbd>
     </button>
   );

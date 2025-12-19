@@ -59,14 +59,14 @@ export function CategoryFilter({
                     whileTap={{ scale: 0.98 }}
                 >
                     <span>{category.name}</span>
-                    {category.menu_items && (
+                    {category.menu_items_count !== undefined && category.menu_items_count > 0 && (
                         <span className={cn(
                             "text-xs px-1.5 py-0.5 rounded-md",
                             selectedCategory === category.id
                                 ? "bg-white/20"
                                 : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                         )}>
-                            {category.menu_items.length}
+                            {category.menu_items_count}
                         </span>
                     )}
                 </motion.button>

@@ -16,7 +16,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'appetizers',
             'display_order' => 1,
-            'image' => 'categories/appetizers.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Appetizers',
@@ -65,7 +65,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'rice-dishes',
             'display_order' => 2,
-            'image' => 'categories/rice-dishes.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Rice Dishes',
@@ -106,7 +106,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'noodles',
             'display_order' => 3,
-            'image' => 'categories/noodles.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Noodles',
@@ -147,7 +147,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'soups',
             'display_order' => 4,
-            'image' => 'categories/soups.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Soups',
@@ -188,7 +188,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'curries',
             'display_order' => 5,
-            'image' => 'categories/curries.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Curries',
@@ -229,7 +229,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'grilled-bbq',
             'display_order' => 6,
-            'image' => 'categories/grilled.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Grilled & BBQ',
@@ -270,7 +270,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'stir-fry',
             'display_order' => 7,
-            'image' => 'categories/stir-fry.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Stir-Fry Dishes',
@@ -311,7 +311,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'salads',
             'display_order' => 8,
-            'image' => 'categories/salads.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Salads',
@@ -352,7 +352,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'desserts',
             'display_order' => 9,
-            'image' => 'categories/desserts.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Desserts',
@@ -393,7 +393,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'beverages',
             'display_order' => 10,
-            'image' => 'categories/beverages.jpg',
+            'image' => null,
             'translations' => [
                 'en' => [
                     'name' => 'Beverages',
@@ -453,32 +453,31 @@ class ImprovedCategorySeeder extends Seeder
     {
         $this->command->info('Starting ImprovedCategorySeeder...');
 
-        // Get all active locations
-        $locations = Location::where('is_active', true)->get();
+        // IMPORTANT: Only seed for ONE location to avoid duplicates
+        // Get the first active location only
+        $location = Location::where('is_active', true)->first();
 
-        if ($locations->isEmpty()) {
+        if (!$location) {
             $this->command->warn('No active locations found. Skipping category seeding.');
             $this->command->warn('Please run LocationSeeder first!');
             return;
         }
 
-        foreach ($locations as $location) {
-            $this->command->info("📁 Creating categories for location: {$location->name}");
+        $this->command->info("📁 Creating categories for location: {$location->name}");
 
-            $mainCount = 0;
-            $subCount = 0;
+        $mainCount = 0;
+        $subCount = 0;
 
-            foreach ($this->mainCategories as $categoryData) {
-                $category = $this->createCategory($categoryData, $location->id, null);
-                $mainCount++;
+        foreach ($this->mainCategories as $categoryData) {
+            $category = $this->createCategory($categoryData, $location->id, null);
+            $mainCount++;
 
-                if (isset($categoryData['children'])) {
-                    $subCount += count($categoryData['children']);
-                }
+            if (isset($categoryData['children'])) {
+                $subCount += count($categoryData['children']);
             }
-
-            $this->command->info("✓ Created {$mainCount} main categories and {$subCount} sub-categories for {$location->name}");
         }
+
+        $this->command->info("✓ Created {$mainCount} main categories and {$subCount} sub-categories for {$location->name}");
 
         $totalMain = Category::whereNull('parent_id')->count();
         $totalSub = Category::whereNotNull('parent_id')->count();
@@ -490,24 +489,30 @@ class ImprovedCategorySeeder extends Seeder
      */
     private function createCategory(array $data, int $locationId, ?int $parentId): Category
     {
-        // Create the category
-        $category = Category::create([
-            'location_id' => $locationId,
-            'parent_id' => $parentId,
-            'slug' => $data['slug'],
-            'display_order' => $data['display_order'],
-            'is_active' => true,
-            'image' => $data['image'] ?? null,
-        ]);
+        // Create or update the category
+        $category = Category::updateOrCreate(
+            [
+                'location_id' => $locationId,
+                'slug' => $data['slug'],
+            ],
+            [
+                'parent_id' => $parentId,
+                'display_order' => $data['display_order'],
+                'is_active' => true,
+                'image' => $data['image'] ?? null,
+            ]
+        );
 
-        // Create translations
+        // Create or update translations
         if (isset($data['translations'])) {
             foreach ($data['translations'] as $locale => $translation) {
-                $category->translations()->create([
-                    'locale' => $locale,
-                    'name' => $translation['name'],
-                    'description' => $translation['description'] ?? '',
-                ]);
+                $category->translations()->updateOrCreate(
+                    ['locale' => $locale],
+                    [
+                        'name' => $translation['name'],
+                        'description' => $translation['description'] ?? '',
+                    ]
+                );
             }
         }
 

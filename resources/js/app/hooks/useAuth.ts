@@ -8,6 +8,7 @@ interface User {
   name: string;
   email: string;
   role: 'admin' | 'employee' | 'customer';
+  permissions?: string[];
   phone?: string;
   email_verified_at?: string;
   created_at: string;
@@ -202,6 +203,11 @@ export function useAuth() {
   // Check if user has permission (you can extend this based on your permission system)
   const hasPermission = (permission: string) => {
     if (!user) return false;
+
+    const explicitPermissions = user.permissions;
+    if (Array.isArray(explicitPermissions)) {
+      return explicitPermissions.includes(permission) || explicitPermissions.includes('*');
+    }
     
     // Basic role-based permissions
     const rolePermissions = {

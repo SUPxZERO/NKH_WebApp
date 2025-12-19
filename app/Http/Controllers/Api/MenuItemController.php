@@ -21,6 +21,11 @@ class MenuItemController extends Controller
                 ->withoutGlobalScope('active')
                 ->with(['translations', 'category.translations']);
 
+            // CRITICAL FIX: Filter by location (default to location_id = 1)
+            // This prevents showing duplicate items from multiple locations
+            $locationId = $request->integer('location_id', 1);
+            $query->where('location_id', $locationId);
+
             // Filter by category if provided
             if ($request->filled('category')) {
                 $query->where('category_id', $request->integer('category'));
@@ -47,7 +52,7 @@ class MenuItemController extends Controller
 
             // Get pagination parameters with validation
             $perPage = min(max((int) $request->input('per_page', default: 16), 1), 100);
-            
+
             $menuItems = $query->paginate($perPage);
 
             return response()->json([

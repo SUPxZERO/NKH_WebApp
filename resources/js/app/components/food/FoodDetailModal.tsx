@@ -35,6 +35,7 @@ import { cn } from '@/app/utils/cn';
 import { MenuItem } from '@/app/types/domain';
 import { apiGet } from '@/app/libs/apiClient';
 import { RestaurantButton } from '@/Components/ui/RestaurantButton';
+import { useModalHotkeys } from '@/app/hooks/useShortcuts';
 
 // ============================================================================
 // Types
@@ -132,16 +133,16 @@ export function FoodDetailModal({
     }
   }, [isOpen, initialQuantity]);
 
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  useModalHotkeys(
+    isOpen,
+    {
+      onClose,
+    },
+    {
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+    }
+  );
 
   // Prevent body scroll when modal is open
   useEffect(() => {

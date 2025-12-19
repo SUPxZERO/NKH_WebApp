@@ -18,6 +18,8 @@ import { apiPost, apiGet } from '@/app/utils/api';
 import { toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { isUserInInputField } from '@/app/utils/shortcuts';
 
 interface Floor {
   id: number;
@@ -133,24 +135,27 @@ export default function POS() {
   // Real-time order updates
   useOrderUpdates();
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      // Focus search with '/'
-      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-      // Toggle numpad with 'n'
-      if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        setShowNumpad(!showNumpad);
-      }
-    };
+  useHotkeys(
+    '/',
+    (e) => {
+      if (isUserInInputField()) return;
+      e.preventDefault();
+      searchRef.current?.focus();
+    },
+    { preventDefault: true },
+    []
+  );
 
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [showNumpad]);
+  useHotkeys(
+    'mod+shift+n',
+    (e) => {
+      if (isUserInInputField()) return;
+      e.preventDefault();
+      setShowNumpad((prev) => !prev);
+    },
+    { preventDefault: true },
+    []
+  );
 
   const handleQuickAdd = (item: MenuItem) => {
     const qty = parseInt(quantity) || 1;

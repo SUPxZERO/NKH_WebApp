@@ -26,6 +26,12 @@ class MenuItemResource extends JsonResource
                     $imagePath = asset('storage/' . $imagePath);
                 }
             }
+
+            // Check if file exists, if not use placeholder
+            $fullPath = public_path('storage/' . ltrim(str_replace('/storage/', '', $imagePath), '/'));
+            if (!file_exists($fullPath)) {
+                $imagePath = null; // Will show default emoji in frontend
+            }
         }
 
         // Get current translation

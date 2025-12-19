@@ -17,48 +17,51 @@ class ImprovedMenuItemSeeder extends Seeder
     {
         $this->command->info('Starting ImprovedMenuItemSeeder...');
 
-        $locations = Location::where('is_active', true)->get();
+        // IMPORTANT: Only seed for ONE location to avoid duplicates
+        // Get the first active location only
+        $location = Location::where('is_active', true)->first();
 
-        if ($locations->isEmpty()) {
+        if (!$location) {
             $this->command->warn('No locations found. Please run LocationSeeder first!');
             return;
         }
 
-        foreach ($locations as $location) {
-            $this->command->info("🍽️  Creating menu items for: {$location->name}");
+        $this->command->info("🍽️  Creating menu items for: {$location->name}");
 
-            // Get ALL sub-categories for this location (parent_id IS NOT NULL)
-            $subCategories = Category::where('location_id', $location->id)
-                ->whereNotNull('parent_id')
-                ->with('translations')
-                ->get()
-                ->keyBy('slug');
+        // Get ALL sub-categories for this location (parent_id IS NOT NULL)
+        $subCategories = Category::where('location_id', $location->id)
+            ->whereNotNull('parent_id')
+            ->with('translations')
+            ->get()
+            ->keyBy('slug');
 
-            if ($subCategories->isEmpty()) {
-                $this->command->warn("No sub-categories found for {$location->name}. Run CategorySeeder first!");
-                continue;
-            }
-
-            $menuData = $this->getMenuItemsData($subCategories, $location);
-
-            foreach ($menuData as $itemData) {
-                $menuItem = MenuItem::create($itemData);
-
-                // Create translations
-                if (isset($itemData['translations'])) {
-                    foreach ($itemData['translations'] as $locale => $translation) {
-                        $menuItem->translations()->create([
-                            'locale' => $locale,
-                            'name' => $translation['name'],
-                            'description' => $translation['description'] ?? '',
-                        ]);
-                    }
-                }
-            }
-
-            $itemCount = MenuItem::where('location_id', $location->id)->count();
-            $this->command->info("✓ Created {$itemCount} menu items for {$location->name}");
+        if ($subCategories->isEmpty()) {
+            $this->command->warn("No sub-categories found for {$location->name}. Run CategorySeeder first!");
+            return;
         }
+
+        $menuData = $this->getMenuItemsData($subCategories, $location);
+
+        foreach ($menuData as $itemData) {
+            // Extract translations before creating menu item
+            $translations = $itemData['translations'] ?? [];
+            unset($itemData['translations']);
+
+            $menuItem = MenuItem::create($itemData);
+
+            // Create translations
+            foreach ($translations as $locale => $translation) {
+                $menuItem->translations()->create([
+                    'locale' => $locale,
+                    'name' => $translation['name'],
+                    'description' => $translation['description'] ?? '',
+                ]);
+            }
+        }
+
+        $itemCount = MenuItem::where('location_id', $location->id)->count();
+        $this->command->info("✓ Created {$itemCount} menu items for {$location->name}");
+
 
         $total = MenuItem::count();
         $this->command->info("✅ Total menu items created: {$total}");
@@ -493,7 +496,7 @@ class ImprovedMenuItemSeeder extends Seeder
             ],
             'allergens' => $this->getAllergens($slug),
             'dietary_tags' => $this->getDietaryTags($slug),
-            'image_path' => "menu/{$slug}.jpg",
+            'image_path' => $this->getImagePath($slug), // Map slug to actual image file
             'translations' => [
                 'en' => [
                     'name' => $nameEn,
@@ -565,5 +568,155 @@ class ImprovedMenuItemSeeder extends Seeder
     {
         // Simple Khmer description
         return 'ម្ហូបឆ្ងាញ់ពិសេស';
+    }
+
+    /**
+     * Get image path for menu item based on slug
+     * Maps slugs to actual image files that exist in storage/app/public/menu_images/
+     */
+    private function getImagePath(string $slug): ?string
+    {
+        $imageMapping = [
+            // Spring Rolls & Appetizers
+            'fried-spring-rolls' => 'menu_images/spring-rolls.jpg',
+            'fresh-spring-rolls' => 'menu_images/spring-rolls.jpg',
+            'veggie-spring-rolls' => 'menu_images/spring-rolls.jpg',
+            'pork-dumplings' => 'menu_images/spring-rolls.jpg',
+            'shrimp-dumplings' => 'menu_images/spring-rolls.jpg',
+            'mixed-appetizer-platter' => 'menu_images/mixed-appetizer-platter.jpg',
+
+            // Satay & Grilled Items
+            'chicken-satay' => 'menu_images/chicken-satay.jpg',
+            'chicken-satay-skewers' => 'menu_images/chicken-satay.jpg',
+            'beef-satay' => 'menu_images/chicken-satay.jpg',
+            'pork-satay' => 'menu_images/chicken-satay.jpg',
+            'fish-cakes' => 'menu_images/fish-cakes.jpg',
+            'crab-cakes' => 'menu_images/fish-cakes.jpg',
+            'stuffed-chicken-wings' => 'menu_images/grilled-chicken-wings.jpg',
+
+            // Salads
+            'beef-salad-khmer' => 'menu_images/beef-salad.jpg',
+            'seafood-salad' => 'menu_images/beef-salad.jpg',
+            'cucumber-salad' => 'menu_images/beef-salad.jpg',
+            'century-egg-tofu' => 'menu_images/beef-salad.jpg',
+            'banana-flower-salad' => 'menu_images/beef-salad.jpg',
+            'lotus-stem-salad' => 'menu_images/lotus-stem-salad.jpg',
+            'papaya-salad-classic' => 'menu_images/papaya-salad.jpg',
+            'papaya-salad-seafood' => 'menu_images/papaya-salad.jpg',
+            'papaya-salad-dried-shrimp' => 'menu_images/papaya-salad.jpg',
+            'garden-salad' => 'menu_images/papaya-salad.jpg',
+            'caesar-salad' => 'menu_images/papaya-salad.jpg',
+            'mango-salad' => 'menu_images/papaya-salad.jpg',
+
+            // Rice Dishes
+            'chicken-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            'shrimp-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            'crab-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            'pineapple-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            'vegetable-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            'special-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            'grilled-pork-rice' => 'menu_images/grilled-pork-ribs.jpg',
+            'grilled-chicken-rice' => 'menu_images/grilled-chicken-wings.jpg',
+            'crispy-pork-belly-rice' => 'menu_images/grilled-pork-ribs.jpg',
+            'duck-rice' => 'menu_images/grilled-chicken-wings.jpg',
+            'chicken-clay-pot-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            'seafood-clay-pot-rice' => 'menu_images/prawns-tamarind-sauce.jpg',
+
+            // Noodles
+            'pad-thai' => 'menu_images/pad-thai.jpg',
+            'pad-see-ew' => 'menu_images/pad-thai.jpg',
+            'drunken-noodles' => 'menu_images/pad-thai.jpg',
+            'chow-mein' => 'menu_images/pad-thai.jpg',
+            'singapore-noodles' => 'menu_images/pad-thai.jpg',
+            'beef-pho' => 'menu_images/khmer-noodle-soup.jpg',
+            'chicken-pho' => 'menu_images/khmer-noodle-soup.jpg',
+            'wonton-noodle-soup' => 'menu_images/khmer-noodle-soup.jpg',
+            'wonton-noodles-dry' => 'menu_images/pad-thai.jpg',
+            'kuy-teav' => 'menu_images/khmer-noodle-soup.jpg',
+            'mi-kola' => 'menu_images/khmer-noodle-soup.jpg',
+            'num-banh-chok' => 'menu_images/khmer-noodle-soup.jpg',
+            'tom-yum-noodles' => 'menu_images/khmer-noodle-soup.jpg',
+
+            // Soups
+            'samlor-kako' => 'menu_images/khmer-noodle-soup.jpg',
+            'samlor-machu-kroeung' => 'menu_images/sour-soup-fish.jpg',
+            'chicken-coconut-soup' => 'menu_images/chicken-coconut-soup.jpg',
+            'fish-sour-soup' => 'menu_images/sour-soup-fish.jpg',
+            'seafood-tom-yum' => 'menu_images/sour-soup-fish.jpg',
+            'prawn-soup' => 'menu_images/sour-soup-fish.jpg',
+            'seafood-hot-pot' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'mixed-hot-pot' => 'menu_images/mixed-appetizer-platter.jpg',
+
+            // Curries
+            'red-curry-chicken' => 'menu_images/tofu-curry.jpg',
+            'red-curry-beef' => 'menu_images/tofu-curry.jpg',
+            'red-curry-duck' => 'menu_images/tofu-curry.jpg',
+            'green-curry-chicken' => 'menu_images/tofu-curry.jpg',
+            'green-curry-seafood' => 'menu_images/tofu-curry.jpg',
+            'green-curry-vegetables' => 'menu_images/tofu-curry.jpg',
+            'fish-amok' => 'menu_images/steamed-fish-ginger.jpg',
+            'chicken-amok' => 'menu_images/chicken-coconut-soup.jpg',
+            'seafood-amok' => 'menu_images/steamed-fish-ginger.jpg',
+
+            // Grilled & BBQ
+            'grilled-beef' => 'menu_images/grilled-beef-lolot.jpg',
+            'grilled-pork-ribs' => 'menu_images/grilled-pork-ribs.jpg',
+            'lemongrass-chicken' => 'menu_images/grilled-chicken-wings.jpg',
+            'grilled-pork-skewers' => 'menu_images/grilled-pork-ribs.jpg',
+            'grilled-prawns' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'grilled-squid' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'grilled-fish' => 'menu_images/grilled-fish-banana-leaf.jpg',
+            'grilled-crab' => 'menu_images/prawns-tamarind-sauce.jpg',
+
+            // Stir-Fry
+            'mixed-vegetables' => 'menu_images/stir-fried-morning-glory.jpg',
+            'morning-glory' => 'menu_images/stir-fried-morning-glory.jpg',
+            'chinese-broccoli-oyster' => 'menu_images/stir-fried-morning-glory.jpg',
+            'beef-black-pepper' => 'menu_images/grilled-beef-lolot.jpg',
+            'chicken-cashew-nuts' => 'menu_images/chicken-satay.jpg',
+            'pork-basil' => 'menu_images/grilled-pork-ribs.jpg',
+            'beef-oyster-sauce' => 'menu_images/grilled-beef-lolot.jpg',
+            'garlic-prawns' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'squid-black-pepper' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'crab-kampot-pepper' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'sweet-sour-fish' => 'menu_images/steamed-fish-ginger.jpg',
+
+            // Desserts
+            'sticky-rice-mango' => 'menu_images/sticky-rice-mango.jpg',
+            'num-ansom-chek' => 'menu_images/sticky-rice-mango.jpg',
+            'sweet-corn-pudding' => 'menu_images/coconut-custard.jpg',
+            'pumpkin-custard' => 'menu_images/coconut-custard.jpg',
+            'vanilla-ice-cream' => 'menu_images/coconut-ice-cream.jpg',
+            'chocolate-ice-cream' => 'menu_images/chocolate-cake.jpg',
+            'mango-ice-cream' => 'menu_images/mango-ice-cream.jpg',
+            'coconut-ice-cream' => 'menu_images/coconut-ice-cream.jpg',
+            'mango-shake' => 'menu_images/mango-ice-cream.jpg',
+            'avocado-shake' => 'menu_images/coconut-ice-cream.jpg',
+            'fresh-fruit-platter' => 'menu_images/mango-ice-cream.jpg',
+            'dragonfruit-plate' => 'menu_images/mango-ice-cream.jpg',
+
+            // Beverages - Juices
+            'orange-juice' => 'menu_images/fresh-orange-juice.jpg',
+            'watermelon-juice' => 'menu_images/watermelon-juice.jpg',
+            'sugarcane-juice' => 'menu_images/watermelon-juice.jpg',
+
+            // Beverages - Coffee & Tea
+            'cambodian-coffee' => 'menu_images/cambodian-coffee.jpg',
+            'iced-coffee' => 'menu_images/iced-coffee.jpg',
+            'jasmine-tea' => 'menu_images/jasmine-tea.jpg',
+
+            // Beverages - Alcohol
+            'angkor-beer' => 'menu_images/angkor-beer.jpg',
+            'anchor-beer' => 'menu_images/angkor-beer.jpg',
+            'heineken' => 'menu_images/angkor-beer.jpg',
+            'red-wine-glass' => 'menu_images/house-wine-red.jpg',
+            'white-wine-glass' => 'menu_images/house-wine-red.jpg',
+
+            // Others
+            'soft-drinks' => 'menu_images/soft-drinks.jpg',
+            'seafood-platter' => 'menu_images/prawns-tamarind-sauce.jpg',
+        ];
+
+        return $imageMapping[$slug] ?? null;
     }
 }

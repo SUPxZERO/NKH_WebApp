@@ -20,23 +20,39 @@ class CategoryController extends Controller
         $search = $request->get('search', '');
         $status = $request->get('status', 'all');
 
+        // CRITICAL FIX: Filter by location (default to location_id = 1)
+        // This prevents showing duplicate categories from multiple locations
+        $locationId = $request->integer('location_id', 1);
+
+        // For customer menu: show only sub-categories (parent_id IS NOT NULL)
+        // This shows categories that actually have menu items attached
+        $showSubCategoriesOnly = $request->boolean('sub_categories_only', false);
+
         $query = Category::query()
-            ->with([
-                'translations',
-                'children',
-                'menuItems' => function($query) {
-                    $query->withoutGlobalScope('active');
-                }
-            ])
+            ->where('location_id', $locationId)
+            ->with(['translations'])
             ->withCount([
-                'menuItems' => function($query) {
-                    $query->withoutGlobalScope('active');
+                'menuItems' => function($query) use ($locationId) {
+                    $query->withoutGlobalScope('active')
+                          ->where('location_id', $locationId);
                 }
             ])
             ->orderBy('display_order');
 
-        // Only root categories for tree view
-        $query->whereNull('parent_id');
+        // Show only sub-categories if requested (for customer menu filter)
+        if ($showSubCategoriesOnly) {
+            $query->whereNotNull('parent_id');
+        } else {
+            // Only root categories for tree view (admin)
+            $query->whereNull('parent_id')
+                  ->with([
+                      'children',
+                      'menuItems' => function($query) use ($locationId) {
+                          $query->withoutGlobalScope('active')
+                                ->where('location_id', $locationId);
+                      }
+                  ]);
+        }
 
         // Status filter
         if ($status === 'active') {

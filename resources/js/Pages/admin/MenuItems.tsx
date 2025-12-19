@@ -118,9 +118,10 @@ export default function MenuItems() {
     }
   });
 
+  // Fetch only sub-categories (leaf categories that can have menu items)
   const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => apiGet('/categories')
+    queryKey: ['categories-subcategories'],
+    queryFn: () => apiGet('/categories?sub_categories_only=true')
   });
 
   const itemList: MenuItem[] = useMemo(() => {
@@ -583,19 +584,12 @@ export default function MenuItems() {
               <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                 className="w-full h-11 bg-secondary/50 border border-border rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                 <option value="">Select Category</option>
-                {(() => {
-                  const renderCategoryOptions = (cats: any[], level = 0) => {
-                    return cats.map(cat => (
-                      <React.Fragment key={cat.id}>
-                        <option value={cat.id}>
-                          {'\u00A0'.repeat(level * 4)}{cat.name || cat.translations?.[0]?.name}
-                        </option>
-                        {cat.children && cat.children.length > 0 && renderCategoryOptions(cat.children, level + 1)}
-                      </React.Fragment>
-                    ));
-                  };
-                  return (categories as any)?.data ? renderCategoryOptions((categories as any).data) : null;
-                })()}
+                {/* Only sub-categories (fetched via sub_categories_only=true) */}
+                {(categories as any)?.data?.map((cat: any) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name || cat.translations?.[0]?.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

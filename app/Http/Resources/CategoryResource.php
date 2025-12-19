@@ -35,9 +35,9 @@ class CategoryResource extends JsonResource
             'is_active' => (bool) $this->is_active,
             'children' => CategoryResource::collection($this->whenLoaded('children')),
             'menu_items' => MenuItemResource::collection($menuItems),
-            'menu_items_count' => $this->whenLoaded('menuItems', function() {
-                return $this->menu_items_count ?? $this->menuItems->count();
-            }, 0),
+            'menu_items_count' => $this->menu_items_count ?? ($this->whenLoaded('menuItems', function() {
+                return $this->menuItems->count();
+            }, 0)),
             'children_count' => $this->whenLoaded('children', function() {
                 return $this->children->count();
             }, 0),

@@ -16,6 +16,7 @@ export interface Category {
   updated_at: string;
   // Relations
   menu_items?: MenuItem[];
+  menu_items_count?: number; // Count of menu items in this category
   location?: Location;
   translations?: CategoryTranslation[];
 }
