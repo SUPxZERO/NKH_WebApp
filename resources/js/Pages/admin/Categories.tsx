@@ -206,11 +206,11 @@ export default function Categories() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.03 }}
             className={cn(
-              "grid grid-cols-12 gap-4 p-3 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group",
+              "grid grid-cols-1 md:grid-cols-12 gap-4 p-3 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group",
               level > 0 && "bg-fuchsia-500/[0.02]"
             )}
           >
-            <div className="col-span-5 flex items-center gap-2" style={{ paddingLeft: `${level * 24}px` }}>
+            <div className="col-span-1 md:col-span-5 flex items-center gap-2" style={{ paddingLeft: `${level * 24}px` }}>
               {hasChildren ? (
                 <button onClick={() => toggleExpand(cat.id)} className="p-1 hover:bg-fuchsia-500/20 rounded text-muted-foreground hover:text-fuchsia-500 transition-colors">
                   {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -227,11 +227,11 @@ export default function Categories() {
               )}
               <span className="font-semibold text-foreground">{cat.name}</span>
             </div>
-            <div className="col-span-3 text-sm text-muted-foreground font-mono">/{cat.slug}</div>
-            <div className="col-span-2 text-sm text-muted-foreground">
+            <div className="hidden md:block col-span-3 text-sm text-muted-foreground font-mono">/{cat.slug}</div>
+            <div className="hidden md:block col-span-2 text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">{cat.menu_items?.length || 0}</span> items
             </div>
-            <div className="col-span-1">
+            <div className="hidden md:block col-span-1">
               <span className={cn(
                 "px-2 py-0.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1",
                 cat.is_active
@@ -242,7 +242,7 @@ export default function Categories() {
                 {cat.is_active ? 'Active' : 'Inactive'}
               </span>
             </div>
-            <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+            <div className="col-span-1 flex justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-all">
               <Button size="sm" variant="ghost" onClick={() => handleCreate(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500" title="Add Sub-category"><Plus size={12} /></Button>
               <Button size="sm" variant="ghost" onClick={() => handleEdit(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"><Edit size={12} /></Button>
               <Button size="sm" variant="ghost" onClick={() => handleDelete(cat)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-500"><Trash2 size={12} /></Button>
@@ -326,8 +326,8 @@ export default function Categories() {
           transition={{ delay: 0.3 }}
           className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
         >
-          {/* Table Header with Gradient */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
+          {/* Table Header with Gradient - Hidden on mobile */}
+          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
             <div className="col-span-5 text-xs font-bold text-foreground uppercase tracking-wider">Category Name</div>
             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Slug</div>
             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Items</div>

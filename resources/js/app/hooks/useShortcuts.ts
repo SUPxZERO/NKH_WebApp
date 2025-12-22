@@ -251,20 +251,16 @@ export const useModalHotkeys = (
 
   const modalOptions: UseShortcutOptions = {
     ...options,
-    enabled: isOpen,
+    enabled: isOpen && options.enabled !== false,
     context: {
       ...(options.context || {}),
       modalOpen: isOpen,
     },
   };
 
-  if (isOpen && handlers.onClose) {
-    useShortcutBase(closeShortcut, handlers.onClose, modalOptions);
-  }
-
-  if (isOpen && handlers.onConfirm) {
-    useShortcutBase(confirmShortcut, handlers.onConfirm, modalOptions);
-  }
+  // Always call hooks unconditionally - enabled flag controls execution
+  useShortcutBase(closeShortcut, handlers.onClose, modalOptions);
+  useShortcutBase(confirmShortcut, handlers.onConfirm, modalOptions);
 };
 
 /**

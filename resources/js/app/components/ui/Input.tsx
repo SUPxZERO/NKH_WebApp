@@ -23,9 +23,9 @@ const variants = {
 };
 
 const sizes = {
-  sm: 'py-2 text-sm',
-  md: 'py-3 text-sm',
-  lg: 'py-4 text-base',
+  sm: 'py-2.5 text-base', // text-base (16px) prevents iOS zoom on focus
+  md: 'py-3 text-base min-h-[44px]', // 44px minimum for touch targets
+  lg: 'py-4 text-base min-h-[48px]',
 };
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -148,7 +148,7 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
 PasswordInput.displayName = 'PasswordInput';
 
 // Search Input with built-in icon
-export interface SearchInputProps extends Omit<InputProps, 'leftIcon'> {}
+export interface SearchInputProps extends Omit<InputProps, 'leftIcon'> { }
 
 export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
   (props, ref) => {

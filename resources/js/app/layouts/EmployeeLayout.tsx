@@ -119,7 +119,7 @@ export default function EmployeeLayout({ children }: Props) {
               </div>
 
               {/* Mobile Navigation */}
-              <nav className="flex-1 p-4 overflow-y-auto">
+              <nav className="flex-1 p-4 overflow-y-auto custom-scrollbar">
                 <div className="space-y-1">
                   {navigation.map((item) => {
                     const Icon = item.icon;

@@ -292,8 +292,8 @@ export default function SalesReport() {
                         transition={{ delay: 0.3 }}
                         className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
-                        {/* Table Header */}
-                        <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-transparent">
+                        {/* Table Header - Hidden on mobile */}
+                        <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-transparent">
                             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Date</div>
                             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Orders</div>
                             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Revenue</div>
@@ -324,9 +324,9 @@ export default function SalesReport() {
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: idx * 0.02 }}
-                                    className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group"
+                                    className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group"
                                 >
-                                    <div className="col-span-2">
+                                    <div className="col-span-1 md:col-span-2">
                                         <div className="flex items-center gap-2">
                                             <Calendar className="w-4 h-4 text-muted-foreground" />
                                             <span className="font-medium text-foreground">
@@ -334,21 +334,21 @@ export default function SalesReport() {
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="col-span-2 text-foreground font-semibold">
+                                    <div className="hidden md:block col-span-2 text-foreground font-semibold">
                                         {sale.order_count}
                                     </div>
-                                    <div className="col-span-2 text-emerald-600 dark:text-emerald-400 font-bold">
+                                    <div className="col-span-1 md:col-span-2 text-emerald-600 dark:text-emerald-400 font-bold">
                                         ${Number(sale.total_revenue).toLocaleString()}
                                     </div>
-                                    <div className="col-span-2 text-muted-foreground">
+                                    <div className="hidden md:block col-span-2 text-muted-foreground">
                                         ${Number(sale.avg_order_value).toFixed(2)}
                                     </div>
-                                    <div className="col-span-2">
+                                    <div className="hidden md:block col-span-2">
                                         <span className="px-2 py-1 text-xs rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
                                             {sale.top_category || 'N/A'}
                                         </span>
                                     </div>
-                                    <div className="col-span-2 flex justify-end gap-1">
+                                    <div className="hidden md:flex col-span-2 justify-end gap-1">
                                         {sale.payment_methods && Object.entries(sale.payment_methods).map(([method, count]) => (
                                             <span
                                                 key={method}
@@ -365,7 +365,7 @@ export default function SalesReport() {
 
                         {/* Pagination */}
                         {salesData?.meta?.last_page > 1 && (
-                            <div className="flex items-center justify-between p-4 border-t border-border/50 bg-secondary/30">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border/50 bg-secondary/30">
                                 <div className="text-sm text-muted-foreground">
                                     Page {page} of {salesData.meta.last_page}
                                 </div>

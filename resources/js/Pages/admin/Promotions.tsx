@@ -304,8 +304,8 @@ export default function Promotions() {
           transition={{ delay: 0.3 }}
           className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
         >
-          {/* Table Header with Gradient */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
+          {/* Table Header with Gradient - Hidden on mobile */}
+          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name / Code</div>
             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Type</div>
             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Discount</div>
@@ -335,13 +335,13 @@ export default function Promotions() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.03 }}
-                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group"
+                className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group"
               >
-                <div className="col-span-3">
+                <div className="col-span-1 md:col-span-3">
                   <div className="font-semibold text-foreground">{promo.name}</div>
                   <div className="text-xs text-muted-foreground font-mono">{promo.code || '-'}</div>
                 </div>
-                <div className="col-span-2 flex items-center gap-2 text-sm">
+                <div className="hidden md:flex col-span-2 items-center gap-2 text-sm">
                   <div className="p-1.5 bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400">{getTypeIcon(promo.type)}</div>
                   <span className="capitalize text-foreground">{(promo.type || 'percentage').replace(/_/g, ' ')}</span>
                 </div>
@@ -350,14 +350,14 @@ export default function Promotions() {
                     {promo.type === 'percentage' ? `${promo.discount_value}%` : `$${promo.discount_value}`}
                   </span>
                 </div>
-                <div className="col-span-2 text-sm text-muted-foreground">
+                <div className="hidden md:block col-span-2 text-sm text-muted-foreground">
                   <span className="font-semibold text-foreground">{promo.usage_count}</span> / {promo.usage_limit || '∞'}
                 </div>
-                <div className="col-span-2 text-sm text-muted-foreground flex items-center gap-1.5">
+                <div className="hidden md:flex col-span-2 text-sm text-muted-foreground items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" />
                   {new Date(promo.end_date).toLocaleDateString()}
                 </div>
-                <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <div className="col-span-1 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-all">
                   <Button size="sm" variant="ghost" onClick={() => handleEdit(promo)}
                     className="h-8 w-8 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500">
                     <Edit className="w-3.5 h-3.5" />
@@ -373,7 +373,7 @@ export default function Promotions() {
 
           {/* Pagination */}
           {promotions?.meta && (
-            <div className="flex items-center justify-between p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
               <div className="text-sm text-muted-foreground">
                 Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to{' '}
                 <span className="font-semibold text-foreground">{Math.min(page * perPage, promotions.meta.total)}</span> of{' '}

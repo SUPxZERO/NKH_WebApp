@@ -303,7 +303,7 @@ export default function Ingredients() {
                         transition={{ delay: 0.3 }}
                         className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
-                        <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-emerald-500/10 via-green-500/5 to-emerald-500/10">
+                        <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-emerald-500/10 via-green-500/5 to-emerald-500/10">
                             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Code</div>
                             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name</div>
                             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Category</div>
@@ -329,10 +329,10 @@ export default function Ingredients() {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: idx * 0.05 }}
-                                        className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-emerald-500/5 transition-all group"
+                                        className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-emerald-500/5 transition-all group"
                                     >
-                                        <div className="col-span-2 font-mono text-sm text-foreground/70 bg-secondary/50 px-2 py-1 rounded w-fit">{ingredient.code}</div>
-                                        <div className="col-span-3">
+                                        <div className="hidden md:block col-span-2 font-mono text-sm text-foreground/70 bg-secondary/50 px-2 py-1 rounded w-fit">{ingredient.code}</div>
+                                        <div className="col-span-1 md:col-span-3">
                                             <div className="font-medium text-foreground">{ingredient.name}</div>
                                             {isLowStock(ingredient) && (
                                                 <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs mt-1 font-bold animate-pulse">
@@ -340,18 +340,18 @@ export default function Ingredients() {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="col-span-2">
+                                        <div className="hidden md:block col-span-2">
                                             <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getCategoryColor(ingredient.category))}>
                                                 <CatIcon size={12} />
                                                 {categories[ingredient.category as keyof typeof categories]}
                                             </span>
                                         </div>
-                                        <div className="col-span-2 text-sm">
+                                        <div className="hidden md:block col-span-2 text-sm">
                                             <div className="text-foreground font-bold">{ingredient.current_stock} {ingredient.unit?.code}</div>
                                             <div className="text-muted-foreground text-xs">${Number(ingredient.cost_per_unit).toFixed(2)} / {ingredient.unit?.code}</div>
                                         </div>
-                                        <div className="col-span-2 text-sm text-muted-foreground">{ingredient.supplier?.name || '-'}</div>
-                                        <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="hidden md:block col-span-2 text-sm text-muted-foreground">{ingredient.supplier?.name || '-'}</div>
+                                        <div className="col-span-1 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                             <Button size="sm" variant="ghost" onClick={() => handleEdit(ingredient)} className="h-8 w-8 p-0 hover:text-blue-600"><Edit size={14} /></Button>
                                             <Button size="sm" variant="ghost" onClick={() => handleDelete(ingredient.id)} className="h-8 w-8 p-0 hover:text-red-500"><Trash2 size={14} /></Button>
                                         </div>

@@ -342,8 +342,8 @@ export default function MenuItems() {
           transition={{ delay: 0.3 }}
           className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm"
         >
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
+          {/* Table Header - Hidden on mobile */}
+          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
             <div className="col-span-1 flex items-center">
               <input
                 type="checkbox"
@@ -385,13 +385,13 @@ export default function MenuItems() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.02 }}
                   className={cn(
-                    "grid grid-cols-12 gap-4 px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
+                    "grid grid-cols-1 md:grid-cols-12 gap-4 px-4 md:px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
                     "hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent",
                     selectedItems.has(item.id) && "bg-primary/5 border-l-2 border-l-primary"
                   )}
                 >
-                  {/* Checkbox */}
-                  <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                  {/* Checkbox - Hidden on mobile */}
+                  <div className="hidden md:block col-span-1" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedItems.has(item.id)}
@@ -400,8 +400,8 @@ export default function MenuItems() {
                     />
                   </div>
 
-                  {/* Item Info */}
-                  <div className="col-span-3 flex items-center gap-3">
+                  {/* Item Info - Full width on mobile */}
+                  <div className="col-span-1 md:col-span-3 flex items-center gap-3">
                     <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex-shrink-0 border border-border">
                       {item.image_path ? (
                         <img src={item.image_path} alt={item.name} className="w-full h-full object-cover" />
@@ -422,22 +422,22 @@ export default function MenuItems() {
                     </div>
                   </div>
 
-                  {/* Category */}
-                  <div className="col-span-2">
+                  {/* Category - Hidden on mobile */}
+                  <div className="hidden md:block col-span-2">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
                       {item.category?.name || 'Uncategorized'}
                     </span>
                   </div>
 
-                  {/* Price */}
-                  <div className="col-span-1">
+                  {/* Price - Visible on mobile */}
+                  <div className="col-span-1 md:col-span-1 text-right md:text-left">
                     <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                       ${item.price}
                     </span>
                   </div>
 
-                  {/* Popular */}
-                  <div className="col-span-1">
+                  {/* Popular - Hidden on mobile */}
+                  <div className="hidden md:block col-span-1">
                     {item.is_popular ? (
                       <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30">
                         <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -449,8 +449,8 @@ export default function MenuItems() {
                     )}
                   </div>
 
-                  {/* Status */}
-                  <div className="col-span-2">
+                  {/* Status - Hidden on mobile */}
+                  <div className="hidden md:block col-span-2">
                     <button
                       onClick={() => toggleActiveMutation.mutate({ id: item.id, is_active: !item.is_active })}
                       className={cn(
@@ -464,8 +464,8 @@ export default function MenuItems() {
                     </button>
                   </div>
 
-                  {/* Actions */}
-                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  {/* Actions - Always visible */}
+                  <div className="col-span-1 md:col-span-2 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -541,7 +541,7 @@ export default function MenuItems() {
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
                         className={cn(
-                          "h-10 w-10 rounded-xl text-sm font-semibold transition-all",
+                          "hidden sm:block h-10 w-10 rounded-xl text-sm font-semibold transition-all",
                           page === pageNum
                             ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
                             : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover hover:text-foreground"
@@ -551,6 +551,10 @@ export default function MenuItems() {
                       </button>
                     );
                   })}
+                  {/* Mobile page indicator */}
+                  <span className="sm:hidden text-sm font-medium text-foreground px-3 py-2 rounded-xl bg-secondary border border-border">
+                    {page} / {Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
+                  </span>
                 </div>
                 <Button
                   variant="secondary"

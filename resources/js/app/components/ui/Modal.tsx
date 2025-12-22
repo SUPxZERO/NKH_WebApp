@@ -16,11 +16,11 @@ export interface ModalProps {
 }
 
 const sizeMap = {
-  sm: 'max-w-md',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
-  full: 'max-w-[96vw] h-[92vh]',
+  sm: 'max-w-[95vw] sm:max-w-md',
+  md: 'max-w-[95vw] sm:max-w-lg',
+  lg: 'max-w-[95vw] sm:max-w-2xl',
+  xl: 'max-w-[95vw] sm:max-w-4xl',
+  full: 'max-w-[98vw] sm:max-w-[96vw] h-[95vh] sm:h-[92vh]',
 };
 
 export function Modal({
@@ -84,11 +84,13 @@ export function Modal({
             aria-labelledby={title ? 'modal-title' : undefined}
             aria-describedby={description ? 'modal-description' : undefined}
             className={cn(
-              'relative w-full rounded-2xl',
+              'relative w-full rounded-xl sm:rounded-2xl',
               'bg-card text-card-foreground',
               'border border-border',
               'shadow-theme-xl',
               'overflow-hidden',
+              'max-h-[90vh] sm:max-h-[85vh]',
+              'flex flex-col',
               sizeMap[size],
               className,
             )}
@@ -125,7 +127,11 @@ export function Modal({
             )}
 
             {/* Body */}
-            <div className={cn('p-6', size === 'full' && 'overflow-y-auto flex-1')}>
+            <div className={cn(
+              'px-4 py-4 sm:px-6 sm:py-6',
+              'overflow-y-auto flex-1',
+              'overscroll-contain'
+            )}>
               {children}
             </div>
           </motion.div>

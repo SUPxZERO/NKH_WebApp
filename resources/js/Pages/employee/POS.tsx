@@ -381,7 +381,7 @@ export default function POS() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                       {favoriteItems.map((item) => (
                         <button
                           key={item.id}
@@ -521,7 +521,7 @@ export default function POS() {
                   )}
 
                   {/* Table Selector */}
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {/* <button
                       onClick={() => setSelectedTable(undefined)}
                       className={cn(
@@ -571,7 +571,7 @@ export default function POS() {
                         <button
                           key={num}
                           onClick={() => handleNumpadClick(num)}
-                          className="h-14 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold text-xl transition-all active:scale-95"
+                          className="h-12 sm:h-14 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold text-lg sm:text-xl transition-all active:scale-95 min-h-[44px]"
                         >
                           {num}
                         </button>
@@ -612,14 +612,14 @@ export default function POS() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => cart.updateQty(it.menu_item_id, Math.max(1, it.quantity - 1))}
-                              className="w-8 h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold"
+                              className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold min-w-[36px] min-h-[36px]"
                             >
                               -
                             </button>
                             <span className="w-8 text-center font-bold text-foreground">{it.quantity}</span>
                             <button
                               onClick={() => cart.updateQty(it.menu_item_id, it.quantity + 1)}
-                              className="w-8 h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold"
+                              className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold min-w-[36px] min-h-[36px]"
                             >
                               +
                             </button>

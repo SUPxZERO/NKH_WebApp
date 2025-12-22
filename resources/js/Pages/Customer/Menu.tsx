@@ -247,12 +247,12 @@ export default function Menu() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
-                {/* Sort Dropdown */}
+              <div className="flex gap-2 w-full sm:w-auto">
+                {/* Sort Dropdown - Full width on mobile */}
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:border-fuchsia-500 dark:focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all outline-none cursor-pointer"
+                  className="flex-1 sm:flex-initial px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:border-fuchsia-500 dark:focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all outline-none cursor-pointer text-base"
                 >
                   {sortOptions.map((option) => (
                     <option key={option.value} value={option.value} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
@@ -261,12 +261,12 @@ export default function Menu() {
                   ))}
                 </select>
 
-                {/* Layout Toggle */}
+                {/* Layout Toggle - Larger touch targets */}
                 <div className="flex rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1">
                   <button
                     onClick={() => setLayout('grid')}
                     className={cn(
-                      'p-2 rounded-lg transition-all',
+                      'p-2.5 sm:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center',
                       layout === 'grid'
                         ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -277,7 +277,7 @@ export default function Menu() {
                   <button
                     onClick={() => setLayout('list')}
                     className={cn(
-                      'p-2 rounded-lg transition-all',
+                      'p-2.5 sm:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center',
                       layout === 'list'
                         ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -462,8 +462,8 @@ export default function Menu() {
                 </div>
               </button>
 
-              {/* Page Numbers */}
-              <div className="flex items-center gap-2">
+              {/* Page Numbers - Simplified on mobile */}
+              <div className="hidden sm:flex items-center gap-2">
                 {/* First page */}
                 {currentPage > 3 && (
                   <>
@@ -511,6 +511,12 @@ export default function Menu() {
                     </button>
                   </>
                 )}
+              </div>
+
+              {/* Mobile Page Indicator */}
+              <div className="sm:hidden px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span>
+                <span className="text-gray-500 dark:text-gray-400"> / {totalPages}</span>
               </div>
 
               {/* Next Page */}

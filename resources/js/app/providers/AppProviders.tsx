@@ -4,7 +4,8 @@ import { Toaster } from 'react-hot-toast';
 import { useThemeStore } from '@/app/store/theme';
 import ErrorBoundary from '@/app/components/ui/ErrorBoundary';
 import PWAInstallPrompt from '@/app/components/ui/PWAInstallPrompt';
-import { FoodDetailProvider } from '@/app/providers/FoodDetailProvider';
+// Note: ShortcutsProvider and FoodDetailProvider moved to InertiaWrapper
+// because they use hooks (useAuth, useModalHotkeys) that require Inertia context
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,9 +32,8 @@ export function AppProviders({ children }: PropsWithChildren) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <FoodDetailProvider>
-          {children}
-          <Toaster
+        {children}
+        <Toaster
             position="top-right"
             gutter={8}
             containerStyle={{
@@ -74,7 +74,6 @@ export function AppProviders({ children }: PropsWithChildren) {
             }}
           />
           <PWAInstallPrompt />
-        </FoodDetailProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

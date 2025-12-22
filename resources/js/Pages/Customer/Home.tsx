@@ -298,44 +298,42 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                 </motion.button>
               </div>
 
-              {/* Stats Row */}
-              <div className="mt-12 flex flex-wrap gap-8 border-t border-white/10 pt-8">
-                <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-white">{stats.averageDeliveryTime}m</span>
-                  <span className="text-sm text-white/60">Avg. Delivery</span>
+              {/* Stats Row - Grid layout for consistent alignment */}
+              <div className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 border-t border-white/10 pt-8">
+                <div className="flex flex-col text-center sm:text-left">
+                  <span className="text-2xl sm:text-3xl font-bold text-white">{stats.averageDeliveryTime}m</span>
+                  <span className="text-xs sm:text-sm text-white/60">Avg. Delivery</span>
                 </div>
-                <div className="w-px h-12 bg-white/10" />
-                <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-white">{stats.totalCustomers > 1000 ? '1k+' : stats.totalCustomers}</span>
-                  <span className="text-sm text-white/60">Happy Customers</span>
+                <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-4">
+                  <span className="text-2xl sm:text-3xl font-bold text-white">{stats.totalCustomers > 1000 ? '1k+' : stats.totalCustomers}</span>
+                  <span className="text-xs sm:text-sm text-white/60">Happy Customers</span>
                 </div>
-                <div className="w-px h-12 bg-white/10" />
-                <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-white">4.9</span>
-                  <span className="text-sm text-white/60">Rating</span>
+                <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-4">
+                  <span className="text-2xl sm:text-3xl font-bold text-white">4.9</span>
+                  <span className="text-xs sm:text-sm text-white/60">Rating</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Carousel Area */}
+            {/* Carousel Area - Now visible on all screens */}
             <motion.div
-              className="hidden lg:flex justify-center items-center relative"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
+              className="flex justify-center items-center relative mt-8 lg:mt-0"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <BrandBlob className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-40 blur-3xl" />
-              <div className="relative z-10 w-full max-w-md">
+              <BrandBlob className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-40 blur-3xl hidden lg:block" />
+              <div className="relative z-10 w-full max-w-xs sm:max-w-sm lg:max-w-md">
                 {featuredItems.length > 0 ? (
                   <FeaturedCarousel items={featuredItems} onItemClick={() => openModal('delivery')} />
                 ) : (
-                  <div className="w-80 h-96 rounded-3xl bg-white/10 animate-pulse mx-auto border border-white/10" />
+                  <div className="w-full aspect-[3/4] max-w-xs mx-auto rounded-3xl bg-white/10 animate-pulse border border-white/10" />
                 )}
               </div>
             </motion.div>
           </div>
         </HeroBackground>
-        
+
         {/* Featured Items Section */}
         <section className="container mx-auto px-4 relative">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -506,7 +504,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
           </div>
         </div>
 
-        
+
 
         <BrandDivider variant="gradient" />
 

@@ -105,6 +105,12 @@ export interface ShortcutDefinition {
 
   /** Confirmation message */
   confirmationMessage?: string;
+
+  /** Keywords for fuzzy search in command palette */
+  keywords?: string[];
+
+  /** Whether this shortcut should appear in command palette */
+  showInPalette?: boolean;
 }
 
 /**

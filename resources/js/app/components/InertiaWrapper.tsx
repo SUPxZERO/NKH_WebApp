@@ -1,17 +1,21 @@
 import { PropsWithChildren } from 'react';
-import CommandPalette from '@/app/components/shortcuts/CommandPalette';
-import HelpOverlay from '@/app/components/shortcuts/HelpOverlay';
+import { ShortcutsProvider } from '@/app/providers/ShortcutsProvider';
+import { FoodDetailProvider } from '@/app/providers/FoodDetailProvider';
 
 /**
  * Wrapper component that renders inside the Inertia App component.
  * This ensures that components using usePage() have access to the Inertia context.
+ * 
+ * ShortcutsProvider and FoodDetailProvider are placed here (not in AppProviders)
+ * because they use hooks (useAuth, useModalHotkeys) that call usePage() - 
+ * this requires being inside the Inertia component tree.
  */
 export function InertiaWrapper({ children }: PropsWithChildren) {
   return (
-    <>
-      {children}
-      <CommandPalette />
-      <HelpOverlay />
-    </>
+    <FoodDetailProvider>
+      <ShortcutsProvider>
+        {children}
+      </ShortcutsProvider>
+    </FoodDetailProvider>
   );
 }

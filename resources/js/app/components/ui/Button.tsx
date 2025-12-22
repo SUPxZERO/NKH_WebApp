@@ -35,13 +35,13 @@ const base =
   'inline-flex items-center justify-center font-semibold transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:pointer-events-none select-none active:scale-[0.98]';
 
 const sizes: Record<ButtonSize, string> = {
-  xs: 'h-7 px-2.5 text-xs gap-1',
+  xs: 'h-8 px-2.5 text-xs gap-1 min-w-[44px]', // min-w ensures touch target width
   sm: 'h-9 px-3.5 text-sm gap-1.5',
   md: 'h-11 px-5 text-sm gap-2',
   lg: 'h-12 px-6 text-base gap-2.5',
   xl: 'h-14 px-8 text-lg gap-3',
-  icon: 'h-10 w-10 p-0',
-  'icon-sm': 'h-8 w-8 p-0',
+  icon: 'h-11 w-11 p-0', // 44px for touch target
+  'icon-sm': 'h-9 w-9 p-0',
   'icon-lg': 'h-12 w-12 p-0',
 };
 

@@ -306,6 +306,12 @@ const isUrlMatchFn = (href: string, url: string) => {
 };
 
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+import { useRouteHotkeys } from '@/app/hooks/useShortcuts';
+import { 
+  ADMIN_NAVIGATION_SHORTCUTS, 
+  ADMIN_EXTENDED_NAVIGATION_SHORTCUTS,
+  ADMIN_PAGE_ACTION_SHORTCUTS 
+} from '@/app/config/shortcuts.config';
 
 export default function AdminLayout({ children }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -314,6 +320,13 @@ export default function AdminLayout({ children }: Props) {
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const { isDark, toggle: toggleTheme } = useThemeStore();
   const search = useGlobalSearch();
+
+  // Enable admin keyboard shortcuts on all admin pages
+  useRouteHotkeys('/admin', [
+    ...ADMIN_NAVIGATION_SHORTCUTS,
+    ...ADMIN_EXTENDED_NAVIGATION_SHORTCUTS,
+    ...ADMIN_PAGE_ACTION_SHORTCUTS,
+  ]);
 
   // Smart Polling for Notifications (Global) - 60s
   useSmartPolling(['admin-notifications'], 60000);

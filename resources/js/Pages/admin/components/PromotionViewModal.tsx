@@ -92,9 +92,9 @@ export default function PromotionViewModal({
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-bold text-white">{promotion.name}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{promotion.name}</h2>
             {promotion.code && (
-              <p className="text-lg text-gray-300 mt-1">Code: <span className="font-mono bg-white/10 px-2 py-1 rounded">{promotion.code}</span></p>
+              <p className="text-lg text-foreground mt-1">Code: <span className="font-mono bg-secondary px-2 py-1 rounded">{promotion.code}</span></p>
             )}
           </div>
           <div className="flex flex-col gap-2">
@@ -112,64 +112,64 @@ export default function PromotionViewModal({
 
         {/* Description */}
         {promotion.description && (
-          <div className="bg-white/5 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-white mb-2">Description</h3>
-            <p className="text-gray-300">{promotion.description}</p>
+          <div className="bg-secondary/30 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-foreground mb-2">Description</h3>
+            <p className="text-foreground">{promotion.description}</p>
           </div>
         )}
 
         {/* Discount Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Discount Details</h3>
+            <h3 className="text-lg font-semibold text-foreground">Discount Details</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Discount Value:</span>
-                <span className="text-white font-bold text-xl">{formatDiscountValue(promotion)}</span>
+                <span className="text-muted-foreground">Discount Value:</span>
+                <span className="text-foreground font-bold text-xl">{formatDiscountValue(promotion)}</span>
               </div>
 
               {promotion.min_order_amount && (
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Minimum Order:</span>
-                  <span className="text-white">${promotion.min_order_amount}</span>
+                  <span className="text-muted-foreground">Minimum Order:</span>
+                  <span className="text-foreground">${promotion.min_order_amount}</span>
                 </div>
               )}
 
               {promotion.max_discount_amount && (
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Maximum Discount:</span>
-                  <span className="text-white">${promotion.max_discount_amount}</span>
+                  <span className="text-muted-foreground">Maximum Discount:</span>
+                  <span className="text-foreground">${promotion.max_discount_amount}</span>
                 </div>
               )}
 
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Applies To:</span>
-                <span className="text-white capitalize">{(promotion.applicable_to || 'all').replace(/_/g, ' ')}</span>
+                <span className="text-muted-foreground">Applies To:</span>
+                <span className="text-foreground capitalize">{(promotion.applicable_to || 'all').replace(/_/g, ' ')}</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Usage & Validity</h3>
+            <h3 className="text-lg font-semibold text-foreground">Usage & Validity</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Usage Count:</span>
-                <span className="text-white">{promotion.usage_count}</span>
+                <span className="text-muted-foreground">Usage Count:</span>
+                <span className="text-foreground">{promotion.usage_count}</span>
               </div>
 
               {promotion.usage_limit && (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Usage Limit:</span>
-                    <span className="text-white">{promotion.usage_limit}</span>
+                    <span className="text-muted-foreground">Usage Limit:</span>
+                    <span className="text-foreground">{promotion.usage_limit}</span>
                   </div>
 
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-gray-400">Usage Progress:</span>
-                      <span className="text-white">{usagePercentage.toFixed(1)}%</span>
+                      <span className="text-muted-foreground">Usage Progress:</span>
+                      <span className="text-foreground">{usagePercentage.toFixed(1)}%</span>
                     </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div className="w-full bg-secondary rounded-full h-2">
                       <div
                         className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${Math.min(usagePercentage, 100)}%` }}
@@ -180,18 +180,18 @@ export default function PromotionViewModal({
               )}
 
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Start Date:</span>
-                <span className="text-white">{new Date(promotion.start_date).toLocaleString()}</span>
+                <span className="text-muted-foreground">Start Date:</span>
+                <span className="text-foreground">{new Date(promotion.start_date).toLocaleString()}</span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">End Date:</span>
-                <span className="text-white">{new Date(promotion.end_date).toLocaleString()}</span>
+                <span className="text-muted-foreground">End Date:</span>
+                <span className="text-foreground">{new Date(promotion.end_date).toLocaleString()}</span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Created:</span>
-                <span className="text-white">{new Date(promotion.created_at).toLocaleDateString()}</span>
+                <span className="text-muted-foreground">Created:</span>
+                <span className="text-foreground">{new Date(promotion.created_at).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
@@ -199,37 +199,37 @@ export default function PromotionViewModal({
 
         {/* Terms & Conditions */}
         {promotion.terms_conditions && (
-          <div className="bg-white/5 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-white mb-2">Terms & Conditions</h3>
-            <div className="text-gray-300 whitespace-pre-wrap">{promotion.terms_conditions}</div>
+          <div className="bg-secondary/30 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-foreground mb-2">Terms & Conditions</h3>
+            <div className="text-foreground whitespace-pre-wrap">{promotion.terms_conditions}</div>
           </div>
         )}
 
         {/* Performance Metrics */}
         <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-4 rounded-lg border border-purple-500/20">
-          <h3 className="text-lg font-semibold text-white mb-3">Performance Metrics</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-3">Performance Metrics</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-400">{promotion.usage_count}</div>
-              <div className="text-sm text-gray-400">Times Used</div>
+              <div className="text-sm text-muted-foreground">Times Used</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-400">
                 {promotion.usage_limit ? `${((promotion.usage_count / promotion.usage_limit) * 100).toFixed(1)}%` : '∞'}
               </div>
-              <div className="text-sm text-gray-400">Usage Rate</div>
+              <div className="text-sm text-muted-foreground">Usage Rate</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-400">
                 {Math.max(0, Math.ceil((new Date(promotion.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))}
               </div>
-              <div className="text-sm text-gray-400">Days Left</div>
+              <div className="text-sm text-muted-foreground">Days Left</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-pink-400">
                 {promotion.is_active ? '✓' : '✗'}
               </div>
-              <div className="text-sm text-gray-400">Status</div>
+              <div className="text-sm text-muted-foreground">Status</div>
             </div>
           </div>
         </div>
@@ -239,7 +239,7 @@ export default function PromotionViewModal({
           <Button
             variant="secondary"
             onClick={() => onEdit(promotion)}
-            className="flex-1 border-white/20 hover:bg-white/10"
+            className="flex-1"
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit Promotion
@@ -247,7 +247,6 @@ export default function PromotionViewModal({
           <Button
             variant="secondary"
             onClick={onClose}
-            className="border-white/20 hover:bg-white/10"
           >
             Close
           </Button>

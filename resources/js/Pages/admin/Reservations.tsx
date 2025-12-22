@@ -430,8 +430,8 @@ export default function Reservations() {
                     dateFilter === key
                       ? color === 'fuchsia' ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/30"
                         : color === 'purple' ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/30"
-                        : color === 'blue' ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
-                        : "bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-lg shadow-slate-500/30"
+                          : color === 'blue' ? "bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                            : "bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-lg shadow-slate-500/30"
                       : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                   )}
                 >
@@ -460,8 +460,8 @@ export default function Reservations() {
           transition={{ delay: 0.3 }}
           className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
         >
-          {/* Table Header with Gradient */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
+          {/* Table Header with Gradient - Hidden on mobile */}
+          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
             <div className="col-span-2 md:col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Time</div>
             <div className="col-span-4 md:col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Customer</div>
             <div className="col-span-3 md:col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Table</div>
@@ -623,7 +623,7 @@ export default function Reservations() {
 
           {/* Pagination with Gradient Active Page */}
           {reservations?.meta && (
-            <div className="flex items-center justify-between p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
               <div className="text-sm text-muted-foreground">
                 Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to{' '}
                 <span className="font-semibold text-foreground">{Math.min(page * perPage, reservations.meta.total)}</span> of{' '}

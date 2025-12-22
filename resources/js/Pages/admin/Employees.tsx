@@ -288,8 +288,8 @@ export default function Employees() {
           transition={{ delay: 0.3 }}
           className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
         >
-          {/* Table Header with Gradient */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
+          {/* Table Header with Gradient - Hidden on mobile */}
+          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Employee</div>
             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Position</div>
             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Contact</div>
@@ -321,9 +321,9 @@ export default function Employees() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.03 }}
-                  className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group"
+                  className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group"
                 >
-                  <div className="col-span-3 flex items-center gap-3">
+                  <div className="col-span-1 md:col-span-3 flex items-center gap-3">
                     <div className="relative">
                       <Avatar
                         src={employee.user?.avatar}
@@ -340,12 +340,12 @@ export default function Employees() {
                       <div className="text-xs text-muted-foreground font-mono">{employee.employee_code}</div>
                     </div>
                   </div>
-                  <div className="col-span-2">
+                  <div className="hidden md:block col-span-2">
                     <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 text-sm font-medium">
                       {employee.position?.title || 'No Position'}
                     </span>
                   </div>
-                  <div className="col-span-2">
+                  <div className="hidden md:block col-span-2">
                     <div className="text-sm text-foreground truncate flex items-center gap-1.5">
                       <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                       {employee.user?.email}
@@ -357,11 +357,11 @@ export default function Employees() {
                       </div>
                     )}
                   </div>
-                  <div className="col-span-2 text-sm text-foreground flex items-center gap-1.5">
+                  <div className="hidden md:block col-span-2 text-sm text-foreground flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                     {employee.hire_date ? new Date(employee.hire_date).toLocaleDateString() : 'N/A'}
                   </div>
-                  <div className="col-span-1">
+                  <div className="hidden md:block col-span-1">
                     <span className={cn(
                       "px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1",
                       employee.status === 'active'
@@ -378,7 +378,7 @@ export default function Employees() {
                       {(employee.status || 'active').replace('_', ' ')}
                     </span>
                   </div>
-                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                  <div className="col-span-1 md:col-span-2 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-all">
                     <Button size="sm" variant="ghost" onClick={() => handleEdit(employee)}
                       className="h-8 w-8 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500">
                       <Edit className="w-3.5 h-3.5" />
@@ -395,7 +395,7 @@ export default function Employees() {
 
           {/* Pagination with Gradient Active Page */}
           {(employees as any)?.meta && (
-            <div className="flex items-center justify-between p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
               <div className="text-sm text-muted-foreground">
                 Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to{' '}
                 <span className="font-semibold text-foreground">{Math.min(page * perPage, (employees as any).meta.total)}</span> of{' '}

@@ -102,34 +102,33 @@ export default function PromotionFormModal({
 
         {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Basic Information</h3>
+          <h3 className="text-lg font-semibold text-foreground">Basic Information</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Promotion Name *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Promotion Name *</label>
               <Input
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-background border-border text-foreground"
                 placeholder="e.g., Summer Sale 2024"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Promo Code</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Promo Code</label>
               <div className="flex gap-2">
                 <Input
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  className="bg-white/5 border-white/10 text-white flex-1"
+                  className="bg-background border-border text-foreground flex-1"
                   placeholder="SUMMER2024"
                 />
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={generatePromoCode}
-                  className="border-white/20 hover:bg-white/10"
                 >
                   Generate
                 </Button>
@@ -138,12 +137,12 @@ export default function PromotionFormModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Description</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-400"
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground"
               placeholder="Describe your promotion..."
             />
           </div>
@@ -151,28 +150,28 @@ export default function PromotionFormModal({
 
         {/* Discount Configuration */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Discount Configuration</h3>
+          <h3 className="text-lg font-semibold text-foreground">Discount Configuration</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Discount Type *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Discount Type *</label>
               <select
                 required
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                className="w-full bg-slate-800 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
               >
-                <option value="percentage" className="bg-slate-800 text-white">Percentage Off</option>
-                <option value="fixed_amount" className="bg-slate-800 text-white">Fixed Amount Off</option>
-                <option value="buy_x_get_y" className="bg-slate-800 text-white">Buy X Get Y Free</option>
-                <option value="free_item" className="bg-slate-800 text-white">Free Item</option>
+                <option value="percentage" className="bg-background text-foreground">Percentage Off</option>
+                <option value="fixed_amount" className="bg-background text-foreground">Fixed Amount Off</option>
+                <option value="buy_x_get_y" className="bg-background text-foreground">Buy X Get Y Free</option>
+                <option value="free_item" className="bg-background text-foreground">Free Item</option>
               </select>
             </div>
 
             {/* Standard discount value for percentage/fixed_amount */}
             {(formData.type === 'percentage' || formData.type === 'fixed_amount') && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   {formData.type === 'percentage' ? 'Percentage (%)' : 'Amount ($)'} *
                 </label>
                 <Input
@@ -183,7 +182,7 @@ export default function PromotionFormModal({
                   required
                   value={formData.discount_value}
                   onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-background border-border text-foreground"
                   placeholder={formData.type === 'percentage' ? '10' : '5.00'}
                 />
               </div>
@@ -193,7 +192,7 @@ export default function PromotionFormModal({
             {formData.type === 'buy_x_get_y' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Buy Quantity *</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Buy Quantity *</label>
                   <Input
                     type="number"
                     min="1"
@@ -201,12 +200,12 @@ export default function PromotionFormModal({
                     required
                     value={formData.buy_quantity}
                     onChange={(e) => setFormData({ ...formData, buy_quantity: e.target.value })}
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-background border-border text-foreground"
                     placeholder="2"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Get Free Quantity *</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Get Free Quantity *</label>
                   <Input
                     type="number"
                     min="1"
@@ -214,7 +213,7 @@ export default function PromotionFormModal({
                     required
                     value={formData.get_quantity}
                     onChange={(e) => setFormData({ ...formData, get_quantity: e.target.value })}
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-background border-border text-foreground"
                     placeholder="1"
                   />
                 </div>
@@ -224,7 +223,7 @@ export default function PromotionFormModal({
             {/* Free item discount value (item ID or placeholder) */}
             {formData.type === 'free_item' && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Free Item Value *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Free Item Value *</label>
                 <Input
                   type="number"
                   min="1"
@@ -232,7 +231,7 @@ export default function PromotionFormModal({
                   required
                   value={formData.discount_value}
                   onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-background border-border text-foreground"
                   placeholder="1"
                 />
               </div>
@@ -241,28 +240,28 @@ export default function PromotionFormModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Minimum Order Amount ($)</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Minimum Order Amount ($)</label>
               <Input
                 type="number"
                 step="0.01"
                 min="0"
                 value={formData.min_order_amount}
                 onChange={(e) => setFormData({ ...formData, min_order_amount: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-background border-border text-foreground"
                 placeholder="0.00"
               />
             </div>
 
             {formData.type === 'percentage' && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Maximum Discount Amount ($)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Maximum Discount Amount ($)</label>
                 <Input
                   type="number"
                   step="0.01"
                   min="0"
                   value={formData.max_discount_amount}
                   onChange={(e) => setFormData({ ...formData, max_discount_amount: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-background border-border text-foreground"
                   placeholder="No limit"
                 />
               </div>
@@ -272,40 +271,40 @@ export default function PromotionFormModal({
 
         {/* Usage & Validity */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Usage & Validity</h3>
+          <h3 className="text-lg font-semibold text-foreground">Usage & Validity</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Usage Limit</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Usage Limit</label>
               <Input
                 type="number"
                 min="1"
                 value={formData.usage_limit}
                 onChange={(e) => setFormData({ ...formData, usage_limit: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-background border-border text-foreground"
                 placeholder="Unlimited"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Start Date *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Start Date *</label>
               <Input
                 type="datetime-local"
                 required
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">End Date *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">End Date *</label>
               <Input
                 type="datetime-local"
                 required
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-background border-border text-foreground"
               />
             </div>
           </div>
@@ -313,44 +312,44 @@ export default function PromotionFormModal({
 
         {/* Applicability */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Applicability</h3>
+          <h3 className="text-lg font-semibold text-foreground">Applicability</h3>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Applies To</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Applies To</label>
             <select
               value={formData.applicable_to}
               onChange={(e) => setFormData({ ...formData, applicable_to: e.target.value as any, selected_categories: [], selected_items: [] })}
-              className="w-full bg-slate-800 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20"
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
             >
-              <option value="all" className="bg-slate-800 text-white">All Items</option>
-              <option value="categories" className="bg-slate-800 text-white">Specific Categories</option>
-              <option value="items" className="bg-slate-800 text-white">Specific Items</option>
+              <option value="all" className="bg-background text-foreground">All Items</option>
+              <option value="categories" className="bg-background text-foreground">Specific Categories</option>
+              <option value="items" className="bg-background text-foreground">Specific Items</option>
             </select>
           </div>
 
           {/* Category Selection */}
           {formData.applicable_to === 'categories' && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Select Categories *</label>
-              <div className="max-h-48 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
+              <label className="block text-sm font-medium text-foreground mb-2">Select Categories *</label>
+              <div className="max-h-48 overflow-y-auto bg-secondary/30 border border-border rounded-lg p-3 space-y-2">
                 {categories.length === 0 ? (
-                  <p className="text-gray-400 text-sm">Loading categories...</p>
+                  <p className="text-muted-foreground text-sm">Loading categories...</p>
                 ) : (
                   categories.map((cat: any) => (
-                    <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-white/5 p-1 rounded">
+                    <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1 rounded">
                       <input
                         type="checkbox"
                         checked={(formData.selected_categories || []).includes(cat.id)}
                         onChange={() => toggleCategory(cat.id)}
-                        className="rounded border-white/20 bg-white/5 text-fuchsia-600 focus:ring-fuchsia-500"
+                        className="rounded border-border bg-background text-primary focus:ring-primary"
                       />
-                      <span className="text-white text-sm">{cat.name || cat.translations?.[0]?.name || `Category ${cat.id}`}</span>
+                      <span className="text-foreground text-sm">{cat.name || cat.translations?.[0]?.name || `Category ${cat.id}`}</span>
                     </label>
                   ))
                 )}
               </div>
               {(formData.selected_categories || []).length > 0 && (
-                <p className="text-xs text-gray-400 mt-1">{formData.selected_categories.length} categories selected</p>
+                <p className="text-xs text-muted-foreground mt-1">{formData.selected_categories.length} categories selected</p>
               )}
             </div>
           )}
@@ -358,38 +357,38 @@ export default function PromotionFormModal({
           {/* Item Selection */}
           {formData.applicable_to === 'items' && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Select Menu Items *</label>
-              <div className="max-h-48 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
+              <label className="block text-sm font-medium text-foreground mb-2">Select Menu Items *</label>
+              <div className="max-h-48 overflow-y-auto bg-secondary/30 border border-border rounded-lg p-3 space-y-2">
                 {menuItems.length === 0 ? (
-                  <p className="text-gray-400 text-sm">Loading items...</p>
+                  <p className="text-muted-foreground text-sm">Loading items...</p>
                 ) : (
                   menuItems.map((item: any) => (
-                    <label key={item.id} className="flex items-center gap-2 cursor-pointer hover:bg-white/5 p-1 rounded">
+                    <label key={item.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1 rounded">
                       <input
                         type="checkbox"
                         checked={(formData.selected_items || []).includes(item.id)}
                         onChange={() => toggleItem(item.id)}
-                        className="rounded border-white/20 bg-white/5 text-fuchsia-600 focus:ring-fuchsia-500"
+                        className="rounded border-border bg-background text-primary focus:ring-primary"
                       />
-                      <span className="text-white text-sm">{item.name || item.translations?.[0]?.name || `Item ${item.id}`}</span>
-                      <span className="text-gray-400 text-xs ml-auto">${item.price}</span>
+                      <span className="text-foreground text-sm">{item.name || item.translations?.[0]?.name || `Item ${item.id}`}</span>
+                      <span className="text-muted-foreground text-xs ml-auto">${item.price}</span>
                     </label>
                   ))
                 )}
               </div>
               {(formData.selected_items || []).length > 0 && (
-                <p className="text-xs text-gray-400 mt-1">{formData.selected_items.length} items selected</p>
+                <p className="text-xs text-muted-foreground mt-1">{formData.selected_items.length} items selected</p>
               )}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Terms & Conditions</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Terms & Conditions</label>
             <textarea
               value={formData.terms_conditions}
               onChange={(e) => setFormData({ ...formData, terms_conditions: e.target.value })}
               rows={4}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-400"
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground"
               placeholder="Enter terms and conditions for this promotion..."
             />
           </div>
@@ -400,9 +399,9 @@ export default function PromotionFormModal({
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="rounded border-white/20 bg-white/5 text-fuchsia-600"
+              className="rounded border-border bg-background text-primary"
             />
-            <label htmlFor="is_active" className="text-sm text-gray-300">
+            <label htmlFor="is_active" className="text-sm text-foreground">
               Active promotion
             </label>
           </div>
@@ -414,7 +413,7 @@ export default function PromotionFormModal({
             type="button"
             variant="secondary"
             onClick={onClose}
-            className="flex-1 border-white/20 hover:bg-white/10"
+            className="flex-1"
           >
             Cancel
           </Button>

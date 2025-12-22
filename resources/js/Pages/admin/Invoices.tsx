@@ -216,7 +216,7 @@ export default function Invoices() {
             transition={{ delay: 0.3 }}
             className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
           >
-            <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-purple-500/10">
+            <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-purple-500/10">
               <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Invoice #</div>
               <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Customer</div>
               <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Amount</div>
@@ -242,28 +242,28 @@ export default function Invoices() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-purple-500/5 transition-all group"
+                    className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-purple-500/5 transition-all group"
                   >
-                    <div className="col-span-2 font-mono text-sm text-foreground/80 bg-secondary/50 px-2 py-1 rounded w-fit">#{invoice.invoice_number}</div>
-                    <div className="col-span-3">
+                    <div className="col-span-1 md:col-span-2 font-mono text-sm text-foreground/80 bg-secondary/50 px-2 py-1 rounded w-fit">#{invoice.invoice_number}</div>
+                    <div className="hidden md:block col-span-3">
                       <div className="font-medium text-foreground">{invoice.order?.customer?.user?.name || 'Guest'}</div>
                       <div className="text-xs text-muted-foreground flex items-center gap-1">
                         <CheckCircle className="w-3 h-3 text-emerald-500" /> Order #{invoice.order?.order_number}
                       </div>
                     </div>
-                    <div className="col-span-2 font-bold text-foreground">
+                    <div className="col-span-1 md:col-span-2 font-bold text-foreground">
                       ${getAmount(invoice.total).toFixed(2)}
                       {getAmount(invoice.amount_paid) > 0 && <span className="text-xs font-normal text-emerald-600 block">Paid: ${getAmount(invoice.amount_paid).toFixed(2)}</span>}
                     </div>
-                    <div className="col-span-2 text-sm text-muted-foreground font-mono">
+                    <div className="hidden md:block col-span-2 text-sm text-muted-foreground font-mono">
                       {invoice.issued_at ? new Date(invoice.issued_at).toLocaleDateString() : '-'}
                     </div>
-                    <div className="col-span-2">
+                    <div className="hidden md:block col-span-2">
                       <span className={cn("px-2 py-1 rounded-md text-xs font-medium border", status.color)}>
                         {status.label}
                       </span>
                     </div>
-                    <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="col-span-1 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <Button size="sm" variant="ghost" onClick={() => handleView(invoice)} className="h-8 w-8 p-0 hover:text-blue-500" title="View Details"><Eye size={14} /></Button>
                       <Button size="sm" variant="ghost" onClick={() => handleDownload(invoice)} className="h-8 w-8 p-0 hover:text-purple-500" title="Download PDF"><Download size={14} /></Button>
                       <Button size="sm" variant="ghost" onClick={() => window.open(`/api/admin/invoices/${invoice.id}/csv`, '_blank')} className="h-8 w-8 p-0 hover:text-green-500" title="Download CSV"><FileText size={14} /></Button>

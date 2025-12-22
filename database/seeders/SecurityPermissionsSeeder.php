@@ -86,6 +86,60 @@ class SecurityPermissionsSeeder extends Seeder
             $managerRole->permissions()->syncWithoutDetaching($managerPerms);
             $this->command->info('Assigned manager permissions.');
         }
+
+        // Assign permissions to chief role (includes notifications)
+        $chiefRole = Role::where('slug', 'chief')->first();
+        if ($chiefRole) {
+            $chiefPerms = Permission::whereIn('slug', [
+                'orders.view', 'orders.approve', 'menu.view', 'notifications.view', 'notifications.send',
+                'dashboard.view', 'reports.view', 'employees.view', 'payments.view'
+            ])->pluck('id')->toArray();
+            $chiefRole->permissions()->syncWithoutDetaching($chiefPerms);
+            $this->command->info('Assigned chief permissions.');
+        }
+
+        // Assign permissions to service-manager role (includes notifications)
+        $serviceManagerRole = Role::where('slug', 'service-manager')->first();
+        if ($serviceManagerRole) {
+            $servicePerms = Permission::whereIn('slug', [
+                'orders.view', 'orders.approve', 'menu.view', 'notifications.view', 'notifications.send',
+                'dashboard.view', 'employees.view'
+            ])->pluck('id')->toArray();
+            $serviceManagerRole->permissions()->syncWithoutDetaching($servicePerms);
+            $this->command->info('Assigned service-manager permissions.');
+        }
+
+        // Assign permissions to other manager roles
+        $otherRoles = ['finance-manager', 'hr-manager', 'inventory-manager', 'operations-manager'];
+        foreach ($otherRoles as $roleSlug) {
+            $role = Role::where('slug', $roleSlug)->first();
+            if ($role) {
+                $perms = Permission::whereIn('slug', [
+                    'dashboard.view', 'reports.view', 'notifications.view',
+                    'settings.view'
+                ])->pluck('id')->toArray();
+                $role->permissions()->syncWithoutDetaching($perms);
+                $this->command->info("Assigned {$roleSlug} permissions.");
+            }
+        }
+
+        // Assign permissions to viewer role
+        $viewerRole = Role::where('slug', 'viewer')->first();
+        if ($viewerRole) {
+            $viewerPerms = Permission::whereIn('slug', [
+                'dashboard.view', 'reports.view', 'notifications.view'
+            ])->pluck('id')->toArray();
+            $viewerRole->permissions()->syncWithoutDetaching($viewerPerms);
+            $this->command->info('Assigned viewer permissions.');
+        }
+
+        // Assign permissions to super-admin role (all permissions)
+        $superAdminRole = Role::where('slug', 'super-admin')->first();
+        if ($superAdminRole) {
+            $allPermissionIds = Permission::pluck('id')->toArray();
+            $superAdminRole->permissions()->syncWithoutDetaching($allPermissionIds);
+            $this->command->info('Assigned all permissions to super-admin role.');
+        }
     }
 }
 

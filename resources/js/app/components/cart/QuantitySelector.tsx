@@ -15,17 +15,17 @@ interface QuantitySelectorProps {
 
 const sizeClasses = {
     sm: {
-        button: 'w-7 h-7',
+        button: 'w-9 h-9', // 36px - acceptable for desktop
         text: 'text-sm',
-        icon: 'w-3 h-3',
+        icon: 'w-3.5 h-3.5',
     },
     md: {
-        button: 'w-9 h-9',
+        button: 'w-10 h-10', // 40px - improved for touch
         text: 'text-base',
         icon: 'w-4 h-4',
     },
     lg: {
-        button: 'w-11 h-11',
+        button: 'w-11 h-11', // 44px - full touch target
         text: 'text-lg',
         icon: 'w-5 h-5',
     },

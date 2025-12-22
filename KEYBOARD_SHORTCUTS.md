@@ -96,14 +96,54 @@ Shift+? (or just "?")
 ```
 See every shortcut available for your role.
 
-**Navigate Quickly (Admin/Manager):**
+**Navigate Quickly (Admin/Manager) - Primary:**
 ```
 G+D → Dashboard
 G+O → Orders
 G+M → Menu Items
 G+I → Inventory
 G+E → Employees
-G+R → Reports
+G+R → Reports / Analytics
+G+C → Customers
+G+S → Settings
+```
+
+**Navigate Quickly (Admin/Manager) - Extended:**
+```
+G+F → Financial Dashboard
+G+P → Payments Dashboard
+G+V → Invoices
+G+X → Expenses
+G+H → Shifts / Schedule
+G+J → Positions
+G+T → Time Off Requests
+G+N → Ingredients
+G+B → Recipes
+G+U → Suppliers
+G+Q → Purchase Orders
+G+A → Stock Alerts
+G+G → Categories
+G+W → Tables
+G+L → Floors
+G+Z → Locations
+G+1 → Reservations
+G+2 → Promotions
+G+3 → Loyalty Points
+G+4 → Admins
+G+5 → Roles & Permissions
+G+6 → Audit Logs
+G+7 → Notifications
+G+8 → Translations
+G+9 → Units
+G+0 → Operating Hours
+```
+
+**Page Action Shortcuts:**
+```
+N        → Create new item (on current page)
+R        → Refresh data
+F        → Toggle filters
+E        → Export data
 ```
 
 **Work with Forms:**
@@ -651,9 +691,175 @@ describe('Keyboard Shortcuts', () => {
 
 ---
 
+## Admin Shortcuts - Complete Reference
+
+### Primary Navigation Shortcuts (Admin/Manager Only)
+
+These are the 8 most-accessed admin pages:
+
+```
+G+D  → Dashboard           # System overview & KPIs
+G+O  → Orders              # Order management & tracking
+G+M  → Menu Items          # Food menu & items
+G+I  → Inventory           # Stock & product inventory
+G+E  → Employees           # Staff management
+G+R  → Reports/Analytics   # Performance reports
+G+C  → Customers           # Customer database
+G+S  → Settings            # System configuration
+```
+
+### Extended Navigation Shortcuts (Admin/Manager Only)
+
+Access to specialized pages:
+
+```
+Financial & Reporting:
+  G+F  → Financial Dashboard    # Revenue, expenses, profit
+  G+P  → Payments Dashboard     # Payment methods, transactions
+  G+V  → Invoices              # Invoice management
+  G+X  → Expenses              # Expense tracking
+
+Operations & Scheduling:
+  G+H  → Shifts                # Staff scheduling
+  G+J  → Positions             # Job titles & roles
+  G+T  → Time Off Requests     # Leave management
+  G+W  → Tables                # Seating & tables
+  G+L  → Floors                # Restaurant layout
+
+Inventory & Products:
+  G+N  → Ingredients           # Raw materials
+  G+B  → Recipes               # Recipe definitions
+  G+U  → Suppliers             # Vendor management
+  G+Q  → Purchase Orders       # Buying orders
+  G+A  → Stock Alerts          # Low stock warnings
+  G+G  → Categories            # Product categories
+  G+Z  → Locations             # Warehouse locations
+
+Business Management:
+  G+1  → Reservations          # Table reservations
+  G+2  → Promotions            # Discounts & offers
+  G+3  → Loyalty Points        # Rewards program
+  G+4  → Admins                # Admin accounts
+  G+5  → Roles & Permissions   # Access control
+  G+6  → Audit Logs            # Activity tracking
+  G+7  → Notifications         # Alert settings
+  G+8  → Translations          # Multi-language
+  G+9  → Units                 # Measurement units
+  G+0  → Operating Hours       # Business hours
+```
+
+### Page Action Shortcuts (Works on Any Admin Page)
+
+Universal shortcuts that adapt to the current page:
+
+```
+N     → Create New Item        # Click Create/Add button
+R     → Refresh Data           # Reload/refetch data
+F     → Toggle Filters         # Show/hide filter panel
+E     → Export Data            # Download as CSV/PDF
+```
+
+**Smart Behavior:**
+- `N` - Finds and clicks the "Create", "Add", or "New" button
+- `R` - Finds Refresh button or reloads the page
+- `F` - Opens the filter sidebar if available
+- `E` - Triggers export in the current format (CSV/PDF/Excel)
+
+### Page-Specific Action Shortcuts
+
+Beyond the universal shortcuts, some pages have specialized shortcuts:
+
+#### Orders Page
+```
+Ctrl+P  → Print Order        # Print selected order
+Ctrl+E  → Mark Exported      # Export to kitchen display
+```
+
+#### Menu Items Page
+```
+Ctrl+B  → Bulk Toggle        # Toggle availability for multiple items
+Ctrl+U  → Upload Image       # Upload item image
+```
+
+#### Inventory Page
+```
+Ctrl+T  → Transfer Stock     # Move inventory between locations
+Ctrl+W  → Record Wastage     # Log waste/spoilage
+```
+
+#### Reports Page
+```
+Ctrl+J  → Schedule Report    # Email report automatically
+Ctrl+G  → Generate Report    # Create custom report
+```
+
+### Form Operations (In Any Admin Form)
+
+```
+Ctrl+S / Cmd+S               → Save Form
+Ctrl+Enter / Cmd+Enter       → Submit & Close
+Escape                       → Cancel & Close
+```
+
+### Table/List Operations (In Any Admin List)
+
+```
+Ctrl+A / Cmd+A  → Select All Rows
+Ctrl+C / Cmd+C  → Copy Selected as CSV
+Delete          → Delete Selected Rows
+Ctrl+R / Cmd+R  → Refresh Table
+```
+
+### Command Palette Actions (Ctrl/Cmd+K)
+
+When you open the command palette, you can search for admin actions:
+
+#### Create Actions
+```
+Type: "create order"          → Open new order form
+Type: "create menu"           → Add menu item
+Type: "create employee"       → Register employee
+Type: "create customer"       → Add customer
+Type: "create reservation"    → Make reservation
+Type: "create promotion"      → Set up promotion
+Type: "create supplier"       → Add supplier
+Type: "create invoice"        → Generate invoice
+```
+
+#### Quick View Actions
+```
+Type: "pending orders"        → View orders awaiting action
+Type: "low stock"            → Show items below threshold
+Type: "today's shifts"       → View today's schedule
+Type: "recent transactions"  → Show latest payments
+Type: "active promotions"    → List running promotions
+```
+
+#### Export Actions
+```
+Type: "export orders"        → Download orders as CSV/PDF
+Type: "export menu"          → Export menu items
+Type: "export inventory"     → Export stock report
+Type: "export employees"     → Download staff list
+Type: "export customers"     → Export customer database
+Type: "export financial"     → Export financial report
+Type: "export payments"      → Download payment history
+```
+
+---
+
 ## Change Log
 
-### Version 1.0.0 (Current)
+### Version 2.0.0 (Current - Enhanced Admin Shortcuts)
+- ✅ Added 30+ admin navigation shortcuts
+- ✅ Added 4 universal page action shortcuts
+- ✅ Added 50+ command palette actions
+- ✅ Added page-specific shortcuts for major pages
+- ✅ Added bulk operations support
+- ✅ Added export functionality shortcuts
+- ✅ Complete admin shortcuts documentation
+
+### Version 1.0.0
 - ✅ Initial implementation
 - ✅ Command palette with fuzzy search
 - ✅ Help overlay with role filtering
@@ -670,8 +876,9 @@ describe('Keyboard Shortcuts', () => {
 For questions or issues:
 1. Check this documentation
 2. Open Help Overlay (Shift+?) to see available shortcuts
-3. Check browser console for error messages
-4. Review source code in `resources/js/app/hooks/useShortcuts.ts`
+3. Press Ctrl+K to search command palette
+4. Check browser console for error messages (F12)
+5. Review source code in `resources/js/app/hooks/useShortcuts.ts`
 
 ---
 

@@ -37,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'account.lockout' => \App\Http\Middleware\AccountLockout::class,
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
             'mfa.verify' => \App\Http\Middleware\VerifyMfa::class,
+            'debug.permissions' => \App\Http\Middleware\DebugPermissions::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
