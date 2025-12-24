@@ -261,41 +261,44 @@ export default function Reservations() {
         <CustomerLayout>
             <Head title="My Reservations" />
 
-            <div className="p-6 max-w-6xl mx-auto space-y-6">
+            <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 sm:space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                            <Calendar className="w-8 h-8 text-fuchsia-600" />
-                            My Reservations
+                        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
+                            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-fuchsia-600" />
+                            <span className="hidden sm:inline">My Reservations</span>
+                            <span className="sm:hidden">Reservations</span>
                         </h1>
-                        <p className="text-gray-600 dark:text-gray-400 mt-2">
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 hidden sm:block">
                             Book a table and manage your reservations
                         </p>
                     </div>
                     <Button
                         onClick={() => setShowBookingModal(true)}
                         variant="primary"
+                        size="sm"
                     >
-                        <Plus className="w-4 h-4 mr-2" />
-                        <span className="hidden md:inline">New Reservation</span>
+                        <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">New Reservation</span>
+                        <span className="sm:hidden">Book</span>
                     </Button>
                 </div>
 
                 {/* Upcoming Reservations */}
                 <div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                        Upcoming Reservations
+                    <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
+                        Upcoming
                     </h2>
                     {reservationsLoading ? (
                         <Card>
-                            <CardContent className="p-12 text-center">
+                            <CardContent className="p-8 sm:p-12 text-center">
                                 <div className="w-8 h-8 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                                <p className="text-gray-600 dark:text-gray-400">Loading reservations...</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
                             </CardContent>
                         </Card>
                     ) : upcomingReservations.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             {upcomingReservations.map((reservation) => (
                                 <motion.div
                                     key={reservation.id}
@@ -307,17 +310,17 @@ export default function Reservations() {
                                         reservation.status === 'confirmed' ? "border-l-green-500" : "border-l-yellow-500"
                                     )}>
                                         <CardContent className="p-4">
-                                            <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-start justify-between mb-2">
                                                 <div>
-                                                    <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                                                    <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white">
                                                         {reservation.location?.name || 'Restaurant'}
                                                     </h3>
-                                                    <p className="text-sm text-gray-500">
+                                                    <p className="text-xs text-gray-500">
                                                         #{reservation.code}
                                                     </p>
                                                 </div>
                                                 <span className={cn(
-                                                    "px-3 py-1 rounded-full text-xs font-semibold",
+                                                    "px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold",
                                                     reservation.status === 'confirmed'
                                                         ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400"
                                                         : "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400"
@@ -326,50 +329,49 @@ export default function Reservations() {
                                                 </span>
                                             </div>
 
-                                            <div className="space-y-2 text-sm">
+                                            <div className="space-y-1.5 text-xs sm:text-sm">
                                                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                                    <Calendar className="w-4 h-4" />
+                                                    <Calendar className="w-3.5 h-3.5" />
                                                     <span>
                                                         {new Date(reservation.reserved_for).toLocaleDateString('en-US', {
-                                                            weekday: 'long',
-                                                            year: 'numeric',
-                                                            month: 'long',
+                                                            weekday: 'short',
+                                                            month: 'short',
                                                             day: 'numeric'
                                                         })}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                                    <Clock className="w-4 h-4" />
+                                                    <Clock className="w-3.5 h-3.5" />
                                                     <span>{new Date(reservation.reserved_for).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                                    <Users className="w-4 h-4" />
+                                                    <Users className="w-3.5 h-3.5" />
                                                     <span>{reservation.guest_count} {reservation.guest_count === 1 ? 'Guest' : 'Guests'}</span>
                                                 </div>
                                                 {reservation.table && (
                                                     <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                                        <Utensils className="w-4 h-4" />
+                                                        <Utensils className="w-3.5 h-3.5" />
                                                         <span>Table {reservation.table.code || reservation.table.number}</span>
                                                     </div>
                                                 )}
                                                 {reservation.notes && (
-                                                    <p className="text-gray-600 dark:text-gray-400 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                                        <strong>Notes:</strong> {reservation.notes}
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                                        {reservation.notes}
                                                     </p>
                                                 )}
                                             </div>
 
                                             {reservation.can_cancel && (
-                                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() => handleCancelReservation(reservation)}
                                                         disabled={cancelReservationMutation.isPending}
-                                                        className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+                                                        className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-xs"
                                                     >
-                                                        <X className="w-4 h-4 mr-2" />
-                                                        Cancel Reservation
+                                                        <X className="w-3.5 h-3.5 mr-1.5" />
+                                                        Cancel
                                                     </Button>
                                                 </div>
                                             )}
@@ -380,14 +382,14 @@ export default function Reservations() {
                         </div>
                     ) : (
                         <Card>
-                            <CardContent className="p-12 text-center">
-                                <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                            <CardContent className="p-8 text-center">
+                                <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                                     No upcoming reservations
                                 </p>
-                                <Button onClick={() => setShowBookingModal(true)} variant="primary">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Make a Reservation
+                                <Button onClick={() => setShowBookingModal(true)} variant="primary" size="sm">
+                                    <Plus className="w-4 h-4 mr-1.5" />
+                                    Make Reservation
                                 </Button>
                             </CardContent>
                         </Card>
@@ -397,34 +399,34 @@ export default function Reservations() {
                 {/* Past Reservations */}
                 {pastReservations.length > 0 && (
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                            Past Reservations
+                        <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
+                            Past
                         </h2>
                         <div className="space-y-2">
                             {pastReservations.slice(0, 5).map((reservation) => (
                                 <Card key={reservation.id} className="opacity-75">
-                                    <CardContent className="p-4">
+                                    <CardContent className="p-3 sm:p-4">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-center min-w-[50px]">
-                                                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                                            <div className="flex items-center gap-3">
+                                                <div className="text-center min-w-[40px]">
+                                                    <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                                                         {new Date(reservation.reserved_for).getDate()}
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
+                                                    <div className="text-[10px] sm:text-xs text-gray-500">
                                                         {new Date(reservation.reserved_for).toLocaleDateString('en-US', { month: 'short' })}
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                    <p className="font-medium text-gray-900 dark:text-white text-sm">
                                                         {reservation.location?.name || 'Restaurant'}
                                                     </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        {reservation.guest_count} guests
+                                                    <p className="text-xs text-gray-500">
+                                                        {reservation.guest_count} guest{reservation.guest_count !== 1 ? 's' : ''}
                                                     </p>
                                                 </div>
                                             </div>
                                             <span className={cn(
-                                                "px-3 py-1 rounded-full text-xs font-semibold",
+                                                "px-2 py-1 rounded-full text-[10px] font-semibold",
                                                 reservation.status === 'completed' && "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400",
                                                 reservation.status === 'cancelled' && "bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400",
                                                 reservation.status === 'no_show' && "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
@@ -450,18 +452,18 @@ export default function Reservations() {
                                 exit={{ opacity: 0 }}
                                 onClick={closeModal}
                             />
-                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
                                 <motion.div
-                                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto my-8"
+                                    className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] overflow-y-auto"
                                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <div className="p-6">
-                                        {/* Modal Header */}
-                                        <div className="flex items-center justify-between mb-6">
-                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    {/* Modal Header - Drag handle for mobile */}
+                                    <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                                        <div className="flex items-center justify-between">
+                                            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                                                 Book a Table
                                             </h2>
                                             <button
@@ -471,26 +473,52 @@ export default function Reservations() {
                                                 <X className="w-5 h-5" />
                                             </button>
                                         </div>
+                                        {/* Drag indicator for mobile */}
+                                        <div className="sm:hidden w-12 h-1 bg-gray-300 rounded-full mx-auto mt-2" />
+                                    </div>
 
-                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                                        {/* Quick Info Bar - Mobile */}
+                                        <div className="sm:hidden flex flex-wrap gap-2 text-xs">
+                                            {selectedLocation && (
+                                                <span className="px-2 py-1 bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-300 rounded-lg">
+                                                    {selectedLocation.name}
+                                                </span>
+                                            )}
+                                            {date && (
+                                                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg">
+                                                    {format(date, 'MMM d')}
+                                                </span>
+                                            )}
+                                            {time && (
+                                                <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg">
+                                                    {format(time, 'h:mm aa')}
+                                                </span>
+                                            )}
+                                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg">
+                                                {guestCount} guest{guestCount !== 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                                             {/* Left Column - Basic Info */}
-                                            <div className="space-y-5">
-                                                <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">
-                                                    Basic Information
+                                            <div className="space-y-4">
+                                                <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700 text-sm">
+                                                    Basic Info
                                                 </h3>
 
                                                 {/* Location */}
-                                                <div className="space-y-2">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        <MapPin className="inline w-4 h-4 mr-1" />
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <MapPin className="inline w-3.5 h-3.5 mr-1" />
                                                         Location *
                                                     </label>
                                                     <select
                                                         value={locationId}
                                                         onChange={(e) => setLocationId(Number(e.target.value) || '')}
-                                                        className="w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-3 px-4"
+                                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-2.5 px-3 text-sm"
                                                     >
-                                                        <option value="">Select Location</option>
+                                                        <option value="">Select</option>
                                                         {locations.map((loc: any) => (
                                                             <option key={loc.id} value={loc.id}>{loc.name}</option>
                                                         ))}
@@ -498,25 +526,25 @@ export default function Reservations() {
                                                 </div>
 
                                                 {/* Date */}
-                                                <div className="space-y-2">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        <Calendar className="inline w-4 h-4 mr-1" />
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <Calendar className="inline w-3.5 h-3.5 mr-1" />
                                                         Date *
                                                     </label>
                                                     <DatePicker
                                                         selected={date}
                                                         onChange={(d) => setDate(d)}
                                                         minDate={new Date()}
-                                                        className="w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-3 px-4"
-                                                        dateFormat="MMMM d, yyyy"
+                                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-2.5 px-3 text-sm"
+                                                        dateFormat="MMM d, yyyy"
                                                         placeholderText="Select date"
                                                     />
                                                 </div>
 
                                                 {/* Time */}
-                                                <div className="space-y-2">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        <Clock className="inline w-4 h-4 mr-1" />
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <Clock className="inline w-3.5 h-3.5 mr-1" />
                                                         Time *
                                                     </label>
                                                     <DatePicker
@@ -527,15 +555,15 @@ export default function Reservations() {
                                                         timeIntervals={30}
                                                         timeCaption="Time"
                                                         dateFormat="h:mm aa"
-                                                        className="w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-3 px-4"
+                                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-2.5 px-3 text-sm"
                                                         placeholderText="Select time"
                                                     />
                                                 </div>
 
                                                 {/* Guests */}
-                                                <div className="space-y-2">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        <Users className="inline w-4 h-4 mr-1" />
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <Users className="inline w-3.5 h-3.5 mr-1" />
                                                         Guests *
                                                     </label>
                                                     <input
@@ -544,34 +572,34 @@ export default function Reservations() {
                                                         max="20"
                                                         value={guestCount}
                                                         onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
-                                                        className="w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-3 px-4"
+                                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-2.5 px-3 text-sm"
                                                     />
                                                 </div>
                                             </div>
 
                                             {/* Middle Column - Floor & Table Selection */}
-                                            <div className="space-y-5">
-                                                <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">
-                                                    Select Your Spot (Optional)
+                                            <div className="space-y-4">
+                                                <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700 text-sm">
+                                                    Select Spot
                                                 </h3>
 
                                                 {/* Floor Selection */}
-                                                <div className="space-y-2">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        <Layers className="inline w-4 h-4 mr-1" />
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <Layers className="inline w-3.5 h-3.5 mr-1" />
                                                         Floor
                                                     </label>
                                                     {!locationId ? (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic py-3">
-                                                            Select a location first
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
+                                                            Select location first
                                                         </p>
                                                     ) : floorsLoading ? (
-                                                        <div className="flex items-center gap-2 py-3 text-gray-500">
-                                                            <div className="w-4 h-4 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                                                            Loading floors...
+                                                        <div className="flex items-center gap-2 py-2 text-xs text-gray-500">
+                                                            <div className="w-3.5 h-3.5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+                                                            Loading...
                                                         </div>
                                                     ) : floors.length === 0 ? (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic py-3">
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
                                                             No floors available
                                                         </p>
                                                     ) : (
@@ -582,10 +610,10 @@ export default function Reservations() {
                                                                     type="button"
                                                                     onClick={() => setFloorId(floor.id)}
                                                                     className={cn(
-                                                                        "p-3 rounded-xl border-2 text-sm font-medium transition-all",
+                                                                        "p-2.5 rounded-lg border-2 text-xs font-medium transition-all",
                                                                         floorId === floor.id
                                                                             ? "border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300"
-                                                                            : "border-gray-200 dark:border-gray-600 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 text-gray-700 dark:text-gray-300"
+                                                                            : "border-gray-200 dark:border-gray-600 hover:border-fuchsia-300 text-gray-700 dark:text-gray-300"
                                                                     )}
                                                                 >
                                                                     {floor.name}
@@ -596,26 +624,26 @@ export default function Reservations() {
                                                 </div>
 
                                                 {/* Table Selection */}
-                                                <div className="space-y-2">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        <Armchair className="inline w-4 h-4 mr-1" />
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <Armchair className="inline w-3.5 h-3.5 mr-1" />
                                                         Table
                                                     </label>
                                                     {!floorId ? (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic py-3">
-                                                            Select a floor first
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
+                                                            Select floor first
                                                         </p>
                                                     ) : tablesLoading ? (
-                                                        <div className="flex items-center gap-2 py-3 text-gray-500">
-                                                            <div className="w-4 h-4 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                                                            Loading tables...
+                                                        <div className="flex items-center gap-2 py-2 text-xs text-gray-500">
+                                                            <div className="w-3.5 h-3.5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+                                                            Loading...
                                                         </div>
                                                     ) : tables.length === 0 ? (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic py-3">
-                                                            No suitable tables available
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
+                                                            No tables available
                                                         </p>
                                                     ) : (
-                                                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                                                        <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                                                             {tables.map(table => (
                                                                 <button
                                                                     key={table.id}
@@ -623,118 +651,102 @@ export default function Reservations() {
                                                                     onClick={() => table.is_available && setTableId(table.id)}
                                                                     disabled={!table.is_available}
                                                                     className={cn(
-                                                                        "p-3 rounded-xl border-2 text-sm transition-all text-left",
+                                                                        "p-2.5 rounded-lg border-2 text-xs transition-all text-left",
                                                                         !table.is_available
-                                                                            ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 text-red-400 dark:text-red-500 cursor-not-allowed opacity-60"
+                                                                            ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 text-red-400 cursor-not-allowed opacity-60"
                                                                             : tableId === table.id
                                                                                 ? "border-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300"
-                                                                                : "border-gray-200 dark:border-gray-600 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 text-gray-700 dark:text-gray-300"
+                                                                                : "border-gray-200 dark:border-gray-600 hover:border-fuchsia-300 text-gray-700 dark:text-gray-300"
                                                                     )}
                                                                 >
                                                                     <div className="font-semibold">Table {table.code}</div>
-                                                                    <div className="text-xs mt-1">
+                                                                    <div className="text-[10px] mt-0.5">
                                                                         {table.capacity} seats
-                                                                        {!table.is_available && " • Booked"}
                                                                     </div>
                                                                 </button>
                                                             ))}
                                                         </div>
                                                     )}
                                                 </div>
-
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    * If you don't select a table, we'll assign the best one for you.
-                                                </p>
                                             </div>
 
-                                            {/* Right Column - Summary */}
-                                            <div className="space-y-5 bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                                                <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-600">
+                                            {/* Right Column - Summary & Actions */}
+                                            <div className="space-y-4">
+                                                <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-600 text-sm">
                                                     Summary
                                                 </h3>
 
-                                                <div className="space-y-3 text-sm">
+                                                <div className="space-y-2 text-xs sm:text-sm">
                                                     <div className="flex justify-between">
-                                                        <span className="text-gray-500 dark:text-gray-400">Location:</span>
-                                                        <span className="font-medium text-gray-900 dark:text-white">
-                                                            {selectedLocation?.name || '—'}
-                                                        </span>
+                                                        <span className="text-gray-500">Location</span>
+                                                        <span className="font-medium">{selectedLocation?.name || '—'}</span>
                                                     </div>
                                                     <div className="flex justify-between">
-                                                        <span className="text-gray-500 dark:text-gray-400">Date:</span>
-                                                        <span className="font-medium text-gray-900 dark:text-white">
-                                                            {date ? format(date, 'MMM d, yyyy') : '—'}
-                                                        </span>
+                                                        <span className="text-gray-500">Date</span>
+                                                        <span className="font-medium">{date ? format(date, 'MMM d, yyyy') : '—'}</span>
                                                     </div>
                                                     <div className="flex justify-between">
-                                                        <span className="text-gray-500 dark:text-gray-400">Time:</span>
-                                                        <span className="font-medium text-gray-900 dark:text-white">
-                                                            {time ? format(time, 'h:mm aa') : '—'}
-                                                        </span>
+                                                        <span className="text-gray-500">Time</span>
+                                                        <span className="font-medium">{time ? format(time, 'h:mm aa') : '—'}</span>
                                                     </div>
                                                     <div className="flex justify-between">
-                                                        <span className="text-gray-500 dark:text-gray-400">Guests:</span>
-                                                        <span className="font-medium text-gray-900 dark:text-white">
-                                                            {guestCount} {guestCount === 1 ? 'person' : 'people'}
-                                                        </span>
+                                                        <span className="text-gray-500">Guests</span>
+                                                        <span className="font-medium">{guestCount}</span>
                                                     </div>
                                                     {selectedFloor && (
                                                         <div className="flex justify-between">
-                                                            <span className="text-gray-500 dark:text-gray-400">Floor:</span>
-                                                            <span className="font-medium text-gray-900 dark:text-white">
-                                                                {selectedFloor.name}
-                                                            </span>
+                                                            <span className="text-gray-500">Floor</span>
+                                                            <span className="font-medium">{selectedFloor.name}</span>
                                                         </div>
                                                     )}
                                                     {selectedTable && (
                                                         <div className="flex justify-between">
-                                                            <span className="text-gray-500 dark:text-gray-400">Table:</span>
-                                                            <span className="font-medium text-gray-900 dark:text-white">
-                                                                Table {selectedTable.code}
-                                                            </span>
+                                                            <span className="text-gray-500">Table</span>
+                                                            <span className="font-medium">{selectedTable.code}</span>
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Notes */}
-                                                <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                <div className="pt-2">
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                                         Special Requests
                                                     </label>
                                                     <textarea
                                                         value={notes}
                                                         onChange={(e) => setNotes(e.target.value)}
                                                         placeholder="Allergies, occasion..."
-                                                        className="w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white text-sm"
-                                                        rows={3}
+                                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white text-xs"
+                                                        rows={2}
                                                     />
                                                 </div>
 
                                                 {/* Actions */}
-                                                <div className="space-y-3 pt-4">
+                                                <div className="space-y-2 pt-2">
                                                     <Button
                                                         onClick={handleBookReservation}
                                                         disabled={!canBook || createReservationMutation.isPending}
                                                         loading={createReservationMutation.isPending}
                                                         className="w-full"
                                                         variant="primary"
-                                                        size="lg"
+                                                        size="sm"
                                                     >
-                                                        <CheckCircle className="w-4 h-4 mr-2" />
-                                                        Confirm Reservation
+                                                        <CheckCircle className="w-4 h-4 mr-1.5" />
+                                                        Confirm
                                                     </Button>
 
                                                     <Button
                                                         onClick={closeModal}
                                                         variant="outline"
                                                         className="w-full"
+                                                        size="sm"
                                                     >
                                                         Cancel
                                                     </Button>
 
                                                     {!canBook && (
-                                                        <p className="text-xs text-center text-amber-600 dark:text-amber-400">
-                                                            Please fill in all required fields
+                                                        <p className="text-[10px] text-center text-amber-600 dark:text-amber-400">
+                                                            Fill required fields
                                                         </p>
                                                     )}
                                                 </div>

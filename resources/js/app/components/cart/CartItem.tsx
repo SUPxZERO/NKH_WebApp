@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { Minus, Plus, X } from 'lucide-react';
 import { OrderItem } from '@/app/types/domain';
-import { QuantitySelector } from './QuantitySelector';
+import { cn } from '@/app/utils/cn';
 
 interface CartItemProps {
     item: OrderItem;
@@ -15,14 +15,15 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
 
     return (
         <motion.div
-            className="relative flex gap-4 p-4 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 hover:border-fuchsia-500/30 transition-all duration-300"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
-            transition={{ duration: 0.3 }}
+            className="flex gap-3 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.2 }}
             layout
         >
-            <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+            {/* Image */}
+            <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
                 {item.image_path ? (
                     <img
                         src={item.image_path}
@@ -31,55 +32,47 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
                         loading="lazy"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-fuchsia-600/30 to-pink-500/30">
-                        <span className="text-3xl">🍽️</span>
+                    <div className="w-full h-full flex items-center justify-center text-2xl">
+                        🍽️
                     </div>
                 )}
             </div>
 
-            <div className="flex-1 flex flex-col justify-between min-w-0">
-                <div>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1">
-                            {item.name || `Item #${item.menu_item_id}`}
-                        </h3>
-
-                        <motion.button
-                            onClick={() => onRemove(item.menu_item_id)}
-                            className="flex-shrink-0 p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            aria-label="Remove item"
-                        >
-                            <X className="w-5 h-5" />
-                        </motion.button>
-                    </div>
-
-                    {item.notes && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-2">
-                            Note: {item.notes}
-                        </p>
-                    )}
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1 flex-1">
+                        {item.name || `Item #${item.menu_item_id}`}
+                    </h3>
+                    <button
+                        onClick={() => onRemove(item.menu_item_id)}
+                        className="p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
                 </div>
 
-                <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                            ${itemTotal.toFixed(2)}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                            ${item.unit_price.toFixed(2)} each
-                        </span>
-                    </div>
+                <div className="flex items-center justify-between mt-2">
+                    <span className="text-sm font-bold text-fuchsia-600 dark:text-fuchsia-400">
+                        ${itemTotal.toFixed(2)}
+                    </span>
 
-                    <QuantitySelector
-                        quantity={item.quantity}
-                        onIncrease={() => onUpdateQuantity(item.menu_item_id, item.quantity + 1)}
-                        onDecrease={() => onUpdateQuantity(item.menu_item_id, Math.max(1, item.quantity - 1))}
-                        min={1}
-                        max={99}
-                        size="md"
-                    />
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                        <button
+                            onClick={() => onUpdateQuantity(item.menu_item_id, Math.max(1, item.quantity - 1))}
+                            className="p-1.5 rounded-md hover:bg-white dark:hover:bg-gray-600 transition-colors"
+                        >
+                            <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                        <button
+                            onClick={() => onUpdateQuantity(item.menu_item_id, item.quantity + 1)}
+                            className="p-1.5 rounded-md hover:bg-white dark:hover:bg-gray-600 transition-colors"
+                        >
+                            <Plus className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </motion.div>

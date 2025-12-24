@@ -118,27 +118,27 @@ function CheckoutForm({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             onSubmit={handleSubmit}
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
         >
             {/* Header */}
             <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                    <CreditCard className="w-8 h-8 text-white" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center">
+                    <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-white">Secure Card Payment</h2>
-                <p className="text-gray-400">Order #{orderNumber}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-white">Secure Card Payment</h2>
+                <p className="text-xs sm:text-sm text-gray-400">Order #{orderNumber}</p>
             </div>
 
             {/* Amount */}
-            <div className="text-center py-4 bg-white/5 rounded-xl">
-                <p className="text-sm text-gray-400">Total Amount</p>
-                <p className="text-3xl font-bold text-white">{formatCurrency(amount)}</p>
+            <div className="text-center py-3 sm:py-4 bg-white/5 rounded-lg sm:rounded-xl">
+                <p className="text-xs sm:text-sm text-gray-400">Total Amount</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white">{formatCurrency(amount)}</p>
             </div>
 
             {/* Card Element */}
             <div className="space-y-2">
-                <label className="block text-sm text-gray-400">Card Details</label>
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 focus-within:border-violet-500 transition-colors">
+                <label className="block text-xs sm:text-sm text-gray-400">Card Details</label>
+                <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/5 border border-white/10 focus-within:border-violet-500 transition-colors">
                     <CardElement
                         options={cardElementOptions}
                         onChange={(e) => {
@@ -151,7 +151,7 @@ function CheckoutForm({
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-2 text-red-400 text-sm"
+                        className="flex items-center gap-2 text-red-400 text-xs sm:text-sm"
                     >
                         <AlertCircle className="w-4 h-4" />
                         {cardError}
@@ -160,49 +160,51 @@ function CheckoutForm({
             </div>
 
             {/* Security Badge */}
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-                <Lock className="w-4 h-4" />
-                <span>Payments secured by Stripe</span>
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-400">
+                <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Secured by Stripe</span>
             </div>
 
             {/* Card Brands */}
-            <div className="flex items-center justify-center gap-3">
-                <div className="px-3 py-1.5 rounded bg-white/10 text-xs font-medium text-gray-300">
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
+                <div className="px-2 sm:px-3 py-1 rounded bg-white/10 text-xs font-medium text-gray-300">
                     VISA
                 </div>
-                <div className="px-3 py-1.5 rounded bg-white/10 text-xs font-medium text-gray-300">
-                    Mastercard
+                <div className="px-2 sm:px-3 py-1 rounded bg-white/10 text-xs font-medium text-gray-300">
+                    MC
                 </div>
-                <div className="px-3 py-1.5 rounded bg-white/10 text-xs font-medium text-gray-300">
+                <div className="px-2 sm:px-3 py-1 rounded bg-white/10 text-xs font-medium text-gray-300">
                     AMEX
                 </div>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
                 <Button
                     type="button"
                     variant="outline"
                     onClick={onCancel}
                     disabled={isProcessing}
-                    className="flex-1"
+                    className="flex-1 text-xs sm:text-sm py-2 sm:py-3"
                 >
                     Cancel
                 </Button>
                 <Button
                     type="submit"
                     disabled={!stripe || !cardComplete || isProcessing}
-                    className="flex-1 bg-violet-600 hover:bg-violet-700"
+                    className="flex-1 bg-violet-600 hover:bg-violet-700 text-xs sm:text-sm py-2 sm:py-3"
                 >
                     {isProcessing ? (
                         <>
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                            Processing...
+                            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 animate-spin" />
+                            <span className="hidden sm:inline">Processing...</span>
+                            <span className="sm:hidden">Wait...</span>
                         </>
                     ) : (
                         <>
-                            <Lock className="w-5 h-5 mr-2" />
-                            Pay {formatCurrency(amount)}
+                            <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                            <span className="hidden sm:inline">Pay {formatCurrency(amount)}</span>
+                            <span className="sm:hidden">Pay</span>
                         </>
                     )}
                 </Button>
@@ -210,12 +212,11 @@ function CheckoutForm({
 
             {/* Test Card Info (for development) */}
             {process.env.NODE_ENV === 'development' && (
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                <div className="p-2.5 sm:p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
                     <p className="text-xs text-amber-400 font-medium mb-1">Test Mode</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-[10px] sm:text-xs text-gray-400">
                         Use card: <code className="text-amber-300">4242 4242 4242 4242</code>
-                        <br />
-                        Any future date, any CVC, any ZIP
+                        <br className="hidden sm:inline" /> Any future date, any CVC, any ZIP
                     </p>
                 </div>
             )}

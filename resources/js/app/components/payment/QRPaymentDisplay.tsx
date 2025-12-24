@@ -145,7 +145,7 @@ export default function QRPaymentDisplay({
 
     if (status !== 'pending') {
         return (
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6">
                 <AnimatePresence mode="wait">
                     {getStatusDisplay()}
                 </AnimatePresence>
@@ -154,34 +154,34 @@ export default function QRPaymentDisplay({
     }
 
     return (
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/10 p-3 sm:p-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div className="flex items-center gap-2">
-                    <QrCode className="w-5 h-5 text-fuchsia-400" />
-                    <span className="font-semibold text-white">Scan to Pay</span>
+                    <QrCode className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
+                    <span className="font-semibold text-white text-sm sm:text-base">Scan to Pay</span>
                 </div>
 
                 {/* Timer */}
-                <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${timeLeft < 60 ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white'
+                <div className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 rounded-full ${timeLeft < 60 ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white'
                     }`}>
-                    <Clock className="w-4 h-4" />
-                    <span className="font-mono text-sm">{formatTime(timeLeft)}</span>
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="font-mono text-xs sm:text-sm">{formatTime(timeLeft)}</span>
                 </div>
             </div>
 
             {/* QR Code */}
-            <div className="relative bg-white rounded-xl p-4 mb-6">
+            <div className="relative bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                 {isExpired ? (
-                    <div className="absolute inset-0 bg-white/90 rounded-xl flex flex-col items-center justify-center">
-                        <AlertCircle className="w-12 h-12 text-red-500 mb-2" />
-                        <div className="text-red-600 font-semibold">QR Code Expired</div>
+                    <div className="absolute inset-0 bg-white/90 rounded-lg sm:rounded-xl flex flex-col items-center justify-center">
+                        <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-500 mb-2" />
+                        <div className="text-red-600 font-semibold text-sm sm:text-base">QR Code Expired</div>
                         {onRetry && (
                             <button
                                 onClick={onRetry}
-                                className="mt-3 px-4 py-2 bg-fuchsia-600 text-white rounded-lg text-sm"
+                                className="mt-3 px-4 py-2 bg-fuchsia-600 text-white rounded-lg text-xs sm:text-sm"
                             >
-                                Generate New QR
+                                Generate New
                             </button>
                         )}
                     </div>
@@ -190,53 +190,53 @@ export default function QRPaymentDisplay({
                 <img
                     src={qrImageBase64}
                     alt="Payment QR Code"
-                    className={`w-full max-w-[250px] mx-auto ${isExpired ? 'opacity-20' : ''}`}
+                    className={`w-full max-w-[200px] sm:max-w-[250px] mx-auto ${isExpired ? 'opacity-20' : ''}`}
                 />
             </div>
 
             {/* Payment Details */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                 <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Amount</span>
-                    <span className="font-bold text-white text-lg">
+                    <span className="font-bold text-white text-base sm:text-lg">
                         {currency} {amount.toFixed(2)}
                     </span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-gray-400">Reference</span>
-                    <span className="font-mono text-white">{qrReference}</span>
+                    <span className="font-mono text-white text-xs">{qrReference}</span>
                 </div>
             </div>
 
             {/* Instructions */}
-            <div className="bg-white/5 rounded-xl p-4 mb-4">
-                <div className="text-sm text-gray-300 space-y-2">
+            <div className="bg-white/5 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                <div className="text-xs sm:text-sm text-gray-300 space-y-1.5 sm:space-y-2">
                     <p className="font-medium text-white">How to pay:</p>
-                    <ol className="list-decimal list-inside space-y-1 text-gray-400">
-                        <li>Open your ABA Mobile app</li>
+                    <ol className="list-decimal list-inside space-y-0.5 sm:space-y-1 text-gray-400 text-[10px] sm:text-sm">
+                        <li>Open ABA Mobile app</li>
                         <li>Tap "Scan" or "KHQR"</li>
                         <li>Scan this QR code</li>
-                        <li>Confirm the payment</li>
+                        <li>Confirm payment</li>
                     </ol>
                 </div>
             </div>
 
             {/* Dev Mode Simulation Buttons */}
             {isDevMode && (
-                <div className="border-t border-white/10 pt-4 mt-4">
-                    <div className="text-xs text-gray-500 mb-2 text-center">Development Mode</div>
+                <div className="border-t border-white/10 pt-3 sm:pt-4 mt-3 sm:mt-4">
+                    <div className="text-[10px] sm:text-xs text-gray-500 mb-2 text-center">Dev Mode</div>
                     <div className="flex gap-2">
                         <button
                             onClick={onSimulateSuccess}
-                            className="flex-1 px-3 py-2 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded-lg text-sm transition-colors"
+                            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded-lg text-xs transition-colors"
                         >
-                            Simulate Success
+                            Success
                         </button>
                         <button
                             onClick={onSimulateFailure}
-                            className="flex-1 px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg text-sm transition-colors"
+                            className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg text-xs transition-colors"
                         >
-                            Simulate Failure
+                            Failure
                         </button>
                     </div>
                 </div>

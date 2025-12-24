@@ -9,30 +9,26 @@ import { CartEmpty } from '@/app/components/cart/CartEmpty';
 import { ModeSelector } from '@/app/components/cart/ModeSelector';
 import { LocationSelector } from '@/app/components/cart/LocationSelector';
 import Button from '@/app/components/ui/Button';
-import { Trash2, ShoppingBag, LogIn, ArrowRight } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toastSuccess, toastError, toastInfo } from '@/app/utils/toast';
-import { OrderProgress } from '@/app/components/customer/OrderProgress';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
+      staggerChildren: 0.05,
+      delayChildren: 0.05,
     },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut",
-    },
+    transition: { duration: 0.3 },
   },
 };
 
@@ -40,13 +36,11 @@ export default function Cart() {
   const cart = useCartStore();
   const [showClearConfirm, setShowClearConfirm] = React.useState(false);
 
-  // Get auth state from Inertia props
   const { auth } = usePage().props as { auth?: { user?: any } };
   const isAuthenticated = !!auth?.user;
 
   const handleUpdateQuantity = (menuItemId: number, quantity: number) => {
     if (quantity < 1) {
-      // If quantity becomes 0, remove the item
       cart.removeItem(menuItemId);
       toastSuccess('Item removed from cart');
     } else {
@@ -76,15 +70,10 @@ export default function Cart() {
       return;
     }
 
-    // Check if user is authenticated
     if (!isAuthenticated) {
-      // Save pending checkout state
       localStorage.setItem('pendingCheckout', 'true');
       localStorage.setItem('checkoutRedirectUrl', '/checkout');
-
       toastInfo('Please sign in to complete your order');
-
-      // Redirect to login with intended destination
       window.location.href = '/login?redirect=/checkout';
       return;
     }
@@ -102,44 +91,42 @@ export default function Cart() {
       </Head>
 
       <motion.div
-        className="space-y-8"
+        className="space-y-4 sm:space-y-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Progress Indicator */}
-        <motion.div variants={itemVariants}>
-          <OrderProgress currentStep="cart" />
-        </motion.div>
-
-        {/* Header */}
+        {/* Header - Compact on mobile */}
         <motion.div
           className="flex items-center justify-between"
           variants={itemVariants}
         >
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-              <span className="bg-gradient-to-r from-fuchsia-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => window.history.back()}
+              className="sm:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 Your Cart
-              </span>
-            </h1>
-            {!isEmpty && (
-              <p className="mt-2 text-gray-600 dark:text-gray-400">
-                {cart.items.length} {cart.items.length === 1 ? 'item' : 'items'} in your cart
-              </p>
-            )}
+              </h1>
+              {!isEmpty && (
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  {cart.items.length} {cart.items.length === 1 ? 'item' : 'items'}
+                </p>
+              )}
+            </div>
           </div>
 
           {!isEmpty && (
-            <Button
-              variant="ghost"
-              size="sm"
-              leftIcon={<Trash2 className="w-4 h-4" />}
+            <button
               onClick={() => setShowClearConfirm(true)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-500/10"
+              className="text-xs text-red-500 hover:text-red-600 p-2"
             >
-              Clear Cart
-            </Button>
+              Clear
+            </button>
           )}
         </motion.div>
 
@@ -147,24 +134,25 @@ export default function Cart() {
         <AnimatePresence>
           {showClearConfirm && (
             <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowClearConfirm(false)}
             >
               <motion.div
-                className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md mx-4 shadow-2xl"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
+                className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-5 shadow-xl"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                   Clear Cart?
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Are you sure you want to remove all items from your cart? This action cannot be undone.
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Remove all items from your cart?
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -179,7 +167,7 @@ export default function Cart() {
                     className="flex-1"
                     onClick={handleClearCart}
                   >
-                    Clear Cart
+                    Clear
                   </Button>
                 </div>
               </motion.div>
@@ -191,51 +179,50 @@ export default function Cart() {
         {isEmpty ? (
           <CartEmpty onBrowseMenu={() => (window.location.href = '/menu')} />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Column - Cart Items + Selectors */}
-            <motion.div className="lg:col-span-8 space-y-6" variants={itemVariants}>
-              {/* Mode Selector */}
+          <div className="space-y-4 sm:space-y-6">
+            {/* Mobile: Compact Mode Selector */}
+            <motion.div variants={itemVariants} className="sm:hidden">
               <ModeSelector
                 mode={cart.mode as 'delivery' | 'pickup'}
                 onChange={(mode) => cart.setMode(mode)}
               />
+            </motion.div>
 
-              {/* Location Selector */}
+            {/* Desktop: Full Mode Selector */}
+            <motion.div variants={itemVariants} className="hidden sm:block">
+              <ModeSelector
+                mode={cart.mode as 'delivery' | 'pickup'}
+                onChange={(mode) => cart.setMode(mode)}
+              />
+            </motion.div>
+
+            {/* Location Selector - Compact */}
+            <motion.div variants={itemVariants}>
               <LocationSelector
                 selectedId={cart.location_id}
                 onSelect={(id, name) => cart.setLocation(id, name)}
               />
-
-              {/* Cart Items */}
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Items</h2>
-                <AnimatePresence mode="popLayout">
-                  {cart.items.map((item) => (
-                    <CartItem
-                      key={item.menu_item_id}
-                      item={item}
-                      onUpdateQuantity={handleUpdateQuantity}
-                      onRemove={handleRemoveItem}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
-
-              {/* Continue Shopping Button (Mobile) */}
-              <div className="lg:hidden pt-4">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => (window.location.href = '/menu')}
-                  leftIcon={<ShoppingBag className="w-5 h-5" />}
-                >
-                  Continue Shopping
-                </Button>
-              </div>
             </motion.div>
 
-            {/* Right Column - Cart Summary */}
-            <motion.div className="lg:col-span-4" variants={itemVariants}>
+            {/* Cart Items */}
+            <motion.div variants={itemVariants} className="space-y-3">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white sm:hidden">
+                Items ({cart.items.length})
+              </h2>
+              <AnimatePresence mode="popLayout">
+                {cart.items.map((item) => (
+                  <CartItem
+                    key={item.menu_item_id}
+                    item={item}
+                    onUpdateQuantity={handleUpdateQuantity}
+                    onRemove={handleRemoveItem}
+                  />
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Desktop: Cart Summary */}
+            <motion.div variants={itemVariants} className="hidden lg:block">
               <CartSummary
                 subtotal={cart.subtotal}
                 deliveryFee={cart.deliveryFee}
@@ -247,67 +234,76 @@ export default function Cart() {
                 isCheckoutDisabled={cart.items.length === 0 || !cart.location_id}
               />
             </motion.div>
+
+            {/* Desktop: Continue Shopping */}
+            <motion.div variants={itemVariants} className="hidden sm:block pt-2">
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = '/menu')}
+                leftIcon={<ShoppingBag className="w-4 h-4" />}
+              >
+                Continue Shopping
+              </Button>
+            </motion.div>
           </div>
         )}
 
-        {/* Recommendations Section (Optional - when cart has items) */}
-        {!isEmpty && (
-          <motion.section
-            className="pt-8 border-t border-gray-200 dark:border-gray-700"
-            variants={itemVariants}
-          >
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              You might also like
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {['🍔', '🍕', '🍝', '🍰'].map((emoji, i) => (
-                <motion.div
-                  key={i}
-                  className="aspect-square rounded-2xl bg-white/60 dark:bg-white/5 border border-white/20 flex items-center justify-center text-5xl hover:scale-105 transition-transform cursor-pointer"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + i * 0.1 }}
-                  whileHover={{ y: -4 }}
-                >
-                  {emoji}
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
-        )}
-
         {/* Spacer for mobile floating button */}
-        {!isEmpty && <div className="lg:hidden h-24" />}
+        {!isEmpty && <div className="h-24 sm:h-0" />}
       </motion.div>
 
-      {/* Floating Checkout Button - Mobile Only */}
+      {/* Mobile Floating Summary & Checkout */}
       {!isEmpty && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-50 p-4 bg-gray-950/90 backdrop-blur-xl border-t border-white/10"
+          className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
         >
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-gray-400">Total</p>
-              <p className="text-2xl font-bold text-white">${cart.total.toFixed(2)}</p>
+          {/* Collapsible Summary Toggle */}
+          <details className="group">
+            <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">{cart.items.length} items</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  ${cart.total.toFixed(2)}
+                </span>
+              </div>
+              <span className="text-xs text-gray-400 group-open:rotate-180 transition-transform">
+                Show details
+              </span>
+            </summary>
+
+            {/* Expanded Details */}
+            <div className="px-4 pb-4 space-y-2 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Subtotal</span>
+                <span>${cart.subtotal.toFixed(2)}</span>
+              </div>
+              {cart.mode === 'delivery' && cart.deliveryFee > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Delivery</span>
+                  <span>${cart.deliveryFee.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Tax</span>
+                <span>${cart.tax.toFixed(2)}</span>
+              </div>
             </div>
-            <motion.button
+          </details>
+
+          {/* Checkout Button */}
+          <div className="p-4 pt-0">
+            <button
               onClick={handleCheckout}
               disabled={!cart.location_id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="relative flex items-center justify-center gap-2 h-14 px-8 rounded-2xl bg-gradient-to-r from-fuchsia-500 via-pink-500 to-rose-500 text-white font-bold text-lg shadow-2xl shadow-fuchsia-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white font-bold rounded-xl shadow-lg active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {/* Pulse effect */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-pink-500 animate-pulse opacity-30 blur-md" />
-              <span className="relative">Checkout</span>
-              <ArrowRight className="relative w-5 h-5" />
-            </motion.button>
+              Checkout • ${cart.total.toFixed(2)}
+            </button>
           </div>
         </motion.div>
       )}
     </CustomerLayout>
   );
 }
-

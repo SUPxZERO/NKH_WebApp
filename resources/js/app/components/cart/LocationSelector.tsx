@@ -22,46 +22,48 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
 
     if (isLoading) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                    Select Restaurant Location
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
+                    Select Location
                 </h3>
-                <Skeleton className="h-24 w-full rounded-xl mb-3" />
-                <Skeleton className="h-24 w-full rounded-xl" />
+                <div className="space-y-2">
+                    <Skeleton className="h-14 sm:h-20 w-full rounded-lg" />
+                    <Skeleton className="h-14 sm:h-20 w-full rounded-lg" />
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-red-200 dark:border-red-700">
-                <p className="text-red-600 text-center">Failed to load locations. Please refresh the page.</p>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-red-200 dark:border-red-700">
+                <p className="text-red-600 text-center text-sm">Failed to load locations</p>
             </div>
         );
     }
 
     if (!locations || locations.length === 0) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-                <p className="text-gray-600 text-center">No locations available at the moment.</p>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                <p className="text-gray-600 text-center text-sm">No locations available</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    Select Restaurant Location
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+                <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white">
+                    Select Location
                 </h3>
                 {selectedId && (
-                    <span className="text-xs text-fuchsia-600 font-medium">
+                    <span className="text-xs text-fuchsia-600 font-medium hidden sm:inline">
                         ✓ Selected
                     </span>
                 )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
                 <AnimatePresence mode="popLayout">
                     {locations.map((location) => (
                         <motion.button
@@ -72,42 +74,38 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
                             onClick={() => onSelect(location.id, location.name)}
-                            className={`w-full p-4 rounded-xl border-2 transition-all text-left ${selectedId === location.id
-                                    ? 'border-fuchsia-500 bg-fuchsia-500/10 shadow-md'
-                                    : 'border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 hover:shadow-sm'
+                            className={`w-full p-2.5 sm:p-4 rounded-lg border-2 transition-all text-left ${selectedId === location.id
+                                    ? 'border-fuchsia-500 bg-fuchsia-500/10'
+                                    : 'border-gray-200 dark:border-gray-700 hover:border-fuchsia-300'
                                 }`}
                         >
-                            <div className="flex items-start gap-3">
-                                <div className={`p-2 rounded-lg ${selectedId === location.id ? 'bg-fuchsia-500/20' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                                    <MapPin className={`w-5 h-5 ${selectedId === location.id ? 'text-fuchsia-600' : 'text-gray-600'}`} />
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 ${selectedId === location.id ? 'bg-fuchsia-500/20' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                                    <MapPin className={`w-4 sm:w-5 h-4 sm:h-5 ${selectedId === location.id ? 'text-fuchsia-600' : 'text-gray-600'}`} />
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <div className={`font-semibold ${selectedId === location.id ? 'text-fuchsia-600' : 'text-gray-900 dark:text-white'}`}>
+                                    <div className={`text-sm sm:text-base font-semibold ${selectedId === location.id ? 'text-fuchsia-600' : 'text-gray-900 dark:text-white'}`}>
                                         {location.name}
                                     </div>
 
-                                    {location.address && (
-                                        <div className="text-sm text-gray-500 mt-1 flex items-start gap-1">
-                                            <MapPin className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                                            <span className="break-words">{location.address}</span>
-                                        </div>
-                                    )}
+                                    <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                                        <span className="truncate">{location.address}</span>
+                                    </div>
 
-                                    <div className="flex flex-wrap items-center gap-3 mt-2">
-                                        {location.phone && (
-                                            <div className="text-xs text-gray-400 flex items-center gap-1">
-                                                <Phone className="w-3 h-3" />
-                                                {location.phone}
-                                            </div>
-                                        )}
-
+                                    <div className="flex items-center gap-2 mt-1">
                                         {location.is_active && (
-                                            <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
-                                                Open Now
+                                            <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-0.5">
+                                                <Clock className="w-2.5 h-2.5" />
+                                                <span className="hidden sm:inline">Open</span>
+                                                <span className="sm:hidden">Now</span>
                                             </div>
                                         )}
+                                        <span className="text-xs text-gray-400 hidden sm:flex items-center gap-0.5">
+                                            <Phone className="w-2.5 h-2.5" />
+                                            {location.phone}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -116,9 +114,9 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
                                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                                        className="w-6 h-6 bg-fuchsia-500 rounded-full flex items-center justify-center flex-shrink-0"
+                                        className="w-5 h-5 sm:w-6 sm:h-6 bg-fuchsia-500 rounded-full flex items-center justify-center flex-shrink-0"
                                     >
-                                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
                                     </motion.div>
@@ -130,8 +128,8 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
             </div>
 
             {!selectedId && (
-                <p className="mt-4 text-sm text-amber-600 dark:text-amber-400 text-center bg-amber-500/10 rounded-lg p-3">
-                    ⚠️ Please select a location to continue
+                <p className="mt-3 text-xs sm:text-sm text-amber-600 dark:text-amber-400 text-center bg-amber-500/10 rounded-lg py-2">
+                    Please select a location
                 </p>
             )}
         </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     User,
@@ -12,11 +12,15 @@ import {
     Trash2,
     Edit,
     Check,
-    Shield,
     Home,
     Crosshair,
-    Loader2
+    Loader2,
+    X,
+    ChevronDown,
+    ChevronUp,
+    UserCircle
 } from 'lucide-react';
+import { Head } from '@inertiajs/react';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
@@ -266,20 +270,23 @@ export default function Profile() {
 
     return (
         <CustomerLayout>
-            <div className="p-6 max-w-4xl mx-auto space-y-6">
+            <Head>
+                <title>My Profile - NKH Restaurant</title>
+            </Head>
+            <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                            <User className="w-8 h-8 text-purple-600" />
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
+                            <User className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
                             My Profile
                         </h1>
-                        <p className="text-gray-600 dark:text-gray-400 mt-2">
+                        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
                             Manage your personal information and preferences
                         </p>
                     </div>
                     {!editMode && !isProfileLoading && (
-                        <Button onClick={() => setEditMode(true)} variant="outline">
+                        <Button onClick={() => setEditMode(true)} variant="outline" size="sm" className="self-start sm:self-auto">
                             <Edit className="w-4 h-4 mr-2" />
                             Edit Profile
                         </Button>
@@ -289,7 +296,7 @@ export default function Profile() {
                 {/* Loading State */}
                 {isProfileLoading && (
                     <Card>
-                        <CardContent className="p-6">
+                        <CardContent className="p-4 sm:p-6">
                             <div className="animate-pulse space-y-4">
                                 <div className="flex justify-center">
                                     <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700" />
@@ -308,12 +315,12 @@ export default function Profile() {
                 {/* Personal Information */}
                 {!isProfileLoading && (
                     <Card>
-                        <CardContent className="p-6">
+                        <CardContent className="p-4 sm:p-6">
                             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                                 Personal Information
                             </h2>
 
-                            <div className="flex justify-center mb-6">
+                            <div className="flex justify-center mb-4 sm:mb-6">
                                 <ProfilePictureUpload
                                     name={userData?.name || formData.name || ''}
                                     currentAvatar={userData?.avatar || userData?.image_path}
@@ -444,15 +451,15 @@ export default function Profile() {
 
                 {/* Addresses */}
                 <Card>
-                    <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                <MapPin className="w-5 h-5 inline mr-2" />
+                    <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-4">
+                            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 inline mr-2" />
                                 My Addresses
                             </h2>
-                            <Button onClick={handleAddAddress} variant="outline" size="sm">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add Address
+                            <Button onClick={handleAddAddress} variant="outline" size="sm" className="self-start sm:self-auto">
+                                <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+                                <span className="sm:inline">Add Address</span>
                             </Button>
                         </div>
 
@@ -460,10 +467,10 @@ export default function Profile() {
                             {addresses.map((address: Address) => (
                                 <motion.div
                                     key={address.id}
-                                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-                                    whileHover={{ scale: 1.01 }}
+                                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 sm:p-4"
+                                    whileHover={{ scale: 1.005 }}
                                 >
-                                    <div className="flex items-start justify-between">
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -489,23 +496,25 @@ export default function Profile() {
                                             )}
                                         </div>
 
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-1.5 sm:gap-2 mt-2 sm:mt-0">
                                             {!address.is_default && (
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
                                                     onClick={() => setDefaultMutation.mutate(address.id)}
                                                     title="Set as Default"
+                                                    className="p-1.5 sm:p-2"
                                                 >
-                                                    <Home className="w-4 h-4" />
+                                                    <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 </Button>
                                             )}
                                             <Button
                                                 size="sm"
                                                 variant="outline"
                                                 onClick={() => handleEditAddress(address)}
+                                                className="p-1.5 sm:p-2"
                                             >
-                                                <Edit className="w-4 h-4" />
+                                                <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                             </Button>
                                             <Button
                                                 size="sm"
@@ -515,9 +524,9 @@ export default function Profile() {
                                                         deleteAddressMutation.mutate(address.id);
                                                     }
                                                 }}
-                                                className="text-red-600 hover:bg-red-50"
+                                                className="text-red-600 hover:bg-red-50 p-1.5 sm:p-2"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                             </Button>
                                         </div>
                                     </div>
@@ -525,9 +534,9 @@ export default function Profile() {
                             ))}
 
                             {addresses.length === 0 && (
-                                <div className="text-center py-12">
-                                    <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-600 dark:text-gray-400">
+                                <div className="text-center py-6 sm:py-12">
+                                    <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                                         No addresses saved. Add one to make ordering easier!
                                     </p>
                                 </div>
@@ -538,7 +547,7 @@ export default function Profile() {
 
                 {/* Notification Preferences */}
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                         <NotificationPreferencesSettings />
                     </CardContent>
                 </Card>
@@ -553,15 +562,15 @@ export default function Profile() {
                                 setEditingAddress(null);
                             }}
                         />
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
                             <motion.div
-                                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                                className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="p-6 space-y-4">
-                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                                         {editingAddress ? 'Edit Address' : 'Add New Address'}
                                     </h2>
 
@@ -585,7 +594,7 @@ export default function Profile() {
                                                 Use My Location
                                             </button>
                                         </div>
-                                        <div className="h-[250px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 relative">
+                                        <div className="h-[160px] sm:h-[250px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 relative">
                                             <Map
                                                 className="h-full w-full"
                                                 center={[addressForm.latitude, addressForm.longitude]}
@@ -608,8 +617,8 @@ export default function Profile() {
                                         </p>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="col-span-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                        <div className="sm:col-span-2">
                                             <label className="block text-sm font-medium mb-1 text-foreground">Label *</label>
                                             <input
                                                 type="text"
@@ -620,7 +629,7 @@ export default function Profile() {
                                             />
                                         </div>
 
-                                        <div className="col-span-2">
+                                        <div className="sm:col-span-2">
                                             <label className="block text-sm font-medium mb-1 text-foreground">Address Line 1 *</label>
                                             <input
                                                 type="text"
@@ -630,7 +639,7 @@ export default function Profile() {
                                             />
                                         </div>
 
-                                        <div className="col-span-2">
+                                        <div className="sm:col-span-2">
                                             <label className="block text-sm font-medium mb-1 text-foreground">Address Line 2</label>
                                             <input
                                                 type="text"
@@ -678,7 +687,7 @@ export default function Profile() {
                                             />
                                         </div>
 
-                                        <div className="col-span-2">
+                                        <div className="sm:col-span-2">
                                             <label className="block text-sm font-medium mb-1 text-foreground">Delivery Instructions</label>
                                             <textarea
                                                 value={addressForm.delivery_instructions}
@@ -700,7 +709,7 @@ export default function Profile() {
                                         <span className="text-sm text-muted-foreground">Set as default address</span>
                                     </label>
 
-                                    <div className="flex gap-3 pt-4">
+                                    <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
                                         <Button variant="outline" onClick={() => setShowAddressModal(false)} className="flex-1">
                                             Cancel
                                         </Button>

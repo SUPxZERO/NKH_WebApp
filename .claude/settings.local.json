@@ -20,7 +20,9 @@
       "Bash(xargs:*)",
       "Bash(ls:*)",
       "Bash(npm install:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(pkill:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

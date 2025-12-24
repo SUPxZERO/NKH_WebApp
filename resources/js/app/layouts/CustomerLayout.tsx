@@ -46,8 +46,15 @@ const navigation = [
 
 export default function CustomerLayout({ children, className }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { url } = usePage();
+  const { url, props } = usePage() as any;
   const search = useGlobalSearch();
+
+  // Get user from auth
+  const auth = props?.auth;
+  const user = auth?.user || {};
+  const userAvatar = user.avatar || user.image_path;
+  const userName = user.name || 'User';
+  const userEmail = user.email || '';
 
   // Subscribe to real-time customer notifications
   useAutoCustomerNotifications({ showToast: true });
@@ -56,9 +63,19 @@ export default function CustomerLayout({ children, className }: Props) {
     router.post('/logout');
   };
 
+  // Get user initials
+  const getInitials = (name: string) => {
+    return name
+      ?.split(' ')
+      .map((part: string) => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?';
+  };
+
   return (
     <div className={cn(
-      "min-h-screen bg-gradient-to-br from-slate-50 via-white to-fuchsia-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900",
+      "min-h-screen bg-gradient-to-br from-slate-50 via-white to-fuchsia-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 overflow-x-hidden",
       className
     )}>
       {/* Mobile Menu Overlay */}
@@ -78,15 +95,15 @@ export default function CustomerLayout({ children, className }: Props) {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="fixed top-0 right-0 h-full w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-l border-white/20 z-50 lg:hidden"
+            className="fixed top-0 right-0 h-full w-[280px] sm:w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-l border-white/20 z-50 xl:hidden overflow-y-auto"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl font-bold">Menu</h2>
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-6 sm:mb-8">
+                <h2 className="text-lg sm:text-xl font-bold">Menu</h2>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"
@@ -95,6 +112,34 @@ export default function CustomerLayout({ children, className }: Props) {
                 </button>
               </div>
               <nav className="space-y-2">
+                {/* User Profile Section in Mobile Menu */}
+                <Link
+                  href="/customer/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 mb-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                    {userAvatar ? (
+                      <img
+                        src={userAvatar}
+                        alt={userName}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.parentElement!.innerHTML = getInitials(userName);
+                        }}
+                      />
+                    ) : (
+                      <span className="text-sm">{getInitials(userName)}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{userName}</p>
+                    <p className="text-xs text-gray-500 truncate">{userEmail || 'View account details'}</p>
+                  </div>
+                </Link>
+
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   const isActive = url === item.href || (item.href !== '/' && url.startsWith(item.href));
@@ -119,7 +164,7 @@ export default function CustomerLayout({ children, className }: Props) {
                 {/* Logout Button in Mobile Menu */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 w-full"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 w-full mt-4"
                 >
                   <LogOut className="w-5 h-5" />
                   Logout
@@ -132,15 +177,15 @@ export default function CustomerLayout({ children, className }: Props) {
 
       {/* Header */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-white/20">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+        <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
             {/* Logo - Using Actual NKH Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
               <div className="relative">
                 {/* Glow effect on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-2xl blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-xl sm:rounded-2xl blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300" />
                 {/* Logo container */}
-                <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 backdrop-blur-sm">
+                <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 backdrop-blur-sm">
                   <img
                     src="/Nkhlogo.png"
                     alt="NKH Restaurant"
@@ -149,15 +194,15 @@ export default function CustomerLayout({ children, className }: Props) {
                 </div>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
                   NKH Restaurant
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Delicious & Fresh</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Delicious & Fresh</p>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            {/* Desktop Navigation - Hide on mobile/tablet */}
+            <nav className="hidden xl:flex items-center space-x-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = url === item.href || (item.href !== '/' && url.startsWith(item.href));
@@ -180,31 +225,44 @@ export default function CustomerLayout({ children, className }: Props) {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Search Button */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Search Button - Show on all sizes */}
               <button
                 onClick={search.open}
                 className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-                title="Search (Ctrl+K)"
+                title="Search"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
 
               {/* Cart Button */}
               <CartIcon />
 
-              {/* Notification Dropdown */}
-              <NotificationDropdown variant="customer" />
+              {/* Notification Dropdown - Show on medium and up */}
+              <div className="hidden sm:block">
+                <NotificationDropdown variant="customer" />
+              </div>
 
-              {/* User Profile */}
-              <UserProfileDropdown variant="customer" />
+              {/* User Profile - Show on medium and up */}
+              <div className="hidden md:block">
+                <UserProfileDropdown variant="customer" />
+              </div>
+
+              {/* Mobile Profile Button - Show only on mobile */}
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
+                title="Profile"
+              >
+                <User className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
 
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                className="xl:hidden p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
               >
-                <MenuIcon className="w-5 h-5" />
+                <MenuIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
@@ -212,19 +270,21 @@ export default function CustomerLayout({ children, className }: Props) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {children}
-        </motion.div>
+      <main className="w-full max-w-full overflow-x-hidden">
+        <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {children}
+          </motion.div>
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white py-16 mt-20">
-        <div className="container mx-auto px-4">
+      <footer className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white py-8 sm:py-12 lg:py-16 mt-12 sm:mt-16 lg:mt-20">
+        <div className="w-full max-w-screen-2xl mx-auto px-4">
           {/* Newsletter Section */}
           {/* <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-fuchsia-600 to-pink-600 p-8 md:p-12 mb-12">
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -247,11 +307,11 @@ export default function CustomerLayout({ children, className }: Props) {
             <div className="absolute -left-10 -bottom-10 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
           </div> */}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
             {/* Brand - Using Actual NKH Logo */}
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="relative w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20">
                   <img
                     src="/Nkhlogo.png"
                     alt="NKH Restaurant"
@@ -259,17 +319,17 @@ export default function CustomerLayout({ children, className }: Props) {
                   />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">
                     NKH Restaurant
                   </h3>
-                  <p className="text-sm text-fuchsia-400">Culinary Excellence</p>
+                  <p className="text-xs sm:text-sm text-fuchsia-400">Culinary Excellence</p>
                 </div>
               </div>
-              <p className="text-gray-400 mb-6">
+              <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6">
                 Serving delicious, fresh meals with love and passion since 2020.
               </p>
               {/* Social Media Icons */}
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <a href="#" className="w-10 h-10 rounded-xl bg-white/10 hover:bg-fuchsia-600 flex items-center justify-center transition-colors group">
                   <svg className="w-5 h-5 text-gray-400 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                 </a>
@@ -282,10 +342,10 @@ export default function CustomerLayout({ children, className }: Props) {
               </div>
             </div>
 
-            {/* Quick Links */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Quick Links</h4>
-              <ul className="space-y-3">
+            {/* Quick Links - Hide on small mobile */}
+            <div className="hidden sm:block">
+              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">Quick Links</h4>
+              <ul className="space-y-2 sm:space-y-3">
                 {navigation.map((item) => (
                   <li key={item.name}>
                     <Link href={item.href} className="text-gray-400 hover:text-fuchsia-400 transition-colors flex items-center gap-2 group">
@@ -299,33 +359,33 @@ export default function CustomerLayout({ children, className }: Props) {
 
             {/* Contact */}
             <div>
-              <h4 className="font-semibold text-white mb-4">Contact Us</h4>
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3 text-gray-400">
-                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center">
-                    <Phone className="w-4 h-4 text-fuchsia-500" />
+              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">Contact Us</h4>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-fuchsia-500" />
                   </div>
-                  <span>+1 (555) 123-4567</span>
+                  <span className="truncate">+1 (555) 123-4567</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-400">
-                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center">
-                    <Mail className="w-4 h-4 text-fuchsia-500" />
+                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-fuchsia-500" />
                   </div>
-                  <span>hello@nkhrestaurant.com</span>
+                  <span className="truncate">hello@nkhrestaurant.com</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-400">
-                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center">
-                    <MapPin className="w-4 h-4 text-fuchsia-500" />
+                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-fuchsia-500" />
                   </div>
-                  <span>123 Food Street, City</span>
+                  <span className="truncate">123 Food Street, City</span>
                 </li>
               </ul>
             </div>
 
             {/* Hours */}
             <div>
-              <h4 className="font-semibold text-white mb-4">Opening Hours</h4>
-              <ul className="space-y-3 text-gray-400">
+              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">Opening Hours</h4>
+              <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-400">
                 <li className="flex items-center justify-between">
                   <span>Mon - Thu</span>
                   <span className="text-white font-medium">11AM - 10PM</span>
@@ -343,16 +403,16 @@ export default function CustomerLayout({ children, className }: Props) {
           </div>
 
           {/* Bottom Bar */}
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-gray-400 text-sm">
+          <div className="border-t border-white/10 pt-6 sm:pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            <p className="text-gray-400 text-xs sm:text-sm text-center sm:text-left">
               &copy; 2025 NKH Restaurant. All rights reserved.
             </p>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-fuchsia-600 text-gray-400 hover:text-white transition-all group"
             >
-              <span className="text-sm font-medium">Back to top</span>
-              <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <span className="text-xs sm:text-sm font-medium">Back to top</span>
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m18 15-6-6-6 6" />
               </svg>
             </button>

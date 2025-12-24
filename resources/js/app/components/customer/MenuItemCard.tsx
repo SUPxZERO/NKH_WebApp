@@ -24,19 +24,13 @@ const dietaryIcons: Record<string, React.ReactNode> = {
 
 export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', isFavorite = false, onToggleFavorite }: MenuItemCardProps) {
     const hasDiscount = item.original_price && item.original_price > item.price;
-
-    // Get global food detail modal context (safe version returns null if not in provider)
     const foodDetailContext = useFoodDetailSafe();
 
-    // Handle card click - open detail modal
     const handleCardClick = useCallback(() => {
-        // If custom handler provided, use it
         if (onQuickView) {
             onQuickView(item);
             return;
         }
-
-        // Otherwise use global modal if available
         if (foodDetailContext) {
             foodDetailContext.openFoodDetail(item.id, {
                 onAddToCart: onAddToCart ? (menuItem, qty) => onAddToCart(menuItem) : undefined,
@@ -53,22 +47,22 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
     if (layout === 'list') {
         return (
             <motion.div
-                className="group relative flex flex-col md:flex-row gap-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 p-4 transition-all duration-300 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 cursor-pointer"
+                className="group relative flex gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 transition-all cursor-pointer"
                 whileHover={{ y: -2 }}
                 onClick={handleCardClick}
                 layout
             >
                 {/* Image */}
-                <div className="relative w-full md:w-32 h-40 md:h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+                <div className="relative w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
                     {item.image_path ? (
                         <img
                             src={item.image_path || ''}
                             alt={item.name}
-                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                            className="w-full h-full object-cover"
                             loading="lazy"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-5xl bg-gray-100 dark:bg-gray-700">
+                        <div className="w-full h-full flex items-center justify-center text-4xl">
                             🍽️
                         </div>
                     )}
@@ -76,210 +70,166 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                     {/* Badges */}
                     <div className="absolute top-2 left-2 flex flex-col gap-1">
                         {item.is_popular && (
-                            <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold flex items-center gap-1 shadow-md">
+                            <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold flex items-center gap-0.5">
                                 <TrendingUp className="w-3 h-3" />
-                                Popular
-                            </span>
+                            </div>
                         )}
                         {hasDiscount && (
-                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-semibold shadow-md">
+                            <div className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
                                 -{discountPercent}%
-                            </span>
+                            </div>
                         )}
                     </div>
 
-                    {/* Favorite Button */}
+                    {/* Favorite */}
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleFavorite?.();
-                        }}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
+                        onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(); }}
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 dark:bg-gray-800/90 flex items-center justify-center shadow-md hover:scale-110 transition-transform"
                     >
-                        <Heart
-                            className={cn(
-                                'w-4 h-4',
-                                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-500 dark:text-gray-400'
-                            )}
-                        />
+                        <Heart className={cn("w-4 h-4", isFavorite ? "fill-red-500 text-red-500" : "text-gray-400")} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 flex flex-col">
-                    <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
-                                {item.name}
-                            </h3>
+                <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
+                            {item.name}
+                        </h3>
+                        {item.description && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+                                {item.description}
+                            </p>
+                        )}
 
-                            {item.description && (
-                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                                    {item.description}
-                                </p>
-                            )}
-                        </div>
+                        {/* Dietary Tags */}
+                        {item.dietary_restrictions && item.dietary_restrictions.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                                {item.dietary_restrictions.slice(0, 3).map((restriction) => (
+                                    <span
+                                        key={restriction}
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs"
+                                    >
+                                        {dietaryIcons[restriction.toLowerCase()]}
+                                        {restriction}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Tags */}
-                    {item.dietary_restrictions && item.dietary_restrictions.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                            {item.dietary_restrictions.slice(0, 3).map((restriction) => (
-                                <span
-                                    key={restriction}
-                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs border border-green-200 dark:border-green-800"
-                                >
-                                    {dietaryIcons[restriction.toLowerCase()]}
-                                    {restriction}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Footer */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-auto pt-3 gap-3">
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center gap-4">
                             {item.rating && (
-                                <div className="flex items-center gap-1 text-sm">
+                                <div className="flex items-center gap-1">
                                     <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                    <span className="font-semibold text-gray-900 dark:text-white">
-                                        {item.rating.toFixed(1)}
-                                    </span>
+                                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{item.rating.toFixed(1)}</span>
                                 </div>
                             )}
-
                             {item.prep_time && (
-                                <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
                                     <Clock className="w-4 h-4" />
-                                    <span>{item.prep_time}m</span>
+                                    <span>{item.prep_time} min</span>
                                 </div>
                             )}
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <div className="text-right">
-                                {hasDiscount && (
-                                    <div className="text-sm text-gray-400 dark:text-gray-500 line-through">
-                                        ${item.original_price?.toFixed(2)}
-                                    </div>
-                                )}
-                                <div className="text-2xl font-bold text-fuchsia-600 dark:text-fuchsia-400">
-                                    ${item.price.toFixed(2)}
-                                </div>
-                            </div>
-
-                            <Button
-                                size="sm"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onAddToCart?.(item);
-                                }}
-                                leftIcon={<Plus className="w-4 h-4" />}
-                            >
-                                Add
-                            </Button>
+                            {hasDiscount && (
+                                <span className="text-sm text-gray-400 line-through">${item.original_price?.toFixed(2)}</span>
+                            )}
+                            <span className="text-xl font-bold text-fuchsia-600 dark:text-fuchsia-400">${item.price.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
+
+                {/* Add Button */}
+                <Button
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); onAddToCart?.(item); }}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                    className="self-center flex-shrink-0"
+                >
+                    Add
+                </Button>
             </motion.div>
         );
     }
 
-
-    // Grid layout (default)
+    // Grid layout - Optimized for both mobile and desktop
     return (
         <motion.div
-            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-gray-900/50 cursor-pointer"
-            whileHover={{ y: -6 }}
+            className="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-700 transition-all cursor-pointer"
+            whileHover={{ y: -4 }}
             onClick={handleCardClick}
             layout
         >
-            {/* Image */}
-            <div className="relative h-52 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+            {/* Image Container */}
+            <div className="relative aspect-[4/3] bg-gray-100 dark:bg-gray-700 overflow-hidden">
                 {item.image_path ? (
                     <img
                         src={item.image_path || ''}
                         alt={item.name}
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-6xl bg-gray-100 dark:bg-gray-700">
+                    <div className="w-full h-full flex items-center justify-center text-6xl">
                         🍽️
                     </div>
                 )}
 
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
                 {/* Badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                     {item.is_popular && (
-                        <span className="px-2.5 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold shadow-md flex items-center gap-1">
+                        <div className="px-2 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold flex items-center gap-1 shadow-lg">
                             <TrendingUp className="w-3 h-3" />
-                            Popular
-                        </span>
+                            <span className="hidden sm:inline">Popular</span>
+                        </div>
                     )}
                     {hasDiscount && (
-                        <span className="px-2.5 py-1 rounded-full bg-red-500 text-white text-xs font-semibold shadow-md">
-                            -{discountPercent}% OFF
-                        </span>
+                        <div className="px-2 py-1 rounded-full bg-red-500 text-white text-xs font-bold shadow-lg">
+                            -{discountPercent}%
+                        </div>
                     )}
                 </div>
 
                 {/* Favorite Button */}
                 <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleFavorite?.();
-                    }}
-                    className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center hover:scale-110 transition-transform shadow-md z-10"
+                    onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(); }}
+                    className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 dark:bg-gray-800/90 flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                 >
-                    <Heart
-                        className={cn(
-                            'w-5 h-5',
-                            isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-500 dark:text-gray-400'
-                        )}
-                    />
+                    <Heart className={cn("w-5 h-5", isFavorite ? "fill-red-500 text-red-500" : "text-gray-400")} />
                 </button>
 
-                {/* Quick Add Button (shows on hover) */}
-                <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                    <Button
-                        size="sm"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onAddToCart?.(item);
-                        }}
-                        leftIcon={<Plus className="w-4 h-4" />}
-                        className="shadow-xl"
-                    >
-                        Add to Cart
-                    </Button>
-                </div>
+                {/* Quick Add Button */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); onAddToCart?.(item); }}
+                    className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-fuchsia-600 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform hover:bg-fuchsia-700"
+                >
+                    <Plus className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Content */}
-            <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 flex-1 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
-                        {item.name}
-                    </h3>
-                </div>
+            <div className="p-4 flex-1 flex flex-col">
+                <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white line-clamp-2 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
+                    {item.name}
+                </h3>
 
                 {item.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1.5 hidden sm:block">
                         {item.description}
                     </p>
                 )}
 
-                {/* Tags */}
+                {/* Dietary Tags */}
                 {item.dietary_restrictions && item.dietary_restrictions.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1.5 mt-2">
                         {item.dietary_restrictions.slice(0, 2).map((restriction) => (
                             <span
                                 key={restriction}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs border border-green-200 dark:border-green-800"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs"
                             >
                                 {dietaryIcons[restriction.toLowerCase()]}
                                 {restriction}
@@ -288,38 +238,26 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                     </div>
                 )}
 
+                <div className="flex-1" />
+
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <div className="flex flex-col gap-1">
-                        {/* Rating */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center gap-2">
                         {item.rating && (
                             <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                                    {item.rating.toFixed(1)}
-                                </span>
-                            </div>
-                        )}
-
-                        {/* Prep Time */}
-                        {item.prep_time && (
-                            <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                                <Clock className="w-3 h-3" />
-                                <span>{item.prep_time}min</span>
+                                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{item.rating.toFixed(1)}</span>
                             </div>
                         )}
                     </div>
 
-                    {/* Price */}
-                    <div className="text-right">
+                    <div className="flex items-center gap-2">
                         {hasDiscount && (
-                            <div className="text-xs text-gray-400 dark:text-gray-500 line-through">
-                                ${item.original_price?.toFixed(2)}
-                            </div>
+                            <span className="text-xs text-gray-400 line-through">${item.original_price?.toFixed(2)}</span>
                         )}
-                        <div className="text-xl font-bold text-fuchsia-600 dark:text-fuchsia-400">
+                        <span className="text-lg font-bold text-fuchsia-600 dark:text-fuchsia-400">
                             ${item.price.toFixed(2)}
-                        </div>
+                        </span>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/app/components/ui/Button';
-import { Camera, X, Loader2, Trash2 } from 'lucide-react';
+import { Camera, X, Loader2, Trash2, User } from 'lucide-react';
 import { apiPost, apiDelete } from '@/app/libs/apiClient';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
@@ -28,20 +28,40 @@ export default function ProfilePictureUpload({
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(currentAvatar || null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        setPreviewUrl(currentAvatar || null);
+        // Only set previewUrl when currentAvatar changes and is not null/undefined
+        if (currentAvatar) {
+            setPreviewUrl(currentAvatar);
+        } else if (previewUrl === null && !currentAvatar) {
+            // Keep null if no avatar
+        }
     }, [currentAvatar]);
 
     const sizeClasses = {
-        sm: 'w-10 h-10',
-        md: 'w-16 h-16',
-        lg: 'w-24 h-24',
-        xl: 'w-32 h-32'
+        sm: 'w-10 h-10 text-xs',
+        md: 'w-14 h-14 text-sm',
+        lg: 'w-20 h-20 text-lg',
+        xl: 'w-24 h-24 sm:w-32 sm:h-32 text-2xl sm:text-3xl'
+    };
+
+    const iconSizes = {
+        sm: 'w-3 h-3',
+        md: 'w-4 h-4',
+        lg: 'w-5 h-5',
+        xl: 'w-5 h-5 sm:w-6 sm:h-6'
+    };
+
+    const buttonSizes = {
+        sm: 'p-1.5',
+        md: 'p-2',
+        lg: 'p-2.5',
+        xl: 'p-2.5 sm:p-3'
     };
 
     const getInitials = (name: string) => {
+        if (!name) return '?';
         return name
             .split(' ')
             .map(part => part[0])
@@ -117,7 +137,7 @@ export default function ProfilePictureUpload({
     };
 
     return (
-        <div className={cn('relative group inline-block', className)}>
+        <div className={cn('relative group inline-flex flex-col items-center', className)}>
             <div className={cn(
                 'rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg relative bg-gray-100 dark:bg-gray-800 flex items-center justify-center',
                 sizeClasses[size]
@@ -125,13 +145,19 @@ export default function ProfilePictureUpload({
                 {previewUrl ? (
                     <img
                         src={previewUrl}
-                        alt={name}
+                        alt={name || 'Profile'}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                            // Fallback to initials if image fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.parentElement!.innerHTML = `<span class="font-bold text-gray-400 ${sizeClasses[size].split(' ')[2]}">${getInitials(name)}</span>`;
+                        }}
                     />
                 ) : (
                     <span className={cn(
-                        'font-bold text-gray-400',
-                        size === 'xl' ? 'text-3xl' : size === 'lg' ? 'text-2xl' : 'text-lg'
+                        'font-bold text-gray-400 flex items-center justify-center',
+                        sizeClasses[size].split(' ')[2]
                     )}>
                         {getInitials(name)}
                     </span>
@@ -139,19 +165,22 @@ export default function ProfilePictureUpload({
 
                 {(isUploading || isDeleting) && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                        <Loader2 className={cn('text-white animate-spin', iconSizes[size])} />
                     </div>
                 )}
             </div>
 
-            <div className="absolute bottom-0 right-0 flex gap-1">
+            <div className="absolute bottom-0 right-0 flex gap-1 mt-2">
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading || isDeleting}
-                    className="p-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    className={cn(
+                        'rounded-full bg-purple-600 text-white hover:bg-purple-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500',
+                        buttonSizes[size]
+                    )}
                 >
-                    <Camera className="w-4 h-4" />
+                    <Camera className={cn(iconSizes[size])} />
                 </button>
 
                 {showDelete && previewUrl && (
@@ -159,9 +188,12 @@ export default function ProfilePictureUpload({
                         type="button"
                         onClick={handleDelete}
                         disabled={isUploading || isDeleting}
-                        className="p-2 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        className={cn(
+                            'rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
+                            buttonSizes[size]
+                        )}
                     >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className={cn(iconSizes[size])} />
                     </button>
                 )}
             </div>

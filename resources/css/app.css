@@ -154,13 +154,87 @@
   .mobile-scroll::-webkit-scrollbar {
     display: none;
   }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    body {
+      font-size: 16px; /* Prevents iOS zoom on input focus */
+    }
+
+    /* Better spacing for mobile */
+    .container {
+      @apply px-3;
+    }
+
+    /* Make tables scrollable on mobile */
+    table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    /* Hide elements with .hidden-mobile class */
+    .hidden-mobile {
+      display: none !important;
+    }
+
+    /* Stack columns on mobile */
+    .mobile-stack {
+      flex-direction: column !important;
+    }
+
+    /* Reduce text sizes slightly */
+    .text-5xl {
+      @apply text-3xl;
+    }
+
+    .text-4xl {
+      @apply text-2xl;
+    }
+
+    .text-3xl {
+      @apply text-xl;
+    }
+
+    /* Reduce padding on mobile */
+    .mobile-p-reduce {
+      @apply p-4;
+    }
+
+    .mobile-px-reduce {
+      @apply px-4;
+    }
+
+    .mobile-py-reduce {
+      @apply py-4;
+    }
+  }
+
+  /* Show only on mobile */
+  .show-mobile {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .show-mobile {
+      display: block !important;
+    }
+  }
+
+  /* Improve tap targets for mobile */
+  @media (hover: none) and (pointer: coarse) {
+    button,
+    a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
 }
 
 /* ============================================
    ANIMATION UTILITIES
    ============================================ */
 @layer utilities {
-
   /* Fade In Animation */
   @keyframes fadeInUp {
     from {

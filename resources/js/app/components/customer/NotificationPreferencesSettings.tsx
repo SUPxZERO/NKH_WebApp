@@ -147,16 +147,16 @@ export default function NotificationPreferencesSettings({ className }: Notificat
     const { channels, types } = data;
 
     return (
-        <div className={cn("space-y-6", className)}>
+        <div className={cn("space-y-4 sm:space-y-6", className)}>
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-500">
-                        <Bell className="w-5 h-5 text-white" />
+                        <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-lg">Notification Preferences</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <h3 className="font-semibold text-base sm:text-lg">Notification Preferences</h3>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                             Choose how and when you want to be notified
                         </p>
                     </div>
@@ -165,22 +165,90 @@ export default function NotificationPreferencesSettings({ className }: Notificat
                     <button
                         onClick={() => enableAllMutation.mutate()}
                         disabled={enableAllMutation.isPending}
-                        className="px-3 py-1.5 text-sm font-medium text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                        className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                     >
                         Enable All
                     </button>
                     <button
                         onClick={() => disableAllMutation.mutate()}
                         disabled={disableAllMutation.isPending}
-                        className="px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     >
                         Disable All
                     </button>
                 </div>
             </div>
 
-            {/* Preferences Grid */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            {/* Mobile: Stacked Cards */}
+            <div className="space-y-3 sm:hidden">
+                {Object.entries(types).map(([typeKey, typeLabel], index) => {
+                    const TypeIcon = typeIcons[typeKey] || Bell;
+                    const typeColor = typeColors[typeKey] || 'text-gray-500';
+
+                    return (
+                        <motion.div
+                            key={typeKey}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3"
+                        >
+                            {/* Type Label */}
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className={cn("p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700", typeColor)}>
+                                    <TypeIcon className="w-4 h-4" />
+                                </div>
+                                <span className="font-medium text-sm text-gray-800 dark:text-gray-200">
+                                    {typeLabel}
+                                </span>
+                            </div>
+
+                            {/* Channel Toggles Row */}
+                            <div className="flex items-center justify-between gap-2">
+                                {Object.entries(channels).map(([channelKey, channelLabel]) => {
+                                    const ChannelIcon = channelIcons[channelKey] || Bell;
+                                    const isEnabled = localPreferences[channelKey]?.[typeKey] ?? true;
+                                    const isPending = toggleMutation.isPending;
+
+                                    return (
+                                        <div key={channelKey} className="flex flex-col items-center gap-1 flex-1">
+                                            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                                <ChannelIcon className="w-3 h-3" />
+                                                <span>{channelLabel}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => handleToggle(channelKey, typeKey)}
+                                                disabled={isPending}
+                                                className={cn(
+                                                    "relative w-10 h-5 rounded-full transition-colors duration-200",
+                                                    isEnabled
+                                                        ? "bg-gradient-to-r from-fuchsia-500 to-pink-500"
+                                                        : "bg-gray-300 dark:bg-gray-600"
+                                                )}
+                                            >
+                                                <motion.div
+                                                    animate={{ x: isEnabled ? 20 : 0 }}
+                                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                                    className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md flex items-center justify-center"
+                                                >
+                                                    {isEnabled ? (
+                                                        <Check className="w-2.5 h-2.5 text-fuchsia-500" />
+                                                    ) : (
+                                                        <X className="w-2.5 h-2.5 text-gray-400" />
+                                                    )}
+                                                </motion.div>
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </div>
+
+            {/* Desktop: Table Grid */}
+            <div className="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 {/* Header Row */}
                 <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                     <div className="font-medium text-gray-700 dark:text-gray-300">
@@ -194,7 +262,7 @@ export default function NotificationPreferencesSettings({ className }: Notificat
                                 className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400"
                             >
                                 <ChannelIcon className="w-4 h-4" />
-                                <span className="hidden sm:inline">{channelLabel}</span>
+                                <span>{channelLabel}</span>
                             </div>
                         );
                     })}
@@ -264,7 +332,7 @@ export default function NotificationPreferencesSettings({ className }: Notificat
             </div>
 
             {/* Info Note */}
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
                 💡 In-app notifications appear in your notification bell. Push notifications require browser permission.
             </p>
         </div>

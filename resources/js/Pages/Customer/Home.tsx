@@ -253,13 +253,14 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
         <title>NKH Restaurant - Fresh Food Delivered Fast</title>
       </Head>
 
-      <div className="space-y-24 pb-20">
+      <div className="space-y-12 sm:space-y-16 lg:space-y-24 pb-12 sm:pb-16 lg:pb-20">
         {/* NEW HERO SECTION & Brand Background */}
-        <HeroBackground variant="mesh" className="rounded-3xl overflow-hidden shadow-2xl shadow-indigo-500/10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10 px-4 md:px-8">
+        <HeroBackground variant="mesh" className="rounded-xl lg:rounded-3xl overflow-hidden shadow-2xl shadow-indigo-500/10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center relative z-10 px-4 md:px-8 py-8 lg:py-12">
             <motion.div className="max-w-2xl" variants={itemVariants} initial="hidden" animate="visible">
+              {/* Hide rating badge on mobile */}
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-8 shadow-lg"
+                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6 lg:mb-8 shadow-lg"
                 whileHover={{ scale: 1.05 }}
               >
                 <div className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse" />
@@ -268,22 +269,22 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                 </span>
               </motion.div>
 
-              <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight text-white mb-6 font-display">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight text-white mb-4 lg:mb-6 font-display">
                 Taste the <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 to-pink-300 animate-pulse">Extraordinary.</span>
               </h1>
 
-              <p className="text-lg md:text-xl text-white/80 leading-relaxed mb-10 max-w-xl">
+              <p className="text-base md:text-lg lg:text-xl text-white/80 leading-relaxed mb-6 lg:mb-10 max-w-xl">
                 Experience culinary perfection delivered to your door. Fresh ingredients, masterful recipes, and passion in every bite.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
                 <motion.button
                   onClick={() => openModal('delivery')}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative flex items-center justify-center gap-3 h-14 px-8 rounded-2xl bg-white text-fuchsia-600 font-bold text-lg shadow-xl shadow-black/10 hover:bg-gray-50 transition-all"
+                  className="relative flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white text-fuchsia-600 font-bold text-base sm:text-lg shadow-xl shadow-black/10 hover:bg-gray-50 transition-all"
                 >
-                  <Truck className="w-5 h-5" />
+                  <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Order Delivery</span>
                 </motion.button>
 
@@ -291,43 +292,44 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                   onClick={() => openModal('pickup')}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-3 h-14 px-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold text-lg hover:bg-white/20 transition-all"
+                  className="flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold text-base sm:text-lg hover:bg-white/20 transition-all"
                 >
-                  <Store className="w-5 h-5" />
+                  <Store className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Order Pickup</span>
                 </motion.button>
               </div>
 
               {/* Stats Row - Grid layout for consistent alignment */}
-              <div className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 border-t border-white/10 pt-8">
+              <div className="mt-8 lg:mt-12 grid grid-cols-3 gap-2 sm:gap-4 lg:gap-8 border-t border-white/10 pt-6 lg:pt-8">
                 <div className="flex flex-col text-center sm:text-left">
-                  <span className="text-2xl sm:text-3xl font-bold text-white">{stats.averageDeliveryTime}m</span>
-                  <span className="text-xs sm:text-sm text-white/60">Avg. Delivery</span>
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{stats.averageDeliveryTime}m</span>
+                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">Avg. Delivery</span>
                 </div>
-                <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-4">
-                  <span className="text-2xl sm:text-3xl font-bold text-white">{stats.totalCustomers > 1000 ? '1k+' : stats.totalCustomers}</span>
-                  <span className="text-xs sm:text-sm text-white/60">Happy Customers</span>
+                <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4">
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{stats.totalCustomers > 1000 ? '1k+' : stats.totalCustomers}</span>
+                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">Happy Customers</span>
                 </div>
-                <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-4">
-                  <span className="text-2xl sm:text-3xl font-bold text-white">4.9</span>
-                  <span className="text-xs sm:text-sm text-white/60">Rating</span>
+                <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4">
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">4.9</span>
+                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">Rating</span>
                 </div>
               </div>
             </motion.div>
 
             {/* Carousel Area - Now visible on all screens */}
+            {/* Hide carousel on mobile, show on desktop */}
             <motion.div
-              className="flex justify-center items-center relative mt-8 lg:mt-0"
+              className="hidden lg:flex justify-center items-center relative"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <BrandBlob className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-40 blur-3xl hidden lg:block" />
-              <div className="relative z-10 w-full max-w-xs sm:max-w-sm lg:max-w-md">
+              <BrandBlob className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-40 blur-3xl" />
+              <div className="relative z-10 w-full max-w-md">
                 {featuredItems.length > 0 ? (
                   <FeaturedCarousel items={featuredItems} onItemClick={() => openModal('delivery')} />
                 ) : (
-                  <div className="w-full aspect-[3/4] max-w-xs mx-auto rounded-3xl bg-white/10 animate-pulse border border-white/10" />
+                  <div className="w-full aspect-[3/4] rounded-3xl bg-white/10 animate-pulse border border-white/10" />
                 )}
               </div>
             </motion.div>
@@ -335,22 +337,73 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
         </HeroBackground>
 
         {/* Featured Items Section */}
-        <section className="container mx-auto px-4 relative">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div>
-              <span className="text-fuchsia-600 font-bold uppercase tracking-widest text-sm">Delicious Choices</span>
-              <h2 className="text-4xl font-bold mt-2 text-gray-900 dark:text-white font-display">Featured Dishes</h2>
+        <section className="relative">
+          <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 lg:mb-12 gap-3 sm:gap-4 lg:gap-6">
+              <div>
+                <span className="text-fuchsia-600 font-bold uppercase tracking-widest text-sm">Delicious Choices</span>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-2 text-gray-900 dark:text-white font-display">Featured Dishes</h2>
+              </div>
+              <motion.button
+                onClick={() => navigateToMenu()}
+                whileHover={{ x: 5 }}
+                className="flex items-center gap-2 text-fuchsia-600 font-bold hover:text-fuchsia-700 transition-colors text-sm lg:text-base"
+              >
+                View Full Menu <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" />
+              </motion.button>
             </div>
-            <motion.button
-              onClick={() => navigateToMenu()}
-              whileHover={{ x: 5 }}
-              className="flex items-center gap-2 text-fuchsia-600 font-bold hover:text-fuchsia-700 transition-colors"
-            >
-              View Full Menu <ArrowRight className="w-5 h-5" />
-            </motion.button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {/* Mobile: Horizontal Scroll, Desktop: Grid */}
+          <div className="lg:hidden overflow-x-auto mobile-scroll">
+            <div className="flex gap-3 pb-4 px-3 sm:px-4">
+            {featuredItems.map((item) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                className="flex-shrink-0 w-[280px]"
+              >
+                <GlowCard
+                  className="h-full overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group"
+                  glowIntensity="subtle"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={item.image_path || '/images/default-food.png'}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-bold text-gray-900 shadow-lg">
+                      ${Number(item.price).toFixed(2)}
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex flex-col">
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-1 flex-1">{item.name}</h3>
+                      <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold ml-2">
+                        <Star className="w-2.5 h-2.5 fill-current" /> 4.9
+                      </div>
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-2 mb-3">{item.description}</p>
+                    <button
+                      onClick={() => addToCartAndOpenModal(item)}
+                      className="w-full py-2 bg-fuchsia-600 text-white rounded-lg font-bold text-xs shadow-md hover:bg-fuchsia-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Plus className="w-3 h-3" /> Add to Order
+                    </button>
+                  </div>
+                </GlowCard>
+              </motion.div>
+            ))}
+            </div>
+          </div>
+
+          {/* Desktop: Grid Layout */}
+          <div className="hidden lg:block w-full max-w-screen-2xl mx-auto px-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
             {featuredItems.map((item) => (
               <motion.div
                 key={item.id}
@@ -397,11 +450,12 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                 </GlowCard>
               </motion.div>
             ))}
+            </div>
           </div>
         </section>
 
         {/* Categories Section */}
-        <section className="container mx-auto px-4">
+        <section className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -428,8 +482,9 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
               />
             </div>
 
-            {/* Categories Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
+            {/* Categories Grid - Horizontal scroll on mobile */}
+            <div className="overflow-x-auto mobile-scroll -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible">
+              <div className="flex md:grid md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4 xl:gap-5 pb-4 md:pb-0">
               {categories.map((category, idx) => (
                 <motion.div
                   key={category.id}
@@ -437,46 +492,48 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                   whileHover={{ y: -6, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigateToMenu(category.id)}
-                  className="group cursor-pointer"
+                  className="group cursor-pointer flex-shrink-0 w-[110px] md:w-auto"
                 >
-                  <div className="relative h-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 transition-all duration-300 hover:border-fuchsia-300 dark:hover:border-fuchsia-600 hover:shadow-lg hover:shadow-fuchsia-500/10 dark:hover:shadow-fuchsia-500/5">
+                  <div className="relative h-full rounded-xl lg:rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 lg:p-5 transition-all duration-300 hover:border-fuchsia-300 dark:hover:border-fuchsia-600 hover:shadow-lg hover:shadow-fuchsia-500/10 dark:hover:shadow-fuchsia-500/5">
                     {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-fuchsia-500/0 to-pink-500/0 group-hover:from-fuchsia-500/5 group-hover:to-pink-500/5 dark:group-hover:from-fuchsia-500/10 dark:group-hover:to-pink-500/10 transition-all duration-300" />
+                    <div className="absolute inset-0 rounded-xl lg:rounded-2xl bg-gradient-to-br from-fuchsia-500/0 to-pink-500/0 group-hover:from-fuchsia-500/5 group-hover:to-pink-500/5 dark:group-hover:from-fuchsia-500/10 dark:group-hover:to-pink-500/10 transition-all duration-300" />
 
                     {/* Content */}
                     <div className="relative flex flex-col items-center text-center">
                       {/* Icon Container */}
-                      <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30 border border-fuchsia-100 dark:border-fuchsia-800/50 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm">
-                        <span className="text-2xl md:text-3xl">{category.icon || '🍽️'}</span>
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg lg:rounded-xl bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30 border border-fuchsia-100 dark:border-fuchsia-800/50 flex items-center justify-center mb-2 lg:mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm">
+                        <span className="text-lg sm:text-xl lg:text-2xl xl:text-3xl">{category.icon || '🍽️'}</span>
                       </div>
 
                       {/* Category Name */}
-                      <h3 className="font-bold text-gray-900 dark:text-white text-sm md:text-base mb-1 line-clamp-1">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-[11px] sm:text-xs lg:text-sm xl:text-base mb-1 line-clamp-1">
                         {category.name}
                       </h3>
 
                       {/* Item Count */}
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                      <p className="text-[9px] sm:text-[10px] lg:text-xs text-gray-500 dark:text-gray-400 font-medium">
                         {category.count} {category.count === 1 ? 'item' : 'items'}
                       </p>
 
-                      {/* Arrow indicator on hover */}
-                      <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <ArrowRight className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400" />
+                      {/* Arrow indicator on hover - hide on mobile */}
+                      <div className="mt-1 lg:mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:block">
+                        <ArrowRight className="w-3 h-3 lg:w-4 lg:h-4 text-fuchsia-500 dark:text-fuchsia-400" />
                       </div>
                     </div>
                   </div>
                 </motion.div>
               ))}
+              </div>
             </div>
           </motion.div>
         </section>
 
-        <BrandDivider variant="wave" className="opacity-30" />
+        {/* Hide divider on mobile */}
+        <BrandDivider variant="wave" className="opacity-30 hidden md:block" />
 
-        {/* Brand Features */}
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Brand Features - Hide on mobile */}
+        <div className="w-full max-w-screen-2xl mx-auto px-4 hidden md:block">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 xl:gap-8">
             {features.map((feature, idx) => (
               <motion.div
                 key={idx}
@@ -506,42 +563,43 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
 
 
 
-        <BrandDivider variant="gradient" />
+        {/* Hide second divider on mobile */}
+        <BrandDivider variant="gradient" className="hidden md:block" />
 
         {/* CTA Section */}
-        <section className="container mx-auto px-4">
-          <div className="relative rounded-[2.5rem] overflow-hidden bg-gray-900 border border-gray-800 shadow-2xl">
+        <section className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4">
+          <div className="relative rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] overflow-hidden bg-gray-900 border border-gray-800 shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-900/80 to-purple-900/80 z-10" />
             <div className="absolute -right-20 -top-20 w-[600px] h-[600px] bg-fuchsia-600/30 rounded-full blur-3xl opacity-50 z-0 animate-pulse" />
 
             {/* Content */}
-            <div className="relative z-20 px-6 py-20 md:px-20 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="relative z-20 px-4 sm:px-6 md:px-12 lg:px-20 py-8 sm:py-12 md:py-16 lg:py-20 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
               <div className="max-w-2xl">
-                <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-                  Ready to taste <br /> something <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">amazing?</span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4 md:mb-6 leading-tight">
+                  Ready to taste <br className="hidden sm:block" /> something <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">amazing?</span>
                 </h2>
-                <p className="text-xl text-gray-300 mb-8">
+                <p className="text-base md:text-lg lg:text-xl text-gray-300 mb-6 md:mb-8">
                   Join thousands of happy customers and experience the best food delivery service in town.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <button
                     onClick={() => openModal('delivery')}
-                    className="px-8 py-4 bg-white text-fuchsia-900 rounded-2xl font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-fuchsia-900 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors shadow-lg"
                   >
                     Order Now
                   </button>
                   <button
                     onClick={() => navigateToMenu()}
-                    className="px-8 py-4 bg-transparent border border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-colors"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border border-white/30 text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:bg-white/10 transition-colors"
                   >
                     Browse Menu
                   </button>
                 </div>
               </div>
 
-              {/* Floating Food Image (Decorative) */}
+              {/* Floating Food Image (Decorative) - Hide on mobile and tablet */}
               <motion.div
-                className="hidden md:block w-80 h-80 relative"
+                className="hidden lg:block w-80 h-80 relative"
                 animate={{ y: [-15, 15, -15] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               >
