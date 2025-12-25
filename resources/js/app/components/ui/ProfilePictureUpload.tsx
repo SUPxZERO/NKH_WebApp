@@ -170,17 +170,19 @@ export default function ProfilePictureUpload({
                 )}
             </div>
 
-            <div className="absolute bottom-0 right-0 flex gap-1 mt-2">
+            {/* Action buttons - positioned at bottom-right corner of avatar */}
+            <div className="absolute -bottom-1 -right-1 w-full justify-around sm:bottom-0 sm:right-0 flex gap-1">
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading || isDeleting}
                     className={cn(
-                        'rounded-full bg-purple-600 text-white hover:bg-purple-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500',
-                        buttonSizes[size]
+                        'rounded-full bg-purple-600 text-white hover:bg-purple-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 w-6 h-6 sm:w-9 sm:h-9 flex items-center justify-center p-0',
+                        // buttonSizes[size] // Overriding size padding for custom sizes
                     )}
+                    aria-label="Upload profile picture"
                 >
-                    <Camera className={cn(iconSizes[size])} />
+                    <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
 
                 {showDelete && previewUrl && (
@@ -189,11 +191,12 @@ export default function ProfilePictureUpload({
                         onClick={handleDelete}
                         disabled={isUploading || isDeleting}
                         className={cn(
-                            'rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
-                            buttonSizes[size]
+                            'rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-6 h-6 sm:w-9 sm:h-9 flex items-center justify-center p-0',
+                            // buttonSizes[size] // Overriding size padding for custom sizes
                         )}
+                        aria-label="Delete profile picture"
                     >
-                        <Trash2 className={cn(iconSizes[size])} />
+                        <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>
                 )}
             </div>
