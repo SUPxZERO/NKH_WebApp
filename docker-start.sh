@@ -10,6 +10,15 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+# Create storage symbolic link for public disk
+echo "Creating storage symbolic link..."
+mkdir -p /var/www/storage/app/public
+php artisan storage:link || echo "Storage link may already exist"
+
+# Ensure storage permissions are correct
+chmod -R 775 /var/www/storage/app/public 2>/dev/null || true
+chown -R www-data:www-data /var/www/storage/app/public 2>/dev/null || true
+
 echo "Running pre-migration fixes..."
 if [ -f /var/www/database/pre-migrate.sql ]; then
     psql "${DATABASE_URL}" -f /var/www/database/pre-migrate.sql || echo "Pre-migration SQL failed, continuing..."

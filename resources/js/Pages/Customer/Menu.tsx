@@ -208,7 +208,6 @@ export default function Menu() {
                   </button>
                 )}
               </div>
-
               {/* Sort Dropdown - Larger */}
               <select
                 value={sortBy}
