@@ -22,7 +22,9 @@
       "Bash(npm install:*)",
       "Bash(tasklist:*)",
       "Bash(pkill:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(mkdir:*)",
+      "Bash(php -l:*)"
     ]
   }
 }

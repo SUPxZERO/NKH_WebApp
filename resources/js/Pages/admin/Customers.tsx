@@ -15,7 +15,7 @@ import { Customer, Location } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
 import Avatar from '@/app/components/ui/Avatar';
 
-// Enhanced Stats Card with Gradients
+// Enhanced Stats Card with Gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
   const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string }> = {
     purple: {
@@ -52,32 +52,34 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
       className={cn(
-        "relative overflow-hidden bg-card border rounded-2xl p-5",
-        "hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5",
+        "relative overflow-hidden bg-card border rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 min-w-[100px] sm:min-w-0",
+        "hover:shadow-lg transition-all duration-300",
         styles.border
       )}
     >
       <div className={cn("absolute inset-0 opacity-50", `bg-gradient-to-br ${styles.gradient}`)} />
-      <div className="relative z-10 flex items-center justify-between">
+      <div className="relative z-10 flex items-center justify-between gap-2">
         <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">{title}</p>
-          <p className={cn("text-3xl font-extrabold mt-1", styles.text)}>{value}</p>
+          <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold">{title}</p>
+          <p className={cn("text-lg sm:text-2xl md:text-3xl font-extrabold mt-0.5 sm:mt-1", styles.text)}>{value}</p>
         </div>
-        <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-lg", styles.iconBg)}>
-          <Icon className="w-6 h-6 text-white" />
+        <div className={cn("h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg flex-shrink-0", styles.iconBg)}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
         </div>
       </div>
     </motion.div>
   );
 };
 
-// Stats Ribbon
+// Stats Ribbon - Mobile optimized with horizontal scroll
 const CustomerStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <StatCard title="Total Customers" value={stats.total} icon={Users} color="purple" index={0} />
-    <StatCard title="Active" value={stats.active} icon={UserPlus} color="emerald" index={1} />
-    <StatCard title="VIP Members" value={stats.vip} icon={Crown} color="amber" index={2} />
-    <StatCard title="Total Points" value={stats.totalPoints.toLocaleString()} icon={Gift} color="blue" index={3} />
+  <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
+    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+      <StatCard title="Total" value={stats.total} icon={Users} color="purple" index={0} />
+      <StatCard title="Active" value={stats.active} icon={UserPlus} color="emerald" index={1} />
+      <StatCard title="VIP" value={stats.vip} icon={Crown} color="amber" index={2} />
+      <StatCard title="Points" value={stats.totalPoints.toLocaleString()} icon={Gift} color="blue" index={3} />
+    </div>
   </div>
 );
 
@@ -182,31 +184,31 @@ export default function Customers() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-background p-6 lg:p-8">
+      <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-hidden">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+          className="flex items-center justify-between gap-3 mb-4 sm:mb-6 md:mb-8"
         >
-          <div>
-            <h1 className="text-4xl font-extrabold tracking-tight">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight truncate">
               <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Customers
               </span>
             </h1>
-            <p className="text-muted-foreground mt-2 flex items-center gap-2">
-              <Users className="w-4 h-4 text-fuchsia-500" />
-              Manage your customer database and loyalty points
+            <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm hidden sm:flex items-center gap-2">
+              <Users className="w-3.5 h-3.5 text-fuchsia-500" />
+              Manage customers and loyalty
             </p>
           </div>
           <Button
             onClick={() => { resetForm(); setOpenCreate(true); }}
             variant="primary"
-            size="lg"
-            leftIcon={<Plus className="w-5 h-5" />}
+            className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0"
           >
-            Add Customer
+            <Plus className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Customer</span>
           </Button>
         </motion.div>
 
@@ -218,76 +220,74 @@ export default function Customers() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-card border border-border rounded-2xl p-5 mb-6 shadow-sm"
+          className="bg-card border border-border rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 mb-4 sm:mb-6 shadow-sm"
         >
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+          <div className="flex gap-2 sm:gap-4">
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search customers by name, email, phone..."
+                placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-12 pl-12 pr-4 bg-secondary/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full h-10 pl-9 pr-3 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
-            <div className="flex gap-1 p-1 bg-secondary/50 rounded-xl">
+            <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg">
               {['all', 'active', 'inactive'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={cn(
-                    "px-5 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap",
+                    "px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-semibold transition-all whitespace-nowrap",
                     statusFilter === status
-                      ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
+                      ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg"
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   )}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === 'all' ? 'All' : status === 'active' ? 'On' : 'Off'}
                 </button>
               ))}
             </div>
           </div>
         </motion.div>
 
-        {/* Bulk Actions */}
+        {/* Bulk Actions - Mobile optimized */}
         <AnimatePresence>
           {selectedCustomers.size > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-2xl p-5 mb-6 shadow-xl shadow-fuchsia-500/20"
+              className="bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-xl"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-bold text-lg">{selectedCustomers.size} customer{selectedCustomers.size === 1 ? '' : 's'} selected</p>
-                    <p className="text-white/70 text-sm">Ready for bulk actions</p>
+                    <p className="text-white font-bold text-sm sm:text-lg">{selectedCustomers.size} selected</p>
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <Button size="md" onClick={() => setSelectedCustomers(new Set())} className="bg-white/20 text-white hover:bg-white/30 border-0">
-                    <X className="w-4 h-4 mr-2" /> Clear Selection
-                  </Button>
-                </div>
+                <Button size="sm" onClick={() => setSelectedCustomers(new Set())} className="bg-white/20 text-white hover:bg-white/30 border-0 h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm">
+                  <X className="w-3.5 h-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Clear</span>
+                </Button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Table */}
+        {/* Desktop Table - Hidden on mobile */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm"
+          className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-sm"
         >
-          {/* Table Header - Hidden on mobile */}
-          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
             <div className="col-span-1 flex items-center">
               <input
                 type="checkbox"
@@ -310,7 +310,7 @@ export default function Customers() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
                   <div className="w-8 h-8 border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-muted-foreground font-medium">Loading customers...</p>
+                <p className="text-muted-foreground font-medium">Loading...</p>
               </div>
             ) : customerList.length === 0 ? (
               <div className="p-16 text-center">
@@ -318,7 +318,7 @@ export default function Customers() {
                   <Users className="w-10 h-10 text-muted-foreground" />
                 </div>
                 <h3 className="text-foreground font-bold text-lg mb-1">No customers found</h3>
-                <p className="text-muted-foreground text-sm">Try adjusting your search or add a new customer</p>
+                <p className="text-muted-foreground text-sm">Try adjusting search</p>
               </div>
             ) : (
               customerList.map((customer, index) => (
@@ -328,51 +328,37 @@ export default function Customers() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.02 }}
                   className={cn(
-                    "grid grid-cols-1 md:grid-cols-12 gap-4 px-4 md:px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
+                    "grid grid-cols-12 gap-4 px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
                     "hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent",
                     selectedCustomers.has(customer.id) && "bg-primary/5 border-l-2 border-l-primary"
                   )}
                 >
-                  {/* Checkbox - Hidden on mobile */}
-                  <div className="hidden md:block col-span-1" onClick={(e) => e.stopPropagation()}>
+                  <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedCustomers.has(customer.id)}
                       onChange={() => toggleSelectCustomer(customer.id)}
-                      className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all hover:border-primary/50"
+                      className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
                     />
                   </div>
-
-                  {/* Customer Info - Full width on mobile */}
-                  <div className="col-span-1 md:col-span-3 flex items-center gap-3">
-                    <Avatar
-                      src={customer.user?.avatar}
-                      name={customer.user?.name}
-                      size="md"
-                      fallbackColor="rose"
-                    />
+                  <div className="col-span-3 flex items-center gap-3">
+                    <Avatar src={customer.user?.avatar} name={customer.user?.name} size="md" fallbackColor="rose" />
                     <div className="min-w-0">
-                      <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors flex items-center gap-2">
+                      <div className="font-bold text-foreground truncate flex items-center gap-2">
                         {customer.user?.name || 'Unknown'}
-                        {(customer.points_balance || 0) > 1000 && (
-                          <Crown className="w-4 h-4 text-amber-500" />
-                        )}
+                        {(customer.points_balance || 0) > 1000 && <Crown className="w-4 h-4 text-amber-500" />}
                       </div>
-                      <div className="mt-1">
-                        <span className={cn(
-                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border",
-                          customer.user?.is_active
-                            ? "bg-gradient-to-r from-emerald-500/20 to-green-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
-                            : "bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-600 dark:text-red-400 border-red-500/30"
-                        )}>
-                          {customer.user?.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
+                      <span className={cn(
+                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                        customer.user?.is_active
+                          ? "bg-emerald-500/20 text-emerald-600 border-emerald-500/30"
+                          : "bg-red-500/20 text-red-600 border-red-500/30"
+                      )}>
+                        {customer.user?.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Contact - Hidden on mobile */}
-                  <div className="hidden md:block col-span-2">
+                  <div className="col-span-2">
                     <div className="text-sm text-foreground truncate flex items-center gap-2">
                       <Mail className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                       <span className="truncate">{customer.user?.email || 'N/A'}</span>
@@ -384,17 +370,13 @@ export default function Customers() {
                       </div>
                     )}
                   </div>
-
-                  {/* Location - Hidden on mobile */}
-                  <div className="hidden md:block col-span-2">
+                  <div className="col-span-2">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
                       <MapPin className="w-3.5 h-3.5" />
                       {customer.preferred_location?.name || 'None'}
                     </span>
                   </div>
-
-                  {/* Points - Hidden on mobile */}
-                  <div className="hidden md:block col-span-2">
+                  <div className="col-span-2">
                     <div className="flex items-center gap-2">
                       <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30">
                         <Gift className="w-4 h-4 text-amber-500" />
@@ -407,25 +389,11 @@ export default function Customers() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Actions - Always visible */}
-                  <div className="col-span-1 md:col-span-2 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleEdit(customer)}
-                      className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                      title="Edit"
-                    >
+                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <Button size="sm" variant="secondary" onClick={() => handleEdit(customer)} className="h-9 w-9 p-0">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={() => handleDelete(customer.id)}
-                      className="h-9 w-9 p-0"
-                      title="Deactivate"
-                    >
+                    <Button size="sm" variant="danger" onClick={() => handleDelete(customer.id)} className="h-9 w-9 p-0">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -433,88 +401,115 @@ export default function Customers() {
               ))
             )}
           </div>
+        </motion.div>
 
-          {/* Pagination */}
-          {customers?.meta && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 border-t border-border bg-gradient-to-r from-secondary/30 to-transparent">
-              <div className="flex items-center gap-3">
-                <div className="h-9 px-4 rounded-lg bg-secondary border border-border flex items-center gap-2">
-                  <Users className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">{customers.meta.total}</span>
-                  <span className="text-sm text-muted-foreground">customers</span>
+        {/* Mobile Cards - Hidden on desktop */}
+        <div className="md:hidden space-y-2">
+          {isLoading ? (
+            <div className="p-6 text-center text-muted-foreground text-sm">
+              <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              Loading...
+            </div>
+          ) : customerList.length === 0 ? (
+            <div className="p-8 text-center bg-card rounded-xl border border-border">
+              <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground text-sm">No customers found</p>
+            </div>
+          ) : (
+            customerList.map((customer, index) => (
+              <motion.div
+                key={customer.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.02 }}
+                className="bg-card border border-border rounded-xl p-3 backdrop-blur-sm"
+              >
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Avatar src={customer.user?.avatar} name={customer.user?.name} size="sm" fallbackColor="rose" />
+                    <div className="min-w-0">
+                      <div className="font-semibold text-foreground text-sm truncate flex items-center gap-1">
+                        {customer.user?.name || 'Unknown'}
+                        {(customer.points_balance || 0) > 1000 && <Crown className="w-3 h-3 text-amber-500" />}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground truncate">{customer.user?.email}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 flex-shrink-0">
+                    <Button size="sm" variant="secondary" onClick={() => handleEdit(customer)} className="h-8 w-8 p-0">
+                      <Edit className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={() => handleDelete(customer.id)} className="h-8 w-8 p-0">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-foreground">{Math.min(page * perPage, customers.meta.total)}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={page === 1}
-                  onClick={() => setPage(p => p - 1)}
-                  className="h-10 px-4 gap-2"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline">Previous</span>
-                </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, customers.meta.last_page) }, (_, i) => {
-                    let pageNum;
-                    if (customers.meta.last_page <= 5) {
-                      pageNum = i + 1;
-                    } else if (page <= 3) {
-                      pageNum = i + 1;
-                    } else if (page >= customers.meta.last_page - 2) {
-                      pageNum = customers.meta.last_page - 4 + i;
-                    } else {
-                      pageNum = page - 2 + i;
-                    }
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
-                        className={cn(
-                          "hidden sm:block h-10 w-10 rounded-xl text-sm font-semibold transition-all",
-                          page === pageNum
-                            ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
-                            : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover hover:text-foreground"
-                        )}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                  {/* Mobile page indicator */}
-                  <span className="sm:hidden text-sm font-medium text-foreground px-3 py-2 rounded-xl bg-secondary border border-border">
-                    {page} / {customers.meta.last_page}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-[10px] font-semibold",
+                    customer.user?.is_active ? "bg-emerald-500/20 text-emerald-600" : "bg-red-500/20 text-red-600"
+                  )}>
+                    {customer.user?.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-500/20 text-amber-600 flex items-center gap-1">
+                    <Gift className="w-2.5 h-2.5" />
+                    {(customer.points_balance || 0).toLocaleString()}
                   </span>
                 </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={page === customers.meta.last_page}
-                  onClick={() => setPage(p => p + 1)}
-                  className="h-10 px-4 gap-2"
-                >
-                  <span className="hidden sm:inline">Next</span>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+              </motion.div>
+            ))
+          )}
+        </div>
+
+        {/* Pagination - Mobile optimized */}
+        {customers?.meta && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 md:p-5 border-t border-border bg-gradient-to-r from-secondary/30 to-transparent">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 sm:h-9 px-2 sm:px-4 rounded-lg bg-secondary border border-border flex items-center gap-1.5 sm:gap-2">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                <span className="text-xs sm:text-sm font-medium text-foreground">{customers.meta.total}</span>
+              </div>
+              <div className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                {((page - 1) * perPage) + 1}-{Math.min(page * perPage, customers.meta.total)}
               </div>
             </div>
-          )}
-        </motion.div>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+                className="h-8 sm:h-10 w-8 sm:w-auto p-0 sm:px-3"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              {/* Mobile page indicator */}
+              <span className="text-xs sm:text-sm font-medium text-foreground px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-secondary border border-border">
+                {page}/{customers.meta.last_page}
+              </span>
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={page === customers.meta.last_page}
+                onClick={() => setPage(p => p + 1)}
+                className="h-8 sm:h-10 w-8 sm:w-auto p-0 sm:px-3"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Create/Edit Modal */}
-      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCustomer ? 'Edit Customer' : 'New Customer'} size="lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+      {/* Create/Edit Modal - Mobile optimized */}
+      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCustomer ? 'Edit' : 'New Customer'} size="lg">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-10 text-sm" />
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">Gender</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Gender</label>
               <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="w-full h-11 bg-secondary/50 border border-border rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                className="w-full h-10 bg-secondary/50 border border-border rounded-lg px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
                 <option value="">Select</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -523,25 +518,25 @@ export default function Customers() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
-            <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required className="h-10 text-sm" />
+            <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-10 text-sm" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input label={editingCustomer ? "Password (optional)" : "Password"} type="password" value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })} required={!editingCustomer} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Input label={editingCustomer ? "Password" : "Password"} type="password" value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })} required={!editingCustomer} className="h-10 text-sm" />
             <Input label="Birth Date" type="date" value={formData.birth_date}
-              onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })} />
+              onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })} className="h-10 text-sm" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Points Balance" type="number" value={formData.points_balance}
-              onChange={(e) => setFormData({ ...formData, points_balance: parseInt(e.target.value) || 0 })} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Input label="Points" type="number" value={formData.points_balance}
+              onChange={(e) => setFormData({ ...formData, points_balance: parseInt(e.target.value) || 0 })} className="h-10 text-sm" />
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">Preferred Location</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Location</label>
               <select value={formData.preferred_location_id} onChange={(e) => setFormData({ ...formData, preferred_location_id: e.target.value })}
-                className="w-full h-11 bg-secondary/50 border border-border rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                className="w-full h-10 bg-secondary/50 border border-border rounded-lg px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
                 <option value="">Select</option>
                 {(locations as any)?.data?.map((loc: Location) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
@@ -550,27 +545,27 @@ export default function Customers() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">Notes</label>
-            <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={3}
-              className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" />
+          <div className="hidden sm:block">
+            <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Notes</label>
+            <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2}
+              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
           </div>
 
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             <input type="checkbox" id="is_active" checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" />
-            <label htmlFor="is_active" className="text-sm font-medium text-foreground cursor-pointer">Active</label>
+              className="w-4 h-4 sm:w-5 sm:h-5 rounded border-2 border-border bg-card cursor-pointer" />
+            <label htmlFor="is_active" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Active</label>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1">
-              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingCustomer ? 'Update' : 'Create')}
+          <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 h-10 sm:h-11 text-sm">
+              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingCustomer ? 'Save' : 'Create')}
             </Button>
           </div>
         </form>
       </Modal>
-    </AdminLayout>
+    </AdminLayout >
   );
 }

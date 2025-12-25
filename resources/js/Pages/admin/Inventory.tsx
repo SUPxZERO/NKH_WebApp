@@ -14,50 +14,52 @@ import { apiGet, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// Stats Ribbon with Dark/Light Mode Support
+// Stats Ribbon with Dark/Light Mode Support - Mobile optimized
 const InventoryStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Value</p>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">${Number(stats.totalValue).toFixed(2)}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-          <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-        </div>
-      </div>
-    </div>
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Low Stock</p>
-          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{stats.lowStock}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
-          <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+  <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
+    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+      <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm shadow-sm min-w-[110px] sm:min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs uppercase tracking-wider font-medium">Value</p>
+            <p className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 sm:mt-1">${Number(stats.totalValue).toFixed(0)}</p>
+          </div>
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+            <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
+          </div>
         </div>
       </div>
-    </div>
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Expiring Soon</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{stats.expiringSoon}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
-          <Clock className="w-6 h-6 text-red-600 dark:text-red-400" />
+      <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm shadow-sm min-w-[110px] sm:min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs uppercase tracking-wider font-medium">Low</p>
+            <p className="text-lg sm:text-2xl font-bold text-amber-600 dark:text-amber-400 mt-0.5 sm:mt-1">{stats.lowStock}</p>
+          </div>
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" />
+          </div>
         </div>
       </div>
-    </div>
-    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-medium">Total Items</p>
-          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.totalItems}</p>
+      <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm shadow-sm min-w-[110px] sm:min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs uppercase tracking-wider font-medium">Expiring</p>
+            <p className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400 mt-0.5 sm:mt-1">{stats.expiringSoon}</p>
+          </div>
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-red-600 dark:text-red-400" />
+          </div>
         </div>
-        <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
-          <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+      </div>
+      <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm shadow-sm min-w-[110px] sm:min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs uppercase tracking-wider font-medium">Items</p>
+            <p className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-0.5 sm:mt-1">{stats.totalItems}</p>
+          </div>
+          <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+            <Package className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
+          </div>
         </div>
       </div>
     </div>
@@ -134,18 +136,18 @@ export default function Inventory() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-6 transition-colors">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Inventory</h1>
-            <p className="text-gray-600 dark:text-slate-400 mt-1">Stock tracking and management</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-3 sm:p-4 md:p-6 transition-colors overflow-x-hidden">
+        <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6 md:mb-8">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight truncate">Inventory</h1>
+            <p className="text-gray-600 dark:text-slate-400 text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Stock tracking</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => setOpenTransfer(true)} className="bg-blue-600 hover:bg-blue-700">
-              <ArrowRightLeft className="w-4 h-4 mr-2" /> Transfer
+            <Button onClick={() => setOpenTransfer(true)} className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm">
+              <ArrowRightLeft className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Transfer</span>
             </Button>
-            <Button onClick={() => setOpenWastage(true)} className="bg-red-600 hover:bg-red-700">
-              <Trash2 className="w-4 h-4 mr-2" /> Wastage
+            <Button onClick={() => setOpenWastage(true)} className="bg-red-600 hover:bg-red-700 h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm">
+              <Trash2 className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Wastage</span>
             </Button>
           </div>
         </div>
@@ -153,24 +155,25 @@ export default function Inventory() {
         <InventoryStatsRibbon stats={stats} />
 
         {/* Filters */}
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 mb-6 backdrop-blur-sm shadow-sm">
-          <div className="flex flex-wrap gap-4">
-            <div className="relative flex-1 min-w-[200px]">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm shadow-sm">
+          <div className="flex gap-2 sm:gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search inventory..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
+              <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 sm:pl-10 h-10 text-sm bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500" />
             </div>
             <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}
-              className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:border-purple-500 outline-none">
-              <option value="all">All Locations</option>
+              className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-gray-900 dark:text-white focus:border-purple-500 outline-none">
+              <option value="all">Location</option>
               {locations?.data?.map((loc: any) => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
             </select>
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-xl overflow-hidden backdrop-blur-sm shadow-sm">
+          {/* Table Header - Desktop only */}
+          <div className="hidden lg:grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
             <div className="col-span-3">Item Name</div>
             <div className="col-span-2">Location</div>
             <div className="col-span-2">Stock Level</div>
@@ -180,45 +183,82 @@ export default function Inventory() {
           </div>
           <div className="divide-y divide-gray-100 dark:divide-white/5">
             {isLoading ? (
-              <div className="p-8 text-center text-gray-500">Loading...</div>
+              <div className="p-8 sm:p-12 text-center text-gray-500 text-sm">Loading...</div>
             ) : inventoryList.length === 0 ? (
-              <div className="p-12 text-center">
-                <Package className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">No inventory items found</p>
+              <div className="p-8 sm:p-12 text-center">
+                <Package className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3 sm:mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No inventory items found</p>
               </div>
             ) : inventoryList.map((item: InventoryItem) => (
               <motion.div key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                <div className="col-span-3">
-                  <div className="font-medium text-gray-900 dark:text-white">{item.ingredient.name}</div>
-                  <div className="text-xs text-gray-500">{item.ingredient.code} • {item.ingredient.category}</div>
+                className="p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                {/* Mobile Card Layout */}
+                <div className="lg:hidden">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-gray-900 dark:text-white text-sm truncate">{item.ingredient.name}</div>
+                      <div className="text-[10px] text-gray-500 mt-0.5">{item.ingredient.code} • {item.ingredient.category}</div>
+                    </div>
+                    <button onClick={() => { setSelectedItem(item); setOpenMovements(true); }}
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 hover:text-gray-700 flex-shrink-0">
+                      <History size={16} />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <Badge className="bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 flex items-center gap-1 text-xs px-2 py-0.5">
+                      <MapPin size={10} /> {item.location.name}
+                    </Badge>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white">{Number(item.quantity).toFixed(2)} <span className="text-gray-400 text-xs font-normal">{item.ingredient.unit?.code}</span></span>
+                    <span className="text-xs text-gray-500">${(item.quantity * item.ingredient.cost_per_unit).toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    {item.batch_number && <span className="font-mono">{item.batch_number}</span>}
+                    {item.expiration_date && (
+                      <span className={cn(
+                        "flex items-center gap-0.5",
+                        isExpired(item.expiration_date) ? "text-red-600 dark:text-red-400 font-bold" :
+                          isExpiringSoon(item.expiration_date) ? "text-amber-600 dark:text-amber-400 font-medium" : ""
+                      )}>
+                        {new Date(item.expiration_date).toLocaleDateString()}
+                        {isExpired(item.expiration_date) && <AlertTriangle size={10} />}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="col-span-2">
-                  <Badge className="bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 flex items-center gap-1 w-fit">
-                    <MapPin size={10} /> {item.location.name}
-                  </Badge>
-                </div>
-                <div className="col-span-2">
-                  <div className="text-gray-900 dark:text-white font-bold">{Number(item.quantity).toFixed(3)} <span className="text-gray-400 text-xs font-normal">{item.ingredient.unit?.code}</span></div>
-                  <div className="text-gray-500 text-xs">${(item.quantity * item.ingredient.cost_per_unit).toFixed(2)} value</div>
-                </div>
-                <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300 font-mono">
-                  {item.batch_number || '-'}
-                </div>
-                <div className="col-span-2 text-sm">
-                  {item.expiration_date ? (
-                    <span className={cn(
-                      "flex items-center gap-1",
-                      isExpired(item.expiration_date) ? "text-red-600 dark:text-red-400 font-bold" :
-                        isExpiringSoon(item.expiration_date) ? "text-amber-600 dark:text-amber-400 font-medium" : "text-gray-600 dark:text-gray-300"
-                    )}>
-                      {new Date(item.expiration_date).toLocaleDateString()}
-                      {isExpired(item.expiration_date) && <AlertTriangle size={12} />}
-                    </span>
-                  ) : <span className="text-gray-500">-</span>}
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  <Button size="sm" variant="secondary" onClick={() => { setSelectedItem(item); setOpenMovements(true); }} className="h-8 w-8 p-0"><History size={14} /></Button>
+
+                {/* Desktop Grid Layout */}
+                <div className="hidden lg:grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-3">
+                    <div className="font-medium text-gray-900 dark:text-white">{item.ingredient.name}</div>
+                    <div className="text-xs text-gray-500">{item.ingredient.code} • {item.ingredient.category}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <Badge className="bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 flex items-center gap-1 w-fit">
+                      <MapPin size={10} /> {item.location.name}
+                    </Badge>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-gray-900 dark:text-white font-bold">{Number(item.quantity).toFixed(3)} <span className="text-gray-400 text-xs font-normal">{item.ingredient.unit?.code}</span></div>
+                    <div className="text-gray-500 text-xs">${(item.quantity * item.ingredient.cost_per_unit).toFixed(2)} value</div>
+                  </div>
+                  <div className="col-span-2 text-sm text-gray-600 dark:text-gray-300 font-mono">
+                    {item.batch_number || '-'}
+                  </div>
+                  <div className="col-span-2 text-sm">
+                    {item.expiration_date ? (
+                      <span className={cn(
+                        "flex items-center gap-1",
+                        isExpired(item.expiration_date) ? "text-red-600 dark:text-red-400 font-bold" :
+                          isExpiringSoon(item.expiration_date) ? "text-amber-600 dark:text-amber-400 font-medium" : "text-gray-600 dark:text-gray-300"
+                      )}>
+                        {new Date(item.expiration_date).toLocaleDateString()}
+                        {isExpired(item.expiration_date) && <AlertTriangle size={12} />}
+                      </span>
+                    ) : <span className="text-gray-500">-</span>}
+                  </div>
+                  <div className="col-span-1 flex justify-end">
+                    <Button size="sm" variant="secondary" onClick={() => { setSelectedItem(item); setOpenMovements(true); }} className="h-8 w-8 p-0"><History size={14} /></Button>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -248,19 +288,19 @@ function TransferForm({ locations, onClose, onSubmit }: any) {
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSubmit(formData); };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label className="text-gray-700 dark:text-gray-300 text-sm mb-1 block">From Location</label>
-          <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 text-gray-900 dark:text-white"
+          <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">From</label>
+          <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
             value={formData.from_location_id} onChange={e => setFormData({ ...formData, from_location_id: e.target.value })}>
             <option value="">Select Location</option>
             {locations?.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-gray-700 dark:text-gray-300 text-sm mb-1 block">To Location</label>
-          <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 text-gray-900 dark:text-white"
+          <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">To</label>
+          <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
             value={formData.to_location_id} onChange={e => setFormData({ ...formData, to_location_id: e.target.value })}>
             <option value="">Select Location</option>
             {locations?.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
@@ -268,18 +308,18 @@ function TransferForm({ locations, onClose, onSubmit }: any) {
         </div>
       </div>
       <div>
-        <label className="text-gray-700 dark:text-gray-300 text-sm mb-1 block">Ingredient</label>
-        <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 text-gray-900 dark:text-white"
+        <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">Ingredient</label>
+        <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
           value={formData.ingredient_id} onChange={e => setFormData({ ...formData, ingredient_id: e.target.value })}>
           <option value="">Select Ingredient</option>
-          {ingredients?.data?.map((i: any) => <option key={i.id} value={i.id}>{i.name} ({i.code})</option>)}
+          {ingredients?.data?.map((i: any) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
       </div>
-      <Input label="Quantity" type="number" step="0.001" required value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} />
-      <Input label="Notes" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
-      <div className="flex gap-3 pt-2">
-        <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
-        <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">Transfer</Button>
+      <Input label="Quantity" type="number" step="0.001" required value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} className="h-10 text-sm" />
+      <Input label="Notes" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} className="h-10 text-sm" />
+      <div className="flex gap-2 sm:gap-3 pt-2">
+        <Button type="button" variant="secondary" onClick={onClose} className="flex-1 h-9 sm:h-10 text-sm">Cancel</Button>
+        <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-sm">Transfer</Button>
       </div>
     </form>
   );
@@ -292,28 +332,28 @@ function WastageForm({ locations, onClose, onSubmit }: any) {
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSubmit(formData); };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
       <div>
-        <label className="text-gray-700 dark:text-gray-300 text-sm mb-1 block">Location</label>
-        <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 text-gray-900 dark:text-white"
+        <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">Location</label>
+        <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
           value={formData.location_id} onChange={e => setFormData({ ...formData, location_id: e.target.value })}>
           <option value="">Select Location</option>
           {locations?.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
       </div>
       <div>
-        <label className="text-gray-700 dark:text-gray-300 text-sm mb-1 block">Ingredient</label>
-        <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 text-gray-900 dark:text-white"
+        <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">Ingredient</label>
+        <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
           value={formData.ingredient_id} onChange={e => setFormData({ ...formData, ingredient_id: e.target.value })}>
           <option value="">Select Ingredient</option>
-          {ingredients?.data?.map((i: any) => <option key={i.id} value={i.id}>{i.name} ({i.code})</option>)}
+          {ingredients?.data?.map((i: any) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Input label="Quantity" type="number" step="0.001" required value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <Input label="Quantity" type="number" step="0.001" required value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} className="h-10 text-sm" />
         <div>
-          <label className="text-gray-700 dark:text-gray-300 text-sm mb-1 block">Reason</label>
-          <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 text-gray-900 dark:text-white"
+          <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">Reason</label>
+          <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
             value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })}>
             <option value="expired">Expired</option>
             <option value="damaged">Damaged</option>
@@ -322,10 +362,10 @@ function WastageForm({ locations, onClose, onSubmit }: any) {
           </select>
         </div>
       </div>
-      <Input label="Notes" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
-      <div className="flex gap-3 pt-2">
-        <Button type="button" variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
-        <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-700">Record Wastage</Button>
+      <Input label="Notes" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} className="h-10 text-sm" />
+      <div className="flex gap-2 sm:gap-3 pt-2">
+        <Button type="button" variant="secondary" onClick={onClose} className="flex-1 h-9 sm:h-10 text-sm">Cancel</Button>
+        <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-700 h-9 sm:h-10 text-sm">Record</Button>
       </div>
     </form>
   );

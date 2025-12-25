@@ -14,7 +14,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// StatCard Component with vibrant gradients
+// StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
     const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
         purple: {
@@ -54,23 +54,23 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-                "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+                "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm",
                 `bg-gradient-to-br ${styles.gradient}`,
                 styles.border,
                 `shadow-lg ${styles.shadow}`
             )}
         >
-            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+            <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8 hidden sm:block">
                 <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
             </div>
-            <div className="relative p-5">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-                        <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
+            <div className="relative p-3 sm:p-4 md:p-5">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                        <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1 truncate">{title}</p>
+                        <p className={cn("text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold", styles.text)}>{value}</p>
                     </div>
-                    <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-                        <Icon className="w-6 h-6 text-white" />
+                    <div className={cn("p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </div>
             </div>
@@ -78,29 +78,30 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
     );
 };
 
-// Stats Ribbon
+// Stats Ribbon - Mobile optimized
 const LocationStatsRibbon = ({ stats }: { stats: any }) => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Locations" value={stats.total} icon={Building2} color="purple" index={0} />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+        <StatCard title="Locations" value={stats.total} icon={Building2} color="purple" index={0} />
         <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-        <StatCard title="Online Orders" value={stats.online} icon={Globe} color="blue" index={2} />
+        <StatCard title="Online" value={stats.online} icon={Globe} color="blue" index={2} />
         <StatCard title="Delivery" value={stats.delivery} icon={Truck} color="amber" index={3} />
     </div>
 );
 
+// LocationCard - Mobile optimized
 const LocationCard = ({ loc, onEdit, onDelete }: { loc: any, onEdit: (loc: any) => void, onDelete: (id: number) => void }) => (
     <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card/50 border border-border/50 rounded-2xl p-4 backdrop-blur-sm shadow-lg"
+        className="bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm shadow-lg"
     >
-        <div className="flex justify-between items-start mb-3">
-            <div>
-                <h3 className="font-bold text-foreground">{loc.name}</h3>
-                <p className="text-xs text-muted-foreground font-mono mt-0.5">{loc.code}</p>
+        <div className="flex justify-between items-start gap-2 mb-2 sm:mb-3">
+            <div className="min-w-0">
+                <h3 className="font-bold text-sm sm:text-base text-foreground truncate">{loc.name}</h3>
+                <p className="text-[10px] sm:text-xs text-muted-foreground font-mono mt-0.5">{loc.code}</p>
             </div>
             <span className={cn(
-                "px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1",
+                "px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold inline-flex items-center gap-1 flex-shrink-0",
                 loc.is_active
                     ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                     : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
@@ -110,28 +111,28 @@ const LocationCard = ({ loc, onEdit, onDelete }: { loc: any, onEdit: (loc: any) 
             </span>
         </div>
 
-        <div className="space-y-2 mb-4">
-            <div className="flex items-center text-sm text-foreground">
-                <MapPin className="w-4 h-4 mr-2 text-fuchsia-500" />
-                {loc.city || 'N/A'}
+        <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+            <div className="flex items-center text-xs sm:text-sm text-foreground">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 text-fuchsia-500 flex-shrink-0" />
+                <span className="truncate">{loc.city || 'N/A'}</span>
             </div>
             {loc.phone && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                    <Phone className="w-4 h-4 mr-2 text-fuchsia-500" />
-                    {loc.phone}
+                <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+                    <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 text-fuchsia-500 flex-shrink-0" />
+                    <span className="truncate">{loc.phone}</span>
                 </div>
             )}
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-border/50">
-            <div className="flex gap-2">
-                {loc.accepts_online_orders && <div title="Online" className="p-1.5 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg text-blue-600 dark:text-blue-400 border border-blue-500/30"><Globe size={14} /></div>}
-                {loc.accepts_pickup && <div title="Pickup" className="p-1.5 bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 rounded-lg text-fuchsia-600 dark:text-fuchsia-400 border border-fuchsia-500/30"><ShoppingBag size={14} /></div>}
-                {loc.accepts_delivery && <div title="Delivery" className="p-1.5 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/30"><Truck size={14} /></div>}
+        <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-border/50">
+            <div className="flex gap-1.5 sm:gap-2">
+                {loc.accepts_online_orders && <div title="Online" className="p-1 sm:p-1.5 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg text-blue-600 dark:text-blue-400 border border-blue-500/30"><Globe size={12} className="sm:w-3.5 sm:h-3.5" /></div>}
+                {loc.accepts_pickup && <div title="Pickup" className="p-1 sm:p-1.5 bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 rounded-lg text-fuchsia-600 dark:text-fuchsia-400 border border-fuchsia-500/30"><ShoppingBag size={12} className="sm:w-3.5 sm:h-3.5" /></div>}
+                {loc.accepts_delivery && <div title="Delivery" className="p-1 sm:p-1.5 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg text-amber-600 dark:text-amber-400 border border-amber-500/30"><Truck size={12} className="sm:w-3.5 sm:h-3.5" /></div>}
             </div>
-            <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => onEdit(loc)} className="h-8 w-8 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"><Edit size={14} /></Button>
-                <Button size="sm" variant="ghost" onClick={() => onDelete(loc.id)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-500"><Trash2 size={14} /></Button>
+            <div className="flex gap-1 sm:gap-2">
+                <Button size="sm" variant="ghost" onClick={() => onEdit(loc)} className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"><Edit size={14} /></Button>
+                <Button size="sm" variant="ghost" onClick={() => onDelete(loc.id)} className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-red-500/20 hover:text-red-500"><Trash2 size={14} /></Button>
             </div>
         </div>
     </motion.div>
@@ -236,28 +237,29 @@ export default function Locations() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-background p-6">
-                {/* Decorative Background Elements */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 overflow-x-hidden">
+                {/* Decorative Background Elements - Hidden on mobile */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
                     <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
                     <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
                 </div>
 
                 {/* Header */}
-                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                    <div>
+                <div className="relative flex items-center justify-between gap-3 mb-4 sm:mb-6 md:mb-8">
+                    <div className="min-w-0">
                         <motion.h1
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent"
+                            className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent truncate"
                         >
                             Locations
                         </motion.h1>
-                        <p className="text-muted-foreground mt-1">Manage restaurant branches</p>
+                        <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Manage restaurant branches</p>
                     </div>
-                    <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary">
-                        <Plus className="w-4 h-4 mr-2" /> Add Location
+                    <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
+                        <Plus className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Add Location</span>
                     </Button>
                 </div>
 
@@ -268,17 +270,17 @@ export default function Locations() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="relative bg-card/50 border border-border/50 rounded-2xl p-4 mb-6 backdrop-blur-sm shadow-lg"
+                    className="relative bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm shadow-lg"
                 >
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1 min-w-[200px]">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                        <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input placeholder="Search locations..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10" variant="filled" />
+                            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                className="pl-10 h-10 text-sm" variant="filled" />
                         </div>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-3 sm:mx-0 px-3 sm:px-0">
                             {[
-                                { key: 'all', label: 'All Status' },
+                                { key: 'all', label: 'All' },
                                 { key: 'active', label: 'Active' },
                                 { key: 'inactive', label: 'Inactive' }
                             ].map(({ key, label }) => (
@@ -286,7 +288,7 @@ export default function Locations() {
                                     key={key}
                                     onClick={() => setStatusFilter(key)}
                                     className={cn(
-                                        "px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
+                                        "px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0",
                                         statusFilter === key
                                             ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/30"
                                             : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
@@ -304,7 +306,7 @@ export default function Locations() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="hidden md:block relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+                    className="hidden lg:block relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                 >
                     {/* Table Header with Gradient */}
                     <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
@@ -371,8 +373,8 @@ export default function Locations() {
                     </div>
                 </motion.div>
 
-                {/* Mobile Cards */}
-                <div className="md:hidden space-y-4">
+                {/* Mobile/Tablet Cards */}
+                <div className="lg:hidden space-y-3 sm:space-y-4">
                     {isLoading ? (
                         <div className="p-12 text-center">
                             <div className="inline-flex items-center gap-3 text-muted-foreground">
@@ -395,44 +397,51 @@ export default function Locations() {
                     )}
                 </div>
 
-                {/* Pagination */}
+                {/* Pagination - Mobile optimized */}
                 {locations?.meta && (
-                    <div className="flex items-center justify-between p-4 mt-6 bg-card/50 border border-border/50 rounded-2xl backdrop-blur-sm">
-                        <div className="text-sm text-muted-foreground">
-                            Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to{' '}
-                            <span className="font-semibold text-foreground">{Math.min(page * perPage, locations.meta.total)}</span> of{' '}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 mt-4 sm:mt-6 bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl backdrop-blur-sm">
+                        <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+                            <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span>-<span className="font-semibold text-foreground">{Math.min(page * perPage, locations.meta.total)}</span>
+                            <span className="mx-1">of</span>
                             <span className="font-semibold text-fuchsia-500">{locations.meta.total}</span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1 sm:gap-2">
                             <Button
                                 variant="secondary"
                                 size="sm"
                                 disabled={page === 1}
                                 onClick={() => setPage(p => p - 1)}
-                                className="hover:bg-fuchsia-500/20 hover:text-fuchsia-500 hover:border-fuchsia-500/30"
+                                className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500 hover:border-fuchsia-500/30"
                             >
                                 <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            {Array.from({ length: Math.min(locations.meta.last_page || 1, 5) }, (_, i) => {
-                                const pageNum = i + 1;
-                                return (
-                                    <Button
-                                        key={pageNum}
-                                        variant={page === pageNum ? "primary" : "secondary"}
-                                        size="sm"
-                                        onClick={() => setPage(pageNum)}
-                                        className={cn("min-w-[36px]", page === pageNum && "shadow-lg shadow-fuchsia-500/30")}
-                                    >
-                                        {pageNum}
-                                    </Button>
-                                );
-                            })}
+                            {/* Show fewer page numbers on mobile */}
+                            <div className="hidden sm:flex gap-1">
+                                {Array.from({ length: Math.min(locations.meta.last_page || 1, 5) }, (_, i) => {
+                                    const pageNum = i + 1;
+                                    return (
+                                        <Button
+                                            key={pageNum}
+                                            variant={page === pageNum ? "primary" : "secondary"}
+                                            size="sm"
+                                            onClick={() => setPage(pageNum)}
+                                            className={cn("min-w-[36px] h-9", page === pageNum && "shadow-lg shadow-fuchsia-500/30")}
+                                        >
+                                            {pageNum}
+                                        </Button>
+                                    );
+                                })}
+                            </div>
+                            {/* Simple page indicator on mobile */}
+                            <div className="sm:hidden flex items-center px-3 text-sm font-medium">
+                                {page} / {locations.meta.last_page || 1}
+                            </div>
                             <Button
                                 variant="secondary"
                                 size="sm"
                                 disabled={page === (locations.meta.last_page || 1)}
                                 onClick={() => setPage(p => p + 1)}
-                                className="hover:bg-fuchsia-500/20 hover:text-fuchsia-500 hover:border-fuchsia-500/30"
+                                className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500 hover:border-fuchsia-500/30"
                             >
                                 <ChevronRight className="w-4 h-4" />
                             </Button>
@@ -442,7 +451,7 @@ export default function Locations() {
             </div>
 
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingLocation ? 'Edit Location' : 'New Location'} size="lg">
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                     {/* Address Picker */}
                     <AddressPicker
                         label="Search & Pin Location"
@@ -464,23 +473,24 @@ export default function Locations() {
                         }}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required />
-                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required className="h-10 text-sm" />
+                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-10 text-sm" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                        <Input label="City" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-10 text-sm" />
+                        <Input label="City" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="h-10 text-sm" />
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
-                        <Input label="Address 1" value={formData.address_line1} onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })} className="col-span-2" />
-                        <Input label="Postal Code" value={formData.postal_code} onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })} />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                        <Input label="Address" value={formData.address_line1} onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })} className="sm:col-span-2 h-10 text-sm" />
+                        <Input label="Postal" value={formData.postal_code} onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })} className="h-10 text-sm" />
                     </div>
-                    <div className="border-t border-gray-200 dark:border-white/10 pt-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Operating Hours</label>
-                        <div className="space-y-2 mb-3">
+                    {/* Operating Hours - Hidden on mobile for simplicity */}
+                    <div className="border-t border-gray-200 dark:border-white/10 pt-3 sm:pt-4 hidden sm:block">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">Operating Hours</label>
+                        <div className="space-y-2 mb-3 max-h-40 overflow-y-auto">
                             {formData.operating_hours.map((hour, index) => (
-                                <div key={index} className="flex gap-2 items-center">
+                                <div key={index} className="flex gap-1.5 sm:gap-2 items-center flex-wrap">
                                     <select
                                         value={hour.day_of_week}
                                         onChange={(e) => {
@@ -488,9 +498,9 @@ export default function Locations() {
                                             newHours[index].day_of_week = parseInt(e.target.value);
                                             setFormData({ ...formData, operating_hours: newHours });
                                         }}
-                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-sm text-gray-900 dark:text-white"
+                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-xs sm:text-sm text-gray-900 dark:text-white h-9"
                                     >
-                                        {days.map((d, i) => <option key={i} value={i}>{d}</option>)}
+                                        {days.map((d, i) => <option key={i} value={i}>{d.slice(0, 3)}</option>)}
                                     </select>
                                     <select
                                         value={hour.service_type}
@@ -499,11 +509,11 @@ export default function Locations() {
                                             newHours[index].service_type = e.target.value;
                                             setFormData({ ...formData, operating_hours: newHours });
                                         }}
-                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-sm text-gray-900 dark:text-white"
+                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-xs sm:text-sm text-gray-900 dark:text-white h-9"
                                     >
-                                        <option value="dine-in">Dine-in</option>
-                                        <option value="pickup">Pickup</option>
-                                        <option value="delivery">Delivery</option>
+                                        <option value="dine-in">Dine</option>
+                                        <option value="pickup">Pick</option>
+                                        <option value="delivery">Deliv</option>
                                     </select>
                                     <input
                                         type="time"
@@ -513,9 +523,9 @@ export default function Locations() {
                                             newHours[index].opening_time = e.target.value;
                                             setFormData({ ...formData, operating_hours: newHours });
                                         }}
-                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-sm text-gray-900 dark:text-white"
+                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-1.5 py-1.5 text-xs sm:text-sm text-gray-900 dark:text-white h-9 w-20 sm:w-auto"
                                     />
-                                    <span className="text-gray-400">-</span>
+                                    <span className="text-gray-400 text-xs">-</span>
                                     <input
                                         type="time"
                                         value={hour.closing_time?.slice(0, 5)}
@@ -524,7 +534,7 @@ export default function Locations() {
                                             newHours[index].closing_time = e.target.value;
                                             setFormData({ ...formData, operating_hours: newHours });
                                         }}
-                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-sm text-gray-900 dark:text-white"
+                                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg px-1.5 py-1.5 text-xs sm:text-sm text-gray-900 dark:text-white h-9 w-20 sm:w-auto"
                                     />
                                     <Button
                                         type="button"
@@ -534,9 +544,9 @@ export default function Locations() {
                                             const newHours = formData.operating_hours.filter((_, i) => i !== index);
                                             setFormData({ ...formData, operating_hours: newHours });
                                         }}
-                                        className="p-1.5"
+                                        className="p-1.5 h-8 w-8"
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 className="w-3.5 h-3.5" />
                                     </Button>
                                 </div>
                             ))}
@@ -554,36 +564,36 @@ export default function Locations() {
                                     ]
                                 });
                             }}
-                            className="w-full flex items-center justify-center gap-2 border-dashed"
+                            className="w-full h-9 flex items-center justify-center gap-2 border-dashed text-xs sm:text-sm"
                         >
-                            <Plus className="w-4 h-4" /> Add Operating Hours
+                            <Plus className="w-4 h-4" /> Add Hours
                         </Button>
                     </div>
 
-                    <div className="border-t border-gray-200 dark:border-white/10 pt-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Services</label>
-                        <div className="flex gap-4 flex-wrap">
-                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-sm">
+                    <div className="border-t border-gray-200 dark:border-white/10 pt-3 sm:pt-4">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">Services & Status</label>
+                        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4">
+                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
                                 <input type="checkbox" checked={formData.accepts_online_orders} onChange={(e) => setFormData({ ...formData, accepts_online_orders: e.target.checked })}
                                     className="rounded bg-white dark:bg-slate-900 border-gray-300 dark:border-white/20 accent-purple-600 w-4 h-4" /> Online
                             </label>
-                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-sm">
+                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
                                 <input type="checkbox" checked={formData.accepts_pickup} onChange={(e) => setFormData({ ...formData, accepts_pickup: e.target.checked })}
                                     className="rounded bg-white dark:bg-slate-900 border-gray-300 dark:border-white/20 accent-purple-600 w-4 h-4" /> Pickup
                             </label>
-                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-sm">
+                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
                                 <input type="checkbox" checked={formData.accepts_delivery} onChange={(e) => setFormData({ ...formData, accepts_delivery: e.target.checked })}
                                     className="rounded bg-white dark:bg-slate-900 border-gray-300 dark:border-white/20 accent-purple-600 w-4 h-4" /> Delivery
                             </label>
-                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-sm ml-auto">
+                            <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-xs sm:text-sm sm:ml-auto">
                                 <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                     className="rounded bg-white dark:bg-slate-900 border-gray-300 dark:border-white/20 accent-purple-600 w-4 h-4" /> Active
                             </label>
                         </div>
                     </div>
-                    <div className="flex gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-                        <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">Save</Button>
+                    <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+                        <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700">Save</Button>
                     </div>
                 </form>
             </Modal>

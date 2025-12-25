@@ -12,7 +12,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// StatCard Component with vibrant gradients
+// StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
     const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
         purple: {
@@ -52,23 +52,23 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-                "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+                "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm min-w-[100px] sm:min-w-0",
                 `bg-gradient-to-br ${styles.gradient}`,
                 styles.border,
                 `shadow-lg ${styles.shadow}`
             )}
         >
-            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8 hidden sm:block">
                 <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
             </div>
-            <div className="relative p-5">
-                <div className="flex items-center justify-between">
+            <div className="relative p-3 sm:p-4 md:p-5">
+                <div className="flex items-center justify-between gap-2">
                     <div>
-                        <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-                        <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
+                        <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1">{title}</p>
+                        <p className={cn("text-lg sm:text-2xl md:text-3xl font-bold", styles.text)}>{value}</p>
                     </div>
-                    <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-                        <Icon className="w-6 h-6 text-white" />
+                    <div className={cn("p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </div>
             </div>
@@ -76,12 +76,14 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
     );
 };
 
-// Stats Ribbon
+// Stats Ribbon - Mobile optimized with horizontal scroll
 const PositionStatsRibbon = ({ stats }: { stats: any }) => (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <StatCard title="Total Positions" value={stats.total} icon={Briefcase} color="purple" index={0} />
-        <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-        <StatCard title="Total Staff" value={stats.staff} icon={Users} color="blue" index={2} />
+    <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
+        <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+            <StatCard title="Total" value={stats.total} icon={Briefcase} color="purple" index={0} />
+            <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+            <StatCard title="Staff" value={stats.staff} icon={Users} color="blue" index={2} />
+        </div>
     </div>
 );
 
@@ -162,28 +164,29 @@ export default function Positions() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-background p-6">
-                {/* Decorative Background Elements */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 overflow-x-hidden">
+                {/* Decorative Background Elements - Hidden on mobile */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" />
                     <div className="absolute bottom-20 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl" />
                     <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
                 </div>
 
                 {/* Header */}
-                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                    <div>
+                <div className="relative flex items-center justify-between gap-3 mb-4 sm:mb-6 md:mb-8">
+                    <div className="min-w-0">
                         <motion.h1
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent"
+                            className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent truncate"
                         >
                             Positions
                         </motion.h1>
-                        <p className="text-muted-foreground mt-1">Manage job titles</p>
+                        <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Manage job titles</p>
                     </div>
-                    <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary">
-                        <Plus className="w-4 h-4 mr-2" /> Add Position
+                    <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
+                        <Plus className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Add Position</span>
                     </Button>
                 </div>
 
@@ -194,43 +197,44 @@ export default function Positions() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="relative bg-card/50 border border-border/50 rounded-2xl p-4 mb-6 backdrop-blur-sm shadow-lg"
+                    className="relative bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm shadow-lg"
                 >
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1 min-w-[200px]">
+                    <div className="flex gap-2 sm:gap-4">
+                        <div className="relative flex-1 min-w-0">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input placeholder="Search positions..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10" variant="filled" />
+                            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                className="pl-9 h-10 text-sm" variant="filled" />
                         </div>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-1.5 sm:gap-2">
                             {[
-                                { key: 'all', label: 'All Status' },
-                                { key: 'active', label: 'Active' },
-                                { key: 'inactive', label: 'Inactive' }
-                            ].map(({ key, label }) => (
+                                { key: 'all', label: 'All', mobileLabel: 'All' },
+                                { key: 'active', label: 'Active', mobileLabel: 'On' },
+                                { key: 'inactive', label: 'Inactive', mobileLabel: 'Off' }
+                            ].map(({ key, label, mobileLabel }) => (
                                 <button
                                     key={key}
                                     onClick={() => setStatusFilter(key)}
                                     className={cn(
-                                        "px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
+                                        "px-2.5 sm:px-4 py-2 h-10 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0",
                                         statusFilter === key
-                                            ? "bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30"
+                                            ? "bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white shadow-lg"
                                             : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                                     )}
                                 >
-                                    {label}
+                                    <span className="sm:hidden">{mobileLabel}</span>
+                                    <span className="hidden sm:inline">{label}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
                 </motion.div>
 
-                {/* Table */}
+                {/* Desktop Table - Hidden on mobile */}
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+                    className="hidden md:block relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                 >
                     {/* Table Header with Gradient */}
                     <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
@@ -245,7 +249,7 @@ export default function Positions() {
                             <div className="p-12 text-center">
                                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                                     <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                                    Loading positions...
+                                    Loading...
                                 </div>
                             </div>
                         ) : positionList.length === 0 ? (
@@ -254,7 +258,7 @@ export default function Positions() {
                                     <Briefcase className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                                 </div>
                                 <h3 className="text-foreground font-semibold">No positions found</h3>
-                                <p className="text-muted-foreground text-sm mt-1">Create your first position to get started</p>
+                                <p className="text-muted-foreground text-sm mt-1">Create your first position</p>
                             </div>
                         ) : positionList.map((pos: any, idx: number) => (
                             <motion.div
@@ -279,42 +283,102 @@ export default function Positions() {
                                     <span className={cn(
                                         "px-2 py-0.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1",
                                         pos.is_active
-                                            ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                                            : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
+                                            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                                            : "bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
                                     )}>
                                         <span className={cn("w-1.5 h-1.5 rounded-full", pos.is_active ? "bg-emerald-500" : "bg-red-500")} />
                                         {pos.is_active ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
                                 <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                    <Button size="sm" variant="ghost" onClick={() => handleEdit(pos)} className="h-7 w-7 p-0 hover:bg-purple-500/20 hover:text-purple-600 dark:hover:text-purple-400"><Edit size={12} /></Button>
-                                    <Button size="sm" variant="ghost" onClick={() => handleDelete(pos.id)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400"><Trash2 size={12} /></Button>
+                                    <Button size="sm" variant="ghost" onClick={() => handleEdit(pos)} className="h-7 w-7 p-0 hover:bg-purple-500/20 hover:text-purple-600"><Edit size={12} /></Button>
+                                    <Button size="sm" variant="ghost" onClick={() => handleDelete(pos.id)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-600"><Trash2 size={12} /></Button>
                                 </div>
                             </motion.div>
                         ))}
                     </div>
                 </motion.div>
+
+                {/* Mobile Cards - Hidden on desktop */}
+                <div className="md:hidden space-y-2">
+                    {isLoading ? (
+                        <div className="p-6 text-center text-muted-foreground text-sm">
+                            <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                            Loading...
+                        </div>
+                    ) : positionList.length === 0 ? (
+                        <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">
+                            <Briefcase className="w-10 h-10 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
+                            <p className="text-muted-foreground text-sm">No positions found</p>
+                        </div>
+                    ) : (
+                        positionList.map((pos: any, idx: number) => (
+                            <motion.div
+                                key={pos.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.03 }}
+                                className="bg-card/50 border border-border/50 rounded-xl p-3 backdrop-blur-sm"
+                            >
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 border border-purple-500/20 flex-shrink-0">
+                                            <Briefcase size={12} />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <div className="font-semibold text-foreground text-sm truncate">{pos.title}</div>
+                                            <div className="text-[10px] text-muted-foreground truncate">{pos.description || 'No description'}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-1 flex-shrink-0">
+                                        <Button size="sm" variant="ghost" onClick={() => handleEdit(pos)} className="h-8 w-8 p-0 hover:bg-purple-500/20 hover:text-purple-600">
+                                            <Edit size={14} />
+                                        </Button>
+                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(pos.id)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-600">
+                                            <Trash2 size={14} />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className={cn(
+                                        "px-2 py-0.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1",
+                                        pos.is_active
+                                            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                                            : "bg-red-500/20 text-red-600 dark:text-red-400"
+                                    )}>
+                                        <span className={cn("w-1.5 h-1.5 rounded-full", pos.is_active ? "bg-emerald-500" : "bg-red-500")} />
+                                        {pos.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                        <Users size={10} />
+                                        {pos.employees_count || 0} staff
+                                    </span>
+                                </div>
+                            </motion.div>
+                        ))
+                    )}
+                </div>
             </div>
 
-            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingPosition ? 'Edit Position' : 'New Position'}>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingPosition ? 'Edit' : 'New Position'}>
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                    <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="h-10 text-sm" />
+                    <div className="hidden sm:block">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            rows={3}
-                            className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                            rows={2}
+                            className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20 text-purple-600 focus:ring-purple-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
+                        <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20 text-purple-600 focus:ring-purple-500 w-4 h-4" />
+                        <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">Active</span>
                     </div>
-                    <div className="flex gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-                        <Button type="submit" variant="primary" className="flex-1">Save</Button>
+                    <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+                        <Button type="submit" variant="primary" className="flex-1 h-10 sm:h-11 text-sm">Save</Button>
                     </div>
                 </form>
             </Modal>

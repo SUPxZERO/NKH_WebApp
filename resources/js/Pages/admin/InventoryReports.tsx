@@ -133,119 +133,124 @@ export default function InventoryReports() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-background p-6 relative">
-                {/* Decorative Background Elements */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 relative overflow-x-hidden">
+                {/* Decorative Background Elements - Hidden on mobile */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
                     <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
                 </div>
 
                 {/* Header */}
-                <div className="mb-8 relative z-10">
+                <div className="mb-4 sm:mb-6 md:mb-8 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col gap-4"
+                        className="flex flex-col gap-3 sm:gap-4"
                     >
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div>
-                                <h1 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent truncate">
                                     Inventory Reports
                                 </h1>
-                                <p className="text-muted-foreground mt-1">Track usage, costs, and waste analytics</p>
+                                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Usage, costs, and waste analytics</p>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                                 <Button
                                     onClick={handleExportPDF}
-                                    className="hover:from-blue-700 hover:to-cyan-700"
+                                    className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                 >
-                                    <FileText className="w-4 h-4 mr-2" /> PDF
+                                    <FileText className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">PDF</span>
                                 </Button>
                                 <Button
                                     onClick={handleExportExcel}
-                                    className="hover:from-green-700 hover:to-emerald-700"
+                                    className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                 >
-                                    <Download className="w-4 h-4 mr-2" /> CSV
+                                    <Download className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">CSV</span>
                                 </Button>
                             </div>
                         </div>
 
                         {/* Date Range Controls */}
-                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                            <DateRangePicker
-                                startDate={startDate}
-                                endDate={endDate}
-                                onStartDateChange={(date) => setStartDate(date ?? undefined)}
-                                onEndDateChange={(date) => setEndDate(date ?? undefined)}
-                            />
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
+                            <div className="w-full sm:w-auto">
+                                <DateRangePicker
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    onStartDateChange={(date) => setStartDate(date ?? undefined)}
+                                    onEndDateChange={(date) => setEndDate(date ?? undefined)}
+                                />
+                            </div>
 
                             {/* Quick Presets */}
-                            <div className="flex gap-2 flex-wrap">
+                            <div className="flex gap-2">
                                 <button
                                     onClick={() => setQuickDate(7)}
-                                    className="px-3 py-1 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
+                                    className="px-3 py-1.5 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
-                                    7 Days
+                                    7D
                                 </button>
                                 <button
                                     onClick={() => setQuickDate(30)}
-                                    className="px-3 py-1 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
+                                    className="px-3 py-1.5 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
-                                    30 Days
+                                    30D
                                 </button>
                                 <button
                                     onClick={() => setQuickDate(90)}
-                                    className="px-3 py-1 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
+                                    className="px-3 py-1.5 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
-                                    90 Days
+                                    90D
                                 </button>
                             </div>
                         </div>
                     </motion.div>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 relative z-10">
-                    {stats.map((stat, index) => (
-                        <motion.div
-                            key={stat.label}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                        >
-                            <Card className="bg-card border-border backdrop-blur-md">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-muted-foreground">{stat.label}</p>
-                                            <h3 className="text-2xl font-bold text-foreground mt-1">{stat.value}</h3>
-                                            {stat.change && (
-                                                <p className={`text-xs mt-1 ${String(stat.change).startsWith('-') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                                                    {stat.change}
-                                                </p>
-                                            )}
+                {/* Stats Cards - Horizontal scroll on mobile */}
+                <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6 md:mb-8 relative z-10">
+                    <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 min-w-max sm:min-w-0">
+                        {stats.map((stat, index) => (
+                            <motion.div
+                                key={stat.label}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="min-w-[140px] sm:min-w-0"
+                            >
+                                <Card className="bg-card border-border backdrop-blur-md h-full">
+                                    <CardContent className="p-3 sm:p-4 md:p-6">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div>
+                                                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">{stat.label}</p>
+                                                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mt-0.5 sm:mt-1">{stat.value}</h3>
+                                                {stat.change && (
+                                                    <p className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${String(stat.change).startsWith('-') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                                                        {stat.change}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className={`p-2 sm:p-3 rounded-full ${stat.bgColor} flex-shrink-0`}>
+                                                <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${stat.color}`} />
+                                            </div>
                                         </div>
-                                        <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                                            <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    ))}
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Charts Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-10">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-6 mb-4 sm:mb-6 md:mb-8 relative z-10 lg:grid-cols-2">
                     {/* Usage Trends */}
                     <Card className="bg-card border-border backdrop-blur-md">
-                        <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                                <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <CardContent className="p-3 sm:p-4 md:p-6">
+                            <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
                                 Usage Trends
                             </h3>
-                            <ResponsiveContainer width="100%" height={300}>
+                            <ResponsiveContainer width="100%" height={200}>
                                 <AreaChart data={usageRates?.data || []}>
                                     <defs>
                                         <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
@@ -254,9 +259,9 @@ export default function InventoryReports() {
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis dataKey="date" stroke="#9ca3af" />
-                                    <YAxis stroke="#9ca3af" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                    <XAxis dataKey="date" stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                                    <YAxis stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', fontSize: 12 }} />
                                     <Area type="monotone" dataKey="usage" stroke="#3b82f6" fillOpacity={1} fill="url(#colorUsage)" />
                                 </AreaChart>
                             </ResponsiveContainer>
@@ -265,20 +270,20 @@ export default function InventoryReports() {
 
                     {/* Cost Breakdown */}
                     <Card className="bg-card border-border backdrop-blur-md">
-                        <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                                <PieChartIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        <CardContent className="p-3 sm:p-4 md:p-6">
+                            <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                                <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
                                 Cost by Category
                             </h3>
-                            <ResponsiveContainer width="100%" height={300}>
+                            <ResponsiveContainer width="100%" height={200}>
                                 <PieChart>
                                     <Pie
                                         data={costAnalysis?.categories || []}
                                         cx="50%"
                                         cy="50%"
                                         labelLine={false}
-                                        label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
-                                        outerRadius={100}
+                                        label={({ name, percent }) => `${(name || '').substring(0, 6)}: ${((percent ?? 0) * 100).toFixed(0)}%`}
+                                        outerRadius={70}
                                         fill="#8884d8"
                                         dataKey="value"
                                     >
@@ -286,7 +291,7 @@ export default function InventoryReports() {
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', fontSize: 12 }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -294,17 +299,17 @@ export default function InventoryReports() {
 
                     {/* Waste Tracking */}
                     <Card className="bg-card border-border backdrop-blur-md">
-                        <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                                <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+                        <CardContent className="p-3 sm:p-4 md:p-6">
+                            <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
                                 Waste by Reason
                             </h3>
-                            <ResponsiveContainer width="100%" height={300}>
+                            <ResponsiveContainer width="100%" height={200}>
                                 <BarChart data={wasteData?.by_reason || []}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis dataKey="reason" stroke="#9ca3af" />
-                                    <YAxis stroke="#9ca3af" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
+                                    <XAxis dataKey="reason" stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                                    <YAxis stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', fontSize: 12 }} />
                                     <Bar dataKey="value" fill="#ef4444" radius={[8, 8, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -313,26 +318,26 @@ export default function InventoryReports() {
 
                     {/* Top Cost Items */}
                     <Card className="bg-card border-border backdrop-blur-md">
-                        <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                                <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                Highest Cost Items
+                        <CardContent className="p-3 sm:p-4 md:p-6">
+                            <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+                                Top Cost Items
                             </h3>
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 {(costAnalysis?.top_items || []).slice(0, 5).map((item: any, index: number) => (
-                                    <div key={item.id} className="flex items-center justify-between bg-card rounded-lg p-3 border border-border">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                                    <div key={item.id} className="flex items-center justify-between bg-card rounded-lg p-2 sm:p-3 border border-border">
+                                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
                                                 {index + 1}
                                             </div>
-                                            <div>
-                                                <h4 className="text-foreground font-semibold">{item.name}</h4>
-                                                <p className="text-sm text-muted-foreground">{item.quantity} {item.unit}</p>
+                                            <div className="min-w-0">
+                                                <h4 className="text-foreground font-semibold text-sm truncate">{item.name}</h4>
+                                                <p className="text-xs text-muted-foreground">{item.quantity} {item.unit}</p>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-green-600 dark:text-green-400 font-bold">${Number(item.total_cost).toLocaleString()}</p>
-                                            <p className="text-xs text-muted-foreground">${Number(item.cost_per_unit).toFixed(2)}/unit</p>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-green-600 dark:text-green-400 font-bold text-sm">${Number(item.total_cost).toLocaleString()}</p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground">${Number(item.cost_per_unit).toFixed(2)}/u</p>
                                         </div>
                                     </div>
                                 ))}
@@ -342,26 +347,26 @@ export default function InventoryReports() {
                 </div>
 
                 {/* Turnover Analysis */}
-                <Card className="bg-card border-border backdrop-blur-md relative z-10">
-                    <CardContent className="p-6">
-                        <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                            <ShoppingCart className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                            Inventory Turnover by Category
+                <Card className="bg-card border-border backdrop-blur-md relative z-10 mb-4">
+                    <CardContent className="p-3 sm:p-4 md:p-6">
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+                            Turnover by Category
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                             {(turnover?.by_category || []).map((cat: any) => (
-                                <div key={cat.category} className="bg-card rounded-lg p-4 border border-border">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h4 className="text-foreground font-semibold">{cat.category}</h4>
+                                <div key={cat.category} className="bg-card rounded-lg p-2 sm:p-3 md:p-4 border border-border">
+                                    <div className="flex items-center justify-between mb-1 sm:mb-2 gap-1">
+                                        <h4 className="text-foreground font-semibold text-xs sm:text-sm truncate">{cat.category}</h4>
                                         <Badge className={
-                                            Number(cat.turnover_rate || 0) > 10 ? 'bg-green-500/20 text-green-600 dark:text-green-400' :
-                                                Number(cat.turnover_rate || 0) > 5 ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400' :
-                                                    'bg-red-500/20 text-red-600 dark:text-red-400'
+                                            Number(cat.turnover_rate || 0) > 10 ? 'bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] px-1' :
+                                                Number(cat.turnover_rate || 0) > 5 ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-[10px] px-1' :
+                                                    'bg-red-500/20 text-red-600 dark:text-red-400 text-[10px] px-1'
                                         }>
                                             {Number(cat.turnover_rate || 0).toFixed(1)}x
                                         </Badge>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">
                                         {Number(cat.turnover_rate || 0) > 10 ? 'Excellent' : Number(cat.turnover_rate || 0) > 5 ? 'Good' : 'Needs Attention'}
                                     </p>
                                 </div>
@@ -370,6 +375,6 @@ export default function InventoryReports() {
                     </CardContent>
                 </Card>
             </div>
-        </AdminLayout>
+        </AdminLayout >
     );
 }

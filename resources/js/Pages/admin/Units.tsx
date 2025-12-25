@@ -14,7 +14,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// Enhanced StatCard Component
+// Enhanced StatCard Component - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) => {
     const colorStyles: Record<string, any> = {
         purple: { gradient: 'from-purple-500/20 to-fuchsia-500/10', iconBg: 'bg-gradient-to-br from-purple-500 to-fuchsia-600', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/30', shadow: 'shadow-purple-500/20' },
@@ -31,24 +31,24 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-                "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+                "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm min-w-[120px] sm:min-w-0",
                 `bg-gradient-to-br ${styles.gradient}`,
                 styles.border,
                 `shadow-lg ${styles.shadow}`
             )}
         >
-            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8 hidden sm:block">
                 <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
             </div>
-            <div className="relative p-5">
-                <div className="flex items-center justify-between">
+            <div className="relative p-3 sm:p-4 md:p-5">
+                <div className="flex items-center justify-between gap-2">
                     <div>
-                        <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-                        <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
-                        {subtext && <p className="text-xs text-muted-foreground mt-1">{subtext}</p>}
+                        <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1">{title}</p>
+                        <p className={cn("text-lg sm:text-2xl md:text-3xl font-bold", styles.text)}>{value}</p>
+                        {subtext && <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">{subtext}</p>}
                     </div>
-                    <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-                        <Icon className="w-6 h-6 text-white" />
+                    <div className={cn("p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </div>
             </div>
@@ -195,40 +195,45 @@ export default function Units() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-background p-6 transition-colors relative overflow-hidden">
-                {/* Decorative Background */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 transition-colors relative overflow-x-hidden">
+                {/* Decorative Background - Hidden on mobile */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl opacity-50" />
                     <div className="absolute bottom-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl opacity-50" />
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto space-y-6">
+                <div className="relative z-10 max-w-7xl mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <motion.h1
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3"
-                            >
-                                <Ruler className="w-8 h-8 text-purple-600" />
-                                Measurement Units
-                            </motion.h1>
-                            <p className="text-muted-foreground mt-2">Manage standard and derived units for recipes and stock</p>
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                            <Ruler className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600 flex-shrink-0" />
+                            <div className="min-w-0">
+                                <motion.h1
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent truncate"
+                                >
+                                    Units
+                                </motion.h1>
+                                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Manage measurement units</p>
+                            </div>
                         </div>
                         <Button
                             onClick={() => { closeModal(); setOpenCreate(true); }}
-                            className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20"
+                            className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20 h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                         >
-                            <Plus className="w-4 h-4 mr-2" /> Add Unit
+                            <Plus className="w-4 h-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Add Unit</span>
                         </Button>
                     </div>
 
-                    {/* Stats Ribbon */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <StatCard title="Total Units" value={stats.total} icon={Ruler} color="purple" index={0} />
-                        <StatCard title="Base Units" value={stats.base} icon={Scale} color="blue" index={1} subtext="Primary measurement standards" />
-                        <StatCard title="Derived Units" value={stats.derived} icon={Hash} color="emerald" index={2} subtext="Calculated from base units" />
+                    {/* Stats Ribbon - Horizontal scroll on mobile */}
+                    <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+                        <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+                            <StatCard title="Total" value={stats.total} icon={Ruler} color="purple" index={0} />
+                            <StatCard title="Base" value={stats.base} icon={Scale} color="blue" index={1} subtext="Primary standards" />
+                            <StatCard title="Derived" value={stats.derived} icon={Hash} color="emerald" index={2} subtext="From base units" />
+                        </div>
                     </div>
 
                     {/* Filters & Search */}
@@ -236,37 +241,37 @@ export default function Units() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl p-4 backdrop-blur-sm shadow-lg"
+                        className="bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm shadow-lg"
                     >
-                        <div className="flex flex-wrap gap-4">
-                            <div className="relative flex-1 min-w-[200px]">
+                        <div className="flex gap-2 sm:gap-4">
+                            <div className="relative flex-1 min-w-0">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                <Input placeholder="Search units by name or code..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 bg-background/50 border-border/50 focus:border-purple-500 transition-all" />
+                                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                    className="pl-9 h-10 text-sm bg-background/50 border-border/50 focus:border-purple-500 transition-all" />
                             </div>
                             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-                                className="bg-background/50 border border-border/50 rounded-xl px-4 py-2 text-foreground focus:border-purple-500 focus:ring-purple-500/20 outline-none transition-all">
-                                <option value="all">All Types</option>
+                                className="bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none transition-all">
+                                <option value="all">Type</option>
                                 <option value="for_weight">Weight</option>
                                 <option value="for_volume">Volume</option>
-                                <option value="for_quantity">Quantity</option>
-                                <option value="for_packaging">Packaging</option>
+                                <option value="for_quantity">Qty</option>
+                                <option value="for_packaging">Pack</option>
                             </select>
                             <select value={baseUnitFilter} onChange={(e) => setBaseUnitFilter(e.target.value)}
-                                className="bg-background/50 border border-border/50 rounded-xl px-4 py-2 text-foreground focus:border-purple-500 focus:ring-purple-500/20 outline-none transition-all">
+                                className="hidden sm:block bg-background/50 border border-border/50 rounded-lg px-4 py-2 h-10 text-sm text-foreground focus:border-purple-500 outline-none transition-all">
                                 <option value="all">All Units</option>
-                                <option value="base">Base Units Only</option>
-                                <option value="derived">Derived Units Only</option>
+                                <option value="base">Base Only</option>
+                                <option value="derived">Derived Only</option>
                             </select>
                         </div>
                     </motion.div>
 
-                    {/* Table */}
+                    {/* Desktop Table - Hidden on mobile */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+                        className="hidden md:block bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
                         <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
                             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name / Code</div>
@@ -309,7 +314,7 @@ export default function Units() {
                                     <div className="col-span-2 text-sm text-muted-foreground">
                                         {unit.is_base_unit ? (
                                             <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1">
-                                                <CheckCircle className="w-3 h-3" /> BASE UNIT
+                                                <CheckCircle className="w-3 h-3" /> BASE
                                             </span>
                                         ) : unit.base_unit}
                                     </div>
@@ -331,71 +336,123 @@ export default function Units() {
                             ))}
                         </div>
                     </motion.div>
+
+                    {/* Mobile Cards - Hidden on desktop */}
+                    <div className="md:hidden space-y-2">
+                        {isLoading ? (
+                            <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
+                        ) : unitList.length === 0 ? (
+                            <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">
+                                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-secondary/50 flex items-center justify-center">
+                                    <Ruler className="w-6 h-6 text-muted-foreground" />
+                                </div>
+                                <p className="text-muted-foreground text-sm">No units found</p>
+                            </div>
+                        ) : unitList.map((unit: Unit, idx: number) => (
+                            <motion.div
+                                key={unit.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.03 }}
+                                className="bg-card/50 border border-border/50 rounded-xl p-3 backdrop-blur-sm"
+                            >
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-semibold text-foreground text-sm">{unit.name}</span>
+                                            <span className="px-1.5 py-0.5 rounded bg-secondary text-[10px] font-mono">{unit.code}</span>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground mt-0.5">{unit.display_name}</div>
+                                    </div>
+                                    <div className="flex gap-1 flex-shrink-0">
+                                        <Button size="sm" variant="ghost" onClick={() => handleEdit(unit)} className="h-8 w-8 p-0 hover:text-blue-600"><Edit size={14} /></Button>
+                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(unit.id)} className="h-8 w-8 p-0 hover:text-red-600"><Trash2 size={14} /></Button>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="px-2 py-1 rounded-md text-[10px] font-medium border bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/20 flex items-center gap-1">
+                                        {getUnitIcon(unit)} {getUnitType(unit)}
+                                    </span>
+                                    {unit.is_base_unit ? (
+                                        <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded-md">
+                                            <CheckCircle className="w-3 h-3" /> BASE
+                                        </span>
+                                    ) : (
+                                        <>
+                                            {unit.base_unit && <span className="text-[10px] text-muted-foreground bg-secondary/50 px-2 py-1 rounded">→ {unit.base_unit}</span>}
+                                            {unit.conversion_factor && <span className="text-[10px] font-mono bg-secondary/50 px-2 py-1 rounded">× {unit.conversion_factor}</span>}
+                                        </>
+                                    )}
+                                    {unit.for_weight && <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 text-[8px] px-1 border-none">W</Badge>}
+                                    {unit.for_volume && <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-[8px] px-1 border-none">V</Badge>}
+                                    {unit.for_quantity && <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-[8px] px-1 border-none">Q</Badge>}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
             {/* Modal */}
-            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingUnit ? 'Edit Unit' : 'Create New Unit'} size="lg">
-                <form onSubmit={handleSubmit} className="space-y-5 p-1">
-                    <div className="grid grid-cols-2 gap-4">
-                        <Input label="Short Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. kg" />
-                        <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Kilogram" />
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingUnit ? 'Edit Unit' : 'New Unit'} size="lg">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
+                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Kilogram" className="h-10 text-sm" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <Input label="Display Label" value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required placeholder="e.g. kg" />
-                        <div className="flex items-center pt-8">
-                            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-border/50 bg-secondary/30 w-full hover:bg-secondary/50 transition-colors">
-                                <div className="relative flex items-center">
-                                    <input type="checkbox" checked={formData.is_base_unit} onChange={(e) => setFormData({ ...formData, is_base_unit: e.target.checked })}
-                                        className="peer h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                                </div>
-                                <span className="text-sm font-medium text-foreground">Is Base Unit?</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <Input label="Display" value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
+                        <div className="flex items-center sm:pt-6">
+                            <label className="flex items-center gap-2 sm:gap-3 cursor-pointer p-2.5 sm:p-3 rounded-lg border border-border/50 bg-secondary/30 w-full hover:bg-secondary/50 transition-colors">
+                                <input type="checkbox" checked={formData.is_base_unit} onChange={(e) => setFormData({ ...formData, is_base_unit: e.target.checked })}
+                                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+                                <span className="text-xs sm:text-sm font-medium text-foreground">Is Base Unit?</span>
                             </label>
                         </div>
                     </div>
 
                     {!formData.is_base_unit && (
-                        <div className="bg-secondary/30 p-4 rounded-xl border border-border/50">
-                            <h4 className="text-sm font-semibold mb-3 text-muted-foreground flex items-center gap-2">
-                                <ArrowRight className="w-4 h-4" />
-                                Conversion Details
+                        <div className="bg-secondary/30 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50">
+                            <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-muted-foreground flex items-center gap-2">
+                                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                                Conversion
                             </h4>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">Base Unit</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Base Unit</label>
                                     <select value={formData.base_unit} onChange={(e) => setFormData({ ...formData, base_unit: e.target.value })}
-                                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:ring-2 focus:ring-purple-500/20 outline-none transition-all">
-                                        <option value="">Select Base Unit</option>
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-purple-500/20 outline-none transition-all">
+                                        <option value="">Select</option>
                                         {baseUnits?.map((u: Unit) => <option key={u.code} value={u.code}>{u.name} ({u.code})</option>)}
                                     </select>
                                 </div>
-                                <Input label="Conversion Factor" type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} placeholder="1 unit = X base units" />
+                                <Input label="Factor" type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} placeholder="1 = X base" className="h-10 text-sm" />
                             </div>
                         </div>
                     )}
 
-                    <div className="border-t border-border/50 pt-4">
-                        <label className="block text-sm font-medium text-foreground mb-3">Applicable Usage</label>
-                        <div className="grid grid-cols-3 gap-3">
+                    <div className="border-t border-border/50 pt-3 sm:pt-4">
+                        <label className="block text-xs sm:text-sm font-medium text-foreground mb-2 sm:mb-3">Usage</label>
+                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
                             {['weight', 'volume', 'quantity', 'packaging', 'produce'].map(type => (
                                 <label key={type} className={cn(
-                                    "flex items-center gap-2 cursor-pointer p-2 rounded-lg border transition-all",
+                                    "flex items-center gap-1.5 sm:gap-2 cursor-pointer p-1.5 sm:p-2 rounded-lg border transition-all text-xs sm:text-sm",
                                     (formData as any)[`for_${type}`] ? "bg-purple-500/10 border-purple-500/30" : "bg-card border-border/50 hover:bg-secondary/50"
                                 )}>
                                     <input type="checkbox" checked={(formData as any)[`for_${type}`]}
                                         onChange={(e) => setFormData({ ...formData, [`for_${type}`]: e.target.checked })}
-                                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                                    <span className="text-sm text-foreground capitalize">{type}</span>
+                                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 w-3 h-3 sm:w-4 sm:h-4" />
+                                    <span className="text-foreground capitalize truncate">{type.slice(0, 4)}</span>
                                 </label>
                             ))}
                         </div>
                     </div>
 
-                    <div className="flex gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 hover:bg-secondary/80">Cancel</Button>
-                        <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20">
-                            {editingUnit ? 'Save Changes' : 'Create Unit'}
+                    <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm hover:bg-secondary/80">Cancel</Button>
+                        <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20">
+                            {editingUnit ? 'Save' : 'Create'}
                         </Button>
                     </div>
                 </form>

@@ -104,14 +104,14 @@ export default function PromotionFormModal({
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground">Basic Information</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Promotion Name *</label>
               <Input
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-background border-border text-foreground"
+                className="bg-background border-border text-foreground h-11"
                 placeholder="e.g., Summer Sale 2024"
               />
             </div>
@@ -122,13 +122,14 @@ export default function PromotionFormModal({
                 <Input
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  className="bg-background border-border text-foreground flex-1"
+                  className="bg-background border-border text-foreground flex-1 h-11"
                   placeholder="SUMMER2024"
                 />
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={generatePromoCode}
+                  className="h-11 px-4"
                 >
                   Generate
                 </Button>
@@ -142,7 +143,7 @@ export default function PromotionFormModal({
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground"
+              className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-foreground placeholder:text-muted-foreground h-24 resize-none"
               placeholder="Describe your promotion..."
             />
           </div>
@@ -159,7 +160,7 @@ export default function PromotionFormModal({
                 required
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full bg-background border border-border rounded-xl px-3 py-2.5 h-11 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 touch-manipulation"
               >
                 <option value="percentage" className="bg-background text-foreground">Percentage Off</option>
                 <option value="fixed_amount" className="bg-background text-foreground">Fixed Amount Off</option>
@@ -182,7 +183,7 @@ export default function PromotionFormModal({
                   required
                   value={formData.discount_value}
                   onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground h-11"
                   placeholder={formData.type === 'percentage' ? '10' : '5.00'}
                 />
               </div>
@@ -200,7 +201,7 @@ export default function PromotionFormModal({
                     required
                     value={formData.buy_quantity}
                     onChange={(e) => setFormData({ ...formData, buy_quantity: e.target.value })}
-                    className="bg-background border-border text-foreground"
+                    className="bg-background border-border text-foreground h-11"
                     placeholder="2"
                   />
                 </div>
@@ -213,7 +214,7 @@ export default function PromotionFormModal({
                     required
                     value={formData.get_quantity}
                     onChange={(e) => setFormData({ ...formData, get_quantity: e.target.value })}
-                    className="bg-background border-border text-foreground"
+                    className="bg-background border-border text-foreground h-11"
                     placeholder="1"
                   />
                 </div>
@@ -231,14 +232,14 @@ export default function PromotionFormModal({
                   required
                   value={formData.discount_value}
                   onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground h-11"
                   placeholder="1"
                 />
               </div>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Minimum Order Amount ($)</label>
               <Input
@@ -261,7 +262,7 @@ export default function PromotionFormModal({
                   min="0"
                   value={formData.max_discount_amount}
                   onChange={(e) => setFormData({ ...formData, max_discount_amount: e.target.value })}
-                  className="bg-background border-border text-foreground"
+                  className="bg-background border-border text-foreground h-11"
                   placeholder="No limit"
                 />
               </div>
@@ -273,7 +274,7 @@ export default function PromotionFormModal({
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground">Usage & Validity</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Usage Limit</label>
               <Input
@@ -319,7 +320,7 @@ export default function PromotionFormModal({
             <select
               value={formData.applicable_to}
               onChange={(e) => setFormData({ ...formData, applicable_to: e.target.value as any, selected_categories: [], selected_items: [] })}
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full bg-background border border-border rounded-xl px-3 py-2.5 h-11 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 touch-manipulation"
             >
               <option value="all" className="bg-background text-foreground">All Items</option>
               <option value="categories" className="bg-background text-foreground">Specific Categories</option>
@@ -388,12 +389,12 @@ export default function PromotionFormModal({
               value={formData.terms_conditions}
               onChange={(e) => setFormData({ ...formData, terms_conditions: e.target.value })}
               rows={4}
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground"
+              className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-foreground placeholder:text-muted-foreground h-28 resize-none"
               placeholder="Enter terms and conditions for this promotion..."
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <input
               type="checkbox"
               id="is_active"
@@ -413,7 +414,7 @@ export default function PromotionFormModal({
             type="button"
             variant="secondary"
             onClick={onClose}
-            className="flex-1"
+            className="flex-1 h-12"
           >
             Cancel
           </Button>
@@ -421,7 +422,7 @@ export default function PromotionFormModal({
             type="submit"
             variant="primary"
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 h-12"
           >
             {editingPromotion ? 'Update' : 'Create'} Promotion
           </Button>

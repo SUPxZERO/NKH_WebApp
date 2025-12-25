@@ -14,7 +14,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { ImageUploader } from '@/app/components/ui/ImageUploader';
 
-// StatCard Component with vibrant gradients
+// StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
   const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
     purple: {
@@ -54,23 +54,23 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
       className={cn(
-        "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+        "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm min-w-[100px] sm:min-w-0",
         `bg-gradient-to-br ${styles.gradient}`,
         styles.border,
         `shadow-lg ${styles.shadow}`
       )}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+      <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 transform translate-x-8 -translate-y-8">
         <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
       </div>
-      <div className="relative p-5">
-        <div className="flex items-center justify-between">
+      <div className="relative p-3 sm:p-5">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-            <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
+            <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1">{title}</p>
+            <p className={cn("text-xl sm:text-3xl font-bold", styles.text)}>{value}</p>
           </div>
-          <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-            <Icon className="w-6 h-6 text-white" />
+          <div className={cn("p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+            <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
           </div>
         </div>
       </div>
@@ -78,13 +78,15 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
   );
 };
 
-// Stats Ribbon
+// Stats Ribbon - Horizontal scroll on mobile
 const CategoryStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <StatCard title="Total Categories" value={stats.total} icon={Folder} color="purple" index={0} />
-    <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-    <StatCard title="Sub-Categories" value={stats.sub} icon={Layers} color="blue" index={2} />
-    <StatCard title="Menu Items" value={stats.items} icon={FolderOpen} color="amber" index={3} />
+  <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+      <StatCard title="Total" value={stats.total} icon={Folder} color="purple" index={0} />
+      <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+      <StatCard title="Sub-Cat" value={stats.sub} icon={Layers} color="blue" index={2} />
+      <StatCard title="Items" value={stats.items} icon={FolderOpen} color="amber" index={3} />
+    </div>
   </div>
 );
 
@@ -198,54 +200,100 @@ export default function Categories() {
     return cats.map((cat, idx) => {
       const hasChildren = cat.children && cat.children.length > 0;
       const isExpanded = expanded.has(cat.id);
+      const mobileIndent = Math.min(level * 12, 36); // Limit indent on mobile
+      const desktopIndent = level * 24;
 
       return (
         <React.Fragment key={cat.id}>
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.03 }}
+            transition={{ delay: idx * 0.02 }}
             className={cn(
-              "grid grid-cols-1 md:grid-cols-12 gap-4 p-3 items-center hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all group",
+              "p-3 sm:p-4 hover:bg-gradient-to-r hover:from-fuchsia-500/5 hover:to-transparent transition-all",
               level > 0 && "bg-fuchsia-500/[0.02]"
             )}
           >
-            <div className="col-span-1 md:col-span-5 flex items-center gap-2" style={{ paddingLeft: `${level * 24}px` }}>
-              {hasChildren ? (
-                <button onClick={() => toggleExpand(cat.id)} className="p-1 hover:bg-fuchsia-500/20 rounded text-muted-foreground hover:text-fuchsia-500 transition-colors">
-                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                </button>
-              ) : (
-                <span className="w-6" />
-              )}
-              {cat.image ? (
-                <img src={cat.image} alt="" className="w-8 h-8 rounded-lg object-cover bg-secondary border border-border/50" />
-              ) : (
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center text-fuchsia-500 border border-fuchsia-500/20">
-                  <Folder size={14} />
+            {/* Mobile Layout */}
+            <div className="md:hidden">
+              <div className="flex items-center gap-2" style={{ paddingLeft: `${mobileIndent}px` }}>
+                {hasChildren ? (
+                  <button onClick={() => toggleExpand(cat.id)} className="p-1.5 hover:bg-fuchsia-500/20 rounded-lg text-muted-foreground hover:text-fuchsia-500 transition-colors flex-shrink-0">
+                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  </button>
+                ) : (
+                  <span className="w-7" />
+                )}
+                {cat.image ? (
+                  <img src={cat.image} alt="" className="w-9 h-9 rounded-lg object-cover bg-secondary border border-border/50 flex-shrink-0" />
+                ) : (
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center text-fuchsia-500 border border-fuchsia-500/20 flex-shrink-0">
+                    <Folder size={16} />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-foreground text-sm truncate block">{cat.name}</span>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-xs text-muted-foreground">{cat.menu_items?.length || 0} items</span>
+                    <span className={cn(
+                      "w-1.5 h-1.5 rounded-full flex-shrink-0",
+                      cat.is_active ? "bg-emerald-500" : "bg-red-500"
+                    )} />
+                  </div>
                 </div>
-              )}
-              <span className="font-semibold text-foreground">{cat.name}</span>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button onClick={() => handleCreate(cat)} className="p-2 rounded-lg hover:bg-fuchsia-500/20 text-muted-foreground hover:text-fuchsia-500">
+                    <Plus size={16} />
+                  </button>
+                  <button onClick={() => handleEdit(cat)} className="p-2 rounded-lg hover:bg-fuchsia-500/20 text-muted-foreground hover:text-fuchsia-500">
+                    <Edit size={16} />
+                  </button>
+                  <button onClick={() => handleDelete(cat)} className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-500">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="hidden md:block col-span-3 text-sm text-muted-foreground font-mono">/{cat.slug}</div>
-            <div className="hidden md:block col-span-2 text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{cat.menu_items?.length || 0}</span> items
-            </div>
-            <div className="hidden md:block col-span-1">
-              <span className={cn(
-                "px-2 py-0.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1",
-                cat.is_active
-                  ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                  : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
-              )}>
-                <span className={cn("w-1.5 h-1.5 rounded-full", cat.is_active ? "bg-emerald-500" : "bg-red-500")} />
-                {cat.is_active ? 'Active' : 'Inactive'}
-              </span>
-            </div>
-            <div className="col-span-1 flex justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-all">
-              <Button size="sm" variant="ghost" onClick={() => handleCreate(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500" title="Add Sub-category"><Plus size={12} /></Button>
-              <Button size="sm" variant="ghost" onClick={() => handleEdit(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"><Edit size={12} /></Button>
-              <Button size="sm" variant="ghost" onClick={() => handleDelete(cat)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-500"><Trash2 size={12} /></Button>
+
+            {/* Desktop Layout */}
+            <div className="hidden md:grid grid-cols-12 gap-4 items-center group">
+              <div className="col-span-5 flex items-center gap-2" style={{ paddingLeft: `${desktopIndent}px` }}>
+                {hasChildren ? (
+                  <button onClick={() => toggleExpand(cat.id)} className="p-1 hover:bg-fuchsia-500/20 rounded text-muted-foreground hover:text-fuchsia-500 transition-colors">
+                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  </button>
+                ) : (
+                  <span className="w-6" />
+                )}
+                {cat.image ? (
+                  <img src={cat.image} alt="" className="w-8 h-8 rounded-lg object-cover bg-secondary border border-border/50" />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center text-fuchsia-500 border border-fuchsia-500/20">
+                    <Folder size={14} />
+                  </div>
+                )}
+                <span className="font-semibold text-foreground">{cat.name}</span>
+              </div>
+              <div className="col-span-3 text-sm text-muted-foreground font-mono">/{cat.slug}</div>
+              <div className="col-span-2 text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{cat.menu_items?.length || 0}</span> items
+              </div>
+              <div className="col-span-1">
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1",
+                  cat.is_active
+                    ? "bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                    : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
+                )}>
+                  <span className={cn("w-1.5 h-1.5 rounded-full", cat.is_active ? "bg-emerald-500" : "bg-red-500")} />
+                  {cat.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <Button size="sm" variant="ghost" onClick={() => handleCreate(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500" title="Add Sub-category"><Plus size={12} /></Button>
+                <Button size="sm" variant="ghost" onClick={() => handleEdit(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"><Edit size={12} /></Button>
+                <Button size="sm" variant="ghost" onClick={() => handleDelete(cat)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-500"><Trash2 size={12} /></Button>
+              </div>
             </div>
           </motion.div>
           {hasChildren && isExpanded && renderTree(cat.children, level + 1)}
@@ -256,28 +304,28 @@ export default function Categories() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-background p-6">
-        {/* Decorative Background Elements */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
+        {/* Decorative Background Elements - Hidden on mobile */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
           <div className="absolute top-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
         </div>
 
         {/* Header */}
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
+        <div className="relative flex items-center justify-between gap-3 mb-4 sm:mb-6">
+          <div className="min-w-0">
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent"
+              className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent truncate"
             >
               Categories
             </motion.h1>
-            <p className="text-muted-foreground mt-1">Manage menu hierarchy</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Manage menu hierarchy</p>
           </div>
-          <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary">
-            <Plus className="w-4 h-4 mr-2" /> Add Category
+          <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0">
+            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Category</span>
           </Button>
         </div>
 
@@ -288,34 +336,32 @@ export default function Categories() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="relative bg-card/50 border border-border/50 rounded-2xl p-4 mb-6 backdrop-blur-sm shadow-lg"
+          className="relative bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm shadow-lg"
         >
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search categories..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10" variant="filled" />
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {[
-                { key: 'all', label: 'All Status' },
-                { key: 'active', label: 'Active' },
-                { key: 'inactive', label: 'Inactive' }
-              ].map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setStatusFilter(key)}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
-                    statusFilter === key
-                      ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/30"
-                      : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 h-10 sm:h-11 text-sm" variant="filled" />
+          </div>
+          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+            {[
+              { key: 'all', label: 'All' },
+              { key: 'active', label: 'Active' },
+              { key: 'inactive', label: 'Inactive' }
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setStatusFilter(key)}
+                className={cn(
+                  "px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0",
+                  statusFilter === key
+                    ? "bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-md"
+                    : "bg-secondary text-muted-foreground"
+                )}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </motion.div>
 
@@ -324,10 +370,10 @@ export default function Categories() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+          className="relative bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
         >
           {/* Table Header with Gradient - Hidden on mobile */}
-          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
+          <div className="hidden md:grid grid-cols-12 gap-4 p-3 sm:p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
             <div className="col-span-5 text-xs font-bold text-foreground uppercase tracking-wider">Category Name</div>
             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Slug</div>
             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Items</div>
@@ -336,19 +382,19 @@ export default function Categories() {
           </div>
           <div className="divide-y divide-border/30">
             {isLoading ? (
-              <div className="p-12 text-center">
+              <div className="p-8 sm:p-12 text-center">
                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                   <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                  Loading categories...
+                  Loading...
                 </div>
               </div>
             ) : categories.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
-                  <Folder className="w-8 h-8 text-fuchsia-500" />
+              <div className="p-8 sm:p-12 text-center">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
+                  <Folder className="w-7 h-7 sm:w-8 sm:h-8 text-fuchsia-500" />
                 </div>
                 <h3 className="text-foreground font-semibold">No categories found</h3>
-                <p className="text-muted-foreground text-sm mt-1">Create your first category to get started</p>
+                <p className="text-muted-foreground text-sm mt-1">Create your first category</p>
               </div>
             ) : renderTree(categories)}
           </div>
@@ -362,32 +408,32 @@ export default function Categories() {
               Adding sub-category to: <span className="font-bold text-blue-900 dark:text-white">{creatingUnder.name}</span>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
             <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="Auto-generated" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3}
-              className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white" />
+              className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image</label>
             <ImageUploader onChange={(file) => setFormData({ ...formData, image: file })} />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                 className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20" />
               <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
             </div>
-            <div className="w-24">
+            <div className="w-20 sm:w-24">
               <Input label="Order" type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
             </div>
           </div>
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-            <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">Save</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11">Cancel</Button>
+            <Button type="submit" className="flex-1 h-10 sm:h-11 bg-purple-600 hover:bg-purple-700">Save</Button>
           </div>
         </form>
       </Modal>

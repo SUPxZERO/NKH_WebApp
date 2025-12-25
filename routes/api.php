@@ -443,7 +443,86 @@ Route::prefix('employee')
     Route::get('driver/orders', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'index']);
     Route::post('driver/orders/{order}/claim', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'claim']);
     Route::put('driver/orders/{order}/status', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'updateStatus']);
-    
+
+});
+
+
+// ============================================================================
+// TELEGRAM BOT WEBHOOK
+// ============================================================================
+// Telegram webhook endpoint - no authentication required (verified by secret token)
+Route::post('/telegram/webhook', [App\Http\Controllers\Api\Telegram\TelegramWebhookController::class, 'handle'])
+    ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
+
+
+// ============================================================================
+// TELEGRAM BOT API ROUTES (For bot to call)
+// ============================================================================
+Route::prefix('telegram')
+    ->middleware(['throttle:api']) // Rate limiting
+    ->group(function () {
+
+    // Public endpoints for menu browsing
+    Route::get('/menu/categories', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'categories']);
+    Route::get('/menu/items/{categoryId}', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'items']);
+    Route::get('/menu/items/{categoryId}/paginated', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'itemsPaginated']);
+    Route::get('/menu/item/{itemId}', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'itemDetail']);
+
+    // Locations
+    Route::get('/locations', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'locations']);
+
+    // Time slots
+    Route::get('/time-slots', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'timeSlots']);
+
+    // Payment modes
+    Route::get('/payment-modes/{orderType}', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'paymentModes']);
+
+    // Cart endpoints (require Telegram user session)
+    Route::middleware([\App\Http\Middleware\TelegramAuth::class])
+        ->group(function () {
+
+        // Cart management
+        Route::get('/cart', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'get']);
+        Route::post('/cart/add', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'add']);
+        Route::put('/cart/update/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'update']);
+        Route::delete('/cart/remove/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'remove']);
+        Route::delete('/cart/clear', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'clear']);
+        Route::get('/cart/total', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'total']);
+
+        // Order management
+        Route::get('/orders', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'list']);
+        Route::get('/orders/{orderId}', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'detail']);
+        Route::post('/orders/{orderId}/cancel', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'cancel']);
+
+        // Account management
+        Route::get('/me', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'me']);
+        Route::post('/link-account', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'linkByPhone']);
+        Route::post('/link-account/email', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'linkByEmail']);
+
+        // Addresses
+        Route::get('/addresses', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'addresses']);
+
+        // Loyalty
+        Route::get('/loyalty/stats', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'loyaltyStats']);
+
+        // Notification preferences
+        Route::get('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'notificationPreferences']);
+        Route::put('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateNotificationPreferences']);
+    });
+});
+
+
+// ============================================================================
+// ADMIN TELEGRAM SETTINGS (Optional - for managing bot settings)
+// ============================================================================
+Route::prefix('admin/telegram')
+    ->middleware(['auth:sanctum', 'role:super-admin,admin'])
+    ->group(function () {
+    Route::get('/stats', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'stats']);
+    Route::get('/users', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'users']);
+    Route::post('/set-webhook', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'setWebhook']);
+    Route::get('/webhook-info', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'webhookInfo']);
+    Route::post('/broadcast', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'broadcast']);
 });
 
 

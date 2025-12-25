@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
 
-// Enhanced Stats Card with Gradients
+// Enhanced Stats Card with Gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
   const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string }> = {
     purple: {
@@ -53,32 +53,34 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
       className={cn(
-        "relative overflow-hidden bg-card border rounded-2xl p-5",
-        "hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5",
+        "relative overflow-hidden bg-card border rounded-xl sm:rounded-2xl p-3 sm:p-5 min-w-[100px] sm:min-w-0",
+        "hover:shadow-lg transition-all duration-300",
         styles.border
       )}
     >
       <div className={cn("absolute inset-0 opacity-50", `bg-gradient-to-br ${styles.gradient}`)} />
-      <div className="relative z-10 flex items-center justify-between">
+      <div className="relative z-10 flex items-center justify-between gap-2">
         <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">{title}</p>
-          <p className={cn("text-3xl font-extrabold mt-1", styles.text)}>{value}</p>
+          <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold">{title}</p>
+          <p className={cn("text-xl sm:text-3xl font-extrabold mt-0.5 sm:mt-1", styles.text)}>{value}</p>
         </div>
-        <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-lg", styles.iconBg)}>
-          <Icon className="w-6 h-6 text-white" />
+        <div className={cn("h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg flex-shrink-0", styles.iconBg)}>
+          <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
         </div>
       </div>
     </motion.div>
   );
 };
 
-// Stats Ribbon
+// Stats Ribbon - Horizontal scroll on mobile
 const MenuStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <StatCard title="Total Items" value={stats.total} icon={Package} color="purple" index={0} />
-    <StatCard title="Active" value={stats.active} icon={Eye} color="emerald" index={1} />
-    <StatCard title="Inactive" value={stats.inactive} icon={EyeOff} color="red" index={2} />
-    <StatCard title="Popular" value={stats.popular} icon={Star} color="amber" index={3} />
+  <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+      <StatCard title="Total" value={stats.total} icon={Package} color="purple" index={0} />
+      <StatCard title="Active" value={stats.active} icon={Eye} color="emerald" index={1} />
+      <StatCard title="Inactive" value={stats.inactive} icon={EyeOff} color="red" index={2} />
+      <StatCard title="Popular" value={stats.popular} icon={Star} color="amber" index={3} />
+    </div>
   </div>
 );
 
@@ -237,31 +239,31 @@ export default function MenuItems() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-background p-6 lg:p-8">
+      <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 lg:p-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+          className="flex items-center justify-between gap-3 mb-4 sm:mb-6"
         >
-          <div>
-            <h1 className="text-4xl font-extrabold tracking-tight">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-4xl font-extrabold tracking-tight truncate">
               <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Menu Items
               </span>
             </h1>
-            <p className="text-muted-foreground mt-2 flex items-center gap-2">
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:flex items-center gap-2">
               <Utensils className="w-4 h-4 text-fuchsia-500" />
-              Manage your restaurant's menu and pricing
+              Manage your restaurant's menu
             </p>
           </div>
           <Button
             onClick={() => { resetForm(); setOpenCreate(true); }}
             variant="primary"
-            size="lg"
-            leftIcon={<Plus className="w-5 h-5" />}
+            className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0"
+            leftIcon={<Plus className="w-4 h-4" />}
           >
-            Add Item
+            <span className="hidden sm:inline">Add Item</span>
           </Button>
         </motion.div>
 
@@ -273,26 +275,26 @@ export default function MenuItems() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-card border border-border rounded-2xl p-5 mb-6 shadow-sm"
+          className="bg-card border border-border rounded-xl sm:rounded-2xl p-3 sm:p-5 mb-4 sm:mb-6 shadow-sm"
         >
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex gap-2 sm:gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
-                placeholder="Search menu items..."
+                placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-12 pl-12 pr-4 bg-secondary/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full h-10 sm:h-12 pl-9 sm:pl-12 pr-3 sm:pr-4 bg-secondary/50 border border-border rounded-lg sm:rounded-xl text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-12 px-4 pr-10 bg-secondary/50 border border-border rounded-xl text-foreground text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none min-w-[200px]"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+              className="h-10 sm:h-12 px-3 sm:px-4 pr-8 sm:pr-10 bg-secondary/50 border border-border rounded-lg sm:rounded-xl text-foreground text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none min-w-[100px] sm:min-w-[200px]"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', backgroundSize: '14px' }}
             >
-              <option value="all">All Categories</option>
+              <option value="all">All</option>
               {(categories as any)?.data?.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>{cat.name || cat.translations?.[0]?.name}</option>
               ))}
@@ -307,27 +309,24 @@ export default function MenuItems() {
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-2xl p-5 mb-6 shadow-xl shadow-fuchsia-500/20"
+              className="bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-xl sm:rounded-2xl p-3 sm:p-5 mb-4 sm:mb-6 shadow-xl shadow-fuchsia-500/20"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <Package className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-white/20 flex items-center justify-center">
+                    <Package className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <div>
-                    <p className="text-white font-bold text-lg">{selectedItems.size} item{selectedItems.size === 1 ? '' : 's'} selected</p>
-                    <p className="text-white/70 text-sm">Ready for bulk actions</p>
-                  </div>
+                  <p className="text-white font-bold text-sm sm:text-lg">{selectedItems.size} selected</p>
                 </div>
-                <div className="flex gap-3">
-                  <Button size="md" onClick={handleBulkEnable} variant="success" className="shadow-lg">
-                    <Eye className="w-4 h-4 mr-2" /> Enable
+                <div className="flex gap-1.5 sm:gap-3">
+                  <Button size="sm" onClick={handleBulkEnable} variant="success" className="h-8 sm:h-10 px-2 sm:px-4">
+                    <Eye className="w-4 h-4" /><span className="hidden sm:inline ml-2">Enable</span>
                   </Button>
-                  <Button size="md" onClick={handleBulkDisable} variant="danger" className="shadow-lg">
-                    <EyeOff className="w-4 h-4 mr-2" /> Disable
+                  <Button size="sm" onClick={handleBulkDisable} variant="danger" className="h-8 sm:h-10 px-2 sm:px-4">
+                    <EyeOff className="w-4 h-4" /><span className="hidden sm:inline ml-2">Disable</span>
                   </Button>
-                  <Button size="md" onClick={() => setSelectedItems(new Set())} className="bg-white/20 text-white hover:bg-white/30 border-0">
-                    <X className="w-4 h-4 mr-2" /> Clear
+                  <Button size="sm" onClick={() => setSelectedItems(new Set())} className="h-8 sm:h-10 px-2 bg-white/20 text-white hover:bg-white/30 border-0">
+                    <X className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -340,7 +339,7 @@ export default function MenuItems() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm"
+          className="bg-card border border-border rounded-xl sm:rounded-2xl overflow-hidden shadow-sm"
         >
           {/* Table Header - Hidden on mobile */}
           <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
@@ -363,19 +362,19 @@ export default function MenuItems() {
           {/* Table Body */}
           <div className="divide-y divide-border/50">
             {isLoading ? (
-              <div className="p-16 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
-                  <div className="w-8 h-8 border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+              <div className="p-8 sm:p-16 text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 sm:border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-muted-foreground font-medium">Loading menu items...</p>
+                <p className="text-muted-foreground font-medium text-sm sm:text-base">Loading...</p>
               </div>
             ) : itemList.length === 0 ? (
-              <div className="p-16 text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-muted mb-4">
-                  <Package className="w-10 h-10 text-muted-foreground" />
+              <div className="p-8 sm:p-16 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-secondary to-muted mb-4">
+                  <Package className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
                 </div>
-                <h3 className="text-foreground font-bold text-lg mb-1">No items found</h3>
-                <p className="text-muted-foreground text-sm">Try adjusting your filters or add a new item</p>
+                <h3 className="text-foreground font-bold text-base sm:text-lg mb-1">No items found</h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">Try adjusting filters or add an item</p>
               </div>
             ) : (
               itemList.map((item, index) => (
@@ -385,114 +384,106 @@ export default function MenuItems() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.02 }}
                   className={cn(
-                    "grid grid-cols-1 md:grid-cols-12 gap-4 px-4 md:px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
+                    "p-3 sm:p-4 transition-all duration-200 cursor-pointer",
                     "hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent",
                     selectedItems.has(item.id) && "bg-primary/5 border-l-2 border-l-primary"
                   )}
                 >
-                  {/* Checkbox - Hidden on mobile */}
-                  <div className="hidden md:block col-span-1" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.has(item.id)}
-                      onChange={() => toggleSelectItem(item.id)}
-                      className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all hover:border-primary/50"
-                    />
+                  {/* Mobile Layout */}
+                  <div className="md:hidden">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex-shrink-0 border border-border">
+                        {item.image_path ? (
+                          <img src={item.image_path} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Utensils className="w-5 h-5 text-fuchsia-500/50" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="font-bold text-foreground text-sm truncate">{item.name || 'Untitled'}</div>
+                          <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent flex-shrink-0">
+                            ${item.price}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground truncate">{item.category?.name || 'Uncategorized'}</span>
+                          {item.is_popular && <Star className="w-3 h-3 text-amber-500 fill-amber-500 flex-shrink-0" />}
+                          <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", item.is_active ? "bg-emerald-500" : "bg-red-500")} />
+                        </div>
+                      </div>
+                      <div className="flex gap-1 flex-shrink-0">
+                        <button onClick={() => handlePreview(item)} className="p-2 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-500"><Maximize2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleEdit(item)} className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(item.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Item Info - Full width on mobile */}
-                  <div className="col-span-1 md:col-span-3 flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex-shrink-0 border border-border">
-                      {item.image_path ? (
-                        <img src={item.image_path} alt={item.name} className="w-full h-full object-cover" />
+                  {/* Desktop Layout */}
+                  <div className="hidden md:grid grid-cols-12 gap-4 px-2 items-center group">
+                    <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(item.id)}
+                        onChange={() => toggleSelectItem(item.id)}
+                        className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all hover:border-primary/50"
+                      />
+                    </div>
+                    <div className="col-span-3 flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex-shrink-0 border border-border">
+                        {item.image_path ? (
+                          <img src={item.image_path} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Utensils className="w-6 h-6 text-fuchsia-500/50" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors">{item.name || 'Untitled'}</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1"><Tag className="w-3 h-3" />SKU: {item.sku || 'N/A'}</div>
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
+                        {item.category?.name || 'Uncategorized'}
+                      </span>
+                    </div>
+                    <div className="col-span-1">
+                      <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">${item.price}</span>
+                    </div>
+                    <div className="col-span-1">
+                      {item.is_popular ? (
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30">
+                          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                        </div>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Utensils className="w-6 h-6 text-fuchsia-500/50" />
+                        <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center">
+                          <Star className="w-4 h-4 text-muted-foreground/30" />
                         </div>
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <div className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                        {item.name || 'Untitled'}
-                      </div>
-                      <div className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Tag className="w-3 h-3" />
-                        SKU: {item.sku || 'N/A'}
-                      </div>
+                    <div className="col-span-2">
+                      <button
+                        onClick={() => toggleActiveMutation.mutate({ id: item.id, is_active: !item.is_active })}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all",
+                          item.is_active
+                            ? "bg-gradient-to-r from-emerald-500/20 to-green-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                            : "bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-600 dark:text-red-400 border-red-500/30"
+                        )}
+                      >
+                        {item.is_active ? <><Eye className="w-3.5 h-3.5" /> Active</> : <><EyeOff className="w-3.5 h-3.5" /> Inactive</>}
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Category - Hidden on mobile */}
-                  <div className="hidden md:block col-span-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
-                      {item.category?.name || 'Uncategorized'}
-                    </span>
-                  </div>
-
-                  {/* Price - Visible on mobile */}
-                  <div className="col-span-1 md:col-span-1 text-right md:text-left">
-                    <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                      ${item.price}
-                    </span>
-                  </div>
-
-                  {/* Popular - Hidden on mobile */}
-                  <div className="hidden md:block col-span-1">
-                    {item.is_popular ? (
-                      <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30">
-                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                      </div>
-                    ) : (
-                      <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center">
-                        <Star className="w-4 h-4 text-muted-foreground/30" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Status - Hidden on mobile */}
-                  <div className="hidden md:block col-span-2">
-                    <button
-                      onClick={() => toggleActiveMutation.mutate({ id: item.id, is_active: !item.is_active })}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all",
-                        item.is_active
-                          ? "bg-gradient-to-r from-emerald-500/20 to-green-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:from-emerald-500/30 hover:to-green-500/20"
-                          : "bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-600 dark:text-red-400 border-red-500/30 hover:from-red-500/30 hover:to-rose-500/20"
-                      )}
-                    >
-                      {item.is_active ? <><Eye className="w-3.5 h-3.5" /> Active</> : <><EyeOff className="w-3.5 h-3.5" /> Inactive</>}
-                    </button>
-                  </div>
-
-                  {/* Actions - Always visible */}
-                  <div className="col-span-1 md:col-span-2 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handlePreview(item)}
-                      className="h-9 w-9 p-0 hover:bg-blue-500/10 hover:text-blue-500"
-                      title="Preview"
-                    >
-                      <Maximize2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleEdit(item)}
-                      className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                      title="Edit"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={() => handleDelete(item.id)}
-                      className="h-9 w-9 p-0"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      <Button size="sm" variant="ghost" onClick={() => handlePreview(item)} className="h-9 w-9 p-0 hover:bg-blue-500/10 hover:text-blue-500" title="Preview"><Maximize2 className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="secondary" onClick={() => handleEdit(item)} className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30" title="Edit"><Edit className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)} className="h-9 w-9 p-0" title="Delete"><Trash2 className="w-4 h-4" /></Button>
+                    </div>
                   </div>
                 </motion.div>
               ))
@@ -501,69 +492,36 @@ export default function MenuItems() {
 
           {/* Pagination */}
           {(menuItems as any)?.meta && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 border-t border-border bg-gradient-to-r from-secondary/30 to-transparent">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between gap-2 sm:gap-4 p-3 sm:p-5 border-t border-border bg-gradient-to-r from-secondary/30 to-transparent">
+              <div className="hidden sm:flex items-center gap-3">
                 <div className="h-9 px-4 rounded-lg bg-secondary border border-border flex items-center gap-2">
                   <Package className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">{(menuItems as any).meta.total}</span>
                   <span className="text-sm text-muted-foreground">items</span>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-foreground">{Math.min(page * perPage, (menuItems as any).meta.total)}</span>
-                </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-between sm:justify-end">
                 <Button
                   variant="secondary"
                   size="sm"
                   disabled={page === 1}
                   onClick={() => setPage(p => Math.max(1, p - 1))}
-                  className="h-10 px-4 gap-2"
+                  className="h-9 sm:h-10 px-2 sm:px-4"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline">Previous</span>
+                  <span className="hidden sm:inline ml-1">Prev</span>
                 </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)) }, (_, i) => {
-                    const totalPages = Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage);
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (page <= 3) {
-                      pageNum = i + 1;
-                    } else if (page >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = page - 2 + i;
-                    }
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
-                        className={cn(
-                          "hidden sm:block h-10 w-10 rounded-xl text-sm font-semibold transition-all",
-                          page === pageNum
-                            ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
-                            : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover hover:text-foreground"
-                        )}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                  {/* Mobile page indicator */}
-                  <span className="sm:hidden text-sm font-medium text-foreground px-3 py-2 rounded-xl bg-secondary border border-border">
-                    {page} / {Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
-                  </span>
-                </div>
+                <span className="text-sm font-medium text-foreground px-3 py-2 rounded-lg bg-secondary border border-border">
+                  {page} / {Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
+                </span>
                 <Button
                   variant="secondary"
                   size="sm"
                   disabled={page >= Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
                   onClick={() => setPage(p => p + 1)}
-                  className="h-10 px-4 gap-2"
+                  className="h-9 sm:h-10 px-2 sm:px-4"
                 >
-                  <span className="hidden sm:inline">Next</span>
+                  <span className="hidden sm:inline mr-1">Next</span>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -575,20 +533,19 @@ export default function MenuItems() {
       {/* Create/Edit Modal */}
       <Modal isOpen={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
         title={editingItem ? 'Edit Menu Item' : 'Create Menu Item'} className="max-w-2xl">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
             <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label="SKU" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">Category</label>
               <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full h-11 bg-secondary/50 border border-border rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                className="w-full h-10 sm:h-11 bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                 <option value="">Select Category</option>
-                {/* Only sub-categories (fetched via sub_categories_only=true) */}
                 {(categories as any)?.data?.map((cat: any) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name || cat.translations?.[0]?.name}
@@ -598,7 +555,7 @@ export default function MenuItems() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <Input label="Price" type="number" step="0.01" value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
             <Input label="Cost" type="number" step="0.01" value={formData.cost}
@@ -608,7 +565,7 @@ export default function MenuItems() {
           <div>
             <label className="block text-sm font-semibold text-foreground mb-2">Description</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3} className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" />
+              rows={2} className="w-full bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" />
           </div>
 
           <div>
@@ -616,26 +573,26 @@ export default function MenuItems() {
             <ImageUploader onChange={(file) => setImage(file)}
               value={editingItem?.image_path || null} />
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            <Input label="Display Order" type="number" value={formData.display_order}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+            <Input label="Order" type="number" value={formData.display_order}
               onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
-            <div className="flex items-center space-x-3 pt-6">
+            <div className="flex items-center gap-2 pt-6">
               <input type="checkbox" id="is_popular" checked={formData.is_popular}
                 onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })}
-                className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" />
-              <label htmlFor="is_popular" className="text-sm font-medium text-foreground cursor-pointer">Popular</label>
+                className="w-4 h-4 sm:w-5 sm:h-5 rounded-md border-2 border-border bg-card text-primary cursor-pointer" />
+              <label htmlFor="is_popular" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Popular</label>
             </div>
-            <div className="flex items-center space-x-3 pt-6">
+            <div className="flex items-center gap-2 pt-6">
               <input type="checkbox" id="is_active" checked={formData.is_active}
                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" />
-              <label htmlFor="is_active" className="text-sm font-medium text-foreground cursor-pointer">Active</label>
+                className="w-4 h-4 sm:w-5 sm:h-5 rounded-md border-2 border-border bg-card text-primary cursor-pointer" />
+              <label htmlFor="is_active" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Active</label>
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1">Cancel</Button>
-            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1">
+          <div className="flex gap-3 pt-3 sm:pt-4">
+            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1 h-10 sm:h-11">Cancel</Button>
+            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 h-10 sm:h-11">
               {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingItem ? 'Update' : 'Create')}
             </Button>
           </div>

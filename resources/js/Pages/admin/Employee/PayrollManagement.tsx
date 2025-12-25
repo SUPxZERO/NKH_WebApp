@@ -54,7 +54,7 @@ interface PayrollDetail {
     percentage?: number;
 }
 
-// Enhanced StatCard
+// Enhanced StatCard - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) => {
     const colorStyles: Record<string, any> = {
         blue: { gradient: 'from-blue-500/20 to-cyan-500/10', iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-600', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/30', shadow: 'shadow-blue-500/20' },
@@ -70,24 +70,24 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-                "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+                "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm",
                 `bg-gradient-to-br ${styles.gradient}`,
                 styles.border,
                 `shadow-lg ${styles.shadow}`
             )}
         >
-            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+            <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8 hidden sm:block">
                 <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
             </div>
-            <div className="relative p-5">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-                        <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
-                        {subtext && <p className="text-xs text-muted-foreground mt-1">{subtext}</p>}
+            <div className="relative p-3 sm:p-4 md:p-5">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                        <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1 truncate">{title}</p>
+                        <p className={cn("text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold truncate", styles.text)}>{value}</p>
+                        {subtext && <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">{subtext}</p>}
                     </div>
-                    <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-                        <Icon className="w-6 h-6 text-white" />
+                    <div className={cn("p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </div>
             </div>
@@ -251,120 +251,118 @@ export default function PayrollManagement() {
     return (
         <AdminLayout>
             <Head title="Payroll Management" />
-            <div className="min-h-screen bg-background p-6 transition-colors relative overflow-hidden">
-                {/* Decorative Background */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 transition-colors relative overflow-x-hidden">
+                {/* Decorative Background - Hidden on mobile */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl opacity-50" />
                     <div className="absolute bottom-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl opacity-50" />
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto space-y-6">
+                <div className="relative z-10 max-w-7xl mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
                             <motion.h1
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-3"
+                                className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3"
                             >
-                                <DollarSign className="w-8 h-8 text-blue-600" />
-                                Payroll Management
+                                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-blue-600 flex-shrink-0" />
+                                <span className="truncate">Payroll</span>
                             </motion.h1>
-                            <p className="text-muted-foreground mt-2">Manage employee compensation, bonuses, and deductions</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-1 hidden sm:block">Manage compensation & deductions</p>
                         </div>
-                        <div className="flex gap-2">
-                            <div className="relative">
-                                <Button
-                                    onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
-                                    disabled={!(payrollData as any)?.data?.length}
-                                    variant="outline"
-                                    className="bg-background/50 backdrop-blur-sm border-border"
-                                >
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Export
-                                    <ChevronDown className="w-4 h-4 ml-2" />
-                                </Button>
-                                {isExportDropdownOpen && (
-                                    <div className="absolute right-0 top-full mt-2 z-50">
-                                        <div
-                                            className="border rounded-xl shadow-2xl p-2 w-48"
-                                            style={{ backgroundColor: '#18181b' }}
+                        <div className="relative flex-shrink-0">
+                            <Button
+                                onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
+                                disabled={!(payrollData as any)?.data?.length}
+                                variant="outline"
+                                className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm bg-background/50 backdrop-blur-sm border-border"
+                            >
+                                <Download className="w-4 h-4 sm:mr-2" />
+                                <span className="hidden sm:inline">Export</span>
+                                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                            </Button>
+                            {isExportDropdownOpen && (
+                                <div className="absolute right-0 top-full mt-2 z-50">
+                                    <div
+                                        className="border rounded-xl shadow-2xl p-2 w-40 sm:w-48"
+                                        style={{ backgroundColor: '#18181b' }}
+                                    >
+                                        <button
+                                            onClick={handleExportCSV}
+                                            className="flex items-center gap-3 w-full p-2 sm:p-2.5 rounded-lg cursor-pointer transition-colors hover:bg-zinc-800"
                                         >
-                                            <button
-                                                onClick={handleExportCSV}
-                                                className="flex items-center gap-3 w-full p-2.5 rounded-lg cursor-pointer transition-colors hover:bg-zinc-800"
-                                            >
-                                                <FileSpreadsheet className="w-4 h-4 text-green-500" />
-                                                <span style={{ color: '#ffffff', fontWeight: 500 }}>Export CSV</span>
-                                            </button>
-                                            <button
-                                                onClick={handleExportPDF}
-                                                className="flex items-center gap-3 w-full p-2.5 rounded-lg cursor-pointer transition-colors hover:bg-zinc-800"
-                                            >
-                                                <FileText className="w-4 h-4 text-red-500" />
-                                                <span style={{ color: '#ffffff', fontWeight: 500 }}>Export PDF</span>
-                                            </button>
-                                        </div>
+                                            <FileSpreadsheet className="w-4 h-4 text-green-500" />
+                                            <span className="text-sm" style={{ color: '#ffffff', fontWeight: 500 }}>CSV</span>
+                                        </button>
+                                        <button
+                                            onClick={handleExportPDF}
+                                            className="flex items-center gap-3 w-full p-2 sm:p-2.5 rounded-lg cursor-pointer transition-colors hover:bg-zinc-800"
+                                        >
+                                            <FileText className="w-4 h-4 text-red-500" />
+                                            <span className="text-sm" style={{ color: '#ffffff', fontWeight: 500 }}>PDF</span>
+                                        </button>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Stats Ribbon */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <StatCard title="Total Employees" value={employeeCount} icon={Users} color="blue" index={0} />
-                        <StatCard title="Gross Pay" value={`$${totalGross.toFixed(2)}`} icon={Wallet} color="emerald" index={1} />
-                        <StatCard title="Total Net Pay" value={`$${totalNet.toFixed(2)}`} icon={CreditCard} color="amber" index={2} />
-                        <StatCard title="Total Deductions" value={`$${totalDeductions.toFixed(2)}`} icon={TrendingDown} color="rose" index={3} />
+                    {/* Stats Ribbon - Grid on all sizes */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+                        <StatCard title="Employees" value={employeeCount} icon={Users} color="blue" index={0} />
+                        <StatCard title="Gross" value={`$${totalGross.toFixed(0)}`} icon={Wallet} color="emerald" index={1} />
+                        <StatCard title="Net" value={`$${totalNet.toFixed(0)}`} icon={CreditCard} color="amber" index={2} />
+                        <StatCard title="Deduct" value={`$${totalDeductions.toFixed(0)}`} icon={TrendingDown} color="rose" index={3} />
                     </div>
 
-                    {/* Control Panel */}
+                    {/* Control Panel - Mobile optimized */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-card border border-border/50 rounded-2xl p-6 shadow-lg"
+                        className="bg-card border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg"
                     >
-                        <div className="flex flex-col md:flex-row gap-6">
-                            <div className="w-full md:w-1/4 space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payroll Period</label>
+                        <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:gap-6">
+                            <div className="w-full md:w-1/4 space-y-1.5 sm:space-y-2">
+                                <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">Period</label>
                                 <div className="relative">
                                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                                     <Input
                                         type="month"
                                         value={selectedMonth}
                                         onChange={(e) => setSelectedMonth(e.target.value)}
-                                        className="pl-10"
+                                        className="pl-10 h-10 text-sm"
                                     />
                                 </div>
                             </div>
-                            <div className="w-full md:w-1/2 space-y-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Employee Selection</label>
+                            <div className="w-full md:w-1/2 space-y-1.5 sm:space-y-2">
+                                <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">Employees</label>
                                 <div className="relative">
                                     <button
                                         onClick={toggleDropdown}
-                                        className="w-full flex items-center justify-between p-2 pl-3 bg-background border border-border rounded-xl shadow-sm hover:border-blue-500/50 transition-colors"
+                                        className="w-full flex items-center justify-between p-2 pl-3 h-10 bg-background border border-border rounded-xl shadow-sm hover:border-blue-500/50 transition-colors"
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <Users className="w-4 h-4 text-blue-500" />
-                                            <span className="text-sm">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <Users className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                            <span className="text-sm truncate">
                                                 {selectedEmployees.length === 0
-                                                    ? 'Select Employees'
-                                                    : `${selectedEmployees.length} Employee${selectedEmployees.length !== 1 ? 's' : ''} Selected`}
+                                                    ? 'Select'
+                                                    : `${selectedEmployees.length} selected`}
                                             </span>
                                         </div>
-                                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
                                     {isDropdownOpen && (
                                         <div className="absolute inset-x-0 top-full mt-2" style={{ zIndex: 9999 }}>
                                             <div
-                                                className="border rounded-xl shadow-2xl p-2 max-h-60 overflow-y-auto"
+                                                className="border rounded-xl shadow-2xl p-2 max-h-48 sm:max-h-60 overflow-y-auto"
                                                 style={{ backgroundColor: '#18181b' }}
                                             >
                                                 <label
-                                                    className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer font-medium border-b mb-2 sticky top-0"
+                                                    className="flex items-center gap-3 p-2 sm:p-2.5 rounded-lg cursor-pointer font-medium border-b mb-2 sticky top-0"
                                                     style={{ backgroundColor: '#18181b', borderColor: '#3f3f46' }}
                                                 >
                                                     <input
@@ -375,15 +373,14 @@ export default function PayrollManagement() {
                                                         }
                                                         onChange={(e) => handleSelectAllEmployees(e.target.checked)}
                                                         className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                                                        style={{ backgroundColor: '#27272a', borderColor: '#52525b' }}
                                                     />
-                                                    <span style={{ color: '#ffffff', fontWeight: 600 }}>Select All ({(employees as any)?.data?.length || 0})</span>
+                                                    <span className="text-sm" style={{ color: '#ffffff', fontWeight: 600 }}>All ({(employees as any)?.data?.length || 0})</span>
                                                 </label>
                                                 <div className="space-y-1">
                                                     {(employees as any)?.data?.map((emp: any) => (
                                                         <label
                                                             key={emp.id}
-                                                            className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors group hover:brightness-125"
+                                                            className="flex items-center gap-3 p-2 sm:p-2.5 rounded-lg cursor-pointer transition-colors group hover:brightness-125"
                                                             style={{ backgroundColor: '#18181b' }}
                                                         >
                                                             <input
@@ -391,9 +388,8 @@ export default function PayrollManagement() {
                                                                 checked={selectedEmployees.includes(emp.id)}
                                                                 onChange={(e) => handleSelectEmployee(emp.id, e.target.checked)}
                                                                 className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                                                                style={{ backgroundColor: '#27272a', borderColor: '#52525b' }}
                                                             />
-                                                            <span style={{ color: '#ffffff', fontWeight: 500 }}>{emp.user?.name || emp.employee_code}</span>
+                                                            <span className="text-sm truncate" style={{ color: '#ffffff', fontWeight: 500 }}>{emp.user?.name || emp.employee_code}</span>
                                                         </label>
                                                     ))}
                                                 </div>
@@ -407,20 +403,20 @@ export default function PayrollManagement() {
                                 <Button
                                     onClick={() => generateMutation.mutate(selectedEmployees)}
                                     disabled={generateMutation.isPending || selectedEmployees.length === 0}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
+                                    className="w-full h-10 text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
                                 >
-                                    {generateMutation.isPending ? 'Generating...' : 'Generate Payroll'}
+                                    {generateMutation.isPending ? 'Generating...' : 'Generate'}
                                 </Button>
                             </div>
                         </div>
                     </motion.div>
 
-                    {/* Records Table */}
+                    {/* Records Table - Desktop */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+                        className="hidden md:block bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
                         <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-blue-500/10">
                             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Employee</div>
@@ -441,7 +437,7 @@ export default function PayrollManagement() {
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
                                         <Wallet className="w-8 h-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-muted-foreground">No payroll records generated for this period</p>
+                                    <p className="text-muted-foreground">No payroll records for this period</p>
                                 </div>
                             ) : (
                                 (payrollData as any).data.map((record: PayrollRecord, idx: number) => (
@@ -487,31 +483,101 @@ export default function PayrollManagement() {
                             )}
                         </div>
                     </motion.div>
+
+                    {/* Records Cards - Mobile */}
+                    <div className="md:hidden space-y-3">
+                        {payrollLoading ? (
+                            <div className="p-8 text-center text-muted-foreground bg-card/50 rounded-xl border border-border/50">Loading...</div>
+                        ) : !(payrollData as any)?.data?.length ? (
+                            <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">
+                                <Wallet className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                                <p className="text-muted-foreground text-sm">No payroll records</p>
+                            </div>
+                        ) : (
+                            (payrollData as any).data.map((record: PayrollRecord) => (
+                                <div
+                                    key={record.id}
+                                    className="bg-card/50 border border-border/50 rounded-xl p-3 backdrop-blur-sm"
+                                >
+                                    {/* Header: Name + Status */}
+                                    <div className="flex items-center justify-between gap-2 mb-3">
+                                        <div className="min-w-0">
+                                            <div className="font-medium text-sm text-foreground truncate">{record.employee_name}</div>
+                                            <div className="text-[10px] text-muted-foreground">
+                                                {new Date(record.period_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(record.period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </div>
+                                        </div>
+                                        <span className={cn("px-2 py-1 rounded-full text-[10px] uppercase font-bold border flex-shrink-0", getStatusColor(record.status))}>
+                                            {record.status}
+                                        </span>
+                                    </div>
+
+                                    {/* Pay breakdown */}
+                                    <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
+                                        <div className="bg-secondary/30 rounded-lg p-2 text-center">
+                                            <div className="text-muted-foreground">Base</div>
+                                            <div className="font-semibold">${record.base_pay.toFixed(0)}</div>
+                                        </div>
+                                        <div className="bg-emerald-500/10 rounded-lg p-2 text-center">
+                                            <div className="text-muted-foreground">+Bonus</div>
+                                            <div className="font-semibold text-emerald-600">${(record.overtime_pay + record.bonuses).toFixed(0)}</div>
+                                        </div>
+                                        <div className="bg-red-500/10 rounded-lg p-2 text-center">
+                                            <div className="text-muted-foreground">-Deduct</div>
+                                            <div className="font-semibold text-red-500">${(record.deductions + record.taxes).toFixed(0)}</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Net pay + Actions */}
+                                    <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                                        <div>
+                                            <span className="text-xs text-muted-foreground">Net Pay: </span>
+                                            <span className="font-bold text-foreground">${record.net_pay.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <Button size="sm" variant="ghost" onClick={() => { setViewingPayrollId(record.id); setShowDetailsModal(true); }} className="h-8 w-8 p-0">
+                                                <Eye className="w-4 h-4" />
+                                            </Button>
+                                            {record.status === 'draft' && (
+                                                <>
+                                                    <Button size="sm" variant="ghost" onClick={() => { setEditingPayrollId(record.id); setShowAddDetailModal(true); }} className="h-8 w-8 p-0 hover:text-blue-600">
+                                                        <Plus className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => finalizeMutation.mutate(record.id)} className="h-8 w-8 p-0 hover:text-emerald-600">
+                                                        <CheckCircle className="w-4 h-4" />
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div >
             </div >
 
-            {/* Details Modal */}
-            < Modal open={showDetailsModal} onClose={() => setShowDetailsModal(false)
-            } title="Payroll Breakdown" >
-                <div className="space-y-4">
+            {/* Details Modal - Mobile optimized */}
+            <Modal open={showDetailsModal} onClose={() => setShowDetailsModal(false)} title="Breakdown">
+                <div className="space-y-3 sm:space-y-4">
                     {(detailsData as any)?.data?.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-4">No additional details</p>
+                        <p className="text-center text-muted-foreground py-4 text-sm">No additional details</p>
                     ) : (
                         <div className="space-y-2">
                             {(detailsData as any)?.data?.map((detail: PayrollDetail) => (
-                                <div key={detail.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border/50">
-                                    <div>
-                                        <p className="font-medium text-foreground">{detail.category}</p>
-                                        <span className={cn("text-xs uppercase font-bold", detail.type === 'earning' ? "text-emerald-600" : "text-red-500")}>
+                                <div key={detail.id} className="flex items-center justify-between p-2.5 sm:p-3 bg-secondary/50 rounded-lg sm:rounded-xl border border-border/50">
+                                    <div className="min-w-0">
+                                        <p className="font-medium text-sm text-foreground truncate">{detail.category}</p>
+                                        <span className={cn("text-[10px] sm:text-xs uppercase font-bold", detail.type === 'earning' ? "text-emerald-600" : "text-red-500")}>
                                             {detail.type}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className={cn("font-bold", detail.type === 'earning' ? "text-emerald-600" : "text-red-600")}>
+                                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                                        <span className={cn("font-bold text-sm", detail.type === 'earning' ? "text-emerald-600" : "text-red-600")}>
                                             {detail.type === 'earning' ? '+' : '-'}${detail.amount.toFixed(2)}
                                         </span>
                                         {editingPayrollId && (
-                                            <button onClick={() => removeDetailMutation.mutate(detail.id)} className="text-muted-foreground hover:text-red-500">
+                                            <button onClick={() => removeDetailMutation.mutate(detail.id)} className="text-muted-foreground hover:text-red-500 p-1">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         )}
@@ -520,40 +586,40 @@ export default function PayrollManagement() {
                             ))}
                         </div>
                     )}
-                    <Button onClick={() => setShowDetailsModal(false)} variant="secondary" className="w-full">Close</Button>
+                    <Button onClick={() => setShowDetailsModal(false)} variant="secondary" className="w-full h-10 sm:h-11 text-sm">Close</Button>
                 </div>
-            </Modal >
+            </Modal>
 
-            {/* Add Detail Modal */}
-            < Modal open={showAddDetailModal} onClose={() => setShowAddDetailModal(false)} title="Add Adjustment" >
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+            {/* Add Detail Modal - Mobile optimized */}
+            <Modal open={showAddDetailModal} onClose={() => setShowAddDetailModal(false)} title="Add Adjustment">
+                <div className="space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">Type</label>
+                            <label className="block text-xs sm:text-sm font-medium mb-1.5">Type</label>
                             <select
                                 value={newDetail.type}
                                 onChange={(e) => setNewDetail({ ...newDetail, type: e.target.value as any })}
-                                className="w-full rounded-xl border border-border bg-background px-3 py-2"
+                                className="w-full h-10 rounded-lg sm:rounded-xl border border-border bg-background px-3 text-sm"
                             >
                                 <option value="earning">Earning (+)</option>
                                 <option value="deduction">Deduction (-)</option>
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Description</label>
-                            <Input value={newDetail.description} onChange={(e) => setNewDetail({ ...newDetail, description: e.target.value })} placeholder="e.g. Bonus" />
+                            <label className="block text-xs sm:text-sm font-medium mb-1.5">Description</label>
+                            <Input value={newDetail.description} onChange={(e) => setNewDetail({ ...newDetail, description: e.target.value })} placeholder="e.g. Bonus" className="h-10 text-sm" />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Amount ($)</label>
-                        <Input type="number" step="0.01" value={newDetail.amount} onChange={(e) => setNewDetail({ ...newDetail, amount: parseFloat(e.target.value) || 0 })} />
+                        <label className="block text-xs sm:text-sm font-medium mb-1.5">Amount ($)</label>
+                        <Input type="number" step="0.01" value={newDetail.amount} onChange={(e) => setNewDetail({ ...newDetail, amount: parseFloat(e.target.value) || 0 })} className="h-10 text-sm" />
                     </div>
-                    <div className="flex gap-3 pt-4">
-                        <Button onClick={() => setShowAddDetailModal(false)} variant="secondary" className="flex-1">Cancel</Button>
-                        <Button onClick={() => addDetailMutation.mutate(editingPayrollId!)} className="flex-1 bg-blue-600 hover:bg-blue-700">Add Adjustment</Button>
+                    <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+                        <Button onClick={() => setShowAddDetailModal(false)} variant="secondary" className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+                        <Button onClick={() => addDetailMutation.mutate(editingPayrollId!)} className="flex-1 h-10 sm:h-11 text-sm bg-blue-600 hover:bg-blue-700">Add</Button>
                     </div>
                 </div>
-            </Modal >
+            </Modal>
         </AdminLayout >
     );
 }

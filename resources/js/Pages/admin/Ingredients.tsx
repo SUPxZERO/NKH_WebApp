@@ -15,7 +15,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// Enhanced StatCard
+// Enhanced StatCard - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) => {
     const colorStyles: Record<string, any> = {
         purple: { gradient: 'from-purple-500/20 to-fuchsia-500/10', iconBg: 'bg-gradient-to-br from-purple-500 to-fuchsia-600', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/30', shadow: 'shadow-purple-500/20' },
@@ -31,24 +31,24 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-                "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+                "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm min-w-[120px] sm:min-w-0",
                 `bg-gradient-to-br ${styles.gradient}`,
                 styles.border,
                 `shadow-lg ${styles.shadow}`
             )}
         >
-            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8 hidden sm:block">
                 <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
             </div>
-            <div className="relative p-5">
-                <div className="flex items-center justify-between">
+            <div className="relative p-3 sm:p-4 md:p-5">
+                <div className="flex items-center justify-between gap-2">
                     <div>
-                        <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-                        <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
-                        {subtext && <p className="text-xs text-muted-foreground mt-1">{subtext}</p>}
+                        <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1">{title}</p>
+                        <p className={cn("text-lg sm:text-2xl md:text-3xl font-bold", styles.text)}>{value}</p>
+                        {subtext && <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">{subtext}</p>}
                     </div>
-                    <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-                        <Icon className="w-6 h-6 text-white" />
+                    <div className={cn("p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </div>
             </div>
@@ -228,40 +228,42 @@ export default function Ingredients() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-background p-6 transition-colors relative overflow-hidden">
-                {/* Decorative Background */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 transition-colors relative overflow-x-hidden">
+                {/* Decorative Background - Hidden on mobile */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 right-10 w-96 h-96 bg-green-500/10 rounded-full blur-3xl opacity-50" />
                     <div className="absolute bottom-20 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl opacity-50" />
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto space-y-6">
+                <div className="relative z-10 max-w-7xl mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
                             <motion.h1
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 bg-clip-text text-transparent flex items-center gap-3"
+                                className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3"
                             >
-                                <Leaf className="w-8 h-8 text-emerald-600" />
-                                Ingredients & Stock
+                                <Leaf className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600 flex-shrink-0" />
+                                <span className="truncate">Ingredients</span>
                             </motion.h1>
-                            <p className="text-muted-foreground mt-2">Manage inventory items, costs, and stock levels</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">Manage inventory items and stock</p>
                         </div>
                         <Button
                             onClick={() => { closeModal(); setOpenCreate(true); }}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                         >
-                            <Plus className="w-4 h-4 mr-2" /> Add Ingredient
+                            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Ingredient</span>
                         </Button>
                     </div>
 
-                    {/* Stats Ribbon */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <StatCard title="Total Items" value={stats.total} icon={Package} color="purple" index={0} />
-                        <StatCard title="Low Stock Alerts" value={stats.lowStock} icon={AlertTriangle} color="amber" index={1} subtext="Items below reorder point" />
-                        <StatCard title="Total Inventory Value" value={`$${stats.totalValue.toLocaleString()}`} icon={DollarSign} color="emerald" index={2} />
+                    {/* Stats Ribbon - Horizontal scroll on mobile */}
+                    <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+                        <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+                            <StatCard title="Total Items" value={stats.total} icon={Package} color="purple" index={0} />
+                            <StatCard title="Low Stock" value={stats.lowStock} icon={AlertTriangle} color="amber" index={1} subtext="Below reorder point" />
+                            <StatCard title="Inventory Value" value={`$${stats.totalValue.toLocaleString()}`} icon={DollarSign} color="emerald" index={2} />
+                        </div>
                     </div>
 
                     {/* Filters */}
@@ -269,27 +271,22 @@ export default function Ingredients() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl p-4 backdrop-blur-sm shadow-lg"
+                        className="bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 backdrop-blur-sm shadow-lg"
                     >
-                        <div className="flex flex-wrap gap-4">
-                            <div className="relative flex-1 min-w-[200px]">
+                        <div className="flex gap-2 sm:gap-4">
+                            <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                <Input placeholder="Search ingredients..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 bg-background/50 border-border/50 focus:border-emerald-500 text-foreground" />
+                                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                    className="pl-9 sm:pl-10 h-10 text-sm bg-background/50 border-border/50 focus:border-emerald-500 text-foreground" />
                             </div>
                             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-                                className="bg-background/50 border border-border/50 rounded-xl px-4 py-2 text-foreground focus:border-emerald-500 focus:ring-emerald-500/20 outline-none transition-all">
-                                <option value="all">All Categories</option>
+                                className="bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-emerald-500 outline-none transition-all">
+                                <option value="all">Category</option>
                                 {Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                             </select>
-                            <select value={supplierFilter} onChange={(e) => setSupplierFilter(e.target.value)}
-                                className="bg-background/50 border border-border/50 rounded-xl px-4 py-2 text-foreground focus:border-emerald-500 focus:ring-emerald-500/20 outline-none transition-all">
-                                <option value="all">All Suppliers</option>
-                                {suppliers?.data?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                            </select>
                             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                                className="bg-background/50 border border-border/50 rounded-xl px-4 py-2 text-foreground focus:border-emerald-500 focus:ring-emerald-500/20 outline-none transition-all">
-                                <option value="all">All Status</option>
+                                className="hidden sm:block bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-emerald-500 outline-none transition-all">
+                                <option value="all">Status</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
                             </select>
@@ -301,9 +298,10 @@ export default function Ingredients() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+                        className="bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
-                        <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-emerald-500/10 via-green-500/5 to-emerald-500/10">
+                        {/* Table Header - Desktop only */}
+                        <div className="hidden lg:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-emerald-500/10 via-green-500/5 to-emerald-500/10">
                             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Code</div>
                             <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name</div>
                             <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Category</div>
@@ -313,13 +311,13 @@ export default function Ingredients() {
                         </div>
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
-                                <div className="p-12 text-center text-muted-foreground">Loading...</div>
+                                <div className="p-8 sm:p-12 text-center text-muted-foreground text-sm">Loading...</div>
                             ) : ingredientList.length === 0 ? (
-                                <div className="p-12 text-center">
-                                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
-                                        <Package className="w-8 h-8 text-muted-foreground" />
+                                <div className="p-8 sm:p-12 text-center">
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
+                                        <Package className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-muted-foreground">No ingredients found</p>
+                                    <p className="text-muted-foreground text-sm">No ingredients found</p>
                                 </div>
                             ) : ingredientList.map((ingredient: Ingredient, idx: number) => {
                                 const CatIcon = getCategoryIcon(ingredient.category);
@@ -329,31 +327,61 @@ export default function Ingredients() {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: idx * 0.05 }}
-                                        className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center hover:bg-emerald-500/5 transition-all group"
+                                        className="p-3 sm:p-4 hover:bg-emerald-500/5 transition-all"
                                     >
-                                        <div className="hidden md:block col-span-2 font-mono text-sm text-foreground/70 bg-secondary/50 px-2 py-1 rounded w-fit">{ingredient.code}</div>
-                                        <div className="col-span-1 md:col-span-3">
-                                            <div className="font-medium text-foreground">{ingredient.name}</div>
+                                        {/* Mobile Card Layout */}
+                                        <div className="lg:hidden">
+                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="font-medium text-foreground text-sm truncate">{ingredient.name}</div>
+                                                    <div className="text-[10px] text-muted-foreground font-mono mt-0.5">{ingredient.code}</div>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => handleEdit(ingredient)} className="p-2 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-600"><Edit size={14} /></button>
+                                                    <button onClick={() => handleDelete(ingredient.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500"><Trash2 size={14} /></button>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                <span className={cn("px-2 py-0.5 rounded text-[10px] font-medium border flex items-center gap-1", getCategoryColor(ingredient.category))}>
+                                                    <CatIcon size={10} />
+                                                    {categories[ingredient.category as keyof typeof categories]}
+                                                </span>
+                                                <span className="text-xs font-bold text-foreground">{ingredient.current_stock} {ingredient.unit?.code}</span>
+                                                <span className="text-[10px] text-muted-foreground">${Number(ingredient.cost_per_unit).toFixed(2)}/{ingredient.unit?.code}</span>
+                                            </div>
                                             {isLowStock(ingredient) && (
-                                                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs mt-1 font-bold animate-pulse">
+                                                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs font-bold">
                                                     <AlertTriangle size={10} /> Low Stock
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="hidden md:block col-span-2">
-                                            <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getCategoryColor(ingredient.category))}>
-                                                <CatIcon size={12} />
-                                                {categories[ingredient.category as keyof typeof categories]}
-                                            </span>
-                                        </div>
-                                        <div className="hidden md:block col-span-2 text-sm">
-                                            <div className="text-foreground font-bold">{ingredient.current_stock} {ingredient.unit?.code}</div>
-                                            <div className="text-muted-foreground text-xs">${Number(ingredient.cost_per_unit).toFixed(2)} / {ingredient.unit?.code}</div>
-                                        </div>
-                                        <div className="hidden md:block col-span-2 text-sm text-muted-foreground">{ingredient.supplier?.name || '-'}</div>
-                                        <div className="col-span-1 flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                            <Button size="sm" variant="ghost" onClick={() => handleEdit(ingredient)} className="h-8 w-8 p-0 hover:text-blue-600"><Edit size={14} /></Button>
-                                            <Button size="sm" variant="ghost" onClick={() => handleDelete(ingredient.id)} className="h-8 w-8 p-0 hover:text-red-500"><Trash2 size={14} /></Button>
+
+                                        {/* Desktop Grid Layout */}
+                                        <div className="hidden lg:grid grid-cols-12 gap-4 items-center group">
+                                            <div className="col-span-2 font-mono text-sm text-foreground/70 bg-secondary/50 px-2 py-1 rounded w-fit">{ingredient.code}</div>
+                                            <div className="col-span-3">
+                                                <div className="font-medium text-foreground">{ingredient.name}</div>
+                                                {isLowStock(ingredient) && (
+                                                    <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs mt-1 font-bold animate-pulse">
+                                                        <AlertTriangle size={10} /> Low Stock
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="col-span-2">
+                                                <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getCategoryColor(ingredient.category))}>
+                                                    <CatIcon size={12} />
+                                                    {categories[ingredient.category as keyof typeof categories]}
+                                                </span>
+                                            </div>
+                                            <div className="col-span-2 text-sm">
+                                                <div className="text-foreground font-bold">{ingredient.current_stock} {ingredient.unit?.code}</div>
+                                                <div className="text-muted-foreground text-xs">${Number(ingredient.cost_per_unit).toFixed(2)} / {ingredient.unit?.code}</div>
+                                            </div>
+                                            <div className="col-span-2 text-sm text-muted-foreground">{ingredient.supplier?.name || '-'}</div>
+                                            <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="sm" variant="ghost" onClick={() => handleEdit(ingredient)} className="h-8 w-8 p-0 hover:text-blue-600"><Edit size={14} /></Button>
+                                                <Button size="sm" variant="ghost" onClick={() => handleDelete(ingredient.id)} className="h-8 w-8 p-0 hover:text-red-500"><Trash2 size={14} /></Button>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 );
@@ -363,38 +391,38 @@ export default function Ingredients() {
                 </div>
 
                 <Modal open={openCreate || openEdit} onClose={closeModal} title={editingIngredient ? 'Edit Ingredient' : 'New Ingredient'} size="lg">
-                    <form onSubmit={handleSubmit} className="space-y-5 p-1">
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input label="Item Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. TOM-001" />
-                            <Input label="Item Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Tomato Ripe" />
+                    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <Input label="Item Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. TOM-001" className="h-10 text-sm" />
+                            <Input label="Item Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Tomato Ripe" className="h-10 text-sm" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Category</label>
                                 <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
+                                    className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
                                     {Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-foreground mb-1">Base Unit</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Unit</label>
                                 <select value={formData.unit_id} onChange={(e) => setFormData({ ...formData, unit_id: e.target.value })} required
-                                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
-                                    <option value="">Select Unit</option>
-                                    {units?.data?.map((u: any) => <option key={u.id} value={u.id}>{u.name} ({u.code})</option>)}
+                                    className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
+                                    <option value="">Select</option>
+                                    {units?.data?.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}
                                 </select>
                             </div>
                         </div>
 
-                        <div className="bg-secondary/30 p-4 rounded-xl border border-border/50">
-                            <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Inventory Settings</h4>
-                            <div className="grid grid-cols-3 gap-4">
-                                <Input label="Cost per Unit ($)" type="number" step="0.01" value={formData.cost_per_unit} onChange={(e) => setFormData({ ...formData, cost_per_unit: e.target.value })} required placeholder="0.00" />
-                                <Input label="Reorder Point" type="number" step="0.01" value={formData.reorder_point} onChange={(e) => setFormData({ ...formData, reorder_point: e.target.value })} placeholder="Min Qty" />
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">Supplier</label>
+                        <div className="bg-secondary/30 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50">
+                            <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-muted-foreground">Inventory</h4>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+                                <Input label="Cost ($)" type="number" step="0.01" value={formData.cost_per_unit} onChange={(e) => setFormData({ ...formData, cost_per_unit: e.target.value })} required placeholder="0.00" className="h-10 text-sm" />
+                                <Input label="Reorder Pt" type="number" step="0.01" value={formData.reorder_point} onChange={(e) => setFormData({ ...formData, reorder_point: e.target.value })} placeholder="Min" className="h-10 text-sm" />
+                                <div className="col-span-2 sm:col-span-1">
+                                    <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Supplier</label>
                                     <select value={formData.supplier_id} onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
-                                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
+                                        className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
                                         <option value="">None</option>
                                         {suppliers?.data?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
@@ -402,10 +430,10 @@ export default function Ingredients() {
                             </div>
                         </div>
 
-                        <div className="flex gap-3 pt-4">
-                            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 hover:bg-secondary/80">Cancel</Button>
-                            <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20">
-                                {editingIngredient ? 'Save Changes' : 'Create Ingredient'}
+                        <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+                            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-9 sm:h-10 text-sm">Cancel</Button>
+                            <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white h-9 sm:h-10 text-sm">
+                                {editingIngredient ? 'Save' : 'Create'}
                             </Button>
                         </div>
                     </form>

@@ -2,178 +2,221 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Search, ChevronLeft, ChevronRight, Eye, Edit, Trash2, Clock,
-  CheckCircle, XCircle, DollarSign, MapPin, User, Calendar, Package,
-  ThumbsUp, ThumbsDown, AlertCircle, Utensils, AlertTriangle,
-  ShoppingBag, Truck, Coffee, ChefHat, X, Phone, FileText, UtensilsCrossed,
-  CreditCard, Receipt, Hash
+  Search, ChevronLeft, ChevronRight, Clock, CheckCircle, XCircle,
+  DollarSign, User, Package, ThumbsUp, AlertTriangle, X, UtensilsCrossed,
+  ChefHat, Coffee, ShoppingBag, Truck, Filter, CalendarDays, Eye,
+  MoreVertical, Play, Timer, Sparkles, TrendingUp, Zap, RefreshCw,
+  ArrowUpRight, ReceiptText, CreditCard, MapPin, Phone, Mail
 } from 'lucide-react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { Button } from '@/app/components/ui/Button';
-import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
-import { Badge } from '@/app/components/ui/Badge';
-import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/app/utils/api';
+import { apiGet, apiPut, apiPatch } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Order } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 
-// --- Stats Ribbon Component ---
-const OrderStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-    {/* Total Orders - Purple gradient */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0 }}
-      className="relative overflow-hidden bg-card border border-border rounded-2xl p-5 shadow-theme-md hover:shadow-theme-lg hover:-translate-y-1 transition-all duration-300"
-    >
-      <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 blur-xl" />
-      <div className="relative flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Total Orders</p>
-          <p className="text-3xl font-bold text-foreground mt-1">{stats.total}</p>
-        </div>
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center border border-fuchsia-500/30">
-          <Package className="w-6 h-6 text-fuchsia-500" />
-        </div>
-      </div>
-    </motion.div>
-
-    {/* Pending - Amber gradient */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 }}
-      className="relative overflow-hidden bg-card border border-border rounded-2xl p-5 shadow-theme-md hover:shadow-theme-lg hover:-translate-y-1 transition-all duration-300"
-    >
-      <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-gradient-to-br from-amber-500/20 to-yellow-500/20 blur-xl" />
-      <div className="relative flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Pending</p>
-          <p className="text-3xl font-bold text-amber-500 mt-1">{stats.pending}</p>
-        </div>
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 flex items-center justify-center border border-amber-500/30">
-          <Clock className="w-6 h-6 text-amber-500" />
-        </div>
-      </div>
-    </motion.div>
-
-    {/* Preparing - Orange gradient */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="relative overflow-hidden bg-card border border-border rounded-2xl p-5 shadow-theme-md hover:shadow-theme-lg hover:-translate-y-1 transition-all duration-300"
-    >
-      <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/20 blur-xl" />
-      <div className="relative flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Preparing</p>
-          <p className="text-3xl font-bold text-orange-500 mt-1">{stats.preparing}</p>
-        </div>
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center border border-orange-500/30">
-          <ChefHat className="w-6 h-6 text-orange-500" />
-        </div>
-      </div>
-    </motion.div>
-
-    {/* Ready - Green gradient */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
-      className="relative overflow-hidden bg-card border border-border rounded-2xl p-5 shadow-theme-md hover:shadow-theme-lg hover:-translate-y-1 transition-all duration-300"
-    >
-      <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/20 blur-xl" />
-      <div className="relative flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Ready</p>
-          <p className="text-3xl font-bold text-emerald-500 mt-1">{stats.ready}</p>
-        </div>
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center border border-emerald-500/30">
-          <CheckCircle className="w-6 h-6 text-emerald-500" />
-        </div>
-      </div>
-    </motion.div>
-
-    {/* Needs Approval - Red/Rose gradient */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="relative overflow-hidden bg-card border border-border rounded-2xl p-5 shadow-theme-md hover:shadow-theme-lg hover:-translate-y-1 transition-all duration-300"
-    >
-      <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-gradient-to-br from-rose-500/20 to-red-500/20 blur-xl" />
-      <div className="relative flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold">Need Approval</p>
-          <p className="text-3xl font-bold text-rose-500 mt-1">{stats.needsApproval}</p>
-        </div>
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-rose-500/20 to-red-500/20 flex items-center justify-center border border-rose-500/30">
-          <AlertTriangle className="w-6 h-6 text-rose-500" />
-        </div>
-      </div>
-    </motion.div>
-  </div>
-);
-
-// --- Status Pill Component ---
-const StatusPill = ({ status }: { status: string }) => {
-  const config: Record<string, { classes: string; icon: React.ReactNode }> = {
+// Enhanced Status badge with icons
+const StatusBadge = ({ status, size = 'default' }: { status: string; size?: 'default' | 'lg' }) => {
+  const configs: Record<string, { bg: string; text: string; icon: React.ReactNode; glow?: string }> = {
     pending: {
-      classes: 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30',
-      icon: <Clock className="w-3 h-3" />,
+      bg: 'bg-amber-500/10 dark:bg-amber-500/20',
+      text: 'text-amber-600 dark:text-amber-400',
+      icon: <Clock className={cn(size === 'lg' ? 'w-4 h-4' : 'w-3 h-3')} />,
+      glow: 'shadow-amber-500/20'
     },
     received: {
-      classes: 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
-      icon: <CheckCircle className="w-3 h-3" />,
+      bg: 'bg-blue-500/10 dark:bg-blue-500/20',
+      text: 'text-blue-600 dark:text-blue-400',
+      icon: <CheckCircle className={cn(size === 'lg' ? 'w-4 h-4' : 'w-3 h-3')} />,
+      glow: 'shadow-blue-500/20'
     },
     preparing: {
-      classes: 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
-      icon: <ChefHat className="w-3 h-3" />,
+      bg: 'bg-orange-500/10 dark:bg-orange-500/20',
+      text: 'text-orange-600 dark:text-orange-400',
+      icon: <ChefHat className={cn(size === 'lg' ? 'w-4 h-4' : 'w-3 h-3')} />,
+      glow: 'shadow-orange-500/20'
     },
     ready: {
-      classes: 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
-      icon: <CheckCircle className="w-3 h-3" />,
+      bg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+      text: 'text-emerald-600 dark:text-emerald-400',
+      icon: <Sparkles className={cn(size === 'lg' ? 'w-4 h-4' : 'w-3 h-3')} />,
+      glow: 'shadow-emerald-500/20'
     },
     completed: {
-      classes: 'bg-gradient-to-r from-green-500/20 to-teal-500/20 text-green-600 dark:text-green-400 border-green-500/30',
-      icon: <CheckCircle className="w-3 h-3" />,
+      bg: 'bg-green-500/10 dark:bg-green-500/20',
+      text: 'text-green-600 dark:text-green-400',
+      icon: <CheckCircle className={cn(size === 'lg' ? 'w-4 h-4' : 'w-3 h-3')} />,
+      glow: 'shadow-green-500/20'
     },
     cancelled: {
-      classes: 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border-red-500/30',
-      icon: <XCircle className="w-3 h-3" />,
+      bg: 'bg-red-500/10 dark:bg-red-500/20',
+      text: 'text-red-600 dark:text-red-400',
+      icon: <XCircle className={cn(size === 'lg' ? 'w-4 h-4' : 'w-3 h-3')} />,
+      glow: 'shadow-red-500/20'
     },
   };
 
-  const statusConfig = config[status] || { classes: 'bg-secondary text-muted-foreground', icon: null };
+  const config = configs[status] || { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-300', icon: null };
 
   return (
-    <div className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold", statusConfig.classes)}>
-      {statusConfig.icon}
+    <span className={cn(
+      "inline-flex items-center gap-1.5 rounded-full font-medium shadow-sm transition-all",
+      config.bg,
+      config.text,
+      config.glow,
+      size === 'lg' ? 'px-3 py-1.5 text-sm' : 'px-2.5 py-1 text-xs'
+    )}>
+      {config.icon}
       <span className="capitalize">{status}</span>
+    </span>
+  );
+};
+
+// Order type badge
+const TypeBadge = ({ type }: { type: string }) => {
+  const configs: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
+    'dine-in': {
+      bg: 'bg-violet-500/10 dark:bg-violet-500/20',
+      text: 'text-violet-600 dark:text-violet-400',
+      icon: <Coffee className="w-3.5 h-3.5" />
+    },
+    'pickup': {
+      bg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
+      text: 'text-cyan-600 dark:text-cyan-400',
+      icon: <ShoppingBag className="w-3.5 h-3.5" />
+    },
+    'delivery': {
+      bg: 'bg-pink-500/10 dark:bg-pink-500/20',
+      text: 'text-pink-600 dark:text-pink-400',
+      icon: <Truck className="w-3.5 h-3.5" />
+    },
+  };
+
+  const config = configs[type] || { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-300', icon: <UtensilsCrossed className="w-3.5 h-3.5" /> };
+
+  return (
+    <span className={cn(
+      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium",
+      config.bg,
+      config.text
+    )}>
+      {config.icon}
+      <span className="capitalize">{type.replace('-', ' ')}</span>
+    </span>
+  );
+};
+
+// Stats Card Component
+const StatsCard = ({
+  label,
+  value,
+  icon: Icon,
+  color,
+  isActive,
+  onClick
+}: {
+  label: string;
+  value: number;
+  icon: any;
+  color: string;
+  isActive?: boolean;
+  onClick?: () => void;
+}) => (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className={cn(
+      "relative flex-1 min-w-[120px] p-4 rounded-2xl border transition-all cursor-pointer text-left",
+      "bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm",
+      isActive
+        ? `border-${color}-500 ring-2 ring-${color}-500/20 shadow-lg`
+        : "border-gray-200/50 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600"
+    )}
+  >
+    <div className={cn(
+      "w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors",
+      `bg-${color}-500/10 dark:bg-${color}-500/20`
+    )}>
+      <Icon className={cn("w-5 h-5", `text-${color}-500`)} />
+    </div>
+    <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{label}</p>
+    {isActive && (
+      <motion.div
+        layoutId="activeIndicator"
+        className={cn("absolute top-2 right-2 w-2 h-2 rounded-full", `bg-${color}-500`)}
+      />
+    )}
+  </motion.button>
+);
+
+// Time ago formatter
+const formatTimeAgo = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+};
+
+// Order Timeline Progress
+const OrderProgress = ({ status }: { status: string }) => {
+  const stages = ['pending', 'received', 'preparing', 'ready', 'completed'];
+  const currentIndex = stages.indexOf(status);
+
+  return (
+    <div className="flex items-center gap-1 w-full">
+      {stages.map((stage, index) => (
+        <React.Fragment key={stage}>
+          <div
+            className={cn(
+              "w-2 h-2 rounded-full transition-all",
+              index <= currentIndex
+                ? index === currentIndex
+                  ? "bg-fuchsia-500 ring-4 ring-fuchsia-500/20"
+                  : "bg-emerald-500"
+                : "bg-gray-200 dark:bg-gray-700"
+            )}
+          />
+          {index < stages.length - 1 && (
+            <div className={cn(
+              "flex-1 h-0.5 rounded-full transition-all",
+              index < currentIndex
+                ? "bg-emerald-500"
+                : "bg-gray-200 dark:bg-gray-700"
+            )} />
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 };
 
-import { useSmartPolling } from '@/app/hooks/useSmartPolling';
-
 export default function Orders() {
-  useSmartPolling(['orders'], 15000); // 15s for admin
+  useSmartPolling(['orders'], 15000);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [approvalFilter, setApprovalFilter] = useState<'all' | 'pending'>('all');
   const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
   const [openView, setOpenView] = useState(false);
   const [openReject, setOpenReject] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
-  const [perPage] = useState(20); // Increased from 15
+  const [perPage] = useState(15);
 
   const getAmount = (value: any): number => {
     if (value === null || value === undefined || value === '') return 0;
@@ -182,55 +225,33 @@ export default function Orders() {
   };
 
   // Fetch orders
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['admin/orders', page, search, statusFilter, typeFilter, approvalFilter],
+  const { data: ordersData, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['admin/orders', page, search, statusFilter, typeFilter],
     queryFn: async () => {
-      // ✅ Build query parameters
-      const params = new URLSearchParams({
-        page: String(page),
-        per_page: String(perPage),
-      });
-
+      const params = new URLSearchParams({ page: String(page), per_page: String(perPage) });
       if (search) params.append('search', search);
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (typeFilter !== 'all') params.append('type', typeFilter);
-      if (approvalFilter !== 'all') params.append('approval_status', approvalFilter);
-
-      const endpoint = `/api/admin/orders?${params.toString()}`;
-
-      console.log('🔍 Fetching orders:', { endpoint, filters: { page, search, statusFilter, typeFilter, approvalFilter } });
-
-      const response = await apiGet(endpoint);
-
-      console.log('📦 Orders response:', {
-        total: response?.meta?.total || response?.total || 'unknown',
-        count: response?.data?.length || (Array.isArray(response) ? response.length : 0),
-        hasData: !!response,
-        sample: response?.data?.[0] || null
-      });
-
-      return response;
+      return await apiGet(`/api/admin/orders?${params.toString()}`);
     }
-  }) as { data: any, isLoading: boolean };
+  });
 
-  const orderList: Order[] = useMemo(() => {
-    if (!orders) return [];
-    if (Array.isArray(orders)) return orders;
-    if (orders.data && Array.isArray(orders.data)) return orders.data;
+  const orderList = useMemo(() => {
+    if (!ordersData) return [];
+    if (Array.isArray(ordersData)) return ordersData;
+    if (ordersData.data && Array.isArray(ordersData.data)) return ordersData.data;
     return [];
-  }, [orders]);
+  }, [ordersData]);
 
-  // Calculate stats
+  // Stats calculation
   const stats = useMemo(() => {
-    const list = orderList;
     return {
-      total: orders?.meta?.total || list.length,
-      pending: list.filter(o => o.status === 'pending').length,
-      preparing: list.filter(o => o.status === 'preparing').length,
-      ready: list.filter(o => o.status === 'ready').length,
-      needsApproval: list.filter(o => (o as any).approval_status === 'pending').length
+      total: ordersData?.meta?.total || orderList.length,
+      pending: orderList.filter(o => o.status === 'pending').length,
+      preparing: orderList.filter(o => o.status === 'preparing').length,
+      ready: orderList.filter(o => o.status === 'ready').length,
     };
-  }, [orderList, orders]);
+  }, [orderList, ordersData]);
 
   // Mutations
   const updateStatusMutation = useMutation({
@@ -240,93 +261,47 @@ export default function Orders() {
       toastSuccess('Status updated');
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
     },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed to update')
+    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
   });
 
-  const updatePaymentStatusMutation = useMutation({
+  const updatePaymentMutation = useMutation({
     mutationFn: ({ id, status }: { id: number, status: 'paid' | 'unpaid' }) =>
       apiPatch(`/api/admin/orders/${id}/payment-status`, { payment_status: status }),
-    onSuccess: (_, variables) => {
-      toastSuccess(`Order marked as ${variables.status}`);
+    onSuccess: () => {
+      toastSuccess('Payment updated');
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
-      // Also close view modal if open
-      if (selectedOrder && selectedOrder.id === variables.id) {
-        setOpenView(false);
-      }
+      setOpenView(false);
     },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed to update payment status')
+    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
   });
 
   const handleApprove = async (order: Order) => {
     try {
       await apiPatch(`/api/admin/orders/${order.id}/approve`, {});
-      toastSuccess('Order approved');
+      toastSuccess('Approved');
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
-    } catch (error: any) {
-      toastError(error.response?.data?.message || 'Failed to approve');
-    }
+    } catch (error: any) { toastError(error.response?.data?.message || 'Failed'); }
   };
 
-  const handleBulkApprove = async () => {
-    if (selectedOrders.size === 0) return;
-    if (!confirm(`Approve ${selectedOrders.size} orders?`)) return;
-
-    try {
-      await Promise.all(
-        Array.from(selectedOrders).map(id =>
-          apiPatch(`/api/admin/orders/${id}/approve`, {})
-        )
-      );
-      toastSuccess(`${selectedOrders.size} orders approved`);
-      setSelectedOrders(new Set());
-      qc.invalidateQueries({ queryKey: ['admin/orders'] });
-    } catch (error: any) {
-      toastError('Failed to approve some orders');
-    }
-  };
-
-  const handleReject = (order: Order) => {
-    setSelectedOrder(order);
-    setOpenReject(true);
-  };
-
-  const confirmReject = async () => {
+  const handleReject = () => {
     if (!selectedOrder || rejectionReason.length < 10) {
-      toastError('Rejection reason must be at least 10 characters');
+      toastError('Reason must be 10+ chars');
       return;
     }
-
-    try {
-      await apiPatch(`/api/admin/orders/${selectedOrder.id}/reject`, {
-        rejection_reason: rejectionReason
-      });
-      toastSuccess('Order rejected');
-      qc.invalidateQueries({ queryKey: ['admin/orders'] });
-      setOpenReject(false);
-      setSelectedOrder(null);
-      setRejectionReason('');
-    } catch (error: any) {
-      toastError(error.response?.data?.message || 'Failed to reject');
-    }
+    apiPatch(`/api/admin/orders/${selectedOrder.id}/reject`, { rejection_reason: rejectionReason })
+      .then(() => {
+        toastSuccess('Rejected');
+        qc.invalidateQueries({ queryKey: ['admin/orders'] });
+        setOpenReject(false);
+        setSelectedOrder(null);
+        setRejectionReason('');
+      })
+      .catch((e: any) => toastError(e.response?.data?.message || 'Failed'));
   };
 
-  const handleQuickStatus = (id: number, status: string) => {
+  const handleQuickStatus = (id: number, status: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     updateStatusMutation.mutate({ id, status });
-  };
-
-  const [paymentConfirmOrder, setPaymentConfirmOrder] = useState<Order | null>(null);
-
-  const handleTogglePayment = (order: Order) => {
-    setPaymentConfirmOrder(order);
-  };
-
-  const processPaymentToggle = () => {
-    if (!paymentConfirmOrder) return;
-    const isPaid = paymentConfirmOrder.payment_status === 'paid';
-    const newStatus = isPaid ? 'unpaid' : 'paid';
-
-    updatePaymentStatusMutation.mutate({ id: paymentConfirmOrder.id, status: newStatus });
-    setPaymentConfirmOrder(null);
   };
 
   const toggleSelectOrder = (id: number) => {
@@ -337,428 +312,386 @@ export default function Orders() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedOrders.size === orderList.length) {
-      setSelectedOrders(new Set());
-    } else {
-      setSelectedOrders(new Set(orderList.map(o => o.id)));
-    }
+    if (selectedOrders.size === orderList.length) setSelectedOrders(new Set());
+    else setSelectedOrders(new Set(orderList.map(o => o.id)));
+  };
+
+  const getNextStatus = (currentStatus: string): string | null => {
+    const flow: Record<string, string> = {
+      pending: 'received',
+      received: 'preparing',
+      preparing: 'ready',
+      ready: 'completed'
+    };
+    return flow[currentStatus] || null;
+  };
+
+  const getNextStatusLabel = (currentStatus: string): string => {
+    const labels: Record<string, string> = {
+      pending: 'Accept',
+      received: 'Start Prep',
+      preparing: 'Ready',
+      ready: 'Complete'
+    };
+    return labels[currentStatus] || 'Update';
   };
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-background p-6 lg:p-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
-        >
-          <div>
-            <h1 className="text-4xl font-extrabold tracking-tight">
-              <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Orders
-              </span>
-            </h1>
-            <p className="text-muted-foreground mt-2">Manage and track all orders in real-time</p>
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-gray-50 to-fuchsia-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-fuchsia-900/10">
+        <div className="p-3 sm:p-4 md:p-6 w-full mx-auto">
+          {/* Header Section */}
+          <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center shadow-lg shadow-fuchsia-500/25 flex-shrink-0">
+                <ReceiptText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate">Orders</h1>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{ordersData?.meta?.total || 0} orders</p>
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400">Live</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <motion.button whileTap={{ scale: 0.95 }} onClick={() => refetch()} disabled={isFetching}
+              className={cn("p-2 sm:p-2.5 rounded-lg sm:rounded-xl border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0", isFetching && "animate-spin")}>
+              <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+            </motion.button>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-sm font-medium text-muted-foreground">Live Updates</span>
+
+          {/* Quick Stats - Horizontal scroll on mobile */}
+          <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+            <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-3 min-w-max sm:min-w-0">
+              <motion.div whileTap={{ scale: 0.98 }} onClick={() => setStatusFilter('all')}
+                className={cn("relative p-3 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition-all bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm min-w-[90px] sm:min-w-0",
+                  statusFilter === 'all' ? "border-fuchsia-500 ring-2 ring-fuchsia-500/20 shadow-lg" : "border-gray-200/50 dark:border-gray-700/50")}>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center mb-2 sm:mb-3">
+                  <Package className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-600 dark:text-fuchsia-400" />
+                </div>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">All</p>
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.98 }} onClick={() => setStatusFilter('pending')}
+                className={cn("relative p-3 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition-all bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm min-w-[90px] sm:min-w-0",
+                  statusFilter === 'pending' ? "border-amber-500 ring-2 ring-amber-500/20 shadow-lg" : "border-gray-200/50 dark:border-gray-700/50")}>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center mb-2 sm:mb-3">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.pending}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Pending</p>
+                {stats.pending > 0 && <span className="absolute top-2 right-2 sm:top-3 sm:right-3 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 animate-pulse" />}
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.98 }} onClick={() => setStatusFilter('preparing')}
+                className={cn("relative p-3 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition-all bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm min-w-[90px] sm:min-w-0",
+                  statusFilter === 'preparing' ? "border-orange-500 ring-2 ring-orange-500/20 shadow-lg" : "border-gray-200/50 dark:border-gray-700/50")}>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center mb-2 sm:mb-3">
+                  <ChefHat className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.preparing}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Preparing</p>
+                {stats.preparing > 0 && <span className="absolute top-2 right-2 sm:top-3 sm:right-3 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-500 animate-pulse" />}
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.98 }} onClick={() => setStatusFilter('ready')}
+                className={cn("relative p-3 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition-all bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm min-w-[90px] sm:min-w-0",
+                  statusFilter === 'ready' ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg" : "border-gray-200/50 dark:border-gray-700/50")}>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center mb-2 sm:mb-3">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.ready}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Ready</p>
+                {stats.ready > 0 && <span className="absolute top-2 right-2 sm:top-3 sm:right-3 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />}
+              </motion.div>
             </div>
           </div>
-        </motion.div>
 
-        {/* Stats */}
-        <OrderStatsRibbon stats={stats} />
-
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-card border border-border rounded-2xl p-5 mb-6 shadow-theme-md"
-        >
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search by order number, customer..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-12 pl-12 pr-4 bg-secondary/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
+          {/* Search & Filters */}
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50 p-4 mb-6 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by order number, customer name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full h-12 pl-12 pr-4 bg-gray-50/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent transition-all"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={cn(
+                    "flex items-center gap-2 px-4 h-12 rounded-xl border transition-all font-medium",
+                    showFilters
+                      ? "bg-fuchsia-500 border-fuchsia-500 text-white"
+                      : "bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-fuchsia-500"
+                  )}
+                >
+                  <Filter className="w-4 h-4" />
+                  <span className="hidden sm:inline">Filters</span>
+                </button>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="h-12 px-4 bg-gray-50/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 cursor-pointer"
+                >
+                  <option value="all">All Types</option>
+                  <option value="dine-in">Dine-In</option>
+                  <option value="pickup">Pickup</option>
+                  <option value="delivery">Delivery</option>
+                </select>
+              </div>
             </div>
 
-            {/* Filter Pills */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-12 px-4 pr-10 bg-secondary/50 border border-border rounded-xl text-foreground text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="received">Received</option>
-                <option value="preparing">Preparing</option>
-                <option value="ready">Ready</option>
-                <option value="completed">Completed</option>
-              </select>
-
-              {/* Type Filter */}
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="h-12 px-4 pr-10 bg-secondary/50 border border-border rounded-xl text-foreground text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
-              >
-                <option value="all">All Types</option>
-                <option value="dine-in">Dine-In</option>
-                <option value="pickup">Pickup</option>
-                <option value="delivery">Delivery</option>
-              </select>
-
-              {/* Approval Toggle */}
-              <button
-                onClick={() => setApprovalFilter(approvalFilter === 'all' ? 'pending' : 'all')}
-                className={cn(
-                  "h-12 px-5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2",
-                  approvalFilter === 'pending'
-                    ? "bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-lg shadow-rose-500/25 hover:shadow-xl"
-                    : "bg-secondary/50 text-muted-foreground border border-border hover:bg-secondary hover:text-foreground"
-                )}
-              >
-                <AlertTriangle className="w-4 h-4" />
-                {approvalFilter === 'pending' ? `Needs Approval (${stats.needsApproval})` : 'Pending Approvals'}
-              </button>
-            </div>
+            {/* Extended Filters */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {['pending', 'received', 'preparing', 'ready', 'completed', 'cancelled'].map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
+                        className={cn(
+                          "flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border transition-all font-medium text-sm capitalize",
+                          statusFilter === s
+                            ? "bg-fuchsia-500 border-fuchsia-500 text-white shadow-lg shadow-fuchsia-500/25"
+                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-fuchsia-300"
+                        )}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </motion.div>
 
-        {/* Bulk Actions Bar */}
-        <AnimatePresence>
-          {selectedOrders.size > 0 && (
+          {/* Bulk Actions */}
+          <AnimatePresence>
+            {selectedOrders.size > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-violet-600 rounded-2xl p-4 mb-6 shadow-xl shadow-fuchsia-500/25"
+              >
+                <div className="flex items-center justify-between text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                      <Package className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-lg">{selectedOrders.size}</span>
+                      <span className="ml-1 opacity-90">order{selectedOrders.size > 1 ? 's' : ''} selected</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setSelectedOrders(new Set())}
+                      className="text-white hover:bg-white/20 h-10 px-4"
+                    >
+                      <X className="w-4 h-4 mr-1" /> Clear
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Orders List */}
+          {isLoading ? (
+            <div className="py-16 text-center">
+              <div className="w-16 h-16 border-4 border-fuchsia-500/30 border-t-fuchsia-500 rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400 font-medium">Loading orders...</p>
+            </div>
+          ) : orderList.length === 0 ? (
             <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-2xl p-5 mb-6 shadow-xl shadow-fuchsia-500/20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-16 text-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <Package className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-lg">
-                      {selectedOrders.size} order{selectedOrders.size === 1 ? '' : 's'} selected
-                    </p>
-                    <p className="text-white/70 text-sm">Ready for bulk actions</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    size="md"
-                    onClick={handleBulkApprove}
-                    className="bg-white text-fuchsia-600 hover:bg-white/90 shadow-lg"
-                  >
-                    <ThumbsUp className="w-4 h-4 mr-2" />
-                    Approve All
-                  </Button>
-                  <Button
-                    size="md"
-                    onClick={() => setSelectedOrders(new Set())}
-                    className="bg-white/20 text-white hover:bg-white/30 border-0"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Clear
-                  </Button>
-                </div>
+              <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-10 h-10 text-gray-400" />
               </div>
+              <p className="text-gray-900 dark:text-white font-semibold text-lg mb-1">No orders found</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or search query</p>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Orders Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-card border border-border rounded-2xl overflow-hidden shadow-theme-lg"
-        >
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-border bg-gradient-to-r from-secondary/50 to-secondary/30">
-            <div className="col-span-1 flex items-center">
-              <input
-                type="checkbox"
-                checked={selectedOrders.size === orderList.length && orderList.length > 0}
-                onChange={toggleSelectAll}
-                className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
-              />
-            </div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Order</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Customer</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Type</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Status</div>
-            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Total</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">Actions</div>
-          </div>
-
-          {/* Table Body */}
-          <div className="divide-y divide-border/50">
-            {isLoading ? (
-              <div className="p-16 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
-                  <div className="w-8 h-8 border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                </div>
-                <p className="text-muted-foreground font-medium">Loading orders...</p>
+          ) : (
+            <div className="space-y-3">
+              {/* Select All */}
+              <div className="flex items-center justify-between px-2">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={selectedOrders.size === orderList.length && orderList.length > 0}
+                    onChange={toggleSelectAll}
+                    className="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 text-fuchsia-600 focus:ring-fuchsia-500 focus:ring-offset-0 cursor-pointer transition-all"
+                  />
+                  <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                    Select all ({orderList.length})
+                  </span>
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-500">
+                  Showing {orderList.length} of {ordersData?.meta?.total || orderList.length}
+                </p>
               </div>
-            ) : orderList.length === 0 ? (
-              <div className="p-16 text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-muted mb-4">
-                  <Package className="w-10 h-10 text-muted-foreground" />
-                </div>
-                <h3 className="text-foreground font-bold text-lg mb-1">No orders found</h3>
-                <p className="text-muted-foreground text-sm">Try adjusting your filters or search terms</p>
-              </div>
-            ) : (
-              orderList.map((order, index) => (
+
+              {/* Order Cards */}
+              {orderList.map((order, index) => (
                 <motion.div
                   key={order.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.02 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
                   className={cn(
-                    "grid grid-cols-12 gap-4 px-6 py-4 items-center transition-all duration-200 group cursor-pointer",
-                    "hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent",
-                    selectedOrders.has(order.id) && "bg-primary/5 border-l-2 border-l-primary"
+                    "group relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border p-4 lg:p-5 cursor-pointer transition-all hover:shadow-lg",
+                    selectedOrders.has(order.id)
+                      ? "border-fuchsia-500 ring-2 ring-fuchsia-500/20 shadow-lg"
+                      : "border-gray-200/50 dark:border-gray-700/50 hover:border-fuchsia-300 dark:hover:border-fuchsia-700"
                   )}
                   onClick={() => { setSelectedOrder(order); setOpenView(true); }}
                 >
-                  {/* Checkbox */}
-                  <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={selectedOrders.has(order.id)}
-                      onChange={() => toggleSelectOrder(order.id)}
-                      className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all hover:border-primary/50"
-                    />
-                  </div>
+                  {/* Approval Alert Banner */}
+                  {(order as any).approval_status === 'pending' && (
+                    <div className="absolute inset-x-0 top-0 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-medium py-1.5 px-4 rounded-t-2xl flex items-center gap-2 justify-center">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      Requires Approval
+                    </div>
+                  )}
 
-                  {/* Order Number & Time */}
-                  <div className="col-span-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                        <Hash className="w-4 h-4 text-fuchsia-500" />
-                      </div>
-                      <div>
-                        <div className="font-bold text-foreground group-hover:text-primary transition-colors">
-                          {order.order_number}
+                  <div className={cn(
+                    "flex flex-col lg:flex-row lg:items-center gap-4",
+                    (order as any).approval_status === 'pending' && "mt-6"
+                  )}>
+                    {/* Checkbox + Order Info */}
+                    <div className="flex items-start lg:items-center gap-4 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedOrders.has(order.id)}
+                        onChange={() => toggleSelectOrder(order.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-5 h-5 mt-1 lg:mt-0 rounded-md border-2 border-gray-300 dark:border-gray-600 text-fuchsia-600 focus:ring-fuchsia-500 focus:ring-offset-0 cursor-pointer transition-all"
+                      />
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className="font-bold text-gray-900 dark:text-white text-lg">
+                            #{order.order_number}
+                          </span>
+                          <StatusBadge status={order.status} />
+                          <TypeBadge type={order.order_type || ''} />
                         </div>
-                        <div className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Customer */}
-                  <div className="col-span-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-blue-500" />
-                      </div>
-                      <div>
-                        <div className="text-foreground font-medium truncate max-w-[120px]">
-                          {order.customer?.user?.name || 'Guest'}
-                        </div>
-                        {order.table && (
-                          <div className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Utensils className="w-3 h-3" />
-                            Table {order.table.number}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Type */}
-                  <div className="col-span-2">
-                    <div className={cn(
-                      "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium",
-                      order.order_type === 'dine-in' && "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400",
-                      order.order_type === 'pickup' && "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600 dark:text-blue-400",
-                      order.order_type === 'delivery' && "bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-600 dark:text-emerald-400"
-                    )}>
-                      {order.order_type === 'dine-in' && <Coffee className="w-4 h-4" />}
-                      {order.order_type === 'pickup' && <ShoppingBag className="w-4 h-4" />}
-                      {order.order_type === 'delivery' && <Truck className="w-4 h-4" />}
-                      <span className="capitalize">{order.order_type?.replace('-', ' ')}</span>
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="col-span-2">
-                    <StatusPill status={order.status} />
-                    {(order as any).approval_status === 'pending' && (
-                      <div className="text-xs mt-1.5 flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-rose-500/20 to-red-500/20 text-rose-500 w-fit">
-                        <AlertTriangle className="w-3 h-3" />
-                        <span className="font-medium">Needs Approval</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Total & Payment */}
-                  <div className="col-span-1">
-                    <div className="font-bold text-foreground text-lg">
-                      ${getAmount(order.total).toFixed(2)}
-                    </div>
-                    <div className="mt-1">
-                      {order.payment_status === 'paid' ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                          <CheckCircle className="w-3 h-3" />
-                          Paid
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30">
-                          <Clock className="w-3 h-3" />
-                          Unpaid
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={(e) => e.stopPropagation()}>
-                    {(order as any).approval_status === 'pending' ? (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => handleApprove(order)}
-                          variant="success"
-                          className="h-9 shadow-lg shadow-emerald-500/20"
-                        >
-                          <ThumbsUp className="w-3.5 h-3.5 mr-1.5" /> Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleReject(order)}
-                          variant="destructive"
-                          className="h-9 w-9 p-0 shadow-lg shadow-red-500/20"
-                        >
-                          <ThumbsDown className="w-3.5 h-3.5" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        {order.status === 'pending' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleQuickStatus(order.id, 'received')}
-                            variant="info"
-                            className="h-9 text-xs shadow-lg shadow-blue-500/20"
-                          >
-                            Accept
-                          </Button>
-                        )}
-                        {order.status === 'received' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleQuickStatus(order.id, 'preparing')}
-                            variant="warning"
-                            className="h-9 text-xs shadow-lg shadow-amber-500/20"
-                          >
-                            Prep
-                          </Button>
-                        )}
-                        {order.status === 'preparing' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleQuickStatus(order.id, 'ready')}
-                            variant="success"
-                            className="h-9 text-xs shadow-lg shadow-emerald-500/20"
-                          >
-                            Ready
-                          </Button>
-                        )}
-                        {order.status === 'ready' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleQuickStatus(order.id, 'completed')}
-                            variant="success"
-                            className="h-9 text-xs shadow-lg shadow-emerald-500/20"
-                          >
-                            Done
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => { setSelectedOrder(order); setOpenView(true); }}
-                          className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleTogglePayment(order)}
-                          className={cn(
-                            "h-9 w-9 p-0 border-2 transition-all",
-                            order.payment_status === 'paid'
-                              ? "text-emerald-500 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20"
-                              : "border-border bg-secondary hover:bg-emerald-500 hover:border-emerald-500 text-muted-foreground hover:text-white"
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+                          <span className="flex items-center gap-1.5">
+                            <User className="w-4 h-4" />
+                            {order.customer?.user?.name || 'Guest Customer'}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Timer className="w-4 h-4" />
+                            {formatTimeAgo((order as any).created_at || '')}
+                          </span>
+                          {order.items && order.items.length > 0 && (
+                            <span className="flex items-center gap-1.5">
+                              <UtensilsCrossed className="w-4 h-4" />
+                              {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                            </span>
                           )}
-                          title={order.payment_status === 'paid' ? "Mark as Unpaid" : "Mark as Paid"}
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mt-3 hidden lg:block max-w-xs">
+                          <OrderProgress status={order.status} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Price & Actions */}
+                    <div className="flex items-center justify-between lg:justify-end gap-4 lg:gap-6 pl-9 lg:pl-0">
+                      <div className="text-left lg:text-right">
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">
+                          ${getAmount(order.total).toFixed(2)}
+                        </div>
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium mt-1",
+                          order.payment_status === 'paid'
+                            ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+                            : "bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400"
+                        )}>
+                          {order.payment_status === 'paid' ? (
+                            <><CreditCard className="w-3.5 h-3.5" /> Paid</>
+                          ) : (
+                            <><Clock className="w-3.5 h-3.5" /> Unpaid</>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Quick Actions */}
+                      <div className="flex items-center gap-2">
+                        {getNextStatus(order.status) && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => handleQuickStatus(order.id, getNextStatus(order.status)!, e)}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 text-white rounded-xl font-medium text-sm shadow-lg shadow-fuchsia-500/25 transition-all"
+                          >
+                            <Zap className="w-4 h-4" />
+                            <span className="hidden sm:inline">{getNextStatusLabel(order.status)}</span>
+                          </motion.button>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setOpenView(true); }}
+                          className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                         >
-                          <DollarSign className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
+                          <Eye className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
-          {orders?.meta && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 border-t border-border bg-gradient-to-r from-secondary/30 to-transparent">
-              <div className="flex items-center gap-3">
-                <div className="h-9 px-4 rounded-lg bg-secondary border border-border flex items-center gap-2">
-                  <Package className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">{orders.meta.total}</span>
-                  <span className="text-sm text-muted-foreground">orders</span>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to <span className="font-semibold text-foreground">{Math.min(page * perPage, orders.meta.total)}</span>
-                </div>
-              </div>
+          {ordersData?.meta && ordersData.meta.last_page > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Page <span className="font-semibold text-gray-900 dark:text-white">{page}</span> of{' '}
+                <span className="font-semibold text-gray-900 dark:text-white">{ordersData.meta.last_page}</span>
+              </p>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
                   disabled={page === 1}
                   onClick={() => setPage(p => p - 1)}
-                  className="h-10 px-4 gap-2"
+                  className="h-10 px-4 border-gray-200 dark:border-gray-700"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline">Previous</span>
+                  <ChevronLeft className="w-4 h-4 mr-1" /> Previous
                 </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, orders.meta.last_page) }, (_, i) => {
-                    let pageNum;
-                    if (orders.meta.last_page <= 5) {
+                <div className="hidden sm:flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, ordersData.meta.last_page) }, (_, i) => {
+                    let pageNum: number;
+                    if (ordersData.meta.last_page <= 5) {
                       pageNum = i + 1;
                     } else if (page <= 3) {
                       pageNum = i + 1;
-                    } else if (page >= orders.meta.last_page - 2) {
-                      pageNum = orders.meta.last_page - 4 + i;
+                    } else if (page >= ordersData.meta.last_page - 2) {
+                      pageNum = ordersData.meta.last_page - 4 + i;
                     } else {
                       pageNum = page - 2 + i;
                     }
@@ -767,10 +700,10 @@ export default function Orders() {
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
                         className={cn(
-                          "h-10 w-10 rounded-xl text-sm font-semibold transition-all",
+                          "w-10 h-10 rounded-xl font-medium transition-all",
                           page === pageNum
-                            ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25"
-                            : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover hover:text-foreground"
+                            ? "bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-500/25"
+                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                         )}
                       >
                         {pageNum}
@@ -779,470 +712,257 @@ export default function Orders() {
                   })}
                 </div>
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
-                  disabled={page === orders.meta.last_page}
+                  disabled={page === ordersData.meta.last_page}
                   onClick={() => setPage(p => p + 1)}
-                  className="h-10 px-4 gap-2"
+                  className="h-10 px-4 border-gray-200 dark:border-gray-700"
                 >
-                  <span className="hidden sm:inline">Next</span>
-                  <ChevronRight className="w-4 h-4" />
+                  Next <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Reject Modal */}
-      <Modal
-        open={openReject}
-        onClose={() => { setOpenReject(false); setRejectionReason(''); }}
-        title={`Reject Order #${selectedOrder?.order_number}`}
-        size="lg"
-      >
+      <Modal open={openReject} onClose={() => setOpenReject(false)} title={`Reject Order #${selectedOrder?.order_number}`} size="sm">
         <div className="space-y-4">
-          <div className="bg-destructive-muted border border-destructive/30 rounded-lg p-4">
-            <p className="text-destructive text-sm">Customer will be notified of rejection. Please provide a clear reason.</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+            <div className="flex items-center gap-2 text-red-700 dark:text-red-400 font-medium mb-1">
+              <AlertTriangle className="w-4 h-4" />
+              Warning
+            </div>
+            <p className="text-red-600 dark:text-red-300 text-sm">Customer will be notified of the rejection.</p>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Rejection Reason <span className="text-destructive">*</span>
-            </label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rejection Reason</label>
             <textarea
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Please provide a reason for rejection..."
               rows={4}
-              className="w-full bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="e.g., Kitchen closed, Out of ingredients, etc."
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent resize-none"
             />
-            <div className="text-xs text-muted-foreground mt-1">{rejectionReason.length} / 500</div>
+            <p className="text-xs text-gray-400 mt-2">{rejectionReason.length}/500 characters (minimum 10)</p>
           </div>
-
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => setOpenReject(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmReject}
-              variant="destructive"
-              className="flex-1"
-            >
-              Confirm Rejection
+          <div className="flex gap-3 pt-2">
+            <Button variant="secondary" onClick={() => setOpenReject(false)} className="flex-1">Cancel</Button>
+            <Button variant="destructive" onClick={handleReject} className="flex-1" disabled={rejectionReason.length < 10}>
+              <XCircle className="w-4 h-4 mr-2" />
+              Reject Order
             </Button>
           </div>
         </div>
       </Modal>
 
-      {/* Payment Confirmation Modal */}
-      <Modal
-        open={!!paymentConfirmOrder}
-        onClose={() => setPaymentConfirmOrder(null)}
-        title={paymentConfirmOrder?.payment_status === 'paid' ? 'Refund / Mark Unpaid' : 'Confirm Payment'}
-        size="md"
-      >
-        {paymentConfirmOrder && (
-          <div className="space-y-6">
-            <div className={cn(
-              "rounded-xl p-6 border text-center relative overflow-hidden",
-              paymentConfirmOrder.payment_status !== 'paid'
-                ? "bg-emerald-500/10 border-emerald-500/20"
-                : "bg-red-500/10 border-red-500/20"
-            )}>
-              {/* Background Glow */}
-              <div className={cn(
-                "absolute inset-0 opacity-20 blur-3xl",
-                paymentConfirmOrder.payment_status !== 'paid'
-                  ? "bg-gradient-to-br from-emerald-500 to-green-500"
-                  : "bg-gradient-to-br from-red-500 to-rose-500"
-              )} />
-
-              <div className="relative">
-                <div className={cn(
-                  "w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg",
-                  paymentConfirmOrder.payment_status !== 'paid'
-                    ? "bg-gradient-to-br from-emerald-500 to-green-500 text-white"
-                    : "bg-gradient-to-br from-red-500 to-rose-500 text-white"
-                )}>
-                  <DollarSign className="w-8 h-8" />
-                </div>
-
-                <h3 className="text-xl font-bold mb-2">
-                  {paymentConfirmOrder.payment_status !== 'paid'
-                    ? "Mark as Paid?"
-                    : "Mark as Unpaid?"}
-                </h3>
-
-                <p className="text-muted-foreground mb-4">
-                  Order <span className="font-mono font-medium text-foreground">#{paymentConfirmOrder.order_number}</span>
-                </p>
-
-                <div className="flex items-center justify-center gap-2 text-3xl font-bold">
-                  <span>${getAmount(paymentConfirmOrder.total).toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-sm text-center text-muted-foreground px-4">
-              {paymentConfirmOrder.payment_status !== 'paid'
-                ? "This will mark the order as fully paid. Ensure you have received the payment."
-                : "This will revert the order status to unpaid. This action should be done if the payment was refunded or marked in error."}
-            </p>
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="secondary"
-                onClick={() => setPaymentConfirmOrder(null)}
-                className="flex-1 h-11 transition-all hover:bg-secondary-hover"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={processPaymentToggle}
-                className={cn(
-                  "flex-1 h-11 text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]",
-                  paymentConfirmOrder.payment_status !== 'paid'
-                    ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-emerald-500/20"
-                    : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/20"
-                )}
-              >
-                {paymentConfirmOrder.payment_status !== 'paid'
-                  ? "Confirm Payment"
-                  : "Mark Unpaid"}
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      {/* Enhanced Order Detail Modal */}
+      {/* Order Detail Modal */}
       <AnimatePresence>
         {openView && selectedOrder && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay"
+            className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/50 backdrop-blur-sm"
             onClick={() => setOpenView(false)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-card border border-border rounded-2xl shadow-theme-xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-t-3xl md:rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
-              <div className={cn(
-                "p-5 text-white",
-                selectedOrder.status === 'pending' || selectedOrder.status === 'received' ? 'bg-gradient-to-r from-status-pending to-warning' :
-                  selectedOrder.status === 'preparing' ? 'bg-gradient-to-r from-warning to-warning/80' :
-                    selectedOrder.status === 'ready' ? 'bg-gradient-to-r from-success to-success/80' :
-                      selectedOrder.status === 'completed' ? 'bg-gradient-to-r from-success to-info' :
-                        'bg-gradient-to-r from-secondary to-muted'
-              )}>
-                <div className="flex items-center justify-between">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-violet-600 p-6 text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
+                <div className="relative flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center">
-                      <UtensilsCrossed className="w-6 h-6" />
+                    <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+                      <ReceiptText className="w-7 h-7" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold">Order #{selectedOrder.order_number}</h2>
-                      <div className="flex items-center gap-3 text-sm opacity-90 mt-1">
-                        <span className="flex items-center gap-1">
-                          {selectedOrder.order_type === 'dine-in' && <Coffee className="w-4 h-4" />}
-                          {selectedOrder.order_type === 'pickup' && <ShoppingBag className="w-4 h-4" />}
-                          {selectedOrder.order_type === 'delivery' && <Truck className="w-4 h-4" />}
-                          <span className="capitalize">{selectedOrder.order_type?.replace('-', ' ')}</span>
-                        </span>
-                        {selectedOrder.table && (
-                          <span className="flex items-center gap-1">
-                            <span>•</span> Table {(selectedOrder.table as any).number || (selectedOrder.table as any).table_number}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {new Date(selectedOrder.created_at).toLocaleString()}
-                        </span>
+                      <h2 className="font-bold text-xl">#{selectedOrder.order_number}</h2>
+                      <div className="flex items-center gap-3 mt-1">
+                        <TypeBadge type={selectedOrder.order_type || ''} />
+                        <StatusBadge status={selectedOrder.status} size="lg" />
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <div className="text-sm font-semibold px-3 py-1 bg-white/20 rounded-full capitalize">
-                        {selectedOrder.status}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setOpenView(false)}
-                      className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setOpenView(false)}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/20 transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
                 </div>
               </div>
 
-              {/* Modal Content */}
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
-                {/* Info Cards Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  {/* Customer Info */}
-                  <div className="bg-secondary border border-border rounded-xl p-4">
-                    <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                      <User className="w-5 h-5 text-info" />
-                      Customer
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        {selectedOrder.customer?.user?.name || 'Guest'}
-                      </div>
+              {/* Content */}
+              <div className="p-6 overflow-y-auto flex-1">
+                {/* Customer Info */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 mb-4">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Customer Details</h3>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                      {(selectedOrder.customer?.user?.name || 'G')[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-white">{selectedOrder.customer?.user?.name || 'Guest Customer'}</p>
                       {selectedOrder.customer?.user?.email && (
-                        <div className="flex items-center gap-2 text-muted-foreground text-xs truncate">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5" />
                           {selectedOrder.customer.user.email}
-                        </div>
-                      )}
-                      {((selectedOrder.customer as any)?.phone || (selectedOrder.customer?.user as any)?.phone) && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          {(selectedOrder.customer as any)?.phone || (selectedOrder.customer?.user as any)?.phone}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Payment Info */}
-                  <div className="bg-secondary border border-border rounded-xl p-4">
-                    <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                      <CreditCard className="w-5 h-5 text-success" />
-                      Payment
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Status:</span>
-                        <span className={cn(
-                          "px-2 py-0.5 rounded-full text-xs font-medium border",
-                          selectedOrder.payment_status === 'paid'
-                            ? "bg-success-muted text-success border-success/30"
-                            : "bg-destructive-muted text-destructive border-destructive/30"
-                        )}>
-                          {selectedOrder.payment_status === 'paid' ? 'Paid' : 'Unpaid'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Subtotal:</span>
-                        <span className="text-foreground">${getAmount(selectedOrder.subtotal).toFixed(2)}</span>
-                      </div>
-                      <div className="flex items-center justify-between font-semibold">
-                        <span className="text-muted-foreground">Total:</span>
-                        <span className="text-foreground text-lg">${getAmount(selectedOrder.total).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Order Details */}
-                  <div className="bg-secondary border border-border rounded-xl p-4">
-                    <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                      <Receipt className="w-5 h-5 text-primary" />
-                      Details
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Order ID:</span>
-                        <span className="text-foreground font-mono">#{selectedOrder.id}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Items:</span>
-                        <span className="text-foreground">{selectedOrder.items?.length || 0}</span>
-                      </div>
-                      {(selectedOrder as any).approval_status && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground">Approval:</span>
-                          <span className={cn(
-                            "px-2 py-0.5 rounded-full text-xs font-medium capitalize",
-                            (selectedOrder as any).approval_status === 'approved'
-                              ? "bg-success-muted text-success"
-                              : (selectedOrder as any).approval_status === 'pending'
-                                ? "bg-warning-muted text-warning"
-                                : "bg-destructive-muted text-destructive"
-                          )}>
-                            {(selectedOrder as any).approval_status}
-                          </span>
-                        </div>
+                        </p>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Delivery Address (for delivery orders) */}
-                {selectedOrder.order_type === 'delivery' && (selectedOrder as any).customer_address && (
-                  <div className="mb-6 p-4 bg-info-muted border border-info/30 rounded-xl">
-                    <h3 className="font-semibold text-info mb-2 flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
-                      Delivery Address
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {(selectedOrder as any).customer_address?.street_address}, {(selectedOrder as any).customer_address?.city}, {(selectedOrder as any).customer_address?.state} {(selectedOrder as any).customer_address?.postal_code}
+                {/* Order Summary */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="text-xs font-medium uppercase">Total Amount</span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">${getAmount(selectedOrder.total).toFixed(2)}</p>
+                  </div>
+                  <div className={cn(
+                    "rounded-2xl p-4",
+                    selectedOrder.payment_status === 'paid'
+                      ? "bg-emerald-50 dark:bg-emerald-900/20"
+                      : "bg-red-50 dark:bg-red-900/20"
+                  )}>
+                    <div className={cn(
+                      "flex items-center gap-2 mb-2",
+                      selectedOrder.payment_status === 'paid'
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400"
+                    )}>
+                      <CreditCard className="w-4 h-4" />
+                      <span className="text-xs font-medium uppercase">Payment</span>
+                    </div>
+                    <p className={cn(
+                      "text-lg font-bold",
+                      selectedOrder.payment_status === 'paid'
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400"
+                    )}>
+                      {selectedOrder.payment_status === 'paid' ? 'Paid' : 'Unpaid'}
                     </p>
                   </div>
-                )}
+                </div>
 
-                {/* Order Notes */}
-                {(selectedOrder as any).special_instructions && (
-                  <div className="mb-6 p-4 bg-warning-muted border border-warning/30 rounded-xl">
-                    <h3 className="font-semibold text-warning mb-2 flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Order Notes
-                    </h3>
-                    <p className="text-foreground">{(selectedOrder as any).special_instructions}</p>
-                  </div>
-                )}
-
-                {/* Items List */}
-                <div>
-                  <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <ChefHat className="w-5 h-5 text-primary" />
+                {/* Items */}
+                <div className="mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                    <ChefHat className="w-5 h-5 text-fuchsia-600" />
                     Order Items ({selectedOrder.items?.length || 0})
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {selectedOrder.items?.map((item: any) => (
-                      <div
-                        key={item.id}
-                        className="flex items-start gap-4 p-4 bg-secondary border border-border rounded-xl hover:bg-secondary-hover transition-colors"
-                      >
-                        <div className="w-12 h-12 rounded-xl bg-primary-muted border border-primary/30 text-primary flex items-center justify-center font-bold text-lg flex-shrink-0">
-                          {item.quantity}x
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="font-semibold text-foreground text-lg">
-                              {item.menu_item?.name || item.name || 'Unknown Item'}
-                            </div>
-                            {item.status && (
-                              <span className={cn(
-                                "text-xs px-2 py-1 rounded-full font-medium border",
-                                item.status === 'served' ? 'bg-success-muted text-success border-success/30' :
-                                  item.status === 'preparing' ? 'bg-warning-muted text-warning border-warning/30' :
-                                    item.status === 'cancelled' ? 'bg-destructive-muted text-destructive border-destructive/30' :
-                                      'bg-secondary text-muted-foreground border-border'
-                              )}>
-                                {item.status}
-                              </span>
-                            )}
-                          </div>
-                          {item.special_instructions && (
-                            <div className="mt-2 p-2 bg-warning-muted border border-warning/30 rounded-lg text-sm text-warning">
-                              <strong>Special Request:</strong> {item.special_instructions}
-                            </div>
-                          )}
-                          <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>${getAmount(item.unit_price).toFixed(2)} each</span>
-                            <span className="text-foreground font-medium">
-                              Total: ${getAmount(item.total_price).toFixed(2)}
-                            </span>
+                      <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <span className="w-10 h-10 bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 text-fuchsia-600 dark:text-fuchsia-400 rounded-xl flex items-center justify-center font-bold text-sm">
+                            {item.quantity}×
+                          </span>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{item.menu_item?.name || item.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">${getAmount(item.unit_price).toFixed(2)} each</p>
                           </div>
                         </div>
+                        <span className="font-bold text-gray-900 dark:text-white">${getAmount(item.total_price).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Order Summary */}
-                <div className="mt-6 pt-4 border-t border-border">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Subtotal</span>
-                      <span>${getAmount(selectedOrder.subtotal).toFixed(2)}</span>
+                {/* Special Instructions */}
+                {(selectedOrder as any).special_instructions && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Special Instructions
                     </div>
-                    {getAmount((selectedOrder as any).tax_amount) > 0 && (
-                      <div className="flex justify-between text-muted-foreground">
-                        <span>Tax</span>
-                        <span>${getAmount((selectedOrder as any).tax_amount).toFixed(2)}</span>
-                      </div>
-                    )}
-                    {getAmount((selectedOrder as any).discount_amount) > 0 && (
-                      <div className="flex justify-between text-success">
-                        <span>Discount</span>
-                        <span>-${getAmount((selectedOrder as any).discount_amount).toFixed(2)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-xl font-bold text-foreground pt-2 border-t border-border">
-                      <span>Total</span>
-                      <span>${getAmount(selectedOrder.total).toFixed(2)}</span>
-                    </div>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">{(selectedOrder as any).special_instructions}</p>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* Modal Footer - Actions */}
-              <div className="p-4 border-t border-border bg-secondary flex flex-wrap gap-3 justify-between">
-                <div className="flex gap-2">
-                  {/* Status Actions */}
-                  {selectedOrder.status === 'pending' && (
-                    <Button
-                      onClick={() => { handleQuickStatus(selectedOrder.id, 'received'); setOpenView(false); }}
-                      className="bg-info hover:bg-info/90 text-info-foreground"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" /> Accept Order
-                    </Button>
-                  )}
-                  {selectedOrder.status === 'received' && (
-                    <Button
-                      onClick={() => { handleQuickStatus(selectedOrder.id, 'preparing'); setOpenView(false); }}
-                      variant="warning"
-                    >
-                      <ChefHat className="w-4 h-4 mr-2" /> Start Preparing
-                    </Button>
-                  )}
-                  {selectedOrder.status === 'preparing' && (
-                    <Button
-                      onClick={() => { handleQuickStatus(selectedOrder.id, 'ready'); setOpenView(false); }}
-                      variant="success"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" /> Mark Ready
-                    </Button>
-                  )}
-                  {selectedOrder.status === 'ready' && (
-                    <Button
-                      onClick={() => { handleQuickStatus(selectedOrder.id, 'completed'); setOpenView(false); }}
-                      variant="success"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" /> Complete Order
-                    </Button>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {/* Payment Toggle */}
-                  <Button
-                    variant="outline"
-                    onClick={() => handleTogglePayment(selectedOrder)}
-                    className={cn(
-                      selectedOrder.payment_status === 'paid'
-                        ? "border-success/30 text-success hover:bg-success-muted"
-                        : "text-muted-foreground hover:bg-secondary-hover"
+              {/* Actions Footer */}
+              <div className="p-6 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex flex-col gap-3">
+                  {/* Primary Actions */}
+                  <div className="flex gap-2">
+                    {selectedOrder.status === 'pending' && (
+                      <Button
+                        onClick={() => { handleQuickStatus(selectedOrder.id, 'received'); setOpenView(false); }}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12"
+                      >
+                        <CheckCircle className="w-5 h-5 mr-2" /> Accept Order
+                      </Button>
                     )}
-                  >
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    {selectedOrder.payment_status === 'paid' ? 'Mark Unpaid' : 'Mark as Paid'}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setOpenView(false)}
-                  >
-                    Close
-                  </Button>
+                    {selectedOrder.status === 'received' && (
+                      <Button
+                        onClick={() => { handleQuickStatus(selectedOrder.id, 'preparing'); setOpenView(false); }}
+                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-12"
+                      >
+                        <ChefHat className="w-5 h-5 mr-2" /> Start Preparing
+                      </Button>
+                    )}
+                    {selectedOrder.status === 'preparing' && (
+                      <Button
+                        onClick={() => { handleQuickStatus(selectedOrder.id, 'ready'); setOpenView(false); }}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white h-12"
+                      >
+                        <Sparkles className="w-5 h-5 mr-2" /> Mark Ready
+                      </Button>
+                    )}
+                    {selectedOrder.status === 'ready' && (
+                      <Button
+                        onClick={() => { handleQuickStatus(selectedOrder.id, 'completed'); setOpenView(false); }}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white h-12"
+                      >
+                        <CheckCircle className="w-5 h-5 mr-2" /> Complete Order
+                      </Button>
+                    )}
+                    {(selectedOrder as any).approval_status === 'pending' && (
+                      <Button
+                        onClick={() => { handleApprove(selectedOrder); setOpenView(false); }}
+                        className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white h-12"
+                      >
+                        <ThumbsUp className="w-5 h-5 mr-2" /> Approve Order
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Secondary Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => updatePaymentMutation.mutate({ id: selectedOrder.id, status: selectedOrder.payment_status === 'paid' ? 'unpaid' : 'paid' })}
+                      className="flex-1 h-11 border-gray-200 dark:border-gray-700"
+                    >
+                      <DollarSign className="w-4 h-4 mr-2" />
+                      {selectedOrder.payment_status === 'paid' ? 'Mark Unpaid' : 'Mark Paid'}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setOpenView(false)}
+                      className="flex-1 h-11"
+                    >
+                      Close
+                    </Button>
+                  </div>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </AdminLayout >
+    </AdminLayout>
   );
 }
