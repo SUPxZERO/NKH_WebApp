@@ -243,70 +243,70 @@ export default function Settings() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-background p-6 relative overflow-hidden">
-        {/* Decorative Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 relative overflow-x-hidden">
+        {/* Decorative Background Elements - Hidden on mobile */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl" />
           <div className="absolute top-1/2 -left-40 w-80 h-80 bg-blue-500/10 dark:bg-blue-500/20 rounded-full blur-3xl" />
           <div className="absolute -bottom-40 right-1/3 w-80 h-80 bg-pink-500/10 dark:bg-pink-500/20 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 w-full mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                  <SettingsIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+          <div className="mb-4 sm:mb-6 md:mb-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
+                  <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent truncate">
                     Settings
                   </span>
                 </h1>
-                <p className="text-muted-foreground mt-1">Manage your profile and system settings</p>
+                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Manage your profile and system settings</p>
               </div>
             </div>
 
             {/* Section Tabs */}
-            <div className="flex gap-2 bg-card border border-border rounded-xl p-1.5 w-fit">
+            <div className="flex gap-1.5 sm:gap-2 bg-card border border-border rounded-lg sm:rounded-xl p-1 sm:p-1.5 w-full sm:w-fit">
               <button
                 onClick={() => setActiveSection('profile')}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all",
                   activeSection === 'profile'
                     ? "bg-purple-600 text-white"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 )}
               >
-                <User className="w-4 h-4" />
-                My Profile
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline sm:inline">My </span>Profile
               </button>
               <button
                 onClick={() => setActiveSection('system')}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all",
                   activeSection === 'system'
                     ? "bg-purple-600 text-white"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 )}
               >
-                <SettingsIcon className="w-4 h-4" />
-                System Settings
+                <SettingsIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">System </span>Settings
               </button>
             </div>
           </div>
 
           {activeSection === 'profile' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Profile Card */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                 {/* Personal Info */}
-                <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm">
-                  <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div className="bg-card border border-border rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                  <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                    <User className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
                     Personal Information
                   </h2>
 
-                  <div className="flex items-center gap-6 mb-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                     {/* Avatar */}
                     <ProfilePictureUpload
                       name={profileForm.name}
@@ -314,49 +314,49 @@ export default function Settings() {
                       size="lg"
                     />
                     <div>
-                      <h3 className="text-xl font-semibold text-foreground">{profileForm.name}</h3>
-                      <p className="text-muted-foreground">{profileForm.email}</p>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                      <h3 className="text-lg sm:text-xl font-semibold text-foreground">{profileForm.name}</h3>
+                      <p className="text-sm sm:text-base text-muted-foreground">{profileForm.email}</p>
+                      <span className="inline-block mt-0.5 sm:mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
                         Administrator
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-muted-foreground mb-2">
-                        <User className="w-4 h-4 inline mr-2" />
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
+                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-2" />
                         Full Name
                       </label>
                       <input
                         type="text"
                         value={profileForm.name}
                         onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 sm:px-4 py-2 h-10 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-muted-foreground mb-2">
-                        <Mail className="w-4 h-4 inline mr-2" />
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
+                        <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-2" />
                         Email
                       </label>
                       <input
                         type="email"
                         value={profileForm.email}
                         onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 sm:px-4 py-2 h-10 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-muted-foreground mb-2">
-                        <Phone className="w-4 h-4 inline mr-2" />
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
+                        <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-2" />
                         Phone
                       </label>
                       <input
                         type="tel"
                         value={profileForm.phone}
                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 sm:px-4 py-2 h-10 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -364,7 +364,7 @@ export default function Settings() {
                   <Button
                     onClick={handleSaveProfile}
                     disabled={updateProfileMutation.isPending}
-                    className="mt-6 bg-purple-600 hover:bg-purple-700"
+                    className="mt-4 sm:mt-6 h-10 text-sm bg-purple-600 hover:bg-purple-700"
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
@@ -372,26 +372,26 @@ export default function Settings() {
                 </div>
 
                 {/* Location */}
-                <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div className="bg-card border border-border rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-0">
+                    <h2 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
                       My Location
                     </h2>
                     <button
                       onClick={handleLocateMe}
-                      className="text-sm flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"
+                      className="text-xs sm:text-sm flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"
                     >
                       {loadingLocation ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                       ) : (
-                        <Crosshair className="w-4 h-4" />
+                        <Crosshair className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       )}
                       Use My Location
                     </button>
                   </div>
 
-                  <div className="h-[300px] rounded-xl overflow-hidden border border-border relative mb-4">
+                  <div className="h-[200px] sm:h-[300px] rounded-xl overflow-hidden border border-border relative mb-3 sm:mb-4">
                     <Map
                       className="h-full w-full"
                       center={[profileForm.latitude, profileForm.longitude]}
@@ -402,21 +402,21 @@ export default function Settings() {
                     />
                     {loadingLocation && (
                       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000]">
-                        <div className="flex items-center gap-2 text-white bg-secondary px-4 py-2 rounded-lg">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span className="text-sm">Finding location...</span>
+                        <div className="flex items-center gap-2 text-white bg-secondary px-3 py-1.5 rounded-lg">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span className="text-xs sm:text-sm">Finding location...</span>
                         </div>
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">Address</label>
+                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Address</label>
                     <textarea
                       value={profileForm.address}
                       onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                       rows={2}
-                      className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 sm:px-4 py-2 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
                       placeholder="Your address will appear here after selecting on map"
                     />
                   </div>
@@ -428,39 +428,39 @@ export default function Settings() {
               </div>
 
               {/* Security Card */}
-              <div className="space-y-6">
-                <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm">
-                  <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <div className="space-y-4 sm:space-y-6">
+                <div className="bg-card border border-border rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                  <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+                    <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
                     Change Password
                   </h2>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-muted-foreground mb-2">Current Password</label>
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Current Password</label>
                       <input
                         type="password"
                         value={passwordForm.current_password}
                         onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 sm:px-4 py-2 h-10 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-muted-foreground mb-2">New Password</label>
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">New Password</label>
                       <input
                         type="password"
                         value={passwordForm.new_password}
                         onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 sm:px-4 py-2 h-10 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-muted-foreground mb-2">Confirm Password</label>
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Confirm Password</label>
                       <input
                         type="password"
                         value={passwordForm.new_password_confirmation}
                         onChange={(e) => setPasswordForm({ ...passwordForm, new_password_confirmation: e.target.value })}
-                        className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 sm:px-4 py-2 h-10 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                   </div>
@@ -468,7 +468,7 @@ export default function Settings() {
                   <Button
                     onClick={handleChangePassword}
                     disabled={updatePasswordMutation.isPending || !passwordForm.current_password || !passwordForm.new_password}
-                    className="w-full mt-6 bg-purple-600 hover:bg-purple-700"
+                    className="w-full mt-4 sm:mt-6 h-10 text-sm bg-purple-600 hover:bg-purple-700"
                   >
                     <Key className="w-4 h-4 mr-2" />
                     {updatePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
@@ -476,9 +476,9 @@ export default function Settings() {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="bg-card border border-border rounded-xl p-6 backdrop-blur-sm">
-                  <h2 className="text-lg font-semibold text-foreground mb-4">Account Info</h2>
-                  <div className="space-y-3 text-sm">
+                <div className="bg-card border border-border rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+                  <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Account Info</h2>
+                  <div className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Role</span>
                       <span className="text-foreground font-medium">Administrator</span>
@@ -500,30 +500,30 @@ export default function Settings() {
           ) : (
             /* System Settings Section */
             <>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                   {hasChanges && (
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex-1">
                       <Button onClick={handleSave} disabled={saveMutation.isPending}
-                        className="bg-emerald-600 hover:bg-emerald-700">
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 h-9 sm:h-10 text-sm">
                         <Save className="w-4 h-4 mr-2" />
                         {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
                       </Button>
                     </motion.div>
                   )}
                   <Button onClick={() => setShowAddModal(true)} variant="secondary"
-                    className="border-border hover:bg-secondary">
+                    className="flex-1 border-border hover:bg-secondary h-9 sm:h-10 text-sm">
                     <Plus className="w-4 h-4 mr-2" /> Add Setting
                   </Button>
                 </div>
               </div>
 
               {/* Location Filter */}
-              <div className="bg-card border border-border rounded-xl p-4 backdrop-blur-sm mb-6">
-                <div className="flex items-center gap-4">
-                  <MapPin className="w-5 h-5 text-muted-foreground" />
+              <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm mb-4 sm:mb-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
                   <select value={selectedLocation || ''} onChange={(e) => setSelectedLocation(e.target.value ? Number(e.target.value) : null)}
-                    className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500">
+                    className="flex-1 px-3 sm:px-4 py-2 h-9 sm:h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500">
                     <option value="">Global Settings</option>
                     {locations.map((location: any) => (
                       <option key={location.id} value={location.id}>{location.name} (Location-specific)</option>
@@ -534,16 +534,16 @@ export default function Settings() {
 
               {/* Category Tabs */}
               {categories.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto mb-6">
+                <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 sm:mb-6">
                   {categories.map((category) => {
                     const Icon = getCategoryIcon(category);
                     return (
                       <button key={category} onClick={() => setActiveTab(category)}
-                        className={cn("flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap",
+                        className={cn("flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all whitespace-nowrap text-xs sm:text-sm",
                           activeTab === category
                             ? "bg-purple-600 text-white shadow-lg"
                             : "bg-card text-muted-foreground hover:bg-secondary border border-border")}>
-                        <Icon className="w-4 h-4" />
+                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         <span className="capitalize">{category}</span>
                       </button>
                     );
@@ -553,55 +553,55 @@ export default function Settings() {
 
               {/* Settings List */}
               {isLoading ? (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="h-20 bg-card border border-border rounded-xl animate-pulse"></div>
+                    <div key={i} className="h-16 sm:h-20 bg-card border border-border rounded-lg sm:rounded-xl animate-pulse"></div>
                   ))}
                 </div>
               ) : currentSettings.length === 0 ? (
-                <div className="bg-card border border-border rounded-xl p-12 text-center backdrop-blur-sm">
-                  <SettingsIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-foreground font-medium">No settings found</h3>
-                  <p className="text-muted-foreground text-sm mt-1">Click "Add Setting" to create one.</p>
+                <div className="bg-card border border-border rounded-xl p-8 sm:p-12 text-center backdrop-blur-sm">
+                  <SettingsIcon className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-foreground font-medium text-sm sm:text-base">No settings found</h3>
+                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">Click "Add Setting" to create one.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {currentSettings.map((setting) => {
                     const currentValue = editedValues[setting.key] ?? setting.value;
                     const isEdited = setting.key in editedValues;
 
                     return (
                       <motion.div key={setting.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                        className={cn("bg-card border rounded-xl p-4 backdrop-blur-sm transition-all",
+                        className={cn("bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm transition-all",
                           isEdited ? "border-purple-500 bg-purple-500/10" : "border-border hover:bg-secondary")}>
-                        <div className="flex items-center gap-4">
-                          <div className="flex-1 space-y-1">
-                            <div className="flex items-center gap-2">
-                              <label className="font-medium text-foreground capitalize">{setting.label}</label>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                          <div className="flex-1 space-y-0.5 sm:space-y-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <label className="font-medium text-sm text-foreground capitalize truncate">{setting.label}</label>
                               {isEdited && (
-                                <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full">Modified</span>
+                                <span className="text-[10px] sm:text-xs bg-purple-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full">Modified</span>
                               )}
                             </div>
-                            <div className="text-xs text-muted-foreground font-mono">{setting.key}</div>
+                            <div className="text-[10px] sm:text-xs text-muted-foreground font-mono truncate">{setting.key}</div>
                           </div>
 
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3">
                             {typeof currentValue === 'boolean' ? (
                               <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" checked={currentValue}
                                   onChange={(e) => handleValueChange(setting.key, e.target.checked)}
-                                  className="w-5 h-5 rounded text-purple-600 focus:ring-purple-500 bg-background border-border" />
-                                <span className="text-sm text-muted-foreground">{currentValue ? 'Enabled' : 'Disabled'}</span>
+                                  className="w-4 h-4 sm:w-5 sm:h-5 rounded text-purple-600 focus:ring-purple-500 bg-background border-border" />
+                                <span className="text-xs sm:text-sm text-muted-foreground">{currentValue ? 'On' : 'Off'}</span>
                               </label>
                             ) : (
                               <input type="text"
                                 value={typeof currentValue === 'object' ? JSON.stringify(currentValue) : currentValue}
                                 onChange={(e) => handleValueChange(setting.key, e.target.value)}
-                                className="px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500 min-w-[300px]" />
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 h-9 sm:h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500 sm:min-w-[200px] md:min-w-[300px]" />
                             )}
 
                             <Button size="sm" variant="danger" onClick={() => handleDelete(setting)}
-                              className="h-9 w-9 p-0 border-red-500/20 hover:bg-red-500/20 text-red-600 dark:text-red-400">
+                              className="h-9 w-9 p-0 border-red-500/20 hover:bg-red-500/20 text-red-600 dark:text-red-400 flex-shrink-0">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -616,36 +616,36 @@ export default function Settings() {
               {showAddModal && (
                 <>
                   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setShowAddModal(false)} />
-                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <motion.div className="bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full"
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+                    <motion.div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full"
                       initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} onClick={(e) => e.stopPropagation()}>
-                      <div className="p-6 space-y-4">
-                        <h2 className="text-2xl font-bold text-foreground">Add New Setting</h2>
+                      <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Add New Setting</h2>
 
                         <div>
-                          <label className="block text-sm font-medium text-muted-foreground mb-2">Key *</label>
+                          <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Key *</label>
                           <input type="text" value={newSetting.key}
                             onChange={(e) => setNewSetting({ ...newSetting, key: e.target.value })}
                             placeholder="e.g., general.site_name"
-                            className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
-                          <p className="text-xs text-muted-foreground mt-1">Use format: category.setting_name</p>
+                            className="w-full px-3 sm:px-4 py-2 h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
+                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Use format: category.setting_name</p>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-muted-foreground mb-2">Value *</label>
+                          <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Value *</label>
                           <input type="text" value={newSetting.value}
                             onChange={(e) => setNewSetting({ ...newSetting, value: e.target.value })}
                             placeholder="Setting value"
-                            className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
+                            className="w-full px-3 sm:px-4 py-2 h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
                         </div>
 
-                        <div className="flex gap-3 pt-4">
-                          <Button variant="secondary" onClick={() => setShowAddModal(false)} className="flex-1 border-border">
+                        <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
+                          <Button variant="secondary" onClick={() => setShowAddModal(false)} className="flex-1 h-10 text-sm border-border">
                             Cancel
                           </Button>
                           <Button onClick={handleCreate}
                             disabled={!newSetting.key || !newSetting.value || createMutation.isPending}
-                            className="flex-1 bg-purple-600 hover:bg-purple-700">
+                            className="flex-1 h-10 text-sm bg-purple-600 hover:bg-purple-700">
                             {createMutation.isPending ? 'Creating...' : 'Create'}
                           </Button>
                         </div>

@@ -12,7 +12,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 
-// Enhanced StatCard Component
+// Enhanced StatCard Component - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
     const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
         purple: {
@@ -52,23 +52,23 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-                "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+                "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm",
                 `bg-gradient-to-br ${styles.gradient}`,
                 styles.border,
                 `shadow-lg ${styles.shadow}`
             )}
         >
-            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+            <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8 hidden sm:block">
                 <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
             </div>
-            <div className="relative p-5">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-                        <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
+            <div className="relative p-3 sm:p-4 md:p-5">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                        <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1 truncate">{title}</p>
+                        <p className={cn("text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold truncate", styles.text)}>{value}</p>
                     </div>
-                    <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-                        <Icon className="w-6 h-6 text-white" />
+                    <div className={cn("p-2 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </div>
             </div>
@@ -76,13 +76,13 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
     );
 };
 
-// Roles Ribbon
+// Roles Ribbon - Mobile optimized
 const RoleStatsRibbon = ({ stats }: { stats: any }) => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Roles" value={stats.total} icon={Shield} color="purple" index={0} />
-        <StatCard title="Assigned Users" value={stats.users} icon={Users} color="emerald" index={1} />
-        <StatCard title="Total Permissions" value={stats.permissions} icon={Lock} color="blue" index={2} />
-        <StatCard title="Avg Perms/Role" value={stats.avgPerms} icon={CheckCircle} color="amber" index={3} />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+        <StatCard title="Roles" value={stats.total} icon={Shield} color="purple" index={0} />
+        <StatCard title="Users" value={stats.users} icon={Users} color="emerald" index={1} />
+        <StatCard title="Perms" value={stats.permissions} icon={Lock} color="blue" index={2} />
+        <StatCard title="Avg/Role" value={stats.avgPerms} icon={CheckCircle} color="amber" index={3} />
     </div>
 );
 
@@ -196,28 +196,30 @@ export default function Roles() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-background p-6 transition-colors relative overflow-hidden">
-                {/* Decorative Background Elements */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 transition-colors relative overflow-x-hidden">
+                {/* Decorative Background Elements - Hidden on mobile */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
                     <div className="absolute bottom-20 left-10 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl" />
                 </div>
 
-                <div className="relative z-10">
+                <div className="relative z-10 w-full mx-auto">
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                        <div>
+                    <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6 md:mb-8">
+                        <div className="min-w-0">
                             <motion.h1
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent"
+                                className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent truncate"
                             >
-                                Roles & Permissions
+                                <span className="hidden sm:inline">Roles & Permissions</span>
+                                <span className="sm:hidden">Roles</span>
                             </motion.h1>
-                            <p className="text-muted-foreground mt-1">Manage user access control and security</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Manage user access control and security</p>
                         </div>
-                        <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-lg shadow-purple-500/20">
-                            <Plus className="w-4 h-4 mr-2" /> Create Role
+                        <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-lg shadow-purple-500/20 flex-shrink-0">
+                            <Plus className="w-4 h-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Create Role</span>
                         </Button>
                     </div>
 
@@ -228,21 +230,21 @@ export default function Roles() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl p-4 mb-6 backdrop-blur-sm shadow-lg"
+                        className="bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm shadow-lg"
                     >
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input placeholder="Search roles..." value={search} onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 bg-background/50 border-border text-foreground placeholder:text-muted-foreground focus:ring-purple-500" />
+                            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                className="pl-10 h-10 text-sm bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
                         </div>
                     </motion.div>
 
-                    {/* Table */}
+                    {/* Desktop Table */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+                        className="hidden md:block bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
                         <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
                             <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">Role Name</div>
@@ -299,7 +301,7 @@ export default function Roles() {
                                         <span className="font-medium">{role.permissions_count}</span>
                                         <span className="text-muted-foreground text-xs">access points</span>
                                     </div>
-                                    <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                    <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                                         <Button size="sm" variant="ghost" onClick={() => handleEdit(role)} className="h-8 w-8 p-0 hover:bg-purple-500/10 hover:text-purple-600"><Edit size={14} /></Button>
                                         <Button size="sm" variant="ghost" onClick={() => handleDelete(role)} className="h-8 w-8 p-0 hover:bg-red-500/10 hover:text-red-600"><Trash2 size={14} /></Button>
                                     </div>
@@ -307,55 +309,122 @@ export default function Roles() {
                             ))}
                         </div>
                     </motion.div>
+
+                    {/* Mobile Cards */}
+                    <div className="md:hidden space-y-3">
+                        {isLoading ? (
+                            <div className="bg-card/50 rounded-xl p-8 text-center border border-border/50 backdrop-blur-sm">
+                                <div className="inline-flex items-center gap-3 text-muted-foreground">
+                                    <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                                    <span className="text-sm">Loading...</span>
+                                </div>
+                            </div>
+                        ) : roles.length === 0 ? (
+                            <div className="bg-card/50 rounded-xl p-8 text-center border border-border/50 backdrop-blur-sm">
+                                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
+                                    <Shield className="w-7 h-7 text-purple-500" />
+                                </div>
+                                <h3 className="text-foreground font-semibold text-sm">No roles found</h3>
+                                <p className="text-muted-foreground text-xs mt-1">Create a new role to get started</p>
+                            </div>
+                        ) : roles.map((role: any, idx: number) => (
+                            <motion.div
+                                key={role.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.03 }}
+                                className="bg-card/50 border border-border/50 rounded-xl p-3 backdrop-blur-sm"
+                            >
+                                {/* Header Row */}
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center border border-purple-500/20 flex-shrink-0">
+                                            <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-1.5">
+                                                <h3 className="font-semibold text-sm text-foreground truncate">{role.name}</h3>
+                                                {role.id === 1 && <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] border border-amber-500/20 flex-shrink-0">Sys</span>}
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground truncate">{role.description || role.slug}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-1 flex-shrink-0">
+                                        <Button size="sm" variant="ghost" onClick={() => handleEdit(role)} className="h-8 w-8 p-0 hover:bg-purple-500/20 hover:text-purple-600">
+                                            <Edit size={14} />
+                                        </Button>
+                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(role)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-600">
+                                            <Trash2 size={14} />
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Info Row */}
+                                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-1.5">
+                                            <Users size={12} className="text-emerald-500" />
+                                            <span className="text-xs font-medium text-foreground">{role.users_count}</span>
+                                            <span className="text-[10px] text-muted-foreground">users</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <Lock size={12} className="text-purple-500" />
+                                            <span className="text-xs font-medium text-foreground">{role.permissions_count}</span>
+                                            <span className="text-[10px] text-muted-foreground">perms</span>
+                                        </div>
+                                    </div>
+                                    <span className="font-mono text-[10px] text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">{role.slug}</span>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRole ? 'Edit Role' : 'New Role'} size="lg">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2">
-                            <Input label="Role Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Restaurant Manager" />
-                        </div>
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                    <div>
+                        <Input label="Role Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Restaurant Manager" className="h-10 text-sm" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-foreground mb-1">Description</label>
+                        <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Description</label>
                         <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
-                            className="w-full bg-background border border-border rounded-xl px-3 py-2 text-foreground focus:ring-2 focus:ring-purple-500 outline-none resize-none"
+                            className="w-full bg-background border border-border rounded-lg sm:rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-purple-500 outline-none resize-none"
                             placeholder="Describe what this role can do..." />
                     </div>
 
-                    <div className="border-t border-border pt-4">
-                        <label className="block text-sm font-medium text-foreground mb-3 flex items-center justify-between">
+                    <div className="border-t border-border pt-3 sm:pt-4">
+                        <label className="block text-xs sm:text-sm font-medium text-foreground mb-2 sm:mb-3 flex items-center justify-between">
                             <span>Permissions</span>
-                            <span className="text-xs text-muted-foreground">{formData.permissions.length} selected</span>
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">{formData.permissions.length} selected</span>
                         </label>
-                        <div className="h-80 overflow-y-auto pr-2 space-y-5">
+                        <div className="h-60 sm:h-80 overflow-y-auto pr-2 space-y-3 sm:space-y-5">
                             {Object.entries(permissions).map(([group, perms]: [string, any]) => (
-                                <div key={group} className="bg-secondary/20 p-4 rounded-xl border border-border/50">
-                                    <h4 className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-3 flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                                <div key={group} className="bg-secondary/20 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50">
+                                    <h4 className="text-[10px] sm:text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2 sm:mb-3 flex items-center gap-2">
+                                        <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-purple-500" />
                                         {group}
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div className="grid grid-cols-1 gap-1.5 sm:gap-2">
                                         {perms.map((p: any) => (
                                             <label key={p.id} className={cn(
-                                                "flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-all",
+                                                "flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-lg border cursor-pointer transition-all",
                                                 formData.permissions.includes(p.id)
                                                     ? "bg-purple-500/10 border-purple-500/30"
                                                     : "bg-background border-border hover:border-purple-500/30 hover:bg-purple-500/5"
                                             )}>
                                                 <div className={cn(
-                                                    "w-5 h-5 rounded flex items-center justify-center border transition-all",
+                                                    "w-4 h-4 sm:w-5 sm:h-5 rounded flex items-center justify-center border transition-all flex-shrink-0",
                                                     formData.permissions.includes(p.id)
                                                         ? "bg-purple-600 border-purple-600 text-white"
                                                         : "bg-background border-muted-foreground/30"
                                                 )}>
                                                     <input type="checkbox" checked={formData.permissions.includes(p.id)} onChange={() => togglePermission(p.id)}
                                                         className="hidden" />
-                                                    {formData.permissions.includes(p.id) && <CheckCircle size={12} />}
+                                                    {formData.permissions.includes(p.id) && <CheckCircle size={10} />}
                                                 </div>
                                                 <span className={cn(
-                                                    "text-sm font-medium transition-colors",
+                                                    "text-xs sm:text-sm font-medium transition-colors truncate",
                                                     formData.permissions.includes(p.id) ? "text-purple-700 dark:text-purple-300" : "text-foreground"
                                                 )}>{p.name}</span>
                                             </label>
@@ -366,10 +435,10 @@ export default function Roles() {
                         </div>
                     </div>
 
-                    <div className="flex gap-3 pt-4 border-t border-border">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-                        <Button type="submit" className="flex-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-lg shadow-purple-500/20">
-                            {editingRole ? 'Update Role' : 'Create Role'}
+                    <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-border">
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+                        <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-lg shadow-purple-500/20">
+                            {editingRole ? 'Update' : 'Create'}
                         </Button>
                     </div>
                 </form>

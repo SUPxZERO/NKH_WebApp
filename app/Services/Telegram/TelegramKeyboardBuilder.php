@@ -376,7 +376,7 @@ class TelegramKeyboardBuilder
     /**
      * Build order type selection keyboard
      */
-    public static function orderType(): array
+    public static function orderTypeSelection(): array
     {
         return self::inlineKeyboard([
             [
@@ -384,88 +384,220 @@ class TelegramKeyboardBuilder
                 ['text' => '🏠 Delivery', 'callback_data' => 'order_type_delivery'],
             ],
             [
-                ['text' => '◀️ Back to Cart', 'callback_data' => 'cart_view'],
+                ['text' => '🛒 View Cart', 'callback_data' => 'cart_view'],
+            ],
+            [
+                ['text' => '◀️ Back', 'callback_data' => 'cart_view'],
             ],
         ]);
     }
 
     /**
-     * Build location selection keyboard
+     * Build location selection with details
      */
-    public static function locations(Collection $locations): array
+    public static function locationsWithDetails(Collection $locations): array
     {
         $buttons = [];
 
         foreach ($locations as $location) {
+            $name = $location->name;
+            $address = substr($location->address ?? '', 0, 30);
+            $hours = $location->opening_hours ?? '10:00-22:00';
+
             $buttons[] = [
                 [
-                    'text' => "📍 {$location->name}",
+                    'text' => "📍 {$name}",
                     'callback_data' => 'location_' . $location->id,
+                ],
+                [
+                    'text' => "🕐 {$hours}",
+                    'callback_data' => 'location_hours_' . $location->id,
                 ],
             ];
         }
 
         $buttons[] = [
-            ['text' => '◀️ Back', 'callback_data' => 'checkout_order_type'],
+            ['text' => '◀️ Back', 'callback_data' => 'order_type_select'],
         ];
 
         return self::inlineKeyboard($buttons);
     }
 
     /**
-     * Build time slot selection keyboard
+     * Build addresses with default selection
      */
-    public static function timeSlots(Collection $slots, string $date, bool $hasMore = false): array
+    public static function addressesWithDefault(Collection $addresses, $customer = null): array
     {
         $buttons = [];
-        $label = $date === now()->format('Y-m-d') ? 'Today' : $date;
+
+        foreach ($addresses as $address) {
+            $label = $address->label ?? 'Address';
+            $shortAddress = substr($address->address_line_1 ?? '', 0, 35);
+
+            $buttons[] = [
+                [
+                    'text' => "📍 {$label}",
+                    'callback_data' => 'address_' . $address->id,
+                ],
+                [
+                    'text' => "📝 {$shortAddress}",
+                    'callback_data' => 'address_view_' . $address->id,
+                ],
+            ];
+        }
+
+        // Add new address button
+        $buttons[] = [
+            ['text' => '➕ Add New Address', 'callback_data' => 'address_add'],
+        ];
 
         $buttons[] = [
-            ['text' => "📅 {$label}", 'callback_data' => 'date_current'],
+            ['text' => '◀️ Back', 'callback_data' => 'order_type_delivery'],
         ];
+
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build time slots with date navigation
+     */
+    public static function timeSlotsWithDates(
+        Collection $slots,
+        string $dateStr,
+        bool $showToday = true,
+        bool $showTomorrow = false
+    ): array {
+        $buttons = [];
+
+        // Date navigation
+        $dateRow = [];
+        if ($showToday) {
+            $dateRow[] = ['text' => '📅 Today', 'callback_data' => 'slots_today'];
+        }
+        if ($showTomorrow) {
+            $dateRow[] = ['text' => '📅 Tomorrow', 'callback_data' => 'slots_tomorrow'];
+        }
+        if (!empty($dateRow)) {
+            $buttons[] = $dateRow;
+        }
 
         // Time slots in rows of 3
         foreach ($slots->chunk(3) as $chunk) {
             $row = [];
             foreach ($chunk as $slot) {
+                $startTime = substr($slot['start'] ?? '', 0, 5);
                 $row[] = [
-                    'text' => substr($slot['start'], 0, 5),
+                    'text' => $startTime,
                     'callback_data' => 'slot_' . $slot['id'],
                 ];
             }
             $buttons[] = $row;
         }
 
-        // Navigation
         $buttons[] = [
-            ['text' => '◀️ Back to Locations', 'callback_data' => 'checkout_locations'],
+            ['text' => '◀️ Back', 'callback_data' => 'checkout_back'],
         ];
 
         return self::inlineKeyboard($buttons);
     }
 
     /**
-     * Build payment method selection keyboard
+     * Build time slot date navigation
      */
-    public static function paymentMethods(bool $supportsOnlinePayment = true): array
+    public static function timeSlotDateNavigation(string $currentDate): array
     {
         $buttons = [];
 
-        if ($supportsOnlinePayment) {
+        if ($currentDate === 'today') {
             $buttons[] = [
-                ['text' => '💳 Pay Now (Online)', 'callback_data' => 'payment_online'],
+                ['text' => '📅 Tomorrow', 'callback_data' => 'slots_tomorrow'],
             ];
         }
 
         $buttons[] = [
-            ['text' => '💵 Pay on ' . ($supportsOnlinePayment ? 'Pickup' : 'Arrival'), 'callback_data' => 'payment_cash'],
-        ];
-
-        $buttons[] = [
-            ['text' => '◀️ Back', 'callback_data' => 'checkout_time'],
+            ['text' => '◀️ Back', 'callback_data' => 'checkout_back'],
         ];
 
         return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build payment methods with Bakong option
+     */
+    public static function paymentMethodsWithBakong(float $total): array
+    {
+        $buttons = [];
+
+        // Bakong option
+        $buttons[] = [
+            ['text' => '🔵 Bakong KHQR', 'callback_data' => 'payment_bakong'],
+        ];
+
+        // Cash payment
+        $paymentText = '💵 Pay on ' . ($total > 0 ? 'Pickup/Delivery' : 'Arrival');
+        $buttons[] = [
+            ['text' => $paymentText, 'callback_data' => 'payment_cash'],
+        ];
+
+        $buttons[] = [
+            ['text' => '◀️ Back', 'callback_data' => 'checkout_back'],
+        ];
+
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build Bakong payment keyboard
+     */
+    public static function bakongPayment(array $data): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '✅ I\'ve Paid', 'callback_data' => 'payment_bakong_confirm'],
+            ],
+            [
+                ['text' => '🔄 Check Status', 'callback_data' => 'payment_bakong_check'],
+            ],
+            [
+                ['text' => '💵 Pay with Cash Instead', 'callback_data' => 'payment_cash'],
+            ],
+            [
+                ['text' => '◀️ Back', 'callback_data' => 'checkout_back'],
+            ],
+        ]);
+    }
+
+    /**
+     * Build order confirmation with edit option
+     */
+    public static function orderConfirmationWithEdit(): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '✅ Confirm Order', 'callback_data' => 'order_confirm'],
+                ['text' => '✏️ Edit Cart', 'callback_data' => 'order_edit'],
+            ],
+            [
+                ['text' => '❌ Cancel', 'callback_data' => 'order_cancel'],
+            ],
+        ]);
+    }
+
+    /**
+     * Build order placed confirmation
+     */
+    public static function orderPlacedConfirmation(string $orderNumber): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '📋 View Order', 'callback_data' => 'order_detail_new'],
+                ['text' => '🔔 Enable Notifications', 'callback_data' => 'orders_enable_notifications'],
+            ],
+            [
+                ['text' => '🍔 Order More', 'callback_data' => 'menu_browse'],
+                ['text' => '◀️ Main Menu', 'callback_data' => 'menu_main'],
+            ],
+        ]);
     }
 
     /**
@@ -545,6 +677,125 @@ class TelegramKeyboardBuilder
         ];
 
         return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build order list with pagination
+     */
+    public static function orderListWithPagination(Collection $orders, int $page, int $totalPages): array
+    {
+        $buttons = [];
+
+        foreach ($orders as $order) {
+            $statusEmoji = self::getStatusEmoji($order->status);
+            $date = $order->created_at?->format('M j');
+            $total = '$' . number_format($order->total_amount, 2);
+            $type = $order->order_type === 'pickup' ? '🚶' : '🏠';
+
+            $buttons[] = [
+                [
+                    'text' => "{$statusEmoji} {$type} #{$order->order_number}",
+                    'callback_data' => 'order_detail_' . $order->id,
+                ],
+                [
+                    'text' => "{$date} - {$total}",
+                    'callback_data' => 'order_detail_' . $order->id,
+                ],
+            ];
+        }
+
+        // Pagination
+        $paginationRow = [];
+        if ($page > 1) {
+            $paginationRow[] = ['text' => '◀️ Prev', 'callback_data' => 'orders_page_' . ($page - 1)];
+        }
+        $paginationRow[] = ['text' => "📄 {$page}/{$totalPages}", 'callback_data' => 'orders_page_' . $page];
+        if ($page < $totalPages) {
+            $paginationRow[] = ['text' => 'Next ▶️', 'callback_data' => 'orders_page_' . ($page + 1)];
+        }
+        if (!empty($paginationRow)) {
+            $buttons[] = $paginationRow;
+        }
+
+        $buttons[] = [
+            ['text' => '🍔 Browse Menu', 'callback_data' => 'menu_browse'],
+            ['text' => '🏠 Main Menu', 'callback_data' => 'menu_main'],
+        ];
+
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build order detail actions
+     */
+    public static function orderDetailActions(Order $order): array
+    {
+        $buttons = [];
+
+        // Reorder button if completed
+        if (in_array($order->status, ['completed', 'delivered'])) {
+            $buttons[] = [
+                ['text' => '🔄 Order Again', 'callback_data' => 'order_reorder_' . $order->id],
+            ];
+        }
+
+        // Track button if not completed/cancelled
+        if (!in_array($order->status, ['completed', 'delivered', 'cancelled'])) {
+            $buttons[] = [
+                ['text' => '📍 Track Order', 'callback_data' => 'order_track_' . $order->id],
+            ];
+        }
+
+        // Cancel button if can be cancelled
+        if ($order->can_cancel) {
+            $buttons[] = [
+                ['text' => '❌ Cancel Order', 'callback_data' => 'order_cancel_request_' . $order->id],
+            ];
+        }
+
+        $buttons[] = [
+            ['text' => '◀️ All Orders', 'callback_data' => 'orders_list'],
+        ];
+
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build order tracking actions
+     */
+    public static function orderTrackingActions(Order $order): array
+    {
+        $buttons = [];
+
+        $buttons[] = [
+            ['text' => '📋 View Details', 'callback_data' => 'order_detail_' . $order->id],
+        ];
+
+        if ($order->can_cancel) {
+            $buttons[] = [
+                ['text' => '❌ Cancel Order', 'callback_data' => 'order_cancel_request_' . $order->id],
+            ];
+        }
+
+        $buttons[] = [
+            ['text' => '◀️ Back to Orders', 'callback_data' => 'orders_list'],
+            ['text' => '🏠 Main Menu', 'callback_data' => 'menu_main'],
+        ];
+
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build confirm cancel order keyboard
+     */
+    public static function confirmCancelOrder(): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '✅ Yes, Cancel', 'callback_data' => 'order_cancel_confirm'],
+                ['text' => '❌ No, Keep', 'callback_data' => 'order_detail_back'],
+            ],
+        ]);
     }
 
     /**
@@ -799,5 +1050,76 @@ class TelegramKeyboardBuilder
             'text' => $text,
             'switch_inline_query_current_chat' => $query,
         ];
+    }
+
+    /**
+     * Build order status keyboard for notifications
+     */
+    public static function buildOrderStatusKeyboard(int $orderId): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '📍 Track Order', 'callback_data' => 'order_track_' . $orderId],
+                ['text' => '📋 View Details', 'callback_data' => 'order_detail_' . $orderId],
+            ],
+            [
+                ['text' => '🔄 Enable Notifications', 'callback_data' => 'orders_enable_notifications'],
+            ],
+            [
+                ['text' => '🏠 Main Menu', 'callback_data' => 'menu_main'],
+            ],
+        ]);
+    }
+
+    /**
+     * Build order completed keyboard
+     */
+    public static function buildOrderCompletedKeyboard(int $orderId): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '⭐ Rate Order', 'callback_data' => 'order_rate_' . $orderId],
+                ['text' => '🔄 Order Again', 'callback_data' => 'order_reorder_' . $orderId],
+            ],
+            [
+                ['text' => '📦 View All Orders', 'callback_data' => 'orders_list'],
+                ['text' => '🏠 Main Menu', 'callback_data' => 'menu_main'],
+            ],
+        ]);
+    }
+
+    /**
+     * Build track order keyboard
+     */
+    public static function buildTrackOrderKeyboard(int $orderId): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '📍 Track Live', 'callback_data' => 'order_track_' . $orderId],
+                ['text' => '📋 View Details', 'callback_data' => 'order_detail_' . $orderId],
+            ],
+            [
+                ['text' => '🏠 Main Menu', 'callback_data' => 'menu_main'],
+            ],
+        ]);
+    }
+
+    /**
+     * Build notification preference keyboard
+     */
+    public static function buildNotificationPreferenceKeyboard(): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '🔔 Enable All Notifications', 'callback_data' => 'notif_enable_all'],
+                ['text' => '📊 Status Updates Only', 'callback_data' => 'notif_status_only'],
+            ],
+            [
+                ['text' => '🔕 Disable Notifications', 'callback_data' => 'notif_disable'],
+            ],
+            [
+                ['text' => '◀️ Back', 'callback_data' => 'menu_main'],
+            ],
+        ]);
     }
 }

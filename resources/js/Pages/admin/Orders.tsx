@@ -247,9 +247,9 @@ export default function Orders() {
   const stats = useMemo(() => {
     return {
       total: ordersData?.meta?.total || orderList.length,
-      pending: orderList.filter(o => o.status === 'pending').length,
-      preparing: orderList.filter(o => o.status === 'preparing').length,
-      ready: orderList.filter(o => o.status === 'ready').length,
+      pending: orderList.filter((o: Order) => o.status === 'pending').length,
+      preparing: orderList.filter((o: Order) => o.status === 'preparing').length,
+      ready: orderList.filter((o: Order) => o.status === 'ready').length,
     };
   }, [orderList, ordersData]);
 
@@ -313,7 +313,7 @@ export default function Orders() {
 
   const toggleSelectAll = () => {
     if (selectedOrders.size === orderList.length) setSelectedOrders(new Set());
-    else setSelectedOrders(new Set(orderList.map(o => o.id)));
+    else setSelectedOrders(new Set(orderList.map((o: Order) => o.id)));
   };
 
   const getNextStatus = (currentStatus: string): string | null => {
@@ -550,7 +550,7 @@ export default function Orders() {
               </div>
 
               {/* Order Cards */}
-              {orderList.map((order, index) => (
+              {orderList.map((order: Order, index: number) => (
                 <motion.div
                   key={order.id}
                   initial={{ opacity: 0, y: 20 }}

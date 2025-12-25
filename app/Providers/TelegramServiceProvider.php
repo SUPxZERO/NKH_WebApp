@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\Telegram\TelegramBotService;
 use App\Services\Telegram\TelegramCartSessionManager;
 use App\Services\Telegram\TelegramKeyboardBuilder;
+use App\Services\Telegram\TelegramOrderNotificationService;
 use Illuminate\Support\ServiceProvider;
 
 class TelegramServiceProvider extends ServiceProvider
@@ -22,6 +23,14 @@ class TelegramServiceProvider extends ServiceProvider
         // Register TelegramKeyboardBuilder as singleton
         $this->app->singleton(TelegramKeyboardBuilder::class, function ($app) {
             return new TelegramKeyboardBuilder();
+        });
+
+        // Register TelegramOrderNotificationService as singleton
+        $this->app->singleton(TelegramOrderNotificationService::class, function ($app) {
+            return new TelegramOrderNotificationService(
+                $app->make(TelegramBotService::class),
+                $app->make(TelegramKeyboardBuilder::class)
+            );
         });
     }
 

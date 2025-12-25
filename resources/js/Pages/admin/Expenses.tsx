@@ -14,7 +14,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { Expense, ExpenseCategory } from '@/app/types/domain';
 
-// StatCard Component with vibrant gradients
+// StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
   const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
     purple: {
@@ -47,23 +47,23 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
       className={cn(
-        "relative overflow-hidden rounded-2xl border backdrop-blur-sm",
+        "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm",
         `bg-gradient-to-br ${styles.gradient}`,
         styles.border,
         `shadow-lg ${styles.shadow}`
       )}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+      <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8 hidden sm:block">
         <div className={cn("w-full h-full rounded-full opacity-20 blur-2xl", styles.iconBg)} />
       </div>
-      <div className="relative p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wider font-semibold mb-1">{title}</p>
-            <p className={cn("text-3xl font-bold", styles.text)}>{value}</p>
+      <div className="relative p-3 sm:p-4 md:p-5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-semibold mb-0.5 sm:mb-1 truncate">{title}</p>
+            <p className={cn("text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold truncate", styles.text)}>{value}</p>
           </div>
-          <div className={cn("p-3 rounded-xl shadow-lg", styles.iconBg)}>
-            <Icon className="w-6 h-6 text-white" />
+          <div className={cn("p-2 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0", styles.iconBg)}>
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
           </div>
         </div>
       </div>
@@ -71,12 +71,12 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
   );
 };
 
-// Stats Ribbon
+// Stats Ribbon - Mobile optimized
 const ExpenseStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-    <StatCard title="Total Expenses" value={`$${stats.total.toFixed(2)}`} icon={DollarSign} color="purple" index={0} />
-    <StatCard title="Paid" value={`$${stats.paid.toFixed(2)}`} icon={CheckCircle} color="emerald" index={1} />
-    <StatCard title="Pending" value={`$${stats.pending.toFixed(2)}`} icon={Clock} color="amber" index={2} />
+  <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+    <StatCard title="Total" value={`$${stats.total.toFixed(0)}`} icon={DollarSign} color="purple" index={0} />
+    <StatCard title="Paid" value={`$${stats.paid.toFixed(0)}`} icon={CheckCircle} color="emerald" index={1} />
+    <StatCard title="Pending" value={`$${stats.pending.toFixed(0)}`} icon={Clock} color="amber" index={2} />
   </div>
 );
 
@@ -199,28 +199,29 @@ export default function Expenses() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-background p-6">
-        {/* Decorative Background Elements */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 overflow-x-hidden">
+        {/* Decorative Background Elements - Hidden on mobile */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
           <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
         </div>
 
         {/* Header */}
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
+        <div className="relative flex items-center justify-between gap-3 mb-4 sm:mb-6 md:mb-8">
+          <div className="min-w-0">
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent"
+              className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent truncate"
             >
               Expenses
             </motion.h1>
-            <p className="text-muted-foreground mt-1">Track business spending</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Track business spending</p>
           </div>
-          <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary">
-            <Plus className="w-4 h-4 mr-2" /> Add Expense
+          <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
+            <Plus className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Expense</span>
           </Button>
         </div>
 
@@ -231,45 +232,47 @@ export default function Expenses() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="relative bg-card/50 border border-border/50 rounded-2xl p-4 mb-6 backdrop-blur-sm shadow-lg"
+          className="relative bg-card/50 border border-border/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm shadow-lg"
         >
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1 min-w-[200px]">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search expenses..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="pl-10" variant="filled" />
+              <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 h-10 text-sm" variant="filled" />
             </div>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-secondary border border-border rounded-xl px-4 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
-              <option value="all">All Status</option>
-              <option value="draft">Draft</option>
-              <option value="approved">Approved</option>
-              <option value="paid">Paid</option>
-              <option value="voided">Voided</option>
-            </select>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-secondary border border-border rounded-xl px-4 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
-              <option value="all">All Categories</option>
-              {categories?.data?.map((c: ExpenseCategory) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-secondary border border-border rounded-xl px-4 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-            </select>
+            <div className="flex gap-2 sm:gap-3">
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                className="flex-1 sm:flex-none bg-secondary border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none">
+                <option value="all">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="approved">Approved</option>
+                <option value="paid">Paid</option>
+                <option value="voided">Voided</option>
+              </select>
+              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
+                className="flex-1 sm:flex-none bg-secondary border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none hidden sm:block">
+                <option value="all">All Categories</option>
+                {categories?.data?.map((c: ExpenseCategory) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
+                className="flex-1 sm:flex-none bg-secondary border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+              </select>
+            </div>
           </div>
         </motion.div>
 
-        {/* Table */}
+        {/* Desktop Table */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
+          className="hidden md:block relative bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
         >
           {/* Table Header with Gradient */}
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
@@ -323,29 +326,92 @@ export default function Expenses() {
             ))}
           </div>
         </motion.div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden space-y-3">
+          {isLoading ? (
+            <div className="bg-card/50 rounded-xl p-8 text-center border border-border/50 backdrop-blur-sm">
+              <div className="inline-flex items-center gap-3 text-muted-foreground">
+                <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm">Loading...</span>
+              </div>
+            </div>
+          ) : expenseList.length === 0 ? (
+            <div className="bg-card/50 rounded-xl p-8 text-center border border-border/50 backdrop-blur-sm">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
+                <DollarSign className="w-7 h-7 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-foreground font-semibold text-sm">No expenses found</h3>
+              <p className="text-muted-foreground text-xs mt-1">Create your first expense</p>
+            </div>
+          ) : expenseList.map((expense: Expense) => (
+            <motion.div
+              key={expense.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-card/50 border border-border/50 rounded-xl p-3 backdrop-blur-sm"
+            >
+              {/* Header Row */}
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center border border-purple-500/20 flex-shrink-0">
+                    <DollarSign className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-sm text-foreground truncate">{expense.expense_category?.name || 'Uncategorized'}</h3>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {new Date(expense.expense_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0", getStatusColor(expense.status))}>
+                  {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
+                </span>
+              </div>
+
+              {/* Info Row */}
+              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="font-bold text-foreground text-base">${parseFloat(expense.amount.toString()).toFixed(2)}</span>
+                  {expense.vendor_name && (
+                    <span className="text-muted-foreground truncate max-w-[100px]">{expense.vendor_name}</span>
+                  )}
+                </div>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => handleEdit(expense)} className="h-8 w-8 p-0 hover:bg-purple-500/20 hover:text-purple-500">
+                    <Edit size={14} />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(expense.id)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-500">
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       <Modal open={openCreate || openEdit} onClose={closeModal} title={editingExpense ? 'Edit Expense' : 'New Expense'} size="lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+              <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">Category</label>
               <select value={formData.expense_category_id} onChange={(e) => setFormData({ ...formData, expense_category_id: e.target.value })}
-                required className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
+                required className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none">
                 <option value="">Select Category</option>
                 {categories?.data?.map((c: ExpenseCategory) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
-            <Input label="Date" type="date" value={formData.expense_date} onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })} required />
+            <Input label="Date" type="date" value={formData.expense_date} onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })} required className="h-10 text-sm" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Amount" type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <Input label="Amount" type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required className="h-10 text-sm" />
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Status</label>
+              <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">Status</label>
               <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors">
+                className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none">
                 <option value="draft">Draft</option>
                 <option value="approved">Approved</option>
                 <option value="paid">Paid</option>
@@ -353,18 +419,18 @@ export default function Expenses() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Vendor" value={formData.vendor_name} onChange={(e) => setFormData({ ...formData, vendor_name: e.target.value })} />
-            <Input label="Reference" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <Input label="Vendor" value={formData.vendor_name} onChange={(e) => setFormData({ ...formData, vendor_name: e.target.value })} className="h-10 text-sm" />
+            <Input label="Reference" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} className="h-10 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
-            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3}
-              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-foreground focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors" />
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">Description</label>
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none resize-none" />
           </div>
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-            <Button type="submit" variant="primary" className="flex-1">Save</Button>
+          <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1 h-10 sm:h-11 text-sm">Save</Button>
           </div>
         </form>
       </Modal>

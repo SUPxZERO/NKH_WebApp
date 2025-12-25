@@ -532,6 +532,23 @@ class TelegramCartSessionManager
     }
 
     /**
+     * Get payment method
+     */
+    public function getPaymentMethod(): ?string
+    {
+        return $this->cart['payment_method'] ?? null;
+    }
+
+    /**
+     * Set payment method
+     */
+    public function setPaymentMethod(string $method): void
+    {
+        $this->cart['payment_method'] = $method;
+        $this->saveCart();
+    }
+
+    /**
      * Recalculate cart totals
      */
     private function recalculateTotals(): void
