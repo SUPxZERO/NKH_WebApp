@@ -63,7 +63,7 @@ Route::prefix('customer')->middleware('auth')->group(function () {
 // EMPLOYEE WEB ROUTES
 // ============================================================================
 
-Route::prefix('employee')->middleware('auth', 'role:employee')->group(function () {
+Route::prefix('employee')->middleware('auth', 'role:employee,admin,manager,waiter,chef,cashier,driver,super-admin')->group(function () {
     // Dashboard
     Route::get('dashboard', fn() => Inertia::render('Employee/Dashboard'))->name('employee.dashboard');
     

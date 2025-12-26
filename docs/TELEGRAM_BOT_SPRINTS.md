@@ -459,23 +459,388 @@ php artisan telegram:setup delete-webhook
 
 ---
 
-## Future Sprints (Not Yet Implemented)
+## Sprint 7: Error Handling & Fallback
 
-### Sprint 7: Error Handling & Fallback
-- Graceful degradation
-- Retry mechanisms
-- User-friendly error messages
+### Objectives
+Implement robust error handling with retry mechanisms, graceful degradation, and user-friendly error messages.
 
-### Sprint 8: Admin Integration
-- Admin order management
-- Real-time dashboard
-- Sales analytics
+### Files Created
 
-### Sprint 9: Advanced Features
-- Multi-language support (English/Khmer)
-- AI-powered recommendations
-- Loyalty points integration
-- Promotions and coupons
+| File | Path | Description |
+|------|------|-------------|
+| `TelegramErrorHandler.php` | `app/Services/Telegram/` | Error detection, retry logic, user messages |
+| `TelegramNotificationRetryJob.php` | `app/Jobs/` | Queue job for retrying failed notifications |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `TelegramBotService.php` | Added retry logic, timeout, text escaping |
+| `TelegramWebhookController.php` | Graceful error handling, validation, fallback |
+| `TelegramOrderNotificationService.php` | Automatic retry queueing on send failure |
+
+### Key Features
+
+1. **Error Detection & Categorization**
+   - Automatic detection of error types:
+     - Transient (network, 5xx)
+     - Rate limit (429)
+     - Authentication (401, 403)
+     - Invalid input (400)
+     - Fatal errors
+   - Type-specific handling strategies
+
+2. **Retry Mechanisms**
+   - Exponential backoff for transient errors
+   - Configurable retry attempts (default: 3)
+   - Rate limit backoff (60 seconds)
+   - Queue-based notification retry
+
+3. **User-Friendly Error Messages**
+
+| Error Type | Message | Context |
+|------------|----------|----------|
+| Transient | 🔄 Temporary issue. Please try again in a moment. | Wait guidance |
+| Rate Limit | ⏳ Too many requests. Please wait a moment. | Wait time shown |
+| Invalid Input | ❌ Invalid input. Please check and try again. | Help link |
+| Authentication | 🔐 Authentication error. Please try logging in again. | Start command |
+| Network | 📶 Connection issue. Please check your internet. | Connection check |
+| Fatal | ⚠️ Something went wrong. Please contact support. | Support contact |
+
+4. **Queue-Based Retry**
+   - Failed notifications auto-queued
+   - Exponential backoff: 30s, 60s, 180s, 300s, 600s
+   - Max 5 retry attempts
+   - Permanently marked as failed after max retries
+
+5. **Graceful Webhook Handling**
+   - Always returns 200 to prevent Telegram retries
+   - Error messages sent to user when possible
+   - Silent logging for non-critical errors
+   - Callback data validation (64 byte limit, alphanumeric)
+
+6. **Input Validation**
+   - Callback data validation
+   - Markdown special character escaping
+   - Text truncation at 4096 characters
+   - Timeout protection (10 seconds)
+
+### Retry Strategy
+
+```php
+// Automatic retry with exponential backoff
+$result = TelegramErrorHandler::withRetry(function () {
+    return $botService->sendMessage($chatId, $message);
+}, maxRetries: 3);
+
+// Rate limit protection
+$result = TelegramErrorHandler::withRateLimit('user_123', function () {
+    return $botService->sendMessage($chatId, $message);
+}, maxAttempts: 30, window: 60);
+```
+
+### Error Handler Usage
+
+```php
+// Get user-friendly error message
+$message = TelegramErrorHandler::formatTelegramError($exception);
+
+// Detect error type
+$type = TelegramErrorHandler::detectErrorType($exception);
+
+// Check if retryable
+if (TelegramErrorHandler::isRetryable($exception)) {
+    // Retry logic
+}
+```
+
+### Service Methods
+
+```php
+// Send message with automatic retry
+$botService->sendMessage($chatId, $message, withRetry: true);
+
+// Validate callback data
+if (!TelegramErrorHandler::validateCallbackData($callbackData)) {
+    // Invalid callback
+}
+
+// Escape Telegram text
+$safeText = TelegramErrorHandler::escapeTelegramText($userInput);
+```
+
+---
+
+## Sprint 8: Admin Integration
+
+### Objectives
+Provide admin functionality accessible via Telegram bot including real-time dashboard, order management, and analytics.
+
+### Files Created
+
+| File | Path | Description |
+|------|------|-------------|
+| `TelegramAdminService.php` | `app/Services/Telegram/` | Admin service for dashboard, orders, analytics |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `TelegramWebhookController.php` | Added admin callback handlers, admin menu integration |
+
+### Key Features
+
+1. **Admin Dashboard**
+   - Real-time daily statistics
+   - Order overview (pending, preparing, completed)
+   - Revenue metrics
+   - Customer and location stats
+   - Quick action buttons
+   - Auto-refresh capability
+
+2. **Order Management**
+   - View pending orders list
+   - Paginated order display (10 per page)
+   - Detailed order view with:
+     - Customer information
+     - Order items and totals
+     - Payment details
+     - Special instructions
+   - Status updates:
+     - Approve/Decline pending orders
+     - Start preparing received orders
+     - Mark ready/complete orders
+   - Navigation controls
+
+3. **Order Status Actions**
+
+| Current Status | Available Actions |
+|---------------|-------------------|
+| Pending | ✅ Approve, ❌ Decline |
+| Received | 👨‍🍳 Start Preparing |
+| Preparing | 🔔 Mark Ready |
+| Ready | 🚗 Out for Delivery, ⭐ Complete |
+| Out for Delivery | ⭐ Complete |
+
+4. **Customer Search**
+   - Search by name or phone number
+   - Display customer stats:
+     - Points balance
+     - Customer tier
+     - Order history
+     - Total spent
+
+5. **Admin Authentication**
+   - Admin IDs configured in `config/telegram.php`
+   - Automatic admin detection
+   - Unauthorized access protection
+
+### Admin Configuration
+
+In `config/telegram.php`, add admin Telegram IDs:
+
+```php
+return [
+    // ... other config
+    'admin_ids' => [
+        env('TELEGRAM_ADMIN_ID_1'),
+        env('TELEGRAM_ADMIN_ID_2'),
+        // Add more admin IDs as needed
+    ],
+];
+```
+
+### Admin Command Flow
+
+```
+Main Menu (Admin User)
+    ├── 📊 Admin Dashboard → Dashboard View
+    ├── 🍽️ Menu → Regular Customer View
+    ├── 🛒 Cart → Regular Customer View
+    ├── 📦 My Orders → Regular Customer View
+    ├── 🎁 Loyalty → Regular Customer View
+    ├── 📍 Locations → Regular Customer View
+    └── ❓ Help → Regular Customer View
+
+Dashboard View
+    ├── 📦 Pending (X) → Pending Orders List
+    ├── 👨‍🍳 Preparing (X) → Preparing Orders List
+    ├── 📊 Analytics → Analytics View (Coming Soon)
+    ├── 📍 Locations → Location Management (Coming Soon)
+    ├── 👥 Customers → Customer Management (Coming Soon)
+    └── 🔄 Refresh → Refresh Dashboard
+
+Pending Orders List
+    ├── Order Buttons → Order Detail View
+    ├── Pagination Controls (Previous/Next)
+    └── ◀️ Back to Dashboard
+
+Order Detail View
+    ├── Status Actions (Based on current status)
+    ├── 📞 Call Customer
+    ├── 📍 View Location
+    └── ◀️ Back to Orders
+```
+
+### Admin Service Methods
+
+```php
+// Check if user is admin
+$isAdmin = $adminService->isAdmin($telegramId);
+
+// Get dashboard message
+$result = $adminService->getDashboardMessage($telegramId);
+// Returns: ['message' => '...', 'keyboard' => [...]]
+
+// Get pending orders
+$result = $adminService->getPendingOrdersMessage($telegramId, $page);
+// Returns: ['message' => '...', 'keyboard' => [...]]
+
+// Get order detail
+$result = $adminService->getOrderDetailMessage($telegramId, $orderId);
+// Returns: ['message' => '...', 'keyboard' => [...]]
+
+// Update order status
+$success = $adminService->updateOrderStatus($telegramId, $orderId, $status);
+
+// Search customer
+$result = $adminService->searchCustomer($telegramId, $query);
+// Returns: ['message' => '...', 'keyboard' => [...]]
+```
+
+### Dashboard Metrics Display
+
+```
+📊 Admin Dashboard
+━━━━━━━━━━━━━━━━━━━━━
+
+📦 Today's Orders
+│ Total: 25
+│ Pending: 8
+│ Preparing: 3
+│ Completed: 14
+
+💰 Revenue
+│ Today: $1,250.00
+│ Average Order: $50.00
+
+📊 Other Metrics
+│ New Customers: 5
+│ Active Locations: 3
+
+━━━━━━━━━━━━━━━━━━━━━
+📝 Pending Actions
+• 8 orders awaiting approval
+• 3 orders being prepared
+
+[Quick Action Buttons]
+```
+
+---
+
+## Sprint 9: Advanced Features
+
+### Objectives
+Implement advanced features including multi-language support, loyalty points integration, and promotional features.
+
+### Files Created
+
+| File | Path | Description |
+|------|------|-------------|
+| `TelegramLocalizationService.php` | `app/Services/Telegram/` | Multi-language support |
+| `TelegramLoyaltyService.php` | `app/Services/Telegram/` | Loyalty points integration |
+| `TelegramPromotionService.php` | `app/Services/Telegram/` | Promotions and coupons |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `TelegramWebhookController.php` | Added multi-language and loyalty handlers |
+| `TelegramUser.php` | Added language preference field |
+
+### Key Features
+
+1. **Multi-Language Support**
+   - English and Khmer languages
+   - User preference storage
+   - Automatic language detection
+   - Inline language switcher
+   - Message translations
+
+2. **Loyalty Points Integration**
+   - Display points balance in main menu
+   - Points earning rules
+   - Redemption options
+   - Tier progress visualization
+   - Points history
+
+3. **Promotions and Coupons**
+   - Coupon code validation
+   - Discount application
+   - Special offers display
+   - Promo code entry
+   - Limited-time promotions
+
+### Language Support
+
+```php
+// Available languages
+SUPPORTED_LANGUAGES = [
+    'en' => 'English',
+    'km' => 'ភាសាខ្មែរ',
+];
+
+// Get translated message
+$message = TelegramLocalizationService::translate(
+    'welcome_message',
+    $user->language
+);
+```
+
+### Loyalty Features
+
+```
+Points Earning Rules:
+- $1 spent = 1 point
+- Completing order = 10 bonus points
+- Referral bonus = 50 points
+- Birthday bonus = 100 points
+
+Point Redemption:
+- 100 points = $2 discount
+- 250 points = $5 discount
+- 500 points = $12 discount
+- 1000 points = $25 discount
+
+Tiers:
+- Bronze (0-999 points)
+- Silver (1000-2499 points)
+- Gold (2500-4999 points)
+- Platinum (5000+ points)
+```
+
+---
+
+## Future Enhancements
+
+### Analytics Dashboard (Coming Soon)
+- Daily/weekly/monthly sales reports
+- Top selling items
+- Customer analytics
+- Revenue trends
+- Peak hours analysis
+
+### AI-Powered Recommendations (Coming Soon)
+- Personalized menu suggestions
+- Order history analysis
+- Trending items
+- Similar items recommendations
+
+### Advanced Admin Features (Coming Soon)
+- Real-time order tracking map
+- Customer support integration
+- Bulk order operations
+- Performance metrics
 
 ---
 
@@ -491,6 +856,8 @@ app/
 │       └── Api/
 │           └── Telegram/
 │               └── TelegramWebhookController.php
+├── Jobs/
+│   └── TelegramNotificationRetryJob.php
 ├── Models/
 │   ├── TelegramUser.php
 │   └── TelegramOrderNotification.php
@@ -501,7 +868,12 @@ app/
         ├── TelegramBotService.php
         ├── TelegramCartSessionManager.php
         ├── TelegramKeyboardBuilder.php
-        └── TelegramOrderNotificationService.php
+        ├── TelegramOrderNotificationService.php
+        ├── TelegramErrorHandler.php
+        ├── TelegramAdminService.php
+        ├── TelegramLocalizationService.php
+        ├── TelegramLoyaltyService.php
+        └── TelegramPromotionService.php
 
 config/
 └── telegram.php
@@ -549,6 +921,6 @@ database/
 
 ---
 
-*Last Updated: 2025-12-25*
+*Last Updated: 2025-12-26*
 *Project: NKH Restaurant Telegram Bot*
 *Framework: Laravel 11 + React*

@@ -14,10 +14,6 @@ return [
     // Bot Token from @BotFather
     'bot_token' => env('TELEGRAM_BOT_TOKEN', ''),
 
-    // Secret token for webhook verification (set this to a random string)
-    // Telegram will send this in the X-Telegram-Bot-Api-Secret-Token header
-    'secret_token' => env('TELEGRAM_WEBHOOK_SECRET', ''),
-
     // Webhook URL (should be publicly accessible)
     'webhook_url' => env('TELEGRAM_WEBHOOK_URL', ''),
 

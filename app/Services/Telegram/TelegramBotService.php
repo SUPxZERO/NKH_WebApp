@@ -34,7 +34,6 @@ class TelegramBotService
     public function __construct()
     {
         $this->token = config('telegram.bot_token', env('TELEGRAM_BOT_TOKEN', ''));
-        $this->secretToken = config('telegram.secret_token', env('TELEGRAM_WEBHOOK_SECRET', ''));
         $this->apiUrl = self::API_BASE . $this->token;
     }
 
@@ -71,19 +70,20 @@ class TelegramBotService
     }
 
     /**
-     * Send a text message
+     * Send a text message with retry logic
      */
     public function sendMessage(
         int $chatId,
         string $text,
         ?int $replyToMessageId = null,
         ?array $replyMarkup = null,
-        ?string $parseMode = 'Markdown'
+        ?string $parseMode = 'Markdown',
+        bool $withRetry = true
     ): ?array {
-        try {
+        $sendOperation = function () use ($chatId, $text, $replyToMessageId, $replyMarkup, $parseMode) {
             $payload = [
                 'chat_id' => $chatId,
-                'text' => $text,
+                'text' => TelegramErrorHandler::escapeTelegramText($text),
                 'parse_mode' => $parseMode,
             ];
 
@@ -95,24 +95,23 @@ class TelegramBotService
                 $payload['reply_markup'] = json_encode($replyMarkup);
             }
 
-            $response = Http::post($this->apiUrl . '/sendMessage', $payload);
+            $response = Http::timeout(10)->post($this->apiUrl . '/sendMessage', $payload);
 
-            if ($response->successful()) {
-                Log::debug('Telegram message sent', ['chat_id' => $chatId]);
-                return $response->json('result');
+            if (!$response->successful()) {
+                throw new \Exception('Telegram API error: ' . json_encode($response->json()));
             }
 
-            Log::error('Telegram sendMessage failed', [
-                'chat_id' => $chatId,
-                'response' => $response->json(),
-            ]);
+            Log::debug('Telegram message sent', ['chat_id' => $chatId]);
+            return $response->json('result');
+        };
 
-            return null;
+        try {
+            if ($withRetry) {
+                return TelegramErrorHandler::withRetry($sendOperation);
+            }
+            return $sendOperation();
         } catch (Throwable $e) {
-            Log::error('Telegram sendMessage error', [
-                'chat_id' => $chatId,
-                'error' => $e->getMessage(),
-            ]);
+            TelegramErrorHandler::logError($e, ['chat_id' => $chatId, 'operation' => 'sendMessage']);
             return null;
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Telegram;
 
+use App\Jobs\TelegramNotificationRetryJob;
 use App\Models\Order;
 use App\Models\TelegramOrderNotification;
 use App\Models\TelegramUser;
@@ -60,7 +61,7 @@ class TelegramOrderNotificationService
     }
 
     /**
-     * Send order status notification to user
+     * Send order status notification to user with automatic retry queueing
      */
     public function sendStatusNotification(
         Order $order,
@@ -88,9 +89,9 @@ class TelegramOrderNotificationService
             $keyboard = $this->keyboardBuilder->buildOrderCompletedKeyboard($order->id);
         }
 
-        $sent = $this->botService->sendMessage($user->chat_id, $message, $keyboard);
+        $sent = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
 
-        return TelegramOrderNotification::create([
+        $notification = TelegramOrderNotification::create([
             'order_id' => $order->id,
             'telegram_user_id' => $user->id,
             'status' => $status,
@@ -98,6 +99,20 @@ class TelegramOrderNotificationService
             'sent' => $sent,
             'sent_at' => $sent ? now() : null,
         ]);
+
+        // If send failed, queue retry job
+        if (!$sent) {
+            try {
+                TelegramNotificationRetryJob::dispatch($notification);
+            } catch (\Throwable $e) {
+                \Log::error('Failed to dispatch notification retry job', [
+                    'notification_id' => $notification->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $notification;
     }
 
     /**
@@ -308,30 +323,33 @@ class TelegramOrderNotificationService
     }
 
     /**
-     * Retry failed notifications
+     * Retry failed notifications using queue jobs
      */
     public function retryFailedNotifications(): int
     {
         $failed = TelegramOrderNotification::where('sent', false)
+            ->where('failed', false)
+            ->where('retry_count', '<', 5)
             ->where('created_at', '>', now()->subHours(24))
             ->get();
 
-        $sent = 0;
+        $queued = 0;
 
         foreach ($failed as $notification) {
-            $user = $notification->telegramUser;
-            $order = $notification->order;
-
-            if ($user && $order) {
-                $keyboard = $this->keyboardBuilder->buildTrackOrderKeyboard($order->id);
-                if ($this->botService->sendMessage($user->chat_id, $notification->message, $keyboard)) {
-                    $notification->markAsSent();
-                    $sent++;
-                }
+            try {
+                // Dispatch retry job with error handling
+                TelegramNotificationRetryJob::dispatch($notification)
+                    ->delay(now()->addSeconds(30 * $notification->retry_count));
+                $queued++;
+            } catch (\Throwable $e) {
+                \Log::error('Failed to dispatch notification retry job', [
+                    'notification_id' => $notification->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
-        return $sent;
+        return $queued;
     }
 
     /**

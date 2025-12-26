@@ -68,10 +68,10 @@ class ShiftSwapController extends Controller
         $swap = ShiftSwap::create([
             'requester_id' => $request->user()->id,
             'shift_id' => $validated['shift_id'],
-            'recipient_id' => $validated['recipient_id'],
+            'recipient_id' => $validated['recipient_id'] ?? null,
             'type' => $validated['type'],
             'status' => 'pending',
-            'reason' => $validated['reason'],
+            'reason' => $validated['reason'] ?? null,
         ]);
 
         return response()->json($swap, 201);

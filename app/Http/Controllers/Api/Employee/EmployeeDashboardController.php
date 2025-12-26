@@ -37,24 +37,24 @@ class EmployeeDashboardController extends Controller
         if ($employee) {
             // Get attendance records for hours calculation
             $weeklyAttendance = Attendance::where('employee_id', $employee->id)
-                ->whereBetween('clock_in', [$startOfWeek, $endOfWeek])
+                ->whereBetween('clock_in_at', [$startOfWeek, $endOfWeek])
                 ->get();
             
             foreach ($weeklyAttendance as $record) {
-                if ($record->clock_out) {
-                    $hoursThisWeek += Carbon::parse($record->clock_in)
-                        ->diffInMinutes(Carbon::parse($record->clock_out)) / 60;
+                if ($record->clock_out_at) {
+                    $hoursThisWeek += Carbon::parse($record->clock_in_at)
+                        ->diffInMinutes(Carbon::parse($record->clock_out_at)) / 60;
                 }
             }
             
             $monthlyAttendance = Attendance::where('employee_id', $employee->id)
-                ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
+                ->whereBetween('clock_in_at', [$startOfMonth, $endOfMonth])
                 ->get();
             
             foreach ($monthlyAttendance as $record) {
-                if ($record->clock_out) {
-                    $hoursThisMonth += Carbon::parse($record->clock_in)
-                        ->diffInMinutes(Carbon::parse($record->clock_out)) / 60;
+                if ($record->clock_out_at) {
+                    $hoursThisMonth += Carbon::parse($record->clock_in_at)
+                        ->diffInMinutes(Carbon::parse($record->clock_out_at)) / 60;
                 }
             }
         }
@@ -65,22 +65,23 @@ class EmployeeDashboardController extends Controller
         $personalBalance = 0;
         
         if ($employee) {
-            $balances = TimeOffBalance::where('employee_id', $employee->id)->get();
-            foreach ($balances as $balance) {
-                if ($balance->leave_type === 'vacation') {
-                    $vacationBalance = $balance->balance ?? 0;
-                } elseif ($balance->leave_type === 'sick') {
-                    $sickBalance = $balance->balance ?? 0;
-                } elseif ($balance->leave_type === 'personal') {
-                    $personalBalance = $balance->balance ?? 0;
-                }
+            $currentYear = Carbon::now()->year;
+            $balance = TimeOffBalance::where('employee_id', $employee->id)
+                ->where('year', $currentYear)
+                ->first();
+            
+            if ($balance) {
+                // Convert hours to days (assuming 8-hour workday)
+                $vacationBalance = round(($balance->vacation_hours_available - $balance->vacation_hours_used) / 8, 1);
+                $sickBalance = round(($balance->sick_hours_available - $balance->sick_hours_used) / 8, 1);
+                $personalBalance = round(($balance->personal_hours_available - $balance->personal_hours_used) / 8, 1);
             }
         }
         
         // Get next shift
         $nextShift = null;
         if ($employee) {
-            $shift = Shift::where('user_id', $user->id)
+            $shift = Shift::where('employee_id', $employee->id)
                 ->where('date', '>=', $today->format('Y-m-d'))
                 ->orderBy('date')
                 ->orderBy('start_time')
@@ -101,7 +102,7 @@ class EmployeeDashboardController extends Controller
         $recentEarnings = 0;
         if ($employee) {
             $recentPayroll = Payroll::where('employee_id', $employee->id)
-                ->where('pay_period_end', '>=', Carbon::now()->subDays(30))
+                ->where('period_end', '>=', Carbon::now()->subDays(30))
                 ->sum('gross_pay');
             $recentEarnings = $recentPayroll;
         }
@@ -131,7 +132,7 @@ class EmployeeDashboardController extends Controller
                 'pending_tasks' => $pendingTasks,
                 'unread_notifications' => $unreadNotifications,
                 'employee_code' => $employee?->employee_code ?? 'N/A',
-                'position' => $employee?->position?->name ?? 'Employee',
+                'position' => $employee?->position?->title ?? 'Employee',
             ],
         ]);
     }
@@ -142,9 +143,17 @@ class EmployeeDashboardController extends Controller
     public function upcomingShifts(Request $request): JsonResponse
     {
         $user = $request->user();
+        $employee = Employee::where('user_id', $user->id)->first();
         $days = $request->input('days', 7);
         
-        $shifts = Shift::where('user_id', $user->id)
+        if (!$employee) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+            ]);
+        }
+        
+        $shifts = Shift::where('employee_id', $employee->id)
             ->where('date', '>=', Carbon::today()->format('Y-m-d'))
             ->where('date', '<=', Carbon::today()->addDays($days)->format('Y-m-d'))
             ->orderBy('date')

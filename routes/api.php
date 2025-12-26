@@ -133,10 +133,6 @@ Route::prefix('payments')->group(function () {
     // Split Payment Routes (Sprint P7)
     Route::prefix('split')->group(function () {
         Route::get('/{order}/status', [\App\Http\Controllers\Api\SplitPaymentController::class, 'status']);
-        Route::get('orders/payment-modes/{orderType}', [\App\Http\Controllers\Api\OrderPaymentController::class, 'getPaymentModes']);
-    Route::get('orders/pending-collection', [\App\Http\Controllers\Api\OrderPaymentController::class, 'pendingCollection']);
-    Route::get('orders/pos/active', [\App\Http\Controllers\Api\OrderPaymentController::class, 'activeOrders']);
-    Route::post('pos/orders/{order}/quick-pay', [\App\Http\Controllers\Api\OrderPaymentController::class, 'quickPay']);
         Route::post('/{order}/add', [\App\Http\Controllers\Api\SplitPaymentController::class, 'addPayment']);
         Route::get('/{order}/suggestions', [\App\Http\Controllers\Api\SplitPaymentController::class, 'suggestions']);
         Route::post('/{order}/cancel/{payment}', [\App\Http\Controllers\Api\SplitPaymentController::class, 'cancelPayment']);
@@ -179,6 +175,9 @@ Route::prefix('orders')->group(function () {
     
     // Orders pending payment collection
     Route::get('/pending-collection', [\App\Http\Controllers\Api\OrderPaymentController::class, 'pendingCollection']);
+    
+    // POS Active Orders
+    Route::get('/pos/active', [\App\Http\Controllers\Api\OrderPaymentController::class, 'activeOrders']);
 });
 
 // POS Quick Pay (for employees)
@@ -275,7 +274,7 @@ Route::prefix('kitchen')
 
 // In-store operations for staff (Employee)
 Route::prefix('employee')
-->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter'])
+->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter,employee,chef,cashier,driver'])
 ->group(function () {
     // POS menu
     Route::get('menu', [MenuItemController::class, 'index']);
@@ -291,11 +290,6 @@ Route::prefix('employee')
     // Employee Schedule
     Route::get('shifts', [EmployeeScheduleController::class, 'shifts']);
     Route::get('shifts/{id}', [EmployeeScheduleController::class, 'showShift']);
-    
-    // Time Off Requests
-    Route::get('time-off-requests', [EmployeeTimeOffController::class, 'index']);
-    Route::post('time-off-requests', [EmployeeTimeOffController::class, 'store']);
-    Route::delete('time-off-requests/{id}', [EmployeeTimeOffController::class, 'destroy']);
     
     // Cash Payment Management
     Route::get('payments/pending-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'pendingCashPayments']);
@@ -434,6 +428,11 @@ Route::prefix('employee')
     Route::get('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'index']);
     Route::post('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'store']);
     Route::put('shift-swaps/{id}', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'update']);
+    
+    // Time Off Requests (available to all authenticated employees)
+    Route::get('time-off-requests', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'index']);
+    Route::post('time-off-requests', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'store']);
+    Route::delete('time-off-requests/{id}', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'destroy']);
     
     // POS Operations
     Route::get('pos/tables', [App\Http\Controllers\Api\Employee\EmployeePOSController::class, 'getTables']);

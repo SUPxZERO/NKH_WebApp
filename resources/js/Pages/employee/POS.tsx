@@ -6,7 +6,7 @@ import Button from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { useCartStore } from '@/app/store/cart';
-import { ShoppingCart, XCircle, Star, Grid3x3, List, Calculator, Info } from 'lucide-react';
+import { ShoppingCart, XCircle, Star, Grid3x3, List, Calculator, Info, Clock, Receipt, Plus, RefreshCw } from 'lucide-react';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { MenuItem } from '@/app/types/domain';
 import { toastSuccess } from '@/app/utils/toast';
@@ -42,6 +42,7 @@ export default function POS() {
 
   const [categoryId, setCategoryId] = React.useState<number | undefined>();
   const [search, setSearch] = useState<string>('');
+  const [mobileTab, setMobileTab] = useState<'menu' | 'cart'>('menu');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeTab, setActiveTab] = useState<'new' | 'orders'>('new');
   const [showNumpad, setShowNumpad] = useState(false);
@@ -268,72 +269,107 @@ export default function POS() {
 
   return (
     <EmployeeLayout>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex bg-gray-100 p-1 rounded-lg dark:bg-gray-800">
+      <div className="space-y-4 pb-20 lg:pb-0">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Point of Sale</h1>
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date().toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
+            </p>
+          </div>
+          <div className="flex bg-gray-100 p-1 rounded-xl dark:bg-gray-800/80 shadow-sm w-full sm:w-auto">
             <button
               onClick={() => setActiveTab('new')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'new' ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+              className={cn(
+                "flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                activeTab === 'new'
+                  ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50'
+              )}
             >
+              <Plus className="w-4 h-4" />
               New Order
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-700 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+              className={cn(
+                "flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                activeTab === 'orders'
+                  ? 'bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg shadow-fuchsia-500/25'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50'
+              )}
             >
-              Active Orders
+              <Receipt className="w-4 h-4" />
+              Active
+              {activeOrders && activeOrders.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs font-bold bg-white/20 rounded-full">
+                  {activeOrders.length}
+                </span>
+              )}
             </button>
           </div>
-
-          {activeTab === 'new' && (
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant={viewMode === 'grid' ? 'primary' : 'ghost'}
-                onClick={() => setViewMode('grid')}
-                leftIcon={<Grid3x3 className="w-4 h-4" />}
-              >
-                Grid
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === 'list' ? 'primary' : 'ghost'}
-                onClick={() => setViewMode('list')}
-                leftIcon={<List className="w-4 h-4" />}
-              >
-                List
-              </Button>
-              <Button
-                size="sm"
-                variant={showNumpad ? 'primary' : 'ghost'}
-                onClick={() => setShowNumpad(!showNumpad)}
-                leftIcon={<Calculator className="w-4 h-4" />}
-              >
-                Numpad
-              </Button>
-            </div>
-          )}
         </div>
+
+        {/* View Mode Toggle (only in New Order tab) */}
+        {activeTab === 'new' && (
+          <div className="flex gap-2 w-full overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+            <Button
+              size="sm"
+              variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+              onClick={() => setViewMode('grid')}
+              leftIcon={<Grid3x3 className="w-4 h-4" />}
+            >
+              Grid
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === 'list' ? 'primary' : 'ghost'}
+              onClick={() => setViewMode('list')}
+              leftIcon={<List className="w-4 h-4" />}
+            >
+              List
+            </Button>
+            <Button
+              size="sm"
+              variant={showNumpad ? 'primary' : 'ghost'}
+              onClick={() => setShowNumpad(!showNumpad)}
+              leftIcon={<Calculator className="w-4 h-4" />}
+            >
+              Numpad
+            </Button>
+          </div>
+        )}
 
         {activeTab === 'orders' ? (
           <div className="grid grid-cols-1 gap-4">
-            <Card>
+            <Card className="bg-white/5 border-white/10">
               <CardHeader className="flex justify-between items-center">
-                <h3 className="font-semibold text-lg">Active Orders</h3>
-                <Button size="sm" variant="ghost" onClick={() => refetchOrders()}>Refresh</Button>
+                <div className="flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-fuchsia-500" />
+                  <h3 className="font-semibold text-lg">Active Orders</h3>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => refetchOrders()} leftIcon={<RefreshCw className="w-4 h-4" />}>Refresh</Button>
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (
                   <div className="flex justify-center p-8"><Skeleton className="w-12 h-12 rounded-full" /></div>
                 ) : activeOrders?.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">No active orders found</div>
+                  <div className="text-center py-16">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <Receipt className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 font-medium">No active orders</p>
+                    <p className="text-sm text-gray-400 mt-1">Create a new order to get started</p>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activeOrders?.map((order) => (
                       <div
                         key={order.id}
                         onClick={() => setPaymentOrder(order)}
-                        className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-500 cursor-pointer transition-all bg-white dark:bg-gray-800 shadow-sm hover:shadow-md"
+                        className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-500 cursor-pointer transition-all bg-white dark:bg-gray-800 shadow-sm hover:shadow-md active:scale-98"
                       >
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -357,7 +393,7 @@ export default function POS() {
                         </div>
                         <div className="pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                           <div className="font-bold text-xl">${order.total_amount.toFixed(2)}</div>
-                          <Button size="sm" className="bg-blue-600">Pay</Button>
+                          <Button size="sm" className="bg-blue-600 h-10 px-4">Pay</Button>
                         </div>
                       </div>
                     ))}
@@ -369,89 +405,107 @@ export default function POS() {
         ) : (
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div className="lg:col-span-8 space-y-4">
+            <div className={cn("lg:col-span-8 space-y-4", mobileTab === 'cart' ? 'hidden lg:block' : 'block')}>
               {/* QUICK ACCESS - FAVORITES */}
               {favoriteItems.length > 0 && (
-                <Card className="bg-gradient-to-r from-fuchsia-500/10 to-pink-500/10 border-fuchsia-500/20">
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <Star className="w-5 h-5 text-fuchsia-600" />
-                      <h3 className="font-semibold text-lg">Quick Access - Favorites</h3>
-                      <span className="text-xs text-gray-500">1-tap ordering</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {favoriteItems.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => handleQuickAdd(item)}
-                          onMouseEnter={() => setSelectedItem(item)}
-                          className="group relative h-24 rounded-xl overflow-hidden border-2 border-white/20 bg-white/60 dark:bg-white/5 backdrop-blur-xl hover:border-fuchsia-500/50 hover:scale-105 transition-all duration-200 active:scale-95"
-                        >
-                          {item.image_path && (
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-3 px-1">
+                    <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Favorites</h3>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto pb-4 snap-x -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+                    {favoriteItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleQuickAdd(item)}
+                        className="group relative min-w-[140px] h-36 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 snap-start flex-shrink-0 flex flex-col text-left transition-transform active:scale-95"
+                      >
+                        {/* Image Area */}
+                        <div className="h-20 w-full relative bg-gray-100 dark:bg-gray-900 overflow-hidden">
+                          {item.image_path ? (
                             <img
                               src={item.image_path}
                               alt={item.name}
-                              className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40"
+                              className="w-full h-full object-cover transition-transform group-hover:scale-110"
                             />
-                          )}
-                          <div className="relative h-full flex flex-col items-center justify-center p-2 text-center">
-                            <div className="text-2xl mb-1">⭐</div>
-                            <div className="font-semibold text-sm line-clamp-1">{item.name}</div>
-                            <div className="text-xs text-fuchsia-600 dark:text-fuchsia-400 font-bold">
-                              ${item.price.toFixed(2)}
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-2xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
+                              ⭐
                             </div>
+                          )}
+                          {/* Price Tag Overlay */}
+                          <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                            ${item.price.toFixed(2)}
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-3 flex-1 flex flex-col justify-center">
+                          <div className="font-semibold text-sm text-gray-900 dark:text-white line-clamp-2 leading-tight">
+                            {item.name}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* MAIN MENU */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="text-lg font-semibold">Full Menu</div>
-                    <div className="flex gap-2 flex-1 max-w-md">
-                      <Input
-                        ref={searchRef}
-                        placeholder="Search menu... (Press / to focus)"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="flex-1"
-                      />
+              <Card className="border-0 shadow-none sm:border sm:shadow-sm bg-transparent sm:bg-white sm:dark:bg-gray-800">
+                <CardHeader className="px-0 sm:px-6 pt-0 sm:pt-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                    <div className="text-lg font-bold hidden sm:block">Menu</div>
+                    <div className="flex gap-2 w-full sm:w-auto sm:flex-1 sm:max-w-md">
+                      <div className="relative flex-1">
+                        <Input
+                          ref={searchRef}
+                          placeholder="Search items..."
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-9 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
+                        />
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
                     {catsLoading ? (
-                      <Skeleton className="h-9 w-24" />
+                      <Skeleton className="h-9 w-24 rounded-full" />
                     ) : (
                       <>
-                        <Button
-                          variant={categoryId ? 'ghost' : 'secondary'}
-                          size="sm"
+                        <button
                           onClick={() => setCategoryId(undefined)}
+                          className={cn(
+                            "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap border",
+                            !categoryId
+                              ? "bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900 dark:border-white shadow-md"
+                              : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+                          )}
                         >
                           All
-                        </Button>
+                        </button>
                         {categories?.map((c) => (
-                          <Button
+                          <button
                             key={c.id}
-                            variant={categoryId === c.id ? 'primary' : 'ghost'}
-                            size="sm"
                             onClick={() => setCategoryId(c.id)}
+                            className={cn(
+                              "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap border",
+                              categoryId === c.id
+                                ? "bg-gray-900 text-white border-gray-900 dark:bg-white dark:text-gray-900 dark:border-white shadow-md"
+                                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+                            )}
                           >
                             {c.name}
-                          </Button>
+                          </button>
                         ))}
                       </>
                     )}
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-0 sm:px-6 pt-0 sm:pt-0">
                   <POSMenuGrid
                     items={filteredMenu}
                     isLoading={menuLoading}
@@ -464,18 +518,19 @@ export default function POS() {
             </div>
 
             {/* RIGHT SIDEBAR - ORDER & NUMPAD */}
-            <div className="lg:col-span-4 space-y-4">
+            <div className={cn("lg:col-span-4 space-y-4", mobileTab === 'menu' ? 'hidden lg:block' : 'block')}>
 
               {/* HELD ORDERS PANEL */}
-              <Card className="bg-warning-muted dark:bg-warning/5 border-warning/20">
-                <CardHeader>
-                  <h3 className="text-lg font-semibold text-foreground">Held Orders</h3>
-                </CardHeader>
-                <CardContent>
-                  {heldOrders.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">No held orders</div>
-                  ) : (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+              {heldOrders.length > 0 && (
+                <Card className="bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/30">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-amber-600" />
+                      <h3 className="text-lg font-semibold text-foreground">Held ({heldOrders.length})</h3>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
                       {heldOrders.map((h) => (
                         <div key={h.id} className="flex justify-between items-center p-2 rounded bg-card border border-border text-sm">
                           <div>
@@ -490,9 +545,9 @@ export default function POS() {
                         </div>
                       ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
               <Card>
                 <CardHeader>
                   <div className="font-semibold">Table & Customer</div>
@@ -522,7 +577,7 @@ export default function POS() {
 
                   {/* Table Selector */}
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {/* <button
+                    <button
                       onClick={() => setSelectedTable(undefined)}
                       className={cn(
                         "h-12 rounded-lg border text-xs font-semibold transition-all flex items-center justify-center",
@@ -532,13 +587,12 @@ export default function POS() {
                       )}
                     >
                       Walk-in
-                    </button> */}
+                    </button>
 
                     {activeFloor?.tables?.map((table) => (
                       <button
                         key={table.id}
                         onClick={() => setSelectedTable(table.id)}
-                        // disabled={table.status === 'occupied'} // Allow selecting occupied for now (e.g. adding items)
                         className={cn(
                           "h-12 rounded-lg border text-xs font-semibold transition-all flex flex-col items-center justify-center",
                           selectedTable === table.id
@@ -591,41 +645,51 @@ export default function POS() {
               )}
 
               {/* CURRENT ORDER */}
-              <Card className='sticky top-4'>
-                <CardHeader>
-                  <div className="font-semibold">Current Order</div>
+              <Card className='sticky top-4 bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border-2 border-fuchsia-200 dark:border-fuchsia-800/30 shadow-lg'>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center">
+                        <ShoppingCart className="w-4 h-4 text-fuchsia-600" />
+                      </div>
+                      <span className="font-semibold text-lg">Current Order</span>
+                    </div>
+                    {cart.items.length > 0 && (
+                      <span className="text-sm text-muted-foreground">{cart.items.length} items</span>
+                    )}
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                <CardContent className="flex flex-col h-[calc(100vh-14rem)] lg:h-auto lg:max-h-none">
+                  <div className="flex-1 overflow-y-auto -mx-4 px-4 space-y-3 pb-4">
                     {cart.items.length === 0 ? (
-                      <div className="text-sm text-muted-foreground text-center py-8">
-                        <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                      <div className="text-sm text-muted-foreground text-center py-8 flex flex-col items-center justify-center h-full">
+                        <ShoppingCart className="w-12 h-12 mb-2 opacity-30" />
                         No items yet
                       </div>
                     ) : (
                       cart.items.map((it) => (
-                        <div key={it.menu_item_id} className="flex items-start justify-between gap-2 pb-3 border-b border-border">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground">{it.name}</div>
+                        <div key={it.menu_item_id} className="flex items-start justify-between gap-2 pb-3 border-b border-border last:border-0">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-foreground truncate">{it.name}</div>
                             <div className="text-xs text-muted-foreground">${it.unit_price.toFixed(2)} × {it.quantity}</div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <button
                               onClick={() => cart.updateQty(it.menu_item_id, Math.max(1, it.quantity - 1))}
-                              className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold min-w-[36px] min-h-[36px]"
+                              className="w-8 h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold flex items-center justify-center touch-manipulation"
                             >
                               -
                             </button>
-                            <span className="w-8 text-center font-bold text-foreground">{it.quantity}</span>
+                            <span className="w-6 text-center font-bold text-foreground text-sm">{it.quantity}</span>
                             <button
                               onClick={() => cart.updateQty(it.menu_item_id, it.quantity + 1)}
-                              className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold min-w-[36px] min-h-[36px]"
+                              className="w-8 h-8 rounded-lg bg-secondary hover:bg-secondary-hover border border-border text-foreground font-bold flex items-center justify-center touch-manipulation"
                             >
                               +
                             </button>
                             <button
                               onClick={() => cart.removeItem(it.menu_item_id)}
-                              className="p-2 rounded-lg bg-destructive-muted text-destructive hover:bg-destructive/20"
+                              className="w-8 h-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 ml-1 touch-manipulation"
                             >
                               <XCircle className="w-5 h-5" />
                             </button>
@@ -648,7 +712,15 @@ export default function POS() {
                       <span className="text-primary">${cart.total.toFixed(2)}</span>
                     </div>
                   </div>
-                  <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <Button
+                      variant="ghost"
+                      className="h-12 text-base text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      onClick={() => cart.clear()}
+                      disabled={cart.items.length === 0}
+                    >
+                      Clear
+                    </Button>
                     <Button
                       variant="secondary"
                       className="h-12 text-base"
@@ -670,6 +742,45 @@ export default function POS() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* MOBILE BOTTOM NAVIGATION - Sticky Footer */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-2 z-50 flex gap-2">
+              <button
+                onClick={() => setMobileTab('menu')}
+                className={cn(
+                  "flex-1 flex flex-col items-center justify-center p-2 rounded-lg transition-colors",
+                  mobileTab === 'menu'
+                    ? "bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"
+                    : "text-gray-500 dark:text-gray-400"
+                )}
+              >
+                <Grid3x3 className="w-5 h-5 mb-1" />
+                <span className="text-xs font-medium">Menu</span>
+              </button>
+              <button
+                onClick={() => setMobileTab('cart')}
+                className={cn(
+                  "flex-1 flex flex-col items-center justify-center p-2 rounded-lg transition-colors relative",
+                  mobileTab === 'cart'
+                    ? "bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                    : "text-gray-500 dark:text-gray-400"
+                )}
+              >
+                {cart.items.length > 0 && (
+                  <span className="absolute top-2 right-1/4 translate-x-1/2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {cart.items.length}
+                  </span>
+                )}
+                <div className="flex flex-col items-center">
+                  <ShoppingCart className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium flex items-center gap-1">
+                    Cart
+                    {cart.total > 0 && <span className="text-green-600 dark:text-green-400 font-bold">(${cart.total.toFixed(0)})</span>}
+                  </span>
+                </div>
+              </button>
+            </div>
+
           </div>
         )}
       </div>

@@ -101,7 +101,7 @@ export default function EmployeeDashboard() {
 
     // Time off mutation
     const timeOffMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/time-off-requests', data),
+        mutationFn: (data: any) => apiPost('/employee/time-off-requests', data),
         onSuccess: () => {
             toastSuccess('Time off request submitted successfully');
             setShowTimeOffModal(false);
@@ -143,22 +143,34 @@ export default function EmployeeDashboard() {
             <Head title="Employee Dashboard" />
 
             <div className="min-h-screen p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
-                {/* Header */}
+                {/* Header - Compact Node */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                    className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-6"
                 >
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <Sun className="w-8 h-8 text-yellow-500" />
-                            {getGreeting()}!
-                        </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            {stats?.position || 'Employee'} • {stats?.employee_code || 'EMP-000'}
-                        </p>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Sun className="w-5 h-5 sm:w-8 sm:h-8 text-yellow-500" />
+                                {getGreeting()}!
+                            </h1>
+                            <p className="text-xs sm:text-base text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
+                                {stats?.position || 'Employee'}
+                            </p>
+                        </div>
+                        {/* Mobile Action Buttons (Visible only on mobile) */}
+                        <div className="flex sm:hidden gap-2">
+                            <Link href="/employee/pos">
+                                <Button size="sm" className="h-9 w-9 p-0 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg text-white">
+                                    <Zap className="w-4 h-4" />
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-3">
+
+                    {/* Desktop Action Buttons */}
+                    <div className="hidden sm:flex items-center gap-3">
                         <Link href="/employee/schedule">
                             <Button variant="outline" size="sm" className="gap-2">
                                 <Calendar className="w-4 h-4" />
@@ -166,7 +178,7 @@ export default function EmployeeDashboard() {
                             </Button>
                         </Link>
                         <Link href="/employee/pos">
-                            <Button size="sm" className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                            <Button size="sm" className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
                                 <Zap className="w-4 h-4" />
                                 Start POS
                             </Button>
@@ -174,25 +186,22 @@ export default function EmployeeDashboard() {
                     </div>
                 </motion.div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Stats Grid - Compact 2x2 on mobile */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
                     >
-                        <Card hover className="h-full bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <Clock className="w-8 h-8 opacity-80" />
-                                    <span className="text-xs opacity-80">This Week</span>
-                                </div>
-                                <p className="text-3xl font-bold mt-2">
-                                    {statsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : `${stats?.hours_this_week || 0}h`}
+                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-blue-500/10 relative overflow-hidden">
+                            <Clock className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                            <div className="relative z-10">
+                                <p className="text-[10px] sm:text-xs font-medium text-blue-100 uppercase tracking-wide">This Week</p>
+                                <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                    {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : `${stats?.hours_this_week || 0}h`}
                                 </p>
-                                <p className="text-sm opacity-80">Hours Worked</p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
 
                     <motion.div
@@ -200,18 +209,15 @@ export default function EmployeeDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 }}
                     >
-                        <Card hover className="h-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0">
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <DollarSign className="w-8 h-8 opacity-80" />
-                                    <span className="text-xs opacity-80">This Month</span>
-                                </div>
-                                <p className="text-3xl font-bold mt-2">
-                                    {statsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : `$${stats?.recent_earnings || 0}`}
+                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-emerald-500/10 relative overflow-hidden">
+                            <DollarSign className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                            <div className="relative z-10">
+                                <p className="text-[10px] sm:text-xs font-medium text-emerald-100 uppercase tracking-wide">Earnings</p>
+                                <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                    {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : `$${stats?.recent_earnings || 0}`}
                                 </p>
-                                <p className="text-sm opacity-80">Earnings</p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
 
                     <motion.div
@@ -219,18 +225,15 @@ export default function EmployeeDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <Card hover className="h-full bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <Coffee className="w-8 h-8 opacity-80" />
-                                    <span className="text-xs opacity-80">Available</span>
-                                </div>
-                                <p className="text-3xl font-bold mt-2">
-                                    {statsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : `${stats?.vacation_balance || 0}d`}
+                        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-purple-500/10 relative overflow-hidden">
+                            <Coffee className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                            <div className="relative z-10">
+                                <p className="text-[10px] sm:text-xs font-medium text-purple-100 uppercase tracking-wide">Leave</p>
+                                <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                    {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : `${stats?.vacation_balance || 0}d`}
                                 </p>
-                                <p className="text-sm opacity-80">Vacation Days</p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
 
                     <motion.div
@@ -238,291 +241,199 @@ export default function EmployeeDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.25 }}
                     >
-                        <Card hover className="h-full bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <ClipboardList className="w-8 h-8 opacity-80" />
-                                    <span className="text-xs opacity-80">Today</span>
-                                </div>
-                                <p className="text-3xl font-bold mt-2">
-                                    {statsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats?.orders_today || 0}
+                        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-orange-500/10 relative overflow-hidden">
+                            <ClipboardList className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                            <div className="relative z-10">
+                                <p className="text-[10px] sm:text-xs font-medium text-orange-100 uppercase tracking-wide">Orders</p>
+                                <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                    {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : stats?.orders_today || 0}
                                 </p>
-                                <p className="text-sm opacity-80">Orders Processed</p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Next Shift Card */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="lg:col-span-2"
-                    >
-                        <Card className="h-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                            <CardHeader className="border-b border-gray-100 dark:border-gray-700">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                        <CalendarDays className="w-5 h-5 text-blue-500" />
-                                        Next Shift
-                                    </h3>
-                                    <Link href="/employee/schedule" className="text-sm text-blue-600 hover:underline">
-                                        View All
-                                    </Link>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                {stats?.next_shift ? (
-                                    <div className="flex flex-col md:flex-row gap-4">
-                                        <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-800">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
-                                                    Upcoming
-                                                </span>
-                                                <Calendar className="w-5 h-5 text-blue-500" />
+                {/* Main Content Grid - Adjusted for Compactness */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {/* Next Shift Section */}
+                    <div className="lg:col-span-2 space-y-4">
+                        {stats?.next_shift ? (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-4 sm:p-5 text-white shadow-lg shadow-blue-500/20"
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center flex-shrink-0 border border-white/10">
+                                            <Calendar className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="px-2 py-0.5 bg-white/20 rounded-md text-[10px] font-bold uppercase tracking-wider">Next Shift</span>
+                                                <span className="text-sm text-blue-100">{formatDate(stats.next_shift.date).split(',')[0]}</span>
                                             </div>
-                                            <p className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                                                {formatDate(stats.next_shift.date)}
-                                            </p>
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                                    <Timer className="w-4 h-4" />
-                                                    <span>{formatTime(stats.next_shift.start_time)} - {formatTime(stats.next_shift.end_time)}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                                    <MapPin className="w-4 h-4" />
-                                                    <span>{stats.next_shift.location_name}</span>
-                                                </div>
+                                            <h3 className="text-xl sm:text-2xl font-bold leading-none mb-1">
+                                                {formatTime(stats.next_shift.start_time)} - {formatTime(stats.next_shift.end_time)}
+                                            </h3>
+                                            <div className="flex items-center gap-1.5 text-blue-100 text-xs sm:text-sm">
+                                                <MapPin className="w-3.5 h-3.5" />
+                                                <span className="truncate max-w-[200px]">{stats.next_shift.location_name}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <Button variant="outline" className="justify-start gap-2">
-                                                <Users className="w-4 h-4" />
-                                                Request Swap
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => setShowTimeOffModal(true)}
-                                                className="justify-start gap-2"
-                                            >
-                                                <Coffee className="w-4 h-4" />
-                                                Request Time Off
-                                            </Button>
-                                        </div>
                                     </div>
-                                ) : (
-                                    <div className="text-center py-12">
-                                        <Calendar className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                                        <p className="text-gray-500 dark:text-gray-400 text-lg">No upcoming shifts scheduled</p>
-                                        <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Check with your manager for your schedule</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
 
-                    {/* Time Off Balance */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.35 }}
-                    >
-                        <Card className="h-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                            <CardHeader className="border-b border-gray-100 dark:border-gray-700">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <Briefcase className="w-5 h-5 text-purple-500" />
-                                    Time Off Balance
-                                </h3>
-                            </CardHeader>
-                            <CardContent className="p-6 space-y-4">
-                                <div className="flex justify-between items-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-                                    <span className="text-gray-700 dark:text-gray-300">Vacation</span>
-                                    <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                                        {stats?.vacation_balance || 0} days
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
-                                    <span className="text-gray-700 dark:text-gray-300">Sick Leave</span>
-                                    <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
-                                        {stats?.sick_balance || 0} days
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                                    <span className="text-gray-700 dark:text-gray-300">Personal</span>
-                                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                        {stats?.personal_balance || 0} days
-                                    </span>
-                                </div>
-                                <Button
-                                    onClick={() => setShowTimeOffModal(true)}
-                                    className="w-full mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
-                                >
-                                    Request Time Off
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                </div>
-
-                {/* Bottom Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Upcoming Shifts List */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                    >
-                        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                            <CardHeader className="border-b border-gray-100 dark:border-gray-700">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                        <Clock className="w-5 h-5 text-blue-500" />
-                                        Upcoming Shifts
-                                    </h3>
-                                    <span className="text-xs text-gray-500">Next 7 days</span>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-4">
-                                {upcomingShifts.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <AlertCircle className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                                        <p className="text-gray-500 dark:text-gray-400">No shifts scheduled</p>
+                                    <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                                        <Button size="sm" variant="secondary" className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 border-0 text-white h-9">
+                                            Swap
+                                        </Button>
+                                        <Button size="sm" variant="secondary" onClick={() => setShowTimeOffModal(true)} className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 border-0 text-white h-9">
+                                            Time Off
+                                        </Button>
                                     </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        {upcomingShifts.slice(0, 5).map((shift) => (
-                                            <div
-                                                key={shift.id}
-                                                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                                        <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-gray-900 dark:text-white">
-                                                            {formatDate(shift.date)}
-                                                        </p>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                            {formatTime(shift.start_time)} - {formatTime(shift.end_time)}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                        {shift.location_name}
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <Card className="p-6 text-center border-dashed">
+                                <p className="text-gray-500">No upcoming shifts</p>
+                            </Card>
+                        )}
+
+                        {/* Upcoming Shifts List - Integrated */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between px-1">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Upcoming This Week</h3>
+                                <Link href="/employee/schedule" className="text-xs text-blue-600 hover:underline">View All</Link>
+                            </div>
+                            {upcomingShifts.length === 0 ? (
+                                <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg">No more shifts this week</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {upcomingShifts.slice(0, 3).map((shift) => (
+                                        <div key={shift.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                                            <div className="w-10 h-10 bg-gray-50 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{new Date(shift.date).toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                                                <span className="text-sm font-bold text-gray-900 dark:text-white">{new Date(shift.date).getDate()}</span>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between mb-0.5">
+                                                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {formatTime(shift.start_time)} - {formatTime(shift.end_time)}
                                                     </span>
-                                                    <ChevronRight className="w-4 h-4 text-gray-400" />
                                                 </div>
+                                                <p className="text-xs text-gray-500 truncate">{shift.location_name}</p>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-                    {/* Announcements */}
+                    {/* Right Column Stack */}
+                    <div className="space-y-4">
+                        {/* Quick Actions - Compact Tile Grid */}
+                        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                            <div className="p-3 sm:p-4 grid grid-cols-2 gap-2 sm:gap-3">
+                                <Link href="/employee/pos">
+                                    <div className="flex flex-col items-center justify-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
+                                        <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 mb-1" />
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">POS</span>
+                                    </div>
+                                </Link>
+                                <Link href="/employee/kitchen">
+                                    <div className="flex flex-col items-center justify-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-100 dark:border-orange-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
+                                        <ClipboardList className="w-5 h-5 text-orange-600 dark:text-orange-400 mb-1" />
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Kitchen</span>
+                                    </div>
+                                </Link>
+                                <Link href="/employee/schedule">
+                                    <div className="flex flex-col items-center justify-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
+                                        <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400 mb-1" />
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Schedule</span>
+                                    </div>
+                                </Link>
+                                <Link href="/employee/performance">
+                                    <div className="flex flex-col items-center justify-center p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
+                                        <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400 mb-1" />
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Stats</span>
+                                    </div>
+                                </Link>
+                            </div>
+                        </Card>
+
+                        {/* Time Off Balance - Compact */}
+                        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                            <div className="p-4">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Time Off Balance</h3>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center p-2 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">Vacation</span>
+                                        <span className="text-sm font-bold text-purple-600 dark:text-purple-400">{stats?.vacation_balance || 0}d</span>
+                                    </div>
+                                    <div className="flex justify-between items-center p-2 bg-orange-50 dark:bg-orange-900/10 rounded-lg">
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">Sick</span>
+                                        <span className="text-sm font-bold text-orange-600 dark:text-orange-400">{stats?.sick_balance || 0}d</span>
+                                    </div>
+                                    <div className="flex justify-between items-center p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">Personal</span>
+                                        <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{stats?.personal_balance || 0}d</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+
+                {/* Announcements Row */}
+                <div className="grid grid-cols-1">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.45 }}
                     >
-                        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                            <CardHeader className="border-b border-gray-100 dark:border-gray-700">
+                        <Card className="bg-amber-50/50 dark:bg-gray-800 border-amber-100 dark:border-gray-700">
+                            <CardHeader className="py-3 px-4 sm:px-6 border-b border-amber-100/50 dark:border-gray-700/50">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                        <Bell className="w-5 h-5 text-amber-500" />
-                                        Announcements
+                                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                        <Bell className="w-4 h-4 text-amber-500" />
+                                        Latest Announcements
                                     </h3>
-                                    {(stats?.unread_notifications || 0) > 0 && (
-                                        <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full text-xs font-medium">
-                                            {stats?.unread_notifications} new
-                                        </span>
-                                    )}
                                 </div>
                             </CardHeader>
-                            <CardContent className="p-4">
+                            <CardContent className="p-3 sm:p-4">
                                 {announcements.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <CheckCircle className="w-12 h-12 mx-auto text-green-400 mb-2" />
-                                        <p className="text-gray-500 dark:text-gray-400">You're all caught up!</p>
+                                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                        <CheckCircle className="w-4 h-4 text-green-500" />
+                                        <span>No new announcements</span>
                                     </div>
                                 ) : (
-                                    <div className="space-y-3">
-                                        {announcements.slice(0, 4).map((announcement) => (
+                                    <div className="space-y-2">
+                                        {announcements.slice(0, 2).map((announcement) => (
                                             <div
                                                 key={announcement.id}
-                                                className={cn(
-                                                    "p-3 rounded-xl border transition-all",
-                                                    announcement.read
-                                                        ? "bg-gray-50 dark:bg-gray-700/30 border-gray-200 dark:border-gray-700"
-                                                        : "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
-                                                )}
+                                                className="flex items-start gap-2 p-2 rounded-lg bg-white/50 dark:bg-gray-800/50"
                                             >
-                                                <p className="font-medium text-gray-900 dark:text-white text-sm">
-                                                    {announcement.title}
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                                                    {announcement.message}
-                                                </p>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                        {announcement.title}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                                                        {announcement.message}
+                                                    </p>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
-                                <Link href="/employee/notifications">
-                                    <Button variant="ghost" className="w-full mt-4 text-blue-600">
-                                        View All Notifications
-                                        <ChevronRight className="w-4 h-4 ml-1" />
-                                    </Button>
-                                </Link>
                             </CardContent>
                         </Card>
                     </motion.div>
                 </div>
-
-                {/* Quick Actions */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                >
-                    <Card className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-gray-200 dark:border-gray-700">
-                        <CardContent className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <Link href="/employee/pos">
-                                    <Button variant="outline" className="w-full h-16 flex-col gap-1 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                        <Zap className="w-5 h-5 text-blue-600" />
-                                        <span className="text-xs">Open POS</span>
-                                    </Button>
-                                </Link>
-                                <Link href="/employee/kitchen">
-                                    <Button variant="outline" className="w-full h-16 flex-col gap-1 hover:bg-orange-50 dark:hover:bg-orange-900/20">
-                                        <ClipboardList className="w-5 h-5 text-orange-600" />
-                                        <span className="text-xs">Kitchen Display</span>
-                                    </Button>
-                                </Link>
-                                <Link href="/employee/schedule">
-                                    <Button variant="outline" className="w-full h-16 flex-col gap-1 hover:bg-purple-50 dark:hover:bg-purple-900/20">
-                                        <Calendar className="w-5 h-5 text-purple-600" />
-                                        <span className="text-xs">My Schedule</span>
-                                    </Button>
-                                </Link>
-                                <Link href="/employee/performance">
-                                    <Button variant="outline" className="w-full h-16 flex-col gap-1 hover:bg-green-50 dark:hover:bg-green-900/20">
-                                        <TrendingUp className="w-5 h-5 text-green-600" />
-                                        <span className="text-xs">Performance</span>
-                                    </Button>
-                                </Link>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
             </div>
+
 
             {/* Time Off Request Modal */}
             <Modal
@@ -530,47 +441,47 @@ export default function EmployeeDashboard() {
                 onClose={() => setShowTimeOffModal(false)}
                 title="Request Time Off"
             >
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                             Request Type
                         </label>
                         <select
                             value={timeOffData.request_type}
                             onChange={(e) => setTimeOffData({ ...timeOffData, request_type: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl"
+                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl text-sm sm:text-base"
                         >
                             <option value="vacation">Vacation</option>
                             <option value="sick">Sick Leave</option>
                             <option value="personal">Personal</option>
                         </select>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                                 Start Date
                             </label>
                             <input
                                 type="date"
                                 value={timeOffData.start_date}
                                 onChange={(e) => setTimeOffData({ ...timeOffData, start_date: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl"
+                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl text-sm sm:text-base"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                                 End Date
                             </label>
                             <input
                                 type="date"
                                 value={timeOffData.end_date}
                                 onChange={(e) => setTimeOffData({ ...timeOffData, end_date: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl"
+                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl text-sm sm:text-base"
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                             Reason (Optional)
                         </label>
                         <textarea
@@ -578,27 +489,27 @@ export default function EmployeeDashboard() {
                             onChange={(e) => setTimeOffData({ ...timeOffData, reason: e.target.value })}
                             rows={3}
                             placeholder="Brief description..."
-                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl resize-none"
+                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl resize-none text-sm sm:text-base"
                         />
                     </div>
-                    <div className="flex gap-3 pt-4">
-                        <Button variant="outline" onClick={() => setShowTimeOffModal(false)} className="flex-1">
+                    <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+                        <Button variant="outline" onClick={() => setShowTimeOffModal(false)} className="flex-1 text-sm sm:text-base py-2.5 sm:py-3">
                             Cancel
                         </Button>
                         <Button
                             onClick={handleSubmitTimeOff}
                             disabled={timeOffMutation.isPending}
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm sm:text-base py-2.5 sm:py-3"
                         >
                             {timeOffMutation.isPending ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
-                                'Submit Request'
+                                'Submit'
                             )}
                         </Button>
                     </div>
                 </div>
             </Modal>
-        </EmployeeLayout>
+        </EmployeeLayout >
     );
 }

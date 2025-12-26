@@ -21,7 +21,7 @@ class UpdateEmployeeRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'phone' => ['nullable', 'string', 'max:30', Rule::unique('users', 'phone')->ignore($userId)],
-            'password' => ['sometimes', 'string', 'min:8'],
+            'password' => ['nullable', 'string', 'min:8'],
             'role' => ['sometimes', 'string', 'in:admin,manager,cashier,waiter,chef,employee'],
             'position_id' => ['sometimes', 'exists:positions,id'],
             'location_id' => ['sometimes', 'exists:locations,id'],
@@ -32,7 +32,6 @@ class UpdateEmployeeRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:500'],
             'employee_code' => ['sometimes', 'string', 'max:50', Rule::unique('employees', 'employee_code')->ignore($employeeId)],
             'hire_date' => ['sometimes', 'date'],
-            'address' => ['nullable', 'string', 'max:500'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];

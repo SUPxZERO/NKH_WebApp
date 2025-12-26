@@ -68,6 +68,7 @@ class EmployeeTimeOffController extends Controller
 
         // Validate request
         $validator = Validator::make($request->all(), [
+            'request_type' => 'nullable|string|in:vacation,sick,personal',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'nullable|string|max:500',
@@ -83,7 +84,7 @@ class EmployeeTimeOffController extends Controller
         // Check for overlapping requests
         $overlap = DB::table('time_off_requests')
             ->where('employee_id', $employee->id)
-            ->where('status', '!=', 'denied')
+            ->whereNotIn('status', ['denied', 'rejected', 'cancelled'])
             ->where(function ($query) use ($request) {
                 $query->whereBetween('start_date', [$request->start_date, $request->end_date])
                       ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
@@ -100,11 +101,18 @@ class EmployeeTimeOffController extends Controller
             ], 422);
         }
 
+        // Calculate days requested
+        $startDate = new \DateTime($request->start_date);
+        $endDate = new \DateTime($request->end_date);
+        $daysRequested = $startDate->diff($endDate)->days + 1;
+
         // Create time off request
         $timeOffId = DB::table('time_off_requests')->insertGetId([
             'employee_id' => $employee->id,
+            'type' => $request->input('request_type', 'vacation'),
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
+            'days_requested' => $daysRequested,
             'reason' => $request->reason,
             'status' => 'pending',
             'created_at' => now(),
@@ -118,8 +126,10 @@ class EmployeeTimeOffController extends Controller
             'data' => [
                 'id' => $timeOff->id,
                 'employee_id' => $timeOff->employee_id,
+                'type' => $timeOff->type,
                 'start_date' => $timeOff->start_date,
                 'end_date' => $timeOff->end_date,
+                'days_requested' => $timeOff->days_requested,
                 'reason' => $timeOff->reason,
                 'status' => $timeOff->status,
                 'created_at' => $timeOff->created_at,

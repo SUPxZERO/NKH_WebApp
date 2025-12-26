@@ -57,6 +57,28 @@ export default function Schedule() {
     });
 
     const qc = useQueryClient();
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    // Navigate Calendar
+    const handlePrev = () => {
+        const newDate = new Date(currentDate);
+        if (viewMode === 'week') {
+            newDate.setDate(newDate.getDate() - 7);
+        } else {
+            newDate.setMonth(newDate.getMonth() - 1);
+        }
+        setCurrentDate(newDate);
+    };
+
+    const handleNext = () => {
+        const newDate = new Date(currentDate);
+        if (viewMode === 'week') {
+            newDate.setDate(newDate.getDate() + 7);
+        } else {
+            newDate.setMonth(newDate.getMonth() + 1);
+        }
+        setCurrentDate(newDate);
+    };
 
     // Fetch employee shifts
     const { data: shifts, isLoading: shiftsLoading } = useQuery<{ data: Shift[] }>({
@@ -86,13 +108,20 @@ export default function Schedule() {
         },
     });
 
+    // Helper to parse shift datetime properly
+    const parseShiftDateTime = (dateStr: string, timeStr: string): Date => {
+        // Extract just the date part (YYYY-MM-DD) from ISO timestamp
+        const datePart = dateStr.split('T')[0];
+        return new Date(`${datePart}T${timeStr}`);
+    };
+
     // Get next shift
     const nextShift = React.useMemo(() => {
         if (!shifts?.data) return null;
         const now = new Date();
         const upcoming = shifts.data
-            .filter((s) => new Date(s.date + ' ' + s.start_time) > now)
-            .sort((a, b) => new Date(a.date + ' ' + a.start_time).getTime() - new Date(b.date + ' ' + b.start_time).getTime());
+            .filter((s) => parseShiftDateTime(s.date, s.start_time) > now)
+            .sort((a, b) => parseShiftDateTime(a.date, a.start_time).getTime() - parseShiftDateTime(b.date, b.start_time).getTime());
         return upcoming[0] || null;
     }, [shifts]);
 
@@ -100,38 +129,52 @@ export default function Schedule() {
     const weekHours = React.useMemo(() => {
         if (!shifts?.data) return 0;
         const now = new Date();
-        const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+        // Calculate week start (Sunday at 00:00)
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+
+        // Calculate week end (Next Sunday at 00:00)
         const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 7);
+        weekEnd.setDate(weekStart.getDate() + 7);
 
         return shifts.data
             .filter((s) => {
-                const shiftDate = new Date(s.date);
+                // Parse just the date part from ISO timestamp
+                const shiftDate = new Date(s.date.split('T')[0]);
                 return shiftDate >= weekStart && shiftDate < weekEnd;
             })
             .reduce((total, s) => {
-                const start = new Date(`2000-01-01 ${s.start_time}`);
-                const end = new Date(`2000-01-01 ${s.end_time}`);
+                const start = new Date(`2000-01-01T${s.start_time}`);
+                let end = new Date(`2000-01-01T${s.end_time}`);
+
+                // Handle overnight shifts (e.g., 18:00 - 02:00)
+                if (end <= start) {
+                    end.setDate(end.getDate() + 1); // Add one day to end time
+                }
+
                 const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
                 return total + hours;
             }, 0);
     }, [shifts]);
 
-    // Group shifts by date
+    // Group shifts by date (using YYYY-MM-DD format as key)
     const groupedShifts = React.useMemo(() => {
         if (!shifts?.data) return {};
         return shifts.data.reduce((acc, shift) => {
-            if (!acc[shift.date]) acc[shift.date] = [];
-            acc[shift.date].push(shift);
+            // Extract just YYYY-MM-DD from ISO timestamp
+            const dateKey = shift.date.split('T')[0];
+            if (!acc[dateKey]) acc[dateKey] = [];
+            acc[dateKey].push(shift);
             return acc;
         }, {} as Record<string, Shift[]>);
     }, [shifts]);
 
-    // Get week days
+    // Get week days based on currentDate
     const getWeekDays = () => {
         const days = [];
-        const now = new Date();
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Start on Sunday
 
         for (let i = 0; i < 7; i++) {
             const day = new Date(startOfWeek);
@@ -141,19 +184,59 @@ export default function Schedule() {
         return days;
     };
 
+    // Get month days (grid 6x7)
+    const getMonthDays = () => {
+        const days = [];
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+
+        const startDayIndex = firstDayOfMonth.getDay(); // 0-6 (Sun-Sat)
+
+        // Previous month padding
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+        for (let i = startDayIndex - 1; i >= 0; i--) {
+            days.push({
+                date: new Date(year, month - 1, prevMonthLastDay - i),
+                isCurrentMonth: false
+            });
+        }
+
+        // Current month days
+        for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+            days.push({
+                date: new Date(year, month, i),
+                isCurrentMonth: true
+            });
+        }
+
+        // Next month padding to fill 42 cells (6 rows)
+        const remainingCells = 42 - days.length;
+        for (let i = 1; i <= remainingCells; i++) {
+            days.push({
+                date: new Date(year, month + 1, i),
+                isCurrentMonth: false
+            });
+        }
+
+        return days;
+    };
+
     // Tab state
     const [activeTab, setActiveTab] = useState<'schedule' | 'marketplace'>('schedule');
 
     // Fetch marketplace shifts (available swaps)
     const { data: marketplaceShifts, isLoading: marketplaceLoading } = useQuery<any[]>({
         queryKey: ['shift-swaps.available'],
-        queryFn: () => apiGet('/api/shift-swaps?view=available'),
+        queryFn: () => apiGet('/employee/shift-swaps?view=available'),
         enabled: activeTab === 'marketplace',
     });
 
     // Claim Shift Mutation
     const claimMutation = useMutation({
-        mutationFn: (id: number) => apiPost(`/api/shift-swaps/${id}`, { _method: 'PUT', action: 'claim' }),
+        mutationFn: (id: number) => apiPost(`/employee/shift-swaps/${id}`, { _method: 'PUT', action: 'claim' }),
         onSuccess: () => {
             toastSuccess('Shift claimed successfully! Awaiting manager approval.');
             qc.invalidateQueries({ queryKey: ['shift-swaps.available'] });
@@ -177,7 +260,7 @@ export default function Schedule() {
 
     // Swap Mutation
     const swapMutation = useMutation({
-        mutationFn: (data: { shift_id: number, type: string, reason: string }) => apiPost('/api/shift-swaps', data),
+        mutationFn: (data: { shift_id: number, type: string, reason: string }) => apiPost('/employee/shift-swaps', data),
         onSuccess: () => {
             toastSuccess('Shift swap request created!');
             setSwapModalOpen(false);
@@ -337,7 +420,7 @@ export default function Schedule() {
                         <Card className="bg-white/5 border-white/10">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold">Weekly Schedule</h2>
+                                    <h2 className="text-xl font-semibold">{viewMode === 'week' ? 'Weekly Schedule' : 'Monthly Schedule'}</h2>
                                     <div className="flex gap-2">
                                         <Button size="sm" variant={viewMode === 'week' ? 'primary' : 'ghost'} onClick={() => setViewMode('week')}>
                                             Week
@@ -356,51 +439,108 @@ export default function Schedule() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="space-y-2">
-                                        {getWeekDays().map((day) => {
-                                            const dateStr = day.toISOString().split('T')[0];
-                                            const dayShifts = groupedShifts[dateStr] || [];
-                                            const isToday = dateStr === new Date().toISOString().split('T')[0];
+                                    <>
+                                        {/* Navigation & Header */}
+                                        <div className="flex items-center justify-between mb-4 bg-white/5 p-2 rounded-lg">
+                                            <Button variant="ghost" size="sm" onClick={handlePrev}>&lt;</Button>
+                                            <div className="font-bold text-lg">
+                                                {viewMode === 'week'
+                                                    ? `Week of ${getWeekDays()[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                                                    : currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                                                }
+                                            </div>
+                                            <Button variant="ghost" size="sm" onClick={handleNext}>&gt;</Button>
+                                        </div>
 
-                                            return (
-                                                <div
-                                                    key={dateStr}
-                                                    className={`flex items-center gap-4 p-4 rounded-xl border ${isToday
-                                                        ? 'border-fuchsia-500/50 bg-fuchsia-500/10'
-                                                        : 'border-white/10 bg-white/5'
-                                                        }`}
-                                                >
-                                                    <div className="w-24 flex-shrink-0">
-                                                        <div className="font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                                                        <div className="text-sm text-gray-400">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                                        {viewMode === 'week' ? (
+                                            <div className="space-y-2">
+                                                {getWeekDays().map((day) => {
+                                                    const dateStr = day.toISOString().split('T')[0];
+                                                    const dayShifts = groupedShifts[dateStr] || [];
+                                                    const isToday = dateStr === new Date().toISOString().split('T')[0];
+
+                                                    return (
+                                                        <div
+                                                            key={dateStr}
+                                                            className={`flex items-center gap-4 p-4 rounded-xl border ${isToday
+                                                                ? 'border-fuchsia-500/50 bg-fuchsia-500/10'
+                                                                : 'border-white/10 bg-white/5'
+                                                                }`}
+                                                        >
+                                                            <div className="w-24 flex-shrink-0">
+                                                                <div className="font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                                                                <div className="text-sm text-gray-400">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                                                            </div>
+
+                                                            <div className="flex-1">
+                                                                {dayShifts.length === 0 ? (
+                                                                    <div className="text-gray-500 text-sm">No shifts</div>
+                                                                ) : (
+                                                                    <div className="space-y-2">
+                                                                        {dayShifts.map((shift) => (
+                                                                            <button
+                                                                                key={shift.id}
+                                                                                onClick={() => setSelectedShift(shift)}
+                                                                                className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 w-full transition-all text-left"
+                                                                            >
+                                                                                <Clock className="w-4 h-4 text-fuchsia-400" />
+                                                                                <span className="font-medium">{shift.start_time} - {shift.end_time}</span>
+                                                                                <span className="text-gray-400">•</span>
+                                                                                <span className="text-gray-300">{shift.position}</span>
+                                                                                <span className="text-gray-400">•</span>
+                                                                                <span className="text-gray-400 text-sm">{shift.location_name}</span>
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-7 gap-px bg-white/10 rounded-xl overflow-hidden border border-white/10">
+                                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                                                    <div key={d} className="bg-gray-900/90 p-2 text-center text-sm font-semibold text-gray-400">
+                                                        {d}
                                                     </div>
+                                                ))}
+                                                {getMonthDays().map((item, i) => {
+                                                    const dateStr = item.date.toISOString().split('T')[0];
+                                                    const dayShifts = groupedShifts[dateStr] || [];
+                                                    const isToday = dateStr === new Date().toISOString().split('T')[0];
 
-                                                    <div className="flex-1">
-                                                        {dayShifts.length === 0 ? (
-                                                            <div className="text-gray-500 text-sm">No shifts</div>
-                                                        ) : (
-                                                            <div className="space-y-2">
-                                                                {dayShifts.map((shift) => (
-                                                                    <button
-                                                                        key={shift.id}
-                                                                        onClick={() => setSelectedShift(shift)}
-                                                                        className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 w-full transition-all text-left"
+                                                    return (
+                                                        <div
+                                                            key={i}
+                                                            className={`bg-gray-900 p-2 min-h-[100px] border-t border-white/5 ${!item.isCurrentMonth ? 'opacity-50' : ''
+                                                                } ${isToday ? 'bg-fuchsia-900/10' : ''} hover:bg-white/5 transition-colors cursor-pointer`}
+                                                            onClick={() => {
+                                                                if (dayShifts.length > 0) setSelectedShift(dayShifts[0]); // Open first shift for now or separate modal for day
+                                                            }}
+                                                        >
+                                                            <div className={`text-right mb-1 ${isToday ? 'text-fuchsia-400 font-bold' : 'text-gray-400'}`}>
+                                                                {item.date.getDate()}
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                {dayShifts.map(shift => (
+                                                                    <div key={shift.id}
+                                                                        className="text-xs p-1 rounded bg-fuchsia-600/20 text-fuchsia-200 border border-fuchsia-500/30 truncate"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedShift(shift);
+                                                                        }}
                                                                     >
-                                                                        <Clock className="w-4 h-4 text-fuchsia-400" />
-                                                                        <span className="font-medium">{shift.start_time} - {shift.end_time}</span>
-                                                                        <span className="text-gray-400">•</span>
-                                                                        <span className="text-gray-300">{shift.position}</span>
-                                                                        <span className="text-gray-400">•</span>
-                                                                        <span className="text-gray-400 text-sm">{shift.location_name}</span>
-                                                                    </button>
+                                                                        {shift.start_time.slice(0, 5)}
+                                                                    </div>
                                                                 ))}
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </CardContent>
                         </Card>

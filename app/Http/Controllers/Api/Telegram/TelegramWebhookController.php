@@ -12,25 +12,35 @@ use App\Models\TelegramUser;
 use App\Services\Telegram\TelegramBotService;
 use App\Services\Telegram\TelegramCartSessionManager;
 use App\Services\Telegram\TelegramKeyboardBuilder;
+use App\Services\Telegram\TelegramErrorHandler;
+use App\Services\Telegram\TelegramAdminService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class TelegramWebhookController extends Controller
 {
     private TelegramBotService $botService;
+    private TelegramAdminService $adminService;
 
-    public function __construct(TelegramBotService $botService)
-    {
+    public function __construct(
+        TelegramBotService $botService,
+        TelegramAdminService $adminService
+    ) {
         $this->botService = $botService;
+        $this->adminService = $adminService;
     }
 
     /**
-     * Handle incoming Telegram webhook
+     * Handle incoming Telegram webhook with graceful error handling
      */
     public function handle(Request $request): JsonResponse
     {
+        // Always return 200 to prevent Telegram retries on errors
+        $successResponse = response()->json(['ok' => true]);
+
         try {
             // Verify secret token
             $secretToken = $request->header('X-Telegram-Bot-Api-Secret-Token');
@@ -42,7 +52,7 @@ class TelegramWebhookController extends Controller
             // Validate request
             $update = $request->all();
             if (!isset($update['update_id'])) {
-                return response()->json(['ok' => true]); // Acknowledge invalid updates
+                return $successResponse; // Acknowledge invalid updates
             }
 
             Log::debug('Telegram webhook received', ['update_id' => $update['update_id']]);
@@ -56,10 +66,31 @@ class TelegramWebhookController extends Controller
                 $this->handleInlineQuery($update['inline_query']);
             }
 
-            return response()->json(['ok' => true]);
-        } catch (\Exception $e) {
-            Log::error('Telegram webhook error', ['error' => $e->getMessage()]);
-            return response()->json(['ok' => false, 'error' => $e->getMessage()], 500);
+            return $successResponse;
+        } catch (Throwable $e) {
+            // Use error handler to log appropriately
+            TelegramErrorHandler::handleWebhookError($e, $request->all());
+
+            // Try to send error message to user if we have a chat_id
+            try {
+                $chatId = $update['message']['chat']['id']
+                    ?? $update['callback_query']['message']['chat']['id']
+                    ?? null;
+
+                if ($chatId) {
+                    $errorMessage = TelegramErrorHandler::formatTelegramError($e);
+                    $this->botService->sendMessage($chatId, $errorMessage, withRetry: false);
+                }
+            } catch (Throwable $sendError) {
+                // If sending error fails, just log it
+                Log::error('Failed to send error message to user', [
+                    'original_error' => $e->getMessage(),
+                    'send_error' => $sendError->getMessage(),
+                ]);
+            }
+
+            // Return success to prevent Telegram from retrying
+            return $successResponse;
         }
     }
 
@@ -93,22 +124,43 @@ class TelegramWebhookController extends Controller
     }
 
     /**
-     * Handle callback queries (inline button clicks)
+     * Handle callback queries (inline button clicks) with validation
      */
     private function handleCallbackQuery(array $callbackQuery): void
     {
-        $chatId = $callbackQuery['message']['chat']['id'];
-        $messageId = $callbackQuery['message']['message_id'];
-        $data = $callbackQuery['data'] ?? '';
-        $user = $this->botService->findOrCreateUser($callbackQuery);
+        try {
+            $chatId = $callbackQuery['message']['chat']['id'] ?? null;
+            $messageId = $callbackQuery['message']['message_id'] ?? null;
+            $data = $callbackQuery['data'] ?? '';
 
-        $this->botService->updateUserInteraction($user);
-        $this->botService->answerCallbackQuery($callbackQuery['id']);
+            // Validate callback data
+            if (!TelegramErrorHandler::validateCallbackData($data)) {
+                Log::warning('Invalid callback data', ['data' => $data, 'chat_id' => $chatId]);
+                return;
+            }
 
-        Log::debug('Telegram callback query', ['data' => $data, 'user_id' => $user->id]);
+            $user = $this->botService->findOrCreateUser($callbackQuery);
+            $this->botService->updateUserInteraction($user);
+            $this->botService->answerCallbackQuery($callbackQuery['id']);
 
-        // Route to appropriate handler
-        $this->routeCallback($user, $data, $chatId, $messageId);
+            Log::debug('Telegram callback query', ['data' => $data, 'user_id' => $user->id]);
+
+            // Route to appropriate handler
+            $this->routeCallback($user, $data, $chatId, $messageId);
+        } catch (Throwable $e) {
+            // Log error but don't fail - answer the callback anyway
+            TelegramErrorHandler::logError($e, ['operation' => 'handleCallbackQuery']);
+
+            try {
+                $this->botService->answerCallbackQuery(
+                    $callbackQuery['id'],
+                    'An error occurred. Please try again.',
+                    true
+                );
+            } catch (Throwable) {
+                // Ignore error answering callback
+            }
+        }
     }
 
     /**
@@ -209,6 +261,12 @@ class TelegramWebhookController extends Controller
         // Loyalty callback
         if (str_starts_with($data, 'loyalty_')) {
             $this->handleLoyaltyCallback($user, $data, $chatId);
+            return;
+        }
+
+        // Admin callbacks
+        if (str_starts_with($data, 'admin_')) {
+            $this->handleAdminCallback($user, $data, $chatId);
             return;
         }
 
@@ -915,6 +973,87 @@ class TelegramWebhookController extends Controller
         $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
     }
 
+    /**
+     * Handle admin callbacks
+     */
+    private function handleAdminCallback(TelegramUser $user, string $data, int $chatId): void
+    {
+        // Dashboard
+        if ($data === 'admin_dashboard') {
+            $result = $this->adminService->getDashboardMessage($user->telegram_id);
+            $this->botService->sendInlineKeyboard($chatId, $result['message'], $result['keyboard']);
+            return;
+        }
+
+        // Pending orders
+        if ($data === 'admin_pending_orders' || str_starts_with($data, 'admin_pending_page_')) {
+            $page = 1;
+            if (str_starts_with($data, 'admin_pending_page_')) {
+                $page = (int) str_replace('admin_pending_page_', '', $data);
+            }
+            $result = $this->adminService->getPendingOrdersMessage($user->telegram_id, $page);
+            $this->botService->sendInlineKeyboard($chatId, $result['message'], $result['keyboard']);
+            return;
+        }
+
+        // Order detail
+        if (str_starts_with($data, 'admin_order_detail_')) {
+            $orderId = (int) str_replace('admin_order_detail_', '', $data);
+            $result = $this->adminService->getOrderDetailMessage($user->telegram_id, $orderId);
+            $this->botService->sendInlineKeyboard($chatId, $result['message'], $result['keyboard']);
+            return;
+        }
+
+        // Order status update
+        if (str_starts_with($data, 'admin_order_') && !str_starts_with($data, 'admin_order_detail_')) {
+            // Parse: admin_order_{orderId}_{action}
+            $parts = explode('_', $data);
+            if (count($parts) >= 4) {
+                $orderId = (int) $parts[2];
+                $action = $parts[3];
+
+                // Map action to status
+                $statusMap = [
+                    'approve' => 'received',
+                    'decline' => 'cancelled',
+                    'preparing' => 'preparing',
+                    'ready' => 'ready',
+                    'out' => 'out_for_delivery',
+                    'complete' => 'completed',
+                ];
+
+                $status = $statusMap[$action] ?? null;
+                if ($status) {
+                    $success = $this->adminService->updateOrderStatus($user->telegram_id, $orderId, $status);
+
+                    if ($success) {
+                        $this->botService->sendMessage($chatId, "✅ Order #{$orderId} status updated to {$status}");
+                        // Refresh order detail
+                        $result = $this->adminService->getOrderDetailMessage($user->telegram_id, $orderId);
+                        $this->botService->sendInlineKeyboard($chatId, $result['message'], $result['keyboard']);
+                    } else {
+                        $this->botService->sendMessage($chatId, "❌ Failed to update order status");
+                    }
+                }
+            }
+            return;
+        }
+
+        // Analytics
+        if (str_starts_with($data, 'admin_analytics_')) {
+            $period = str_replace('admin_analytics_', '', $data);
+            // Analytics implementation can be added later
+            $this->botService->sendMessage($chatId, "📊 Analytics feature coming soon!");
+            return;
+        }
+
+        // Other admin features (placeholder)
+        if (in_array($data, ['admin_locations', 'admin_customers', 'admin_search_customer'])) {
+            $this->botService->sendMessage($chatId, "🔧 This admin feature is coming soon!");
+            return;
+        }
+    }
+
     // ============================================
     // Helper Methods
     // ============================================
@@ -922,9 +1061,42 @@ class TelegramWebhookController extends Controller
     private function showMainMenu(TelegramUser $user, int $chatId): void
     {
         $hasAccount = $user->hasLinkedAccount();
-        $keyboard = TelegramKeyboardBuilder::mainMenu($hasAccount);
+        $isAdmin = $this->adminService->isAdmin($user->telegram_id);
+
+        // Build custom keyboard with admin option
+        $keyboard = [];
+
+        if ($isAdmin) {
+            // Admin user - show admin dashboard option
+            $keyboard[] = [
+                ['text' => '📊 Admin Dashboard', 'callback_data' => 'admin_dashboard'],
+            ];
+            $keyboard[] = [
+                ['text' => '🍽️ Menu', 'callback_data' => 'menu_browse'],
+                ['text' => '🛒 Cart', 'callback_data' => 'cart_view'],
+            ];
+        } else {
+            // Regular user
+            $keyboard[] = [
+                ['text' => '🍽️ Menu', 'callback_data' => 'menu_browse'],
+                ['text' => '🛒 Cart', 'callback_data' => 'cart_view'],
+            ];
+        }
+
+        $keyboard[] = [
+            ['text' => '📦 My Orders', 'callback_data' => 'orders_list'],
+            ['text' => '🎁 Loyalty', 'callback_data' => 'loyalty_status'],
+        ];
+
+        $keyboard[] = [
+            ['text' => '📍 Locations', 'callback_data' => 'locations_list'],
+            ['text' => '❓ Help', 'callback_data' => 'help_menu'],
+        ];
 
         $message = "🍽️ *NKH Restaurant*\n\n";
+        if ($isAdmin) {
+            $message .= "👑 *Admin Access Enabled*\n\n";
+        }
         $message .= "What would you like to do?";
 
         $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
@@ -1303,6 +1475,9 @@ class TelegramWebhookController extends Controller
         $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
     }
 
+    /**
+     * Process order with error handling and fallback
+     */
     private function processOrder(TelegramUser $user, int $chatId): void
     {
         if (!$user->hasLinkedAccount()) {
@@ -1319,14 +1494,35 @@ class TelegramWebhookController extends Controller
         }
 
         try {
+            // Validate cart before processing
+            $errors = $cart->isValidForCheckout();
+            if (!empty($errors)) {
+                $message = "⚠️ *Cannot place order*\n\n";
+                $message .= implode("\n", array_map(fn($e) => "• {$e}", $errors));
+
+                $keyboard = TelegramKeyboardBuilder::inlineKeyboard([
+                    [
+                        ['text' => '🔙 View Cart', 'callback_data' => 'cart_view'],
+                    ],
+                    [
+                        ['text' => '🍔 Browse Menu', 'callback_data' => 'menu_categories'],
+                    ],
+                ]);
+
+                $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
+                return;
+            }
+
             // Sync cart to database first
             $cart->syncToDatabase($user->customer);
 
-            // Create order via API
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->getCustomerToken($user->customer),
-                'Accept' => 'application/json',
-            ])->post(route('api.customer.online-orders'), $orderData);
+            // Create order via API with timeout
+            $response = TelegramErrorHandler::withRetry(function () use ($user, $orderData) {
+                return \Illuminate\Support\Facades\Http::timeout(30)->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->getCustomerToken($user->customer),
+                    'Accept' => 'application/json',
+                ])->post(route('api.customer.online-orders'), $orderData);
+            });
 
             if ($response->successful()) {
                 $order = $response->json('data');
@@ -1350,12 +1546,46 @@ class TelegramWebhookController extends Controller
 
                 $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
             } else {
-                $error = $response->json('message') ?? 'Failed to place order';
-                $this->botService->sendMessage($chatId, "❌ Error: {$error}");
+                $errorData = $response->json();
+                $error = $errorData['message'] ?? $errorData['error'] ?? 'Failed to place order';
+
+                // Handle validation errors
+                if (is_array($error)) {
+                    $error = implode(', ', $error);
+                }
+
+                $message = "❌ *Order Failed*\n\n";
+                $message .= TelegramErrorHandler::getUserContext(new \Exception($error));
+
+                $keyboard = TelegramKeyboardBuilder::inlineKeyboard([
+                    [
+                        ['text' => '🔄 Try Again', 'callback_data' => 'cart_view'],
+                    ],
+                    [
+                        ['text' => '🍔 Browse Menu', 'callback_data' => 'menu_categories'],
+                    ],
+                ]);
+
+                $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
             }
-        } catch (\Exception $e) {
-            Log::error('Telegram order processing failed', ['error' => $e->getMessage()]);
-            $this->botService->sendMessage($chatId, "❌ An error occurred. Please try again.");
+        } catch (Throwable $e) {
+            Log::error('Telegram order processing failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+            ]);
+
+            $message = TelegramErrorHandler::formatTelegramError($e);
+
+            $keyboard = TelegramKeyboardBuilder::inlineKeyboard([
+                [
+                    ['text' => '🔄 Try Again', 'callback_data' => 'cart_view'],
+                ],
+                [
+                    ['text' => '📞 Contact Support', 'callback_data' => 'help_support'],
+                ],
+            ]);
+
+            $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
         }
     }
 
