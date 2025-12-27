@@ -453,6 +453,21 @@ Route::prefix('employee')
 Route::post('/telegram/webhook', [App\Http\Controllers\Api\Telegram\TelegramWebhookController::class, 'handle'])
     ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 
+// Debug endpoint to check Telegram bot configuration
+Route::get('/telegram/debug', function () {
+    $token = config('telegram.bot_token', env('TELEGRAM_BOT_TOKEN', ''));
+    $hasToken = !empty($token);
+    $tokenPreview = $hasToken ? substr($token, 0, 10) . '...' : 'NOT SET';
+    
+    return response()->json([
+        'token_configured' => $hasToken,
+        'token_preview' => $tokenPreview,
+        'webhook_url' => env('TELEGRAM_WEBHOOK_URL', 'NOT SET'),
+        'app_env' => env('APP_ENV'),
+    ]);
+});
+
+
 
 // ============================================================================
 // TELEGRAM BOT API ROUTES (For bot to call)
