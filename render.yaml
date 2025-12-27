@@ -60,6 +60,13 @@ services:
         value: log
       - key: BROADCAST_CONNECTION
         value: log
+      # Telegram Bot Configuration
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+        # Set manually in Render dashboard
+      - key: TELEGRAM_WEBHOOK_URL
+        sync: false
+        # Set to: https://your-render-url.onrender.com/api/telegram/webhook
       
     # Health check
     healthCheckPath: /
