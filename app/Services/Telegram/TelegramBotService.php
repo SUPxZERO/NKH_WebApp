@@ -34,6 +34,7 @@ class TelegramBotService
     public function __construct()
     {
         $this->token = config('telegram.bot_token', env('TELEGRAM_BOT_TOKEN', ''));
+        $this->secretToken = config('telegram.secret_token', env('TELEGRAM_SECRET_TOKEN', ''));
         $this->apiUrl = self::API_BASE . $this->token;
     }
 

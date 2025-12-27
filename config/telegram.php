@@ -17,6 +17,9 @@ return [
     // Webhook URL (should be publicly accessible)
     'webhook_url' => env('TELEGRAM_WEBHOOK_URL', ''),
 
+    // Secret token for webhook verification (optional but recommended)
+    'secret_token' => env('TELEGRAM_SECRET_TOKEN', ''),
+
     // Bot username (optional, for display purposes)
     'bot_username' => env('TELEGRAM_BOT_USERNAME', ''),
 
