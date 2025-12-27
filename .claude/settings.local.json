@@ -24,7 +24,19 @@
       "Bash(pkill:*)",
       "Bash(npm run dev:*)",
       "Bash(mkdir:*)",
-      "Bash(php -l:*)"
+      "Bash(php -l:*)",
+      "Bash(ngrok version:*)",
+      "Bash(winget:*)",
+      "Bash(scoop:*)",
+      "Bash(choco --version:*)",
+      "Bash(choco install:*)",
+      "Bash(./ngrok config add-authtoken:*)",
+      "Bash(timeout:*)",
+      "Bash(tee:*)",
+      "Bash(start /B ngrok http 8000 2)",
+      "Bash(1 sleep 10 cat /tmp/ngrok_tunnel.log)",
+      "Bash(./ngrok config:*)",
+      "Bash(./ngrok http:*)"
     ]
   }
 }
