@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+# Force rebuild v2 - PostgreSQL migration fix
 
 # Ensure production environment variables are set
 export APP_ENV=production
