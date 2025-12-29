@@ -9,8 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         // Set default values for new CRM fields on existing customers
+        // Use single quotes for PostgreSQL compatibility
         DB::table('customers')->update([
-            'customer_tier' => DB::raw('COALESCE(customer_tier, "bronze")'),
+            'customer_tier' => DB::raw("COALESCE(customer_tier, 'bronze')"),
             'visit_count' => DB::raw('COALESCE(visit_count, 0)'),
             'average_order_value' => DB::raw('COALESCE(average_order_value, 0)'),
             'no_show_count' => DB::raw('COALESCE(no_show_count, 0)'),
