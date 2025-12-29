@@ -459,11 +459,50 @@ Route::get('/telegram/debug', function () {
     $hasToken = !empty($token);
     $tokenPreview = $hasToken ? substr($token, 0, 10) . '...' : 'NOT SET';
     
+    // Test Telegram Connection
+    $telegramStatus = 'SKIPPED';
+    $telegramInfo = null;
+    $telegramError = null;
+    
+    if ($hasToken) {
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(5)->get("https://api.telegram.org/bot{$token}/getMe");
+            if ($response->successful()) {
+                $telegramStatus = 'OK';
+                $telegramInfo = $response->json('result');
+            } else {
+                $telegramStatus = 'FAILED';
+                $telegramError = $response->body();
+            }
+        } catch (\Exception $e) {
+            $telegramStatus = 'ERROR';
+            $telegramError = $e->getMessage();
+        }
+    }
+
+    // Test Database
+    $dbStatus = 'UNKNOWN';
+    $tables = [];
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $dbStatus = 'CONNECTED';
+        
+        // Check for key tables
+        $tables['telegram_users'] = \Illuminate\Support\Facades\Schema::hasTable('telegram_users');
+        $tables['users'] = \Illuminate\Support\Facades\Schema::hasTable('users');
+    } catch (\Exception $e) {
+        $dbStatus = 'FAILED: ' . $e->getMessage();
+    }
+    
     return response()->json([
         'token_configured' => $hasToken,
         'token_preview' => $tokenPreview,
-        'webhook_url' => env('TELEGRAM_WEBHOOK_URL', 'NOT SET'),
-        'app_env' => env('APP_ENV'),
+        'telegram_api_check' => $telegramStatus,
+        'telegram_info' => $telegramInfo,
+        'telegram_error' => $telegramError,
+        'webhook_url_env' => env('TELEGRAM_WEBHOOK_URL', 'NOT SET'),
+        'database_status' => $dbStatus,
+        'tables_exist' => $tables,
     ]);
 });
 
