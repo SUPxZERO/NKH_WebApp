@@ -25,7 +25,11 @@ if [ -f /var/www/database/pre-migrate.sql ]; then
 fi
 
 echo "Running database migrations..."
-php artisan migrate --force || echo "Migration failed, continuing..."
+php artisan migrate --force 2>&1 || {
+    echo "Migration attempt 1 failed, retrying..."
+    sleep 5
+    php artisan migrate --force 2>&1 || echo "Migration failed after retry"
+}
 
 echo "Seeding database with initial data..."
 php artisan db:seed --force || echo "Seeding failed, continuing..."

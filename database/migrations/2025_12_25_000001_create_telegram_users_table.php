@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if table already exists
+        if (Schema::hasTable('telegram_users')) {
+            return;
+        }
+
         Schema::create('telegram_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')
-                ->nullable()
-                ->constrained('customers')
-                ->onDelete('set null');
+            // Use unsignedBigInteger instead of foreignId to avoid constraint issues
+            $table->unsignedBigInteger('customer_id')->nullable();
 
             $table->bigInteger('telegram_id')->unique('telegram_users_telegram_id_unique');
             $table->string('telegram_username', 100)->nullable();
@@ -41,15 +44,16 @@ return new class extends Migration
             $table->index('conversation_state');
         });
 
+        // Skip if table already exists
+        if (Schema::hasTable('telegram_order_notifications')) {
+            return;
+        }
+
         Schema::create('telegram_order_notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')
-                ->constrained('orders')
-                ->onDelete('cascade');
-
-            $table->foreignId('telegram_user_id')
-                ->constrained('telegram_users')
-                ->onDelete('cascade');
+            // Use unsignedBigInteger to avoid foreign key constraint issues
+            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('telegram_user_id');
 
             $table->string('status', 50); // placed, approved, preparing, ready, etc.
             $table->text('message')->nullable();
