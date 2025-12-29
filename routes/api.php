@@ -506,6 +506,22 @@ Route::get('/telegram/debug', function () {
     ]);
 });
 
+// EMERGENCY MIGRATION ROUTE (Since Shell is not available)
+Route::get('/telegram/debug/migrate', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return response()->json([
+            'status' => 'success',
+            'output' => \Illuminate\Support\Facades\Artisan::output(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+});
+
 
 
 // ============================================================================
