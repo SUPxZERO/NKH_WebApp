@@ -509,12 +509,21 @@ Route::get('/telegram/debug', function () {
 // EMERGENCY MIGRATION ROUTE (Since Shell is not available)
 Route::get('/telegram/debug/migrate', function () {
     try {
+        // Reset any stuck transactions first
+        \Illuminate\Support\Facades\DB::reconnect();
+
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         return response()->json([
             'status' => 'success',
             'output' => \Illuminate\Support\Facades\Artisan::output(),
         ]);
     } catch (\Exception $e) {
+        // Try to reconnect and get more info
+        try {
+            \Illuminate\Support\Facades\DB::reconnect();
+        } catch (\Exception $reconnectError) {
+            // ignore
+        }
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage(),
