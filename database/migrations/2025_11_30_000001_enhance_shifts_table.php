@@ -12,32 +12,43 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if shifts table doesn't exist
+        if (!Schema::hasTable('shifts')) {
+            return;
+        }
+
         Schema::table('shifts', function (Blueprint $table) {
             // Add calculated fields to shifts
             if (!Schema::hasColumn('shifts', 'actual_start_time')) {
-                $table->time('actual_start_time')->nullable()->after('end_time');
+                $table->time('actual_start_time')->nullable();
             }
             if (!Schema::hasColumn('shifts', 'actual_end_time')) {
-                $table->time('actual_end_time')->nullable()->after('actual_start_time');
+                $table->time('actual_end_time')->nullable();
             }
             if (!Schema::hasColumn('shifts', 'calculated_hours')) {
-                $table->decimal('calculated_hours', 10, 2)->nullable()->after('actual_end_time');
+                $table->decimal('calculated_hours', 10, 2)->nullable();
             }
             if (!Schema::hasColumn('shifts', 'published_at')) {
-                $table->timestamp('published_at')->nullable()->after('calculated_hours');
-            }
-
-            // Add missing indexes (skip if they already exist)
-            $indexes = DB::select("SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_NAME = 'shifts' AND COLUMN_NAME IN ('location_id', 'date')");
-            if (empty($indexes)) {
-                $table->index(['location_id', 'date']);
-            }
-            
-            $statusIndex = DB::select("SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_NAME = 'shifts' AND COLUMN_NAME = 'status'");
-            if (empty($statusIndex)) {
-                $table->index('status');
+                $table->timestamp('published_at')->nullable();
             }
         });
+
+        // Add indexes separately with error handling for both MySQL and PostgreSQL
+        try {
+            Schema::table('shifts', function (Blueprint $table) {
+                $table->index(['location_id', 'date'], 'shifts_location_date_index');
+            });
+        } catch (\Exception $e) {
+            // Index may already exist, ignore
+        }
+
+        try {
+            Schema::table('shifts', function (Blueprint $table) {
+                $table->index('status', 'shifts_status_index');
+            });
+        } catch (\Exception $e) {
+            // Index may already exist, ignore
+        }
     }
 
     /**
