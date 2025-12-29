@@ -84,7 +84,7 @@ class TelegramBotService
         $sendOperation = function () use ($chatId, $text, $replyToMessageId, $replyMarkup, $parseMode) {
             $payload = [
                 'chat_id' => $chatId,
-                'text' => TelegramErrorHandler::escapeTelegramText($text),
+                'text' => $text,
                 'parse_mode' => $parseMode,
             ];
 
