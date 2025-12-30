@@ -453,6 +453,9 @@ Route::prefix('employee')
 Route::post('/telegram/webhook', [App\Http\Controllers\Api\Telegram\TelegramWebhookController::class, 'handle'])
     ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 
+// Direct test endpoint for categories (without throttle middleware for debugging)
+Route::get('/telegram/test-categories', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'categories']);
+
 // Debug endpoint to check Telegram bot configuration
 Route::get('/telegram/debug', function () {
     $token = config('telegram.bot_token', env('TELEGRAM_BOT_TOKEN', ''));
