@@ -253,6 +253,18 @@ class TelegramWebhookController extends Controller
             return;
         }
 
+        // Locations list callback
+        if ($data === 'locations_list') {
+            $this->cmdLocations($user, $chatId);
+            return;
+        }
+
+        // Help menu callback
+        if ($data === 'help_menu') {
+            $this->cmdHelp($user, $chatId);
+            return;
+        }
+
         // Help callback
         if (str_starts_with($data, 'help_')) {
             $this->handleHelpCallback($user, $data, $chatId);
@@ -352,24 +364,23 @@ class TelegramWebhookController extends Controller
         $message = "🎉 *Welcome to NKH Restaurant!*\n";
         $message .= "━━━━━━━━━━━━━━━━━━━━━\n\n";
         $message .= "🍽️ *Your favorite food, delivered to you!*\n\n";
-        $message .= "As a guest, you can:\n";
-        $message .= "• 🍔 Browse our menu\n";
-        $message .= "• 🛒 Add items to cart\n";
-        $message .= "• 📍 Find nearby locations\n\n";
+        $message .= "What would you like to do?";
 
-        $message .= "━━━━━━━━━━━━━━━━━━━━━\n\n";
-        $message .= "🎁 *Unlock exclusive features by linking your account:*\n\n";
-        $message .= "│ 📦 *Track orders* - Never miss a delivery\n";
-        $message .= "│ 🎁 *Earn points* - Get rewards on every order\n";
-        $message .= "│ 🔔 *Order updates* - Real-time notifications\n";
-        $message .= "│ 💰 *Exclusive deals* - Member-only specials\n\n";
+        // Simple inline keyboard with clear actions
+        $keyboard = [
+            [
+                ['text' => '🍔 Order Now', 'callback_data' => 'menu_browse'],
+            ],
+            [
+                ['text' => '📍 Locations', 'callback_data' => 'locations_list'],
+                ['text' => '❓ Help', 'callback_data' => 'help_menu'],
+            ],
+            [
+                ['text' => '🔐 Link Account', 'callback_data' => 'auth_phone_request'],
+            ],
+        ];
 
-        $message .= "━━━━━━━━━━━━━━━━━━━━━\n\n";
-
-        $keyboard = TelegramKeyboardBuilder::welcomeKeyboard();
-
-        // welcomeKeyboard() returns a full keyboard structure, use sendMessage directly
-        $this->botService->sendMessage($chatId, $message, null, $keyboard);
+        $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
     }
 
     /**
