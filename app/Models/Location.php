@@ -53,6 +53,20 @@ class Location extends Model
         return $query->where('is_active', true);
     }
 
+    /**
+     * Get the full address string.
+     * Combines address_line1 and address_line2 into a single address.
+     */
+    public function getAddressAttribute(): string
+    {
+        $parts = array_filter([
+            $this->address_line1,
+            $this->address_line2,
+        ]);
+        
+        return implode(', ', $parts);
+    }
+
     public function settings()
     {
         return $this->hasMany(Setting::class);
