@@ -24,7 +24,7 @@ class TelegramMenuController extends Controller
                     'id' => $category->id,
                     'name' => $category->name,
                     'slug' => $category->slug,
-                    'image' => $category->image_path,
+                    'image' => $category->image,
                 ];
             });
 

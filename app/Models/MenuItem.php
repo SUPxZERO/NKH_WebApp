@@ -106,6 +106,14 @@ class MenuItem extends Model
         'dietary_tags' => 'array',
     ];
 
+    /**
+     * Scope to filter only active menu items
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     public function location()
     {
         return $this->belongsTo(Location::class);
