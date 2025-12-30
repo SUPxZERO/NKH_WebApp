@@ -45,6 +45,14 @@ class Location extends Model
         'accepts_delivery' => 'boolean',
     ];
 
+    /**
+     * Scope to filter only active locations
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     public function settings()
     {
         return $this->hasMany(Setting::class);
