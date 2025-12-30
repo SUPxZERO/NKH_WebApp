@@ -70,7 +70,10 @@ export default function Cart() {
       return;
     }
 
-    if (!isAuthenticated) {
+    // Check if running in Telegram Web App
+    const isTelegram = (window as any).Telegram?.WebApp?.initData;
+
+    if (!isAuthenticated && !isTelegram) {
       localStorage.setItem('pendingCheckout', 'true');
       localStorage.setItem('checkoutRedirectUrl', '/checkout');
       toastInfo('Please sign in to complete your order');

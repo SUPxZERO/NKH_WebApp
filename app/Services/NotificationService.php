@@ -118,15 +118,19 @@ class NotificationService
     ): ?UserNotification {
         $user = $order->user ?? $order->customer?->user;
         
-        if (!$user) {
-            Log::warning("Cannot send order notification - no user found for order {$order->id}");
+        // Log warning but continue if we have a customer (for Telegram/Guest support)
+        if (!$user && !$order->customer) {
+            Log::warning("Cannot send order notification - no user or customer found for order {$order->id}");
             return null;
         }
 
         // Monitor Telegram Notification Attempt
         try {
-            if ($user->customer) {
-                $telegramUser = $user->customer->telegramUser;
+            // Check for TelegramUser via User->Customer OR directly via Order->Customer
+            $customer = $order->customer ?? $user?->customer;
+            
+            if ($customer) {
+                $telegramUser = $customer->telegramUser;
                 if ($telegramUser) {
                     Log::info("🤖 Found TelegramUser for Order #{$order->id}: {$telegramUser->id} (TelegramID: {$telegramUser->telegram_id})");
                     
@@ -139,14 +143,17 @@ class NotificationService
                     
                     Log::info("📤 Telegram notification send result: " . ($sent ? 'Success' : 'Failed'));
                 } else {
-                    Log::warning("⚠️ No TelegramUser linked for Customer #{$user->customer->id} (User #{$user->id})");
+                    Log::warning("⚠️ No TelegramUser linked for Customer #{$customer->id}");
                 }
-            } else {
-                Log::warning("⚠️ No Customer profile for User #{$user->id}");
             }
         } catch (\Exception $e) {
             Log::error("❌ Failed to send Telegram notification: " . $e->getMessage());
             Log::error($e->getTraceAsString());
+        }
+
+        // Only proceed with In-App/Broadcast if we have a registered User
+        if (!$user) {
+            return null; // Guest user only gets Telegram/Email (if implemented)
         }
 
         $data = $this->getOrderNotificationData($order, $event, $customMessage);

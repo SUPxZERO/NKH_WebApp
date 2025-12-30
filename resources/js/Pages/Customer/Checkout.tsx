@@ -63,6 +63,8 @@ export default function Checkout() {
       slot_time: cart.timeSlot?.slot_start_time,
       notes: cart.notes || undefined,
       payment_mode: selectedPaymentMode,
+      // Inject Telegram ID if available
+      telegram_id: (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id,
       order_items: cart.items.map(item => ({
         menu_item_id: item.menu_item_id,
         quantity: item.quantity,
@@ -187,11 +189,10 @@ export default function Checkout() {
                       <button
                         key={s.id}
                         onClick={() => cart.setTimeSlot(s)}
-                        className={`px-2 py-2 sm:px-3 sm:py-2.5 rounded-lg border text-xs sm:text-sm transition-all ${
-                          cart.timeSlot?.id === s.id
+                        className={`px-2 py-2 sm:px-3 sm:py-2.5 rounded-lg border text-xs sm:text-sm transition-all ${cart.timeSlot?.id === s.id
                             ? 'border-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-300'
                             : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
-                        }`}
+                          }`}
                       >
                         {s.label}
                       </button>
@@ -221,14 +222,13 @@ export default function Checkout() {
                         className={`
                           relative p-2.5 sm:p-4 rounded-lg border text-left
                           transition-all duration-200
-                          ${
-                            selectedPaymentMode === mode.code
-                              ? `
+                          ${selectedPaymentMode === mode.code
+                            ? `
                                 border-fuchsia-500
                                 bg-fuchsia-50 dark:bg-fuchsia-500/15
                                 text-fuchsia-700 dark:text-white
                               `
-                              : `
+                            : `
                                 border-gray-200 dark:border-white/10
                                 bg-white dark:bg-white/5
                                 text-gray-700 dark:text-gray-400

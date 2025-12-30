@@ -11,6 +11,8 @@ export interface OnlineOrderPayload {
   slot_date?: string;                  // New: dynamic time slot date (Y-m-d)
   slot_time?: string;                  // New: dynamic time slot time (H:i)
   notes?: string;
+  telegram_id?: number | string;       // Optional: for Telegram Mini App users
+  payment_mode?: string;               // Optional: payment mode
   order_items: Array<{                 // Backend expects order_items array
     menu_item_id: number;
     quantity: number;
