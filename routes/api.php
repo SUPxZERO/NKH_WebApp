@@ -546,6 +546,14 @@ Route::get('/telegram/debug', function () {
     } catch (\Throwable $e) {
         $methodTests['categories'] = 'ERROR: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine();
     }
+    
+    // Test if controller class can be loaded
+    try {
+        $controller = new \App\Http\Controllers\Api\Telegram\TelegramMenuController();
+        $methodTests['controller_load'] = 'OK';
+    } catch (\Throwable $e) {
+        $methodTests['controller_load'] = 'ERROR: ' . $e->getMessage();
+    }
 
     return response()->json([
         'token_configured' => $hasToken,
