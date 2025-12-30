@@ -529,10 +529,22 @@ Route::get('/telegram/debug', function () {
     
     // Test categories query (the problematic endpoint)
     try {
-        $cats = \App\Models\Category::active()->take(5)->get();
+        $cats = \App\Models\Category::active()
+            ->with('translations')
+            ->orderBy('display_order')
+            ->take(5)
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'image' => $category->image,
+                ];
+            });
         $methodTests['categories'] = 'OK (count: ' . $cats->count() . ')';
     } catch (\Throwable $e) {
-        $methodTests['categories'] = 'ERROR: ' . $e->getMessage();
+        $methodTests['categories'] = 'ERROR: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine();
     }
 
     return response()->json([
