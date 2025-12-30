@@ -126,12 +126,22 @@ class TelegramBotService
         array $buttons,
         ?string $parseMode = 'Markdown'
     ): ?array {
-        $keyboard = [
-            'inline_keyboard' => array_map(fn($row) => array_map(fn($btn) => [
-                'text' => $btn['text'],
-                'callback_data' => $btn['callback_data'] ?? $btn['url'] ?? '',
-            ], $row), $buttons),
-        ];
+        // Check if buttons are already formatted as a keyboard (has inline_keyboard key)
+        if (isset($buttons['inline_keyboard'])) {
+            $keyboard = $buttons;
+        } else {
+            // Manual construction for backward compatibility or simple arrays
+            $keyboard = [
+                'inline_keyboard' => array_map(fn($row) => array_map(fn($btn) => array_merge(
+                    ['text' => $btn['text']],
+                    isset($btn['url']) ? ['url' => $btn['url']] : [],
+                    isset($btn['callback_data']) ? ['callback_data' => $btn['callback_data']] : [],
+                    isset($btn['web_app']) ? ['web_app' => $btn['web_app']] : [],
+                    isset($btn['login_url']) ? ['login_url' => $btn['login_url']] : [],
+                    isset($btn['switch_inline_query']) ? ['switch_inline_query' => $btn['switch_inline_query']] : []
+                ), $row), $buttons),
+            ];
+        }
 
         return $this->sendMessage($chatId, $text, null, $keyboard, $parseMode);
     }
