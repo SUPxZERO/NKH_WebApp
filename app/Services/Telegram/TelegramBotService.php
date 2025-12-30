@@ -385,11 +385,35 @@ class TelegramBotService
 
     /**
      * Find or create Telegram user from update
+     *
+     * Accepts either:
+     * - Full update array with 'message' or 'callback_query' key
+     * - Direct message array with 'from' key
+     * - Callback query array with 'from' key
      */
     public function findOrCreateUser(array $update): TelegramUser
     {
-        $message = $update['message'] ?? $update['callback_query'] ?? [];
-        $from = $message['from'] ?? [];
+        // Check if this is a full update with message/callback_query keys
+        if (isset($update['message'])) {
+            $from = $update['message']['from'] ?? [];
+        } elseif (isset($update['callback_query'])) {
+            $from = $update['callback_query']['from'] ?? [];
+        } elseif (isset($update['from'])) {
+            // Direct message or callback_query passed (already extracted)
+            $from = $update['from'];
+        } else {
+            // Fallback: assume $update IS the from data
+            $from = $update;
+        }
+
+        if (empty($from) || !isset($from['id'])) {
+            Log::error('Telegram: Cannot extract user from update', [
+                'update_keys' => array_keys($update),
+                'has_from' => isset($update['from']),
+                'has_message' => isset($update['message']),
+            ]);
+            throw new \InvalidArgumentException('Cannot extract Telegram user from update data');
+        }
 
         return TelegramUser::findOrCreate($from);
     }

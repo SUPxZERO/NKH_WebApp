@@ -245,7 +245,13 @@ class TelegramUser extends Model
      */
     public static function findOrCreate(array $telegramData): self
     {
-        $telegramId = $telegramData['id'];
+        if (!isset($telegramData['id'])) {
+            throw new \InvalidArgumentException(
+                'Telegram user data must contain "id" key. Received keys: ' . implode(', ', array_keys($telegramData))
+            );
+        }
+
+        $telegramId = (int) $telegramData['id'];
 
         $user = static::findByTelegramId($telegramId);
 
