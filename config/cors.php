@@ -6,6 +6,7 @@ return [
     // Explicitly allow both common dev hosts to support credentials
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://127.0.0.1:5173'),
+        env('APP_URL'), // Allow the main APP_URL (e.g. Tunnel URL)
         'http://127.0.0.1:5173',
         'http://localhost:5173',
         'http://localhost:8000',
