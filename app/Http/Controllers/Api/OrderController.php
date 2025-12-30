@@ -627,6 +627,13 @@ class OrderController extends Controller
                 if ($order->customer_id) {
                     $this->loyaltyService->awardPoints($order);
                 }
+
+                // Notify Customer of Payment
+                try {
+                    app(NotificationService::class)->sendOrderNotification($order, 'paid');
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to send order paid notification: ' . $e->getMessage());
+                }
             });
         } elseif ($newStatus === 'unpaid') {
             if ($order->isUnpaid()) {

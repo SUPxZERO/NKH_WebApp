@@ -347,6 +347,7 @@ class TelegramBotService
             'delivered' => "📦 *Delivered!*\n\nYour order `{$orderNumber}` has been delivered. Enjoy your meal!",
             'completed' => "⭐ *Order Complete*\n\nThank you for your order `{$orderNumber}`! We hope you enjoyed it.",
             'cancelled' => "🚫 *Order Cancelled*\n\nYour order `{$orderNumber}` has been cancelled.",
+            'paid' => "💸 *Payment Received*\n\nYour payment for order `{$orderNumber}` has been confirmed.",
         ];
 
         $message = $templates[$status] ?? "📋 Order `{$orderNumber}` status: {$status}";
@@ -367,6 +368,17 @@ class TelegramBotService
     public function formatOrderDetails(Order $order): string
     {
         $details = "\n\n─────────────────────";
+        
+        // Add Items List
+        $details .= "\n🛒 *Items:*";
+        foreach ($order->items as $item) {
+            $itemName = $item->menuItem?->name ?? 'Unknown Item';
+            // Escape special chars in name
+            $itemName = self::escapeMarkdown($itemName);
+            $price = number_format($item->total_price, 2);
+            $details .= "\n{$item->quantity}x {$itemName} (\${$price})";
+        }
+        $details .= "\n─────────────────────";
 
         // Order type and location
         if ($order->order_type === 'delivery') {
@@ -381,11 +393,11 @@ class TelegramBotService
         }
 
         // Amount
-        $details .= "\n💵 Total: $" . number_format($order->total_amount, 2);
+        $details .= "\n💰 *TOTAL: $" . number_format($order->total_amount, 2) . "*";
 
         // Payment status
         if ($order->payment_status === 'paid') {
-            $details .= " (Paid)";
+            $details .= " (Paid ✅)";
         } elseif ($order->payment_mode === 'pay_on_pickup' || $order->payment_mode === 'pay_on_delivery') {
             $details .= " (Pay on " . ($order->order_type === 'delivery' ? 'Delivery' : 'Pickup') . ")";
         }

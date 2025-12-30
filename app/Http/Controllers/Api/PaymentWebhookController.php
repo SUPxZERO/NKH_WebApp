@@ -152,7 +152,18 @@ class PaymentWebhookController extends Controller
                 $invoice = $payment->invoice()->lockForUpdate()->firstOrFail();
                 $invoice->loadMissing('payments', 'order');
 
+                $invoice->loadMissing('payments', 'order');
+
                 $invoiceService->reconcileStatus($invoice);
+
+                // Check if order is fully paid and notify
+                if ($invoice->order && $invoice->order->payment_status === 'paid') {
+                    try {
+                        app(\App\Services\NotificationService::class)->sendOrderNotification($invoice->order, 'paid');
+                    } catch (\Exception $e) {
+                         Log::warning('Failed to send order paid notification via webhook: ' . $e->getMessage());
+                    }
+                }
             });
 
             return response()->json(['ok' => true]);

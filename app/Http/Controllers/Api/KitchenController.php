@@ -108,6 +108,13 @@ class KitchenController extends Controller
             // Log transition
             Log::info("Order #{$order->order_number} status updated from {$oldStatus} to {$newStatus} by Kitchen");
 
+            // Notify Customer (Telegram etc)
+            try {
+                app(\App\Services\NotificationService::class)->sendOrderNotification($order, $newStatus);
+            } catch (\Exception $e) {
+                Log::warning("Failed to send notification via KitchenController: " . $e->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Order status updated successfully',

@@ -123,14 +123,30 @@ class NotificationService
             return null;
         }
 
-        // Trigger Telegram Notification
+        // Monitor Telegram Notification Attempt
         try {
-            if ($user->customer && $user->customer->telegramUser) {
-                $botService = app(\App\Services\Telegram\TelegramBotService::class);
-                $botService->sendOrderNotification($user->customer->telegramUser, $order, $event, $customMessage);
+            if ($user->customer) {
+                $telegramUser = $user->customer->telegramUser;
+                if ($telegramUser) {
+                    Log::info("🤖 Found TelegramUser for Order #{$order->id}: {$telegramUser->id} (TelegramID: {$telegramUser->telegram_id})");
+                    
+                    if (!$telegramUser->notifications_enabled) {
+                        Log::warning("⚠️ Telegram notifications disabled for user {$telegramUser->id}");
+                    }
+                    
+                    $botService = app(\App\Services\Telegram\TelegramBotService::class);
+                    $sent = $botService->sendOrderNotification($telegramUser, $order, $event, $customMessage);
+                    
+                    Log::info("📤 Telegram notification send result: " . ($sent ? 'Success' : 'Failed'));
+                } else {
+                    Log::warning("⚠️ No TelegramUser linked for Customer #{$user->customer->id} (User #{$user->id})");
+                }
+            } else {
+                Log::warning("⚠️ No Customer profile for User #{$user->id}");
             }
         } catch (\Exception $e) {
-            Log::error("Failed to send Telegram notification: " . $e->getMessage());
+            Log::error("❌ Failed to send Telegram notification: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
         }
 
         $data = $this->getOrderNotificationData($order, $event, $customMessage);
@@ -198,6 +214,11 @@ class NotificationService
             'cancelled' => [
                 'title' => 'Order Cancelled',
                 'message' => $customMessage ?? "Your order {$orderNumber} has been cancelled.",
+                'action_url' => "/customer/orders",
+            ],
+            'paid' => [
+                'title' => 'Payment Successful ✅',
+                'message' => "We have received your payment for order {$orderNumber}.",
                 'action_url' => "/customer/orders",
             ],
         ];
