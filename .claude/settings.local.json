@@ -36,7 +36,9 @@
       "Bash(start /B ngrok http 8000 2)",
       "Bash(1 sleep 10 cat /tmp/ngrok_tunnel.log)",
       "Bash(./ngrok config:*)",
-      "Bash(./ngrok http:*)"
+      "Bash(./ngrok http:*)",
+      "WebFetch(domain:nkh-webapp-1.onrender.com)",
+      "WebFetch(domain:api.telegram.org)"
     ]
   }
 }
