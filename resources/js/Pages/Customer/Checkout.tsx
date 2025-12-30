@@ -190,8 +190,8 @@ export default function Checkout() {
                         key={s.id}
                         onClick={() => cart.setTimeSlot(s)}
                         className={`px-2 py-2 sm:px-3 sm:py-2.5 rounded-lg border text-xs sm:text-sm transition-all ${cart.timeSlot?.id === s.id
-                            ? 'border-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-300'
-                            : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                          ? 'border-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-300'
+                          : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
                           }`}
                       >
                         {s.label}
