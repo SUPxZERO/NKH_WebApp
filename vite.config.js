@@ -17,6 +17,10 @@ export default defineConfig({
         },
     },
     server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: process.env.VITE_APP_URL ? new URL(process.env.VITE_APP_URL).hostname : 'localhost',
+        },
         // Proxy API requests to Laravel backend during development
         proxy: {
             '/api': {
@@ -31,7 +35,7 @@ export default defineConfig({
                         if (setCookie) {
                             proxyRes.headers['set-cookie'] = setCookie.map(cookie =>
                                 cookie.replace(/;\s*Domain=[^;]*/gi, '')
-                                      .replace(/;\s*SameSite=Lax/gi, '; SameSite=Lax')
+                                    .replace(/;\s*SameSite=Lax/gi, '; SameSite=Lax')
                             );
                         }
                     });
@@ -47,7 +51,7 @@ export default defineConfig({
                         if (setCookie) {
                             proxyRes.headers['set-cookie'] = setCookie.map(cookie =>
                                 cookie.replace(/;\s*Domain=[^;]*/gi, '')
-                                      .replace(/;\s*SameSite=Lax/gi, '; SameSite=Lax')
+                                    .replace(/;\s*SameSite=Lax/gi, '; SameSite=Lax')
                             );
                         }
                     });

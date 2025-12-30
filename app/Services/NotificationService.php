@@ -123,6 +123,16 @@ class NotificationService
             return null;
         }
 
+        // Trigger Telegram Notification
+        try {
+            if ($user->customer && $user->customer->telegramUser) {
+                $botService = app(\App\Services\Telegram\TelegramBotService::class);
+                $botService->sendOrderNotification($user->customer->telegramUser, $order, $event, $customMessage);
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to send Telegram notification: " . $e->getMessage());
+        }
+
         $data = $this->getOrderNotificationData($order, $event, $customMessage);
         
         $notifications = $this->send(
