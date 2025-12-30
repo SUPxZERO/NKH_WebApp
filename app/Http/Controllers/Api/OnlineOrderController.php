@@ -209,10 +209,41 @@ class OnlineOrderController extends Controller
             \Log::info('👤 User identified via telegram_id:', ['telegram_id' => $telegramId]);
             
             $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
-            if ($telegramUser && $telegramUser->customer) {
-                $customer = $telegramUser->customer;
+            
+            if (!$telegramUser) {
+                 // First time user from Telegram - Create TelegramUser profile
+                 try {
+                     // We might not have full details yet, just ID
+                     $telegramUser = \App\Models\TelegramUser::create([
+                         'telegram_id' => $telegramId,
+                         'is_active' => true,
+                         'notifications_enabled' => true,
+                     ]);
+                     \Log::info('🆕 Created new TelegramUser profile', ['id' => $telegramUser->id]);
+                 } catch (\Exception $e) {
+                     \Log::error('failed to create telegram user', ['error' => $e->getMessage()]);
+                 }
+            }
+
+            if ($telegramUser) {
+                if ($telegramUser->customer) {
+                    $customer = $telegramUser->customer;
+                } else {
+                    // Create a Guest Customer profile linked to this Telegram User
+                    \Log::info('🆕 Creating Guest Customer for Telegram User', ['telegram_user_id' => $telegramUser->id]);
+                    
+                    $customer = Customer::create([
+                        'user_id' => null, // Guest
+                        'name' => $telegramUser->first_name ? ($telegramUser->first_name . ' ' . $telegramUser->last_name) : 'Telegram Guest',
+                        'customer_code' => 'TEL-' . substr(md5((string)$telegramId), 0, 8),
+                    ]);
+                    
+                    // Link them
+                    $telegramUser->update(['customer_id' => $customer->id]);
+                    \Log::info('🔗 Linked Telegram User to new Guest Customer', ['customer_id' => $customer->id]);
+                }
             } else {
-                 \Log::warning('⚠️ Telegram User found but no customer linked, or user not found.', ['telegram_id' => $telegramId]);
+                 \Log::warning('⚠️ Failed to resolve or create Telegram User.', ['telegram_id' => $telegramId]);
             }
         } 
         
