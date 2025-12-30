@@ -492,8 +492,9 @@ class TelegramWebhookController extends Controller
         $message = "📍 *Our Locations*\n\n";
 
         foreach ($locations as $location) {
+            $address = trim(($location->address_line1 ?? '') . ($location->address_line2 ? ', ' . $location->address_line2 : ''));
             $message .= "*{$location->name}*\n";
-            $message .= "📌 {$location->address}\n";
+            $message .= "📌 {$address}\n";
             $message .= "📞 {$location->phone}\n\n";
         }
 
