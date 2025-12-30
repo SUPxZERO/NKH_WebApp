@@ -118,7 +118,7 @@ class TelegramMenuController extends Controller
                 return [
                     'id' => $location->id,
                     'name' => $location->name,
-                    'address' => $location->address,
+                    'address' => trim(($location->address_line1 ?? '') . ($location->address_line2 ? ', ' . $location->address_line2 : '')),
                     'phone' => $location->phone,
                     'latitude' => $location->latitude,
                     'longitude' => $location->longitude,

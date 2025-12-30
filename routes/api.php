@@ -526,6 +526,14 @@ Route::get('/telegram/debug', function () {
     } catch (\Throwable $e) {
         $methodTests['welcomeKeyboard'] = 'ERROR: ' . $e->getMessage();
     }
+    
+    // Test categories query (the problematic endpoint)
+    try {
+        $cats = \App\Models\Category::active()->take(5)->get();
+        $methodTests['categories'] = 'OK (count: ' . $cats->count() . ')';
+    } catch (\Throwable $e) {
+        $methodTests['categories'] = 'ERROR: ' . $e->getMessage();
+    }
 
     return response()->json([
         'token_configured' => $hasToken,
