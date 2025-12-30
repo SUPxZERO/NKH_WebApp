@@ -506,6 +506,86 @@ Route::get('/telegram/debug', function () {
     ]);
 });
 
+// TEST WEBHOOK ROUTE - Simulates /start command to debug errors
+Route::get('/telegram/debug/test-start', function () {
+    try {
+        $botService = app(\App\Services\Telegram\TelegramBotService::class);
+
+        // Simulate a user sending /start
+        $testData = [
+            'id' => 123456789,
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'username' => 'testuser',
+            'language_code' => 'en',
+        ];
+
+        // Try to create/find user
+        $user = \App\Models\TelegramUser::findOrCreate($testData);
+
+        // Check if user has linked account
+        $hasLinked = $user->hasLinkedAccount();
+
+        // Test keyboard builder methods that might be missing
+        $tests = [];
+
+        // Test orderType method
+        try {
+            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::orderType();
+            $tests['orderType'] = 'EXISTS';
+        } catch (\Error $e) {
+            $tests['orderType'] = 'MISSING: ' . $e->getMessage();
+        }
+
+        // Test locations method
+        try {
+            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::locations(collect([]));
+            $tests['locations'] = 'EXISTS';
+        } catch (\Error $e) {
+            $tests['locations'] = 'MISSING: ' . $e->getMessage();
+        }
+
+        // Test timeSlots method
+        try {
+            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::timeSlots(collect([]), now()->format('Y-m-d'), false);
+            $tests['timeSlots'] = 'EXISTS';
+        } catch (\Error $e) {
+            $tests['timeSlots'] = 'MISSING: ' . $e->getMessage();
+        }
+
+        // Test paymentMethods method
+        try {
+            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::paymentMethods(false);
+            $tests['paymentMethods'] = 'EXISTS';
+        } catch (\Error $e) {
+            $tests['paymentMethods'] = 'MISSING: ' . $e->getMessage();
+        }
+
+        // Test welcomeKeyboard method
+        try {
+            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::welcomeKeyboard();
+            $tests['welcomeKeyboard'] = 'EXISTS';
+        } catch (\Error $e) {
+            $tests['welcomeKeyboard'] = 'MISSING: ' . $e->getMessage();
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'user_created' => $user->id,
+            'has_linked_account' => $hasLinked,
+            'method_tests' => $tests,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => array_slice($e->getTrace(), 0, 5),
+        ], 500);
+    }
+});
+
 // EMERGENCY MIGRATION ROUTE - Creates telegram tables directly
 Route::get('/telegram/debug/migrate', function () {
     $results = [];

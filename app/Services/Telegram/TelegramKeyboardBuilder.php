@@ -393,6 +393,14 @@ class TelegramKeyboardBuilder
     }
 
     /**
+     * Alias for orderTypeSelection (backward compatibility)
+     */
+    public static function orderType(): array
+    {
+        return self::orderTypeSelection();
+    }
+
+    /**
      * Build location selection with details
      */
     public static function locationsWithDetails(Collection $locations): array
@@ -421,6 +429,14 @@ class TelegramKeyboardBuilder
         ];
 
         return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Alias for locationsWithDetails (backward compatibility)
+     */
+    public static function locations(Collection $locations): array
+    {
+        return self::locationsWithDetails($locations);
     }
 
     /**
@@ -502,6 +518,18 @@ class TelegramKeyboardBuilder
     }
 
     /**
+     * Alias for timeSlotsWithDates (backward compatibility)
+     */
+    public static function timeSlots(
+        Collection $slots,
+        string $dateStr,
+        bool $showToday = true,
+        bool $showTomorrow = false
+    ): array {
+        return self::timeSlotsWithDates($slots, $dateStr, $showToday, $showTomorrow);
+    }
+
+    /**
      * Build time slot date navigation
      */
     public static function timeSlotDateNavigation(string $currentDate): array
@@ -537,6 +565,30 @@ class TelegramKeyboardBuilder
         $paymentText = '💵 Pay on ' . ($total > 0 ? 'Pickup/Delivery' : 'Arrival');
         $buttons[] = [
             ['text' => $paymentText, 'callback_data' => 'payment_cash'],
+        ];
+
+        $buttons[] = [
+            ['text' => '◀️ Back', 'callback_data' => 'checkout_back'],
+        ];
+
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Alias for paymentMethodsWithBakong (backward compatibility)
+     */
+    public static function paymentMethods(bool $onlineAvailable = false): array
+    {
+        $buttons = [];
+
+        if ($onlineAvailable) {
+            $buttons[] = [
+                ['text' => '💳 Pay Online', 'callback_data' => 'payment_online'],
+            ];
+        }
+
+        $buttons[] = [
+            ['text' => '💵 Pay on Pickup/Delivery', 'callback_data' => 'payment_cash'],
         ];
 
         $buttons[] = [
