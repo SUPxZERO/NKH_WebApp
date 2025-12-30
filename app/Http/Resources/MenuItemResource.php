@@ -19,12 +19,15 @@ class MenuItemResource extends JsonResource
 
             // If not absolute URL, use Storage::url() for files stored in public disk
             if (!str_starts_with($imagePath, 'http')) {
-                // Check if it's a storage path (menu_images directory)
-                if (str_contains($imagePath, 'menu_images')) {
-                    $imagePath = Storage::url($imagePath);
-                } else {
-                    $imagePath = asset('storage/' . $imagePath);
-                }
+                // Ensure we use the configured APP_URL (Tunnel URL)
+                $baseUrl = config('app.url');
+                
+                // Clean up path
+                $imagePath = ltrim($imagePath, '/');
+                $imagePath = str_replace('storage/', '', $imagePath);
+                
+                // Construct full URL
+                $imagePath = "{$baseUrl}/storage/{$imagePath}";
             }
 
             // Check if file exists, if not use placeholder

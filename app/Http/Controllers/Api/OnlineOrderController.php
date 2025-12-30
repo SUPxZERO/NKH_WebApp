@@ -203,8 +203,21 @@ class OnlineOrderController extends Controller
             \Log::info('👤 User is authenticated:', ['id' => $request->user()->id]);
             // Authenticated: Get customer from user relationship
             $customer = $request->user()->customer;
-        } else {
-            \Log::warning('⚠️ No authenticated user found. Attempting fallback.');
+        } elseif ($request->filled('telegram_id')) {
+            // Check if telegram_id is provided (e.g. from Mini App)
+            $telegramId = $request->input('telegram_id');
+            \Log::info('👤 User identified via telegram_id:', ['telegram_id' => $telegramId]);
+            
+            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
+            if ($telegramUser && $telegramUser->customer) {
+                $customer = $telegramUser->customer;
+            } else {
+                 \Log::warning('⚠️ Telegram User found but no customer linked, or user not found.', ['telegram_id' => $telegramId]);
+            }
+        } 
+        
+        if (!$customer) {
+            \Log::warning('⚠️ No authenticated user or valid telegram_id found. Attempting fallback.');
             // DEVELOPMENT ONLY: Fallback to first customer or specific ID
             // TODO: Remove this in production and enable auth middleware
             // Try to get customer ID from request (for testing)
