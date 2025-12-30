@@ -5,12 +5,11 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 // - Retries once on 419 (CSRF token mismatch) after refreshing the cookie
 
 // In development with Vite proxy, use relative URLs so requests go through the proxy
-// In production, use the full backend URL
+// In production, use the full backend URL - for Inertia monolith, this is also relative
 const isDev = import.meta.env.DEV;
-const BACKEND_BASE = isDev ? '' : ((import.meta.env.VITE_API_BASE_URL as string) || '');
-const API_BASE_URL = BACKEND_BASE
-  ? `${BACKEND_BASE.replace(/\/$/, '')}/api/`
-  : '/api/';
+// Always use relative paths for Inertia/Monolith setup to support Tunnels/different domains automatically
+const BACKEND_BASE = '';
+const API_BASE_URL = '/api/';
 
 function createClient(): AxiosInstance {
   const instance = axios.create({
