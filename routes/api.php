@@ -207,7 +207,8 @@ Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup'])
 
 
 // Poll Helper for Smart Polling
-Route::get('/poll-helper/sync-state', [\App\Http\Controllers\Api\PollHelperController::class, 'syncState'])
+Route::get('/poll-helper/sync-state', [\App\Http\Controllers\Api\PollHelperController::cl
+ass, 'syncState'])
     ->middleware('auth:sanctum');
 
 // Sprint 1: Suppliers & Units (CRUD accessible to all for now)
@@ -721,7 +722,7 @@ Route::get('/telegram/debug/migrate', function () {
 // TELEGRAM BOT API ROUTES (For bot to call)
 // ============================================================================
 Route::prefix('telegram')
-    ->middleware(['throttle:api']) // Rate limiting
+    // Note: throttle:api removed - was causing 500 errors on production (rate limiter config issue)
     ->group(function () {
 
     // Public endpoints for menu browsing
