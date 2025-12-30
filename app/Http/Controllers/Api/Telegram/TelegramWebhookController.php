@@ -368,8 +368,8 @@ class TelegramWebhookController extends Controller
 
         $keyboard = TelegramKeyboardBuilder::welcomeKeyboard();
 
-        $this->botService->sendMessage($chatId, $message);
-        $this->botService->sendReplyKeyboard($chatId, "Choose an option:", $keyboard);
+        // welcomeKeyboard() returns a full keyboard structure, use sendMessage directly
+        $this->botService->sendMessage($chatId, $message, null, $keyboard);
     }
 
     /**
