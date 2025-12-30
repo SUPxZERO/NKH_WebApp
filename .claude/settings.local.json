@@ -38,7 +38,8 @@
       "Bash(./ngrok config:*)",
       "Bash(./ngrok http:*)",
       "WebFetch(domain:nkh-webapp-1.onrender.com)",
-      "WebFetch(domain:api.telegram.org)"
+      "WebFetch(domain:api.telegram.org)",
+      "Bash(composer dump-autoload:*)"
     ]
   }
 }

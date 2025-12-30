@@ -207,8 +207,7 @@ Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup'])
 
 
 // Poll Helper for Smart Polling
-Route::get('/poll-helper/sync-state', [\App\Http\Controllers\Api\PollHelperController::cl
-ass, 'syncState'])
+Route::get('/poll-helper/sync-state', [\App\Http\Controllers\Api\PollHelperController::class, 'syncState'])
     ->middleware('auth:sanctum');
 
 // Sprint 1: Suppliers & Units (CRUD accessible to all for now)
