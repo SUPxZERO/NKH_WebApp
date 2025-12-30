@@ -506,32 +506,71 @@ Route::get('/telegram/debug', function () {
     ]);
 });
 
-// EMERGENCY MIGRATION ROUTE (Since Shell is not available)
+// EMERGENCY MIGRATION ROUTE - Creates telegram tables directly
 Route::get('/telegram/debug/migrate', function () {
+    $results = [];
+
     try {
         // Reset any stuck transactions first
         \Illuminate\Support\Facades\DB::reconnect();
+        $results['reconnect'] = 'OK';
 
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        // Check if telegram_users table exists
+        if (!\Illuminate\Support\Facades\Schema::hasTable('telegram_users')) {
+            \Illuminate\Support\Facades\Schema::create('telegram_users', function ($table) {
+                $table->id();
+                $table->unsignedBigInteger('customer_id')->nullable();
+                $table->bigInteger('telegram_id')->unique();
+                $table->string('telegram_username', 100)->nullable();
+                $table->string('first_name', 100)->nullable();
+                $table->string('last_name', 100)->nullable();
+                $table->string('language_code', 10)->default('en');
+                $table->string('conversation_state', 50)->default('none');
+                $table->json('conversation_data')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->boolean('notifications_enabled')->default(true);
+                $table->timestamp('last_interaction_at')->nullable();
+                $table->timestamps();
+                $table->index(['is_active', 'notifications_enabled']);
+                $table->index('customer_id');
+                $table->index('conversation_state');
+            });
+            $results['telegram_users'] = 'CREATED';
+        } else {
+            $results['telegram_users'] = 'EXISTS';
+        }
+
+        // Check if telegram_order_notifications table exists
+        if (!\Illuminate\Support\Facades\Schema::hasTable('telegram_order_notifications')) {
+            \Illuminate\Support\Facades\Schema::create('telegram_order_notifications', function ($table) {
+                $table->id();
+                $table->unsignedBigInteger('order_id');
+                $table->unsignedBigInteger('telegram_user_id');
+                $table->string('status', 50);
+                $table->text('message')->nullable();
+                $table->boolean('sent')->default(false);
+                $table->timestamp('sent_at')->nullable();
+                $table->timestamps();
+                $table->index(['order_id', 'telegram_user_id']);
+                $table->index('sent');
+            });
+            $results['telegram_order_notifications'] = 'CREATED';
+        } else {
+            $results['telegram_order_notifications'] = 'EXISTS';
+        }
+
         return response()->json([
             'status' => 'success',
-            'output' => \Illuminate\Support\Facades\Artisan::output(),
+            'results' => $results,
         ]);
     } catch (\Exception $e) {
-        // Try to reconnect and get more info
-        try {
-            \Illuminate\Support\Facades\DB::reconnect();
-        } catch (\Exception $reconnectError) {
-            // ignore
-        }
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage(),
+            'results' => $results,
         ], 500);
     }
 });
-//s d
-
 
 // ============================================================================
 // TELEGRAM BOT API ROUTES (For bot to call)
