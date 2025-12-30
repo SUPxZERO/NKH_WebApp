@@ -494,6 +494,39 @@ Route::get('/telegram/debug', function () {
         $dbStatus = 'FAILED: ' . $e->getMessage();
     }
     
+    // Test keyboard builder methods
+    $methodTests = [];
+    try {
+        \App\Services\Telegram\TelegramKeyboardBuilder::orderType();
+        $methodTests['orderType'] = 'OK';
+    } catch (\Throwable $e) {
+        $methodTests['orderType'] = 'ERROR: ' . $e->getMessage();
+    }
+    try {
+        \App\Services\Telegram\TelegramKeyboardBuilder::locations(collect([]));
+        $methodTests['locations'] = 'OK';
+    } catch (\Throwable $e) {
+        $methodTests['locations'] = 'ERROR: ' . $e->getMessage();
+    }
+    try {
+        \App\Services\Telegram\TelegramKeyboardBuilder::timeSlots(collect([]), now()->format('Y-m-d'), false);
+        $methodTests['timeSlots'] = 'OK';
+    } catch (\Throwable $e) {
+        $methodTests['timeSlots'] = 'ERROR: ' . $e->getMessage();
+    }
+    try {
+        \App\Services\Telegram\TelegramKeyboardBuilder::paymentMethods(false);
+        $methodTests['paymentMethods'] = 'OK';
+    } catch (\Throwable $e) {
+        $methodTests['paymentMethods'] = 'ERROR: ' . $e->getMessage();
+    }
+    try {
+        \App\Services\Telegram\TelegramKeyboardBuilder::welcomeKeyboard();
+        $methodTests['welcomeKeyboard'] = 'OK';
+    } catch (\Throwable $e) {
+        $methodTests['welcomeKeyboard'] = 'ERROR: ' . $e->getMessage();
+    }
+
     return response()->json([
         'token_configured' => $hasToken,
         'token_preview' => $tokenPreview,
@@ -503,6 +536,7 @@ Route::get('/telegram/debug', function () {
         'webhook_url_env' => env('TELEGRAM_WEBHOOK_URL', 'NOT SET'),
         'database_status' => $dbStatus,
         'tables_exist' => $tables,
+        'method_tests' => $methodTests,
     ]);
 });
 
