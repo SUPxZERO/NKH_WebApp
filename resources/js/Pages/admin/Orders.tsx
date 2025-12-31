@@ -328,7 +328,7 @@ export default function Orders() {
 
   const getNextStatusLabel = (currentStatus: string): string => {
     const labels: Record<string, string> = {
-      pending: 'Accept',
+      pending: 'Receive',
       received: 'Start Prep',
       preparing: 'Ready',
       ready: 'Complete'
@@ -902,7 +902,7 @@ export default function Orders() {
                         onClick={() => { handleQuickStatus(selectedOrder.id, 'received'); setOpenView(false); }}
                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12"
                       >
-                        <CheckCircle className="w-5 h-5 mr-2" /> Accept Order
+                        <CheckCircle className="w-5 h-5 mr-2" /> Receive Order
                       </Button>
                     )}
                     {selectedOrder.status === 'received' && (
@@ -927,14 +927,6 @@ export default function Orders() {
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white h-12"
                       >
                         <CheckCircle className="w-5 h-5 mr-2" /> Complete Order
-                      </Button>
-                    )}
-                    {(selectedOrder as any).approval_status === 'pending' && (
-                      <Button
-                        onClick={() => { handleApprove(selectedOrder); setOpenView(false); }}
-                        className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white h-12"
-                      >
-                        <ThumbsUp className="w-5 h-5 mr-2" /> Approve Order
                       </Button>
                     )}
                   </div>

@@ -486,12 +486,39 @@ class OrderController extends Controller
     }
 
     // PUT /api/admin/orders/{order}/status
-    public function updateStatus(Request $request, Order $order): OrderResource
+    public function updateStatus(Request $request, Order $order): JsonResponse|OrderResource
     {
         $request->validate([
             'status' => 'required|in:pending,received,preparing,ready,completed,cancelled',
         ]);
         $newStatus = $request->status;
+
+        // Auto-approve online orders when transitioning from pending to received
+        if ($order->approval_status === Order::APPROVAL_STATUS_PENDING 
+            && in_array($order->order_type, ['delivery', 'pickup'])
+            && $newStatus === 'received') {
+            // Auto-approve the order
+            $userId = $request->user() ? $request->user()->id : null;
+            $order->update([
+                'approval_status' => Order::APPROVAL_STATUS_APPROVED,
+                'approved_by' => $userId,
+                'approved_at' => now(),
+            ]);
+            
+            // Send approval notification
+            try {
+                $notificationService = app(NotificationService::class);
+                $notificationService->sendOrderNotification($order, 'approved');
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send order approval notification: ' . $e->getMessage());
+            }
+            
+            \Log::info('Order auto-approved via status update', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'approved_by' => $userId,
+            ]);
+        }
 
         // Automatically serve all items if completing the order
         if ($newStatus === 'completed') {

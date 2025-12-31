@@ -71,6 +71,9 @@ export function useSmartPolling(modules: string[], interval = 10000) {
                     queryClient.invalidateQueries({ queryKey: ['pos.active-orders'] });
                     // Dashboard stats might benefit too
                     queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
+                    // Customer Orders
+                    queryClient.invalidateQueries({ queryKey: ['customer-orders'] });
+                    queryClient.invalidateQueries({ queryKey: ['customer-order'] });
                 }
 
                 // 2. Kitchen Display

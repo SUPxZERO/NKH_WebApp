@@ -212,6 +212,7 @@ export interface Order {
   location?: Location;
   table?: DiningTable;
   items?: OrderItem[];
+  approval_status?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface PaginatedResponse<T> {

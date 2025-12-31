@@ -24,7 +24,12 @@ const statusConfig = {
     delivered: { label: 'Delivered', color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400', icon: Package },
 };
 
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+
 export default function OrderDetails({ orderId }: OrderDetailsProps) {
+    // Poll for order updates every 3 seconds
+    useSmartPolling(['orders'], 3000);
+
     const { data, isLoading, error } = useQuery({
         queryKey: ['customer-order', orderId],
         queryFn: async () => {
@@ -67,21 +72,28 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
 
             <div className="max-w-5xl mx-auto space-y-6">
                 {/* Header & Back Button */}
-                <div className="flex items-center gap-4 mb-2">
-                    <Button variant="ghost" size="sm" onClick={() => window.location.href = '/customer/orders'}>
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back
-                    </Button>
-                    <div className="flex-1">
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
+                {/* Header & Back Button */}
+                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                    <div className="flex items-center justify-between w-full md:w-auto gap-4">
+                        <Button variant="ghost" size="sm" onClick={() => window.location.href = '/customer/orders'}>
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Back
+                        </Button>
+                        {/* Mobile-only Pay button could optionally go here, but let's keep it consistent at bottom/right */}
+                    </div>
+
+                    <div className="flex-1 w-full">
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent break-words">
                             Order #{order.order_number}
                         </h1>
                         <p className="text-sm text-gray-500">Placed on {new Date(order.ordered_at).toLocaleString()}</p>
                     </div>
+
                     {!order.is_paid && order.status !== 'cancelled' && (
                         <Button
                             variant="primary"
                             onClick={() => window.location.href = `/payment?order_id=${order.id}`}
+                            className="w-full md:w-auto"
                             leftIcon={<CreditCard className="w-4 h-4" />}
                         >
                             Pay Now
@@ -95,9 +107,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                         {/* Status Card */}
                         <Card className="border-l-4 border-l-fuchsia-500">
                             <CardContent className="pt-6">
-                                <div className="flex items-center justify-between mb-6">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className={cn("p-2 rounded-full", statusInfo.color)}>
+                                        <div className={cn("p-2 rounded-full shrink-0", statusInfo.color)}>
                                             <StatusIcon className="w-6 h-6" />
                                         </div>
                                         <div>
@@ -108,7 +120,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                         </div>
                                     </div>
                                     {order.pickup_time && (
-                                        <div className="text-right">
+                                        <div className="text-left sm:text-right pl-[3.25rem] sm:pl-0">
                                             <div className="text-xs text-gray-500 uppercase tracking-wider">Estimated {order.order_type === 'delivery' ? 'Arrival' : 'Pickup'}</div>
                                             <div className="font-semibold text-lg text-fuchsia-600">
                                                 {new Date(order.pickup_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -133,9 +145,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                 {order.items.map((item: any) => (
                                     <div key={item.id} className="flex gap-4 py-4 border-b border-gray-100 dark:border-gray-800 last:border-0">
                                         {item.image_path ? (
-                                            <img src={item.image_path} alt={item.name} className="w-20 h-20 object-cover rounded-xl" />
+                                            <img src={item.image_path} alt={item.name} className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-xl shrink-0" />
                                         ) : (
-                                            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-400">
+                                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-400 shrink-0">
                                                 <Package className="w-8 h-8" />
                                             </div>
                                         )}
