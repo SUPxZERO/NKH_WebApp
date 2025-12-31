@@ -247,12 +247,12 @@ export default function AddressManagerEnhanced({
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     <span className="font-medium text-white text-sm">{address.label}</span>
-                                                    {address.latitude && address.longitude && (
+                                                    {!!address.latitude && !!address.longitude && (
                                                         <span className="text-[10px] px-1 py-0.5 rounded bg-green-500/20 text-green-400">
                                                             GPS
                                                         </span>
                                                     )}
-                                                    {address.is_default && (
+                                                    {!!address.is_default && (
                                                         <span className="text-[10px] px-1 py-0.5 rounded bg-purple-500/20 text-purple-400 hidden sm:inline">
                                                             Default
                                                         </span>
@@ -263,7 +263,7 @@ export default function AddressManagerEnhanced({
                                                     {address.address_line_2 && `, ${address.address_line_2}`}
                                                 </p>
                                                 <p className="text-[10px] sm:text-xs text-gray-500">
-                                                    {address.city}, {address.province} {address.postal_code}
+                                                    {address.city}, {address.province}{address.postal_code && address.postal_code !== '0' ? ` ${address.postal_code}` : ''}
                                                 </p>
                                             </div>
                                         </div>

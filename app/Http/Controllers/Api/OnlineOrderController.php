@@ -287,12 +287,52 @@ class OnlineOrderController extends Controller
             $order = DB::transaction(function () use ($data, $customer, $request) {
                 \Log::info('🔄 Starting DB Transaction');
 
-                // Handle time slot - support both old (time_slot_id) and new (slot_date + slot_time) approaches
+                // Handle time slot - support old (time_slot_id), new (slot_date + slot_time), and ASAP (order_now) approaches
                 $slot = null;
                 $slotDate = null;
                 $slotTime = null;
+                $timeSlotService = app(\App\Services\TimeSlotService::class);
 
-                if (isset($data['time_slot_id'])) {
+                // Check if this is an "Order Now" request
+                $orderNow = $data['order_now'] ?? false;
+
+                if ($orderNow) {
+                    // ASAP ordering - auto-assign earliest available slot
+                    \Log::info('⚡ Order Now requested - finding earliest available slot');
+                    
+                    $earliestSlot = $timeSlotService->getEarliestAvailableSlot(
+                        $data['location_id'],
+                        $data['order_type']
+                    );
+                    
+                    if (!$earliestSlot) {
+                        \Log::error('❌ No available slots for ASAP ordering');
+                        abort(422, 'No available time slots found. The restaurant may be closed or fully booked.');
+                    }
+                    
+                    $slotDate = $earliestSlot['slot_date'];
+                    $slotTime = $earliestSlot['slot_time'];
+                    
+                    \Log::info('⚡ Auto-assigned slot:', ['date' => $slotDate, 'time' => $slotTime]);
+                    
+                    // Get or create the OrderTimeSlot record
+                    $slot = $timeSlotService->getOrCreateTimeSlot(
+                        $data['location_id'],
+                        $slotDate,
+                        $slotTime,
+                        $data['order_type'],
+                        10
+                    );
+                    
+                    // Lock for update
+                    $slot = OrderTimeSlot::where('id', $slot->id)->lockForUpdate()->first();
+                    
+                    if ($slot->current_orders >= $slot->max_orders) {
+                        \Log::error('❌ Slot became full');
+                        abort(409, 'The earliest time slot is now fully booked. Please try again.');
+                    }
+                    
+                } elseif (isset($data['time_slot_id'])) {
                     // Legacy approach: use existing OrderTimeSlot
                     $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
                     \Log::info('🕒 Time Slot locked (legacy):', ['id' => $slot->id]);
@@ -329,7 +369,6 @@ class OnlineOrderController extends Controller
                     ]);
                     
                     // Validate the time slot using TimeSlotService
-                    $timeSlotService = app(\App\Services\TimeSlotService::class);
                     $validation = $timeSlotService->validateTimeSlot(
                         $data['location_id'],
                         $slotDate,

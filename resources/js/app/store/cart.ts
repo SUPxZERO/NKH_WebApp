@@ -9,6 +9,7 @@ interface CartState {
   locationName?: string;
   addressId?: number; // for delivery
   selectedAddress?: CustomerAddress | null;
+  orderNow: boolean; // true = ASAP order, false = scheduled
   timeSlot?: TimeSlot | null;
   notes?: string;
 
@@ -20,10 +21,12 @@ interface CartState {
   setMode: (mode: OrderMode) => void;
   setLocation: (location_id: number, locationName?: string) => void;
   setAddress: (address?: CustomerAddress | null) => void;
+  setOrderNow: (value: boolean) => void;
   setTimeSlot: (slot?: TimeSlot | null) => void;
   setNotes: (notes?: string) => void;
 
   addItem: (item: Omit<OrderItem, 'unit_price' | 'name'> & { unit_price: number; name?: string }) => void;
+  setItems: (items: OrderItem[]) => void;
   updateQty: (menu_item_id: number, quantity: number) => void;
   removeItem: (menu_item_id: number) => void;
   clear: () => void;
@@ -42,6 +45,7 @@ export const useCartStore = create<CartState>()(
       location_id: undefined,
       locationName: undefined,
       selectedAddress: null,
+      orderNow: true, // Default to ASAP ordering
       timeSlot: null,
       notes: '',
 
@@ -65,7 +69,8 @@ export const useCartStore = create<CartState>()(
         get().recalc();
       },
 
-      setTimeSlot: (slot) => set({ timeSlot: slot ?? null }),
+      setOrderNow: (value) => set({ orderNow: value, timeSlot: value ? null : get().timeSlot }),
+      setTimeSlot: (slot) => set({ timeSlot: slot ?? null, orderNow: slot ? false : get().orderNow }),
       setNotes: (notes) => set({ notes: notes ?? '' }),
 
       addItem: (item) => {
@@ -76,6 +81,11 @@ export const useCartStore = create<CartState>()(
         } else {
           items.push({ ...item });
         }
+        set({ items });
+        get().recalc();
+      },
+
+      setItems: (items) => {
         set({ items });
         get().recalc();
       },
@@ -92,7 +102,7 @@ export const useCartStore = create<CartState>()(
         get().recalc();
       },
 
-      clear: () => set({ items: [], notes: '', timeSlot: null }),
+      clear: () => set({ items: [], notes: '', timeSlot: null, orderNow: true }),
 
       recalc: () => {
         const items = get().items;

@@ -612,6 +612,82 @@ class CustomerDashboardController extends Controller
     }
 
     /**
+     * Reorder items from a previous order
+     */
+    public function reorder(Request $request, $id)
+    {
+        \Log::info('Reorder requested', ['user_id' => $request->user()->id, 'order_id' => $id]);
+        
+        $user = $request->user();
+        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+
+        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+
+        $order = Order::where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->with(['items'])
+            ->firstOrFail();
+
+        \Log::info('Order found for reorder', ['items_count' => $order->items->count()]);
+
+        // Add items to cart
+        try {
+            DB::beginTransaction();
+            
+            $addedCount = 0;
+            foreach ($order->items as $item) {
+                \Log::info('Processing reorder item', ['item_id' => $item->id, 'menu_item_id' => $item->menu_item_id]);
+
+                // Optional: Check if menu item still exists
+                $menuItemExists = \App\Models\MenuItem::where('id', $item->menu_item_id)->exists();
+                if (!$menuItemExists) {
+                    \Log::warning('Skipping reorder item - Menu Item not found', ['menu_item_id' => $item->menu_item_id]);
+                    continue;
+                }
+
+                $cartItem = \App\Models\CartItem::where('customer_id', $customer->id)
+                    ->where('menu_item_id', $item->menu_item_id)
+                    ->first();
+                
+                if ($cartItem) {
+                    $cartItem->increment('quantity', $item->quantity);
+                    \Log::info('Incremented cart item', ['cart_item_id' => $cartItem->id]);
+                } else {
+                    $newCartItem = \App\Models\CartItem::create([
+                        'customer_id' => $customer->id,
+                        'menu_item_id' => $item->menu_item_id,
+                        'quantity' => $item->quantity,
+                        'notes' => $item->special_instructions,
+                        'customizations' => [], // Default to empty array
+                    ]);
+                    \Log::info('Created new cart item', ['cart_item_id' => $newCartItem->id]);
+                }
+                $addedCount++;
+            }
+            
+            DB::commit();
+            \Log::info('Reorder transaction completed', ['added_items' => $addedCount]);
+
+            if ($addedCount === 0) {
+                 return response()->json([
+                    'status' => 'warning',
+                    'message' => 'No valid items could be reordered (items may no longer be available).',
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Items added to cart',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Reorder failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Failed to reorder items: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Cancel an order (customer-initiated)
      */
     public function cancel(Request $request, $id)

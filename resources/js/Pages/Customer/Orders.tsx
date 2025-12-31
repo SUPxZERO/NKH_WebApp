@@ -7,7 +7,7 @@ import { apiGet, apiPost } from '@/app/libs/apiClient';
 import {
     Clock, Package, CheckCircle, XCircle, MapPin, Calendar, DollarSign,
     ChevronDown, Filter, AlertTriangle, ShoppingBag, Truck, Coffee,
-    ChevronLeft, ChevronRight, RefreshCcw, Receipt, Store, Hash
+    ChevronLeft, ChevronRight, RefreshCcw, Receipt, Store, Hash, Search
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
@@ -146,6 +146,8 @@ export default function Orders() {
     const [currentPage, setCurrentPage] = useState(1);
     const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
     const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+    const [confirmReorderId, setConfirmReorderId] = useState<number | null>(null);
+    const [isReordering, setIsReordering] = useState(false);
     const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
@@ -367,7 +369,8 @@ export default function Orders() {
                                 variant="outline"
                                 size="sm"
                                 className="h-9 sm:h-11 px-3"
-                                onClick={() => { }}
+                                onClick={() => setConfirmReorderId(order.id)}
+                                title="Reorder"
                             >
                                 <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </Button>
@@ -826,6 +829,95 @@ export default function Orders() {
                                         </p>
                                     </div>
                                 )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            {/* Reorder Confirmation Modal */}
+            <AnimatePresence>
+                {confirmReorderId && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+                        onClick={() => setConfirmReorderId(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", duration: 0.5 }}
+                            className="bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Modal Header */}
+                            <div className="bg-gradient-to-r from-fuchsia-500/10 to-purple-500/5 p-4 sm:p-6 border-b border-fuchsia-500/20">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center border border-fuchsia-500/30">
+                                        <RefreshCcw className="w-5 h-5 sm:w-7 sm:h-7 text-fuchsia-500" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg sm:text-xl font-bold text-foreground">
+                                            Reorder Items?
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                                            Add all items from this order to your cart
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="p-4 sm:p-6">
+                                <p className="text-sm text-muted-foreground mb-6">
+                                    This will add all items from Order #{data?.data.find(o => o.id === confirmReorderId)?.order_number} to your current cart.
+                                </p>
+
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="secondary"
+                                        className="flex-1 h-10 sm:h-12"
+                                        onClick={() => setConfirmReorderId(null)}
+                                        disabled={isReordering}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="primary"
+                                        className="flex-1 h-10 sm:h-12"
+                                        onClick={() => {
+                                            if (confirmReorderId) {
+                                                setIsReordering(true);
+                                                apiPost(`/customer/orders/${confirmReorderId}/reorder`)
+                                                    .then(() => {
+                                                        queryClient.invalidateQueries({ queryKey: ['cart'] });
+                                                        window.location.href = '/cart';
+                                                    })
+                                                    .catch(err => {
+                                                        console.error('Reorder failed', err);
+                                                        setIsReordering(false);
+                                                        setConfirmReorderId(null);
+                                                        alert('Failed to reorder items. Please try again.');
+                                                    });
+                                            }
+                                        }}
+                                        disabled={isReordering}
+                                    >
+                                        {isReordering ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                                Adding...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ShoppingBag className="w-4 h-4 mr-1.5" />
+                                                Add to Cart
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>

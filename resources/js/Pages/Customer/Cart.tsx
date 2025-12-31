@@ -12,6 +12,8 @@ import Button from '@/app/components/ui/Button';
 import { Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toastSuccess, toastError, toastInfo } from '@/app/utils/toast';
 
+import { apiGet } from '@/app/utils/api';
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -38,6 +40,25 @@ export default function Cart() {
 
   const { auth } = usePage().props as { auth?: { user?: any } };
   const isAuthenticated = !!auth?.user;
+
+  // Sync cart with server on mount
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      apiGet('/customer/cart')
+        .then((res: any) => {
+          if (res.data && Array.isArray(res.data)) {
+            // Only sync from server if local cart is empty to avoid overwriting new items
+            if (cart.items.length === 0 && res.data.length > 0) {
+              console.log('Syncing cart from server:', res.data);
+              cart.setItems(res.data);
+            }
+          }
+        })
+        .catch(err => {
+          console.error('Failed to sync cart:', err);
+        });
+    }
+  }, [isAuthenticated]);
 
   const handleUpdateQuantity = (menuItemId: number, quantity: number) => {
     if (quantity < 1) {

@@ -19,40 +19,58 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        if (!$user) return response()->json(['data' => []]);
+
         $customer = Customer::where('user_id', $user->id)->first();
 
         if (!$customer) {
+            \Log::warning('Cart index: Customer not found for user ' . $user->id);
             return response()->json(['data' => []]);
         }
 
+        \Log::info("Fetching cart for customer: {$customer->id}");
+
         $cartItems = CartItem::where('customer_id', $customer->id)
             ->with(['menuItem.translations'])
-            ->get()
-            ->map(function ($item) {
-                $menuItem = $item->menuItem;
-                $translation = $menuItem->translations->firstWhere('locale', app()->getLocale()) 
-                    ?? $menuItem->translations->first();
+            ->get();
+            
+        \Log::info("Cart raw count: " . $cartItems->count());
 
-                // Build image URL
-                $imagePath = null;
-                if ($menuItem->image_path) {
-                    $storagePath = ltrim(str_replace('\\', '/', $menuItem->image_path), '/');
-                    $imagePath = config('app.url') . '/storage/' . $storagePath;
-                }
+        $data = $cartItems->map(function ($item) {
+            $menuItem = $item->menuItem;
 
-                return [
-                    'id' => $item->id,
-                    'menu_item_id' => $item->menu_item_id,
-                    'name' => $translation ? $translation->name : $menuItem->slug,
-                    'unit_price' => (float) $menuItem->price,
-                    'quantity' => $item->quantity,
-                    'notes' => $item->notes,
-                    'customizations' => $item->customizations,
-                    'image_path' => $imagePath,
-                ];
-            });
+            if (!$menuItem) {
+                // Self-healing: remove cart item if menu item refers to a deleted record
+                \Log::warning("Cart Item {$item->id} refers to missing Menu Item {$item->menu_item_id}. Deleting.");
+                $item->delete();
+                return null;
+            }
 
-        return response()->json(['data' => $cartItems]);
+            $translation = $menuItem->translations->firstWhere('locale', app()->getLocale()) 
+                ?? $menuItem->translations->first();
+
+            // Build image URL
+            $imagePath = null;
+            if ($menuItem->image_path) {
+                $storagePath = ltrim(str_replace('\\', '/', $menuItem->image_path), '/');
+                $imagePath = config('app.url') . '/storage/' . $storagePath;
+            }
+
+            return [
+                'id' => $item->id,
+                'menu_item_id' => $item->menu_item_id,
+                'name' => $translation ? $translation->name : ($menuItem->slug ?? 'Unknown Item'),
+                'unit_price' => (float) $menuItem->price,
+                'quantity' => $item->quantity,
+                'notes' => $item->notes,
+                'customizations' => $item->customizations,
+                'image_path' => $imagePath,
+            ];
+        })->filter()->values(); // Filter out nulls and re-index
+
+        \Log::info("Cart valid items: " . $data->count());
+
+        return response()->json(['data' => $data]);
     }
 
     /**

@@ -12,8 +12,9 @@ import { Skeleton } from '@/app/components/ui/Loading';
 import { usePlaceOnlineOrder } from '@/app/hooks/useOrders';
 import { usePaymentModes } from '@/app/hooks/useOrderPayment';
 import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
-import { Banknote, CreditCard, ShoppingBag, Truck, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { Banknote, CreditCard, ShoppingBag, Truck, ArrowLeft, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { OrderProgress } from '@/app/components/customer/OrderProgress';
+import { TimePicker } from '@/app/components/ui/TimePicker';
 
 export default function Checkout() {
   const cart = useCartStore();
@@ -25,12 +26,75 @@ export default function Checkout() {
   const [selectedPaymentMode, setSelectedPaymentMode] = React.useState<string>('pay_now');
   const [showSummary, setShowSummary] = React.useState(false);
 
+  // Scheduled time state for the time picker
+  const [scheduledTime, setScheduledTime] = React.useState<{ hour: number; minute: number; period: 'AM' | 'PM' } | null>(null);
+
   const placeOrder = usePlaceOnlineOrder();
+
+  // Helper to convert picker time to slot format
+  const formatTimeForSlot = (time: { hour: number; minute: number; period: 'AM' | 'PM' }) => {
+    let hour24 = time.hour;
+    if (time.period === 'AM' && time.hour === 12) hour24 = 0;
+    else if (time.period === 'PM' && time.hour !== 12) hour24 = time.hour + 12;
+    return `${hour24.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}:00`;
+  };
+
+  // Helper to get display label for selected time
+  const getTimeLabel = () => {
+    if (!scheduledTime) return null;
+    const displayHour = scheduledTime.hour;
+    const displayMin = scheduledTime.minute.toString().padStart(2, '0');
+    return `${displayHour}:${displayMin} ${scheduledTime.period}`;
+  };
 
   // Reset payment mode when order type changes
   React.useEffect(() => {
     setSelectedPaymentMode('pay_now');
   }, [cart.mode]);
+
+  // Initialize scheduled time when switching to "Schedule for Later"
+  React.useEffect(() => {
+    if (!cart.orderNow && !cart.timeSlot) {
+      const now = new Date();
+      // Default to next hour
+      let nextHour = now.getHours() + 1;
+      // Clamp between min and max (assuming roughly 7 AM to 10 PM)
+      if (nextHour < 7) nextHour = 7;
+      if (nextHour > 22) nextHour = 22;
+
+      const period = nextHour >= 12 ? 'PM' : 'AM';
+      const displayHour = nextHour > 12 ? nextHour - 12 : (nextHour === 0 || nextHour === 12 ? 12 : nextHour);
+
+      const initialTime = {
+        hour: displayHour,
+        minute: 0,
+        period: period as 'AM' | 'PM'
+      };
+
+      setScheduledTime(initialTime);
+
+      // Also update the cart immediately
+      const timeStr = formatTimeForSlot(initialTime);
+      // Format today as YYYY-MM-DD in local time
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
+      const label = `${displayHour}:00 ${period}`;
+
+      cart.setTimeSlot({
+        id: `custom-${timeStr}`,
+        label: label,
+        start: `${today}T${timeStr}`,
+        end: `${today}T${timeStr}`,
+        available: true,
+        slot_date: today,
+        slot_start_time: timeStr,
+        slot_type: cart.mode === 'delivery' ? 'delivery' : 'pickup',
+      });
+    }
+  }, [cart.orderNow, cart.timeSlot]);
 
   async function onPlaceOrder() {
     // Validation
@@ -44,7 +108,7 @@ export default function Checkout() {
       return;
     }
 
-    if (!cart.timeSlot) {
+    if (!cart.orderNow && !cart.timeSlot) {
       toastError('Please select a time slot');
       return;
     }
@@ -59,8 +123,9 @@ export default function Checkout() {
       order_type: cart.mode as 'delivery' | 'pickup',
       location_id: cart.location_id,
       customer_address_id: cart.mode === 'delivery' ? cart.selectedAddress?.id : undefined,
-      slot_date: cart.timeSlot?.slot_date,
-      slot_time: cart.timeSlot?.slot_start_time,
+      order_now: cart.orderNow, // ASAP order flag
+      slot_date: cart.orderNow ? undefined : cart.timeSlot?.slot_date,
+      slot_time: cart.orderNow ? undefined : cart.timeSlot?.slot_start_time,
       notes: cart.notes || undefined,
       payment_mode: selectedPaymentMode,
       // Inject Telegram ID if available
@@ -120,7 +185,7 @@ export default function Checkout() {
     }
   }
 
-  const isCheckoutDisabled = placeOrder.isPending || cart.items.length === 0 || !cart.location_id || !cart.timeSlot || (cart.mode === 'delivery' && !cart.selectedAddress);
+  const isCheckoutDisabled = placeOrder.isPending || cart.items.length === 0 || !cart.location_id || (!cart.orderNow && !cart.timeSlot) || (cart.mode === 'delivery' && !cart.selectedAddress);
 
   return (
     <CustomerLayout>
@@ -165,39 +230,134 @@ export default function Checkout() {
             {/* Time Slot */}
             <Card className="overflow-hidden">
               <CardHeader className="pb-2 sm:pb-3">
-                <div className="text-sm sm:text-base font-semibold">Time Slot</div>
+                <div className="text-sm sm:text-base font-semibold">When do you want your order?</div>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 space-y-3">
                 {!cart.location_id ? (
                   <div className="text-xs sm:text-sm text-gray-400 p-3 sm:p-4 text-center border border-white/10 rounded-lg bg-white/5">
                     Please select a restaurant location first
                   </div>
-                ) : slotsLoading ? (
-                  <div className="grid grid-cols-3 gap-2">
-                    <Skeleton className="h-10 sm:h-12 w-full" />
-                    <Skeleton className="h-10 sm:h-12 w-full" />
-                    <Skeleton className="h-10 sm:h-12 w-full" />
-                  </div>
-                ) : (!slots || slots.length === 0) ? (
-                  <div className="text-xs sm:text-sm text-gray-400 p-3 sm:p-4 text-center border border-white/10 rounded-lg bg-white/5">
-                    <div className="font-medium text-gray-300 mb-1">No time slots available</div>
-                    <div className="text-xs hidden sm:block">The restaurant is currently closed for {cart.mode}.</div>
-                  </div>
                 ) : (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {slots.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => cart.setTimeSlot(s)}
-                        className={`px-2 py-2 sm:px-3 sm:py-2.5 rounded-lg border text-xs sm:text-sm transition-all ${cart.timeSlot?.id === s.id
-                          ? 'border-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-300'
-                          : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
-                          }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
+                  <>
+                    {/* Order Now Option */}
+                    <button
+                      onClick={() => cart.setOrderNow(true)}
+                      className={`w-full p-3 sm:p-4 rounded-xl border text-left transition-all ${cart.orderNow
+                        ? 'border-fuchsia-500 bg-fuchsia-500/15 ring-1 ring-fuchsia-500/50'
+                        : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${cart.orderNow ? 'bg-fuchsia-500/20' : 'bg-white/10'
+                            }`}>
+                            <span className="text-lg">⚡</span>
+                          </div>
+                          <div>
+                            <div className={`font-semibold text-sm sm:text-base ${cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
+                              }`}>
+                              Order Now
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {cart.mode === 'delivery' ? 'Fastest delivery available' : 'Ready in ~15-20 mins'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cart.orderNow
+                          ? 'border-fuchsia-500 bg-fuchsia-500'
+                          : 'border-gray-500'
+                          }`}>
+                          {cart.orderNow && <div className="w-2 h-2 rounded-full bg-white" />}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Schedule for Later - Collapsible */}
+                    <details
+                      className="group"
+                      open={!cart.orderNow}
+                      onToggle={(e) => {
+                        if ((e.target as HTMLDetailsElement).open && cart.orderNow) {
+                          cart.setOrderNow(false);
+                        }
+                      }}
+                    >
+                      <summary className={`cursor-pointer p-3 sm:p-4 rounded-xl border transition-all list-none ${!cart.orderNow
+                        ? 'border-fuchsia-500 bg-fuchsia-500/15 ring-1 ring-fuchsia-500/50'
+                        : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                        }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${!cart.orderNow ? 'bg-fuchsia-500/20' : 'bg-white/10'
+                              }`}>
+                              <span className="text-lg">📅</span>
+                            </div>
+                            <div>
+                              <div className={`font-semibold text-sm sm:text-base ${!cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
+                                }`}>
+                                Schedule for Later
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {cart.timeSlot ? cart.timeSlot.label : 'Pick a specific time'}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <ChevronDown className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" />
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${!cart.orderNow
+                              ? 'border-fuchsia-500 bg-fuchsia-500'
+                              : 'border-gray-500'
+                              }`}>
+                              {!cart.orderNow && <div className="w-2 h-2 rounded-full bg-white" />}
+                            </div>
+                          </div>
+                        </div>
+                      </summary>
+
+                      {/* Time Picker */}
+                      <div className="mt-3 p-4 rounded-lg border border-white/10 bg-gray-800/30">
+                        {slotsLoading ? (
+                          <Skeleton className="h-14 w-full" />
+                        ) : (!slots || slots.length === 0) ? (
+                          <div className="text-sm text-gray-400 py-4 text-center">
+                            <div className="font-medium text-gray-300">Restaurant Closed</div>
+                            <div className="text-xs mt-1">No times available for {cart.mode}.</div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <TimePicker
+                              value={scheduledTime}
+                              minHour24={new Date().getHours() + new Date().getMinutes() / 60} // Current time forward
+                              maxHour24={22} // Restaurant closes at 10 PM
+                              onChange={(time) => {
+                                setScheduledTime(time);
+                                const timeStr = formatTimeForSlot(time);
+                                const today = new Date().toISOString().split('T')[0];
+                                const label = `${time.hour}:${time.minute.toString().padStart(2, '0')} ${time.period}`;
+
+                                cart.setTimeSlot({
+                                  id: `custom-${timeStr}`,
+                                  label: label,
+                                  start: `${today}T${timeStr}`,
+                                  end: `${today}T${timeStr}`,
+                                  available: true,
+                                  slot_date: today,
+                                  slot_start_time: timeStr,
+                                  slot_type: cart.mode === 'delivery' ? 'delivery' : 'pickup',
+                                });
+                              }}
+                            />
+
+                            {scheduledTime && (
+                              <div className="text-center text-sm text-fuchsia-400 font-medium">
+                                ✓ {cart.mode === 'pickup' ? 'Pickup' : 'Delivery'} at {scheduledTime.hour}:{scheduledTime.minute.toString().padStart(2, '0')} {scheduledTime.period}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -311,20 +471,21 @@ export default function Checkout() {
               </CardFooter>
             </Card>
           </div>
-        </div>
+        </div >
 
         {/* Spacer for mobile fixed bar */}
-        <div className="h-20 sm:h-0" />
-      </motion.div>
+        < div className="h-20 sm:h-0" />
+      </motion.div >
 
       {/* Mobile Fixed Summary & Checkout */}
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
+      < motion.div
+        initial={{ y: 100, opacity: 0 }
+        }
         animate={{ y: 0, opacity: 1 }}
         className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
       >
         {/* Collapsible Summary Toggle */}
-        <details className="group" open={showSummary} onToggle={(e) => setShowSummary((e.target as HTMLDetailsElement).open)}>
+        < details className="group" open={showSummary} onToggle={(e) => setShowSummary((e.target as HTMLDetailsElement).open)}>
           <summary className="flex items-center justify-between p-3 sm:p-4 cursor-pointer list-none bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">{cart.items.length} items</span>
@@ -366,10 +527,10 @@ export default function Checkout() {
               </div>
             </div>
           </div>
-        </details>
+        </details >
 
         {/* Checkout Button */}
-        <div className="p-3 sm:p-4 pt-0">
+        < div className="p-3 sm:p-4 pt-0" >
           <button
             onClick={onPlaceOrder}
             disabled={isCheckoutDisabled}
@@ -379,8 +540,8 @@ export default function Checkout() {
               selectedPaymentMode === 'pay_now' ? 'Place & Pay Now' : 'Place Order'
             )}
           </button>
-        </div>
-      </motion.div>
-    </CustomerLayout>
+        </div >
+      </motion.div >
+    </CustomerLayout >
   );
 }

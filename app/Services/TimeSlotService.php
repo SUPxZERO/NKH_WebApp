@@ -211,6 +211,48 @@ class TimeSlotService
     }
     
     /**
+     * Get the earliest available time slot for ASAP ordering
+     * 
+     * This is used when a customer selects "Order Now" and the system
+     * needs to automatically assign the soonest available slot.
+     * 
+     * @param int $locationId
+     * @param string $serviceType 'pickup' or 'delivery'
+     * @return array|null Returns slot data or null if no slots available
+     */
+    public function getEarliestAvailableSlot(
+        int $locationId,
+        string $serviceType
+    ): ?array {
+        // Get today's available slots
+        $slots = $this->getAvailableTimeSlots($locationId, $serviceType, null, 30);
+        
+        if ($slots->isEmpty()) {
+            // Try tomorrow if today has no slots
+            $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+            $slots = $this->getAvailableTimeSlots($locationId, $serviceType, $tomorrow, 30);
+        }
+        
+        if ($slots->isEmpty()) {
+            Log::warning("No available slots found for ASAP ordering", [
+                'location_id' => $locationId,
+                'service_type' => $serviceType
+            ]);
+            return null;
+        }
+        
+        // Return the first (earliest) available slot
+        $firstSlot = $slots->first();
+        
+        Log::info("Found earliest slot for ASAP ordering", [
+            'location_id' => $locationId,
+            'slot' => $firstSlot
+        ]);
+        
+        return $firstSlot;
+    }
+    
+    /**
      * Validate if a time slot is still available for booking
      * 
      * @param int $locationId
