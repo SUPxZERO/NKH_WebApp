@@ -116,8 +116,11 @@ class NotificationService
         string $event,
         ?string $customMessage = null
     ): ?UserNotification {
+        // Eager load customer with telegramUser relationship for Guest support
+        $order->loadMissing('customer.telegramUser');
+
         $user = $order->user ?? $order->customer?->user;
-        
+
         // Log warning but continue if we have a customer (for Telegram/Guest support)
         if (!$user && !$order->customer) {
             Log::warning("Cannot send order notification - no user or customer found for order {$order->id}");
@@ -128,7 +131,7 @@ class NotificationService
         try {
             // Check for TelegramUser via User->Customer OR directly via Order->Customer
             $customer = $order->customer ?? $user?->customer;
-            
+
             if ($customer) {
                 $telegramUser = $customer->telegramUser;
                 if ($telegramUser) {

@@ -99,6 +99,11 @@ class TelegramBotService
             $response = Http::timeout(10)->post($this->apiUrl . '/sendMessage', $payload);
 
             if (!$response->successful()) {
+                Log::error('❌ Telegram API Error:', [
+                    'payload' => $payload,
+                    'status' => $response->status(),
+                    'body' => $response->json(),
+                ]);
                 throw new \Exception('Telegram API error: ' . json_encode($response->json()));
             }
 
@@ -532,6 +537,7 @@ class TelegramBotService
      */
     public static function escapeMarkdown(string $text): string
     {
-        return preg_replace('/([_*\[\]()~`>#+\-=|{}.!])/', '\\$1', $text);
+        // Legacy Markdown escapes: _ * [ `
+        return preg_replace('/([_*\[`])/', '\\$1', $text);
     }
 }

@@ -40,7 +40,8 @@
       "WebFetch(domain:nkh-webapp-1.onrender.com)",
       "WebFetch(domain:api.telegram.org)",
       "Bash(composer dump-autoload:*)",
-      "Bash(cloudflared:*)"
+      "Bash(cloudflared:*)",
+      "Bash(mysql:*)"
     ]
   }
 }

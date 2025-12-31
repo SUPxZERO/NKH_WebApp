@@ -137,12 +137,19 @@ class TelegramMenuController extends Controller
      */
     private function formatItem(MenuItem $item, bool $includeDetails = false): array
     {
+        // Build image URL
+        $imagePath = null;
+        if ($item->image_path) {
+            $storagePath = ltrim(str_replace('\\', '/', $item->image_path), '/');
+            $imagePath = config('app.url') . '/storage/' . $storagePath;
+        }
+
         $data = [
             'id' => $item->id,
             'name' => $item->name,
             'slug' => $item->slug,
             'price' => (float) $item->price,
-            'image' => $item->image_path ? asset(ltrim(str_replace('\\', '/', $item->image_path), '/')) : null,
+            'image' => $imagePath,
             'is_available' => $item->is_active,
         ];
 

@@ -14,6 +14,7 @@ class StoreOnlineOrderRequest extends FormRequest
             'order_type' => ['required','in:pickup,delivery'],
             'location_id' => ['required','exists:locations,id'],
             'customer_address_id' => ['nullable','required_if:order_type,delivery','exists:customer_addresses,id'],
+            'telegram_id' => ['nullable','integer'], // Allow Telegram ID for guest identification
             // Accept either time_slot_id OR slot_date + slot_time
             'time_slot_id' => ['nullable','exists:order_time_slots,id'],
             'slot_date' => ['required_without:time_slot_id','date','after_or_equal:today'],

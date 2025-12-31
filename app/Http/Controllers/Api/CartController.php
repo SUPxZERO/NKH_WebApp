@@ -33,6 +33,13 @@ class CartController extends Controller
                 $translation = $menuItem->translations->firstWhere('locale', app()->getLocale()) 
                     ?? $menuItem->translations->first();
 
+                // Build image URL
+                $imagePath = null;
+                if ($menuItem->image_path) {
+                    $storagePath = ltrim(str_replace('\\', '/', $menuItem->image_path), '/');
+                    $imagePath = config('app.url') . '/storage/' . $storagePath;
+                }
+
                 return [
                     'id' => $item->id,
                     'menu_item_id' => $item->menu_item_id,
@@ -41,7 +48,7 @@ class CartController extends Controller
                     'quantity' => $item->quantity,
                     'notes' => $item->notes,
                     'customizations' => $item->customizations,
-                    'image_path' => $menuItem->image_path ? asset(ltrim(str_replace('\\', '/', $menuItem->image_path), '/')) : null,
+                    'image_path' => $imagePath,
                 ];
             });
 

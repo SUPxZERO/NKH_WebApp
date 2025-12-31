@@ -114,6 +114,11 @@ class Customer extends Model
         return $this->hasMany(CustomerCommunicationLog::class);
     }
 
+    public function telegramUser()
+    {
+        return $this->hasOne(\App\Models\TelegramUser::class);
+    }
+
     // Helper methods
     public function calculateTier()
     {

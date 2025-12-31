@@ -14,26 +14,25 @@ class MenuItemResource extends JsonResource
         $imagePath = $this->image_path;
         if ($imagePath) {
             // Normalize slashes and remove leading slash/backslash
-            $imagePath = str_replace('\\', '/', $imagePath);
-            $imagePath = ltrim($imagePath, '/');
+            $originalPath = str_replace('\\', '/', $imagePath);
+            $storagePath = ltrim($originalPath, '/');
 
             // If not absolute URL, use Storage::url() for files stored in public disk
-            if (!str_starts_with($imagePath, 'http')) {
+            if (!str_starts_with($storagePath, 'http')) {
                 // Ensure we use the configured APP_URL (Tunnel URL)
                 $baseUrl = config('app.url');
-                
-                // Clean up path
-                $imagePath = ltrim($imagePath, '/');
-                $imagePath = str_replace('storage/', '', $imagePath);
-                
-                // Construct full URL
-                $imagePath = "{$baseUrl}/storage/{$imagePath}";
-            }
 
-            // Check if file exists, if not use placeholder
-            $fullPath = public_path('storage/' . ltrim(str_replace('/storage/', '', $imagePath), '/'));
-            if (!file_exists($fullPath)) {
-                $imagePath = null; // Will show default emoji in frontend
+                // Clean up path for URL construction
+                $urlPath = ltrim($storagePath, '/');
+                $urlPath = str_replace('storage/', '', $urlPath);
+
+                // Construct full URL
+                $imagePath = "{$baseUrl}/storage/{$urlPath}";
+
+                // Check if file exists using the original storage path
+                if (!Storage::disk('public')->exists($storagePath)) {
+                    $imagePath = null; // Will show default emoji in frontend
+                }
             }
         }
 

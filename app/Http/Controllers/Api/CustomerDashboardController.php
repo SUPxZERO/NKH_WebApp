@@ -150,11 +150,17 @@ class CustomerDashboardController extends Controller
             ->limit(5)
             ->get()
             ->map(function($item) {
+                // Build proper image URL using APP_URL
+                $imagePath = null;
+                if ($item->image_path) {
+                    $storagePath = ltrim(str_replace('\\', '/', $item->image_path), '/');
+                    $imagePath = config('app.url') . '/storage/' . $storagePath;
+                }
                 return [
                     'id' => $item->id,
                     'name' => $item->name,
                     'price' => (float) $item->price,
-                    'image_path' => $item->image_path ? asset(ltrim(str_replace('\\', '/', $item->image_path), '/')) : null,
+                    'image_path' => $imagePath,
                 ];
             })
             ->toArray();
@@ -347,7 +353,10 @@ class CustomerDashboardController extends Controller
                 $previewImage = null;
                 if ($firstItem = $order->items->first()) {
                     if ($menuItem = $firstItem->menuItem) {
-                        $previewImage = $menuItem->image_path ? asset(ltrim(str_replace('\\', '/', $menuItem->image_path), '/')) : null;
+                        if ($menuItem->image_path) {
+                            $storagePath = ltrim(str_replace('\\', '/', $menuItem->image_path), '/');
+                            $previewImage = config('app.url') . '/storage/' . $storagePath;
+                        }
                     }
                 }
 
@@ -399,6 +408,12 @@ class CustomerDashboardController extends Controller
                     // Order items summary
                     'items_count' => $order->items->count(),
                     'items' => $order->items->map(function ($item) {
+                        // Build image URL
+                        $imagePath = null;
+                        if ($item->menuItem && $item->menuItem->image_path) {
+                            $storagePath = ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/');
+                            $imagePath = config('app.url') . '/storage/' . $storagePath;
+                        }
                         return [
                             'id' => $item->id,
                             'menu_item_id' => $item->menu_item_id,
@@ -407,7 +422,7 @@ class CustomerDashboardController extends Controller
                             'unit_price' => (float) $item->unit_price,
                             'total_price' => (float) $item->total_price,
                             'special_instructions' => $item->special_instructions,
-                            'image_path' => $item->menuItem?->image_path ? asset(ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/')) : null,
+                            'image_path' => $imagePath,
                         ];
                     })->toArray(),
                     
@@ -507,7 +522,10 @@ class CustomerDashboardController extends Controller
         $previewImage = null;
         if ($firstItem = $order->items->first()) {
             if ($menuItem = $firstItem->menuItem) {
-                $previewImage = $menuItem->image_path ? asset(ltrim(str_replace('\\', '/', $menuItem->image_path), '/')) : null;
+                if ($menuItem->image_path) {
+                    $storagePath = ltrim(str_replace('\\', '/', $menuItem->image_path), '/');
+                    $previewImage = config('app.url') . '/storage/' . $storagePath;
+                }
             }
         }
 
@@ -564,6 +582,12 @@ class CustomerDashboardController extends Controller
             // Items
             'items_count' => $order->items->count(),
             'items' => $order->items->map(function ($item) {
+                // Build image URL
+                $imagePath = null;
+                if ($item->menuItem && $item->menuItem->image_path) {
+                    $storagePath = ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/');
+                    $imagePath = config('app.url') . '/storage/' . $storagePath;
+                }
                 return [
                     'id' => $item->id,
                     'menu_item_id' => $item->menu_item_id,
@@ -572,7 +596,7 @@ class CustomerDashboardController extends Controller
                     'unit_price' => (float) $item->unit_price,
                     'total_price' => (float) $item->total_price,
                     'special_instructions' => $item->special_instructions,
-                    'image_path' => $item->menuItem?->image_path ? asset(ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/')) : null,
+                    'image_path' => $imagePath,
                     'customizations' => $item->customizations ?? [], // Assuming customizations might be stored
                 ];
             }),
