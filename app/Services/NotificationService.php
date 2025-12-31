@@ -139,12 +139,13 @@ class NotificationService
                     
                     if (!$telegramUser->notifications_enabled) {
                         Log::warning("⚠️ Telegram notifications disabled for user {$telegramUser->id}");
+                    } else {
+                        // Use TelegramOrderNotificationService for tracking and retry support
+                        $notificationService = app(\App\Services\Telegram\TelegramOrderNotificationService::class);
+                        $notification = $notificationService->sendStatusNotification($order, $event, $telegramUser);
+                        
+                        Log::info("📤 Telegram notification tracked: " . ($notification ? "ID #{$notification->id} (sent: " . ($notification->sent ? 'Yes' : 'No') . ")" : 'Failed to create'));
                     }
-                    
-                    $botService = app(\App\Services\Telegram\TelegramBotService::class);
-                    $sent = $botService->sendOrderNotification($telegramUser, $order, $event, $customMessage);
-                    
-                    Log::info("📤 Telegram notification send result: " . ($sent ? 'Success' : 'Failed'));
                 } else {
                     Log::warning("⚠️ No TelegramUser linked for Customer #{$customer->id}");
                 }

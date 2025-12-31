@@ -24,11 +24,11 @@ const statusConfig = {
     delivered: { label: 'Delivered', color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400', icon: Package },
 };
 
-import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+// import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 
 export default function OrderDetails({ orderId }: OrderDetailsProps) {
     // Poll for order updates every 3 seconds
-    useSmartPolling(['orders'], 3000);
+    // useSmartPolling(['orders'], 3000);
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['customer-order', orderId],

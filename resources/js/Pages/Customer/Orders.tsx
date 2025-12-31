@@ -140,7 +140,7 @@ const approvalConfig = {
     },
 };
 
-import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+// import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 
 export default function Orders() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -153,7 +153,7 @@ export default function Orders() {
     const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
 
     // Poll for order updates every 3 seconds
-    useSmartPolling(['orders'], 3000);
+    // useSmartPolling(['orders'], 3000);
 
     const queryClient = useQueryClient();
 

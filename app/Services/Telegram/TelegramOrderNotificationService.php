@@ -13,12 +13,28 @@ class TelegramOrderNotificationService
     private TelegramBotService $botService;
     private TelegramKeyboardBuilder $keyboardBuilder;
 
+
     // Status mapping for notification messages
     private const STATUS_MESSAGES = [
+        'placed' => [
+            'title' => '📋 Order Placed',
+            'emoji' => '✅',
+            'message' => 'Your order has been placed successfully! We will confirm it shortly.',
+        ],
         'pending' => [
             'title' => '📋 Order Received',
             'emoji' => '✅',
             'message' => 'Your order has been received and is waiting for confirmation.',
+        ],
+        'approved' => [
+            'title' => '✅ Order Approved',
+            'emoji' => '👍',
+            'message' => 'Great news! Your order has been approved and is being prepared.',
+        ],
+        'rejected' => [
+            'title' => '❌ Order Declined',
+            'emoji' => '🛑',
+            'message' => 'We are sorry, your order could not be processed.',
         ],
         'received' => [
             'title' => '🏪 Order Confirmed',
@@ -39,6 +55,11 @@ class TelegramOrderNotificationService
             'title' => '🚗 On The Way',
             'emoji' => '🛵',
             'message' => 'Your order is out for delivery!',
+        ],
+        'paid' => [
+            'title' => '💳 Payment Confirmed',
+            'emoji' => '💰',
+            'message' => 'Your payment has been received. Thank you!',
         ],
         'completed' => [
             'title' => '⭐ Order Completed',
@@ -89,7 +110,9 @@ class TelegramOrderNotificationService
             $keyboard = $this->keyboardBuilder->buildOrderCompletedKeyboard($order->id);
         }
 
-        $sent = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
+        // sendMessage returns ?array, convert to boolean for database
+        $result = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
+        $sent = $result !== null;
 
         $notification = TelegramOrderNotification::create([
             'order_id' => $order->id,
