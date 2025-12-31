@@ -263,7 +263,10 @@ export default function Orders() {
                                 <Hash className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-500" />
                             </div>
                             <div>
-                                <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                                <h3
+                                    className="text-base sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer"
+                                    onClick={() => window.location.href = `/customer/orders/${order.id}`}
+                                >
                                     {order.order_number}
                                 </h3>
                                 <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -349,6 +352,15 @@ export default function Orders() {
                             rightIcon={<ChevronDown className={cn('w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300', isExpanded && 'rotate-180')} />}
                         >
                             {isExpanded ? 'Hide' : 'Details'}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9 sm:h-11 px-3"
+                            onClick={() => window.location.href = `/customer/orders/${order.id}`}
+                            title="Open Full Page"
+                        >
+                            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
                         {order.can_reorder && (
                             <Button
