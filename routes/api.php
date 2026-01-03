@@ -72,6 +72,12 @@ if (app()->environment(['local', 'testing'])) {
     });
 }
 
+// Telegram WebApp session endpoints (public, no auth required) - Sprint P15
+Route::prefix('telegram-webapp')->group(function () {
+    Route::post('/init', [App\Http\Controllers\Api\TelegramWebAppController::class, 'init']);
+    Route::get('/status', [App\Http\Controllers\Api\TelegramWebAppController::class, 'status']);
+});
+
 // Public endpoints with rate limiting and lockout protection
 Route::middleware(['throttle.api:auth', 'account.lockout'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -313,9 +319,9 @@ Route::prefix('order-holds')
 // MOVED ROUTES (Consolidated from web.php)
 // ============================================================================
 
-// CUSTOMER API ROUTES
+// CUSTOMER API ROUTES (Supports both Sanctum and Telegram guest authentication - Sprint P15)
 Route::prefix('customer')
-    ->middleware(['auth:sanctum'])
+    ->middleware(['auth.customer'])
     ->group(function () {
     // Profile & Dashboard
     Route::get('profile', [App\Http\Controllers\Api\CustomerDashboardController::class, 'profile']);
@@ -756,6 +762,13 @@ Route::prefix('telegram')
         Route::get('/orders', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'list']);
         Route::get('/orders/{orderId}', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'detail']);
         Route::post('/orders/{orderId}/cancel', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'cancel']);
+
+        // Guest Checkout (Sprint P15)
+        Route::post('/checkout/validate', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'validate']);
+        Route::post('/checkout/guest-info', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'saveGuestInfo']);
+        Route::post('/checkout/place-order', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'placeOrder']);
+        Route::get('/checkout/confirm/{orderId}', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'confirm']);
+        Route::get('/checkout/saved-addresses', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'getSavedAddresses']);
 
         // Account management
         Route::get('/me', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'me']);

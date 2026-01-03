@@ -88,20 +88,19 @@ class TelegramOrderController extends Controller
     }
 
     /**
-     * List customer orders
+     * List customer orders (supports both linked accounts and guest orders)
      */
     public function list(Request $request): JsonResponse
     {
         $user = $request->user('telegram');
 
-        if (!$user->hasLinkedAccount()) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Account not linked',
-            ], 401);
-        }
-
-        $orders = Order::where('customer_id', $user->customer_id)
+        // Query orders by telegram_user_id OR customer_id (supports guest orders)
+        $orders = Order::where(function ($query) use ($user) {
+                $query->where('telegram_user_id', $user->id);
+                if ($user->customer_id) {
+                    $query->orWhere('customer_id', $user->customer_id);
+                }
+            })
             ->with(['location', 'items'])
             ->orderBy('created_at', 'desc')
             ->limit(20)
@@ -117,14 +116,19 @@ class TelegramOrderController extends Controller
     }
 
     /**
-     * Get order details
+     * Get order details (supports guest orders)
      */
     public function detail(Request $request, int $orderId): JsonResponse
     {
         $user = $request->user('telegram');
 
         $order = Order::where('id', $orderId)
-            ->where('customer_id', $user->customer_id)
+            ->where(function ($query) use ($user) {
+                $query->where('telegram_user_id', $user->id);
+                if ($user->customer_id) {
+                    $query->orWhere('customer_id', $user->customer_id);
+                }
+            })
             ->with(['items.menuItem', 'location', 'timeSlot', 'customerAddress'])
             ->first();
 
@@ -142,14 +146,19 @@ class TelegramOrderController extends Controller
     }
 
     /**
-     * Cancel order
+     * Cancel order (supports guest orders)
      */
     public function cancel(Request $request, int $orderId): JsonResponse
     {
         $user = $request->user('telegram');
 
         $order = Order::where('id', $orderId)
-            ->where('customer_id', $user->customer_id)
+            ->where(function ($query) use ($user) {
+                $query->where('telegram_user_id', $user->id);
+                if ($user->customer_id) {
+                    $query->orWhere('customer_id', $user->customer_id);
+                }
+            })
             ->first();
 
         if (!$order) {

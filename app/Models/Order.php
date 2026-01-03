@@ -32,6 +32,7 @@ class Order extends Model
         'location_id',
         'table_id',
         'customer_id',
+        'telegram_user_id',
         'employee_id',
         'order_number',
         'order_type',
@@ -142,6 +143,50 @@ class Order extends Model
     public function approvedBy()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Telegram user for guest orders (without customer account)
+     */
+    public function telegramUser()
+    {
+        return $this->belongsTo(TelegramUser::class);
+    }
+
+    /**
+     * Check if this is a guest order (via Telegram without customer account)
+     */
+    public function isGuestOrder(): bool
+    {
+        return $this->telegram_user_id !== null && $this->customer_id === null;
+    }
+
+    /**
+     * Get the order owner display name (customer or telegram user)
+     */
+    public function getOwnerNameAttribute(): string
+    {
+        if ($this->customer_id && $this->customer?->user) {
+            return $this->customer->user->name;
+        }
+        if ($this->telegram_user_id && $this->telegramUser) {
+            return $this->telegramUser->display_name;
+        }
+        return 'Guest';
+    }
+
+    /**
+     * Get contact phone for this order (from customer or telegram user)
+     */
+    public function getContactPhoneAttribute(): ?string
+    {
+        if ($this->customer_id && $this->customer?->user) {
+            return $this->customer->user->phone;
+        }
+        if ($this->telegram_user_id && $this->telegramUser) {
+            return $this->telegramUser->phone_number;
+        }
+        return null;
     }
 
     // ==================== HELPER METHODS ====================

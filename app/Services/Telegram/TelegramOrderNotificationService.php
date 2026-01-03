@@ -89,7 +89,7 @@ class TelegramOrderNotificationService
         string $status,
         ?TelegramUser $telegramUser = null
     ): ?TelegramOrderNotification {
-        $user = $telegramUser ?? $order->telegramUser;
+        $user = $telegramUser ?? $this->getTelegramUserForOrder($order);
 
         if (!$user) {
             return null;
@@ -143,7 +143,7 @@ class TelegramOrderNotificationService
      */
     public function sendETAUpdate(Order $order, int $etaMinutes): ?TelegramOrderNotification
     {
-        $user = $order->telegramUser;
+        $user = $this->getTelegramUserForOrder($order);
 
         if (!$user) {
             return null;
@@ -153,7 +153,8 @@ class TelegramOrderNotificationService
         $message = "🕐 *Order Update*\n\nYour order will be ready in approximately *{$etaText}*.";
 
         $keyboard = $this->keyboardBuilder->buildTrackOrderKeyboard($order->id);
-        $sent = $this->botService->sendMessage($user->chat_id, $message, $keyboard);
+        $result = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
+        $sent = $result !== null;
 
         return TelegramOrderNotification::create([
             'order_id' => $order->id,
@@ -170,7 +171,7 @@ class TelegramOrderNotificationService
      */
     public function sendPaymentConfirmation(Order $order): ?TelegramOrderNotification
     {
-        $user = $order->telegramUser;
+        $user = $this->getTelegramUserForOrder($order);
 
         if (!$user) {
             return null;
@@ -181,7 +182,8 @@ class TelegramOrderNotificationService
             . "Order #{$order->id} is now being processed.";
 
         $keyboard = $this->keyboardBuilder->buildTrackOrderKeyboard($order->id);
-        $sent = $this->botService->sendMessage($user->chat_id, $message, $keyboard);
+        $result = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
+        $sent = $result !== null;
 
         return TelegramOrderNotification::create([
             'order_id' => $order->id,
@@ -198,7 +200,7 @@ class TelegramOrderNotificationService
      */
     public function sendScheduledOrderReminder(Order $order, int $minutesUntil): ?TelegramOrderNotification
     {
-        $user = $order->telegramUser;
+        $user = $this->getTelegramUserForOrder($order);
 
         if (!$user) {
             return null;
@@ -210,7 +212,8 @@ class TelegramOrderNotificationService
             . "We look forward to serving you!";
 
         $keyboard = $this->keyboardBuilder->buildTrackOrderKeyboard($order->id);
-        $sent = $this->botService->sendMessage($user->chat_id, $message, $keyboard);
+        $result = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
+        $sent = $result !== null;
 
         return TelegramOrderNotification::create([
             'order_id' => $order->id,
@@ -231,7 +234,7 @@ class TelegramOrderNotificationService
         string $messageText,
         ?string $emoji = null
     ): ?TelegramOrderNotification {
-        $user = $order->telegramUser;
+        $user = $this->getTelegramUserForOrder($order);
 
         if (!$user) {
             return null;
@@ -241,7 +244,8 @@ class TelegramOrderNotificationService
         $message = "{$emoji} *{$title}*\n\n{$messageText}";
 
         $keyboard = $this->keyboardBuilder->buildTrackOrderKeyboard($order->id);
-        $sent = $this->botService->sendMessage($user->chat_id, $message, $keyboard);
+        $result = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
+        $sent = $result !== null;
 
         return TelegramOrderNotification::create([
             'order_id' => $order->id,
@@ -273,12 +277,30 @@ class TelegramOrderNotificationService
 
         foreach ($users as $user) {
             $keyboard = $this->keyboardBuilder->buildMainMenuKeyboard();
-            if ($this->botService->sendMessage($user->chat_id, $message, $keyboard)) {
+            if ($this->botService->sendMessage($user->telegram_id, $message, null, $keyboard)) {
                 $sentCount++;
             }
         }
 
         return $sentCount;
+    }
+
+    /**
+     * Get TelegramUser for an order (supports both guest and linked accounts)
+     */
+    public function getTelegramUserForOrder(Order $order): ?TelegramUser
+    {
+        // Priority 1: Direct telegram_user_id on order (guest orders)
+        if ($order->telegram_user_id) {
+            return $order->telegramUser;
+        }
+
+        // Priority 2: Via customer -> telegram user relationship
+        if ($order->customer_id && $order->customer?->telegramUser) {
+            return $order->customer->telegramUser;
+        }
+
+        return null;
     }
 
     /**
@@ -389,6 +411,7 @@ class TelegramOrderNotificationService
             . "• Your order is completed";
 
         $keyboard = $this->keyboardBuilder->buildNotificationPreferenceKeyboard();
-        return $this->botService->sendMessage($user->chat_id, $message, $keyboard);
+        $result = $this->botService->sendMessage($user->telegram_id, $message, null, $keyboard);
+        return $result !== null;
     }
 }

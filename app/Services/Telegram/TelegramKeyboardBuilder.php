@@ -56,4 +56,178 @@ class TelegramKeyboardBuilder
             ],
         ]);
     }
+
+    /**
+     * Build track order keyboard
+     */
+    public static function buildTrackOrderKeyboard(int $orderId): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '📦 Track Order', 'web_app' => ['url' => config('app.url') . "/orders/{$orderId}"]],
+            ],
+        ]);
+    }
+
+    /**
+     * Build main menu keyboard (for returning to main menu)
+     */
+    public static function buildMainMenuKeyboard(): array
+    {
+        return self::mainMenu();
+    }
+
+    /**
+     * Build notification preference keyboard
+     */
+    public static function buildNotificationPreferenceKeyboard(): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '✅ Enable Notifications', 'callback_data' => 'notif_enable'],
+                ['text' => '❌ Disable', 'callback_data' => 'notif_disable'],
+            ],
+        ]);
+    }
+
+    // ==================== GUEST CHECKOUT KEYBOARDS ====================
+
+    /**
+     * Build order type selection keyboard (pickup/delivery)
+     */
+    public static function orderTypeSelection(): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '🏪 Pickup', 'callback_data' => 'checkout_type_pickup'],
+                ['text' => '🚗 Delivery', 'callback_data' => 'checkout_type_delivery'],
+            ],
+            [
+                ['text' => '❌ Cancel', 'callback_data' => 'checkout_cancel'],
+            ],
+        ]);
+    }
+
+    /**
+     * Build location selection keyboard
+     */
+    public static function locationSelection(array $locations): array
+    {
+        $buttons = [];
+        foreach ($locations as $location) {
+            $buttons[] = [
+                ['text' => "📍 {$location['name']}", 'callback_data' => "checkout_loc_{$location['id']}"],
+            ];
+        }
+        $buttons[] = [
+            ['text' => '◀️ Back', 'callback_data' => 'checkout_back_type'],
+        ];
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build contact info request keyboard (for delivery)
+     */
+    public static function contactInfoRequest(bool $hasPhone = false, bool $hasAddress = false): array
+    {
+        $buttons = [];
+        
+        if (!$hasPhone) {
+            $buttons[] = [
+                ['text' => '📞 Share Phone Number', 'callback_data' => 'checkout_share_phone'],
+            ];
+        }
+        
+        if (!$hasAddress) {
+            $buttons[] = [
+                ['text' => '📍 Enter Delivery Address', 'callback_data' => 'checkout_enter_address'],
+            ];
+        }
+        
+        if ($hasPhone && $hasAddress) {
+            $buttons[] = [
+                ['text' => '✅ Continue to Checkout', 'callback_data' => 'checkout_continue'],
+            ];
+        }
+        
+        $buttons[] = [
+            ['text' => '◀️ Back', 'callback_data' => 'checkout_back_location'],
+        ];
+        
+        return self::inlineKeyboard($buttons);
+    }
+
+    /**
+     * Build guest checkout confirmation keyboard
+     */
+    public static function guestCheckoutConfirmation(): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '✅ Confirm Order', 'callback_data' => 'checkout_confirm'],
+            ],
+            [
+                ['text' => '✏️ Edit Cart', 'callback_data' => 'checkout_edit_cart'],
+                ['text' => '❌ Cancel', 'callback_data' => 'checkout_cancel'],
+            ],
+        ]);
+    }
+
+    /**
+     * Build payment mode selection keyboard
+     */
+    public static function paymentModeSelection(string $orderType): array
+    {
+        $modes = [];
+        
+        $modes[] = [
+            ['text' => '💳 Pay Now (Online)', 'callback_data' => 'checkout_pay_now'],
+        ];
+        
+        if ($orderType === 'delivery') {
+            $modes[] = [
+                ['text' => '💵 Pay on Delivery', 'callback_data' => 'checkout_pay_on_delivery'],
+            ];
+        } elseif ($orderType === 'pickup') {
+            $modes[] = [
+                ['text' => '💵 Pay on Pickup', 'callback_data' => 'checkout_pay_on_pickup'],
+            ];
+        }
+        
+        $modes[] = [
+            ['text' => '◀️ Back', 'callback_data' => 'checkout_back_contact'],
+        ];
+        
+        return self::inlineKeyboard($modes);
+    }
+
+    /**
+     * Build order success keyboard
+     */
+    public static function orderSuccessKeyboard(int $orderId): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '📦 View Order', 'web_app' => ['url' => config('app.url') . "/orders/{$orderId}"]],
+            ],
+            [
+                ['text' => '🍔 Order More', 'web_app' => ['url' => config('app.url')]],
+            ],
+        ]);
+    }
+
+    /**
+     * Build skip account linking keyboard (continue as guest)
+     */
+    public static function skipAccountLinking(): array
+    {
+        return self::inlineKeyboard([
+            [
+                ['text' => '👤 Link Account (Get Rewards)', 'callback_data' => 'link_account'],
+            ],
+            [
+                ['text' => '➡️ Continue as Guest', 'callback_data' => 'continue_guest'],
+            ],
+        ]);
+    }
 }

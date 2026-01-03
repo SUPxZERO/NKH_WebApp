@@ -32,23 +32,45 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 // CUSTOMER WEB ROUTES
 // ============================================================================
 
-// Protected routes - Require authentication with Customer role
-Route::middleware(['auth', 'role:Customer'])->group(function () {
-    // Menu and Cart (require login)
-    Route::get('/menu', fn() => Inertia::render('Customer/Menu'))->name('customer.menu');
-    Route::get('/cart', fn() => Inertia::render('Customer/Cart'))->name('customer.cart');
-    
-    // Dashboard and ordering
-    Route::get('/dashboard', fn() => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
-    Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
-    Route::get('/payment', fn() => Inertia::render('Customer/Payment'))->name('customer.payment');
-    Route::get('/reservation', fn() => redirect()->route('customer.reservations'))->name('customer.reservation');
-    Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
-    Route::get('/orders/{order}', fn() => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
-    Route::get('/track/{orderId}', fn() => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
+// ALL customer routes are PUBLIC (for Telegram Mini App - Sprint P15)
+// Auth is handled at the API level via auth.customer middleware
+// The frontend will detect Telegram and call /api/telegram-webapp/init to establish session
+Route::get('/menu', fn() => Inertia::render('Customer/Menu'))->name('customer.menu');
+Route::get('/cart', fn() => Inertia::render('Customer/Cart'))->name('customer.cart');
+Route::get('/dashboard', fn() => Inertia::render('Customer/Dashboard'))->name('customer.dashboard');
+Route::get('/checkout', fn() => Inertia::render('Customer/Checkout'))->name('customer.checkout');
+Route::get('/payment', fn() => Inertia::render('Customer/Payment'))->name('customer.payment');
+Route::get('/reservation', fn() => redirect()->route('customer.reservations'))->name('customer.reservation');
+Route::get('/restaurant', fn() => Inertia::render('Customer/RestaurantDashboard'))->name('customer.restaurant');
+Route::get('/orders/{order}', fn() => Inertia::render('Customer/OrderDetail'))->name('customer.order.detail');
+Route::get('/track/{orderId}', fn() => Inertia::render('Customer/OrderTracking'))->name('customer.order.track');
+
+
+// Temporary Fix Route
+Route::middleware(['auth'])->get('/fix-my-profile', function () {
+    $user = auth()->user();
+    if (!$user->customer) {
+        \App\Models\Customer::create([
+            'user_id' => $user->id,
+            'customer_code' => 'CUST-' . strtoupper(\Illuminate\Support\Str::random(8)),
+            'loyalty_points' => 0,
+            'points_balance' => 0,
+            'total_spent' => 0,
+        ]);
+        
+        // Ensure role is attached
+        $role = \App\Models\Role::where('slug', 'customer')->first();
+        if ($role && !$user->hasRole('customer')) {
+            $user->roles()->attach($role);
+        }
+        
+        return 'Fixed! Customer profile created. <a href="/customer/dashboard">Go to Dashboard</a>';
+    }
+    return 'Your profile is already fine. <a href="/customer/dashboard">Go to Dashboard</a>';
 });
 
-Route::prefix('customer')->middleware('auth')->group(function () {
+// Customer prefixed routes - PUBLIC for Telegram Mini App (Sprint P15)
+Route::prefix('customer')->group(function () {
     Route::get('/profile', fn() => Inertia::render('Customer/Profile'))->name('customer.profile');
     Route::get('/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');    
     Route::get('/orders/{orderId}', fn($orderId) => Inertia::render('Customer/OrderDetails', ['orderId' => $orderId]))->name('customer.orders.show');

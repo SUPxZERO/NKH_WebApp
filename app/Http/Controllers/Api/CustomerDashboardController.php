@@ -205,6 +205,47 @@ class CustomerDashboardController extends Controller
      */
     public function dashboardStats(Request $request)
     {
+        // Handle Telegram Guest Logic
+        $telegramUserId = session('telegram_user_id');
+        $telegramData = session('telegram_user');
+        $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
+
+        if ($telegramId) {
+            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
+            if ($telegramUser) {
+                // Get orders for Telegram guest
+                $ordersQuery = Order::where(function($q) use ($telegramUser) {
+                    $q->where('telegram_user_id', $telegramUser->id);
+                    if ($telegramUser->customer_id) {
+                        $q->orWhere('customer_id', $telegramUser->customer_id);
+                    }
+                });
+
+                $ordersThisMonth = (clone $ordersQuery)
+                    ->whereYear('created_at', now()->year)
+                    ->whereMonth('created_at', now()->month)
+                    ->count();
+
+                $ordersLastMonth = (clone $ordersQuery)
+                    ->whereYear('created_at', now()->subMonth()->year)
+                    ->whereMonth('created_at', now()->subMonth()->month)
+                    ->count();
+
+                $ordersTrend = $ordersLastMonth > 0 
+                    ? (int) ((($ordersThisMonth - $ordersLastMonth) / $ordersLastMonth) * 100)
+                    : 0;
+
+                return response()->json([
+                    'data' => [
+                        'orders_this_month' => $ordersThisMonth,
+                        'orders_trend' => $ordersTrend,
+                        'points_earned_this_month' => 0, // Guests don't earn points yet
+                        'available_rewards' => 0,
+                    ],
+                ]);
+            }
+        }
+
         $user = Auth::user();
         
         if (!$user) {
@@ -268,15 +309,30 @@ class CustomerDashboardController extends Controller
      */
     public function orders(Request $request)
     {
-        // Handle both authenticated users and dev mode
+        // Handle Telegram Guest Access
+        $telegramUserId = session('telegram_user_id');
+        $telegramData = session('telegram_user');
+        $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
+
+        if ($telegramId) {
+            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
+            if ($telegramUser) {
+                // Build query for Telegram guest
+                $query = Order::where(function($q) use ($telegramUser) {
+                    $q->where('telegram_user_id', $telegramUser->id);
+                    if ($telegramUser->customer_id) {
+                        $q->orWhere('customer_id', $telegramUser->customer_id);
+                    }
+                });
+                
+                return $this->processOrdersQuery($query, $request);
+            }
+        }
+
+        // Standard Customer Access
         $customer = null;
-        
         if ($request->user()) {
             $customer = Customer::where('user_id', $request->user()->id)->first();
-        } else {
-            // DEV MODE: Fallback to customer ID 1
-            \Log::warning('CustomerDashboardController: No authenticated user, using fallback customer');
-            $customer = Customer::find(1);
         }
 
         if (!$customer) {
@@ -287,12 +343,19 @@ class CustomerDashboardController extends Controller
             ], 404);
         }
 
+        // Build query for Standard Customer
+        $query = Order::where('customer_id', $customer->id);
+        
+        return $this->processOrdersQuery($query, $request);
+    }
+
+    /**
+     * Helper to process orders query with filters and pagination
+     */
+    private function processOrdersQuery($query, Request $request) 
+    {
         // Build query with eager loading to prevent N+1
-        $query = Order::where('customer_id', $customer->id)
-            // For pay_now orders, only show them once payment has been at least partially
-            // completed. This prevents failed or abandoned immediate-payment attempts
-            // from appearing in the customer's order history.
-            ->where(function ($q) {
+        $query->where(function ($q) {
                 $q->where('payment_mode', '!=', 'pay_now')
                   ->orWhereIn('payment_status', [
                       Order::PAYMENT_STATUS_PAID,
@@ -497,8 +560,42 @@ class CustomerDashboardController extends Controller
     /**
      * Get single order details
      */
+    /**
+     * Get single order details
+     */
     public function show(Request $request, $id)
     {
+        // Handle Telegram Guest Access
+        $telegramUserId = session('telegram_user_id'); // From header or session
+        $telegramData = session('telegram_user');
+        $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
+
+        if ($telegramId) {
+            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
+            if ($telegramUser) {
+                $order = Order::where('id', $id)
+                    ->where(function($q) use ($telegramUser) {
+                        $q->where('telegram_user_id', $telegramUser->id);
+                        // Also allow if linked customer matches
+                        if ($telegramUser->customer_id) {
+                            $q->orWhere('customer_id', $telegramUser->customer_id);
+                        }
+                    })
+                    ->with([
+                        'items.menuItem.translations',
+                        'location',
+                        'timeSlot',
+                        'customerAddress',
+                        'invoice',
+                        'paymentCollector'
+                    ])
+                    ->firstOrFail();
+                    
+                return $this->formatOrderResponse($order);
+            }
+        }
+
+        // Standard Customer Access
         $user = $request->user();
         if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
 
@@ -516,9 +613,14 @@ class CustomerDashboardController extends Controller
             ])
             ->firstOrFail();
 
-        // reuse basic mapping logic or simple response
-        // for simplicity, returning mostly raw model with relations or mapped similar to orders list
-        
+        return $this->formatOrderResponse($order);
+    }
+
+    /**
+     * Helper to format order response
+     */
+    private function formatOrderResponse($order)
+    {
         $previewImage = null;
         if ($firstItem = $order->items->first()) {
             if ($menuItem = $firstItem->menuItem) {

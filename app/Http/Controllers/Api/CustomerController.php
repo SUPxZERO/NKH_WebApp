@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\TelegramWebAppAuth;
 use App\Http\Requests\Api\Customer\StoreCustomerRequest;
 use App\Http\Requests\Api\Customer\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\OrderResource;
 use App\Models\Customer;
+use App\Models\TelegramUser;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +21,44 @@ use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
+    /**
+     * Get customer from authenticated user OR from Telegram session
+     * Returns [Customer|null, TelegramUser|null, error_message|null]
+     */
+    private function getCustomerOrTelegram(Request $request): array
+    {
+        // First check if user is authenticated via Laravel
+        if ($request->user() && $request->user()->customer) {
+            return [$request->user()->customer, null, null];
+        }
+
+        // Check for any Telegram session (guest or webapp)
+        $telegramUserId = session('telegram_user_id');
+        $telegramData = session('telegram_user');
+        
+        // Try to get telegram_id from either source
+        $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
+        
+        if ($telegramId) {
+            $telegramUser = TelegramUser::where('telegram_id', $telegramId)->first();
+            
+            if ($telegramUser) {
+                // If Telegram user has a linked customer, use that
+                if ($telegramUser->customer_id) {
+                    $customer = Customer::find($telegramUser->customer_id);
+                    if ($customer) {
+                        return [$customer, $telegramUser, null];
+                    }
+                }
+                
+                // Return TelegramUser for guest operations
+                return [null, $telegramUser, null];
+            }
+        }
+
+        return [null, null, 'Customer profile not found. Please login or use Telegram.'];
+    }
+
     // GET /api/admin/customers (role:admin,manager)
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -283,8 +323,19 @@ class CustomerController extends Controller
     // GET /api/customer/addresses - Get customer addresses
     public function getAddresses(Request $request): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        
+        // For Telegram guests without customer account, return empty addresses
+        // They can still place orders with address entered at checkout
+        if (!$customer && $telegramUser) {
+            return response()->json([
+                'data' => [],
+                'telegram_guest' => true,
+                'message' => 'Telegram guests can enter address during checkout',
+            ]);
+        }
+        
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
         
         $addresses = $customer->addresses()->get();
         return response()->json(['data' => $addresses]);
@@ -293,8 +344,40 @@ class CustomerController extends Controller
     // POST /api/customer/addresses - Add new address
     public function storeAddress(Request $request): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        
+        // For Telegram guests without customer account, store address in session for checkout
+        if (!$customer && $telegramUser) {
+            $validated = $request->validate([
+                'label' => 'required|string|max:100',
+                'address_line_1' => 'required|string|max:255',
+                'address_line_2' => 'nullable|string|max:255',
+                'city' => 'required|string|max:120',
+                'province' => 'required|string|max:120',
+                'postal_code' => 'required|string|max:20',
+                'delivery_instructions' => 'nullable|string',
+            ]);
+
+            // Store in session for use during checkout
+            $sessionAddresses = session('telegram_guest_addresses', []);
+            $validated['id'] = count($sessionAddresses) + 1;
+            $validated['is_default'] = count($sessionAddresses) === 0;
+            $sessionAddresses[] = $validated;
+            session(['telegram_guest_addresses' => $sessionAddresses]);
+
+            // Also update TelegramUser delivery_address
+            $telegramUser->update([
+                'delivery_address' => $validated['address_line_1'] . ', ' . $validated['city'],
+            ]);
+
+            return response()->json([
+                'message' => 'Address saved for checkout',
+                'data' => $validated,
+                'telegram_guest' => true,
+            ], 201);
+        }
+        
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $validated = $request->validate([
             'label' => 'required|string|max:100',

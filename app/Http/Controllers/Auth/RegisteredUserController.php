@@ -61,8 +61,20 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
-            'role' => 'customer', // Always customer
             'is_active' => true,
+        ]);
+
+        $role = \App\Models\Role::where('slug', 'customer')->first();
+        if ($role) {
+            $user->roles()->attach($role);
+        }
+
+        \App\Models\Customer::create([
+            'user_id' => $user->id,
+            'customer_code' => 'CUST-' . strtoupper(\Illuminate\Support\Str::random(8)),
+            'loyalty_points' => 0,
+            'points_balance' => 0,
+            'total_spent' => 0,
         ]);
 
         event(new Registered($user));

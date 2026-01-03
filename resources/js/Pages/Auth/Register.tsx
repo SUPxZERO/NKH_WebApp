@@ -24,6 +24,56 @@ const registerSchema = z.object({
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
+// Premium Input Component
+// Premium Input Component
+const InputField = React.forwardRef(({
+  icon: Icon,
+  label,
+  error,
+  type = 'text',
+  showToggle = false,
+  toggleValue = false,
+  onToggle = () => { },
+  ...props
+}: any, ref: any) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-gray-300">{label}</label>
+    <div className="relative group">
+      <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+      <div className="relative flex items-center">
+        <Icon className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-fuchsia-400 transition-colors duration-200" />
+        <input
+          ref={ref}
+          type={showToggle ? (toggleValue ? 'text' : 'password') : type}
+          className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all duration-200"
+          {...props}
+        />
+        {showToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="absolute right-4 text-gray-500 hover:text-white transition-colors"
+          >
+            {toggleValue ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        )}
+      </div>
+    </div>
+    {error && (
+      <motion.p
+        initial={{ opacity: 0, y: -5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-xs text-rose-400 flex items-center gap-1"
+      >
+        {error}
+      </motion.p>
+    )}
+  </div>
+));
+
+// Set display name for debugging
+InputField.displayName = 'InputField';
+
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -35,6 +85,7 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -42,6 +93,11 @@ export default function Register() {
       terms: false,
     },
   });
+
+  const termsAccepted = watch('terms');
+
+
+
 
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
@@ -85,50 +141,7 @@ export default function Register() {
     }
   };
 
-  // Premium Input Component
-  const InputField = ({
-    icon: Icon,
-    label,
-    error,
-    type = 'text',
-    showToggle = false,
-    toggleValue = false,
-    onToggle = () => { },
-    ...props
-  }: any) => (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-300">{label}</label>
-      <div className="relative group">
-        <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
-        <div className="relative flex items-center">
-          <Icon className="absolute left-4 w-5 h-5 text-gray-500 group-focus-within:text-fuchsia-400 transition-colors duration-200" />
-          <input
-            type={showToggle ? (toggleValue ? 'text' : 'password') : type}
-            className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all duration-200"
-            {...props}
-          />
-          {showToggle && (
-            <button
-              type="button"
-              onClick={onToggle}
-              className="absolute right-4 text-gray-500 hover:text-white transition-colors"
-            >
-              {toggleValue ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          )}
-        </div>
-      </div>
-      {error && (
-        <motion.p
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-xs text-rose-400 flex items-center gap-1"
-        >
-          {error}
-        </motion.p>
-      )}
-    </div>
-  );
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -265,10 +278,18 @@ export default function Register() {
                   <input
                     {...register('terms')}
                     type="checkbox"
-                    className="sr-only peer"
+                    className="sr-only"
                   />
-                  <div className="w-5 h-5 rounded-md border border-white/20 bg-white/[0.03] peer-checked:bg-gradient-to-br peer-checked:from-fuchsia-500 peer-checked:to-pink-500 peer-checked:border-transparent transition-all flex items-center justify-center">
-                    <Check className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                  <div className={cn(
+                    "w-5 h-5 rounded-md border bg-white/[0.03] transition-all flex items-center justify-center",
+                    termsAccepted
+                      ? "bg-gradient-to-br from-fuchsia-500 to-pink-500 border-transparent"
+                      : "border-white/20"
+                  )}>
+                    <Check className={cn(
+                      "w-3.5 h-3.5 text-white transition-opacity",
+                      termsAccepted ? "opacity-100" : "opacity-0"
+                    )} />
                   </div>
                 </div>
                 <span className="text-sm text-gray-400 leading-relaxed">

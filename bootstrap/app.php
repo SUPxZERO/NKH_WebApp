@@ -15,7 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust all proxies (for Render.com HTTPS support)
         $middleware->trustProxies(at: '*');
 
-        // Web middleware - add Inertia handling
+        // Web middleware - Telegram auth MUST run before Authenticate
+        $middleware->web(prepend: [
+            \App\Http\Middleware\TelegramWebAppAuth::class, // Sprint P15: MUST run before auth
+        ]);
+        
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
@@ -27,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
+            \App\Http\Middleware\TelegramWebAppAuth::class, // Sprint P15: Auto-auth Telegram users for API
         ]);
 
         // Middleware aliases
@@ -38,6 +43,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
             'mfa.verify' => \App\Http\Middleware\VerifyMfa::class,
             'debug.permissions' => \App\Http\Middleware\DebugPermissions::class,
+            'telegram.api' => \App\Http\Middleware\TelegramAuth::class,
+            'telegram.webapp' => \App\Http\Middleware\TelegramWebAppAuth::class,
+            'auth.customer' => \App\Http\Middleware\CustomerApiAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

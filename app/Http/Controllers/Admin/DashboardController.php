@@ -63,6 +63,10 @@ class DashboardController extends Controller
         $now = Carbon::now();
         $revenue = collect();
 
+        // Use COALESCE to prefer completed_at, then ordered_at for determining revenue date
+        // Include orders that are either completed OR have payment_status = 'paid'
+        // Note: orders table doesn't have paid_at column, use completed_at or ordered_at
+
         switch ($period) {
             case 'daily':
                 // Show hourly breakdown for today (6 AM to 11 PM)
@@ -70,12 +74,14 @@ class DashboardController extends Controller
                 $endHour = 23;
 
                 $hourlyData = Order::select(
-                    DB::raw('HOUR(completed_at) as hour'),
+                    DB::raw('HOUR(COALESCE(completed_at, ordered_at)) as hour'),
                     DB::raw('SUM(total_amount) as total')
                 )
-                ->where('status', 'completed')
-                ->whereNotNull('completed_at')
-                ->whereDate('completed_at', $now->toDateString())
+                ->where(function($query) {
+                    $query->where('status', 'completed')
+                          ->orWhere('payment_status', 'paid');
+                })
+                ->whereDate(DB::raw('COALESCE(completed_at, ordered_at)'), $now->toDateString())
                 ->groupBy('hour')
                 ->get()
                 ->keyBy('hour');
@@ -95,12 +101,14 @@ class DashboardController extends Controller
                 $endOfWeek = $now->copy()->endOfWeek();
 
                 $dailyData = Order::select(
-                    DB::raw('DATE(completed_at) as date'),
+                    DB::raw('DATE(COALESCE(completed_at, ordered_at)) as date'),
                     DB::raw('SUM(total_amount) as total')
                 )
-                ->where('status', 'completed')
-                ->whereNotNull('completed_at')
-                ->whereBetween('completed_at', [$startOfWeek, $endOfWeek])
+                ->where(function($query) {
+                    $query->where('status', 'completed')
+                          ->orWhere('payment_status', 'paid');
+                })
+                ->whereBetween(DB::raw('COALESCE(completed_at, ordered_at)'), [$startOfWeek, $endOfWeek])
                 ->groupBy('date')
                 ->get()
                 ->keyBy('date');
@@ -121,13 +129,15 @@ class DashboardController extends Controller
                 $daysInMonth = $now->daysInMonth;
 
                 $dailyData = Order::select(
-                    DB::raw('DATE(completed_at) as date'),
+                    DB::raw('DATE(COALESCE(completed_at, ordered_at)) as date'),
                     DB::raw('SUM(total_amount) as total')
                 )
-                ->where('status', 'completed')
-                ->whereNotNull('completed_at')
-                ->whereMonth('completed_at', $now->month)
-                ->whereYear('completed_at', $now->year)
+                ->where(function($query) {
+                    $query->where('status', 'completed')
+                          ->orWhere('payment_status', 'paid');
+                })
+                ->whereMonth(DB::raw('COALESCE(completed_at, ordered_at)'), $now->month)
+                ->whereYear(DB::raw('COALESCE(completed_at, ordered_at)'), $now->year)
                 ->groupBy('date')
                 ->get()
                 ->keyBy('date');

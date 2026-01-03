@@ -26,6 +26,7 @@ import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import { GlobalSearch, useGlobalSearch, SearchTrigger } from '@/app/components/ui/GlobalSearch';
 import { useAutoCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
+import { useTelegramAuth } from '@/app/hooks/useTelegramAuth';
 
 type Props = {
   children: React.ReactNode;
@@ -58,6 +59,9 @@ export default function CustomerLayout({ children, className }: Props) {
 
   // Subscribe to real-time customer notifications
   useAutoCustomerNotifications({ showToast: true });
+
+  // Initialize Telegram WebApp session (Sprint P15 - Guest ordering)
+  const telegram = useTelegramAuth();
 
   const handleLogout = () => {
     router.post('/logout');

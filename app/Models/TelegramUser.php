@@ -17,6 +17,9 @@ class TelegramUser extends Model
         'first_name',
         'last_name',
         'language_code',
+        'phone_number',
+        'delivery_address',
+        'saved_addresses',
         'conversation_state',
         'conversation_data',
         'is_active',
@@ -26,6 +29,7 @@ class TelegramUser extends Model
 
     protected $casts = [
         'conversation_data' => 'array',
+        'saved_addresses' => 'array',
         'is_active' => 'boolean',
         'notifications_enabled' => 'boolean',
         'last_interaction_at' => 'datetime',
@@ -78,6 +82,14 @@ class TelegramUser extends Model
     public function orderNotifications()
     {
         return $this->hasMany(TelegramOrderNotification::class);
+    }
+
+    /**
+     * Get orders placed by this Telegram user (guest orders)
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
     /**

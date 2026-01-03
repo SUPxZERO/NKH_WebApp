@@ -30,7 +30,6 @@ class User extends Authenticatable
         'image_path',
         'default_location_id',
         'is_active',
-        'role',
     ];
 
     /**

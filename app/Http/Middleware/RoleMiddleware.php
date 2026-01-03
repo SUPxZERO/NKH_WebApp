@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Middleware\TelegramWebAppAuth;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -15,6 +16,28 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string ...$roles)
     {
         $user = $request->user();
+
+        // Check for Telegram guest users trying to access Customer routes
+        if (!$user && !empty($roles)) {
+            // Parse roles
+            $parsedRoles = $roles;
+            if (count($roles) === 1 && str_contains($roles[0], ',')) {
+                $parsedRoles = array_map('trim', explode(',', $roles[0]));
+            }
+            $parsedRoles = array_map('strtolower', $parsedRoles);
+
+            // If customer role is required and we have any telegram session, allow through
+            if (in_array('customer', $parsedRoles)) {
+                // Allow fully authenticated Telegram guests
+                if (TelegramWebAppAuth::isTelegramGuest()) {
+                    return $next($request);
+                }
+                // Allow pending Telegram sessions (frontend will upgrade)
+                if (TelegramWebAppAuth::isTelegramPending() || session('telegram_webapp')) {
+                    return $next($request);
+                }
+            }
+        }
 
         if (!$user) {
             throw new HttpException(401, 'Unauthenticated.');

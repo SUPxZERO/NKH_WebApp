@@ -52,6 +52,16 @@ function createClient(): AxiosInstance {
       delete config.headers['Content-Type'];
     }
 
+    // Add Telegram user ID header for iframe auth (Sprint P15)
+    try {
+      if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        const telegramUserId = (window as any).Telegram.WebApp.initDataUnsafe.user.id;
+        (config.headers = config.headers || {})['X-Telegram-User-Id'] = String(telegramUserId);
+      }
+    } catch (_) {
+      // no-op
+    }
+
     // Preserve legacy token-based flows if a token exists in localStorage
     try {
       if (typeof window !== 'undefined') {
