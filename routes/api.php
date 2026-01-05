@@ -777,6 +777,13 @@ Route::prefix('telegram')
 
         // Addresses
         Route::get('/addresses', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'addresses']);
+        Route::post('/addresses', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'addAddress']);
+        Route::put('/addresses/{index}', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateAddress']);
+        Route::delete('/addresses/{index}', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'deleteAddress']);
+        Route::post('/addresses/{index}/set-default', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'setDefaultAddress']);
+
+        // Profile management
+        Route::put('/profile', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateProfile']);
 
         // Loyalty
         Route::get('/loyalty/stats', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'loyaltyStats']);

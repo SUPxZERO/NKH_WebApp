@@ -85,6 +85,12 @@ class TelegramCheckoutController extends Controller
         $validated = $request->validate([
             'phone_number' => 'nullable|string|max:20',
             'delivery_address' => 'nullable|string|max:500',
+            'address_label' => 'nullable|string|max:50',
+            'address_line_1' => 'nullable|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
             'save_for_future' => 'nullable|boolean',
         ]);
 
@@ -99,14 +105,31 @@ class TelegramCheckoutController extends Controller
         
         if (isset($validated['delivery_address'])) {
             $updates['delivery_address'] = $validated['delivery_address'];
+        }
+        
+        // Save structured address to database if save_for_future is requested
+        if (($validated['save_for_future'] ?? false) && isset($validated['address_line_1'])) {
+            // Determine ownership - customer_id for linked, telegram_user_id for guests
+            $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
+            $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
             
-            // Save to saved_addresses if requested
-            if ($validated['save_for_future'] ?? false) {
-                $savedAddresses = $user->saved_addresses ?? [];
-                if (!in_array($validated['delivery_address'], $savedAddresses)) {
-                    $savedAddresses[] = $validated['delivery_address'];
-                    $updates['saved_addresses'] = $savedAddresses;
-                }
+            // Check if address already exists
+            $existingAddress = \App\Models\CustomerAddress::where($ownerField, $ownerId)
+                ->where('address_line_1', $validated['address_line_1'])
+                ->where('city', $validated['city'] ?? '')
+                ->first();
+            
+            if (!$existingAddress) {
+                \App\Models\CustomerAddress::create([
+                    $ownerField => $ownerId,
+                    'label' => $validated['address_label'] ?? 'Home',
+                    'address_line_1' => $validated['address_line_1'],
+                    'address_line_2' => $validated['address_line_2'] ?? null,
+                    'city' => $validated['city'] ?? '',
+                    'province' => $validated['province'] ?? $validated['city'] ?? '',
+                    'postal_code' => $validated['postal_code'] ?? '',
+                    'is_default' => false,
+                ]);
             }
         }
 
@@ -114,13 +137,26 @@ class TelegramCheckoutController extends Controller
             $user->update($updates);
         }
 
+        // Get addresses from database for response
+        $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
+        $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
+        $savedAddresses = \App\Models\CustomerAddress::where($ownerField, $ownerId)
+            ->get()
+            ->map(fn($addr) => [
+                'id' => $addr->id,
+                'label' => $addr->label,
+                'address_line_1' => $addr->address_line_1,
+                'city' => $addr->city,
+            ])
+            ->toArray();
+
         return response()->json([
             'success' => true,
             'message' => 'Guest info saved',
             'data' => [
                 'phone_number' => $user->phone_number,
                 'delivery_address' => $user->delivery_address,
-                'saved_addresses' => $user->saved_addresses ?? [],
+                'saved_addresses' => $savedAddresses,
             ],
         ]);
     }
@@ -309,18 +345,39 @@ class TelegramCheckoutController extends Controller
     }
 
     /**
-     * Get saved addresses for the user
+     * Get saved addresses for the user (from database)
      */
     public function getSavedAddresses(Request $request): JsonResponse
     {
         /** @var TelegramUser $user */
         $user = $request->user('telegram');
 
+        // Get addresses from database
+        $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
+        $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
+
+        $savedAddresses = \App\Models\CustomerAddress::where($ownerField, $ownerId)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn($addr) => [
+                'id' => $addr->id,
+                'label' => $addr->label,
+                'address_line_1' => $addr->address_line_1,
+                'address_line_2' => $addr->address_line_2,
+                'city' => $addr->city,
+                'province' => $addr->province,
+                'postal_code' => $addr->postal_code,
+                'delivery_instructions' => $addr->delivery_instructions,
+                'is_default' => (bool) $addr->is_default,
+            ])
+            ->toArray();
+
         return response()->json([
             'success' => true,
             'data' => [
                 'current_address' => $user->delivery_address,
-                'saved_addresses' => $user->saved_addresses ?? [],
+                'saved_addresses' => $savedAddresses,
                 'phone_number' => $user->phone_number,
             ],
         ]);

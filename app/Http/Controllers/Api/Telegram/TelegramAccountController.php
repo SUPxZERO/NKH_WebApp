@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class TelegramAccountController extends Controller
 {
     /**
-     * Get current user info
+     * Get current user info (works for both guest and linked accounts)
      */
     public function me(Request $request): JsonResponse
     {
@@ -28,7 +28,12 @@ class TelegramAccountController extends Controller
             'id' => $user->id,
             'telegram_id' => $user->telegram_id,
             'telegram_username' => $user->telegram_username,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
             'display_name' => $user->display_name,
+            'phone_number' => $user->phone_number,
+            'delivery_address' => $user->delivery_address,
+            'saved_addresses' => $user->saved_addresses ?? [],
             'has_linked_account' => $user->hasLinkedAccount(),
         ];
 
@@ -123,35 +128,283 @@ class TelegramAccountController extends Controller
     }
 
     /**
-     * Get customer addresses
+     * Get addresses (works for both guest and linked accounts)
+     * All addresses stored in customer_addresses table
+     * - Guest users: linked by telegram_user_id
+     * - Linked users: linked by customer_id
      */
     public function addresses(Request $request): JsonResponse
     {
         $user = $request->user('telegram');
 
-        if (!$user->hasLinkedAccount()) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Account not linked',
-            ], 401);
+        // Query addresses - for linked accounts use customer_id, for guests use telegram_user_id
+        $query = CustomerAddress::query();
+        
+        if ($user->hasLinkedAccount()) {
+            $query->where('customer_id', $user->customer_id);
+        } else {
+            $query->where('telegram_user_id', $user->id);
         }
 
-        $addresses = CustomerAddress::where('customer_id', $user->customer_id)
+        $addresses = $query->orderBy('is_default', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($addr) {
+            ->map(function ($addr) use ($user) {
                 return [
                     'id' => $addr->id,
                     'label' => $addr->label,
                     'address_line_1' => $addr->address_line_1,
                     'address_line_2' => $addr->address_line_2,
                     'city' => $addr->city,
-                    'is_default' => $addr->is_default,
+                    'province' => $addr->province,
+                    'postal_code' => $addr->postal_code,
+                    'latitude' => $addr->latitude,
+                    'longitude' => $addr->longitude,
+                    'delivery_instructions' => $addr->delivery_instructions,
+                    'is_default' => (bool) $addr->is_default,
+                    'source' => $user->hasLinkedAccount() ? 'customer' : 'telegram',
                 ];
             });
 
         return response()->json([
             'success' => true,
             'data' => $addresses,
+        ]);
+    }
+
+    /**
+     * Update profile information (works for both guest and linked accounts)
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'first_name' => 'nullable|string|max:100',
+            'last_name' => 'nullable|string|max:100',
+            'phone_number' => 'nullable|string|max:20',
+            'delivery_address' => 'nullable|string|max:500',
+        ]);
+
+        $user = $request->user('telegram');
+
+        $updates = array_filter($validated, fn($value) => $value !== null);
+
+        if (!empty($updates)) {
+            $user->update($updates);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'data' => [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'phone_number' => $user->phone_number,
+                'delivery_address' => $user->delivery_address,
+                'display_name' => $user->display_name,
+            ],
+        ]);
+    }
+
+    /**
+     * Add a new address (stored in database for both guest and linked accounts)
+     */
+    public function addAddress(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'label' => 'required|string|max:50',
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'delivery_instructions' => 'nullable|string|max:500',
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        $user = $request->user('telegram');
+
+        // Determine ownership - customer_id for linked, telegram_user_id for guests
+        $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
+        $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
+
+        // If setting as default, unset other defaults first
+        if ($validated['is_default'] ?? false) {
+            CustomerAddress::where($ownerField, $ownerId)
+                ->update(['is_default' => false]);
+        }
+
+        // Create address in database
+        $address = CustomerAddress::create([
+            $ownerField => $ownerId,
+            'label' => $validated['label'],
+            'address_line_1' => $validated['address_line_1'],
+            'address_line_2' => $validated['address_line_2'] ?? null,
+            'city' => $validated['city'],
+            'province' => $validated['province'] ?? $validated['city'],
+            'postal_code' => $validated['postal_code'] ?? '',
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'delivery_instructions' => $validated['delivery_instructions'] ?? null,
+            'is_default' => $validated['is_default'] ?? false,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Address added successfully',
+            'data' => [
+                'id' => $address->id,
+                'label' => $address->label,
+                'address_line_1' => $address->address_line_1,
+                'address_line_2' => $address->address_line_2,
+                'city' => $address->city,
+                'province' => $address->province,
+                'postal_code' => $address->postal_code,
+                'latitude' => $address->latitude,
+                'longitude' => $address->longitude,
+                'delivery_instructions' => $address->delivery_instructions,
+                'is_default' => (bool) $address->is_default,
+                'source' => $user->hasLinkedAccount() ? 'customer' : 'telegram',
+            ],
+        ]);
+    }
+
+    /**
+     * Update an existing address (stored in database for both guest and linked accounts)
+     */
+    public function updateAddress(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'label' => 'nullable|string|max:50',
+            'address_line_1' => 'nullable|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'delivery_instructions' => 'nullable|string|max:500',
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        $user = $request->user('telegram');
+
+        // Determine ownership
+        $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
+        $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
+
+        // Find address
+        $address = CustomerAddress::where($ownerField, $ownerId)
+            ->where('id', $id)
+            ->first();
+
+        if (!$address) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Address not found',
+            ], 404);
+        }
+
+        // If setting as default, unset other defaults first
+        if ($validated['is_default'] ?? false) {
+            CustomerAddress::where($ownerField, $ownerId)
+                ->where('id', '!=', $id)
+                ->update(['is_default' => false]);
+        }
+
+        $address->update(array_filter($validated, fn($v) => $v !== null));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Address updated successfully',
+            'data' => [
+                'id' => $address->id,
+                'label' => $address->label,
+                'address_line_1' => $address->address_line_1,
+                'address_line_2' => $address->address_line_2,
+                'city' => $address->city,
+                'province' => $address->province,
+                'postal_code' => $address->postal_code,
+                'latitude' => $address->latitude,
+                'longitude' => $address->longitude,
+                'delivery_instructions' => $address->delivery_instructions,
+                'is_default' => (bool) $address->is_default,
+                'source' => $user->hasLinkedAccount() ? 'customer' : 'telegram',
+            ],
+        ]);
+    }
+
+    /**
+     * Delete an address (from database for both guest and linked accounts)
+     */
+    public function deleteAddress(Request $request, $id): JsonResponse
+    {
+        $user = $request->user('telegram');
+
+        // Determine ownership
+        $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
+        $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
+
+        // Find address
+        $address = CustomerAddress::where($ownerField, $ownerId)
+            ->where('id', $id)
+            ->first();
+
+        if (!$address) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Address not found',
+            ], 404);
+        }
+
+        $address->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Address deleted successfully',
+        ]);
+    }
+
+    /**
+     * Set an address as default (in database for both guest and linked accounts)
+     */
+    public function setDefaultAddress(Request $request, $id): JsonResponse
+    {
+        $user = $request->user('telegram');
+
+        // Determine ownership
+        $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
+        $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
+
+        // Find address
+        $address = CustomerAddress::where($ownerField, $ownerId)
+            ->where('id', $id)
+            ->first();
+
+        if (!$address) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Address not found',
+            ], 404);
+        }
+
+        // Unset all defaults first
+        CustomerAddress::where($ownerField, $ownerId)
+            ->update(['is_default' => false]);
+
+        $address->update(['is_default' => true]);
+
+        // Also update TelegramUser's delivery_address for convenience
+        $user->update([
+            'delivery_address' => $address->address_line_1 . 
+                ($address->address_line_2 ? ', ' . $address->address_line_2 : '') .
+                ', ' . $address->city,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Default address updated',
         ]);
     }
 
