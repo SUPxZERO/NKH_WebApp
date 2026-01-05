@@ -13,7 +13,13 @@ createInertiaApp({
   resolve: async (name) => {
     const page = await resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')) as any;
     // Wrap the page component with InertiaWrapper to provide global components
-    page.default.layout = page.default.layout || ((pageNode: React.ReactNode) => <InertiaWrapper>{pageNode}</InertiaWrapper>);
+    // We wrap ALL pages, even if they have a custom layout, to ensure AuthProvider is always available
+    const pageLayout = page.default.layout;
+    page.default.layout = (pageNode: React.ReactNode) => (
+      <InertiaWrapper>
+        {pageLayout ? pageLayout(pageNode) : pageNode}
+      </InertiaWrapper>
+    );
     return page;
   },
   setup({ el, App, props }) {

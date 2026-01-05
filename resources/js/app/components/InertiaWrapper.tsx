@@ -1,6 +1,7 @@
 import { PropsWithChildren } from 'react';
 import { ShortcutsProvider } from '@/app/providers/ShortcutsProvider';
 import { FoodDetailProvider } from '@/app/providers/FoodDetailProvider';
+import { AuthProvider } from '@/app/providers/AuthProvider';
 
 /**
  * Wrapper component that renders inside the Inertia App component.
@@ -13,9 +14,11 @@ import { FoodDetailProvider } from '@/app/providers/FoodDetailProvider';
 export function InertiaWrapper({ children }: PropsWithChildren) {
   return (
     <FoodDetailProvider>
-      <ShortcutsProvider>
-        {children}
-      </ShortcutsProvider>
+      <AuthProvider>
+        <ShortcutsProvider>
+          {children}
+        </ShortcutsProvider>
+      </AuthProvider>
     </FoodDetailProvider>
   );
 }

@@ -230,4 +230,44 @@ class TelegramKeyboardBuilder
             ],
         ]);
     }
+
+    /**
+     * SPRINT P16: Build phone request keyboard using Telegram's native request_contact
+     * 
+     * This uses a ReplyKeyboard (not InlineKeyboard) with request_contact: true
+     * to get verified phone number directly from Telegram.
+     */
+    public static function requestPhoneContact(): array
+    {
+        return [
+            'keyboard' => [
+                [['text' => '📱 Share My Phone Number', 'request_contact' => true]],
+                [['text' => '⏭️ Skip for Now']],
+            ],
+            'resize_keyboard' => true,
+            'one_time_keyboard' => true,
+        ];
+    }
+
+    /**
+     * SPRINT P16: Build welcome keyboard with setup options
+     * Encourages phone sharing for better experience
+     */
+    public static function welcomeWithSetup(bool $hasPhone = false): array
+    {
+        if ($hasPhone) {
+            return self::mainMenu();
+        }
+
+        // Show phone request for first-time users
+        return [
+            'keyboard' => [
+                [['text' => '📱 Share Phone for Order Updates', 'request_contact' => true]],
+                [['text' => '🍔 Start Ordering']],
+            ],
+            'resize_keyboard' => true,
+            'one_time_keyboard' => true,
+        ];
+    }
 }
+

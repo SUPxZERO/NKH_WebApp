@@ -15,6 +15,26 @@ use Illuminate\Support\Facades\DB;
 class CustomerDashboardController extends Controller
 {
     /**
+     * Helper to get current customer from Auth or Telegram Session
+     */
+    private function getCurrentCustomer(Request $request): ?Customer
+    {
+        // 1. Standard Auth
+        if ($request->user()) {
+            // Assuming User model has a hasOne Customer relationship
+            return $request->user()->customer;
+        }
+
+        // 2. Telegram Session (set by TelegramWebAppAuth middleware)
+        $telegramData = session('telegram_user');
+        if ($telegramData && isset($telegramData['customer_id'])) {
+             return Customer::find($telegramData['customer_id']);
+        }
+
+        return null;
+    }
+
+    /**
      * Toggle favorite status for a menu item
      */
     public function toggleFavorite(Request $request)
@@ -23,8 +43,9 @@ class CustomerDashboardController extends Controller
             'menu_item_id' => 'required|exists:menu_items,id',
         ]);
 
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+        $customer = $this->getCurrentCustomer($request);
+        if (!$customer) abort(404, 'Customer profile not found');
+
         $menuItemId = $request->input('menu_item_id');
 
         $exists = DB::table('customer_favorites')
@@ -60,9 +81,7 @@ class CustomerDashboardController extends Controller
      */
     public function getExplicitFavorites(Request $request)
     {
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
-
+        $customer = $this->getCurrentCustomer($request);
         if (!$customer) return response()->json(['data' => []]);
 
         $ids = DB::table('customer_favorites')
@@ -77,9 +96,11 @@ class CustomerDashboardController extends Controller
      */
     public function notifications(Request $request)
     {
-        $user = $request->user();
+        $customer = $this->getCurrentCustomer($request);
+        if (!$customer) return response()->json(['data' => []]);
         
-        $notifications = $user->notifications()
+        // Use Notifiable trait on Customer model
+        $notifications = $customer->notifications()
             ->latest()
             ->paginate($request->per_page ?? 20);
 
@@ -91,29 +112,10 @@ class CustomerDashboardController extends Controller
      */
     public function profile(Request $request)
     {
-        $user = Auth::user();
+        $customer = $this->getCurrentCustomer($request);
         
         \Log::info('CustomerDashboardController::profile called', [
-            'user_id' => $user ? $user->id : 'null',
-            'guard' => 'default',
-            'is_web' => Auth::guard('web')->check(),
-            'is_sanctum' => Auth::guard('sanctum')->check(),
-        ]);
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not authenticated',
-            ], 401);
-        }
-        
-        // Get customer record
-        $customer = Customer::with(['user', 'preferredLocation'])
-            ->where('user_id', $user->id)
-            ->first();
-            
-        \Log::info('Customer lookup result', [
-            'found' => $customer ? 'yes' : 'no',
-            'customer_id' => $customer ? $customer->id : 'null'
+            'customer_id' => $customer ? $customer->id : 'null',
         ]);
 
         if (!$customer) {
@@ -121,6 +123,16 @@ class CustomerDashboardController extends Controller
                 'message' => 'Customer profile not found',
             ], 404);
         }
+        
+        // Get customer record
+        // $customer is already loaded by getCurrentCustomer, potentially with user relation
+        // If user relation is not loaded, we can load it here if needed for specific fields
+        $customer->loadMissing(['user', 'preferredLocation']);
+            
+        \Log::info('Customer lookup result', [
+            'found' => $customer ? 'yes' : 'no',
+            'customer_id' => $customer ? $customer->id : 'null'
+        ]);
 
         // Calculate stats
         $totalOrders = Order::where('customer_id', $customer->id)->count();
@@ -171,17 +183,19 @@ class CustomerDashboardController extends Controller
             $nextRewardPoints = 100 - ($customer->points_balance % 100);
         }
 
+        $user = $customer->user; // Could be null for Telegram users
+
         return response()->json([
             'data' => [
                 'id' => $customer->id,
                 'customer_code' => $customer->customer_code,
-                // Include full user object for profile page
+                // Include full user object for profile page (mock if missing)
                 'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'phone' => $user->phone,
-                    'avatar' => $user->avatar_url ?? $user->image_path_url,
+                    'id' => $user?->id ?? 0,
+                    'name' => $user?->name ?? $customer->name,
+                    'email' => $user?->email ?? $customer->email,
+                    'phone' => $user?->phone ?? $customer->phone,
+                    'avatar' => $user?->avatar_url ?? ($user?->image_path_url ?? null),
                 ],
                 // Profile-specific fields
                 'birth_date' => $customer->birth_date?->format('Y-m-d'),
@@ -205,60 +219,8 @@ class CustomerDashboardController extends Controller
      */
     public function dashboardStats(Request $request)
     {
-        // Handle Telegram Guest Logic
-        $telegramUserId = session('telegram_user_id');
-        $telegramData = session('telegram_user');
-        $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
-
-        if ($telegramId) {
-            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
-            if ($telegramUser) {
-                // Get orders for Telegram guest
-                $ordersQuery = Order::where(function($q) use ($telegramUser) {
-                    $q->where('telegram_user_id', $telegramUser->id);
-                    if ($telegramUser->customer_id) {
-                        $q->orWhere('customer_id', $telegramUser->customer_id);
-                    }
-                });
-
-                $ordersThisMonth = (clone $ordersQuery)
-                    ->whereYear('created_at', now()->year)
-                    ->whereMonth('created_at', now()->month)
-                    ->count();
-
-                $ordersLastMonth = (clone $ordersQuery)
-                    ->whereYear('created_at', now()->subMonth()->year)
-                    ->whereMonth('created_at', now()->subMonth()->month)
-                    ->count();
-
-                $ordersTrend = $ordersLastMonth > 0 
-                    ? (int) ((($ordersThisMonth - $ordersLastMonth) / $ordersLastMonth) * 100)
-                    : 0;
-
-                return response()->json([
-                    'data' => [
-                        'orders_this_month' => $ordersThisMonth,
-                        'orders_trend' => $ordersTrend,
-                        'points_earned_this_month' => 0, // Guests don't earn points yet
-                        'available_rewards' => 0,
-                    ],
-                ]);
-            }
-        }
-
-        $user = Auth::user();
+        $customer = $this->getCurrentCustomer($request);
         
-        if (!$user) {
-            return response()->json(['data' => [
-                'orders_this_month' => 0,
-                'orders_trend' => 0,
-                'points_earned_this_month' => 0,
-                'available_rewards' => 0,
-            ]]);
-        }
-        
-        $customer = Customer::where('user_id', $user->id)->first();
-
         if (!$customer) {
             return response()->json(['data' => [
                 'orders_this_month' => 0,
@@ -267,7 +229,7 @@ class CustomerDashboardController extends Controller
                 'available_rewards' => 0,
             ]]);
         }
-
+        
         // Orders this month
         $ordersThisMonth = Order::where('customer_id', $customer->id)
             ->whereYear('created_at', now()->year)
@@ -309,31 +271,7 @@ class CustomerDashboardController extends Controller
      */
     public function orders(Request $request)
     {
-        // Handle Telegram Guest Access
-        $telegramUserId = session('telegram_user_id');
-        $telegramData = session('telegram_user');
-        $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
-
-        if ($telegramId) {
-            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
-            if ($telegramUser) {
-                // Build query for Telegram guest
-                $query = Order::where(function($q) use ($telegramUser) {
-                    $q->where('telegram_user_id', $telegramUser->id);
-                    if ($telegramUser->customer_id) {
-                        $q->orWhere('customer_id', $telegramUser->customer_id);
-                    }
-                });
-                
-                return $this->processOrdersQuery($query, $request);
-            }
-        }
-
-        // Standard Customer Access
-        $customer = null;
-        if ($request->user()) {
-            $customer = Customer::where('user_id', $request->user()->id)->first();
-        }
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
             return response()->json([
@@ -343,7 +281,7 @@ class CustomerDashboardController extends Controller
             ], 404);
         }
 
-        // Build query for Standard Customer
+        // Build query for Customer
         $query = Order::where('customer_id', $customer->id);
         
         return $this->processOrdersQuery($query, $request);
@@ -521,8 +459,7 @@ class CustomerDashboardController extends Controller
      */
     public function favorites(Request $request)
     {
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
             return response()->json(['data' => []]);
@@ -560,46 +497,10 @@ class CustomerDashboardController extends Controller
     /**
      * Get single order details
      */
-    /**
-     * Get single order details
-     */
     public function show(Request $request, $id)
     {
-        // Handle Telegram Guest Access
-        $telegramUserId = session('telegram_user_id'); // From header or session
-        $telegramData = session('telegram_user');
-        $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
-
-        if ($telegramId) {
-            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
-            if ($telegramUser) {
-                $order = Order::where('id', $id)
-                    ->where(function($q) use ($telegramUser) {
-                        $q->where('telegram_user_id', $telegramUser->id);
-                        // Also allow if linked customer matches
-                        if ($telegramUser->customer_id) {
-                            $q->orWhere('customer_id', $telegramUser->customer_id);
-                        }
-                    })
-                    ->with([
-                        'items.menuItem.translations',
-                        'location',
-                        'timeSlot',
-                        'customerAddress',
-                        'invoice',
-                        'paymentCollector'
-                    ])
-                    ->firstOrFail();
-                    
-                return $this->formatOrderResponse($order);
-            }
-        }
-
-        // Standard Customer Access
-        $user = $request->user();
-        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
-
-        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+        $customer = $this->getCurrentCustomer($request);
+        if (!$customer) return response()->json(['message' => 'Unauthenticated'], 401);
 
         $order = Order::where('customer_id', $customer->id)
             ->where('id', $id)
@@ -718,12 +619,10 @@ class CustomerDashboardController extends Controller
      */
     public function reorder(Request $request, $id)
     {
-        \Log::info('Reorder requested', ['user_id' => $request->user()->id, 'order_id' => $id]);
-        
-        $user = $request->user();
-        if (!$user) return response()->json(['message' => 'Unauthenticated'], 401);
+        $customer = $this->getCurrentCustomer($request);
+        if (!$customer) return response()->json(['message' => 'Unauthenticated'], 401);
 
-        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+        \Log::info('Reorder requested', ['customer_id' => $customer->id, 'order_id' => $id]);
 
         $order = Order::where('customer_id', $customer->id)
             ->where('id', $id)
@@ -837,20 +736,15 @@ class CustomerDashboardController extends Controller
     /**
      * Get customer loyalty stats
      */
+    /**
+     * Get customer loyalty stats
+     */
     public function loyaltyStats(Request $request)
     {
-        $user = Auth::user();
-
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
-
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
-            return response()->json([
-                'message' => 'Customer profile not found'
-            ], 404);
+            return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
         // Calculate total orders and lifetime spend
@@ -879,7 +773,9 @@ class CustomerDashboardController extends Controller
             case 'bronze':
                 $nextTier = 'silver';
                 $nextTierThreshold = $tierThresholds['silver'];
-                $progressToNextTier = min(100, ($lifetimeSpend / $nextTierThreshold) * 100);
+                $progressToNextTier = $nextTierThreshold > 0 
+                    ? min(100, ($lifetimeSpend / $nextTierThreshold) * 100) 
+                    : 0;
                 break;
             case 'silver':
                 $nextTier = 'gold';
@@ -918,18 +814,10 @@ class CustomerDashboardController extends Controller
      */
     public function loyaltyHistory(Request $request)
     {
-        $user = Auth::user();
-
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
-
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
-            return response()->json([
-                'message' => 'Customer profile not found'
-            ], 404);
+            return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
         // Get last 20 loyalty transactions
@@ -953,4 +841,5 @@ class CustomerDashboardController extends Controller
         ]);
     }
 }
+
 

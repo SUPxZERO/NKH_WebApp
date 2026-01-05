@@ -25,7 +25,8 @@ import CartIcon from '@/app/components/ui/CartIcon';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import { GlobalSearch, useGlobalSearch, SearchTrigger } from '@/app/components/ui/GlobalSearch';
-import { useAutoCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
+import { useCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { useTelegramAuth } from '@/app/hooks/useTelegramAuth';
 
 type Props = {
@@ -47,18 +48,19 @@ const navigation = [
 
 export default function CustomerLayout({ children, className }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { url, props } = usePage() as any;
+  const { url } = usePage();
   const search = useGlobalSearch();
 
-  // Get user from auth
-  const auth = props?.auth;
-  const user = auth?.user || {};
-  const userAvatar = user.avatar || user.image_path;
-  const userName = user.name || 'User';
-  const userEmail = user.email || '';
+  // Get user from AuthContext (supports Telegram fallback)
+  const { user } = useAuth();
+
+  const userAvatar = user?.avatar;
+  const userName = user?.name || 'User';
+  const userEmail = user?.email || '';
 
   // Subscribe to real-time customer notifications
-  useAutoCustomerNotifications({ showToast: true });
+  // Pass user ID explicitly to ensure Telegram users are connected
+  useCustomerNotifications(user?.id, { showToast: true });
 
   // Initialize Telegram WebApp session (Sprint P15 - Guest ordering)
   const telegram = useTelegramAuth();

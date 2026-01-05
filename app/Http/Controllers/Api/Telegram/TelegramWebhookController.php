@@ -71,9 +71,35 @@ class TelegramWebhookController extends Controller
             $user = $this->botService->findOrCreateUser($message);
             $this->botService->updateUserInteraction($user);
 
+            // SPRINT P16: Handle Contact Sharing
+            if (isset($message['contact'])) {
+                $this->handleContact($user, $message['contact'], $chatId);
+                return;
+            }
+
             // Only handle /start command
             if (trim($text) === '/start') {
                 $this->cmdStart($user, $chatId);
+            } elseif (
+                $text === '🍔 Start Ordering' || 
+                $text === 'Start Ordering' || 
+                $text === '⏭️ Skip for Now'
+            ) {
+                 // User wants to skip phone setup or start ordering immediately
+                 // First remove the reply keyboard
+                 $this->botService->sendMessage(
+                    $chatId, 
+                    "👍 Okay, taking you to the menu...",
+                    null,
+                    ['remove_keyboard' => true]
+                 );
+                 
+                 // Then show the main inline menu
+                 $this->botService->sendInlineKeyboard(
+                    $chatId, 
+                    "What would you like to do?", 
+                    TelegramKeyboardBuilder::mainMenu()
+                 );
             } else {
                 // Determine if we should reply to other text or just ignore
                 // For now, let's just ignore or maybe send a hint if it looks like a command
@@ -83,6 +109,51 @@ class TelegramWebhookController extends Controller
             }
         } catch (Throwable $e) {
             TelegramErrorHandler::logError($e, ['method' => 'handleMessage']);
+        }
+    }
+
+    /**
+     * SPRINT P16: Handle Contact Sharing
+     */
+    private function handleContact(TelegramUser $user, array $contact, int $chatId): void
+    {
+        // Security check: ensure the contact shared belongs to the sender
+        if (isset($contact['user_id']) && $contact['user_id'] !== $user->telegram_id) {
+            $this->botService->sendMessage($chatId, "⚠️ Please share your own contact information.");
+            return;
+        }
+
+        $phoneNumber = $contact['phone_number'] ?? null;
+
+        if ($phoneNumber) {
+            // Normalize phone (ensure it starts with +)
+            if (!str_starts_with($phoneNumber, '+')) {
+                $phoneNumber = '+' . $phoneNumber;
+            }
+
+            // Update TelegramUser
+            $user->update(['phone_number' => $phoneNumber]);
+
+            // Sync to Customer
+            if ($user->customer_id) {
+                $user->customer->update([
+                    'phone' => $phoneNumber,
+                    'phone_verified_at' => now(), // Trusted from Telegram
+                ]);
+            }
+
+            // Confirm success and show main menu
+            $this->botService->sendMessage(
+                $chatId, 
+                "✅ Phone number verified! You can now track orders and receive updates."
+            );
+            
+            // Show main menu (remove phone request keyboard)
+            $this->botService->sendInlineKeyboard(
+                $chatId, 
+                "What would you like to do?",
+                TelegramKeyboardBuilder::mainMenu()
+            );
         }
     }
 
@@ -116,15 +187,35 @@ class TelegramWebhookController extends Controller
      */
     private function cmdStart(TelegramUser $user, int $chatId): void
     {
+        // SPRINT P16: Customized welcome based on phone verification
+        $hasPhone = !empty($user->phone_number);
+
         $message = "🎉 *Welcome to NKH Restaurant!*\n";
         $message .= "━━━━━━━━━━━━━━━━━━━━━\n\n";
-        $message .= "🍽️ *Delicious food, delivered to you!*\n\n";
-        $message .= "Click *Order Now* to browse our full menu and place your order directly through our website app.\n\n";
-        $message .= "Need help? Click Help below.";
+        
+        if (!$hasPhone) {
+            $message .= "👋 Hi " . ($user->first_name ?? 'there') . "! \n\n";
+            $message .= "To receive order updates and track your delivery, please share your phone number using the button below.\n\n";
+            $message .= "Or simply start ordering now:";
+        } else {
+            $message .= "🍽️ *Delicious food, delivered to you!*\n\n";
+            $message .= "Click *Order Now* to browse our full menu and place your order directly through our website app.\n\n";
+            $message .= "Need help? Click Help below.";
+        }
 
-        $keyboard = TelegramKeyboardBuilder::mainMenu();
-
-        $this->botService->sendInlineKeyboard($chatId, $message, $keyboard);
+        // Use appropriate keyboard
+        if (!$hasPhone) {
+            // Send ReplyKeyboard for phone request (not inline)
+            $this->botService->sendMessage(
+                $chatId, 
+                $message, 
+                null,
+                TelegramKeyboardBuilder::welcomeWithSetup(false)
+            );
+        } else {
+            // Standard Inline Menu
+            $this->botService->sendInlineKeyboard($chatId, $message, TelegramKeyboardBuilder::mainMenu());
+        }
     }
 
     /**
@@ -149,3 +240,4 @@ class TelegramWebhookController extends Controller
         $this->botService->sendMessage($chatId, $message);
     }
 }
+

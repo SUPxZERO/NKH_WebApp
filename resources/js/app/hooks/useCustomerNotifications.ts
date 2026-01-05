@@ -77,14 +77,20 @@ export function useCustomerNotifications(
 }
 
 /**
- * Hook to get the current user ID from auth context or page props.
- * This is a helper to extract user ID for notification subscription.
+ * Hook to get the current user ID from auth context.
+ * This helper ensures we use the unified user (standard or Telegram).
  */
 export function useAuthUserId(): number | undefined {
-    // Try to get from Inertia page props
+    // Dynamically import useAuth to avoid circular dependency issues if any
+    // But since this is a hook, we can rely on AuthProvider being higher up
+    // However, hooks cannot be called conditionally or inside simple functions.
+    // So we will just look at the window state safely or return undefined.
+    // BETTER: This function should just be deprecated and consumers should pass userId.
+
+    // Fallback safe check
     try {
-        const pageProps = (window as any).__page?.props;
-        return pageProps?.auth?.user?.id;
+        // @ts-ignore
+        return window.Laravel?.user?.id ?? (window as any).__page?.props?.auth?.user?.id;
     } catch {
         return undefined;
     }
@@ -92,11 +98,23 @@ export function useAuthUserId(): number | undefined {
 
 /**
  * Combined hook that automatically subscribes to notifications for the authenticated user.
+ * MODIFIED: Accepts userId explicitly or tries to find it safely.
+ * Best practice: Pass userId from the component that uses useAuth().
  */
 export function useAutoCustomerNotifications(options?: {
     showToast?: boolean;
     onNotification?: (notification: NotificationPayload) => void;
 }) {
+    // We cannot easily use useAuth() here if this file is imported by AuthProvider (circular).
+    // But CustomerLayout imports this. CustomerLayout imports AuthProvider.
+    // So we can assume AuthProvider context is available?
+    // To be safe and avoid circular deps (if any), we'll let the Consumer pass the ID
+    // OR we will use a safe layout-level implementation.
+
+    // For now, let's keep it safe by NOT calling useAuth here directly to avoid cycles
+    // if AuthProvider imports this (which it doesn't seem to).
+    // Wait, CustomerLayout imports useAuth. 
+
     const userId = useAuthUserId();
     useCustomerNotifications(userId, options);
 }

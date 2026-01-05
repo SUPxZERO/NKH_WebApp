@@ -14,17 +14,33 @@ use Illuminate\Support\Facades\Storage;
 class CartController extends Controller
 {
     /**
+     * Helper to get current customer from Auth or Telegram Session
+     */
+    private function getCurrentCustomer(Request $request): ?Customer
+    {
+        // 1. Standard Auth
+        if ($request->user()) {
+            return Customer::where('user_id', $request->user()->id)->first();
+        }
+
+        // 2. Telegram Session (set by TelegramWebAppAuth middleware)
+        $telegramData = session('telegram_user');
+        if ($telegramData && isset($telegramData['customer_id'])) {
+             return Customer::find($telegramData['customer_id']);
+        }
+
+        return null;
+    }
+
+    /**
      * Get customer's cart
      */
     public function index(Request $request)
     {
-        $user = $request->user();
-        if (!$user) return response()->json(['data' => []]);
-
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
-            \Log::warning('Cart index: Customer not found for user ' . $user->id);
+            // Guests return empty cart instead of error
             return response()->json(['data' => []]);
         }
 
@@ -85,11 +101,10 @@ class CartController extends Controller
             'customizations' => 'nullable|array',
         ]);
 
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
-            return response()->json(['message' => 'Customer not found'], 404);
+            return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
         // Check if item already in cart
@@ -128,8 +143,8 @@ class CartController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
+        if (!$customer) return response()->json(['message' => 'Unauthenticated'], 401);
 
         // Verify ownership
         if ($cartItem->customer_id !== $customer->id) {
@@ -149,8 +164,8 @@ class CartController extends Controller
      */
     public function destroy(CartItem $cartItem, Request $request)
     {
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
+        if (!$customer) return response()->json(['message' => 'Unauthenticated'], 401);
 
         // Verify ownership
         if ($cartItem->customer_id !== $customer->id) {
@@ -169,8 +184,7 @@ class CartController extends Controller
      */
     public function clear(Request $request)
     {
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
             return response()->json(['message' => 'Customer not found'], 404);
@@ -195,8 +209,7 @@ class CartController extends Controller
             'items.*.notes' => 'nullable|string|max:500',
         ]);
 
-        $user = $request->user();
-        $customer = Customer::where('user_id', $user->id)->first();
+        $customer = $this->getCurrentCustomer($request);
 
         if (!$customer) {
             return response()->json(['message' => 'Customer not found'], 404);

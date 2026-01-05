@@ -108,20 +108,19 @@ class TelegramWebAppAuth
 
     /**
      * Authenticate a Telegram user for web access
+     * 
+     * SPRINT P16: Uses TelegramUser::findOrCreate() which now automatically
+     * creates a Customer record, giving full customer features.
      */
     private function authenticateTelegramUser(int $telegramId): bool
     {
-        // Find or create TelegramUser
-        $telegramUser = TelegramUser::where('telegram_id', $telegramId)->first();
+        // SPRINT P16: Use findOrCreate to ensure Customer is auto-created
+        // This now creates a Customer record if one doesn't exist
+        $telegramUser = TelegramUser::findOrCreate(['id' => $telegramId]);
         
         if (!$telegramUser) {
-            // Auto-create for new users
-            $telegramUser = TelegramUser::create([
-                'telegram_id' => $telegramId,
-                'first_name' => 'Guest',
-                'is_active' => true,
-            ]);
-            Log::info('TelegramWebAppAuth: Auto-created TelegramUser', ['telegram_id' => $telegramId]);
+            Log::error('TelegramWebAppAuth: Failed to find/create TelegramUser', ['telegram_id' => $telegramId]);
+            return false;
         }
 
         if (!$telegramUser->is_active) {
@@ -129,7 +128,7 @@ class TelegramWebAppAuth
             return false;
         }
 
-        // If the telegram user has a linked customer account, authenticate that user
+        // If the telegram user has a linked customer account WITH a User, authenticate that User
         if ($telegramUser->customer_id && $telegramUser->customer?->user) {
             Auth::login($telegramUser->customer->user);
             Log::info('TelegramWebAppAuth: Authenticated linked user', [
@@ -139,7 +138,8 @@ class TelegramWebAppAuth
             return true;
         }
 
-        // For guest telegram users (no linked account), create guest session
+        // SPRINT P16: For Telegram users with auto-created Customer (no User account),
+        // create session with customer_id for full feature access
         session([
             'telegram_guest' => true,
             'telegram_user_id' => $telegramId,
@@ -151,12 +151,18 @@ class TelegramWebAppAuth
                 'first_name' => $telegramUser->first_name,
                 'last_name' => $telegramUser->last_name,
                 'username' => $telegramUser->telegram_username,
+                'customer_id' => $telegramUser->customer_id, // P16: Include customer_id
+                'customer_code' => $telegramUser->customer?->customer_code,
             ],
         ]);
 
-        Log::info('TelegramWebAppAuth: Created guest session', ['telegram_id' => $telegramId]);
+        Log::info('TelegramWebAppAuth: Created session with customer', [
+            'telegram_id' => $telegramId,
+            'customer_id' => $telegramUser->customer_id,
+        ]);
         return true;
     }
+
 
     /**
      * Check if current request is from a Telegram guest (not logged in but has telegram session)

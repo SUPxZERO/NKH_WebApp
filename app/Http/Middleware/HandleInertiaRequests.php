@@ -30,10 +30,10 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $roles = $user ? $user->roles()->with('permissions')->get() : collect([]);
 
-        $permissions = $user
-            ? $user->roles()->with('permissions')->get()->pluck('permissions.*.slug')->flatten()->unique()->values()->all()
-            : [];
+        $permissions = $roles->pluck('permissions.*.slug')->flatten()->unique()->values()->all();
+        $userRole = $roles->first()?->slug;
 
         return [
             ...parent::share($request),
@@ -42,7 +42,7 @@ class HandleInertiaRequests extends Middleware
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->role ?? null,
+                    'role' => $userRole,
                     'avatar' => $user->avatar ? \Illuminate\Support\Facades\Storage::url($user->avatar) : null,
                     'permissions' => $permissions,
                 ] : null,

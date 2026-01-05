@@ -78,36 +78,42 @@ export default function AddressManagerEnhanced({
     const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
     const [formData, setFormData] = useState<AddressFormData>(defaultFormData);
 
+    // Detect if running in Telegram WebApp
+    const isInTelegram = typeof window !== 'undefined' && !!(window as any).Telegram?.WebApp?.initData;
+
+    // Use different API endpoints based on context
+    const apiBasePath = isInTelegram ? '/api/telegram/addresses' : '/api/customer/addresses';
+
     // Fetch addresses
     const { data: addressesResponse, isLoading } = useQuery({
-        queryKey: ['customer', 'addresses'],
-        queryFn: () => apiGet('/api/customer/addresses'),
+        queryKey: ['addresses', isInTelegram ? 'telegram' : 'customer'],
+        queryFn: () => apiGet(apiBasePath),
     });
 
     const addresses: CustomerAddress[] = addressesResponse?.data || [];
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: AddressFormData) => apiPost('/api/customer/addresses', data),
+        mutationFn: (data: AddressFormData) => apiPost(apiBasePath, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
+            queryClient.invalidateQueries({ queryKey: ['addresses'] });
             closeModal();
         },
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: AddressFormData }) =>
-            apiPut(`/api/customer/addresses/${id}`, data),
+            apiPut(`${apiBasePath}/${id}`, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
+            queryClient.invalidateQueries({ queryKey: ['addresses'] });
             closeModal();
         },
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/customer/addresses/${id}`),
+        mutationFn: (id: number) => apiDelete(`${apiBasePath}/${id}`),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
+            queryClient.invalidateQueries({ queryKey: ['addresses'] });
         },
     });
 

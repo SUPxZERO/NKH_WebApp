@@ -791,6 +791,13 @@ Route::prefix('telegram')
         // Notification preferences
         Route::get('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'notificationPreferences']);
         Route::put('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateNotificationPreferences']);
+
+        // Sprint P16: Favorites (using auto-created Customer)
+        Route::get('/favorites', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'index']);
+        Route::post('/favorites/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'store']);
+        Route::delete('/favorites/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'destroy']);
+        Route::get('/favorites/{menuItemId}/check', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'check']);
+        Route::post('/favorites/{menuItemId}/toggle', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'toggle']);
     });
 });
 

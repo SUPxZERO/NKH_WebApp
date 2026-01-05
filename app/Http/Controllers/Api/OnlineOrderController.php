@@ -136,10 +136,37 @@ class OnlineOrderController extends Controller
         return [$discount, $promotion->id];
     }
 
+    /**
+     * Helper to get current customer from Auth or Telegram Session
+     */
+    private function getCurrentCustomer(Request $request): ?Customer
+    {
+        // 1. Standard Auth
+        if ($request->user()) {
+            return $request->user()->customer;
+        }
+
+        // 2. Telegram Session (set by TelegramWebAppAuth middleware)
+        $telegramData = session('telegram_user');
+        if ($telegramData && isset($telegramData['customer_id'])) {
+             return Customer::find($telegramData['customer_id']);
+        }
+
+        // 3. Fallback: Check request for telegram_id (Legacy/Dev)
+        if ($request->filled('telegram_id')) {
+            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $request->input('telegram_id'))->first();
+            if ($telegramUser && $telegramUser->customer) {
+                return $telegramUser->customer;
+            }
+        }
+
+        return null;
+    }
+
     // GET /api/customer/addresses (auth:sanctum, role:customer)
     public function addressesIndex(Request $request)
     {
-        $customer = $request->user()->customer;
+        $customer = $this->getCurrentCustomer($request);
         if (!$customer) {
             abort(404, 'Customer profile not found');
         }
@@ -150,7 +177,7 @@ class OnlineOrderController extends Controller
     // POST /api/customer/addresses (auth:sanctum, role:customer)
     public function addressesStore(StoreAddressRequest $request)
     {
-        $customer = $request->user()->customer;
+        $customer = $this->getCurrentCustomer($request);
         if (!$customer) {
             abort(404, 'Customer profile not found');
         }
@@ -167,21 +194,6 @@ class OnlineOrderController extends Controller
 
     /**
      * POST /api/online-orders (auth:sanctum, role:customer)
-     * 
-     * Creates a new online order (pickup or delivery) from customer cart
-     * 
-     * Request body:
-     * {
-     *   "order_type": "delivery" | "pickup",
-     *   "location_id": 1,
-     *   "customer_address_id": 2,  // required if delivery
-     *   "time_slot_id": 5,
-     *   "notes": "Leave at door",
-     *   "order_items": [
-     *     { "menu_item_id": 10, "quantity": 2 },
-     *     { "menu_item_id": 15, "quantity": 1 }
-     *   ]
-     * }
      */
     public function store(StoreOnlineOrderRequest $request)
     {
@@ -196,83 +208,37 @@ class OnlineOrderController extends Controller
             throw $e;
         }
         
-        // DEVELOPMENT MODE: Handle when authentication is disabled
-        $customer = null;
+        // Get Customer using unified helper
+        $customer = $this->getCurrentCustomer($request);
         
-        if ($request->user()) {
-            \Log::info('👤 User is authenticated:', ['id' => $request->user()->id]);
-            // Authenticated: Get customer from user relationship
-            $customer = $request->user()->customer;
-        } elseif ($request->filled('telegram_id')) {
-            // Check if telegram_id is provided (e.g. from Mini App)
+        // If still no customer, try to create one if telegram_id is present (First time user)
+        if (!$customer && $request->filled('telegram_id')) {
             $telegramId = $request->input('telegram_id');
-            \Log::info('👤 User identified via telegram_id:', ['telegram_id' => $telegramId]);
-            
-            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $telegramId)->first();
-            
-            if (!$telegramUser) {
-                 // First time user from Telegram - Create TelegramUser profile
-                 try {
-                     // We might not have full details yet, just ID
-                     $telegramUser = \App\Models\TelegramUser::create([
-                         'telegram_id' => $telegramId,
-                         'is_active' => true,
-                         'notifications_enabled' => true,
-                     ]);
-                     \Log::info('🆕 Created new TelegramUser profile', ['id' => $telegramUser->id]);
-                 } catch (\Exception $e) {
-                     \Log::error('failed to create telegram user', ['error' => $e->getMessage()]);
-                 }
-            }
+            \Log::info('👤 First time Telegram ID:', ['telegram_id' => $telegramId]);
 
-            if ($telegramUser) {
-                if ($telegramUser->customer) {
-                    $customer = $telegramUser->customer;
-                    \Log::info('🔗 Found existing Customer for Telegram User', ['telegram_user_id' => $telegramUser->id, 'customer_id' => $customer->id]);
-                } else {
-                    // Create a Guest Customer profile linked to this Telegram User
-                    \Log::info('🆕 Creating Guest Customer for Telegram User', ['telegram_user_id' => $telegramUser->id]);
+            $telegramUser = \App\Models\TelegramUser::firstOrCreate(
+                ['telegram_id' => $telegramId],
+                ['is_active' => true, 'notifications_enabled' => true]
+            );
 
-                    $customer = Customer::create([
-                        'user_id' => null, // Guest
-                        'name' => $telegramUser->first_name ? ($telegramUser->first_name . ' ' . $telegramUser->last_name) : 'Telegram Guest',
-                        'customer_code' => 'TEL-' . substr(md5((string)$telegramId), 0, 8),
-                    ]);
-
-                    \Log::info('👤 Guest Customer created', ['customer_id' => $customer->id, 'name' => $customer->name]);
-
-                    // Link them
-                    $updated = $telegramUser->update(['customer_id' => $customer->id]);
-
-                    \Log::info('🔗 TelegramUser->update() returned', [
-                        'success' => $updated,
-                        'telegram_user_id' => $telegramUser->id,
-                        'customer_id' => $customer->id,
-                        'affected_rows' => $updated
-                    ]);
-
-                    // Refresh to verify link
-                    $telegramUser->refresh();
-                    $customer->refresh();
-
-                    \Log::info('🔎 Verification after refresh', [
-                        'telegram_user_id' => $telegramUser->id,
-                        'telegram_user_customer_id' => $telegramUser->customer_id,
-                        'customer_id' => $customer->id,
-                        'customer_telegram_user_id' => $customer->telegramUser?->id ?? 'NULL'
-                    ]);
-                }
+            // Auto-create customer if missing
+            if (!$telegramUser->customer_id) {
+                 $newCustomer = Customer::create([
+                    'user_id' => null, // Guest
+                    'name' => $telegramUser->first_name ? ($telegramUser->first_name . ' ' . $telegramUser->last_name) : 'Telegram Guest',
+                    'customer_code' => \App\Models\Customer::generateCustomerCode('TG'), // Use proper helper
+                ]);
+                $telegramUser->update(['customer_id' => $newCustomer->id]);
+                $customer = $newCustomer;
             } else {
-                 \Log::warning('⚠️ Failed to resolve or create Telegram User.', ['telegram_id' => $telegramId]);
+                $customer = $telegramUser->customer;
             }
-        } 
+        }
         
         if (!$customer) {
             \Log::warning('⚠️ No authenticated user or valid telegram_id found. Attempting fallback.');
-            // DEVELOPMENT ONLY: Fallback to first customer or specific ID
-            // TODO: Remove this in production and enable auth middleware
-            // Try to get customer ID from request (for testing)
-            $customerId = $request->input('customer_id', 1); // Default to ID 1
+            // DEVELOPMENT ONLY
+            $customerId = $request->input('customer_id', 1);
             $customer = Customer::find($customerId);
         }
         
@@ -403,9 +369,24 @@ class OnlineOrderController extends Controller
                 // Validate delivery address for delivery orders
                 $deliveryFee = 0;
                 if ($data['order_type'] === 'delivery') {
-                    $address = CustomerAddress::where('id', $data['customer_address_id'] ?? 0)
-                        ->where('customer_id', $customer->id)
-                        ->first();
+                    // Check if address belongs to customer OR to telegram user
+                    $addressQuery = CustomerAddress::where('id', $data['customer_address_id'] ?? 0);
+                    
+                    // Get telegram_user_id from telegram_id if provided
+                    $telegramUser = null;
+                    if ($request->filled('telegram_id')) {
+                        $telegramUser = \App\Models\TelegramUser::where('telegram_id', $request->input('telegram_id'))->first();
+                    }
+                    
+                    // Address can belong to customer_id OR telegram_user_id
+                    $addressQuery->where(function ($q) use ($customer, $telegramUser) {
+                        $q->where('customer_id', $customer->id);
+                        if ($telegramUser) {
+                            $q->orWhere('telegram_user_id', $telegramUser->id);
+                        }
+                    });
+                    
+                    $address = $addressQuery->first();
                         
                     if (!$address) {
                         abort(422, 'Invalid delivery address.');

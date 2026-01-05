@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
+import { RequireAuth } from '@/app/providers/AuthProvider';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/app/libs/apiClient';
 import {
@@ -505,424 +506,426 @@ export default function Orders() {
     };
 
     return (
-        <CustomerLayout>
-            <Head>
-                <title>My Orders - NKH Restaurant</title>
-                <meta name="description" content="View and manage your order history" />
-            </Head>
+        <RequireAuth roles={['customer']}>
+            <CustomerLayout>
+                <Head>
+                    <title>My Orders - NKH Restaurant</title>
+                    <meta name="description" content="View and manage your order history" />
+                </Head>
 
-            <div className="space-y-4 sm:space-y-8">
-                {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                >
-                    <div>
-                        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-                            <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                My Orders
-                            </span>
-                        </h1>
-                        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                            Track your order history
-                        </p>
-                    </div>
-                    {data && (
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 px-3 rounded-lg bg-card border border-border flex items-center gap-1.5 shadow-sm">
-                                <Package className="w-4 h-4 text-primary" />
-                                <span className="text-sm font-bold text-foreground">{data.meta.total}</span>
+                <div className="space-y-4 sm:space-y-8">
+                    {/* Header */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                        <div>
+                            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+                                <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                    My Orders
+                                </span>
+                            </h1>
+                            <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                                Track your order history
+                            </p>
+                        </div>
+                        {data && (
+                            <div className="flex items-center gap-2">
+                                <div className="h-8 px-3 rounded-lg bg-card border border-border flex items-center gap-1.5 shadow-sm">
+                                    <Package className="w-4 h-4 text-primary" />
+                                    <span className="text-sm font-bold text-foreground">{data.meta.total}</span>
+                                </div>
                             </div>
+                        )}
+                    </motion.div>
+
+                    {/* Filters */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="flex flex-wrap gap-1.5 p-1.5 bg-card border border-border rounded-xl shadow-sm"
+                    >
+                        <button
+                            onClick={() => setFilterStatus('all')}
+                            className={cn(
+                                "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
+                                filterStatus === 'all'
+                                    ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg"
+                                    : "bg-transparent text-muted-foreground hover:bg-secondary"
+                            )}
+                        >
+                            <Filter className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">All</span>
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('pending')}
+                            className={cn(
+                                "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
+                                filterStatus === 'pending'
+                                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg"
+                                    : "bg-transparent text-muted-foreground hover:bg-secondary"
+                            )}
+                        >
+                            <Clock className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Active</span>
+                            <span className="sm:hidden">Active</span>
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('completed')}
+                            className={cn(
+                                "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
+                                filterStatus === 'completed'
+                                    ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg"
+                                    : "bg-transparent text-muted-foreground hover:bg-secondary"
+                            )}
+                        >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Completed</span>
+                            <span className="sm:hidden">Done</span>
+                        </button>
+                        <button
+                            onClick={() => setFilterStatus('cancelled')}
+                            className={cn(
+                                "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
+                                filterStatus === 'cancelled'
+                                    ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg"
+                                    : "bg-transparent text-muted-foreground hover:bg-secondary"
+                            )}
+                        >
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Cancelled</span>
+                            <span className="sm:hidden">Cancel</span>
+                        </button>
+                    </motion.div>
+
+                    {/* Loading State */}
+                    {isLoading && (
+                        <div className="flex flex-col justify-center items-center py-16">
+                            <div className="relative">
+                                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
+                                    <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            </div>
+                            <p className="mt-4 text-sm text-muted-foreground font-medium">Loading orders...</p>
                         </div>
                     )}
-                </motion.div>
 
-                {/* Filters */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="flex flex-wrap gap-1.5 p-1.5 bg-card border border-border rounded-xl shadow-sm"
-                >
-                    <button
-                        onClick={() => setFilterStatus('all')}
-                        className={cn(
-                            "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
-                            filterStatus === 'all'
-                                ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg"
-                                : "bg-transparent text-muted-foreground hover:bg-secondary"
-                        )}
-                    >
-                        <Filter className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">All</span>
-                    </button>
-                    <button
-                        onClick={() => setFilterStatus('pending')}
-                        className={cn(
-                            "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
-                            filterStatus === 'pending'
-                                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg"
-                                : "bg-transparent text-muted-foreground hover:bg-secondary"
-                        )}
-                    >
-                        <Clock className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Active</span>
-                        <span className="sm:hidden">Active</span>
-                    </button>
-                    <button
-                        onClick={() => setFilterStatus('completed')}
-                        className={cn(
-                            "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
-                            filterStatus === 'completed'
-                                ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg"
-                                : "bg-transparent text-muted-foreground hover:bg-secondary"
-                        )}
-                    >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Completed</span>
-                        <span className="sm:hidden">Done</span>
-                    </button>
-                    <button
-                        onClick={() => setFilterStatus('cancelled')}
-                        className={cn(
-                            "px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
-                            filterStatus === 'cancelled'
-                                ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg"
-                                : "bg-transparent text-muted-foreground hover:bg-secondary"
-                        )}
-                    >
-                        <XCircle className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Cancelled</span>
-                        <span className="sm:hidden">Cancel</span>
-                    </button>
-                </motion.div>
-
-                {/* Loading State */}
-                {isLoading && (
-                    <div className="flex flex-col justify-center items-center py-16">
-                        <div className="relative">
-                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
-                                <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
+                    {/* Error State */}
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-gradient-to-r from-red-500/10 to-rose-500/5 border border-red-500/20 rounded-xl p-6 text-center"
+                        >
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-3">
+                                <AlertTriangle className="w-6 h-6 text-red-500" />
                             </div>
-                        </div>
-                        <p className="mt-4 text-sm text-muted-foreground font-medium">Loading orders...</p>
-                    </div>
-                )}
-
-                {/* Error State */}
-                {error && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-gradient-to-r from-red-500/10 to-rose-500/5 border border-red-500/20 rounded-xl p-6 text-center"
-                    >
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-3">
-                            <AlertTriangle className="w-6 h-6 text-red-500" />
-                        </div>
-                        <h3 className="text-base font-bold text-foreground mb-1">Failed to load orders</h3>
-                        <p className="text-sm text-muted-foreground mb-3">Please try again later.</p>
-                        <Button variant="destructive" size="sm" onClick={() => window.location.reload()}>
-                            <RefreshCcw className="w-3.5 h-3.5 mr-1.5" />
-                            Try Again
-                        </Button>
-                    </motion.div>
-                )}
-
-                {/* Empty State */}
-                {!isLoading && !error && data && data.data.length === 0 && (
-                    <motion.div
-                        className="text-center py-12"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                    >
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4 border border-fuchsia-500/30">
-                            <Package className="w-8 h-8 text-fuchsia-500" />
-                        </div>
-                        <h3 className="text-xl font-bold text-foreground mb-2">
-                            {filterStatus === 'all' ? 'No orders yet' : `No ${filterStatus} orders`}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
-                            {filterStatus === 'all'
-                                ? "Ready to order? Browse our menu!"
-                                : `No ${filterStatus} orders. Try changing the filter.`}
-                        </p>
-                        <Button variant="primary" onClick={() => window.location.href = '/menu'}>
-                            <ShoppingBag className="w-4 h-4 mr-2" />
-                            Browse Menu
-                        </Button>
-                    </motion.div>
-                )}
-
-                {/* Orders List */}
-                {!isLoading && !error && data && data.data.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="space-y-3"
-                    >
-                        {data.data.map((order, index) => (
-                            <motion.div
-                                key={order.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                            >
-                                <OrderCard order={order} />
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                )}
-
-                {/* Pagination */}
-                {data && data.meta.last_page > 1 && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 bg-card border border-border rounded-xl shadow-sm"
-                    >
-                        <div className="text-xs text-muted-foreground hidden sm:block">
-                            Showing <span className="font-semibold text-foreground">{data.meta.from}</span> to <span className="font-semibold text-foreground">{data.meta.to}</span> of <span className="font-semibold text-foreground">{data.meta.total}</span> orders
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                disabled={currentPage === 1}
-                                onClick={() => setCurrentPage(p => p - 1)}
-                                className="h-9 px-3"
-                            >
-                                <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-                                <span className="hidden sm:inline">Prev</span>
+                            <h3 className="text-base font-bold text-foreground mb-1">Failed to load orders</h3>
+                            <p className="text-sm text-muted-foreground mb-3">Please try again later.</p>
+                            <Button variant="destructive" size="sm" onClick={() => window.location.reload()}>
+                                <RefreshCcw className="w-3.5 h-3.5 mr-1.5" />
+                                Try Again
                             </Button>
+                        </motion.div>
+                    )}
+
+                    {/* Empty State */}
+                    {!isLoading && !error && data && data.data.length === 0 && (
+                        <motion.div
+                            className="text-center py-12"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                        >
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4 border border-fuchsia-500/30">
+                                <Package className="w-8 h-8 text-fuchsia-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-foreground mb-2">
+                                {filterStatus === 'all' ? 'No orders yet' : `No ${filterStatus} orders`}
+                            </h3>
+                            <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
+                                {filterStatus === 'all'
+                                    ? "Ready to order? Browse our menu!"
+                                    : `No ${filterStatus} orders. Try changing the filter.`}
+                            </p>
+                            <Button variant="primary" onClick={() => window.location.href = '/menu'}>
+                                <ShoppingBag className="w-4 h-4 mr-2" />
+                                Browse Menu
+                            </Button>
+                        </motion.div>
+                    )}
+
+                    {/* Orders List */}
+                    {!isLoading && !error && data && data.data.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="space-y-3"
+                        >
+                            {data.data.map((order, index) => (
+                                <motion.div
+                                    key={order.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                >
+                                    <OrderCard order={order} />
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    )}
+
+                    {/* Pagination */}
+                    {data && data.meta.last_page > 1 && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 bg-card border border-border rounded-xl shadow-sm"
+                        >
+                            <div className="text-xs text-muted-foreground hidden sm:block">
+                                Showing <span className="font-semibold text-foreground">{data.meta.from}</span> to <span className="font-semibold text-foreground">{data.meta.to}</span> of <span className="font-semibold text-foreground">{data.meta.total}</span> orders
+                            </div>
                             <div className="flex items-center gap-1">
-                                {Array.from({ length: Math.min(5, data.meta.last_page) }, (_, i) => {
-                                    let pageNum;
-                                    if (data.meta.last_page <= 5) {
-                                        pageNum = i + 1;
-                                    } else if (currentPage <= 3) {
-                                        pageNum = i + 1;
-                                    } else if (currentPage >= data.meta.last_page - 2) {
-                                        pageNum = data.meta.last_page - 4 + i;
-                                    } else {
-                                        pageNum = currentPage - 2 + i;
-                                    }
-                                    return (
-                                        <button
-                                            key={pageNum}
-                                            onClick={() => setCurrentPage(pageNum)}
-                                            className={cn(
-                                                "h-9 w-9 rounded-lg text-xs font-semibold transition-all",
-                                                currentPage === pageNum
-                                                    ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg"
-                                                    : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover"
-                                            )}
-                                        >
-                                            {pageNum}
-                                        </button>
-                                    );
-                                })}
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(p => p - 1)}
+                                    className="h-9 px-3"
+                                >
+                                    <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+                                    <span className="hidden sm:inline">Prev</span>
+                                </Button>
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: Math.min(5, data.meta.last_page) }, (_, i) => {
+                                        let pageNum;
+                                        if (data.meta.last_page <= 5) {
+                                            pageNum = i + 1;
+                                        } else if (currentPage <= 3) {
+                                            pageNum = i + 1;
+                                        } else if (currentPage >= data.meta.last_page - 2) {
+                                            pageNum = data.meta.last_page - 4 + i;
+                                        } else {
+                                            pageNum = currentPage - 2 + i;
+                                        }
+                                        return (
+                                            <button
+                                                key={pageNum}
+                                                onClick={() => setCurrentPage(pageNum)}
+                                                className={cn(
+                                                    "h-9 w-9 rounded-lg text-xs font-semibold transition-all",
+                                                    currentPage === pageNum
+                                                        ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-lg"
+                                                        : "bg-secondary border border-border text-muted-foreground hover:bg-secondary-hover"
+                                                )}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={currentPage === data.meta.last_page}
+                                    onClick={() => setCurrentPage(p => p + 1)}
+                                    className="h-9 px-3"
+                                >
+                                    <span className="hidden sm:inline">Next</span>
+                                    <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                                </Button>
                             </div>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                disabled={currentPage === data.meta.last_page}
-                                onClick={() => setCurrentPage(p => p + 1)}
-                                className="h-9 px-3"
+                        </motion.div>
+                    )}
+                </div>
+
+                {/* Cancel Order Confirmation Modal */}
+                <AnimatePresence>
+                    {showCancelModal && orderToCancel && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+                            onClick={() => setShowCancelModal(false)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                transition={{ type: "spring", duration: 0.5 }}
+                                className="bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                                onClick={(e) => e.stopPropagation()}
                             >
-                                <span className="hidden sm:inline">Next</span>
-                                <ChevronRight className="w-3.5 h-3.5 ml-1" />
-                            </Button>
-                        </div>
-                    </motion.div>
-                )}
-            </div>
-
-            {/* Cancel Order Confirmation Modal */}
-            <AnimatePresence>
-                {showCancelModal && orderToCancel && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
-                        onClick={() => setShowCancelModal(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            transition={{ type: "spring", duration: 0.5 }}
-                            className="bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Modal Header */}
-                            <div className="bg-gradient-to-r from-red-500/10 to-rose-500/5 p-4 sm:p-6 border-b border-red-500/20">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center border border-red-500/30">
-                                        <AlertTriangle className="w-5 h-5 sm:w-7 sm:h-7 text-red-500" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                                            Cancel Order?
-                                        </h3>
-                                        <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                                            <Hash className="w-3 h-3" />
-                                            {orderToCancel.order_number}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Modal Body */}
-                            <div className="p-4 sm:p-6">
-                                <p className="text-sm text-muted-foreground mb-4">
-                                    Are you sure you want to cancel? This action <span className="text-red-500 font-semibold">cannot be undone</span>.
-                                </p>
-
-                                {/* Order Summary */}
-                                <div className="p-3 rounded-lg bg-secondary/50 border border-border mb-4">
-                                    <div className="flex items-center justify-between mb-1.5">
-                                        <span className="text-xs text-muted-foreground">Order Total</span>
-                                        <span className="text-base font-bold text-foreground">${orderToCancel.total_amount.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-muted-foreground">Items</span>
-                                        <span className="text-xs font-medium text-foreground">{orderToCancel.items_count} items</span>
+                                {/* Modal Header */}
+                                <div className="bg-gradient-to-r from-red-500/10 to-rose-500/5 p-4 sm:p-6 border-b border-red-500/20">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center border border-red-500/30">
+                                            <AlertTriangle className="w-5 h-5 sm:w-7 sm:h-7 text-red-500" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg sm:text-xl font-bold text-foreground">
+                                                Cancel Order?
+                                            </h3>
+                                            <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                                                <Hash className="w-3 h-3" />
+                                                {orderToCancel.order_number}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="secondary"
-                                        className="flex-1 h-10 sm:h-12"
-                                        onClick={() => setShowCancelModal(false)}
-                                        disabled={cancelOrderMutation.isPending}
-                                    >
-                                        Keep
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        className="flex-1 h-10 sm:h-12"
-                                        onClick={confirmCancel}
-                                        disabled={cancelOrderMutation.isPending}
-                                    >
-                                        {cancelOrderMutation.isPending ? (
-                                            <>
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                                Cancelling...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <XCircle className="w-4 h-4 mr-1.5" />
-                                                Cancel Order
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
+                                {/* Modal Body */}
+                                <div className="p-4 sm:p-6">
+                                    <p className="text-sm text-muted-foreground mb-4">
+                                        Are you sure you want to cancel? This action <span className="text-red-500 font-semibold">cannot be undone</span>.
+                                    </p>
 
-                                {cancelOrderMutation.isError && (
-                                    <div className="mt-3 p-2.5 rounded-lg bg-gradient-to-r from-red-500/10 to-rose-500/5 border border-red-500/20">
-                                        <p className="text-xs text-red-500 text-center font-medium">
-                                            Failed to cancel order. Try again.
-                                        </p>
+                                    {/* Order Summary */}
+                                    <div className="p-3 rounded-lg bg-secondary/50 border border-border mb-4">
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <span className="text-xs text-muted-foreground">Order Total</span>
+                                            <span className="text-base font-bold text-foreground">${orderToCancel.total_amount.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-muted-foreground">Items</span>
+                                            <span className="text-xs font-medium text-foreground">{orderToCancel.items_count} items</span>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
+
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="secondary"
+                                            className="flex-1 h-10 sm:h-12"
+                                            onClick={() => setShowCancelModal(false)}
+                                            disabled={cancelOrderMutation.isPending}
+                                        >
+                                            Keep
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            className="flex-1 h-10 sm:h-12"
+                                            onClick={confirmCancel}
+                                            disabled={cancelOrderMutation.isPending}
+                                        >
+                                            {cancelOrderMutation.isPending ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                                    Cancelling...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <XCircle className="w-4 h-4 mr-1.5" />
+                                                    Cancel Order
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+
+                                    {cancelOrderMutation.isError && (
+                                        <div className="mt-3 p-2.5 rounded-lg bg-gradient-to-r from-red-500/10 to-rose-500/5 border border-red-500/20">
+                                            <p className="text-xs text-red-500 text-center font-medium">
+                                                Failed to cancel order. Try again.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-            {/* Reorder Confirmation Modal */}
-            <AnimatePresence>
-                {confirmReorderId && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
-                        onClick={() => setConfirmReorderId(null)}
-                    >
+                    )}
+                </AnimatePresence>
+                {/* Reorder Confirmation Modal */}
+                <AnimatePresence>
+                    {confirmReorderId && (
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            transition={{ type: "spring", duration: 0.5 }}
-                            className="bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+                            onClick={() => setConfirmReorderId(null)}
                         >
-                            {/* Modal Header */}
-                            <div className="bg-gradient-to-r from-fuchsia-500/10 to-purple-500/5 p-4 sm:p-6 border-b border-fuchsia-500/20">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center border border-fuchsia-500/30">
-                                        <RefreshCcw className="w-5 h-5 sm:w-7 sm:h-7 text-fuchsia-500" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                                            Reorder Items?
-                                        </h3>
-                                        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                                            Add all items from this order to your cart
-                                        </p>
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                transition={{ type: "spring", duration: 0.5 }}
+                                className="bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Modal Header */}
+                                <div className="bg-gradient-to-r from-fuchsia-500/10 to-purple-500/5 p-4 sm:p-6 border-b border-fuchsia-500/20">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center border border-fuchsia-500/30">
+                                            <RefreshCcw className="w-5 h-5 sm:w-7 sm:h-7 text-fuchsia-500" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg sm:text-xl font-bold text-foreground">
+                                                Reorder Items?
+                                            </h3>
+                                            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                                                Add all items from this order to your cart
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Modal Body */}
-                            <div className="p-4 sm:p-6">
-                                <p className="text-sm text-muted-foreground mb-6">
-                                    This will add all items from Order #{data?.data.find(o => o.id === confirmReorderId)?.order_number} to your current cart.
-                                </p>
+                                {/* Modal Body */}
+                                <div className="p-4 sm:p-6">
+                                    <p className="text-sm text-muted-foreground mb-6">
+                                        This will add all items from Order #{data?.data.find(o => o.id === confirmReorderId)?.order_number} to your current cart.
+                                    </p>
 
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="secondary"
-                                        className="flex-1 h-10 sm:h-12"
-                                        onClick={() => setConfirmReorderId(null)}
-                                        disabled={isReordering}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant="primary"
-                                        className="flex-1 h-10 sm:h-12"
-                                        onClick={() => {
-                                            if (confirmReorderId) {
-                                                setIsReordering(true);
-                                                apiPost(`/customer/orders/${confirmReorderId}/reorder`)
-                                                    .then(() => {
-                                                        queryClient.invalidateQueries({ queryKey: ['cart'] });
-                                                        window.location.href = '/cart';
-                                                    })
-                                                    .catch(err => {
-                                                        console.error('Reorder failed', err);
-                                                        setIsReordering(false);
-                                                        setConfirmReorderId(null);
-                                                        alert('Failed to reorder items. Please try again.');
-                                                    });
-                                            }
-                                        }}
-                                        disabled={isReordering}
-                                    >
-                                        {isReordering ? (
-                                            <>
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                                Adding...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <ShoppingBag className="w-4 h-4 mr-1.5" />
-                                                Add to Cart
-                                            </>
-                                        )}
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="secondary"
+                                            className="flex-1 h-10 sm:h-12"
+                                            onClick={() => setConfirmReorderId(null)}
+                                            disabled={isReordering}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            variant="primary"
+                                            className="flex-1 h-10 sm:h-12"
+                                            onClick={() => {
+                                                if (confirmReorderId) {
+                                                    setIsReordering(true);
+                                                    apiPost(`/customer/orders/${confirmReorderId}/reorder`)
+                                                        .then(() => {
+                                                            queryClient.invalidateQueries({ queryKey: ['cart'] });
+                                                            window.location.href = '/cart';
+                                                        })
+                                                        .catch(err => {
+                                                            console.error('Reorder failed', err);
+                                                            setIsReordering(false);
+                                                            setConfirmReorderId(null);
+                                                            alert('Failed to reorder items. Please try again.');
+                                                        });
+                                                }
+                                            }}
+                                            disabled={isReordering}
+                                        >
+                                            {isReordering ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                                    Adding...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ShoppingBag className="w-4 h-4 mr-1.5" />
+                                                    Add to Cart
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </CustomerLayout>
+                    )}
+                </AnimatePresence>
+            </CustomerLayout>
+        </RequireAuth>
     );
 }

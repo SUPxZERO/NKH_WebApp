@@ -7,12 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Notifications\Notifiable;
 
     protected $fillable = [
         'user_id',
         'preferred_location_id',
         'customer_code',
+        'name',
+        'email',
+        'phone',
         'birth_date',
         'gender',
         'loyalty_points',
@@ -36,6 +39,7 @@ class Customer extends Model
         'tags',
         'no_show_count',
     ];
+
 
     protected $casts = [
         'birth_date' => 'date',
@@ -148,4 +152,28 @@ class Customer extends Model
         return $this->addresses()->where('is_default', true)->first() 
             ?? $this->addresses()->first();
     }
+
+    /**
+     * Generate a unique customer code for Telegram-created customers
+     * Format: TG + 6 alphanumeric characters (e.g., TG-A3B7C9)
+     */
+    public static function generateCustomerCode(string $prefix = 'TG'): string
+    {
+        $maxAttempts = 10;
+        $attempt = 0;
+
+        do {
+            $code = $prefix . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+            $exists = static::where('customer_code', $code)->exists();
+            $attempt++;
+        } while ($exists && $attempt < $maxAttempts);
+
+        if ($exists) {
+            // Fallback to timestamp-based code
+            $code = $prefix . '-' . strtoupper(dechex(time() % 16777215));
+        }
+
+        return $code;
+    }
 }
+

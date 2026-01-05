@@ -23,6 +23,7 @@ import {
     X,
 } from 'lucide-react';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
+import { RequireAuth } from '@/app/providers/AuthProvider';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { cn } from '@/app/utils/cn';
@@ -567,304 +568,306 @@ export default function Settings() {
     };
 
     return (
-        <CustomerLayout>
-            <div className="px-4 sm:px-6 py-6 max-w-5xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                            Settings
-                        </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm sm:text-base">
-                            Manage your account preferences
-                        </p>
+        <RequireAuth roles={['customer']}>
+            <CustomerLayout>
+                <div className="px-4 sm:px-6 py-6 max-w-5xl mx-auto space-y-6">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
+                                Settings
+                            </h1>
+                            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm sm:text-base">
+                                Manage your account preferences
+                            </p>
+                        </div>
+                        <Button
+                            onClick={() => saveSettingsMutation.mutate()}
+                            className="bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white w-full sm:w-auto"
+                            disabled={saveSettingsMutation.isPending}
+                        >
+                            {saveSettingsMutation.isPending ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Save All
+                                </>
+                            )}
+                        </Button>
                     </div>
-                    <Button
-                        onClick={() => saveSettingsMutation.mutate()}
-                        className="bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white w-full sm:w-auto"
-                        disabled={saveSettingsMutation.isPending}
-                    >
-                        {saveSettingsMutation.isPending ? (
-                            <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            <>
-                                <Save className="w-4 h-4 mr-2" />
-                                Save All
-                            </>
-                        )}
-                    </Button>
-                </div>
 
-                {/* Mobile Section Tabs */}
-                <div className="lg:hidden overflow-x-auto -mx-4 px-4 pb-2">
-                    <div className="flex gap-2 min-w-max">
-                        {sections.map((section) => {
-                            const Icon = section.icon;
-                            const isActive = activeSection === section.id;
-                            return (
-                                <button
-                                    key={section.id}
-                                    onClick={() => setActiveSection(section.id)}
-                                    className={cn(
-                                        'flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap',
-                                        isActive
-                                            ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-lg'
-                                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
-                                    )}
+                    {/* Mobile Section Tabs */}
+                    <div className="lg:hidden overflow-x-auto -mx-4 px-4 pb-2">
+                        <div className="flex gap-2 min-w-max">
+                            {sections.map((section) => {
+                                const Icon = section.icon;
+                                const isActive = activeSection === section.id;
+                                return (
+                                    <button
+                                        key={section.id}
+                                        onClick={() => setActiveSection(section.id)}
+                                        className={cn(
+                                            'flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap',
+                                            isActive
+                                                ? 'bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-lg'
+                                                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+                                        )}
+                                    >
+                                        <Icon className="w-4 h-4" />
+                                        <span className="font-medium text-sm">{section.title}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        {/* Desktop Sidebar */}
+                        <Card hover={false} className="hidden lg:block lg:col-span-1 h-fit bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50">
+                            <CardContent className="p-2">
+                                <nav className="space-y-1">
+                                    {sections.map((section) => {
+                                        const Icon = section.icon;
+                                        const isActive = activeSection === section.id;
+                                        return (
+                                            <button
+                                                key={section.id}
+                                                onClick={() => setActiveSection(section.id)}
+                                                className={cn(
+                                                    'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left',
+                                                    isActive
+                                                        ? 'bg-gradient-to-r from-fuchsia-500/10 to-pink-500/10 text-fuchsia-600 dark:text-fuchsia-400'
+                                                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                                )}
+                                            >
+                                                <Icon className={cn('w-5 h-5', isActive && 'text-fuchsia-500')} />
+                                                <span className="font-medium">{section.title}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </nav>
+                            </CardContent>
+                        </Card>
+
+                        {/* Main Content */}
+                        <Card hover={false} className="lg:col-span-3 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50">
+                            <CardContent className="p-4 sm:p-6">
+                                <motion.div
+                                    key={activeSection}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3 }}
                                 >
-                                    <Icon className="w-4 h-4" />
-                                    <span className="font-medium text-sm">{section.title}</span>
-                                </button>
-                            );
-                        })}
+                                    {renderSectionContent()}
+                                </motion.div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    {/* Desktop Sidebar */}
-                    <Card hover={false} className="hidden lg:block lg:col-span-1 h-fit bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50">
-                        <CardContent className="p-2">
-                            <nav className="space-y-1">
-                                {sections.map((section) => {
-                                    const Icon = section.icon;
-                                    const isActive = activeSection === section.id;
-                                    return (
-                                        <button
-                                            key={section.id}
-                                            onClick={() => setActiveSection(section.id)}
-                                            className={cn(
-                                                'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left',
-                                                isActive
-                                                    ? 'bg-gradient-to-r from-fuchsia-500/10 to-pink-500/10 text-fuchsia-600 dark:text-fuchsia-400'
-                                                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                                            )}
-                                        >
-                                            <Icon className={cn('w-5 h-5', isActive && 'text-fuchsia-500')} />
-                                            <span className="font-medium">{section.title}</span>
-                                        </button>
-                                    );
-                                })}
-                            </nav>
-                        </CardContent>
-                    </Card>
-
-                    {/* Main Content */}
-                    <Card hover={false} className="lg:col-span-3 bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50">
-                        <CardContent className="p-4 sm:p-6">
+                {/* Password Change Modal */}
+                <AnimatePresence>
+                    {showPasswordModal && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                             <motion.div
-                                key={activeSection}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.3 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
                             >
-                                {renderSectionContent()}
-                            </motion.div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-
-            {/* Password Change Modal */}
-            <AnimatePresence>
-                {showPasswordModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Change Password</h3>
-                                <button
-                                    onClick={() => setShowPasswordModal(false)}
-                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <form onSubmit={(e) => { e.preventDefault(); changePasswordMutation.mutate(); }} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">
-                                        Current Password
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type={showCurrentPassword ? 'text' : 'password'}
-                                            value={passwordForm.current_password}
-                                            onChange={(e) => setPasswordForm(prev => ({ ...prev, current_password: e.target.value }))}
-                                            className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
-                                        >
-                                            {showCurrentPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">
-                                        New Password
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type={showNewPassword ? 'text' : 'password'}
-                                            value={passwordForm.new_password}
-                                            onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password: e.target.value }))}
-                                            className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
-                                            required
-                                            minLength={8}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
-                                        >
-                                            {showNewPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">
-                                        Confirm New Password
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={passwordForm.new_password_confirmation}
-                                        onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password_confirmation: e.target.value }))}
-                                        className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
-                                        required
-                                    />
-                                </div>
-                                <div className="flex gap-3 pt-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Change Password</h3>
                                     <button
-                                        type="button"
                                         onClick={() => setShowPasswordModal(false)}
-                                        className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                                     >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={changePasswordMutation.isPending}
-                                        className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                                    >
-                                        {changePasswordMutation.isPending ? (
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                        ) : (
-                                            'Change Password'
-                                        )}
+                                        <X className="w-5 h-5" />
                                     </button>
                                 </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                                <form onSubmit={(e) => { e.preventDefault(); changePasswordMutation.mutate(); }} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-foreground mb-1">
+                                            Current Password
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type={showCurrentPassword ? 'text' : 'password'}
+                                                value={passwordForm.current_password}
+                                                onChange={(e) => setPasswordForm(prev => ({ ...prev, current_password: e.target.value }))}
+                                                className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
+                                            >
+                                                {showCurrentPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-foreground mb-1">
+                                            New Password
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type={showNewPassword ? 'text' : 'password'}
+                                                value={passwordForm.new_password}
+                                                onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password: e.target.value }))}
+                                                className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                                required
+                                                minLength={8}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
+                                            >
+                                                {showNewPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-foreground mb-1">
+                                            Confirm New Password
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={passwordForm.new_password_confirmation}
+                                            onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password_confirmation: e.target.value }))}
+                                            className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex gap-3 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordModal(false)}
+                                            className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={changePasswordMutation.isPending}
+                                            className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                        >
+                                            {changePasswordMutation.isPending ? (
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                            ) : (
+                                                'Change Password'
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
 
-            {/* Phone Number Modal */}
-            <AnimatePresence>
-                {showPhoneModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Add Phone Number</h3>
-                                <button
-                                    onClick={() => setShowPhoneModal(false)}
-                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <form onSubmit={(e) => { e.preventDefault(); updatePhoneMutation.mutate(); }} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-foreground mb-1">
-                                        Phone Number
-                                    </label>
-                                    <input
-                                        type="tel"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
-                                        placeholder="+855 12 345 6789"
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
-                                        required
-                                    />
-                                </div>
-                                <div className="flex gap-3 pt-4">
+                {/* Phone Number Modal */}
+                <AnimatePresence>
+                    {showPhoneModal && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Add Phone Number</h3>
                                     <button
-                                        type="button"
                                         onClick={() => setShowPhoneModal(false)}
+                                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <form onSubmit={(e) => { e.preventDefault(); updatePhoneMutation.mutate(); }} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-foreground mb-1">
+                                            Phone Number
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            placeholder="+855 12 345 6789"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex gap-3 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPhoneModal(false)}
+                                            className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={updatePhoneMutation.isPending}
+                                            className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                        >
+                                            {updatePhoneMutation.isPending ? (
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                            ) : (
+                                                'Save Phone'
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                {/* Delete Confirmation Modal */}
+                <AnimatePresence>
+                    {showDeleteConfirm && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
+                            >
+                                <div className="text-center">
+                                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <AlertTriangle className="w-8 h-8 text-red-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Delete Account?</h3>
+                                    <p className="text-gray-500 dark:text-gray-400 mt-2">
+                                        This action cannot be undone. All your data, orders, and preferences will be permanently deleted.
+                                    </p>
+                                </div>
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(false)}
                                         className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
-                                        type="submit"
-                                        disabled={updatePhoneMutation.isPending}
-                                        className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                        onClick={handleDeleteAccount}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors"
                                     >
-                                        {updatePhoneMutation.isPending ? (
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                        ) : (
-                                            'Save Phone'
-                                        )}
+                                        Delete Account
                                     </button>
                                 </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* Delete Confirmation Modal */}
-            <AnimatePresence>
-                {showDeleteConfirm && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
-                        >
-                            <div className="text-center">
-                                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <AlertTriangle className="w-8 h-8 text-red-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Delete Account?</h3>
-                                <p className="text-gray-500 dark:text-gray-400 mt-2">
-                                    This action cannot be undone. All your data, orders, and preferences will be permanently deleted.
-                                </p>
-                            </div>
-                            <div className="flex gap-3 mt-6">
-                                <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleDeleteAccount}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors"
-                                >
-                                    Delete Account
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </CustomerLayout>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </CustomerLayout>
+        </RequireAuth>
     );
 }

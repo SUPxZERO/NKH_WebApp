@@ -27,6 +27,7 @@ import {
 import { cn } from '@/app/utils/cn';
 import { useThemeStore } from '@/app/store/theme';
 import Avatar from '@/app/components/ui/Avatar';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 type UserRole = 'admin' | 'employee' | 'customer';
 
@@ -100,16 +101,17 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
     const { isDark, toggle } = useThemeStore();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Get user from page props
-    const { props } = usePage<{ auth: { user: { id: number; name: string; email: string; role: UserRole; avatar?: string } } }>();
-    const user = props.auth?.user;
+    // Get user from AuthContext (Sourced from Inertia OR Telegram)
+    const { user } = useAuth();
 
-    // Determine user role
-    const userRole: UserRole = variant || user?.role || 'customer';
-    const config = menuConfigs[userRole];
+    // Determine user role with safe fallback
+    const userRole: UserRole = variant || (user?.role as UserRole) || 'customer';
+    // Ensure config exists, fallback to customer if role is invalid
+    const config = menuConfigs[userRole] || menuConfigs['customer'];
 
-    // Get initials from name
+    // Get initials from name safely
     const getInitials = (name: string) => {
+        if (!name) return '?';
         return name
             .split(' ')
             .map(part => part[0])
@@ -170,7 +172,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
             >
                 <Avatar
                     src={user.avatar}
-                    name={user.name}
+                    name={user.name || 'User'}
                     size="md"
                     fallbackColor={userRole === 'admin' ? 'purple' : userRole === 'employee' ? 'blue' : 'rose'}
                     className={cn(isOpen && 'ring-2 ring-offset-2 ring-purple-500/50')}
@@ -214,7 +216,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                     {/* Avatar */}
                                     <Avatar
                                         src={user.avatar}
-                                        name={user.name}
+                                        name={user.name || 'User'}
                                         size="lg"
                                         fallbackColor={userRole === 'admin' ? 'purple' : userRole === 'employee' ? 'blue' : 'rose'}
                                     />
@@ -222,7 +224,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                                            Hi, {user.name.split(' ')[0]}!
+                                            Hi, {(user.name || 'User').split(' ')[0]}!
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                             {user.email}
@@ -264,7 +266,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
 
                             {/* Menu Items */}
                             <div className="py-2 px-2">
-                                {config.items.map((item) => {
+                                {(config?.items || []).map((item) => {
                                     const Icon = item.icon;
                                     return (
                                         <Link

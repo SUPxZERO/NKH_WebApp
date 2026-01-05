@@ -11,7 +11,10 @@ use Illuminate\Http\Request;
 class TelegramAccountController extends Controller
 {
     /**
-     * Get current user info (works for both guest and linked accounts)
+     * Get current user info
+     * 
+     * SPRINT P16: All Telegram users now have auto-created Customer records,
+     * so customer data is always available.
      */
     public function me(Request $request): JsonResponse
     {
@@ -24,6 +27,14 @@ class TelegramAccountController extends Controller
             ], 401);
         }
 
+        // P16: Ensure customer exists (backfill if somehow missing)
+        if (!$user->customer_id) {
+            // Trigger backfill by refreshing via findOrCreate
+            $user = \App\Models\TelegramUser::findOrCreate(['id' => $user->telegram_id]);
+        }
+
+        $customer = $user->customer;
+
         $data = [
             'id' => $user->id,
             'telegram_id' => $user->telegram_id,
@@ -33,25 +44,27 @@ class TelegramAccountController extends Controller
             'display_name' => $user->display_name,
             'phone_number' => $user->phone_number,
             'delivery_address' => $user->delivery_address,
-            'saved_addresses' => $user->saved_addresses ?? [],
-            'has_linked_account' => $user->hasLinkedAccount(),
-        ];
-
-        if ($user->hasLinkedAccount()) {
-            $customer = $user->customer;
-            $data['customer'] = [
+            'has_linked_account' => true, // P16: Always true now
+            // P16: Always include customer data
+            'customer' => $customer ? [
                 'id' => $customer->id,
                 'customer_code' => $customer->customer_code,
+                'name' => $customer->name,
+                'email' => $customer->email,
+                'phone' => $customer->phone,
                 'loyalty_points' => $customer->points_balance ?? 0,
-                'customer_tier' => $customer->customer_tier ?? 'Bronze',
-            ];
-        }
+                'customer_tier' => $customer->customer_tier ?? 'bronze',
+                'total_spent' => (float) ($customer->total_spent ?? 0),
+                'visit_count' => $customer->visit_count ?? 0,
+            ] : null,
+        ];
 
         return response()->json([
             'success' => true,
             'data' => $data,
         ]);
     }
+
 
     /**
      * Link account by phone number
@@ -173,7 +186,9 @@ class TelegramAccountController extends Controller
     }
 
     /**
-     * Update profile information (works for both guest and linked accounts)
+     * Update profile information
+     * 
+     * SPRINT P16: Now syncs to Customer record as well as TelegramUser
      */
     public function updateProfile(Request $request): JsonResponse
     {
@@ -181,15 +196,47 @@ class TelegramAccountController extends Controller
             'first_name' => 'nullable|string|max:100',
             'last_name' => 'nullable|string|max:100',
             'phone_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
             'delivery_address' => 'nullable|string|max:500',
         ]);
 
         $user = $request->user('telegram');
 
-        $updates = array_filter($validated, fn($value) => $value !== null);
+        // Update TelegramUser
+        $telegramUpdates = array_filter([
+            'first_name' => $validated['first_name'] ?? null,
+            'last_name' => $validated['last_name'] ?? null,
+            'phone_number' => $validated['phone_number'] ?? null,
+            'delivery_address' => $validated['delivery_address'] ?? null,
+        ], fn($value) => $value !== null);
 
-        if (!empty($updates)) {
-            $user->update($updates);
+        if (!empty($telegramUpdates)) {
+            $user->update($telegramUpdates);
+        }
+
+        // P16: Sync to Customer record
+        if ($user->customer_id) {
+            $customer = $user->customer;
+            $customerUpdates = [];
+
+            // Update name if first/last name changed
+            if (isset($validated['first_name']) || isset($validated['last_name'])) {
+                $firstName = $validated['first_name'] ?? $user->first_name ?? '';
+                $lastName = $validated['last_name'] ?? $user->last_name ?? '';
+                $customerUpdates['name'] = trim("{$firstName} {$lastName}") ?: 'Telegram User';
+            }
+
+            if (isset($validated['phone_number'])) {
+                $customerUpdates['phone'] = $validated['phone_number'];
+            }
+
+            if (isset($validated['email'])) {
+                $customerUpdates['email'] = $validated['email'];
+            }
+
+            if (!empty($customerUpdates)) {
+                $customer->update($customerUpdates);
+            }
         }
 
         return response()->json([
@@ -199,11 +246,13 @@ class TelegramAccountController extends Controller
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'phone_number' => $user->phone_number,
+                'email' => $user->customer?->email,
                 'delivery_address' => $user->delivery_address,
                 'display_name' => $user->display_name,
             ],
         ]);
     }
+
 
     /**
      * Add a new address (stored in database for both guest and linked accounts)

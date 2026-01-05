@@ -39,7 +39,9 @@ interface TelegramWebApp {
         hide: () => void;
         onClick: (callback: () => void) => void;
     };
+    setHeaderColor?: (color: string) => void;
 }
+
 
 declare global {
     interface Window {
@@ -55,6 +57,7 @@ interface TelegramAuthState {
     isAuthenticated: boolean;
     isGuest: boolean;
     user: TelegramUser | null;
+    backendUser: any | null; // Full user object from backend for AuthProvider
     error: string | null;
 }
 
@@ -65,6 +68,7 @@ export function useTelegramAuth(): TelegramAuthState {
         isAuthenticated: false,
         isGuest: false,
         user: null,
+        backendUser: null,
         error: null,
     });
 
@@ -94,6 +98,11 @@ export function useTelegramAuth(): TelegramAuthState {
             tg.ready();
             tg.expand();
 
+            // Set theme color to match app
+            if (tg.setHeaderColor) {
+                tg.setHeaderColor('#1e1e2e'); // bg-slate-900 / dark theme
+            }
+
             try {
                 // Initialize session with backend
                 const response = await fetch('/api/telegram-webapp/init', {
@@ -118,6 +127,7 @@ export function useTelegramAuth(): TelegramAuthState {
                         isAuthenticated: true,
                         isGuest: data.data?.is_guest ?? true,
                         user: tg.initDataUnsafe.user || null,
+                        backendUser: data.data?.user || null, // Capture backend user object
                     }));
 
                     console.log('[TelegramAuth] Session established:', data.data);
@@ -144,6 +154,7 @@ export function useTelegramAuth(): TelegramAuthState {
 
     return state;
 }
+
 
 /**
  * Check if we're running in Telegram (synchronous, no API call)

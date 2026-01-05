@@ -134,13 +134,32 @@ class TelegramWebAppController extends Controller
                 'last_name' => $telegramUser->last_name,
                 'username' => $telegramUser->telegram_username,
                 'display_name' => $telegramUser->display_name,
+                'customer_id' => $telegramUser->customer_id, // Ensure customer_id is in session
             ],
         ]);
 
         Log::info('TelegramWebApp: Guest session established', [
             'telegram_id' => $telegramId,
             'telegram_user_id' => $telegramUser->id,
+            'customer_id' => $telegramUser->customer_id,
         ]);
+
+        // SPRINT P16 FIX: Return a full "User" object structure that
+        // the Frontend AuthProvider can understand and accept.
+        // This mocks a logged-in user based on the valid Telegram session.
+        $mockUser = [
+            'id' => 990000000 + $telegramUser->id, // Pseudo ID to avoid conflict with real users
+            'name' => $telegramUser->display_name,
+            'email' => $telegramUser->customer?->email ?? "telegram_{$telegramUser->telegram_id}@nkh.local",
+            'role' => 'customer',
+            'phone' => $telegramUser->phone_number,
+            'avatar' => null,
+            'created_at' => $telegramUser->created_at->toISOString(),
+            'updated_at' => $telegramUser->updated_at->toISOString(),
+            'is_telegram_user' => true, // Flag for frontend to know source
+            'telegram_user_id' => $telegramUser->id,
+            'customer_id' => $telegramUser->customer_id,
+        ];
 
         return response()->json([
             'success' => true,
@@ -149,9 +168,11 @@ class TelegramWebAppController extends Controller
                 'is_guest' => true,
                 'telegram_user_id' => $telegramUser->id,
                 'name' => $telegramUser->display_name,
+                'user' => $mockUser, // The full user object for AuthProvider
             ],
         ]);
     }
+
 
     /**
      * Validate Telegram WebApp initData using HMAC-SHA256

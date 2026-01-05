@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { usePage, router } from '@inertiajs/react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useTelegramAuth } from '../hooks/useTelegramAuth';
 
 interface User {
   id: number;
@@ -18,6 +19,8 @@ interface User {
   employee_id?: string;
   department?: string;
   restaurant_location?: string;
+  // Telegram fields
+  is_telegram_user?: boolean;
 }
 
 interface AuthContextType {
@@ -41,8 +44,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get user from Inertia props
-  const user = (props.auth?.user as User) || null;
+  // SPRINT P16: Integrate Telegram Auth
+  const { backendUser, isAuthenticated: isTelegramAuth } = useTelegramAuth();
+
+  // Get user from Inertia props OR from Telegram Auth
+  const user = (props.auth?.user as User) || (isTelegramAuth ? backendUser : null);
   const isAuthenticated = !!user;
 
   useEffect(() => {
@@ -67,7 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (Array.isArray(explicitPermissions)) {
       return explicitPermissions.includes(permission) || explicitPermissions.includes('*');
     }
-    
+
     // Role-based permissions
     const rolePermissions = {
       admin: [
@@ -177,12 +183,12 @@ interface RequireAuthProps {
   redirectTo?: string;
 }
 
-export function RequireAuth({ 
-  children, 
-  roles, 
-  permissions, 
-  fallback, 
-  redirectTo = '/login' 
+export function RequireAuth({
+  children,
+  roles,
+  permissions,
+  fallback,
+  redirectTo = '/login'
 }: RequireAuthProps) {
   const { user, isAuthenticated, hasRole, hasPermission, isLoading } = useAuth();
 
