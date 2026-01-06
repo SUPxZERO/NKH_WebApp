@@ -8,6 +8,7 @@ use App\Http\Requests\Api\OnlineOrder\StoreOnlineOrderRequest;
 use App\Http\Resources\CustomerAddressResource;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrderTimeSlotResource;
+use App\Http\Traits\TelegramAwareAuth;
 use App\Models\CartItem;
 use App\Models\Customer;
 use App\Models\CustomerAddress;
@@ -25,6 +26,7 @@ use Illuminate\Support\Str;
 
 class OnlineOrderController extends Controller
 {
+    use TelegramAwareAuth;
     /**
      * GET /api/time-slots?date=YYYY-MM-DD&mode=delivery&location_id=1
      */
@@ -136,32 +138,7 @@ class OnlineOrderController extends Controller
         return [$discount, $promotion->id];
     }
 
-    /**
-     * Helper to get current customer from Auth or Telegram Session
-     */
-    private function getCurrentCustomer(Request $request): ?Customer
-    {
-        // 1. Standard Auth
-        if ($request->user()) {
-            return $request->user()->customer;
-        }
 
-        // 2. Telegram Session (set by TelegramWebAppAuth middleware)
-        $telegramData = session('telegram_user');
-        if ($telegramData && isset($telegramData['customer_id'])) {
-             return Customer::find($telegramData['customer_id']);
-        }
-
-        // 3. Fallback: Check request for telegram_id (Legacy/Dev)
-        if ($request->filled('telegram_id')) {
-            $telegramUser = \App\Models\TelegramUser::where('telegram_id', $request->input('telegram_id'))->first();
-            if ($telegramUser && $telegramUser->customer) {
-                return $telegramUser->customer;
-            }
-        }
-
-        return null;
-    }
 
     // GET /api/customer/addresses (auth:sanctum, role:customer)
     public function addressesIndex(Request $request)

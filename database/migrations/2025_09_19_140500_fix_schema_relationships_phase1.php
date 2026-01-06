@@ -16,13 +16,16 @@ return new class extends Migration
     {
         // 1) users: add unique index on phone if present and not already unique
         if (Schema::hasTable('users') && Schema::hasColumn('users', 'phone')) {
-            // Check if constraint already exists
-            $constraintExists = \DB::select("
-                SELECT constraint_name
-                FROM information_schema.table_constraints
-                WHERE table_name = 'users'
-                AND constraint_name = 'ux_users_phone'
-            ");
+            // Check if constraint already exists (skip for SQLite which doesn't have information_schema)
+            $constraintExists = [];
+            if (DB::getDriverName() !== 'sqlite') {
+                $constraintExists = \DB::select("
+                    SELECT constraint_name
+                    FROM information_schema.table_constraints
+                    WHERE table_name = 'users'
+                    AND constraint_name = 'ux_users_phone'
+                ");
+            }
 
             if (empty($constraintExists)) {
                 try {
@@ -175,13 +178,16 @@ return new class extends Migration
             // Add unique(code) constraint separately with proper check
             if (Schema::hasColumn('reservations', 'code')) {
                 try {
-                    // Check if constraint already exists before adding
-                    $constraintExists = \DB::select("
-                        SELECT constraint_name
-                        FROM information_schema.table_constraints
-                        WHERE table_name = 'reservations'
-                        AND constraint_name = 'reservations_code_unique'
-                    ");
+                    // Check if constraint already exists before adding (skip for SQLite)
+                    $constraintExists = [];
+                    if (DB::getDriverName() !== 'sqlite') {
+                        $constraintExists = \DB::select("
+                            SELECT constraint_name
+                            FROM information_schema.table_constraints
+                            WHERE table_name = 'reservations'
+                            AND constraint_name = 'reservations_code_unique'
+                        ");
+                    }
 
                     if (empty($constraintExists)) {
                         Schema::table('reservations', function (Blueprint $table) {

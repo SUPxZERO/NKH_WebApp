@@ -34,7 +34,9 @@ return new class extends Migration
         }
 
         // Modify status column
-        DB::statement("ALTER TABLE time_off_requests MODIFY COLUMN status ENUM('pending', 'approved', 'rejected', 'cancelled') DEFAULT 'pending'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE time_off_requests MODIFY COLUMN status ENUM('pending', 'approved', 'rejected', 'cancelled') DEFAULT 'pending'");
+        }
     }
 
     /**

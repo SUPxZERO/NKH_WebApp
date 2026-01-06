@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\TelegramAwareAuth;
 use App\Models\Customer;
 use App\Models\LoyaltyPoint;
 use App\Models\Reward;
@@ -14,15 +15,15 @@ use Carbon\Carbon;
 
 class RewardController extends Controller
 {
+    use TelegramAwareAuth;
+
     /**
      * Get available rewards catalog
      */
     public function index(Request $request): JsonResponse
     {
-        // Get authenticated customer
-        $user = $request->user();
-        $customer = $user ? Customer::where('user_id', $user->id)->first() : null;
-        
+        // Get customer from auth or Telegram session
+        $customer = $this->getCurrentCustomer($request);
         $customerPoints = $customer ? $customer->points_balance : 0;
 
         // Define rewards catalog
@@ -134,19 +135,13 @@ class RewardController extends Controller
             'reward_title' => 'required|string',
         ]);
 
-        // Get authenticated customer
-        $user = $request->user();
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not authenticated'
-            ], 401);
-        }
-
-        $customer = Customer::where('user_id', $user->id)->first();
+        // Get customer from auth or Telegram session
+        $customer = $this->getCurrentCustomer($request);
+        
         if (!$customer) {
             return response()->json([
-                'message' => 'Customer profile not found'
-            ], 404);
+                'message' => 'Customer profile not found. Please login or use Telegram.'
+            ], 401);
         }
 
         // Check if customer has enough points
@@ -186,17 +181,19 @@ class RewardController extends Controller
 
             DB::commit();
 
-            // Send notification about reward redemption
-            try {
-                $notificationService = app(NotificationService::class);
-                $notificationService->sendRewardNotification(
-                    $user,
-                    -$validated['points_required'],
-                    "You redeemed: {$validated['reward_title']}! Use code: " . strtoupper(substr(md5($redemption->id . time()), 0, 8)),
-                    '/customer/loyalty'
-                );
-            } catch (\Exception $e) {
-                \Log::warning('Failed to send reward redemption notification: ' . $e->getMessage());
+            // Send notification about reward redemption (only if customer has linked User)
+            if ($customer->user) {
+                try {
+                    $notificationService = app(NotificationService::class);
+                    $notificationService->sendRewardNotification(
+                        $customer->user,
+                        -$validated['points_required'],
+                        "You redeemed: {$validated['reward_title']}! Use code: " . strtoupper(substr(md5($redemption->id . time()), 0, 8)),
+                        '/customer/loyalty'
+                    );
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to send reward redemption notification: ' . $e->getMessage());
+                }
             }
 
             return response()->json([
@@ -225,14 +222,13 @@ class RewardController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
-
-        $customer = Customer::where('user_id', $user->id)->first();
+        // Get customer from auth or Telegram session
+        $customer = $this->getCurrentCustomer($request);
+        
         if (!$customer) {
-            return response()->json(['message' => 'Customer profile not found'], 404);
+            return response()->json([
+                'message' => 'Customer profile not found. Please login or use Telegram.'
+            ], 401);
         }
 
         $redemptions = LoyaltyPoint::where('customer_id', $customer->id)

@@ -27,7 +27,9 @@ return new class extends Migration
             // Note: Changing ENUM values in Laravel/MySQL without doctrine/dbal is tricky.
             // We will attempt to modify the column using raw SQL for safety.
             // This adds 'draft' and 'published' to the allowed values.
-            DB::statement("ALTER TABLE shifts MODIFY COLUMN status ENUM('scheduled', 'completed', 'cancelled', 'no_show', 'draft', 'published') NOT NULL DEFAULT 'draft'");
+            if (DB::getDriverName() === 'mysql') {
+                DB::statement("ALTER TABLE shifts MODIFY COLUMN status ENUM('scheduled', 'completed', 'cancelled', 'no_show', 'draft', 'published') NOT NULL DEFAULT 'draft'");
+            }
         });
     }
 

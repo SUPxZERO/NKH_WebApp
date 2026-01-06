@@ -14,13 +14,16 @@ return new class extends Migration
     public function up(): void
     {
         // MySQL requires ALTER to change ENUM to VARCHAR
-        // First, let's change the column type from ENUM to VARCHAR(50)
-        DB::statement("ALTER TABLE inventory_transactions MODIFY COLUMN type VARCHAR(50) NULL");
-        
-        // Map old values to new values for consistency
-        DB::statement("UPDATE inventory_transactions SET type = 'stock_in' WHERE type = 'in'");
-        DB::statement("UPDATE inventory_transactions SET type = 'stock_out' WHERE type = 'out'");
-        DB::statement("UPDATE inventory_transactions SET type = 'adjustment' WHERE type = 'adjust'");
+        if (DB::getDriverName() === 'mysql') {
+            // MySQL requires ALTER to change ENUM to VARCHAR
+            // First, let's change the column type from ENUM to VARCHAR(50)
+            DB::statement("ALTER TABLE inventory_transactions MODIFY COLUMN type VARCHAR(50) NULL");
+            
+            // Map old values to new values for consistency
+            DB::statement("UPDATE inventory_transactions SET type = 'stock_in' WHERE type = 'in'");
+            DB::statement("UPDATE inventory_transactions SET type = 'stock_out' WHERE type = 'out'");
+            DB::statement("UPDATE inventory_transactions SET type = 'adjustment' WHERE type = 'adjust'");
+        }
     }
 
     /**

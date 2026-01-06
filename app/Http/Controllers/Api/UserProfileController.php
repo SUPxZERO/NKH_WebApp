@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\TelegramAwareAuth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -11,12 +12,23 @@ use Illuminate\Validation\Rules\Password;
 
 class UserProfileController extends Controller
 {
+    use TelegramAwareAuth;
+
     /**
      * Update the authenticated user's profile
      */
     public function update(Request $request): JsonResponse
     {
         $user = $request->user();
+        
+        // For Telegram guests without User record, delegate to customer/telegram update
+        if (!$user && $this->isTelegramGuest($request)) {
+            return $this->updateTelegramGuestProfile($request);
+        }
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -46,19 +58,92 @@ class UserProfileController extends Controller
     }
 
     /**
-     * Upload and update user profile image
+     * Update profile for Telegram guests (no User record)
+     */
+    private function updateTelegramGuestProfile(Request $request): JsonResponse
+    {
+        $customer = $this->getCurrentCustomer($request);
+        $telegramUser = $this->getTelegramUser($request);
+
+        if (!$customer && !$telegramUser) {
+            return response()->json(['message' => 'Profile not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        // Update TelegramUser if available
+        if ($telegramUser && isset($validated['name'])) {
+            $names = explode(' ', $validated['name'], 2);
+            $telegramUser->first_name = $names[0];
+            if (isset($names[1])) {
+                $telegramUser->last_name = $names[1];
+            }
+            if (isset($validated['phone'])) {
+                $telegramUser->phone_number = $validated['phone'];
+            }
+            $telegramUser->save();
+        }
+
+        // Update Customer if available
+        if ($customer) {
+            $customerUpdate = [];
+            if (isset($validated['name'])) $customerUpdate['name'] = $validated['name'];
+            if (isset($validated['email'])) $customerUpdate['email'] = $validated['email'];
+            if (isset($validated['phone'])) $customerUpdate['phone'] = $validated['phone'];
+            
+            if (!empty($customerUpdate)) {
+                $customer->update($customerUpdate);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'data' => [
+                'id' => $customer?->id ?? 0,
+                'name' => $customer?->name ?? $telegramUser?->display_name,
+                'email' => $customer?->email,
+                'phone' => $customer?->phone ?? $telegramUser?->phone_number,
+                'is_telegram_guest' => true,
+            ]
+        ]);
+    }
+
+    /**
+     * Upload and update user profile Image
+     * 
+     * Supports:
+     * 1. Standard authenticated users (stores on User model)
+     * 2. Telegram users with linked User account (stores on User model)
+     * 3. Telegram users without User account (stores on Customer model)
      */
     public function uploadAvatar(Request $request): JsonResponse
     {
+        // Get user - either from direct auth or via Telegram customer linkage
+        $user = $request->user();
+        $customer = null;
+        $telegramUser = null;
+        
+        // If no direct user, try to get via Telegram session
+        if (!$user && $this->isTelegramGuest($request)) {
+            // Using logic from trait manually to avoid "undefined method" risk if trait isn't updating
+            $customer = $this->getCurrentCustomer($request);
+            // $telegramUser = $this->getTelegramUser($request); // Not needed for avatar
+            
+            // Check if customer has a linked User account
+            if ($customer && $customer->user) {
+                $user = $customer->user;
+            }
+        }
+
         // Check if file was received at all
         if (!$request->hasFile('avatar')) {
             return response()->json([
                 'message' => 'No file received',
                 'errors' => ['avatar' => ['No file was uploaded. Please try again.']],
-                'debug' => [
-                    'files' => $request->allFiles(),
-                    'all_input' => array_keys($request->all()),
-                ]
             ], 422);
         }
 
@@ -76,32 +161,45 @@ class UserProfileController extends Controller
             'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
         ]);
 
-        $user = $request->user();
-
-        // Defensive check - this shouldn't happen if auth middleware is applied
-        if (!$user) {
+        // Must have either User or Customer to store avatar
+        if (!$user && !$customer) {
             return response()->json([
                 'message' => 'Authentication required',
                 'errors' => ['auth' => ['You must be logged in to upload a profile picture.']],
             ], 401);
         }
 
-        // Delete old image if exists
-        if ($user->image_path) {
-            Storage::disk('public')->delete($user->image_path);
-        }
-        if ($user->avatar && $user->avatar !== $user->image_path) {
-            Storage::disk('public')->delete($user->avatar);
-        }
-
         // Store new image
         $path = $file->store('avatars', 'public');
 
-        // Update user record - set both fields for compatibility
-        $user->update([
-            'image_path' => $path,
-            'avatar' => $path,
-        ]);
+        // If we have a User, store on User model
+        if ($user) {
+            // Delete old images if exists
+            if ($user->image_path) {
+                Storage::disk('public')->delete($user->image_path);
+            }
+            if ($user->avatar && $user->avatar !== $user->image_path) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Update user record
+            $user->update([
+                'image_path' => $path,
+                'avatar' => $path,
+            ]);
+        }
+        // If Telegram user without User account, store on Customer model
+        elseif ($customer) {
+            // Delete old avatar if exists
+            if ($customer->avatar) {
+                Storage::disk('public')->delete($customer->avatar);
+            }
+
+            // Update customer record
+            $customer->update([
+                'avatar' => $path,
+            ]);
+        }
 
         return response()->json([
             'message' => 'Profile picture updated successfully',
@@ -116,12 +214,24 @@ class UserProfileController extends Controller
      */
     public function changePassword(Request $request): JsonResponse
     {
+        // Telegram guests cannot change password (no User record)
+        if (!$request->user() && $this->isTelegramGuest($request)) {
+            return response()->json([
+                'message' => 'Password change is not available for Telegram guests',
+                'info' => 'Create a full account to set a password.'
+            ], 422);
+        }
+
         $validated = $request->validate([
             'current_password' => 'required|string',
             'new_password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         // Verify current password
         if (!Hash::check($validated['current_password'], $user->password)) {
@@ -142,42 +252,101 @@ class UserProfileController extends Controller
 
     /**
      * Delete the authenticated user's avatar
+     * 
+     * Supports both User model (standard auth) and Customer model (Telegram)
      */
     public function deleteAvatar(Request $request): JsonResponse
     {
         $user = $request->user();
+        $customer = null;
 
-        // Delete from storage
-        if ($user->image_path) {
-            Storage::disk('public')->delete($user->image_path);
-        }
-        if ($user->avatar && $user->avatar !== $user->image_path) {
-            Storage::disk('public')->delete($user->avatar);
+        // If no direct user, try to get via Telegram session
+        if (!$user && $this->isTelegramGuest($request)) {
+            $customer = $this->getCurrentCustomer($request);
+            // Check if customer has a linked User account
+            if ($customer && $customer->user) {
+                $user = $customer->user;
+            }
         }
 
-        // Clear both fields
-        $user->update([
-            'image_path' => null,
-            'avatar' => null,
-        ]);
+        // Must have either User or Customer to delete avatar
+        if (!$user && !$customer) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // If we have a User, delete from User model
+        if ($user) {
+            // Delete from storage
+            if ($user->image_path) {
+                Storage::disk('public')->delete($user->image_path);
+            }
+            if ($user->avatar && $user->avatar !== $user->image_path) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Clear both fields
+            $user->update([
+                'image_path' => null,
+                'avatar' => null,
+            ]);
+        }
+        // If Telegram user without User account, delete from Customer model
+        elseif ($customer && $customer->avatar) {
+            // Delete from storage
+            Storage::disk('public')->delete($customer->avatar);
+
+            // Clear avatar field
+            $customer->update([
+                'avatar' => null,
+            ]);
+        }
 
         return response()->json([
-            'message' => 'Profile picture deleted successfully'
+            'message' => 'Avatar deleted successfully'
         ]);
     }
 
     /**
      * Get full avatar URL for the authenticated user
+     * 
+     * Supports both User model (standard auth) and Customer model (Telegram)
      */
     public function getAvatarUrl(Request $request): JsonResponse
     {
         $user = $request->user();
+        $customer = null;
 
-        return response()->json([
-            'avatar_url' => $user->avatar_url,
-            'image_path' => $user->image_path,
-            'image_path_url' => $user->image_path_url,
-            'has_avatar' => !empty($user->image_path) || !empty($user->avatar),
-        ]);
+        // For Telegram guests, check Customer avatar
+        if (!$user && $this->isTelegramGuest($request)) {
+            $customer = $this->getCurrentCustomer($request);
+            // Check if customer has a linked User account
+            if ($customer && $customer->user) {
+                $user = $customer->user;
+            }
+        }
+
+        // Return User avatar if available
+        if ($user) {
+            return response()->json([
+                'avatar_url' => $user->avatar_url,
+                'image_path' => $user->image_path,
+                'image_path_url' => $user->image_path_url,
+                'has_avatar' => !empty($user->image_path) || !empty($user->avatar),
+            ]);
+        }
+
+        // Return Customer avatar if available (Telegram users)
+        if ($customer) {
+            $avatarUrl = $customer->avatar ? Storage::url($customer->avatar) : null;
+            return response()->json([
+                'avatar_url' => $avatarUrl,
+                'image_path' => $customer->avatar,
+                'image_path_url' => $avatarUrl,
+                'has_avatar' => !empty($customer->avatar),
+                'is_telegram_guest' => true,
+            ]);
+        }
+
+        return response()->json(['message' => 'Unauthenticated'], 401);
     }
 }

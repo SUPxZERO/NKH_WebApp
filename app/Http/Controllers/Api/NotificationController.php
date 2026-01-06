@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\TelegramAwareAuth;
 use Illuminate\Http\Request;
 use App\Models\UserNotification;
 use App\Models\BroadcastNotification;
@@ -11,15 +12,32 @@ use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
+    use TelegramAwareAuth;
+
     public function index(Request $request)
     {
-        $user = $request->user();
-        if (!$user) {
+        // Get user ID - for Telegram guests, use pseudo ID based on customer
+        $userId = $this->getUserIdForStorage($request);
+        
+        if (!$userId) {
+            // For Telegram guests without linked user, return empty notifications
+            // They can still receive Telegram notifications via bots
+            if ($this->isTelegramGuest($request)) {
+                return response()->json([
+                    'data' => [],
+                    'current_page' => 1,
+                    'per_page' => 20,
+                    'total' => 0,
+                    'last_page' => 1,
+                    'is_telegram_guest' => true,
+                    'message' => 'In-app notifications are not available for Telegram guests. You receive notifications via Telegram.',
+                ]);
+            }
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
         // Scope to the authenticated user using UserNotification model
-        $query = UserNotification::where('user_id', $user->id);
+        $query = UserNotification::where('user_id', $userId);
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;
@@ -168,7 +186,16 @@ class NotificationController extends Controller
 
     public function markAllRead(Request $request)
     {
-        UserNotification::where('user_id', $request->user()->id)
+        $userId = $this->getUserIdForStorage($request);
+        
+        if (!$userId) {
+            if ($this->isTelegramGuest($request)) {
+                return response()->json(['message' => 'No in-app notifications for Telegram guests']);
+            }
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
+        UserNotification::where('user_id', $userId)
             ->where('read', false)
             ->update(['read' => true, 'read_at' => now()]);
         return response()->json(['message' => 'All marked as read']);
@@ -176,8 +203,15 @@ class NotificationController extends Controller
 
     public function unreadCount(Request $request)
     {
+        $userId = $this->getUserIdForStorage($request);
+        
+        if (!$userId) {
+            // Telegram guests have 0 in-app notifications
+            return response()->json(['count' => 0]);
+        }
+        
         return response()->json([
-            'count' => UserNotification::where('user_id', $request->user()->id)->where('read', false)->count()
+            'count' => UserNotification::where('user_id', $userId)->where('read', false)->count()
         ]);
     }
 

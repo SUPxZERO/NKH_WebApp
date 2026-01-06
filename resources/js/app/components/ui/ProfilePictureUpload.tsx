@@ -96,7 +96,8 @@ export default function ProfilePictureUpload({
         setIsUploading(true);
         try {
             // Don't set Content-Type header - axios sets it automatically for FormData
-            const response = await apiPost('/user/profile/avatar', formData) as any;
+            // Use /customer/avatar route which supports both Auth and Telegram guests (Sprint P15)
+            const response = await apiPost('customer/avatar', formData) as any;
 
             toastSuccess('Profile picture updated');
             if (response.avatar_url) {
@@ -123,7 +124,8 @@ export default function ProfilePictureUpload({
 
         setIsDeleting(true);
         try {
-            await apiDelete('/user/profile/avatar');
+            // Use /customer/avatar route which supports both Auth and Telegram guests (Sprint P15)
+            await apiDelete('customer/avatar');
             toastSuccess('Profile picture removed');
             setPreviewUrl(null);
             if (onDeleteSuccess) onDeleteSuccess();

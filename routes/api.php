@@ -385,6 +385,21 @@ Route::prefix('customer')
     Route::post('notification-preferences/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
     Route::post('notification-preferences/disable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'disableAll']);
     Route::post('notification-preferences/enable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'enableAll']);
+    
+    // User Settings (for customer portal)
+    Route::get('settings', [App\Http\Controllers\Api\UserSettingsController::class, 'show']);
+    Route::put('settings', [App\Http\Controllers\Api\UserSettingsController::class, 'update']);
+    Route::put('settings/notifications', [App\Http\Controllers\Api\UserSettingsController::class, 'updateNotifications']);
+    Route::put('settings/privacy', [App\Http\Controllers\Api\UserSettingsController::class, 'updatePrivacy']);
+    Route::put('settings/theme', [App\Http\Controllers\Api\UserSettingsController::class, 'updateTheme']);
+    Route::put('settings/language', [App\Http\Controllers\Api\UserSettingsController::class, 'updateLanguage']);
+    Route::post('change-password', [App\Http\Controllers\Api\UserSettingsController::class, 'changePassword']);
+    Route::put('phone', [App\Http\Controllers\Api\UserSettingsController::class, 'updatePhone']);
+    
+    // Profile Avatar (supports both Auth and Telegram guests - Sprint P15)
+    Route::get('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
+    Route::post('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar']);
+    Route::delete('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
 });
 
 // USER API ROUTES

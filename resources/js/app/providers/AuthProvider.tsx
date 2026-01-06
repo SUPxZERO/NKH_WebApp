@@ -45,11 +45,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   // SPRINT P16: Integrate Telegram Auth
-  const { backendUser, isAuthenticated: isTelegramAuth } = useTelegramAuth();
+  const { backendUser, isAuthenticated: isTelegramAuth, isLoading: isTelegramLoading, isInTelegram } = useTelegramAuth();
 
   // Get user from Inertia props OR from Telegram Auth
   const user = (props.auth?.user as User) || (isTelegramAuth ? backendUser : null);
   const isAuthenticated = !!user;
+
+  // Combined loading state - wait for both initial mount AND Telegram auth if in Telegram context
+  // This prevents premature redirects to login before Telegram session is established
+  const combinedLoading = isLoading || (isInTelegram && isTelegramLoading);
 
   useEffect(() => {
     // Initialize auth state
@@ -152,7 +156,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const contextValue: AuthContextType = {
     user,
     isAuthenticated,
-    isLoading,
+    isLoading: combinedLoading, // Use combined loading to wait for Telegram auth
     hasRole,
     hasPermission,
     redirectToDashboard,

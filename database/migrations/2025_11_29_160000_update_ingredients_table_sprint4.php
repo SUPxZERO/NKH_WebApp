@@ -63,6 +63,21 @@ return new class extends Migration
                 // but for now we are simplifying or it's handled in inventory table.
                 // The Inventory module handles location-specific stock.
                 // So we can drop it from ingredients table which is the catalog.
+
+                // Fix for SQLite: explicitly drop index first
+                try {
+                    $table->dropIndex('ingredients_location_id_name_index');
+                } catch (\Throwable $e) {
+                    try { $table->dropIndex(['location_id', 'name']); } catch (\Throwable $e2) {}
+                }
+
+                try {
+                    $table->dropIndex('ingredients_location_id_sku_unique');
+                } catch (\Throwable $e) {
+                    try { $table->dropUnique(['location_id', 'sku']); } catch (\Throwable $e2) {}
+                    try { $table->dropUnique(['location_id', 'code']); } catch (\Throwable $e3) {}
+                }
+
                 $table->dropForeign(['location_id']);
                 $table->dropColumn('location_id');
             }

@@ -21,7 +21,7 @@ class TelegramKeyboardBuilder
     {
         return self::inlineKeyboard([
             [
-                ['text' => '🍔 Order Now', 'web_app' => ['url' => config('app.url')]],
+                ['text' => '🍔 Order Now', 'web_app' => ['url' => config('app.url') . '/menu']],
             ],
             [
                 ['text' => 'ℹ️ Help & Locations', 'callback_data' => 'help_info'],
@@ -211,7 +211,7 @@ class TelegramKeyboardBuilder
                 ['text' => '📦 View Order', 'web_app' => ['url' => config('app.url') . "/orders/{$orderId}"]],
             ],
             [
-                ['text' => '🍔 Order More', 'web_app' => ['url' => config('app.url')]],
+                ['text' => '🍔 Order More', 'web_app' => ['url' => config('app.url') . '/menu']],
             ],
         ]);
     }

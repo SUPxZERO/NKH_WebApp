@@ -147,13 +147,14 @@ class TelegramWebAppController extends Controller
         // SPRINT P16 FIX: Return a full "User" object structure that
         // the Frontend AuthProvider can understand and accept.
         // This mocks a logged-in user based on the valid Telegram session.
+        $customer = $telegramUser->customer;
         $mockUser = [
             'id' => 990000000 + $telegramUser->id, // Pseudo ID to avoid conflict with real users
             'name' => $telegramUser->display_name,
-            'email' => $telegramUser->customer?->email ?? "telegram_{$telegramUser->telegram_id}@nkh.local",
+            'email' => $customer?->email ?? "telegram_{$telegramUser->telegram_id}@nkh.local",
             'role' => 'customer',
             'phone' => $telegramUser->phone_number,
-            'avatar' => null,
+            'avatar' => $customer && $customer->avatar ? \Illuminate\Support\Facades\Storage::url($customer->avatar) : null,
             'created_at' => $telegramUser->created_at->toISOString(),
             'updated_at' => $telegramUser->updated_at->toISOString(),
             'is_telegram_user' => true, // Flag for frontend to know source

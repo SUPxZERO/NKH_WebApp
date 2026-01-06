@@ -177,22 +177,26 @@ class CustomerController extends Controller
     }
 
     // GET /api/customer/profile (auth:sanctum, role:customer)
+    // UPDATED: Supports both Auth and Telegram guests
     public function profile(Request $request): CustomerResource
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
         return new CustomerResource($customer->load(['user']));
     }
 
     // PUT /api/customer/profile (auth, role:customer) - Update own profile
+    // UPDATED: Supports both Auth and Telegram guests via getCustomerOrTelegram
     public function updateProfile(Request $request): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
+        // Build validation rules - email uniqueness check needs user_id if available
+        $userId = $customer->user_id ?? 0;
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|max:255|unique:users,email,' . $request->user()->id,
+            'email' => 'sometimes|email|max:255|unique:users,email,' . $userId,
             'phone' => 'nullable|string|max:20',
             'birth_date' => 'nullable|date',
             'gender' => 'nullable|string|in:male,female,other',
@@ -200,19 +204,37 @@ class CustomerController extends Controller
             'marketing_consent' => 'nullable|boolean',
         ]);
 
-        DB::transaction(function () use ($customer, $validated) {
-            // Update user table fields
-            $userUpdate = [];
-            if (isset($validated['name'])) $userUpdate['name'] = $validated['name'];
-            if (isset($validated['email'])) $userUpdate['email'] = $validated['email'];
-            if (isset($validated['phone'])) $userUpdate['phone'] = $validated['phone'];
+        DB::transaction(function () use ($customer, $telegramUser, $validated) {
+            // Update user table fields (only if customer has a linked User)
+            if ($customer->user) {
+                $userUpdate = [];
+                if (isset($validated['name'])) $userUpdate['name'] = $validated['name'];
+                if (isset($validated['email'])) $userUpdate['email'] = $validated['email'];
+                if (isset($validated['phone'])) $userUpdate['phone'] = $validated['phone'];
 
-            if (!empty($userUpdate)) {
-                $customer->user()->update($userUpdate);
+                if (!empty($userUpdate)) {
+                    $customer->user()->update($userUpdate);
+                }
+            } elseif ($telegramUser) {
+                // For Telegram guests, update TelegramUser record
+                $telegramUpdate = [];
+                if (isset($validated['name'])) {
+                    $names = explode(' ', $validated['name'], 2);
+                    $telegramUpdate['first_name'] = $names[0];
+                    if (isset($names[1])) $telegramUpdate['last_name'] = $names[1];
+                }
+                if (isset($validated['phone'])) $telegramUpdate['phone_number'] = $validated['phone'];
+                
+                if (!empty($telegramUpdate)) {
+                    $telegramUser->update($telegramUpdate);
+                }
             }
 
-            // Update customer table fields
+            // Update customer table fields (works for both auth types)
             $customerUpdate = [];
+            if (isset($validated['name'])) $customerUpdate['name'] = $validated['name'];
+            if (isset($validated['email'])) $customerUpdate['email'] = $validated['email'];
+            if (isset($validated['phone'])) $customerUpdate['phone'] = $validated['phone'];
             if (isset($validated['birth_date'])) $customerUpdate['birth_date'] = $validated['birth_date'];
             if (isset($validated['gender'])) $customerUpdate['gender'] = $validated['gender'];
             if (isset($validated['preferred_language'])) $customerUpdate['preferred_language'] = $validated['preferred_language'];
@@ -230,19 +252,21 @@ class CustomerController extends Controller
     }
 
     // GET /api/customer/orders (auth:sanctum, role:customer)
+    // UPDATED: Supports both Auth and Telegram guests
     public function orders(Request $request): AnonymousResourceCollection
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
         $orders = $customer->orders()->latest()->paginate();
         return OrderResource::collection($orders);
     }
 
     // GET /api/customer/loyalty-points (auth:sanctum, role:customer)
+    // UPDATED: Supports both Auth and Telegram guests
     public function loyaltyPoints(Request $request): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         // Column is points_balance in current schema; exposed as loyalty_points
         return response()->json([
@@ -406,10 +430,11 @@ class CustomerController extends Controller
     }
 
     // PUT /api/customer/addresses/{address} - Update address
+    // UPDATED: Supports both Auth and Telegram guests
     public function updateAddress(Request $request, $addressId): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $address = $customer->addresses()->findOrFail($addressId);
 
@@ -440,10 +465,11 @@ class CustomerController extends Controller
     }
 
     // DELETE /api/customer/addresses/{address} - Delete address
+    // UPDATED: Supports both Auth and Telegram guests
     public function destroyAddress(Request $request, $addressId): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $address = $customer->addresses()->findOrFail($addressId);
         $address->delete();
@@ -452,10 +478,11 @@ class CustomerController extends Controller
     }
 
     // POST /api/customer/addresses/{address}/set-default - Mark address as default
+    // UPDATED: Supports both Auth and Telegram guests
     public function setDefaultAddress(Request $request, $addressId): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $address = $customer->addresses()->findOrFail($addressId);
         
@@ -472,10 +499,11 @@ class CustomerController extends Controller
     }
 
     // GET /api/customer/stats - Get authenticated customer's statistics
+    // UPDATED: Supports both Auth and Telegram guests
     public function customerStats(Request $request): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $stats = [
             'total_orders' => $customer->orders()->count(),
@@ -502,10 +530,11 @@ class CustomerController extends Controller
     }
 
     // GET /api/customer/history - Get authenticated customer's activity history
+    // UPDATED: Supports both Auth and Telegram guests
     public function customerHistory(Request $request): JsonResponse
     {
-        $customer = $request->user()->customer;
-        abort_if(!$customer, 404, 'Customer profile not found.');
+        [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
+        abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $history = [
             'orders' => $customer->orders()

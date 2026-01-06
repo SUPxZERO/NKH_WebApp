@@ -16,3 +16,18 @@ if (token && token.content) {
 } else {
   console.warn('CSRF token not found in meta tag');
 }
+
+/**
+ * Sprint P15: Add Telegram user ID header for iframe authentication.
+ * This ensures Inertia navigations and all axios requests include the Telegram user ID.
+ */
+try {
+  if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+    const telegramUserId = (window as any).Telegram.WebApp.initDataUnsafe.user.id;
+    window.axios.defaults.headers.common['X-Telegram-User-Id'] = String(telegramUserId);
+    console.log('[Bootstrap] Telegram user ID set in headers:', telegramUserId);
+  }
+} catch (_) {
+  // Telegram not available, ignore
+}
+

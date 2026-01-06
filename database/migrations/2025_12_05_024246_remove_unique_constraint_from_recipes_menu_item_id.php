@@ -14,25 +14,33 @@ return new class extends Migration
     public function up(): void
     {
         // Disable foreign key checks temporarily
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        }
         
         Schema::table('recipes', function (Blueprint $table) {
-            // Drop the foreign key constraint first
-            $table->dropForeign(['menu_item_id']);
+            // Drop the foreign key constraint first (skip for SQLite)
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['menu_item_id']);
+            }
             
             // Drop the unique index
             $table->dropUnique(['menu_item_id']);
             
-            // Re-add the foreign key without unique constraint
-            $table->foreign('menu_item_id')
-                  ->references('id')
-                  ->on('menu_items')
-                  ->cascadeOnDelete()
-                  ->cascadeOnUpdate();
+            // Re-add the foreign key without unique constraint (skip for SQLite)
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->foreign('menu_item_id')
+                      ->references('id')
+                      ->on('menu_items')
+                      ->cascadeOnDelete()
+                      ->cascadeOnUpdate();
+            }
         });
         
         // Re-enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        }
     }
 
     /**

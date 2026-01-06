@@ -21,16 +21,26 @@ class CustomerReservationController extends Controller
     {
         $customer = null;
 
+        // 1. Standard Auth
         if ($request->user()) {
             $customer = $request->user()->customer ?? null;
         }
 
-        if (! $customer && $request->filled('customer_id')) {
+        // 2. Telegram Session (set by TelegramWebAppAuth middleware)
+        if (!$customer) {
+            $telegramData = session('telegram_user');
+            if ($telegramData && isset($telegramData['customer_id'])) {
+                $customer = Customer::find($telegramData['customer_id']);
+            }
+        }
+
+        // 3. Fallback to customer_id parameter (legacy)
+        if (!$customer && $request->filled('customer_id')) {
             $customer = Customer::find($request->input('customer_id'));
         }
 
-        if (! $customer) {
-            abort(422, 'Customer profile not found. Please ensure you are logged in.');
+        if (!$customer) {
+            abort(422, 'Customer profile not found. Please ensure you are logged in or access via Telegram.');
         }
 
         return $customer;

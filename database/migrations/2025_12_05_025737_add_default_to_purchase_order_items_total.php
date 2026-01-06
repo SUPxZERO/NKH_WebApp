@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         // Add default value to total column
-        DB::statement('ALTER TABLE `purchase_order_items` MODIFY COLUMN `total` DECIMAL(12,2) NOT NULL DEFAULT 0');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE `purchase_order_items` MODIFY COLUMN `total` DECIMAL(12,2) NOT NULL DEFAULT 0');
+        }
     }
 
     /**

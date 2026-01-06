@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\TelegramAwareAuth;
 use App\Models\UserSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,16 +13,44 @@ use Illuminate\Validation\Rules\Password;
 
 class UserSettingsController extends Controller
 {
+    use TelegramAwareAuth;
+
+    /**
+     * Get user/customer ID for settings storage
+     * Uses User ID for standard auth, or pseudo-ID for Telegram guests
+     */
+    private function getSettingsOwnerId(Request $request): ?int
+    {
+        if ($request->user()) {
+            return $request->user()->id;
+        }
+        
+        // For Telegram guests, use same pseudo-ID approach as NotificationPreferences
+        $customer = $this->getCurrentCustomer($request);
+        if ($customer) {
+            return 900000000 + $customer->id;
+        }
+        
+        return null;
+    }
+
     /**
      * Get the current user's settings.
      */
-    public function show(): JsonResponse
+    public function show(Request $request): JsonResponse
     {
-        $user = Auth::user();
+        $ownerId = $this->getSettingsOwnerId($request);
+        
+        if (!$ownerId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required',
+            ], 401);
+        }
         
         // Get or create settings for user
         $settings = UserSetting::firstOrCreate(
-            ['user_id' => $user->id],
+            ['user_id' => $ownerId],
             UserSetting::getDefaults()
         );
 
@@ -36,7 +65,14 @@ class UserSettingsController extends Controller
      */
     public function update(Request $request): JsonResponse
     {
-        $user = Auth::user();
+        $ownerId = $this->getSettingsOwnerId($request);
+        
+        if (!$ownerId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required',
+            ], 401);
+        }
         
         // Validate request
         $validated = $request->validate([
@@ -56,7 +92,7 @@ class UserSettingsController extends Controller
 
         // Get or create settings
         $settings = UserSetting::firstOrCreate(
-            ['user_id' => $user->id],
+            ['user_id' => $ownerId],
             UserSetting::getDefaults()
         );
 
@@ -71,15 +107,54 @@ class UserSettingsController extends Controller
     }
 
     /**
+     * Update notifications settings.
+     */
+    public function updateNotifications(Request $request): JsonResponse
+    {
+        return $this->updateCategory($request, 'notifications');
+    }
+
+    /**
+     * Update privacy settings.
+     */
+    public function updatePrivacy(Request $request): JsonResponse
+    {
+        return $this->updateCategory($request, 'privacy');
+    }
+
+    /**
+     * Update theme setting.
+     */
+    public function updateTheme(Request $request): JsonResponse
+    {
+        return $this->updateCategory($request, 'theme');
+    }
+
+    /**
+     * Update language setting.
+     */
+    public function updateLanguage(Request $request): JsonResponse
+    {
+        return $this->updateCategory($request, 'language');
+    }
+
+    /**
      * Update a specific setting category.
      */
     public function updateCategory(Request $request, string $category): JsonResponse
     {
-        $user = Auth::user();
+        $ownerId = $this->getSettingsOwnerId($request);
+        
+        if (!$ownerId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required',
+            ], 401);
+        }
         
         // Get or create settings
         $settings = UserSetting::firstOrCreate(
-            ['user_id' => $user->id],
+            ['user_id' => $ownerId],
             UserSetting::getDefaults()
         );
 
@@ -139,7 +214,23 @@ class UserSettingsController extends Controller
      */
     public function changePassword(Request $request): JsonResponse
     {
-        $user = Auth::user();
+        // Telegram guests cannot change password (no User record)
+        if (!$request->user() && $this->isTelegramGuest($request)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password change is not available for Telegram guests',
+                'info' => 'Create a full account to set a password.'
+            ], 422);
+        }
+
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required',
+            ], 401);
+        }
 
         $validated = $request->validate([
             'current_password' => 'required|string',
@@ -172,21 +263,52 @@ class UserSettingsController extends Controller
      */
     public function updatePhone(Request $request): JsonResponse
     {
-        $user = Auth::user();
-
         $validated = $request->validate([
             'phone' => 'required|string|max:20',
         ]);
 
-        $user->phone = $validated['phone'];
-        $user->save();
+        // Standard user
+        if ($request->user()) {
+            $user = $request->user();
+            $user->phone = $validated['phone'];
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Phone number updated successfully',
+                'data' => [
+                    'phone' => $user->phone,
+                ],
+            ]);
+        }
+
+        // Telegram guest - update customer record
+        if ($this->isTelegramGuest($request)) {
+            $customer = $this->getCurrentCustomer($request);
+            if ($customer) {
+                $customer->phone = $validated['phone'];
+                $customer->save();
+
+                // Also update TelegramUser if available
+                $telegramUser = $this->getTelegramUser($request);
+                if ($telegramUser) {
+                    $telegramUser->phone_number = $validated['phone'];
+                    $telegramUser->save();
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Phone number updated successfully',
+                    'data' => [
+                        'phone' => $customer->phone,
+                    ],
+                ]);
+            }
+        }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Phone number updated successfully',
-            'data' => [
-                'phone' => $user->phone,
-            ],
-        ]);
+            'success' => false,
+            'message' => 'Authentication required',
+        ], 401);
     }
 }

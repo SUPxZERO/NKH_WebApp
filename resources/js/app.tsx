@@ -1,12 +1,32 @@
 import '../css/app.css';
 import './bootstrap';
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { AppProviders } from '@/app/providers/AppProviders';
 import { InertiaWrapper } from '@/app/components/InertiaWrapper';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+/**
+ * Sprint P15: Add Telegram user ID header to all Inertia requests.
+ * This ensures page navigations in Telegram iframe include the user ID for auth.
+ */
+router.on('before', (event) => {
+  try {
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+      const telegramUserId = String((window as any).Telegram.WebApp.initDataUnsafe.user.id);
+      // Add the header to the visit options
+      event.detail.visit.headers = {
+        ...event.detail.visit.headers,
+        'X-Telegram-User-Id': telegramUserId,
+      };
+      console.log('[Inertia] Added Telegram user ID header:', telegramUserId);
+    }
+  } catch (_) {
+    // Telegram not available, ignore
+  }
+});
 
 createInertiaApp({
   title: (title) => `${title} - ${appName}`,
@@ -32,3 +52,4 @@ createInertiaApp({
   },
   progress: { color: '#4B5563' },
 });
+

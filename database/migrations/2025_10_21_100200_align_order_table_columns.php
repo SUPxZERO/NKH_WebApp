@@ -15,6 +15,14 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             // Drop type if it exists (we'll use order_type instead)
             if (Schema::hasColumn('orders', 'type')) {
+                // Fix for SQLite: explicitly drop the index on 'type' column first
+                try {
+                    $table->dropIndex(['type']); // Laravel generates name 'orders_type_index' usually, but array works for generic drop
+                } catch (\Throwable $e) {
+                    // Try by specific name if array method fails or just ignore if not found
+                    try { $table->dropIndex('orders_type_index'); } catch (\Throwable $e2) {}
+                }
+                
                 $table->dropColumn('type');
             }
 

@@ -41,14 +41,17 @@ return new class extends Migration
 
             if (!$constraintExists && Schema::hasColumn('reservations', 'code')) {
                 // Ensure all codes are unique before adding constraint
-                DB::statement("
-                    UPDATE reservations r1
-                    SET code = CONCAT(code, '-', id)
-                    WHERE EXISTS (
-                        SELECT 1 FROM reservations r2
-                        WHERE r2.code = r1.code AND r2.id < r1.id
-                    )
-                ");
+                // Ensure all codes are unique before adding constraint (skip for SQLite which complicates aliased updates)
+                if (DB::getDriverName() !== 'sqlite') {
+                    DB::statement("
+                        UPDATE reservations r1
+                        SET code = CONCAT(code, '-', id)
+                        WHERE EXISTS (
+                            SELECT 1 FROM reservations r2
+                            WHERE r2.code = r1.code AND r2.id < r1.id
+                        )
+                    ");
+                }
 
                 // Now add the unique constraint
                 try {

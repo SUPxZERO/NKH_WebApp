@@ -16,6 +16,7 @@ class Customer extends Model
         'name',
         'email',
         'phone',
+        'avatar', // Added for Telegram user profile pictures
         'birth_date',
         'gender',
         'loyalty_points',
