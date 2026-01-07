@@ -12,12 +12,14 @@ use App\Http\Traits\TelegramAwareAuth;
 use App\Models\CartItem;
 use App\Models\Customer;
 use App\Models\CustomerAddress;
+use App\Models\DiningTable;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderTimeSlot;
 use App\Models\Promotion;
 use App\Models\Setting;
+use App\Models\TableSession;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -187,6 +189,39 @@ class OnlineOrderController extends Controller
         
         // Get Customer using unified helper
         $customer = $this->getCurrentCustomer($request);
+
+        // ==================== TABLE SESSION GUEST HANDLING ====================
+        // If no customer but we have a valid table session, allow as Guest
+        $tableSession = $this->getActiveTableSession($request);
+
+        if (!$customer && $tableSession && $tableSession->isValid()) {
+            // Check if this session already has a temp customer assigned (from previous orders?)
+            // Or create a new one based on the session
+            
+            if ($tableSession->customer) {
+                $customer = $tableSession->customer;
+            } else {
+                // Create specific guest customer for this session to track history
+                // We use a specific prefix to identify them
+                try {
+                    $customer = Customer::create([
+                        'name' => 'Guest ' . $tableSession->table->code, // e.g. "Guest T-01"
+                        'customer_code' => 'GUEST-' . strtoupper(Str::random(6)),
+                        // No phone/email
+                    ]);
+                    
+                    // Attach to session so future requests use same customer
+                    $tableSession->customer_id = $customer->id;
+                    $tableSession->save();
+                    
+                    \Log::info('👤 Created Guest Customer for Table Session:', ['id' => $customer->id]);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to create guest customer: ' . $e->getMessage());
+                    // Fallback to a generic guest if creation fails?
+                }
+            }
+        }
+        // ==================== END TABLE SESSION GUEST HANDLING ====================
         
         // If still no customer, try to create one if telegram_id is present (First time user)
         if (!$customer && $request->filled('telegram_id')) {
@@ -215,13 +250,14 @@ class OnlineOrderController extends Controller
         if (!$customer) {
             \Log::warning('⚠️ No authenticated user or valid telegram_id found. Attempting fallback.');
             // DEVELOPMENT ONLY
-            $customerId = $request->input('customer_id', 1);
-            $customer = Customer::find($customerId);
+            // $customerId = $request->input('customer_id', 1);
+            // $customer = Customer::find($customerId);
         }
         
         if (!$customer) {
             \Log::error('❌ Customer profile not found.');
-            abort(422, 'Customer profile not found. Please ensure you are logged in.');
+            // Return 401 instead of 422 for unauthenticated
+            abort(401, 'Unauthenticated. Please scan the QR code again.');
         }
 
         \Log::info('👤 Customer identified:', ['id' => $customer->id, 'name' => $customer->name]);
@@ -229,6 +265,30 @@ class OnlineOrderController extends Controller
         try {
             $order = DB::transaction(function () use ($data, $customer, $request) {
                 \Log::info('🔄 Starting DB Transaction');
+
+                // ==================== TABLE SESSION DETECTION (Sprint P17) ====================
+                // Check if this order is being placed from a QR table session
+                $tableSession = $this->getActiveTableSession($request);
+                $tableId = null;
+                $isQrTableOrder = false;
+
+                if ($tableSession) {
+                    $tableId = $tableSession->table_id;
+                    $isQrTableOrder = true;
+                    
+                    // Force order_type to dine-in for table orders
+                    $data['order_type'] = 'dine-in';
+                    
+                    \Log::info('🍽️ QR Table Order detected', [
+                        'session_id' => $tableSession->id,
+                        'table_id' => $tableId,
+                        'table_code' => $tableSession->table?->code,
+                    ]);
+                    
+                    // Update table session status to 'ordering'
+                    $tableSession->updateStatus(TableSession::STATUS_ORDERING);
+                }
+                // ==================== END TABLE SESSION DETECTION ====================
 
                 // Handle time slot - support old (time_slot_id), new (slot_date + slot_time), and ASAP (order_now) approaches
                 $slot = null;
@@ -275,6 +335,11 @@ class OnlineOrderController extends Controller
                         abort(409, 'The earliest time slot is now fully booked. Please try again.');
                     }
                     
+                } elseif ($data['order_type'] === 'dine-in') {
+                    // For dine-in, we don't use time slots. 
+                    // We just use the current time as placed_at (handled by default)
+                    \Log::info('🍽️ Dine-in order - skipping time slot validation');
+                    $slot = null;
                 } elseif (isset($data['time_slot_id'])) {
                     // Legacy approach: use existing OrderTimeSlot
                     $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
@@ -426,16 +491,20 @@ class OnlineOrderController extends Controller
                     'total_amount' => $totalAmount
                 ]);
 
-                $scheduledAt = $slot->slot_date->format('Y-m-d') . ' ' . $slot->slot_start_time;
+                $scheduledAt = $slot 
+                    ? $slot->slot_date->format('Y-m-d') . ' ' . $slot->slot_start_time
+                    : now()->format('Y-m-d H:i:s');
 
                 // Create the order
                 $order = Order::create([
                     'location_id' => $data['location_id'],
+                    'table_id' => $tableId, // QR Table Order: auto-bind table (Sprint P17)
                     'customer_id' => $customer->id,
-                    'order_number' => $this->generateOrderNumber($data['location_id'], 'ONL'),
+                    'order_number' => $this->generateOrderNumber($data['location_id'], $isQrTableOrder ? 'TBL' : 'ONL'),
                     'order_type' => $data['order_type'],
-                    'status' => 'pending',
-                    'approval_status' => 'pending',
+                    'status' => $isQrTableOrder ? 'received' : 'pending', // QR orders auto-approved
+                    'approval_status' => $isQrTableOrder ? 'approved' : 'pending', // QR orders auto-approved
+                    'is_auto_approved' => $isQrTableOrder,
                     'subtotal' => $subtotal,
                     'discount_amount' => $discountAmount,
                     'service_charge' => $serviceCharge,
@@ -448,8 +517,8 @@ class OnlineOrderController extends Controller
                     'pickup_time' => $data['order_type'] === 'pickup' ? $scheduledAt : null,
                     'special_instructions' => $data['notes'] ?? null,
                     'customer_address_id' => $data['customer_address_id'] ?? null,
-                    'time_slot_id' => $slot->id,
-                    'payment_mode' => $data['payment_mode'] ?? 'pay_now',
+                    'time_slot_id' => $slot ? $slot->id : null,
+                    'payment_mode' => $isQrTableOrder ? ($data['payment_mode'] ?? Order::PAYMENT_MODE_PAY_AT_COUNTER) : ($data['payment_mode'] ?? 'pay_now'),
                 ]);
 
             // Create order items
@@ -458,10 +527,28 @@ class OnlineOrderController extends Controller
             }
 
             // Increment slot usage
-            $slot->increment('current_orders');
+            if ($slot) {
+                $slot->increment('current_orders');
+            }
 
             // Clear customer's cart items (if they exist)
             CartItem::where('customer_id', $customer->id)->delete();
+
+            // ==================== TABLE SESSION LINKING (Sprint P17) ====================
+            if ($tableSession && $isQrTableOrder) {
+                // Link order to table session
+                $tableSession->linkOrder($order);
+                
+                // Mark table as occupied
+                $tableSession->table->markOccupied();
+                
+                \Log::info('🍽️ Order linked to table session', [
+                    'order_id' => $order->id,
+                    'session_id' => $tableSession->id,
+                    'table_code' => $tableSession->table->code,
+                ]);
+            }
+            // ==================== END TABLE SESSION LINKING ====================
 
             return $order;
         });
@@ -536,5 +623,31 @@ class OnlineOrderController extends Controller
             if (!$exists) return $number;
         }
         return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
+    }
+
+    // ==================== TABLE SESSION HELPER (Sprint P17) ====================
+
+    /**
+     * Get active table session from request
+     * Checks X-Table-Session header, cookie, and middleware attachment
+     */
+    private function getActiveTableSession(Request $request): ?TableSession
+    {
+        // First check if attached by TableSessionMiddleware
+        if ($request->attributes->has('table_session')) {
+            return $request->attributes->get('table_session');
+        }
+
+        // Try to get from header or cookie
+        $sessionToken = $request->header('X-Table-Session')
+            ?? $request->cookie('table_session')
+            ?? $request->input('table_session_token');
+
+        if (!$sessionToken) {
+            return null;
+        }
+
+        // Find active, non-expired session
+        return TableSession::findByToken($sessionToken);
     }
 }

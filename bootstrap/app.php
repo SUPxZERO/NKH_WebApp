@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Trust all proxies (for Render.com HTTPS support)
         $middleware->trustProxies(at: '*');
+        
+        $middleware->encryptCookies(except: [
+            'table_session',
+        ]);
 
         // Web middleware - Telegram auth MUST run before Authenticate
         $middleware->web(prepend: [

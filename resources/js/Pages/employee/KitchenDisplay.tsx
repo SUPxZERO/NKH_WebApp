@@ -21,6 +21,8 @@ import {
     Phone,
     FileText,
     UtensilsCrossed,
+    QrCode,
+    Truck,
 } from 'lucide-react';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 
@@ -195,9 +197,14 @@ export default function KitchenDisplay() {
                                 <UtensilsCrossed className="w-8 h-8" />
                                 <div>
                                     <h2 className="text-2xl font-bold">Order #{order.order_number}</h2>
-                                    <div className="flex items-center gap-2 text-sm opacity-90">
-                                        <span className="capitalize">{order.type.replace('-', ' ')}</span>
-                                        {order.table_number && <span>• Table {order.table_number}</span>}
+                                    <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
+                                        <span className="capitalize px-2 py-0.5 rounded bg-white/20 font-bold">{order.type.replace('-', ' ')}</span>
+                                        {order.table_number && (
+                                            <span className="flex items-center gap-1 font-bold bg-white/20 px-2 py-0.5 rounded">
+                                                <QrCode className="w-4 h-4" />
+                                                Table {order.table_number}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -285,8 +292,8 @@ export default function KitchenDisplay() {
                                                 </div>
                                                 {item.status && (
                                                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${item.status === 'served' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                                            item.status === 'preparing' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                                                'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
+                                                        item.status === 'preparing' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                                            'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
                                                         }`}>
                                                         {item.status}
                                                     </span>
@@ -366,10 +373,19 @@ export default function KitchenDisplay() {
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                             #{order.order_number}
                         </div>
-                        {order.table_number && (
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Table {order.table_number}</div>
-                        )}
-                        <div className="text-sm text-gray-600 dark:text-gray-400 capitalize">{order.type}</div>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                            {order.table_number ? (
+                                <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 font-bold text-sm">
+                                    <QrCode className="w-3.5 h-3.5" />
+                                    <span>Table {order.table_number}</span>
+                                </div>
+                            ) : (
+                                <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 text-sm font-medium capitalize">
+                                    {order.type === 'delivery' ? <Truck className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
+                                    <span>{order.type}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="text-right">
                         <div className={`text-lg font-bold ${isUrgent ? 'text-red-600 animate-pulse' : 'text-gray-700 dark:text-gray-300'}`}>

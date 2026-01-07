@@ -6,6 +6,7 @@ import CustomerLayout from '@/app/layouts/CustomerLayout';
 import OrderingModal from '@/app/components/customer/OrderingModal';
 import { useCartStore } from '@/app/store/cart';
 import { toastSuccess } from '@/app/utils/toast';
+import { useTableSession } from '@/app/hooks/useTableSession';
 import {
   Truck,
   Store,
@@ -218,10 +219,11 @@ const FeaturedCarousel = ({ items, onItemClick }: { items: FeaturedItem[], onIte
 
 export default function Home({ featuredItems, categories, testimonials, stats }: HomeProps) {
   const [open, setOpen] = React.useState(false);
-  const [mode, setMode] = React.useState<'delivery' | 'pickup'>('delivery');
+  const [mode, setMode] = React.useState<'delivery' | 'pickup' | 'dine-in'>('delivery');
   const cart = useCartStore();
+  const { isTableOrder } = useTableSession();
 
-  function openModal(m: 'delivery' | 'pickup') {
+  function openModal(m: 'delivery' | 'pickup' | 'dine-in') {
     setMode(m);
     setOpen(true);
   }
@@ -235,7 +237,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
       image_path: item.image_path || undefined,
     });
     toastSuccess(`${item.name} added to cart!`);
-    setMode('delivery');
+    setMode(isTableOrder ? 'dine-in' : 'delivery');
     setOpen(true);
   }
 
@@ -278,25 +280,39 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
-                <motion.button
-                  onClick={() => openModal('delivery')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="relative flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white text-fuchsia-600 font-bold text-base sm:text-lg shadow-xl shadow-black/10 hover:bg-gray-50 transition-all"
-                >
-                  <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>Order Delivery</span>
-                </motion.button>
+                {isTableOrder ? (
+                  <motion.button
+                    onClick={() => openModal('dine-in')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white text-fuchsia-600 font-bold text-base sm:text-lg shadow-xl shadow-black/10 hover:bg-gray-50 transition-all w-full sm:w-auto"
+                  >
+                    <Utensils className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>Start Ordering</span>
+                  </motion.button>
+                ) : (
+                  <>
+                    <motion.button
+                      onClick={() => openModal('delivery')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="relative flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white text-fuchsia-600 font-bold text-base sm:text-lg shadow-xl shadow-black/10 hover:bg-gray-50 transition-all"
+                    >
+                      <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>Order Delivery</span>
+                    </motion.button>
 
-                <motion.button
-                  onClick={() => openModal('pickup')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold text-base sm:text-lg hover:bg-white/20 transition-all"
-                >
-                  <Store className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>Order Pickup</span>
-                </motion.button>
+                    <motion.button
+                      onClick={() => openModal('pickup')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold text-base sm:text-lg hover:bg-white/20 transition-all"
+                    >
+                      <Store className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>Order Pickup</span>
+                    </motion.button>
+                  </>
+                )}
               </div>
 
               {/* Stats Row - Grid layout for consistent alignment */}
@@ -327,7 +343,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
               <BrandBlob className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-40 blur-3xl" />
               <div className="relative z-10 w-full max-w-md">
                 {featuredItems.length > 0 ? (
-                  <FeaturedCarousel items={featuredItems} onItemClick={() => openModal('delivery')} />
+                  <FeaturedCarousel items={featuredItems} onItemClick={() => openModal(isTableOrder ? 'dine-in' : 'delivery')} />
                 ) : (
                   <div className="w-full aspect-[3/4] rounded-3xl bg-white/10 animate-pulse border border-white/10" />
                 )}
@@ -357,99 +373,99 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
           {/* Mobile: Horizontal Scroll, Desktop: Grid */}
           <div className="lg:hidden overflow-x-auto mobile-scroll">
             <div className="flex gap-3 pb-4 px-3 sm:px-4">
-            {featuredItems.map((item) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="flex-shrink-0 w-[280px]"
-              >
-                <GlowCard
-                  className="h-full overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group"
-                  glowIntensity="subtle"
+              {featuredItems.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  className="flex-shrink-0 w-[280px]"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={item.image_path || '/images/default-food.png'}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-bold text-gray-900 shadow-lg">
-                      ${Number(item.price).toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div className="p-3 flex flex-col">
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-1 flex-1">{item.name}</h3>
-                      <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold ml-2">
-                        <Star className="w-2.5 h-2.5 fill-current" /> 4.9
+                  <GlowCard
+                    className="h-full overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group"
+                    glowIntensity="subtle"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img
+                        src={item.image_path || '/images/default-food.png'}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-bold text-gray-900 shadow-lg">
+                        ${Number(item.price).toFixed(2)}
                       </div>
                     </div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-2 mb-3">{item.description}</p>
-                    <button
-                      onClick={() => addToCartAndOpenModal(item)}
-                      className="w-full py-2 bg-fuchsia-600 text-white rounded-lg font-bold text-xs shadow-md hover:bg-fuchsia-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Plus className="w-3 h-3" /> Add to Order
-                    </button>
-                  </div>
-                </GlowCard>
-              </motion.div>
-            ))}
+
+                    <div className="p-3 flex flex-col">
+                      <div className="flex justify-between items-start mb-1">
+                        <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-1 flex-1">{item.name}</h3>
+                        <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold ml-2">
+                          <Star className="w-2.5 h-2.5 fill-current" /> 4.9
+                        </div>
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-2 mb-3">{item.description}</p>
+                      <button
+                        onClick={() => addToCartAndOpenModal(item)}
+                        className="w-full py-2 bg-fuchsia-600 text-white rounded-lg font-bold text-xs shadow-md hover:bg-fuchsia-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-3 h-3" /> Add to Order
+                      </button>
+                    </div>
+                  </GlowCard>
+                </motion.div>
+              ))}
             </div>
           </div>
 
           {/* Desktop: Grid Layout */}
           <div className="hidden lg:block w-full max-w-screen-2xl mx-auto px-4">
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
-            {featuredItems.map((item) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-              >
-                <GlowCard
-                  className="h-full overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group"
-                  glowIntensity="subtle"
+              {featuredItems.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -10 }}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={item.image_path || '/images/default-food.png'}
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                      <button
-                        onClick={() => addToCartAndOpenModal(item)}
-                        className="w-full py-3 bg-white text-gray-900 rounded-xl font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" /> Add to Order
-                      </button>
-                    </div>
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-lg">
-                      ${Number(item.price).toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">{item.name}</h3>
-                      <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
-                        <Star className="w-3 h-3 fill-current" /> 4.9
+                  <GlowCard
+                    className="h-full overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group"
+                    glowIntensity="subtle"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img
+                        src={item.image_path || '/images/default-food.png'}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                        <button
+                          onClick={() => addToCartAndOpenModal(item)}
+                          className="w-full py-3 bg-white text-gray-900 rounded-xl font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
+                        >
+                          <Plus className="w-4 h-4" /> Add to Order
+                        </button>
+                      </div>
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-lg">
+                        ${Number(item.price).toFixed(2)}
                       </div>
                     </div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4 flex-1">{item.description}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <Clock className="w-3 h-3" /> 15-20 min • <Utensils className="w-3 h-3" /> {item.category?.name || 'Main Course'}
+
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">{item.name}</h3>
+                        <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+                          <Star className="w-3 h-3 fill-current" /> 4.9
+                        </div>
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4 flex-1">{item.description}</p>
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <Clock className="w-3 h-3" /> 15-20 min • <Utensils className="w-3 h-3" /> {item.category?.name || 'Main Course'}
+                      </div>
                     </div>
-                  </div>
-                </GlowCard>
-              </motion.div>
-            ))}
+                  </GlowCard>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
@@ -485,44 +501,44 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
             {/* Categories Grid - Horizontal scroll on mobile */}
             <div className="overflow-x-auto mobile-scroll -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible">
               <div className="flex md:grid md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4 xl:gap-5 pb-4 md:pb-0">
-              {categories.map((category, idx) => (
-                <motion.div
-                  key={category.id}
-                  variants={itemVariants}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigateToMenu(category.id)}
-                  className="group cursor-pointer flex-shrink-0 w-[110px] md:w-auto"
-                >
-                  <div className="relative h-full rounded-xl lg:rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 lg:p-5 transition-all duration-300 hover:border-fuchsia-300 dark:hover:border-fuchsia-600 hover:shadow-lg hover:shadow-fuchsia-500/10 dark:hover:shadow-fuchsia-500/5">
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 rounded-xl lg:rounded-2xl bg-gradient-to-br from-fuchsia-500/0 to-pink-500/0 group-hover:from-fuchsia-500/5 group-hover:to-pink-500/5 dark:group-hover:from-fuchsia-500/10 dark:group-hover:to-pink-500/10 transition-all duration-300" />
+                {categories.map((category, idx) => (
+                  <motion.div
+                    key={category.id}
+                    variants={itemVariants}
+                    whileHover={{ y: -6, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => navigateToMenu(category.id)}
+                    className="group cursor-pointer flex-shrink-0 w-[110px] md:w-auto"
+                  >
+                    <div className="relative h-full rounded-xl lg:rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 lg:p-5 transition-all duration-300 hover:border-fuchsia-300 dark:hover:border-fuchsia-600 hover:shadow-lg hover:shadow-fuchsia-500/10 dark:hover:shadow-fuchsia-500/5">
+                      {/* Hover Glow Effect */}
+                      <div className="absolute inset-0 rounded-xl lg:rounded-2xl bg-gradient-to-br from-fuchsia-500/0 to-pink-500/0 group-hover:from-fuchsia-500/5 group-hover:to-pink-500/5 dark:group-hover:from-fuchsia-500/10 dark:group-hover:to-pink-500/10 transition-all duration-300" />
 
-                    {/* Content */}
-                    <div className="relative flex flex-col items-center text-center">
-                      {/* Icon Container */}
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg lg:rounded-xl bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30 border border-fuchsia-100 dark:border-fuchsia-800/50 flex items-center justify-center mb-2 lg:mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm">
-                        <span className="text-lg sm:text-xl lg:text-2xl xl:text-3xl">{category.icon || '🍽️'}</span>
-                      </div>
+                      {/* Content */}
+                      <div className="relative flex flex-col items-center text-center">
+                        {/* Icon Container */}
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg lg:rounded-xl bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/30 dark:to-pink-900/30 border border-fuchsia-100 dark:border-fuchsia-800/50 flex items-center justify-center mb-2 lg:mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm">
+                          <span className="text-lg sm:text-xl lg:text-2xl xl:text-3xl">{category.icon || '🍽️'}</span>
+                        </div>
 
-                      {/* Category Name */}
-                      <h3 className="font-bold text-gray-900 dark:text-white text-[11px] sm:text-xs lg:text-sm xl:text-base mb-1 line-clamp-1">
-                        {category.name}
-                      </h3>
+                        {/* Category Name */}
+                        <h3 className="font-bold text-gray-900 dark:text-white text-[11px] sm:text-xs lg:text-sm xl:text-base mb-1 line-clamp-1">
+                          {category.name}
+                        </h3>
 
-                      {/* Item Count */}
-                      <p className="text-[9px] sm:text-[10px] lg:text-xs text-gray-500 dark:text-gray-400 font-medium">
-                        {category.count} {category.count === 1 ? 'item' : 'items'}
-                      </p>
+                        {/* Item Count */}
+                        <p className="text-[9px] sm:text-[10px] lg:text-xs text-gray-500 dark:text-gray-400 font-medium">
+                          {category.count} {category.count === 1 ? 'item' : 'items'}
+                        </p>
 
-                      {/* Arrow indicator on hover - hide on mobile */}
-                      <div className="mt-1 lg:mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:block">
-                        <ArrowRight className="w-3 h-3 lg:w-4 lg:h-4 text-fuchsia-500 dark:text-fuchsia-400" />
+                        {/* Arrow indicator on hover - hide on mobile */}
+                        <div className="mt-1 lg:mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden sm:block">
+                          <ArrowRight className="w-3 h-3 lg:w-4 lg:h-4 text-fuchsia-500 dark:text-fuchsia-400" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
               </div>
             </div>
           </motion.div>
@@ -583,7 +599,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <button
-                    onClick={() => openModal('delivery')}
+                    onClick={() => openModal(isTableOrder ? 'dine-in' : 'delivery')}
                     className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-fuchsia-900 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors shadow-lg"
                   >
                     Order Now

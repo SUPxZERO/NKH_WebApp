@@ -459,6 +459,14 @@ Route::middleware('permission:locations.manage')
         Route::put('tables/{table}', [TableController::class, 'update']);
         Route::delete('tables/{table}', [TableController::class, 'destroy']);
         Route::put('tables/{table}/status', [TableController::class, 'updateStatus']);
+        
+        // QR Code Management (Sprint P17)
+        Route::post('tables/{table}/generate-qr', [TableController::class, 'generateQr']);
+        Route::get('tables/{table}/qr-image', [TableController::class, 'getQrImage']);
+        Route::get('tables/{table}/printable-qr', [TableController::class, 'getPrintableQr']);
+        Route::post('tables/bulk-generate-qr', [TableController::class, 'bulkGenerateQr']);
+        Route::get('tables/qr-stats', [TableController::class, 'qrStats']);
+        Route::get('tables/{table}/sessions', [\App\Http\Controllers\Api\QrTableController::class, 'tableSessions']);
     });
 
 // Notifications - requires notifications.* permissions

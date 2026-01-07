@@ -13,6 +13,13 @@ interface CartState {
   timeSlot?: TimeSlot | null;
   notes?: string;
 
+  // Table Session State
+  tableSessionToken?: string;
+  tableId?: number;
+  tableCode?: string;
+  floorName?: string;
+  isTableOrder: boolean;
+
   subtotal: number;
   deliveryFee: number;
   tax: number;
@@ -24,6 +31,10 @@ interface CartState {
   setOrderNow: (value: boolean) => void;
   setTimeSlot: (slot?: TimeSlot | null) => void;
   setNotes: (notes?: string) => void;
+
+  // Table Session Actions
+  setTableSession: (token: string, tableId: number, tableCode: string, floorName?: string) => void;
+  clearTableSession: () => void;
 
   addItem: (item: Omit<OrderItem, 'unit_price' | 'name'> & { unit_price: number; name?: string }) => void;
   setItems: (items: OrderItem[]) => void;
@@ -49,6 +60,13 @@ export const useCartStore = create<CartState>()(
       timeSlot: null,
       notes: '',
 
+      // Table Session Initial State
+      tableSessionToken: undefined,
+      tableId: undefined,
+      tableCode: undefined,
+      floorName: undefined,
+      isTableOrder: false,
+
       subtotal: 0,
       deliveryFee: 0,
       tax: 0,
@@ -72,6 +90,30 @@ export const useCartStore = create<CartState>()(
       setOrderNow: (value) => set({ orderNow: value, timeSlot: value ? null : get().timeSlot }),
       setTimeSlot: (slot) => set({ timeSlot: slot ?? null, orderNow: slot ? false : get().orderNow }),
       setNotes: (notes) => set({ notes: notes ?? '' }),
+
+      setTableSession: (token, tableId, tableCode, floorName) => {
+        set({
+          tableSessionToken: token,
+          tableId,
+          tableCode,
+          floorName,
+          isTableOrder: true,
+          mode: 'dine-in', // Switch to dine-in mode
+          orderNow: true, // Auto-set order now
+          timeSlot: null // Clear time slot
+        });
+        get().recalc();
+      },
+
+      clearTableSession: () => {
+        set({
+          tableSessionToken: undefined,
+          tableId: undefined,
+          tableCode: undefined,
+          floorName: undefined,
+          isTableOrder: false
+        });
+      },
 
       addItem: (item) => {
         const items = [...get().items];

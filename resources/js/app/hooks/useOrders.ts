@@ -3,7 +3,7 @@ import { apiPost } from '@/app/libs/apiClient';
 import { ApiResponse, Order } from '@/app/types/domain';
 
 export interface OnlineOrderPayload {
-  order_type: 'delivery' | 'pickup';  // Backend expects order_type, not mode
+  order_type: 'delivery' | 'pickup' | 'dine-in';  // Backend expects order_type, not mode
   location_id: number;                 // REQUIRED by backend
   customer_address_id?: number;        // Required if order_type is delivery
   // Support both old and new time slot approaches

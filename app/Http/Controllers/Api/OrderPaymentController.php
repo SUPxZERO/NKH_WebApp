@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentAuditLog;
 use App\Models\PaymentMethod;
+use App\Models\TableSession;
 use App\Services\InvoiceService;
 use App\Services\LoyaltyService;
 use Illuminate\Http\JsonResponse;
@@ -169,6 +170,29 @@ class OrderPaymentController extends Controller
 
                 // Award loyalty points
                 $this->loyaltyService->awardPoints($order);
+
+                // ==================== TABLE SESSION CLOSE (Sprint P17) ====================
+                // If this was a QR table order, close the session and reset table
+                if ($order->table_id) {
+                    $tableSession = TableSession::where('order_id', $order->id)
+                        ->orWhere(function ($query) use ($order) {
+                            $query->where('table_id', $order->table_id)
+                                  ->whereIn('status', ['ordering', 'payment_pending']);
+                        })
+                        ->first();
+
+                    if ($tableSession) {
+                        $tableSession->close();
+                        $tableSession->table->resetStatus();
+
+                        Log::info('Table session closed after payment', [
+                            'order_id' => $order->id,
+                            'session_id' => $tableSession->id,
+                            'table_code' => $tableSession->table->code,
+                        ]);
+                    }
+                }
+                // ==================== END TABLE SESSION CLOSE ====================
             });
 
             $order->refresh();

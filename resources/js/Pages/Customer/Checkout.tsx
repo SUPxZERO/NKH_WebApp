@@ -15,15 +15,22 @@ import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
 import { Banknote, CreditCard, ShoppingBag, Truck, ArrowLeft, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { OrderProgress } from '@/app/components/customer/OrderProgress';
 import { TimePicker } from '@/app/components/ui/TimePicker';
+import { useTableSession } from '@/app/hooks/useTableSession';
 
 export default function Checkout() {
   const cart = useCartStore();
+  const { isTableOrder, session } = useTableSession();
+
   const { data: slots, isLoading: slotsLoading } = useTimeSlots(
     cart.mode === 'delivery' ? 'delivery' : 'pickup',
     cart.location_id
   );
-  const { data: paymentModes, isLoading: modesLoading } = usePaymentModes(cart.mode || 'pickup');
-  const [selectedPaymentMode, setSelectedPaymentMode] = React.useState<string>('pay_now');
+  const { data: paymentModes, isLoading: modesLoading } = usePaymentModes(
+    isTableOrder ? 'dine-in' : (cart.mode || 'pickup')
+  );
+  const [selectedPaymentMode, setSelectedPaymentMode] = React.useState<string>(
+    isTableOrder ? 'pay_at_counter' : 'pay_now'
+  );
   const [showSummary, setShowSummary] = React.useState(false);
 
   // Scheduled time state for the time picker
@@ -47,10 +54,14 @@ export default function Checkout() {
     return `${displayHour}:${displayMin} ${scheduledTime.period}`;
   };
 
-  // Reset payment mode when order type changes
+  // Reset payment mode when order type changes (if not table order)
   React.useEffect(() => {
-    setSelectedPaymentMode('pay_now');
-  }, [cart.mode]);
+    if (!isTableOrder) {
+      setSelectedPaymentMode('pay_now');
+    } else {
+      setSelectedPaymentMode('pay_at_counter');
+    }
+  }, [cart.mode, isTableOrder]);
 
   // Initialize scheduled time when switching to "Schedule for Later"
   React.useEffect(() => {
@@ -120,7 +131,7 @@ export default function Checkout() {
 
     // Build payload matching backend API expectations
     const payload = {
-      order_type: cart.mode as 'delivery' | 'pickup',
+      order_type: cart.mode, // 'delivery' | 'pickup' | 'dine-in'
       location_id: cart.location_id,
       customer_address_id: cart.mode === 'delivery' ? cart.selectedAddress?.id : undefined,
       order_now: cart.orderNow, // ASAP order flag
@@ -154,10 +165,11 @@ export default function Checkout() {
           window.location.href = `/payment?order_id=${orderId}`;
         }, 500);
       } else {
-        // For pay later, redirect to order details/success page
+        // For pay later / pay at counter, redirect to order details/success page
         toastSuccess('Order placed successfully!');
-        cart.clear();
+        cart.clear(); // Clear cart (but session persists via cookie if table order)
         setTimeout(() => {
+          // If table order, go to status page or order details
           window.location.href = `/customer/orders/${orderId}`;
         }, 1000);
       }
@@ -216,7 +228,33 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           {/* Left Column - Form Sections */}
           <div className="lg:col-span-8 space-y-3 sm:space-y-6">
-            {cart.mode === 'delivery' && (
+            {/* Table Info Card - Only for Table Orders */}
+            {isTableOrder && (
+              <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/20">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <div className="flex items-center gap-2 font-semibold text-purple-700 dark:text-purple-300">
+                    <span className="text-xl">🍽️</span> Dine-In at Table
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {cart.tableCode || 'TB-??'}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {cart.floorName || 'Main Floor'}
+                      </div>
+                    </div>
+                    <div className="text-right text-xs text-gray-500 max-w-[50%]">
+                      Your order will be linked to this table automatically.
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {!isTableOrder && cart.mode === 'delivery' && (
               <AddressManager
                 selected={cart.selectedAddress}
                 onSelect={(a) => cart.setAddress(a)}
@@ -227,140 +265,143 @@ export default function Checkout() {
               />
             )}
 
-            {/* Time Slot */}
-            <Card className="overflow-hidden">
-              <CardHeader className="pb-2 sm:pb-3">
-                <div className="text-sm sm:text-base font-semibold">When do you want your order?</div>
-              </CardHeader>
-              <CardContent className="pt-0 space-y-3">
-                {!cart.location_id ? (
-                  <div className="text-xs sm:text-sm text-gray-400 p-3 sm:p-4 text-center border border-white/10 rounded-lg bg-white/5">
-                    Please select a restaurant location first
-                  </div>
-                ) : (
-                  <>
-                    {/* Order Now Option */}
-                    <button
-                      onClick={() => cart.setOrderNow(true)}
-                      className={`w-full p-3 sm:p-4 rounded-xl border text-left transition-all ${cart.orderNow
-                        ? 'border-fuchsia-500 bg-fuchsia-500/15 ring-1 ring-fuchsia-500/50'
-                        : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
-                        }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${cart.orderNow ? 'bg-fuchsia-500/20' : 'bg-white/10'
-                            }`}>
-                            <span className="text-lg">⚡</span>
-                          </div>
-                          <div>
-                            <div className={`font-semibold text-sm sm:text-base ${cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
-                              }`}>
-                              Order Now
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {cart.mode === 'delivery' ? 'Fastest delivery available' : 'Ready in ~15-20 mins'}
-                            </div>
-                          </div>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cart.orderNow
-                          ? 'border-fuchsia-500 bg-fuchsia-500'
-                          : 'border-gray-500'
-                          }`}>
-                          {cart.orderNow && <div className="w-2 h-2 rounded-full bg-white" />}
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* Schedule for Later - Collapsible */}
-                    <details
-                      className="group"
-                      open={!cart.orderNow}
-                      onToggle={(e) => {
-                        if ((e.target as HTMLDetailsElement).open && cart.orderNow) {
-                          cart.setOrderNow(false);
-                        }
-                      }}
-                    >
-                      <summary className={`cursor-pointer p-3 sm:p-4 rounded-xl border transition-all list-none ${!cart.orderNow
-                        ? 'border-fuchsia-500 bg-fuchsia-500/15 ring-1 ring-fuchsia-500/50'
-                        : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
-                        }`}>
+            {/* Time Slot - Hide for Table Orders */}
+            {!isTableOrder && (
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <div className="text-sm sm:text-base font-semibold">When do you want your order?</div>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-3">
+                  {!cart.location_id ? (
+                    <div className="text-xs sm:text-sm text-gray-400 p-3 sm:p-4 text-center border border-white/10 rounded-lg bg-white/5">
+                      Please select a restaurant location first
+                    </div>
+                  ) : (
+                    <>
+                      {/* Order Now Option */}
+                      <button
+                        onClick={() => cart.setOrderNow(true)}
+                        className={`w-full p-3 sm:p-4 rounded-xl border text-left transition-all ${cart.orderNow
+                          ? 'border-fuchsia-500 bg-fuchsia-500/15 ring-1 ring-fuchsia-500/50'
+                          : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                          }`}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${!cart.orderNow ? 'bg-fuchsia-500/20' : 'bg-white/10'
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${cart.orderNow ? 'bg-fuchsia-500/20' : 'bg-white/10'
                               }`}>
-                              <span className="text-lg">📅</span>
+                              <span className="text-lg">⚡</span>
                             </div>
                             <div>
-                              <div className={`font-semibold text-sm sm:text-base ${!cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
+                              <div className={`font-semibold text-sm sm:text-base ${cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
                                 }`}>
-                                Schedule for Later
+                                Order Now
                               </div>
                               <div className="text-xs text-gray-500">
-                                {cart.timeSlot ? cart.timeSlot.label : 'Pick a specific time'}
+                                {cart.mode === 'delivery' ? 'Fastest delivery available' : 'Ready in ~15-20 mins'}
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <ChevronDown className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" />
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${!cart.orderNow
-                              ? 'border-fuchsia-500 bg-fuchsia-500'
-                              : 'border-gray-500'
-                              }`}>
-                              {!cart.orderNow && <div className="w-2 h-2 rounded-full bg-white" />}
-                            </div>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${cart.orderNow
+                            ? 'border-fuchsia-500 bg-fuchsia-500'
+                            : 'border-gray-500'
+                            }`}>
+                            {cart.orderNow && <div className="w-2 h-2 rounded-full bg-white" />}
                           </div>
                         </div>
-                      </summary>
+                      </button>
 
-                      {/* Time Picker */}
-                      <div className="mt-3 p-4 rounded-lg border border-white/10 bg-gray-800/30">
-                        {slotsLoading ? (
-                          <Skeleton className="h-14 w-full" />
-                        ) : (!slots || slots.length === 0) ? (
-                          <div className="text-sm text-gray-400 py-4 text-center">
-                            <div className="font-medium text-gray-300">Restaurant Closed</div>
-                            <div className="text-xs mt-1">No times available for {cart.mode}.</div>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <TimePicker
-                              value={scheduledTime}
-                              minHour24={new Date().getHours() + new Date().getMinutes() / 60} // Current time forward
-                              maxHour24={22} // Restaurant closes at 10 PM
-                              onChange={(time) => {
-                                setScheduledTime(time);
-                                const timeStr = formatTimeForSlot(time);
-                                const today = new Date().toISOString().split('T')[0];
-                                const label = `${time.hour}:${time.minute.toString().padStart(2, '0')} ${time.period}`;
-
-                                cart.setTimeSlot({
-                                  id: `custom-${timeStr}`,
-                                  label: label,
-                                  start: `${today}T${timeStr}`,
-                                  end: `${today}T${timeStr}`,
-                                  available: true,
-                                  slot_date: today,
-                                  slot_start_time: timeStr,
-                                  slot_type: cart.mode === 'delivery' ? 'delivery' : 'pickup',
-                                });
-                              }}
-                            />
-
-                            {scheduledTime && (
-                              <div className="text-center text-sm text-fuchsia-400 font-medium">
-                                ✓ {cart.mode === 'pickup' ? 'Pickup' : 'Delivery'} at {scheduledTime.hour}:{scheduledTime.minute.toString().padStart(2, '0')} {scheduledTime.period}
+                      {/* Schedule for Later - Collapsible */}
+                      <details
+                        className="group"
+                        open={!cart.orderNow}
+                        onToggle={(e) => {
+                          if ((e.target as HTMLDetailsElement).open && cart.orderNow) {
+                            cart.setOrderNow(false);
+                          }
+                        }}
+                      >
+                        <summary className={`cursor-pointer p-3 sm:p-4 rounded-xl border transition-all list-none ${!cart.orderNow
+                          ? 'border-fuchsia-500 bg-fuchsia-500/15 ring-1 ring-fuchsia-500/50'
+                          : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                          }`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${!cart.orderNow ? 'bg-fuchsia-500/20' : 'bg-white/10'
+                                }`}>
+                                <span className="text-lg">📅</span>
                               </div>
-                            )}
+                              <div>
+                                <div className={`font-semibold text-sm sm:text-base ${!cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
+                                  }`}>
+                                  Schedule for Later
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {cart.timeSlot ? cart.timeSlot.label : 'Pick a specific time'}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <ChevronDown className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" />
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${!cart.orderNow
+                                ? 'border-fuchsia-500 bg-fuchsia-500'
+                                : 'border-gray-500'
+                                }`}>
+                                {!cart.orderNow && <div className="w-2 h-2 rounded-full bg-white" />}
+                              </div>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </details>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                        </summary>
+
+                        {/* Time Picker */}
+                        <div className="mt-3 p-4 rounded-lg border border-white/10 bg-gray-800/30">
+                          {slotsLoading ? (
+                            <Skeleton className="h-14 w-full" />
+                          ) : (!slots || slots.length === 0) ? (
+                            <div className="text-sm text-gray-400 py-4 text-center">
+                              <div className="font-medium text-gray-300">Restaurant Closed</div>
+                              <div className="text-xs mt-1">No times available for {cart.mode}.</div>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <TimePicker
+                                value={scheduledTime}
+                                minHour24={new Date().getHours() + new Date().getMinutes() / 60} // Current time forward
+                                maxHour24={22} // Restaurant closes at 10 PM
+                                onChange={(time) => {
+                                  setScheduledTime(time);
+                                  const timeStr = formatTimeForSlot(time);
+                                  const today = new Date().toISOString().split('T')[0];
+                                  const label = `${time.hour}:${time.minute.toString().padStart(2, '0')} ${time.period}`;
+
+                                  cart.setTimeSlot({
+                                    id: `custom-${timeStr}`,
+                                    label: label,
+                                    start: `${today}T${timeStr}`,
+                                    end: `${today}T${timeStr}`,
+                                    available: true,
+                                    slot_date: today,
+                                    slot_start_time: timeStr,
+                                    slot_type: cart.mode === 'delivery' ? 'delivery' : 'pickup',
+                                  });
+                                }}
+                              />
+
+                              {scheduledTime && (
+                                <div className="text-center text-sm text-fuchsia-400 font-medium">
+                                  ✓ {cart.mode === 'pickup' ? 'Pickup' : 'Delivery'} at {scheduledTime.hour}:{scheduledTime.minute.toString().padStart(2, '0')} {scheduledTime.period}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </details>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
 
             {/* Payment Option */}
             <Card className="overflow-hidden">

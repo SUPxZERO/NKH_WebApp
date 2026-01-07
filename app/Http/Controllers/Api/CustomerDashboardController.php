@@ -272,8 +272,14 @@ class CustomerDashboardController extends Controller
     public function orders(Request $request)
     {
         $customer = $this->getCurrentCustomer($request);
+        $sessionToken = $request->header('X-Table-Session');
+        $tableSession = null;
 
-        if (!$customer) {
+        if ($sessionToken) {
+            $tableSession = \App\Models\TableSession::findByToken($sessionToken);
+        }
+
+        if (!$customer && !$tableSession) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Customer profile not found',
@@ -281,8 +287,20 @@ class CustomerDashboardController extends Controller
             ], 404);
         }
 
-        // Build query for Customer
-        $query = Order::where('customer_id', $customer->id);
+        // Build query
+        $query = Order::query();
+
+        if ($customer) {
+            $query->where('customer_id', $customer->id);
+        } elseif ($tableSession) {
+            $query->where('table_id', $tableSession->table_id)
+                  ->where('created_at', '>=', $tableSession->started_at);
+            
+            // If session is closed, cap the query
+            if ($tableSession->closed_at) {
+                $query->where('created_at', '<=', $tableSession->closed_at);
+            }
+        }
         
         return $this->processOrdersQuery($query, $request);
     }
@@ -418,12 +436,16 @@ class CustomerDashboardController extends Controller
                         return [
                             'id' => $item->id,
                             'menu_item_id' => $item->menu_item_id,
-                            'name' => $item->menuItem?->name ?? 'Unknown Item',
                             'quantity' => $item->quantity,
                             'unit_price' => (float) $item->unit_price,
                             'total_price' => (float) $item->total_price,
                             'special_instructions' => $item->special_instructions,
-                            'image_path' => $imagePath,
+                            'status' => $item->status ?? 'pending',
+                            // Nested menu_item object to match frontend interface
+                            'menu_item' => [
+                                'name' => $item->menuItem?->name ?? 'Unknown Item',
+                                'image_path' => $imagePath,
+                            ],
                         ];
                     })->toArray(),
                     
@@ -500,10 +522,18 @@ class CustomerDashboardController extends Controller
     public function show(Request $request, $id)
     {
         $customer = $this->getCurrentCustomer($request);
-        if (!$customer) return response()->json(['message' => 'Unauthenticated'], 401);
+        $sessionToken = $request->header('X-Table-Session');
+        $tableSession = null;
 
-        $order = Order::where('customer_id', $customer->id)
-            ->where('id', $id)
+        if ($sessionToken) {
+            $tableSession = \App\Models\TableSession::findByToken($sessionToken);
+        }
+
+        if (!$customer && !$tableSession) {
+             return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $query = Order::where('id', $id)
             ->with([
                 'items.menuItem.translations',
                 'location',
@@ -511,8 +541,16 @@ class CustomerDashboardController extends Controller
                 'customerAddress',
                 'invoice',
                 'paymentCollector'
-            ])
-            ->firstOrFail();
+            ]);
+
+        if ($customer) {
+            $query->where('customer_id', $customer->id);
+        } elseif ($tableSession) {
+            $query->where('table_id', $tableSession->table_id)
+                  ->where('created_at', '>=', $tableSession->started_at);
+        }
+
+        $order = $query->firstOrFail();
 
         return $this->formatOrderResponse($order);
     }

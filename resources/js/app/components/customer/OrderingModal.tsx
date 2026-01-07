@@ -14,7 +14,7 @@ import { ShoppingCart, XCircle, LogIn, ArrowRight, Star, Clock, TrendingUp, Plus
 interface OrderingModalProps {
   open: boolean;
   onClose: () => void;
-  mode: 'delivery' | 'pickup';
+  mode: 'delivery' | 'pickup' | 'dine-in';
 }
 
 export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
@@ -91,7 +91,18 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={mode === 'delivery' ? 'Order for Delivery' : 'Order for Pickup'} size="full">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={
+        mode === 'dine-in'
+          ? 'Table Order'
+          : mode === 'delivery'
+            ? 'Order for Delivery'
+            : 'Order for Pickup'
+      }
+      size="full"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8rem)] overflow-hidden">
         {/* Menu Browser - Main Section */}
         <div className="lg:col-span-8 space-y-6 overflow-y-auto pr-4">

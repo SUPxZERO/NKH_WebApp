@@ -78,6 +78,24 @@ Route::prefix('telegram-webapp')->group(function () {
     Route::get('/status', [App\Http\Controllers\Api\TelegramWebAppController::class, 'status']);
 });
 
+// ============================================================================
+// QR TABLE ORDERING ROUTES (Sprint P17 - QR Table Ordering)
+// ============================================================================
+
+// Public QR scan endpoint (no auth required)
+Route::get('/table-scan/{token}', [App\Http\Controllers\Api\QrTableController::class, 'scan'])
+    ->middleware('throttle:60,1'); // Rate limit: 60 per minute
+
+// Table session management (with optional table session middleware)
+Route::prefix('table-session')
+    ->middleware([\App\Http\Middleware\TableSessionMiddleware::class])
+    ->group(function () {
+        Route::get('/current', [App\Http\Controllers\Api\QrTableController::class, 'currentSession']);
+        Route::post('/close', [App\Http\Controllers\Api\QrTableController::class, 'closeSession']);
+        Route::post('/status', [App\Http\Controllers\Api\QrTableController::class, 'updateSessionStatus']);
+    });
+
+
 // Public endpoints with rate limiting and lockout protection
 Route::middleware(['throttle.api:auth', 'account.lockout'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);

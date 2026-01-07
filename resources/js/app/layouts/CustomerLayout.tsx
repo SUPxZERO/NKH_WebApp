@@ -18,7 +18,8 @@ import {
   Clock, ClipboardList,
   LogOut,
   Calendar,
-  Search
+  Search,
+  QrCode
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import CartIcon from '@/app/components/ui/CartIcon';
@@ -28,6 +29,7 @@ import { GlobalSearch, useGlobalSearch, SearchTrigger } from '@/app/components/u
 import { useCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useTelegramAuth } from '@/app/hooks/useTelegramAuth';
+import { useTableSession } from '@/app/hooks/useTableSession';
 
 type Props = {
   children: React.ReactNode;
@@ -64,6 +66,14 @@ export default function CustomerLayout({ children, className }: Props) {
 
   // Initialize Telegram WebApp session (Sprint P15 - Guest ordering)
   const telegram = useTelegramAuth();
+
+  // Table Session Indicator
+  const { isTableOrder, session } = useTableSession();
+  // Fallback to cart store display values if session object isn't fully loaded but token exists
+  // (handled by hook matching logic, here we just use what the hook gives or cart store directly if accessible)
+  // For display we'll trust the hook's sync or local session data
+  const tableDisplay = session?.table?.code || 'Table';
+  const floorDisplay = session?.table?.floor?.name;
 
   const handleLogout = () => {
     router.post('/logout');
@@ -207,6 +217,24 @@ export default function CustomerLayout({ children, className }: Props) {
               </div>
             </Link>
 
+
+            {/* Table Indicator (Mobile/Desktop) */}
+            {isTableOrder && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-full">
+                <QrCode className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <div className="flex flex-col leading-none">
+                  <span className="text-xs font-bold text-purple-700 dark:text-purple-300">
+                    {tableDisplay}
+                  </span>
+                  {floorDisplay && (
+                    <span className="text-[10px] text-purple-600/70 dark:text-purple-400/70 font-medium">
+                      {floorDisplay}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Desktop Navigation - Hide on mobile/tablet */}
             <nav className="hidden xl:flex items-center space-x-1">
               {navigation.map((item) => {
@@ -232,6 +260,13 @@ export default function CustomerLayout({ children, className }: Props) {
 
             {/* Actions */}
             <div className="flex items-center gap-1 sm:gap-2">
+              {/* Mobile Table Indicator - Icon Only */}
+              {isTableOrder && (
+                <div className="sm:hidden flex items-center justify-center w-9 h-9 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
+                  <span className="text-xs font-bold">{tableDisplay.replace('Table ', '')}</span>
+                </div>
+              )}
+
               {/* Search Button - Show on all sizes */}
               <button
                 onClick={search.open}
@@ -273,10 +308,10 @@ export default function CustomerLayout({ children, className }: Props) {
             </div>
           </div>
         </div>
-      </header>
+      </header >
 
       {/* Main Content */}
-      <main className="w-full max-w-full overflow-x-hidden">
+      < main className="w-full max-w-full overflow-x-hidden" >
         <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -286,10 +321,10 @@ export default function CustomerLayout({ children, className }: Props) {
             {children}
           </motion.div>
         </div>
-      </main>
+      </main >
 
       {/* Footer */}
-      <footer className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white py-8 sm:py-12 lg:py-16 mt-12 sm:mt-16 lg:mt-20">
+      < footer className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white py-8 sm:py-12 lg:py-16 mt-12 sm:mt-16 lg:mt-20" >
         <div className="w-full max-w-screen-2xl mx-auto px-4">
           {/* Newsletter Section */}
           {/* <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-fuchsia-600 to-pink-600 p-8 md:p-12 mb-12">
@@ -424,10 +459,10 @@ export default function CustomerLayout({ children, className }: Props) {
             </button>
           </div>
         </div>
-      </footer>
+      </footer >
 
       {/* Global Search Modal */}
-      <GlobalSearch variant="customer" isOpen={search.isOpen} onClose={search.close} />
-    </div>
+      < GlobalSearch variant="customer" isOpen={search.isOpen} onClose={search.close} />
+    </div >
   );
 }

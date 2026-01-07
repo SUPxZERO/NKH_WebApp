@@ -59,7 +59,21 @@ class CustomerApiAuth
             }
         }
 
-        // Check 5: Try Sanctum authentication (for API tokens)
+        // Check 5: Active Table Session (Qr Code Guest) - Handled here to allow API access
+        $tableSessionToken = $request->header('X-Table-Session') 
+            ?? $request->cookie('table_session')
+            ?? $request->query('session_token');
+
+        if ($tableSessionToken) {
+            $tableSession = \App\Models\TableSession::findByToken($tableSessionToken);
+            if ($tableSession) {
+                // Attach session to request for controller usage
+                $request->attributes->set('table_session', $tableSession);
+                return $next($request);
+            }
+        }
+
+        // Check 6: Try Sanctum authentication (for API tokens)
         if ($request->bearerToken()) {
             try {
                 Auth::shouldUse('sanctum');

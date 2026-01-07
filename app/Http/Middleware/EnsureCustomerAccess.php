@@ -103,6 +103,37 @@ class EnsureCustomerAccess
             return $next($request);
         }
 
+        // 8. Check for active Table Session (QR Code Guest)
+        $tableSessionToken = $request->header('X-Table-Session') 
+            ?? $request->cookie('table_session')
+            ?? $request->query('session_token');
+
+        if ($tableSessionToken) {
+            \Log::info('🔍 EnsureCustomerAccess: Checking Table Session Token', ['token' => $tableSessionToken]);
+            $tableSession = \App\Models\TableSession::findByToken($tableSessionToken);
+            
+            if ($tableSession) {
+                \Log::info('✅ EnsureCustomerAccess: Valid Session Found', ['id' => $tableSession->id]);
+                // Determine user context (Customer or Guest) from session
+                if ($tableSession->customer_id) {
+                    // If session is linked to a customer, we might want to log them in or specific handling
+                    // But for now, just allowing access is sufficient as the frontend expects
+                }
+                
+                // Explicitly attach session to request for controller usage (optimization)
+                $request->attributes->set('table_session', $tableSession);
+                
+                return $next($request);
+            } else {
+                \Log::warning('⚠️ EnsureCustomerAccess: Token Invalid or Expired', ['token' => $tableSessionToken]);
+            }
+        } else {
+             // Only log if we are about to fail content-type json requests to avoid spamming logs for standard web access
+             if ($request->expectsJson() && !$request->is('api/user') && !$request->user()) {
+                 \Log::info('ℹ️ EnsureCustomerAccess: No Auth, No Table Token', ['headers' => $request->headers->all()]);
+             }
+        }
+
         // 8. Otherwise, redirect to login
         // If it's an API request (expects JSON), return 401
         if ($request->expectsJson()) {

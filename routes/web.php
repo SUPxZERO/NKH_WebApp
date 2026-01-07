@@ -29,6 +29,12 @@ use App\Http\Middleware\EnsureCustomerAccess;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+// QR Table Scan Landing Page (Sprint P17 - QR Table Ordering)
+// Accessible without authentication - handles session creation via API
+Route::get('/t/{token}', fn(string $token) => Inertia::render('Customer/TableScan', [
+    'token' => $token,
+]))->name('table.scan');
+
 // ============================================================================
 // CUSTOMER WEB ROUTES
 // ============================================================================
@@ -80,6 +86,14 @@ Route::prefix('customer')->middleware([EnsureCustomerAccess::class])->group(func
     Route::get('/feedback', fn() => Inertia::render('Customer/Feedback'))->name('customer.feedback');
     Route::get('/settings', fn() => Inertia::render('Customer/Settings'))->name('customer.settings');
     Route::get('/help', fn() => Inertia::render('Customer/HelpSupport'))->name('customer.help');
+
+    // High, End Table Ordering Routes (Sprint P17)
+    Route::prefix('table')->group(function () {
+        Route::get('/menu', fn() => Inertia::render('Customer/Table/Menu'))->name('customer.table.menu');
+        Route::get('/cart', fn() => Inertia::render('Customer/Table/Cart'))->name('customer.table.cart');
+        Route::get('/success', fn() => Inertia::render('Customer/Table/OrderSuccess'))->name('customer.table.success');
+        Route::get('/orders', fn() => Inertia::render('Customer/Table/Orders'))->name('customer.table.orders'); // Placeholder if needed
+    });
 });
 
 // =========================================================================== =
@@ -134,6 +148,7 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,servic
     Route::get('orders', fn() => Inertia::render('admin/Orders'))->name('admin.orders');
     Route::get('floors', fn() => Inertia::render('admin/Floors'))->name('admin.floors');
     Route::get('tables', fn() => Inertia::render('admin/Tables'))->name('admin.tables');
+    Route::get('tables/print-qr-view', fn() => Inertia::render('admin/QrPrintView'))->name('admin.tables.print-qr');
     Route::get('reservations', fn() => Inertia::render('admin/Reservations'))->name('admin.reservations');
     
     // Finance

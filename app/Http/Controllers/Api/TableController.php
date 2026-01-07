@@ -133,4 +133,145 @@ class TableController extends Controller
         $table->delete();
         return response()->json(['message' => 'Table deleted successfully.']);
     }
+
+    // ==================== QR CODE ENDPOINTS ====================
+
+    /**
+     * Generate or regenerate QR code for a table
+     * POST /api/admin/tables/{table}/generate-qr
+     */
+    public function generateQr(DiningTable $table): JsonResponse
+    {
+        $service = app(\App\Services\QrTableService::class);
+        
+        try {
+            $token = $service->generateQrForTable($table);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'QR code generated successfully',
+                'data' => [
+                    'table_id' => $table->id,
+                    'table_code' => $table->code,
+                    'qr_token' => $token,
+                    'qr_url' => $table->getQrUrl(),
+                    'generated_at' => $table->qr_generated_at->toIso8601String(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate QR code',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get QR code image for a table
+     * GET /api/admin/tables/{table}/qr-image
+     */
+    public function getQrImage(Request $request, DiningTable $table): JsonResponse
+    {
+        $service = app(\App\Services\QrTableService::class);
+        $size = $request->integer('size', 300);
+        $format = $request->string('format', 'base64');
+
+        try {
+            // Generate QR if not exists
+            if (!$table->hasQrToken()) {
+                $service->generateQrForTable($table);
+            }
+
+            if ($format === 'svg') {
+                $image = $service->getQrImageSvg($table, $size);
+                return response()->json([
+                    'success' => true,
+                    'format' => 'svg',
+                    'image' => $image,
+                ]);
+            }
+
+            $imageBase64 = $service->getQrImageBase64($table, $size);
+            
+            return response()->json([
+                'success' => true,
+                'format' => 'base64',
+                'image' => $imageBase64,
+                'table_code' => $table->code,
+                'qr_url' => $table->getQrUrl(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate QR image',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk generate QR codes for multiple tables
+     * POST /api/admin/tables/bulk-generate-qr
+     */
+    public function bulkGenerateQr(Request $request): JsonResponse
+    {
+        $request->validate([
+            'table_ids' => 'required|array|min:1',
+            'table_ids.*' => 'exists:tables,id',
+        ]);
+
+        $service = app(\App\Services\QrTableService::class);
+        $results = $service->bulkGenerateQr($request->table_ids);
+
+        $successCount = collect($results)->where('success', true)->count();
+        $failCount = collect($results)->where('success', false)->count();
+
+        return response()->json([
+            'success' => $failCount === 0,
+            'message' => "{$successCount} QR codes generated" . ($failCount > 0 ? ", {$failCount} failed" : ""),
+            'results' => $results,
+        ]);
+    }
+
+    /**
+     * Get QR statistics
+     * GET /api/admin/tables/qr-stats
+     */
+    public function qrStats(): JsonResponse
+    {
+        $service = app(\App\Services\QrTableService::class);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $service->getStatistics(),
+        ]);
+    }
+
+    /**
+     * Get printable QR data for a table
+     * GET /api/admin/tables/{table}/printable-qr
+     */
+    public function getPrintableQr(DiningTable $table): JsonResponse
+    {
+        $service = app(\App\Services\QrTableService::class);
+
+        try {
+            // Generate QR if not exists
+            if (!$table->hasQrToken()) {
+                $service->generateQrForTable($table);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $service->getPrintableData($table),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get printable data',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
