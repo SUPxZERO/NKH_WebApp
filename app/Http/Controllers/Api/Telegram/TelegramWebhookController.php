@@ -94,11 +94,11 @@ class TelegramWebhookController extends Controller
                     ['remove_keyboard' => true]
                  );
                  
-                 // Then show the main inline menu
+                 // Then show the main inline menu with telegram_user_id for session continuity
                  $this->botService->sendInlineKeyboard(
                     $chatId, 
                     "What would you like to do?", 
-                    TelegramKeyboardBuilder::mainMenu()
+                    TelegramKeyboardBuilder::mainMenu($user->telegram_id)
                  );
             } else {
                 // Determine if we should reply to other text or just ignore
@@ -148,11 +148,11 @@ class TelegramWebhookController extends Controller
                 "✅ Phone number verified! You can now track orders and receive updates."
             );
             
-            // Show main menu (remove phone request keyboard)
+            // Show main menu with telegram_user_id for WebApp session continuity
             $this->botService->sendInlineKeyboard(
                 $chatId, 
                 "What would you like to do?",
-                TelegramKeyboardBuilder::mainMenu()
+                TelegramKeyboardBuilder::mainMenu($user->telegram_id)
             );
         }
     }
@@ -213,8 +213,8 @@ class TelegramWebhookController extends Controller
                 TelegramKeyboardBuilder::welcomeWithSetup(false)
             );
         } else {
-            // Standard Inline Menu
-            $this->botService->sendInlineKeyboard($chatId, $message, TelegramKeyboardBuilder::mainMenu());
+            // Standard Inline Menu with telegram_user_id for WebApp session continuity
+            $this->botService->sendInlineKeyboard($chatId, $message, TelegramKeyboardBuilder::mainMenu($user->telegram_id));
         }
     }
 

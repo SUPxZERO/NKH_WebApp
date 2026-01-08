@@ -13,7 +13,12 @@ class InvoiceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Invoice::with(['order.customer.user', 'location', 'payments']);
+        $query = Invoice::with([
+            'order.customer.user',
+            'order.customer.telegramUser',
+            'location',
+            'payments'
+        ]);
         
         // Filter by date range
         if ($request->has('start_date')) {
@@ -66,9 +71,15 @@ class InvoiceController extends Controller
             'company_name' => config('app.name'),
             'company_address' => $invoice->location->address ?? 'Main Branch',
             'company_phone' => $invoice->location->phone ?? '',
-            'customer_name' => $invoice->order->customer->user->name ?? 'Guest',
-            'customer_email' => $invoice->order->customer->user->email ?? '',
-            'customer_phone' => $invoice->order->customer->user->phone ?? '',
+            'customer_name' => $invoice->order->customer?->user?->name 
+                ?? $invoice->order->customer?->name 
+                ?? 'Guest',
+            'customer_email' => $invoice->order->customer?->user?->email 
+                ?? $invoice->order->customer?->email 
+                ?? '',
+            'customer_phone' => $invoice->order->customer?->user?->phone 
+                ?? $invoice->order->customer?->phone 
+                ?? '',
             'order_ref' => $invoice->order->order_number ?? '',
             'items' => $invoice->order->items->map(function ($item) {
                 return [
@@ -90,14 +101,16 @@ class InvoiceController extends Controller
 
         $pdf = Pdf::loadView('invoices.pdf', $data);
         
-        $pdf = Pdf::loadView('invoices.pdf', $data);
-        
         return $pdf->download('Invoice-' . ($invoice->invoice_number ?? $invoice->id) . '.pdf');
     }
 
     public function exportCsv(Request $request)
     {
-        $query = Invoice::with(['order.customer.user', 'location']);
+        $query = Invoice::with([
+            'order.customer.user',
+            'order.customer.telegramUser',
+            'location'
+        ]);
 
         // Filter by date range
         if ($request->has('start_date')) {
@@ -134,7 +147,7 @@ class InvoiceController extends Controller
                 fputcsv($file, [
                     $invoice->invoice_number,
                     $invoice->issued_at ? $invoice->issued_at->format('Y-m-d') : '',
-                    $invoice->order->customer->user->name ?? 'Guest',
+                    $invoice->order->customer?->user?->name ?? $invoice->order->customer?->name ?? 'Guest',
                     $invoice->total,
                     $invoice->amount_paid,
                     $invoice->amount_due,

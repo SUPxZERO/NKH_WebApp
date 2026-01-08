@@ -78,18 +78,13 @@ class TelegramWebAppController extends Controller
      */
     private function establishSession(int $telegramId, ?array $userData): JsonResponse
     {
-        // Find or create TelegramUser
-        $telegramUser = TelegramUser::where('telegram_id', $telegramId)->first();
-        
-        if (!$telegramUser && $userData) {
-            // Auto-create TelegramUser if it doesn't exist
-            $telegramUser = TelegramUser::create([
-                'telegram_id' => $telegramId,
-                'first_name' => $userData['first_name'] ?? 'Guest',
-                'last_name' => $userData['last_name'] ?? null,
-                'telegram_username' => $userData['username'] ?? null,
-                'is_active' => true,
-            ]);
+        // SPRINT P16: Use findOrCreate to ensure Customer record is auto-created
+        // This ensures consistency with webhook handler and guarantees full customer features
+        if ($userData) {
+            $telegramUser = TelegramUser::findOrCreate($userData);
+        } else {
+            // Fallback: if no userData provided, create minimal array with just ID
+            $telegramUser = TelegramUser::findOrCreate(['id' => $telegramId]);
         }
 
         if (!$telegramUser) {

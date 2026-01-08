@@ -16,12 +16,21 @@ class TelegramKeyboardBuilder
 
     /**
      * Build main simplified menu
+     * 
+     * @param int|null $telegramUserId Optional Telegram user ID for WebApp session continuity
      */
-    public static function mainMenu(): array
+    public static function mainMenu(?int $telegramUserId = null): array
     {
+        // Build menu URL with telegram_user_id for session continuity
+        // This allows middleware to authenticate the user immediately when WebApp opens
+        $menuUrl = config('app.url') . '/menu';
+        if ($telegramUserId) {
+            $menuUrl .= '?telegram_user_id=' . $telegramUserId;
+        }
+        
         return self::inlineKeyboard([
             [
-                ['text' => '🍔 Order Now', 'web_app' => ['url' => config('app.url') . '/menu']],
+                ['text' => '🍔 Order Now', 'web_app' => ['url' => $menuUrl]],
             ],
             [
                 ['text' => 'ℹ️ Help & Locations', 'callback_data' => 'help_info'],
@@ -71,10 +80,12 @@ class TelegramKeyboardBuilder
 
     /**
      * Build main menu keyboard (for returning to main menu)
+     * 
+     * @param int|null $telegramUserId Optional Telegram user ID for WebApp session continuity
      */
-    public static function buildMainMenuKeyboard(): array
+    public static function buildMainMenuKeyboard(?int $telegramUserId = null): array
     {
-        return self::mainMenu();
+        return self::mainMenu($telegramUserId);
     }
 
     /**
@@ -252,11 +263,14 @@ class TelegramKeyboardBuilder
     /**
      * SPRINT P16: Build welcome keyboard with setup options
      * Encourages phone sharing for better experience
+     * 
+     * @param bool $hasPhone Whether user has shared phone
+     * @param int|null $telegramUserId Optional Telegram user ID for WebApp session continuity
      */
-    public static function welcomeWithSetup(bool $hasPhone = false): array
+    public static function welcomeWithSetup(bool $hasPhone = false, ?int $telegramUserId = null): array
     {
         if ($hasPhone) {
-            return self::mainMenu();
+            return self::mainMenu($telegramUserId);
         }
 
         // Show phone request for first-time users

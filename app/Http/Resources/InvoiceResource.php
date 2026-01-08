@@ -15,19 +15,22 @@ class InvoiceResource extends JsonResource
             'location_id' => $this->location_id,
             'invoice_number' => $this->invoice_number,
             'subtotal' => $this->subtotal,
-            'tax_total' => $this->tax_amount,
-            'discount_total' => $this->discount_amount,
-            'service_charge' => $this->service_charge,
-            'total' => $this->total_amount,
-            'amount_paid' => $this->amount_paid,
-            'amount_due' => $this->amount_due,
-            'currency' => $this->currency,
+            'tax_total' => $this->tax_amount ?? 0,
+            'tax_amount' => $this->tax_amount ?? 0,
+            'discount_total' => $this->discount_amount ?? 0,
+            'discount_amount' => $this->discount_amount ?? 0,
+            'service_charge' => $this->service_charge ?? 0,
+            'total' => $this->total_amount ?? 0,
+            'total_amount' => $this->total_amount ?? 0,
+            'amount_paid' => $this->amount_paid ?? 0,
+            'amount_due' => $this->amount_due ?? 0,
+            'currency' => $this->currency ?? 'USD',
             'issued_at' => optional($this->issued_at)->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             
             // Payment status
-            'status' => $this->amount_due <= 0 ? 'paid' : 'unpaid',
+            'status' => ($this->amount_due ?? 0) <= 0 ? 'paid' : 'unpaid',
             
             // Location (for display in UI)
             'location' => $this->whenLoaded('location', function () {
@@ -47,9 +50,9 @@ class InvoiceResource extends JsonResource
                     // Backward-compat alias for older UI
                     'placed_at' => $this->order->ordered_at?->toISOString(),
                     'ordered_at' => $this->order->ordered_at?->toISOString(),
-                    'customer' => $this->order->relationLoaded('customer') ? [
+                    'customer' => $this->order->relationLoaded('customer') && $this->order->customer ? [
                         'id' => $this->order->customer->id,
-                        'user' => $this->order->customer->relationLoaded('user') ? [
+                        'user' => $this->order->customer->relationLoaded('user') && $this->order->customer->user ? [
                             'id' => $this->order->customer->user->id,
                             'name' => $this->order->customer->user->name,
                             'email' => $this->order->customer->user->email,
