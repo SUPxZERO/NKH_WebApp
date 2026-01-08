@@ -28,42 +28,28 @@ class Order extends Model
 
     // Removed is_customer_request accessor - no longer needed
 
-    protected $fillable = [
-        'location_id',
-        'table_id',
-        'customer_id',
-        'telegram_user_id',
-        'employee_id',
-        'order_number',
-        'order_type',
-        'status',
-        'payment_status',
-        'payment_mode',
+    /**
+     * SECURITY: Use $guarded instead of $fillable to protect sensitive fields
+     * 
+     * These fields MUST NOT be settable via user input/API requests:
+     * - payment_status: Only PaymentService can update
+     * - status: Only workflow/admin can update
+     * - approved_by: Only auth system sets this
+     * - payment_collected_by/at: Only payment collection flow
+     * 
+     * Attack prevented: User sending {"payment_status": "paid"} to bypass payment
+     */
+    protected $guarded = [
+        'id',
+        'payment_status',           // ⚠️ CRITICAL: Must be set by PaymentService only
+        'status',                   // ⚠️ Set by workflow, not user
+        'approved_by',              // ⚠️ Set by auth system
+        'approved_at',
         'payment_collected_by',
         'payment_collected_at',
-        'payment_collection_notes',
-        'subtotal',
-        'tax_amount',
-        'discount_amount',
-        'service_charge',
-        'delivery_fee',
-        'total_amount',
-        'currency',
-        'ordered_at',
-        'scheduled_at',
-        'pickup_time',
-        'completed_at',
-        'special_instructions',
-        'delivery_instructions',
-        'customer_address_id',
-        'time_slot_id',
-        'estimated_ready_time',
-        'approval_status',
-        'approved_by',
-        'approved_at',
-        'rejection_reason',
         'is_auto_approved',
-        'promotion_id',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [
