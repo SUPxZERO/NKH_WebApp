@@ -178,23 +178,27 @@ class PaymentService
 
     /**
      * Process webhook callback (payment confirmation).
+     * 
+     * SECURITY FIX: Load with lock immediately to prevent race conditions
      */
     public function processWebhook(array $webhookData): Payment
     {
         return DB::transaction(function () use ($webhookData) {
-            // Find payment by reference
-            $payment = $this->findPaymentByWebhook($webhookData);
+            // FIXED: Find and lock payment in single query to prevent race condition
+            // Race condition scenario:
+            // Thread 1: findPaymentByWebhook() returns payment
+            // Thread 2: findPaymentByWebhook() returns same payment
+            // Thread 1: locks and processes
+            // Thread 2: locks and processes AGAIN (double charge!)
+            //
+            // Solution: Lock immediately during find
+            $payment = $this->findPaymentByWebhookWithLock($webhookData);
             
             if (!$payment) {
                 throw new \Exception('Payment not found for webhook data');
             }
 
-            // Lock for update to prevent race conditions
-            $payment = Payment::where('id', $payment->id)
-                ->lockForUpdate()
-                ->first();
-
-            // Verify payment is still pending
+            // Verify payment is still pending (idempotency check)
             if (!$payment->isPending()) {
                 Log::info('Webhook received for already processed payment', [
                     'payment_id' => $payment->id,
@@ -324,6 +328,40 @@ class PaymentService
         }
 
         return null;
+    }
+
+    /**
+     * SECURITY FIX: Find payment by webhook data WITH database lock.
+     * 
+     * This prevents race conditions when multiple webhooks arrive simultaneously.
+     * The lock ensures only ONE thread can process the payment at a time.
+     */
+    protected function findPaymentByWebhookWithLock(array $webhookData): ?Payment
+    {
+        $payment = null;
+
+        // Try to find by transaction_id WITH LOCK
+        if (isset($webhookData['transaction_id'])) {
+            $payment = Payment::where('transaction_id', $webhookData['transaction_id'])
+                ->lockForUpdate()
+                ->first();
+        }
+
+        // Try QR reference WITH LOCK
+        if (!$payment && isset($webhookData['reference'])) {
+            $payment = Payment::where('qr_reference', $webhookData['reference'])
+                ->lockForUpdate()
+                ->first();
+        }
+
+        // Try payment_id WITH LOCK
+        if (!$payment && isset($webhookData['payment_id'])) {
+            $payment = Payment::where('id', $webhookData['payment_id'])
+                ->lockForUpdate()
+                ->first();
+        }
+
+        return $payment;
     }
 
     private function handleSuccessfulPayment(Payment $payment, array $webhookData): void
