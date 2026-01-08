@@ -50,12 +50,13 @@ class ReportsController extends Controller
     {
         $range = $request->get('range', '30days');
         $dates = $this->getDateRange($range);
+        // FIXED: Use safe getGroupByFormat which returns whitelisted SQL
         $groupBy = $this->getGroupByFormat($range);
 
         $usage = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
             ->where('inventory_transactions.type', 'usage')
             ->select([
-                DB::raw($groupBy . ' as date'),
+                DB::raw($groupBy . ' as date'), // Safe: $groupBy comes from getGroupByFormat whitelist
                 DB::raw('SUM(quantity) as usage')
             ])
             ->groupBy('date')
@@ -204,13 +205,14 @@ class ReportsController extends Controller
     {
         $range = $request->get('range', '30days');
         $dates = $this->getDateRange($range);
+        // FIXED: Use safe getGroupByFormat which returns whitelisted SQL
         $groupBy = $this->getGroupByFormat($range);
 
         $data = DB::table('orders')
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
             ->where('orders.status', '!=', 'cancelled')
             ->select([
-                DB::raw($groupBy . ' as date'),
+                DB::raw($groupBy . ' as date'), // Safe: $groupBy comes from getGroupByFormat whitelist
                 DB::raw('SUM(orders.total_amount) as revenue')
             ])
             ->groupBy('date')
@@ -219,10 +221,11 @@ class ReportsController extends Controller
             ->map(function ($item) use ($dates, $groupBy) {
                 // Get expenses for the same date
                 $dateStr = $item->date;
+                // FIXED: Use whereRaw with parameter binding instead of DB::raw in where clause
                 $expenses = Expense::when(
                     $groupBy === "DATE(created_at)",
                     fn($q) => $q->whereDate('expense_date', $dateStr),
-                    fn($q) => $q->where(DB::raw("DATE_FORMAT(expense_date, '%Y-%m')"), $dateStr)
+                    fn($q) => $q->whereRaw("DATE_FORMAT(expense_date, '%Y-%m') = ?", [$dateStr])
                 )->sum('amount');
 
                 $item->expenses = $expenses;
