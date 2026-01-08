@@ -2,395 +2,202 @@
 
 namespace App\Services;
 
-use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
-use App\Models\PaymentAuditLog;
 use App\Models\PaymentMethod;
-use App\Services\Payment\PaymentStrategyInterface;
-use App\Services\Payment\Strategies\QrPaymentStrategy;
-use App\Services\Payment\Strategies\CashPaymentStrategy;
-use App\Services\Payment\Strategies\CardPaymentStrategy;
-use App\Services\Payment\Strategies\StripePaymentStrategy;
-use App\Services\Payment\Strategies\AbaPaymentStrategy;
-use App\Services\Payment\Strategies\WingPaymentStrategy;
+use App\Models\Invoice;
+use App\Services\InvoiceService;
+use App\Services\NotificationService;
+use App\Services\LoyaltyService;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
+use App\Models\PaymentAuditLog; // Ensure this model exists or use logic
 
 class PaymentService
 {
-    protected PaymentReferenceGenerator $referenceGenerator;
-    protected InvoiceService $invoiceService;
-    protected FraudDetectionService $fraudDetection;
-    protected LoyaltyService $loyaltyService;
-
-    // Strategy cache
-    protected array $strategies = [];
+    protected $invoiceService;
+    protected $notificationService;
+    protected $loyaltyService;
 
     public function __construct(
-        PaymentReferenceGenerator $referenceGenerator,
         InvoiceService $invoiceService,
-        FraudDetectionService $fraudDetection,
+        NotificationService $notificationService,
         LoyaltyService $loyaltyService
     ) {
-        $this->referenceGenerator = $referenceGenerator;
         $this->invoiceService = $invoiceService;
-        $this->fraudDetection = $fraudDetection;
+        $this->notificationService = $notificationService;
         $this->loyaltyService = $loyaltyService;
     }
 
     /**
-     * Get the strategy for a specific payment method code.
+     * Process a payment for an order.
+     * Creates invoice if needed, records payment, reconciles, and updates order.
      */
-    protected function getStrategy(string $code): PaymentStrategyInterface
+    public function processOrderPayment(Order $order, array $paymentData, $processedByUserId = null): Payment
     {
-        if (isset($this->strategies[$code])) {
-            return $this->strategies[$code];
-        }
+        return DB::transaction(function () use ($order, $paymentData, $processedByUserId) {
+            // 1. Ensure Invoice Exists
+            $invoice = $this->invoiceService->createOrUpdateForOrder($order);
 
-        $strategy = match ($code) {
-            'qr' => app(QrPaymentStrategy::class),
-            'cash' => app(CashPaymentStrategy::class),
-            'card' => config('services.stripe.secret') ? app(StripePaymentStrategy::class) : app(CardPaymentStrategy::class),
-            'aba_pay' => app(AbaPaymentStrategy::class),
-            'wing' => app(WingPaymentStrategy::class),
-            default => throw new \Exception("Payment strategy for '{$code}' not implemented"),
-        };
-
-        $this->strategies[$code] = $strategy;
-        return $strategy;
-    }
-
-    /**
-     * Initiate a payment for an order.
-     */
-    public function initiatePayment(Order $order, string $paymentMethodCode = 'qr', float $amountToPay = null, string $userId = null, float $tipAmount = 0): array
-    {
-        return DB::transaction(function () use ($order, $paymentMethodCode, $amountToPay, $userId, $tipAmount) {
-            // Ensure invoice exists
-            $invoice = $order->invoice;
-            if (!$invoice) {
-                $invoice = $this->createInvoiceForOrder($order);
-            }
-
-            // Get allocation amount (default to full remaining due if not specified)
-            $amount = $amountToPay ?? $invoice->amount_due;
-
-            // Get payment method
-            $paymentMethod = PaymentMethod::where('code', $paymentMethodCode)
-                ->where('is_active', true)
-                ->first();
-    
-            // ... (method retrieval fallback logic remains)
-            if (!$paymentMethod) { // Simplified check for brevity in replacement, assuming exists logic is block above or here
-                 // RE-INSERTING THE FALLBACK LOGIC TO BE SAFE
-                 if ($paymentMethodCode === 'qr') {
-                     $paymentMethod = PaymentMethod::firstOrCreate(
-                         ['code' => 'qr'], 
-                         ['name' => 'KHQR', 'type' => 'digital_wallet', 'is_active' => true, 'display_order' => 1]
-                     );
-                 } else {
-                      throw new \Exception("Payment method '{$paymentMethodCode}' not available or inactive");
-                 }
-            }
-
-            // Generate references
-            $referenceNumber = $this->referenceGenerator->generate($order);
-            $transactionId = $this->referenceGenerator->generateTransactionId();
-            $qrReference = $this->referenceGenerator->generateQrReference();
-
-            // Create payment record
-            $payment = Payment::create([
-                'invoice_id' => $invoice->id,
-                'payment_method_id' => $paymentMethod->id,
-                'amount' => $amount, // Appied to invoice
-                'tip' => $tipAmount,  // Tip amount
-                'currency' => $invoice->currency ?? 'USD',
-                'transaction_id' => $transactionId,
-                'reference_number' => $referenceNumber,
-                'qr_reference' => $qrReference,
-                'status' => Payment::STATUS_PENDING,
-                'created_by' => $userId, // Ensure creator is logged
-                'expires_at' => now()->addMinutes(config('payment.expiry_minutes', 15)),
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                'device_fingerprint' => request()->header('X-Device-Fingerprint'),
-            ]);
-
-            // Run fraud detection check
-            $fraudCheck = $this->fraudDetection->checkPayment($payment, [
-                'ip' => request()->ip(),
-                'fingerprint' => request()->header('X-Device-Fingerprint'),
-            ]);
-
-            if (!$fraudCheck['passed']) {
-                $payment->update([
-                    'status' => Payment::STATUS_FAILED,
-                    'failure_reason' => 'Fraud detection: ' . implode(', ', $fraudCheck['reasons']),
-                ]);
-
-                PaymentAuditLog::log($payment, 'fraud_blocked', Payment::STATUS_PENDING, Payment::STATUS_FAILED, null, $fraudCheck);
-
-                throw new \Exception('Payment blocked by security check. Please contact support.');
-            }
-
-            // Log payment initiation
-            PaymentAuditLog::log($payment, 'initiated', null, Payment::STATUS_PENDING, null, [
-                'order_id' => $order->id,
-                'payment_method' => $paymentMethodCode,
-                'fraud_score' => $fraudCheck['score'],
-            ]);
-
-            // Delegate initiation logic to strategy
-            $strategy = $this->getStrategy($paymentMethodCode);
-            $strategy->initiate($order, $payment);
-
-            return $strategy->formatResponse($payment, $order);
-        });
-    }
-
-    /**
-     * Get payment status with QR code data.
-     */
-    public function getPaymentStatus(Payment $payment): array
-    {
-        $payment->load(['invoice.order', 'paymentMethod']);
-        $order = $payment->invoice->order;
-        $methodCode = $payment->paymentMethod->code ?? 'qr';
-
-        try {
-            $strategy = $this->getStrategy($methodCode);
-            return $strategy->formatResponse($payment, $order);
-        } catch (\Exception $e) {
-            // Fallback generic response if strategy fails
-             return [
-                'success' => true,
-                'payment' => [
-                    'id' => $payment->id,
-                    'status' => $payment->status,
-                    'amount' => (float) $payment->amount,
-                ],
-                'error' => 'Could not format full response: ' . $e->getMessage()
-            ];
-        }
-    }
-
-    /**
-     * Process webhook callback (payment confirmation).
-     * 
-     * SECURITY FIX: Load with lock immediately to prevent race conditions
-     */
-    public function processWebhook(array $webhookData): Payment
-    {
-        return DB::transaction(function () use ($webhookData) {
-            // FIXED: Find and lock payment in single query to prevent race condition
-            // Race condition scenario:
-            // Thread 1: findPaymentByWebhook() returns payment
-            // Thread 2: findPaymentByWebhook() returns same payment
-            // Thread 1: locks and processes
-            // Thread 2: locks and processes AGAIN (double charge!)
-            //
-            // Solution: Lock immediately during find
-            $payment = $this->findPaymentByWebhookWithLock($webhookData);
+            // 2. Validate Payment Amount (Optional: Check if overpaying?)
+            // For now, allow overpayment or partial payment.
             
-            if (!$payment) {
-                throw new \Exception('Payment not found for webhook data');
+            // 3. Create Payment Record
+            // Resolve Payment Method ID if code passed? 
+            // Assume paymentData has payment_method_id, amount
+            
+            $payment = new Payment([
+                'invoice_id' => $invoice->id,
+                'payment_method_id' => $paymentData['payment_method_id'],
+                'amount' => $paymentData['amount'],
+                'transaction_id' => $paymentData['transaction_id'] ?? 'TXN-' . Str::upper(Str::random(12)),
+                'reference_number' => $paymentData['reference_number'] ?? null,
+                'status' => 'completed', // Assume completed for now (or pending for async gateways)
+                'processed_at' => now(),
+                'notes' => $paymentData['notes'] ?? null,
+            ]);
+            $invoice->payments()->save($payment);
+
+            // Log Audit
+            if (class_exists(PaymentAuditLog::class)) {
+                PaymentAuditLog::log(
+                    $payment,
+                    'payment_received',
+                    null,
+                    'completed',
+                    $processedByUserId,
+                    ['note' => 'Payment processed via service']
+                );
             }
 
-            // Verify payment is still pending (idempotency check)
-            if (!$payment->isPending()) {
-                Log::info('Webhook received for already processed payment', [
-                    'payment_id' => $payment->id,
-                    'status' => $payment->status,
-                ]);
-                return $payment;
+            // 4. Reconcile Invoice Status
+            $this->invoiceService->reconcileStatus($invoice);
+            $invoice->refresh();
+
+            // 5. Update Order Status if fully paid
+            if ($invoice->amount_due <= 0) {
+                 // Check if order should be completed? 
+                 // Usually for Dine-in, paying closes the order?
+                 // Or just marks it as paid. 
+                 // OrderController logic had "Close order & free table only when fully paid"
+                 
+                 // Let's just handle payment status here. Order completion might be strict separation.
+                 // But for convenience, let's replicate logic or make it configurable?
+                 // The Controller logic specifically completed the order.
+                 
+                $updates = ['payment_status' => 'paid'];
+                
+                // If it was unpaid, now paid.
+                if ($order->status === 'completed' && $order->payment_status !== 'paid') {
+                    // Already completed service, just paying late?
+                } else {
+                     // For now, let's NOT auto-complete the order status here unless requested.
+                     // The PaymentService should focus on Money. Order State (Preparing/Served) is different.
+                     // BUT, for "Pay & Close" flow, it's useful.
+                     // Let's leave order status update to the Caller or a separate listener.
+                     // EXCEPT existing controller logic did:
+                     // if ($invoice->amount_due <= 0) { 
+                     //    $order->update(['status' => 'completed', ...]); 
+                     //    if table... table->available
+                     // }
+                     // We should probably invoke a "CloseOrder" action if paid?
+                }
+                
+                // Loyalty Points
+                if ($order->customer_id) {
+                    $this->loyaltyService->awardPoints($order);
+                }
+
+                // Notify
+                try {
+                    $this->notificationService->sendOrderNotification($order, 'paid');
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to send order paid notification: ' . $e->getMessage());
+                }
             }
-
-            $oldStatus = $payment->status;
-            $success = $webhookData['status'] === 'success' || $webhookData['status'] === 'completed';
-
-            if ($success) {
-                $this->handleSuccessfulPayment($payment, $webhookData);
-            } else {
-                $this->handleFailedPayment($payment, $webhookData);
-            }
-
-            // Log webhook processing
-            PaymentAuditLog::logWebhook(
-                $payment,
-                'webhook_processed',
-                $oldStatus,
-                $payment->status,
-                $webhookData
-            );
-
-            return $payment->fresh();
+            
+            return $payment;
         });
     }
 
     /**
-     * Cancel a pending payment.
+     * Mark an order as fully paid manually (Admin override).
      */
-    public function cancelPayment(Payment $payment, string $reason = 'User cancelled'): bool
+    public function markAsPaid(Order $order, $processedByUserId, string $note = 'Manual mark as paid'): void
     {
-        if (!$payment->isPending()) {
-            return false;
-        }
+        DB::transaction(function () use ($order, $processedByUserId, $note) {
+            $order->loadMissing('invoice');
+            $invoice = $this->invoiceService->createOrUpdateForOrder($order);
+            
+            $existingPaid = $invoice->payments()->where('status', 'completed')->sum('amount');
+            
+            if ($existingPaid < $order->total_amount) {
+                $diff = $order->total_amount - $existingPaid;
+                
+                // Resolve Cash method
+                $paymentMethod = PaymentMethod::where('code', 'cash')->where('is_active', true)->first() 
+                    ?? PaymentMethod::where('is_active', true)->first();
+                    
+                 if (!$paymentMethod) {
+                     // Should not happen in production usually
+                     throw new \RuntimeException('No active payment method available.');
+                 }
 
-        $payment->markAsCancelled();
-        
-        PaymentAuditLog::log($payment, 'cancelled', $payment->status, Payment::STATUS_CANCELLED, null, [
-            'reason' => $reason,
-        ]);
-
-        return true;
+                $payment = new Payment([
+                    'invoice_id' => $invoice->id,
+                    'payment_method_id' => $paymentMethod->id,
+                    'amount' => $diff,
+                    'transaction_id' => 'MANUAL-ADMIN-' . Str::upper(Str::random(8)),
+                    'status' => 'completed',
+                    'processed_at' => now(),
+                    'notes' => $note,
+                ]);
+                $invoice->payments()->save($payment);
+                
+                if (class_exists(PaymentAuditLog::class)) {
+                     PaymentAuditLog::log($payment, 'admin_manual_pay', null, 'completed', $processedByUserId, ['note' => $note]);
+                }
+            }
+            
+            $this->invoiceService->reconcileStatus($invoice);
+            
+            // Loyalty and Notifications
+            if ($order->customer_id) {
+                $this->loyaltyService->awardPoints($order);
+            }
+            try {
+                $this->notificationService->sendOrderNotification($order, 'paid');
+            } catch (\Exception $e) {
+                // ignore
+            }
+        });
     }
 
     /**
-     * Retry a failed payment.
+     * Mark order as unpaid (void payments).
      */
-    public function retryPayment(Payment $payment): array
+    public function markAsUnpaid(Order $order, $processedByUserId, string $note = 'Manual mark as unpaid'): void
     {
-        if (!$payment->canRetry()) {
-            throw new \Exception('Payment cannot be retried');
-        }
-
-        $order = $payment->invoice->order;
-        
-        // Cancel old payment
-        $payment->markAsCancelled();
-
-        // Create new payment
-        return $this->initiatePayment($order, $payment->paymentMethod->code ?? 'qr');
-    }
-
-    /**
-     * Expire old pending payments.
-     */
-    public function expireOldPayments(): int
-    {
-        $expiredPayments = Payment::expired()->get();
-
-        foreach ($expiredPayments as $payment) {
-            $payment->update([
-                'status' => Payment::STATUS_CANCELLED,
-                'failure_reason' => 'Payment expired',
-            ]);
-
-            PaymentAuditLog::log($payment, 'expired', Payment::STATUS_PENDING, Payment::STATUS_CANCELLED);
-        }
-
-        return $expiredPayments->count();
-    }
-
-    // ==================== PRIVATE METHODS ====================
-
-    private function createInvoiceForOrder(Order $order): Invoice
-    {
-        return Invoice::create([
-            'order_id' => $order->id,
-            'location_id' => $order->location_id,
-            'invoice_number' => 'INV-' . now()->format('ymd') . '-' . str_pad($order->id, 6, '0', STR_PAD_LEFT),
-            'subtotal' => $order->subtotal,
-            'tax_amount' => $order->tax_amount,
-            'discount_amount' => $order->discount_amount,
-            'service_charge' => $order->service_charge ?? 0,
-            'total_amount' => $order->total_amount,
-            'amount_paid' => 0,
-            'amount_due' => $order->total_amount,
-            'currency' => $order->currency ?? 'USD',
-            'status' => 'issued',
-            'issued_at' => now(),
-        ]);
-    }
-
-    private function formatPaymentResponse(Payment $payment, Order $order): array
-    {
-        // Wrapper to call the strategy's formatter, ensuring consistent interface usage
-        $strategy = $this->getStrategy($payment->paymentMethod->code ?? 'qr');
-        return $strategy->formatResponse($payment, $order);
-    }
-
-    private function findPaymentByWebhook(array $webhookData): ?Payment
-    {
-        // Try different reference fields
-        if (!empty($webhookData['qr_reference'])) {
-            return Payment::byQrReference($webhookData['qr_reference'])->first();
-        }
-        
-        if (!empty($webhookData['transaction_id'])) {
-            return Payment::where('transaction_id', $webhookData['transaction_id'])->first();
-        }
-        
-        if (!empty($webhookData['reference_number'])) {
-            return Payment::where('reference_number', $webhookData['reference_number'])->first();
-        }
-
-        return null;
-    }
-
-    /**
-     * SECURITY FIX: Find payment by webhook data WITH database lock.
-     * 
-     * This prevents race conditions when multiple webhooks arrive simultaneously.
-     * The lock ensures only ONE thread can process the payment at a time.
-     */
-    protected function findPaymentByWebhookWithLock(array $webhookData): ?Payment
-    {
-        $payment = null;
-
-        // Try to find by transaction_id WITH LOCK
-        if (isset($webhookData['transaction_id'])) {
-            $payment = Payment::where('transaction_id', $webhookData['transaction_id'])
-                ->lockForUpdate()
-                ->first();
-        }
-
-        // Try QR reference WITH LOCK
-        if (!$payment && isset($webhookData['reference'])) {
-            $payment = Payment::where('qr_reference', $webhookData['reference'])
-                ->lockForUpdate()
-                ->first();
-        }
-
-        // Try payment_id WITH LOCK
-        if (!$payment && isset($webhookData['payment_id'])) {
-            $payment = Payment::where('id', $webhookData['payment_id'])
-                ->lockForUpdate()
-                ->first();
-        }
-
-        return $payment;
-    }
-
-    private function handleSuccessfulPayment(Payment $payment, array $webhookData): void
-    {
-        $payment->markAsCompleted($webhookData['gateway_reference'] ?? null);
-        
-        // Update invoice
-        $invoice = $payment->invoice;
-        $invoice->loadMissing('payments', 'order');
-
-        // If this invoice's order is not yet linked to a customer but we have an
-        // authenticated customer, attach it so it appears in /customer/orders.
-        if ($invoice->order && !$invoice->order->customer_id && auth()->check() && auth()->user()->customer) {
-            $order = $invoice->order;
-            $order->customer_id = auth()->user()->customer->id;
-            $order->save();
-        }
-
-        $this->invoiceService->reconcileStatus($invoice);
-
-        // Award loyalty points
-        if ($invoice->order) {
-            $this->loyaltyService->awardPoints($invoice->order);
-        }
-    }
-
-    private function handleFailedPayment(Payment $payment, array $webhookData): void
-    {
-        $reason = $webhookData['failure_reason'] ?? $webhookData['message'] ?? 'Payment failed';
-        $payment->markAsFailed($reason);
+        DB::transaction(function () use ($order, $processedByUserId, $note) {
+             $order->update([
+                 'payment_status' => 'unpaid',
+                 'payment_collected_by' => null,
+                 'payment_collected_at' => null,
+             ]);
+             
+             $invoice = $order->invoice;
+             if ($invoice) {
+                 foreach ($invoice->payments as $payment) {
+                     if ($payment->status === 'completed') {
+                         $payment->update(['status' => 'cancelled']);
+                         
+                         if (class_exists(PaymentAuditLog::class)) {
+                             PaymentAuditLog::log($payment, 'admin_manual_unpay', 'completed', 'cancelled', $processedByUserId, ['note' => $note]);
+                         }
+                     }
+                 }
+                 $this->invoiceService->reconcileStatus($invoice);
+             }
+        });
     }
 }

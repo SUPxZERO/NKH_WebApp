@@ -8,6 +8,7 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\TelegramUser;
+use App\Services\OrderCalculationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,13 @@ use Illuminate\Support\Facades\Log;
 
 class TelegramCheckoutController extends Controller
 {
+    protected $calculationService;
+
+    public function __construct(OrderCalculationService $calculationService)
+    {
+        $this->calculationService = $calculationService;
+    }
+
     /**
      * Validate cart before checkout
      */
@@ -35,6 +43,7 @@ class TelegramCheckoutController extends Controller
         $items = $cartData['items'];
         $validItems = [];
         $invalidItems = [];
+        $calculationItems = []; // Format for service
 
         foreach ($items as $item) {
             $menuItem = MenuItem::with('translations')->find($item['menu_item_id']);
@@ -45,6 +54,11 @@ class TelegramCheckoutController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $menuItem->price,
                     'total_price' => $menuItem->price * $item['quantity'],
+                ];
+                
+                $calculationItems[] = [
+                    'menu_item_id' => $menuItem->id,
+                    'quantity' => $item['quantity'],
                 ];
             } else {
                 $invalidItems[] = $item['name'] ?? 'Unknown item';
@@ -59,22 +73,44 @@ class TelegramCheckoutController extends Controller
             ], 400);
         }
 
-        $subtotal = collect($validItems)->sum('total_price');
-        $taxAmount = $subtotal * 0.1; // 10% tax
-        $totalAmount = $subtotal + $taxAmount;
-
-        return response()->json([
-            'success' => true,
-            'can_checkout' => true,
-            'data' => [
-                'items' => $validItems,
-                'invalid_items' => $invalidItems,
-                'subtotal' => round($subtotal, 2),
-                'tax_amount' => round($taxAmount, 2),
-                'total_amount' => round($totalAmount, 2),
-                'item_count' => count($validItems),
-            ],
-        ]);
+        // Use service to calculate totals
+        // Note: For validation, we might not have location_id or order_type easily if not passed.
+        // Assuming location_id from user context or default 1 for estimate?
+        // Actually the cart usually has location_id stored or selected.
+        // But here we might just want raw subtotal/tax estimate.
+        // Let's rely on basic calc if location unknown, or try to get it.
+        $locationId = $user->conversation_data['location_id'] ?? 1; // Fallback
+        
+        try {
+            $totals = $this->calculationService->calculate(
+                $calculationItems, 
+                $locationId,
+                null, // No code
+                null, // No customer
+                null, // No address
+                'pickup' // Default to pickup for validation estimate (no delivery fee)
+            );
+            
+            return response()->json([
+                'success' => true,
+                'can_checkout' => true,
+                'data' => [
+                    'items' => $validItems,
+                    'invalid_items' => $invalidItems,
+                    'subtotal' => round($totals['subtotal'], 2),
+                    'tax_amount' => round($totals['tax_amount'], 2),
+                    'total_amount' => round($totals['total_amount'], 2),
+                    'item_count' => count($validItems),
+                    'currency' => 'USD',
+                ],
+            ]);
+        } catch (\Exception $e) {
+             return response()->json([
+                'success' => false,
+                'error' => 'Calculation error: ' . $e->getMessage(),
+                'can_checkout' => false,
+            ], 400);
+        }
     }
 
     /**
@@ -206,31 +242,33 @@ class TelegramCheckoutController extends Controller
 
         try {
             $order = DB::transaction(function () use ($validated, $user, $cartData) {
-                // Calculate totals
-                $subtotal = 0;
-                $orderItems = [];
-
+                
+                // Prepare items for calculation
+                $calculationItems = [];
                 foreach ($cartData['items'] as $item) {
-                    $menuItem = MenuItem::with('translations')->find($item['menu_item_id']);
-                    if (!$menuItem || !$menuItem->isAvailable()) {
-                        throw new \Exception("Item {$item['name']} is no longer available");
-                    }
-
-                    $itemTotal = $menuItem->price * $item['quantity'];
-                    $subtotal += $itemTotal;
-
-                    $orderItems[] = [
-                        'menu_item_id' => $menuItem->id,
+                     $calculationItems[] = [
+                        'menu_item_id' => $item['menu_item_id'],
                         'quantity' => $item['quantity'],
-                        'unit_price' => $menuItem->price,
-                        'total_price' => $itemTotal,
                         'special_instructions' => $item['special_instructions'] ?? null,
                     ];
                 }
 
-                $taxAmount = $subtotal * 0.1;
-                $deliveryFee = $validated['order_type'] === 'delivery' ? 2.50 : 0;
-                $totalAmount = $subtotal + $taxAmount + $deliveryFee;
+                // Calculate totals via service
+                $totals = $this->calculationService->calculate(
+                    $calculationItems,
+                    $validated['location_id'],
+                    null, // No promo
+                    null, // No customer object (unless linked)
+                    $validated['delivery_address'] ?? null, // Pass address string if available or null (service handles null but we might want string support? Service expects object or null. We pass null for now and let simple logic handle it, or we rely on the fact that service uses settings)
+                    $validated['order_type']
+                );
+                
+                // Extract calculation results
+                $subtotal = $totals['subtotal'];
+                $taxAmount = $totals['tax_amount'];
+                $deliveryFee = $totals['delivery_fee'];
+                $totalAmount = $totals['total_amount'];
+                $orderItemsData = $totals['items_data'];
 
                 // Generate order number
                 $orderNumber = 'TG' . date('ymd') . strtoupper(substr(uniqid(), -6));
@@ -256,7 +294,7 @@ class TelegramCheckoutController extends Controller
                 ]);
 
                 // Create order items
-                foreach ($orderItems as $item) {
+                foreach ($orderItemsData as $item) {
                     $order->items()->create($item);
                 }
 

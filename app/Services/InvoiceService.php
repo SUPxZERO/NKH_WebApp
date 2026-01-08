@@ -56,4 +56,59 @@ class InvoiceService
             ])->save();
         }
     }
+    /**
+     * Create or update an invoice for a given order.
+     */
+    public function createOrUpdateForOrder(\App\Models\Order $order): Invoice
+    {
+        $invoice = $order->invoice;
+
+        if (!$invoice) {
+            $invoice = new Invoice([
+                'order_id' => $order->id,
+                'location_id' => $order->location_id,
+                'invoice_number' => $this->generateInvoiceNumber($order->location_id),
+                'subtotal' => $order->subtotal,
+                'tax_amount' => $order->tax_amount,
+                'discount_amount' => $order->discount_amount,
+                'service_charge' => $order->service_charge,
+                'total_amount' => $order->total_amount,
+                'amount_paid' => 0,
+                'amount_due' => $order->total_amount, // Initially all due
+                'currency' => $order->currency,
+                'issued_at' => now(),
+                'status' => 'issued', // Default status
+            ]);
+            $order->invoice()->save($invoice);
+        } else {
+            // Update existing invoice amounts if order changed (assuming we want to sync)
+            // But be careful not to reset paid amounts if we just want to update totals
+            // For now, let's just ensure it exists or update totals if it's draft/issued
+             if ($invoice->status !== 'paid' && $invoice->status !== 'void') {
+                 $invoice->update([
+                    'subtotal' => $order->subtotal,
+                    'tax_amount' => $order->tax_amount,
+                    'discount_amount' => $order->discount_amount,
+                    'service_charge' => $order->service_charge,
+                    'total_amount' => $order->total_amount,
+                    'amount_due' => max(0, $order->total_amount - $invoice->amount_paid),
+                 ]);
+             }
+        }
+        
+        return $invoice;
+    }
+
+    /**
+     * Generate a unique invoice number.
+     */
+    public function generateInvoiceNumber(int $locationId, string $prefix = 'INV'): string
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(5)));
+            $exists = Invoice::where('location_id', $locationId)->where('invoice_number', $number)->exists();
+            if (!$exists) return $number;
+        }
+        return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
+    }
 }

@@ -116,7 +116,7 @@ class NotificationService
         string $event,
         ?string $customMessage = null
     ): ?UserNotification {
-        // Eager load customer with telegramUser relationship for Guest support
+        // Eager load customer for Guest support
         $order->loadMissing('customer.telegramUser');
 
         $user = $order->user ?? $order->customer?->user;
@@ -127,35 +127,10 @@ class NotificationService
             return null;
         }
 
-        // Monitor Telegram Notification Attempt
-        try {
-            // Check for TelegramUser via User->Customer OR directly via Order->Customer
-            $customer = $order->customer ?? $user?->customer;
+        // 1. Attempt Telegram Notification (if applicable)
+        $this->sendTelegramOrderNotification($order, $event);
 
-            if ($customer) {
-                $telegramUser = $customer->telegramUser;
-                if ($telegramUser) {
-                    Log::info("🤖 Found TelegramUser for Order #{$order->id}: {$telegramUser->id} (TelegramID: {$telegramUser->telegram_id})");
-                    
-                    if (!$telegramUser->notifications_enabled) {
-                        Log::warning("⚠️ Telegram notifications disabled for user {$telegramUser->id}");
-                    } else {
-                        // Use TelegramOrderNotificationService for tracking and retry support
-                        $notificationService = app(\App\Services\Telegram\TelegramOrderNotificationService::class);
-                        $notification = $notificationService->sendStatusNotification($order, $event, $telegramUser);
-                        
-                        Log::info("📤 Telegram notification tracked: " . ($notification ? "ID #{$notification->id} (sent: " . ($notification->sent ? 'Yes' : 'No') . ")" : 'Failed to create'));
-                    }
-                } else {
-                    Log::warning("⚠️ No TelegramUser linked for Customer #{$customer->id}");
-                }
-            }
-        } catch (\Exception $e) {
-            Log::error("❌ Failed to send Telegram notification: " . $e->getMessage());
-            Log::error($e->getTraceAsString());
-        }
-
-        // Only proceed with In-App/Broadcast if we have a registered User
+        // 2. Only proceed with In-App/Broadcast if we have a registered User
         if (!$user) {
             return null; // Guest user only gets Telegram/Email (if implemented)
         }
@@ -172,6 +147,58 @@ class NotificationService
         );
 
         return $notifications->first();
+    }
+
+    /**
+     * Helper to handle Telegram notifications for an order.
+     */
+    private function sendTelegramOrderNotification(Order $order, string $event): void
+    {
+        try {
+            // Check for TelegramUser via User->Customer OR directly via Order->Customer
+            // Priority: Order Customer relationship is source of truth for "who made this order"
+            $customer = $order->customer; 
+            if (!$customer && $order->user) {
+                 $customer = $order->user->customer;
+            }
+
+            if ($customer) {
+                // Ensure relationship is loaded
+                if (!$customer->relationLoaded('telegramUser')) {
+                    $customer->load('telegramUser');
+                }
+                
+                $telegramUser = $customer->telegramUser;
+                
+                // Also check for direct TelegramUser on order (Guest checkout feature from TelegramCheckoutController)
+                if (!$telegramUser && $order->telegram_user_id) {
+                     // If explicit telegram user ID is on the order, we can use that (though usually linked to customer)
+                     // But let's assume OrderCalculationService/Checkout linked them correctly.
+                     // Accessing the model if needed, but let's rely on standard relationships unless we load it manually.
+                     // Actually, TelegramOrderNotificationService::getTelegramUserForOrder handles this logic perfectly!
+                     // So we just need to pass the order to the service.
+                }
+
+                if ($telegramUser || $order->telegram_user_id) {
+                     // Determine if notifications are enabled if we have the user object
+                     if ($telegramUser && !$telegramUser->notifications_enabled) {
+                        Log::warning("⚠️ Telegram notifications disabled for user {$telegramUser->id}");
+                        return;
+                    }
+                    
+                    // Use TelegramOrderNotificationService for tracking and retry support
+                    $notificationService = app(\App\Services\Telegram\TelegramOrderNotificationService::class);
+                    $notification = $notificationService->sendStatusNotification($order, $event);
+                    
+                    Log::info("📤 Telegram notification tracked: " . ($notification ? "ID #{$notification->id} (sent: " . ($notification->sent ? 'Yes' : 'No') . ")" : 'Failed to create'));
+                } else {
+                    // Silent fail/log if no telegram user is found - perfectly normal for non-telegram users
+                    // Log::debug("No TelegramUser linked for Order #{$order->id}");
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("❌ Failed to send Telegram notification: " . $e->getMessage());
+        }
     }
 
     /**

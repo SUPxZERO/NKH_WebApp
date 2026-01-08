@@ -19,6 +19,7 @@ use App\Models\Payment;
 use App\Services\InvoiceService;
 use App\Services\LoyaltyService;
 use App\Services\NotificationService;
+use App\Services\OrderCalculationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,10 +28,14 @@ use Illuminate\Support\Str;
 class OrderController extends Controller
 {
     protected $loyaltyService;
+    protected $calculationService;
 
-    public function __construct(LoyaltyService $loyaltyService)
-    {
+    public function __construct(
+        LoyaltyService $loyaltyService,
+        OrderCalculationService $calculationService
+    ) {
         $this->loyaltyService = $loyaltyService;
+        $this->calculationService = $calculationService;
     }
     // POST /api/orders (role:admin,manager,waiter)
     public function store(StoreOrderRequest $request): OrderResource|JsonResponse
@@ -174,11 +179,11 @@ class OrderController extends Controller
     }
 
     // POST /api/orders/{order}/invoice (role:admin,manager,waiter)
-    public function generateInvoice(GenerateInvoiceRequest $request, Order $order, InvoiceService $invoiceService): OrderResource
+    public function generateInvoice(GenerateInvoiceRequest $request, Order $order, \App\Services\PaymentService $paymentService): OrderResource
     {
         $data = $request->validated();
 
-        DB::transaction(function () use ($order, $data, $request, $invoiceService) {
+        DB::transaction(function () use ($order, $data, $request, $paymentService) {
             if ($order->status !== 'received') {
                 abort(409, 'Order is not pending.');
             }
@@ -186,49 +191,16 @@ class OrderController extends Controller
             $order->loadMissing('items');
             $this->recalculateTotals($order);
 
-            // Create invoice with unique invoice number
-            $invoiceNumber = $this->generateInvoiceNumber($order->location_id, 'INV');
-            $invoice = $order->invoice;
-            if (!$invoice) {
-                $invoice = new Invoice([
-                    'order_id' => $order->id,
-                    'location_id' => $order->location_id,
-                    'invoice_number' => $invoiceNumber,
-                    'subtotal' => $order->subtotal,
-                    'tax_amount' => $order->tax_amount,
-                    'discount_amount' => $order->discount_amount,
-                    'service_charge' => $order->service_charge,
-                    'total_amount' => $order->total_amount,
-                    'amount_paid' => 0,
-                    'amount_due' => $order->total_amount,
-                    'currency' => $order->currency,
-                    'issued_at' => now(),
-                ]);
-                $order->invoice()->save($invoice);
-            }
-
-            // Record payment
-            $payment = new Payment([
-                'invoice_id' => $invoice->id,
+            // Process Payment using Service
+            $paymentService->processOrderPayment($order, [
                 'payment_method_id' => $data['payment_method_id'],
                 'amount' => $data['amount_paid'],
-                'transaction_id' => 'TXN-'.Str::upper(Str::random(12)),
-                'reference_number' => 'INV-MANUAL-' . Str::upper(Str::random(8)),
-                'status' => 'completed',
-                'processed_at' => now(),
-                'notes' => null,
-            ]);
-            $invoice->payments()->save($payment);
+                'notes' => null, // Optional
+            ], $request->user()->id);
 
-            // Recalculate invoice + order financial status from completed payments
-            $invoice->refresh();
-            $invoice->loadMissing('payments', 'order');
-            $invoiceService->reconcileStatus($invoice);
-
-            $invoice->refresh();
-
-            // Close order & free table only when fully paid
-            if ($invoice->amount_due <= 0) {
+            // Close order & free table only when fully paid (Controller specific logic)
+            // Re-fetch invoice status
+            if ($order->invoice->amount_due <= 0) {
                 $order->update([
                     'status' => 'completed',
                     'completed_at' => now(),
@@ -248,16 +220,6 @@ class OrderController extends Controller
         for ($i = 0; $i < 5; $i++) {
             $number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), Str::upper(Str::random(5)));
             $exists = Order::where('location_id', $locationId)->where('order_number', $number)->exists();
-            if (!$exists) return $number;
-        }
-        return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
-    }
-
-    private function generateInvoiceNumber(int $locationId, string $prefix = 'INV'): string
-    {
-        for ($i = 0; $i < 5; $i++) {
-            $number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), Str::upper(Str::random(5)));
-            $exists = Invoice::where('location_id', $locationId)->where('invoice_number', $number)->exists();
             if (!$exists) return $number;
         }
         return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
@@ -487,25 +449,8 @@ class OrderController extends Controller
 
     private function recalculateTotals(Order $order): void
     {
-        $subtotal = $order->items->sum(function ($i) {
-            return (float) $i->total_price;
-        });
-
-        // TODO: read tax rate from settings; default 0
-        $taxRate = 0.0; // e.g., 0.1 for 10%
-        $tax = round($subtotal * $taxRate, 2);
-
-        $service = 0.0;
-        $discount = 0.0;
-        $total = $subtotal + $tax + $service - $discount;
-
-        $order->update([
-            'subtotal' => $subtotal,
-            'tax_amount' => $tax,
-            'discount_amount' => $discount,
-            'service_charge' => $service,
-            'total_amount' => $total,
-        ]);
+        // Delegate to calculation service
+        $this->calculationService->recalculateOrder($order);
     }
 
     // PUT /api/admin/orders/{order}/status
@@ -585,7 +530,7 @@ class OrderController extends Controller
     }
 
     // PATCH /api/admin/orders/{order}/payment-status
-    public function updatePaymentStatus(Request $request, Order $order): OrderResource
+    public function updatePaymentStatus(Request $request, Order $order, \App\Services\PaymentService $paymentService): OrderResource
     {
         $request->validate([
             'payment_status' => 'required|in:paid,unpaid',
@@ -597,134 +542,15 @@ class OrderController extends Controller
             if ($order->isPaid()) {
                 abort(409, 'Order is already paid.');
             }
+            
+            $paymentService->markAsPaid($order, $request->user()->id);
 
-            DB::transaction(function () use ($order, $request) {
-                // 1. Mark order as paid
-                $order->collectPayment($request->user()->id, 'Admin manually marked as paid');
-
-                // 2. Manage Invoice
-                $invoice = $order->invoice;
-                if (!$invoice) {
-                    $invoice = new Invoice([
-                        'order_id' => $order->id,
-                        'location_id' => $order->location_id,
-                        'invoice_number' => $this->generateInvoiceNumber($order->location_id, 'INV'),
-                        'subtotal' => $order->subtotal,
-                        'tax_amount' => $order->tax_amount,
-                        'discount_amount' => $order->discount_amount,
-                        'service_charge' => $order->service_charge,
-                        'total_amount' => $order->total_amount,
-                        'amount_paid' => $order->total_amount,
-                        'amount_due' => 0,
-                        'currency' => $order->currency,
-                        'issued_at' => now(),
-                        'status' => 'paid',
-                    ]);
-                    $order->invoice()->save($invoice);
-                } else {
-                    $invoice->update([
-                        'amount_paid' => $order->total_amount,
-                        'amount_due' => 0,
-                        'status' => 'paid',
-                    ]);
-                }
-
-                // 3. Create a placeholder payment if none exists to justify the "paid" status
-                // We assume "Cash" as the default method for manual admin override if not specified
-                // But we check if successful payments already sum up to total
-                $existingPaid = $invoice->payments()->where('status', 'completed')->sum('amount');
-
-                if ($existingPaid < $order->total_amount) {
-                    $diff = $order->total_amount - $existingPaid;
-
-                    // Resolve a concrete payment method for manual admin payments
-                    $paymentMethod = \App\Models\PaymentMethod::where('code', 'cash')
-                        ->where('is_active', true)
-                        ->first();
-
-                    if (!$paymentMethod) {
-                        $paymentMethod = \App\Models\PaymentMethod::where('is_active', true)->first();
-                    }
-
-                    if (!$paymentMethod) {
-                        throw new \RuntimeException('No active payment method available for manual admin payment.');
-                    }
-
-                    $payment = new Payment([
-                        'invoice_id' => $invoice->id,
-                        'payment_method_id' => $paymentMethod->id,
-                        'amount' => $diff,
-                        'transaction_id' => 'MANUAL-ADMIN-' . Str::upper(Str::random(8)),
-                        'reference_number' => 'MANUAL-ADMIN-' . Str::upper(Str::random(8)),
-                        'status' => 'completed',
-                        'processed_at' => now(),
-                        'notes' => 'Admin manually marked as paid',
-                    ]);
-                    $invoice->payments()->save($payment);
-
-                    // Log the manual payment
-                    \App\Models\PaymentAuditLog::log(
-                        $payment,
-                        'admin_manual_pay',
-                        null,
-                        'completed',
-                        $request->user()->id,
-                        ['note' => 'Admin marked as paid']
-                    );
-                }
-
-                // Award loyalty points for this order (if customer exists)
-                if ($order->customer_id) {
-                    $this->loyaltyService->awardPoints($order);
-                }
-
-                // Notify Customer of Payment
-                try {
-                    app(NotificationService::class)->sendOrderNotification($order, 'paid');
-                } catch (\Exception $e) {
-                    \Log::warning('Failed to send order paid notification: ' . $e->getMessage());
-                }
-            });
         } elseif ($newStatus === 'unpaid') {
             if ($order->isUnpaid()) {
                 abort(409, 'Order is already unpaid.');
             }
-
-            DB::transaction(function () use ($order, $request) {
-                 // 1. Revert order status
-                 $order->update([
-                     'payment_status' => 'unpaid',
-                     'payment_collected_by' => null,
-                     'payment_collected_at' => null,
-                     'payment_collection_notes' => null,
-                 ]);
-
-                 // 2. Revert Invoice
-                 $invoice = $order->invoice;
-                 if ($invoice) {
-                     $invoice->update([
-                         'amount_paid' => 0,
-                         'amount_due' => $invoice->total_amount,
-                         'status' => 'issued',
-                     ]);
-
-                     // 3. Void/Cancel existing completed payments
-                     foreach ($invoice->payments as $payment) {
-                         if ($payment->status === 'completed') {
-                             $payment->update(['status' => 'cancelled']);
-                             
-                             \App\Models\PaymentAuditLog::log(
-                                $payment,
-                                'admin_manual_unpay',
-                                'completed',
-                                'cancelled',
-                                $request->user()->id,
-                                ['note' => 'Admin marked as unpaid']
-                            );
-                         }
-                     }
-                 }
-            });
+            
+            $paymentService->markAsUnpaid($order, $request->user()->id);
         }
 
         return new OrderResource($order->fresh(['items.menuItem', 'invoice', 'customer', 'table']));
