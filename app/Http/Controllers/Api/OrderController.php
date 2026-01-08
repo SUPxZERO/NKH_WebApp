@@ -80,7 +80,20 @@ class OrderController extends Controller
     // GET /api/orders/{order} (role:admin,manager,waiter)
     public function show(Order $order): OrderResource
     {
-        return new OrderResource($order->load(['items.menuItem', 'invoice']));
+        // PHASE 2: Comprehensive eager loading for order details
+        return new OrderResource($order->load([
+            'items.menuItem.category',
+            'items.menuItem.ingredientUsage.ingredient',
+            'invoice.payments',
+            'customer.user',
+            'customer.telegramUser',
+            'customer.addresses',
+            'table.floor',
+            'location',
+            'employee.user',
+            'timeSlot',
+            'promotion',
+        ]));
     }
 
     // POST /api/orders/{order}/items (role:admin,manager,waiter)
@@ -253,7 +266,17 @@ class OrderController extends Controller
     // GET /api/admin/orders (Admin oversight)
     public function index(Request $request)
     {
-        $query = Order::with(['items.menuItem', 'table', 'customer.user', 'employee.user', 'timeSlot', 'location']);
+        // PHASE 2: Enhanced eager loading to prevent N+1 queries
+        $query = Order::with([
+            'items.menuItem.category',  // Load menu items with categories
+            'table.floor',               // Load table with floor info
+            'customer.user',             // Customer with user account
+            'customer.telegramUser',     // Support Telegram guests
+            'employee.user',             // Employee details
+            'timeSlot',                  // Scheduled time slot
+            'location',                  // Location info
+            'promotion',                 // Applied promotion
+        ]);
         
         // ✅ FIX: Show ALL orders by default (removed hardcoded exclusion of pending approval orders)
         // Admin can filter by approval_status if needed via query parameter
