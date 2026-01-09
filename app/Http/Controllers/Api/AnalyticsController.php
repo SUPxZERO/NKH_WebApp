@@ -115,10 +115,13 @@ class AnalyticsController extends Controller
         $range = $request->get('range', '7days');
         $dates = $this->getDateRange($range);
 
+        $driver = DB::connection()->getDriverName();
+        $hourSql = $driver === 'sqlite' ? "CAST(strftime('%H', created_at) AS INTEGER)" : "HOUR(created_at)";
+
         $peakHours = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
             ->where('status', '!=', 'cancelled')
             ->select([
-                DB::raw('HOUR(created_at) as hour'),
+                DB::raw("$hourSql as hour"),
                 DB::raw('COUNT(*) as orders'),
                 DB::raw('SUM(total_amount) as revenue')
             ])
@@ -732,17 +735,20 @@ class AnalyticsController extends Controller
 
     private function getGroupByFormat(string $range): string
     {
+        $driver = DB::connection()->getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
         switch ($range) {
             case 'today':
-                return "DATE_FORMAT(created_at, '%H:00')";
+                return $isSqlite ? "strftime('%H:00', created_at)" : "DATE_FORMAT(created_at, '%H:00')";
             case '7days':
             case '30days':
-                return "DATE(created_at)";
+                return $isSqlite ? "date(created_at)" : "DATE(created_at)";
             case '90days':
             case 'year':
-                return "DATE_FORMAT(created_at, '%Y-%m')";
+                return $isSqlite ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
             default:
-                return "DATE(created_at)";
+                return $isSqlite ? "date(created_at)" : "DATE(created_at)";
         }
     }
 }

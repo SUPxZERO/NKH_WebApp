@@ -181,8 +181,13 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,servic
     
     // Analytics
     Route::get('sales-analytics', fn() => Inertia::render('admin/SalesAnalytics'))->name('admin.sales-analytics');
-    Route::get('inventory-reports', fn() => Inertia::render('admin/InventoryReports'))->name('admin.inventory-reports');
+    
+    // Standardized Reports Routes
+    Route::get('reports/inventory', fn() => Inertia::render('admin/Reports/InventoryReport'))->name('admin.reports.inventory');
     Route::get('reports/sales', fn() => Inertia::render('admin/Reports/SalesReport'))->name('admin.reports.sales');
+    
+    // Legacy Redirects or Aliases (Keeping for backward compat if menu links exist)
+    Route::get('inventory-reports', fn() => redirect()->route('admin.reports.inventory'))->name('admin.inventory-reports');
     
     // System Settings
     Route::get('locations', fn() => Inertia::render('admin/Locations'))->name('admin.locations');

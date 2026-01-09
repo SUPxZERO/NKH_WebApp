@@ -25,7 +25,14 @@ try {
   if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id) {
     const telegramUserId = (window as any).Telegram.WebApp.initDataUnsafe.user.id;
     window.axios.defaults.headers.common['X-Telegram-User-Id'] = String(telegramUserId);
-    console.log('[Bootstrap] Telegram user ID set in headers:', telegramUserId);
+
+    // SPRINT P16: Add Init Data for authentication
+    const initData = (window as any).Telegram.WebApp.initData;
+    if (initData) {
+      window.axios.defaults.headers.common['X-Telegram-Init-Data'] = initData;
+    }
+
+    console.log('[Bootstrap] Telegram headers set:', { userId: telegramUserId, hasInitData: !!initData });
   }
 } catch (_) {
   // Telegram not available, ignore

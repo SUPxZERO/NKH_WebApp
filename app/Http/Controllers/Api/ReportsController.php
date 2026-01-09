@@ -221,11 +221,14 @@ class ReportsController extends Controller
             ->map(function ($item) use ($dates, $groupBy) {
                 // Get expenses for the same date
                 $dateStr = $item->date;
+                $driver = DB::connection()->getDriverName();
+                $isSqlite = $driver === 'sqlite';
+
                 // FIXED: Use whereRaw with parameter binding instead of DB::raw in where clause
                 $expenses = Expense::when(
-                    $groupBy === "DATE(created_at)",
+                    $groupBy === ($isSqlite ? "date(created_at)" : "DATE(created_at)"),
                     fn($q) => $q->whereDate('expense_date', $dateStr),
-                    fn($q) => $q->whereRaw("DATE_FORMAT(expense_date, '%Y-%m') = ?", [$dateStr])
+                    fn($q) => $q->whereRaw($isSqlite ? "strftime('%Y-%m', expense_date) = ?" : "DATE_FORMAT(expense_date, '%Y-%m') = ?", [$dateStr])
                 )->sum('amount');
 
                 $item->expenses = $expenses;
@@ -314,19 +317,125 @@ class ReportsController extends Controller
         return ['start' => $start, 'end' => $end];
     }
 
+    public function dailySalesReport(Request $request): JsonResponse
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $page = $request->input('page', 1);
+        $perPage = $request->input('per_page', 20);
+        $category = $request->input('category', 'all');
+        $paymentMethod = $request->input('payment_method', 'all');
+        
+        $driver = DB::connection()->getDriverName();
+        $isSqlite = $driver === 'sqlite';
+        $dateSql = $isSqlite ? "date(created_at)" : "DATE(created_at)";
+
+        // Base query for orders
+        $query = Order::query()
+            ->where('status', 'completed') // Or paid? Usually completed orders are final.
+            ->when($startDate && $endDate, function($q) use ($startDate, $endDate) {
+                return $q->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->when(!$startDate, function($q) {
+                return $q->whereDate('created_at', '>=', Carbon::now()->subDays(30));
+            });
+
+        // Apply filters (more complex filters like category requiring joins would go here)
+        // For simplicity, category filter is applied at row level or subquery level if needed. 
+        // But Sales Report as requested aggregates by DATE. Filtering by category for a "Daily Summary" means "Sales of Category X per day".
+        
+        if ($category !== 'all') {
+            $query->whereHas('items.menuItem', function($q) use ($category) {
+                $q->where('category_id', $category);
+            });
+        }
+        
+        if ($paymentMethod !== 'all') {
+             // Assuming payment_method column exists or relationship to payments
+             // For now, check 'payment_method' column on orders if it exists, or 'payments' table.
+             // Based on typical schema:
+             $query->where('payment_method', $paymentMethod);
+        }
+
+        // We paginate DATES, not orders.
+        // So we need distinct dates first.
+        
+        // However, standard pagination expects rows.
+        // Group by Date.
+        $dailyStats = $query->select([
+                DB::raw("$dateSql as date"),
+                DB::raw('COUNT(*) as order_count'),
+                DB::raw('SUM(total_amount) as total_revenue'),
+                DB::raw('AVG(total_amount) as avg_order_value')
+            ])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->paginate($perPage);
+
+        // Enhance data with Top Category and Payment Methods (Lazy Load / Subqueries)
+        // Since we are paginating (e.g. 20 rows), we can run small subqueries for each row without major performance hit.
+        
+        $enhancedData = collect($dailyStats->items())->map(function($day) use ($isSqlite) {
+            $date = $day->date;
+            
+            // Top Category for this day
+            $topCategory = DB::table('order_items')
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+                ->join('categories', 'menu_items.category_id', '=', 'categories.id')
+                ->whereRaw($isSqlite ? "date(orders.created_at) = ?" : "DATE(orders.created_at) = ?", [$date])
+                ->where('orders.status', 'completed')
+                ->select('categories.name', DB::raw('COUNT(*) as count'))
+                ->groupBy('categories.name')
+                ->orderByDesc('count')
+                ->first();
+
+            // Payment Methods for this day
+            $paymentMethods = Order::whereDate('created_at', $date)
+                ->where('status', 'completed')
+                ->select('payment_method', DB::raw('COUNT(*) as count'))
+                ->groupBy('payment_method')
+                ->pluck('count', 'payment_method')
+                ->toArray();
+
+            return [
+                'date' => $day->date,
+                'order_count' => $day->order_count,
+                'total_revenue' => $day->total_revenue,
+                'avg_order_value' => $day->avg_order_value,
+                'top_category' => $topCategory?->name ?? 'N/A',
+                'payment_methods' => $paymentMethods
+            ];
+        });
+
+        // Reconstruct Paginator with enhanced items
+        $result = new \Illuminate\Pagination\LengthAwarePaginator(
+            $enhancedData,
+            $dailyStats->total(),
+            $dailyStats->perPage(),
+            $dailyStats->currentPage(),
+            ['path' => $request->url()]
+        );
+
+        return response()->json($result);
+    }
+
     private function getGroupByFormat(string $range): string
     {
+        $driver = DB::connection()->getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
         switch ($range) {
             case 'today':
-                return "DATE_FORMAT(created_at, '%H:00')";
+                return $isSqlite ? "strftime('%H:00', created_at)" : "DATE_FORMAT(created_at, '%H:00')";
             case '7days':
             case '30days':
-                return "DATE(created_at)";
+                return $isSqlite ? "date(created_at)" : "DATE(created_at)";
             case '90days':
             case 'year':
-                return "DATE_FORMAT(created_at, '%Y-%m')";
+                return $isSqlite ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
             default:
-                return "DATE(created_at)";
+                return $isSqlite ? "date(created_at)" : "DATE(created_at)";
         }
     }
 }

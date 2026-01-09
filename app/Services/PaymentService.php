@@ -30,8 +30,155 @@ class PaymentService
     }
 
     /**
-     * Process a payment for an order.
-     * Creates invoice if needed, records payment, reconciles, and updates order.
+     * Initiate a payment via a gateway or method.
+     */
+    public function initiatePayment(Order $order, string $methodCode): array
+    {
+        $invoice = $this->invoiceService->createOrUpdateForOrder($order);
+
+        // 1. Check if method exists
+        $method = PaymentMethod::where('code', $methodCode)->firstOrFail();
+
+        // 2. Logic depends on method
+        if (in_array($methodCode, ['qr', 'aba_pay', 'wing'])) {
+            // Create pending payment for QR
+            $payment = new Payment([
+                'invoice_id' => $invoice->id,
+                'payment_method_id' => $method->id,
+                'amount' => $invoice->amount_due,
+                'currency' => $order->currency,
+                'status' => Payment::STATUS_PENDING,
+                'uuid' => Str::uuid(),
+                'transaction_id' => 'INIT-' . Str::random(12),
+                'expires_at' => now()->addMinutes(15), 
+            ]);
+            
+            // Generate QR reference (e.g. for KHQR)
+            $qrRef = 'KHQR-' . $payment->transaction_id;
+            $payment->qr_reference = $qrRef;
+            $invoice->payments()->save($payment);
+            
+            return [
+                'success' => true,
+                'payment_id' => $payment->id,
+                'uuid' => $payment->uuid,
+                'status' => 'pending',
+                'qr_string' => 'mock_qr_string_for_' . $qrRef, // In prod, use QrCodeGenerator
+                'qr_reference' => $qrRef,
+            ];
+            
+        } elseif ($methodCode === 'cash') {
+            // Cash flow is usually "Collect Payment" not "Initiate"
+            // But if user selects Cash on Checkout, we just create a pending payment?
+            // Or just return success.
+             return [
+                'success' => true,
+                'message' => 'Please proceed to counter or wait for delivery.',
+                'status' => 'pending_manual',
+            ];
+            
+        }
+        
+        throw new \Exception("Payment method $methodCode not fully implemented in initiation.");
+    }
+
+    /**
+     * Cancel a payment.
+     */
+    public function cancelPayment(Payment $payment, string $reason): bool
+    {
+        if (!$payment->isPending()) {
+            return false;
+        }
+
+        $payment->update([
+            'status' => Payment::STATUS_CANCELLED,
+            'failure_reason' => $reason,
+        ]);
+        
+        return true;
+    }
+
+    /**
+     * Retry a failed payment.
+     */
+    public function retryPayment(Payment $payment): array
+    {
+        if (!$payment->canRetry()) {
+            throw new \Exception('Payment cannot be retried.');
+        }
+
+        // Reset status
+        $payment->update([
+            'status' => Payment::STATUS_PENDING,
+            'failure_reason' => null,
+            'expires_at' => now()->addMinutes(15),
+        ]);
+        
+        return [
+            'success' => true,
+            'payment_id' => $payment->id,
+            'status' => 'pending',
+        ];
+    }
+
+    /**
+     * Process webhook/callback from gateway.
+     */
+    public function processWebhook(array $payload): Payment
+    {
+        // Example logic
+        $ref = $payload['qr_reference'] ?? $payload['reference_number'] ?? null;
+        if (!$ref) throw new \Exception('No reference found in payload.');
+        
+        $payment = Payment::where('qr_reference', $ref)
+            ->orWhere('reference_number', $ref)
+            ->firstOrFail();
+            
+        $status = $payload['status'] ?? 'pending';
+        
+        if ($status === 'success') {
+            $payment->update([
+                'status' => Payment::STATUS_COMPLETED,
+                'processed_at' => now(),
+                'gateway_reference' => $payload['gateway_reference'] ?? null,
+            ]);
+            
+            $this->invoiceService->reconcileStatus($payment->invoice);
+            
+            // Trigger order paid logic
+            $order = $payment->invoice->order;
+            if ($order && $payment->invoice->amount_due <= 0) {
+                 $this->loyaltyService->awardPoints($order);
+                 $this->notificationService->sendOrderNotification($order, 'paid');
+            }
+            
+        } elseif ($status === 'failed') {
+            $payment->update([
+                'status' => Payment::STATUS_FAILED,
+                'failure_reason' => $payload['failure_reason'] ?? 'Gateway reported failure',
+            ]);
+        }
+        
+        return $payment;
+    }
+
+    /**
+     * Get payment status (helper)
+     */
+    public function getPaymentStatus(Payment $payment): array
+    {
+        return [
+            'id' => $payment->id,
+            'status' => $payment->status,
+            'amount' => $payment->amount,
+            'is_paid' => $payment->isCompleted(),
+        ];
+    }
+
+    /**
+     * Process order payment (Generic / Manual).
+     * Replaces duplicated logic in OrderPaymentController.
      */
     public function processOrderPayment(Order $order, array $paymentData, $processedByUserId = null): Payment
     {
@@ -39,23 +186,35 @@ class PaymentService
             // 1. Ensure Invoice Exists
             $invoice = $this->invoiceService->createOrUpdateForOrder($order);
 
-            // 2. Validate Payment Amount (Optional: Check if overpaying?)
-            // For now, allow overpayment or partial payment.
-            
+            // 2. Validate Method
+            $methodId = $paymentData['payment_method_id'] ?? null;
+            if (!$methodId && !empty($paymentData['payment_method_code'])) {
+                 $method = PaymentMethod::where('code', $paymentData['payment_method_code'])->first();
+                 $methodId = $method?->id;
+            }
+
             // 3. Create Payment Record
-            // Resolve Payment Method ID if code passed? 
-            // Assume paymentData has payment_method_id, amount
-            
             $payment = new Payment([
                 'invoice_id' => $invoice->id,
-                'payment_method_id' => $paymentData['payment_method_id'],
+                'payment_method_id' => $methodId,
                 'amount' => $paymentData['amount'],
+                'currency' => $order->currency,
                 'transaction_id' => $paymentData['transaction_id'] ?? 'TXN-' . Str::upper(Str::random(12)),
                 'reference_number' => $paymentData['reference_number'] ?? null,
-                'status' => 'completed', // Assume completed for now (or pending for async gateways)
+                'status' => Payment::STATUS_COMPLETED,
                 'processed_at' => now(),
+                'confirmed_by' => $processedByUserId,
+                'confirmed_at' => now(),
                 'notes' => $paymentData['notes'] ?? null,
+                'cash_received' => $paymentData['cash_received'] ?? null,
+                'change_given' => $paymentData['change_given'] ?? 0,
             ]);
+            
+            // Handle specific UUID if passed
+            if (isset($paymentData['uuid'])) {
+                $payment->uuid = $paymentData['uuid'];
+            }
+            
             $invoice->payments()->save($payment);
 
             // Log Audit
@@ -66,56 +225,38 @@ class PaymentService
                     null,
                     'completed',
                     $processedByUserId,
-                    ['note' => 'Payment processed via service']
+                    ['note' => 'Payment processed via service', 'mode' => $paymentData['mode'] ?? 'unknown']
                 );
             }
 
             // 4. Reconcile Invoice Status
             $this->invoiceService->reconcileStatus($invoice);
-            $invoice->refresh();
-
-            // 5. Update Order Status if fully paid
-            if ($invoice->amount_due <= 0) {
-                 // Check if order should be completed? 
-                 // Usually for Dine-in, paying closes the order?
-                 // Or just marks it as paid. 
-                 // OrderController logic had "Close order & free table only when fully paid"
-                 
-                 // Let's just handle payment status here. Order completion might be strict separation.
-                 // But for convenience, let's replicate logic or make it configurable?
-                 // The Controller logic specifically completed the order.
-                 
-                $updates = ['payment_status' => 'paid'];
-                
-                // If it was unpaid, now paid.
-                if ($order->status === 'completed' && $order->payment_status !== 'paid') {
-                    // Already completed service, just paying late?
-                } else {
-                     // For now, let's NOT auto-complete the order status here unless requested.
-                     // The PaymentService should focus on Money. Order State (Preparing/Served) is different.
-                     // BUT, for "Pay & Close" flow, it's useful.
-                     // Let's leave order status update to the Caller or a separate listener.
-                     // EXCEPT existing controller logic did:
-                     // if ($invoice->amount_due <= 0) { 
-                     //    $order->update(['status' => 'completed', ...]); 
-                     //    if table... table->available
-                     // }
-                     // We should probably invoke a "CloseOrder" action if paid?
-                }
-                
-                // Loyalty Points
-                if ($order->customer_id) {
-                    $this->loyaltyService->awardPoints($order);
-                }
-
-                // Notify
-                try {
-                    $this->notificationService->sendOrderNotification($order, 'paid');
-                } catch (\Exception $e) {
-                    \Log::warning('Failed to send order paid notification: ' . $e->getMessage());
-                }
-            }
             
+            // 5. Update Order Payment Status
+            $order->refresh(); // Invoice reconciliation might trigger observers? 
+            // Explicitly set order payment status if fully paid based on invoice
+             if ($invoice->amount_due <= 0) {
+                 $order->update([
+                     'payment_status' => Order::PAYMENT_STATUS_PAID,
+                     'payment_collected_by' => $processedByUserId,
+                     'payment_collected_at' => now(),
+                 ]);
+                 
+                 // Loyalty
+                 if ($order->customer_id) {
+                     $this->loyaltyService->awardPoints($order);
+                 }
+                 
+                 // Notifications
+                 try {
+                     $this->notificationService->sendOrderNotification($order, 'paid');
+                 } catch (\Exception $e) {
+                     // ignore
+                 }
+             } else {
+                 $order->update(['payment_status' => Order::PAYMENT_STATUS_PARTIAL]);
+             }
+
             return $payment;
         });
     }
@@ -138,37 +279,13 @@ class PaymentService
                 $paymentMethod = PaymentMethod::where('code', 'cash')->where('is_active', true)->first() 
                     ?? PaymentMethod::where('is_active', true)->first();
                     
-                 if (!$paymentMethod) {
-                     // Should not happen in production usually
-                     throw new \RuntimeException('No active payment method available.');
-                 }
-
-                $payment = new Payment([
-                    'invoice_id' => $invoice->id,
+                $this->processOrderPayment($order, [
                     'payment_method_id' => $paymentMethod->id,
                     'amount' => $diff,
                     'transaction_id' => 'MANUAL-ADMIN-' . Str::upper(Str::random(8)),
-                    'status' => 'completed',
-                    'processed_at' => now(),
                     'notes' => $note,
-                ]);
-                $invoice->payments()->save($payment);
-                
-                if (class_exists(PaymentAuditLog::class)) {
-                     PaymentAuditLog::log($payment, 'admin_manual_pay', null, 'completed', $processedByUserId, ['note' => $note]);
-                }
-            }
-            
-            $this->invoiceService->reconcileStatus($invoice);
-            
-            // Loyalty and Notifications
-            if ($order->customer_id) {
-                $this->loyaltyService->awardPoints($order);
-            }
-            try {
-                $this->notificationService->sendOrderNotification($order, 'paid');
-            } catch (\Exception $e) {
-                // ignore
+                    'mode' => 'admin_manual'
+                ], $processedByUserId);
             }
         });
     }

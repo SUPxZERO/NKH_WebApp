@@ -290,7 +290,7 @@ Route::prefix('admin')
 
 // Kitchen Display System Routes
 Route::prefix('kitchen')
-    ->middleware(['auth:sanctum']) // Uncomment to enforce auth
+    ->middleware(['auth:sanctum', 'role:admin,manager,chef,employee,super-admin']) 
     ->group(function () {
         Route::get('orders', [\App\Http\Controllers\Api\KitchenController::class, 'index']);
         Route::put('orders/{order}/status', [\App\Http\Controllers\Api\KitchenController::class, 'updateStatus']);
@@ -491,7 +491,13 @@ Route::prefix('employee')
 // ============================================================================
 // Telegram webhook endpoint - no authentication required (verified by secret token)
 Route::post('/telegram/webhook', [App\Http\Controllers\Api\Telegram\TelegramWebhookController::class, 'handle'])
-    ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
+    ->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class, 
+        'auth:sanctum',
+        \App\Http\Middleware\TelegramWebAppAuth::class, // Exclude: webhook uses secret token verification
+        \App\Http\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    ]);
 
 // Direct test endpoint for categories (without throttle middleware for debugging)
 Route::get('/telegram/test-categories', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'categories']);

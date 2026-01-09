@@ -380,7 +380,7 @@ export default function SignIn() {
             {[
               { role: 'customer', email: 'demo@customer.com', color: 'emerald' },
               { role: 'employee', email: 'demo@employee.com', color: 'blue' },
-              { role: 'admin', email: 'demo@admin.com', color: 'purple' },
+              { role: 'admin', email: 'admin_test@example.com', color: 'purple' },
             ].map(({ role, email, color }) => (
               <motion.button
                 key={role}
@@ -390,7 +390,7 @@ export default function SignIn() {
                 onClick={() => {
                   setValue('role', role as any);
                   setValue('email', email);
-                  setValue('password', 'demo123');
+                  setValue('password', 'password');
                 }}
                 className={cn(
                   `p-2 sm:p-3 rounded-lg sm:rounded-xl border transition-all group`,
@@ -408,7 +408,7 @@ export default function SignIn() {
               </motion.button>
             ))}
           </div>
-          <p className="text-center text-gray-600 text-[9px] sm:text-[10px] mt-2 sm:mt-3">Password: demo123</p>
+          <p className="text-center text-gray-600 text-[9px] sm:text-[10px] mt-2 sm:mt-3">Password: password</p>
         </motion.div>
       </motion.div>
     </div>

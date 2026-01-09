@@ -130,6 +130,13 @@ class NotificationService
         // 1. Attempt Telegram Notification (if applicable)
         $this->sendTelegramOrderNotification($order, $event);
 
+        // 2. Broadcast System-Wide Events (KDS, Admin Dashboard)
+        if ($event === 'placed' || $event === 'received') {
+            event(new \App\Events\NewOrderPlaced($order));
+        } else {
+            event(new \App\Events\OrderStatusUpdated($order));
+        }
+
         // 2. Only proceed with In-App/Broadcast if we have a registered User
         if (!$user) {
             return null; // Guest user only gets Telegram/Email (if implemented)

@@ -304,6 +304,7 @@ Route::middleware('permission:reports.view')
     ->prefix('analytics/sales')
     ->group(function () {
         Route::get('overview', [AnalyticsController::class, 'salesOverview']);
+        Route::get('daily-summary', [ReportsController::class, 'dailySalesReport']);
         Route::get('trends', [AnalyticsController::class, 'salesTrends']);
         Route::get('top-items', [AnalyticsController::class, 'topSellingItems']);
         Route::get('by-category', [AnalyticsController::class, 'salesByCategory']);

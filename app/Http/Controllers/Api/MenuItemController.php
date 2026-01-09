@@ -21,9 +21,15 @@ class MenuItemController extends Controller
                 ->withoutGlobalScope('active')
                 ->with(['translations', 'category.translations']);
 
-            // CRITICAL FIX: Filter by location (default to location_id = 1)
-            // This prevents showing duplicate items from multiple locations
-            $locationId = $request->integer('location_id', 1);
+            // CRITICAL FIX: Filter by location
+            // Default to the first active location if not provided (instead of hardcoded 1)
+            $locationId = $request->input('location_id');
+            if (!$locationId) {
+                // Find first active location
+                $defaultLocation = \App\Models\Location::where('is_active', true)->first();
+                $locationId = $defaultLocation ? $defaultLocation->id : 1; 
+            }
+            
             $query->where('location_id', $locationId);
 
             // Filter by category if provided

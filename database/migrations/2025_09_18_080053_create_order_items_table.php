@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('discount_amount', 12, 2)->default(0);
             $table->decimal('tax_amount', 12, 2)->default(0);
             $table->decimal('total', 12, 2);
-            $table->enum('kitchen_status', ['pending','preparing','ready','served','cancelled'])->default('pending')->index();
+            $table->enum('status', ['pending','preparing','ready','served','cancelled'])->default('pending')->index();
             $table->text('notes')->nullable();
             $table->timestamps();
 

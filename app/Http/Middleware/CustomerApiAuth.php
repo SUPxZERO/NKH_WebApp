@@ -26,7 +26,20 @@ class CustomerApiAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check 1: Already authenticated via Laravel (Sanctum/Session)
+        // Check 1: Try Sanctum authentication first (for API tokens)
+        if ($request->bearerToken()) {
+            try {
+                $user = auth('sanctum')->user();
+                if ($user) {
+                    Auth::setUser($user);
+                    return $next($request);
+                }
+            } catch (\Exception $e) {
+                // Sanctum auth failed, continue to other checks
+            }
+        }
+
+        // Check 2: Already authenticated via Laravel (Session)
         if (Auth::check()) {
             return $next($request);
         }
@@ -73,18 +86,7 @@ class CustomerApiAuth
             }
         }
 
-        // Check 6: Try Sanctum authentication (for API tokens)
-        if ($request->bearerToken()) {
-            try {
-                Auth::shouldUse('sanctum');
-                $user = Auth::user();
-                if ($user) {
-                    return $next($request);
-                }
-            } catch (\Exception $e) {
-                // Sanctum auth failed, continue to rejection
-            }
-        }
+        // (Sanctum auth is now handled first - removed duplicate check)
 
         // No valid authentication
         return response()->json([

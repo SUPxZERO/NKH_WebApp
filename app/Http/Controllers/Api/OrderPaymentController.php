@@ -21,11 +21,16 @@ class OrderPaymentController extends Controller
 {
     protected InvoiceService $invoiceService;
     protected LoyaltyService $loyaltyService;
+    protected \App\Services\PaymentService $paymentService;
 
-    public function __construct(InvoiceService $invoiceService, LoyaltyService $loyaltyService)
-    {
+    public function __construct(
+        InvoiceService $invoiceService, 
+        LoyaltyService $loyaltyService,
+        \App\Services\PaymentService $paymentService
+    ) {
         $this->invoiceService = $invoiceService;
         $this->loyaltyService = $loyaltyService;
+        $this->paymentService = $paymentService;
     }
 
     /**
@@ -108,68 +113,18 @@ class OrderPaymentController extends Controller
                 $amount = $validated['amount'] ?? (float) $order->total_amount;
                 $cashReceived = $validated['cash_received'] ?? $amount;
                 $paymentMethodCode = $validated['payment_method'] ?? 'cash';
+                $changeGiven = $paymentMethodCode === 'cash' ? max(0, $cashReceived - $amount) : 0;
 
-                // Get or create invoice
-                $invoice = $order->invoice;
-                if (!$invoice) {
-                    $invoice = Invoice::create([
-                        'order_id' => $order->id,
-                        'location_id' => $order->location_id,
-                        'invoice_number' => 'INV-' . $order->order_number,
-                        'subtotal' => $order->subtotal,
-                        'tax_amount' => $order->tax_amount,
-                        'discount_amount' => $order->discount_amount,
-                        'service_charge' => $order->service_charge,
-                        'total_amount' => $order->total_amount,
-                        'amount_paid' => 0,
-                        'amount_due' => $order->total_amount,
-                        'currency' => $order->currency,
-                        'status' => Invoice::STATUS_ISSUED,
-                        'issued_at' => now(),
-                    ]);
-                }
-
-                // Get payment method
-                $paymentMethod = PaymentMethod::where('code', $paymentMethodCode)->first();
-
-                // Create payment record
-                $payment = Payment::create([
-                    'uuid' => Str::uuid(),
-                    'invoice_id' => $invoice->id,
-                    'payment_method_id' => $paymentMethod?->id,
+                // Process Payment via Service
+                $payment = $this->paymentService->processOrderPayment($order, [
+                    'payment_method_code' => $paymentMethodCode,
                     'amount' => $amount,
-                    'currency' => $order->currency,
-                    'reference_number' => 'COD-' . strtoupper(Str::random(8)),
-                    'status' => Payment::STATUS_COMPLETED,
+                    'transaction_id' => 'COD-' . strtoupper(Str::random(8)),
                     'cash_received' => $paymentMethodCode === 'cash' ? $cashReceived : null,
-                    'change_given' => $paymentMethodCode === 'cash' ? max(0, $cashReceived - $amount) : null,
-                    'confirmed_by' => $request->user()->id,
-                    'confirmed_at' => now(),
-                    'processed_at' => now(),
+                    'change_given' => $changeGiven,
                     'notes' => $validated['notes'] ?? null,
-                ]);
-
-                // Log the payment
-                PaymentAuditLog::log(
-                    $payment,
-                    'payment_collected',
-                    null,
-                    Payment::STATUS_COMPLETED,
-                    $request->user()->id,
-                    [
-                        'collection_type' => $order->payment_mode,
-                        'collector_name' => $request->user()->name,
-                    ]
-                );
-
-                // Update invoice status
-                $this->invoiceService->reconcileStatus($invoice);
-
-                // Update order payment status
-                $order->collectPayment($request->user()->id, $validated['notes'] ?? null);
-
-                // Award loyalty points
-                $this->loyaltyService->awardPoints($order);
+                    'mode' => 'collect_payment',
+                ], $request->user()->id);
 
                 // ==================== TABLE SESSION CLOSE (Sprint P17) ====================
                 // If this was a QR table order, close the session and reset table
@@ -327,69 +282,18 @@ class OrderPaymentController extends Controller
                 $amount = (float) $order->total_amount;
                 $paymentMethodCode = $validated['payment_method'];
                 $cashReceived = $validated['cash_received'] ?? $amount;
+                $changeGiven = $paymentMethodCode === 'cash' ? max(0, $cashReceived - $amount) : 0;
 
-                // Get or create invoice
-                $invoice = $order->invoice;
-                if (!$invoice) {
-                    $invoice = Invoice::create([
-                        'order_id' => $order->id,
-                        'location_id' => $order->location_id,
-                        'invoice_number' => 'INV-' . $order->order_number,
-                        'subtotal' => $order->subtotal,
-                        'tax_amount' => $order->tax_amount,
-                        'discount_amount' => $order->discount_amount,
-                        'service_charge' => $order->service_charge,
-                        'total_amount' => $order->total_amount,
-                        'amount_paid' => 0,
-                        'amount_due' => $order->total_amount,
-                        'currency' => $order->currency,
-                        'status' => Invoice::STATUS_ISSUED,
-                        'issued_at' => now(),
-                    ]);
-                }
-
-                // Get payment method
-                $paymentMethod = PaymentMethod::where('code', $paymentMethodCode)->first();
-
-                // Create payment record
-                $payment = Payment::create([
-                    'uuid' => Str::uuid(),
-                    'invoice_id' => $invoice->id,
-                    'payment_method_id' => $paymentMethod?->id,
+                // Process Payment via Service
+                $this->paymentService->processOrderPayment($order, [
+                    'payment_method_code' => $paymentMethodCode,
                     'amount' => $amount,
-                    'currency' => $order->currency,
-                    'reference_number' => 'POS-' . strtoupper(Str::random(8)),
-                    'status' => Payment::STATUS_COMPLETED,
+                    'transaction_id' => 'POS-' . strtoupper(Str::random(8)),
                     'cash_received' => $paymentMethodCode === 'cash' ? $cashReceived : null,
-                    'change_given' => $paymentMethodCode === 'cash' ? max(0, $cashReceived - $amount) : null,
-                    'confirmed_by' => $request->user()->id,
-                    'confirmed_at' => now(),
-                    'processed_at' => now(),
+                    'change_given' => $changeGiven,
                     'notes' => $validated['notes'] ?? 'POS Quick Pay',
-                ]);
-
-                // Log
-                PaymentAuditLog::log(
-                    $payment,
-                    'pos_quick_pay',
-                    null,
-                    Payment::STATUS_COMPLETED,
-                    $request->user()->id,
-                    ['operator_name' => $request->user()->name]
-                );
-
-                // Update invoice
-                $this->invoiceService->reconcileStatus($invoice);
-
-                // Update order
-                $order->update([
-                    'payment_status' => Order::PAYMENT_STATUS_PAID,
-                    'payment_collected_by' => $request->user()->id,
-                    'payment_collected_at' => now(),
-                ]);
-
-                // Award loyalty points
-                $this->loyaltyService->awardPoints($order);
+                    'mode' => 'pos_quick_pay',
+                ], $request->user()->id);
             });
 
             $order->refresh();

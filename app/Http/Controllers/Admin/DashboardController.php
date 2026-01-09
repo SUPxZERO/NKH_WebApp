@@ -62,10 +62,11 @@ class DashboardController extends Controller
     {
         $now = Carbon::now();
         $revenue = collect();
+        $driver = DB::connection()->getDriverName();
+        $isSqlite = $driver === 'sqlite';
 
         // Use COALESCE to prefer completed_at, then ordered_at for determining revenue date
-        // Include orders that are either completed OR have payment_status = 'paid'
-        // Note: orders table doesn't have paid_at column, use completed_at or ordered_at
+        $dateColumn = "COALESCE(completed_at, ordered_at)";
 
         switch ($period) {
             case 'daily':
@@ -73,15 +74,19 @@ class DashboardController extends Controller
                 $startHour = 6;
                 $endHour = 23;
 
+                $hourSql = $isSqlite 
+                    ? "CAST(strftime('%H', $dateColumn) AS INTEGER)" 
+                    : "HOUR($dateColumn)";
+
                 $hourlyData = Order::select(
-                    DB::raw('HOUR(COALESCE(completed_at, ordered_at)) as hour'),
+                    DB::raw("$hourSql as hour"),
                     DB::raw('SUM(total_amount) as total')
                 )
                 ->where(function($query) {
                     $query->where('status', 'completed')
                           ->orWhere('payment_status', 'paid');
                 })
-                ->whereDate(DB::raw('COALESCE(completed_at, ordered_at)'), $now->toDateString())
+                ->whereDate(DB::raw($dateColumn), $now->toDateString())
                 ->groupBy('hour')
                 ->get()
                 ->keyBy('hour');
@@ -100,22 +105,25 @@ class DashboardController extends Controller
                 $startOfWeek = $now->copy()->startOfWeek();
                 $endOfWeek = $now->copy()->endOfWeek();
 
+                $dateSql = $isSqlite ? "date($dateColumn)" : "DATE($dateColumn)";
+
                 $dailyData = Order::select(
-                    DB::raw('DATE(COALESCE(completed_at, ordered_at)) as date'),
+                    DB::raw("$dateSql as date"),
                     DB::raw('SUM(total_amount) as total')
                 )
                 ->where(function($query) {
                     $query->where('status', 'completed')
                           ->orWhere('payment_status', 'paid');
                 })
-                ->whereBetween(DB::raw('COALESCE(completed_at, ordered_at)'), [$startOfWeek, $endOfWeek])
+                ->whereBetween(DB::raw($dateColumn), [$startOfWeek, $endOfWeek])
                 ->groupBy('date')
                 ->get()
                 ->keyBy('date');
 
                 for ($i = 0; $i < 7; $i++) {
                     $date = $startOfWeek->copy()->addDays($i);
-                    $dateKey = $date->toDateString();
+                    // SQLite might return YYYY-MM-DD, so standardizing key
+                    $dateKey = $date->toDateString(); 
                     $revenue->push([
                         'label' => $date->format('D'),
                         'value' => (float) ($dailyData->get($dateKey)?->total ?? 0)
@@ -128,16 +136,18 @@ class DashboardController extends Controller
                 $startOfMonth = $now->copy()->startOfMonth();
                 $daysInMonth = $now->daysInMonth;
 
+                $dateSql = $isSqlite ? "date($dateColumn)" : "DATE($dateColumn)";
+
                 $dailyData = Order::select(
-                    DB::raw('DATE(COALESCE(completed_at, ordered_at)) as date'),
+                    DB::raw("$dateSql as date"),
                     DB::raw('SUM(total_amount) as total')
                 )
                 ->where(function($query) {
                     $query->where('status', 'completed')
                           ->orWhere('payment_status', 'paid');
                 })
-                ->whereMonth(DB::raw('COALESCE(completed_at, ordered_at)'), $now->month)
-                ->whereYear(DB::raw('COALESCE(completed_at, ordered_at)'), $now->year)
+                ->whereMonth(DB::raw($dateColumn), $now->month)
+                ->whereYear(DB::raw($dateColumn), $now->year)
                 ->groupBy('date')
                 ->get()
                 ->keyBy('date');

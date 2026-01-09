@@ -68,13 +68,34 @@ trait TelegramAwareAuth
     /**
      * Get the current customer from auth or Telegram session.
      * 
+     * For authenticated users without a linked Customer record, 
+     * one will be auto-created to ensure order placement works.
+     * 
      * @return Customer|null
      */
     protected function getCurrentCustomer(Request $request): ?Customer
     {
         // 1. Standard Auth - get customer from User relationship
         if ($request->user()) {
-            return $request->user()->customer;
+            $user = $request->user();
+            $customer = $user->customer;
+            
+            // If user is authenticated but has no Customer record, create one
+            if (!$customer && $user->role === 'customer') {
+                $customer = Customer::create([
+                    'user_id' => $user->id,
+                    'name' => $user->name ?? 'Customer',
+                    'customer_code' => Customer::generateCustomerCode('WEB'),
+                    'phone' => $user->phone,
+                    'email' => $user->email,
+                ]);
+                \Log::info('Auto-created Customer for authenticated user', [
+                    'user_id' => $user->id,
+                    'customer_id' => $customer->id,
+                ]);
+            }
+            
+            return $customer;
         }
 
         // 2. Telegram Session (set by TelegramWebAppAuth middleware)

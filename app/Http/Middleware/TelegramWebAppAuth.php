@@ -18,6 +18,24 @@ class TelegramWebAppAuth
      */
     public function handle(Request $request, Closure $next)
     {
+        // Check 1: Try Sanctum authentication first (for API tokens)
+        if ($request->bearerToken()) {
+            try {
+                $user = auth('sanctum')->user();
+                if ($user) {
+                    Auth::setUser($user);
+                    return $next($request);
+                }
+            } catch (\Exception $e) {
+                // Sanctum auth failed, continue to other checks
+            }
+        }
+
+        // Check 2: Allow already authenticated users to pass through (standard web login)
+        if (Auth::check()) {
+            return $next($request);
+        }
+
         $initData = $request->header('X-Telegram-Init-Data');
         
         if (!$initData) {

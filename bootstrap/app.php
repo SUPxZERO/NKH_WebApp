@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Web middleware - Telegram auth MUST run before Authenticate
         $middleware->web(prepend: [
-            \App\Http\Middleware\TelegramWebAppAuth::class, // Sprint P15: MUST run before auth
+            // \App\Http\Middleware\TelegramWebAppAuth::class, // Sprint P15: MUST run before auth
         ]);
         
         $middleware->web(append: [
