@@ -177,16 +177,17 @@ class TelegramOrderController extends Controller
 
         try {
             DB::transaction(function () use ($order, $user) {
-                $order->update([
-                    'status' => 'cancelled',
-                    'cancelled_at' => now(),
-                    'cancellation_reason' => 'Cancelled by customer via Telegram',
-                ]);
+                // NOTE: status and payment_status are guarded - must use direct assignment
+                $order->status = 'cancelled';
+                $order->cancelled_at = now();
+                $order->cancellation_reason = 'Cancelled by customer via Telegram';
+                $order->save();
 
                 // Refund if paid
                 if ($order->payment_status === 'paid') {
                     // Trigger refund process
-                    $order->update(['payment_status' => 'refunded']);
+                    $order->payment_status = 'refunded';
+                    $order->save();
                 }
             });
 

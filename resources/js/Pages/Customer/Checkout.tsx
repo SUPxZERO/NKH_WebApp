@@ -54,13 +54,15 @@ export default function Checkout() {
     return `${displayHour}:${displayMin} ${scheduledTime.period}`;
   };
 
-  // Reset payment mode when order type changes (if not table order)
+  // FIX Issue #10: Reset payment mode based on order type (respect backend options)
+  // - Table orders: Default to pay_at_counter
+  // - Pickup/Delivery: Let backend decide available modes (don't force pay_now)
   React.useEffect(() => {
-    if (!isTableOrder) {
-      setSelectedPaymentMode('pay_now');
-    } else {
+    if (isTableOrder) {
       setSelectedPaymentMode('pay_at_counter');
     }
+    // For pickup/delivery, paymentModes from backend will determine available options
+    // Don't force pay_now - customer may want to pay at counter for pickup
   }, [cart.mode, isTableOrder]);
 
   // Initialize scheduled time when switching to "Schedule for Later"

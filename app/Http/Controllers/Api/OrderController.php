@@ -85,6 +85,9 @@ class OrderController extends Controller
     // GET /api/orders/{order} (role:admin,manager,waiter)
     public function show(Order $order): OrderResource
     {
+        // FIX Issue #13: IDOR Prevention - Ensure user has permission to view this order
+        $this->authorize('view', $order);
+        
         // PHASE 2: Comprehensive eager loading for order details
         return new OrderResource($order->load([
             'items.menuItem.category',
@@ -201,10 +204,10 @@ class OrderController extends Controller
             // Close order & free table only when fully paid (Controller specific logic)
             // Re-fetch invoice status
             if ($order->invoice->amount_due <= 0) {
-                $order->update([
-                    'status' => 'completed',
-                    'completed_at' => now(),
-                ]);
+                // NOTE: status is guarded - must use direct assignment
+                $order->status = 'completed';
+                $order->completed_at = now();
+                $order->save();
 
                 if ($order->table) {
                     $order->table->update(['status' => 'available']);
@@ -347,10 +350,10 @@ class OrderController extends Controller
             abort(422, 'Cannot submit order with no items.');
         }
         
-        $order->update([
-            'status' => 'preparing',
-            'kitchen_submitted_at' => now(),
-        ]);
+        // NOTE: status is guarded - must use direct assignment
+        $order->status = 'preparing';
+        $order->kitchen_submitted_at = now();
+        $order->save();
         
         // Update all order items to preparing status
         $order->items()->update(['status' => 'preparing']);
@@ -500,7 +503,9 @@ class OrderController extends Controller
             });
         }
 
-        $order->update(['status' => $newStatus]);
+        // NOTE: status is guarded - must use direct assignment
+        $order->status = $newStatus;
+        $order->save();
 
         // Send status update notification to customer
         try {

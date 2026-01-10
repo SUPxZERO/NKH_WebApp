@@ -47,15 +47,20 @@ class ImprovedMenuItemSeeder extends Seeder
             $translations = $itemData['translations'] ?? [];
             unset($itemData['translations']);
 
-            $menuItem = MenuItem::create($itemData);
+            $menuItem = MenuItem::updateOrCreate(
+                ['location_id' => $itemData['location_id'], 'slug' => $itemData['slug']],
+                $itemData
+            );
 
             // Create translations
             foreach ($translations as $locale => $translation) {
-                $menuItem->translations()->create([
-                    'locale' => $locale,
-                    'name' => $translation['name'],
-                    'description' => $translation['description'] ?? '',
-                ]);
+                $menuItem->translations()->updateOrCreate(
+                    ['locale' => $locale],
+                    [
+                        'name' => $translation['name'],
+                        'description' => $translation['description'] ?? '',
+                    ]
+                );
             }
         }
 

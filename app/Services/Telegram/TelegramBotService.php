@@ -43,8 +43,16 @@ class TelegramBotService
      */
     public function verifySecretToken(?string $secretToken): bool
     {
+        // FIX Issue #3: Require secret token in production (no bypass)
         if (empty($this->secretToken)) {
-            return true; // No secret configured, skip verification
+            // In local/testing, log warning but allow (backwards compatibility)
+            if (app()->environment(['local', 'testing'])) {
+                \Log::warning('⚠️ TELEGRAM_SECRET_TOKEN is empty! Webhook verification skipped in dev mode.');
+                return true;
+            }
+            // In production, FAIL verification if no secret is configured
+            \Log::error('🔴 TELEGRAM_SECRET_TOKEN is empty! Webhook rejected.');
+            return false;
         }
 
         return $secretToken === $this->secretToken;

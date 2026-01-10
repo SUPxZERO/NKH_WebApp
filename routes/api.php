@@ -502,8 +502,10 @@ Route::post('/telegram/webhook', [App\Http\Controllers\Api\Telegram\TelegramWebh
 // Direct test endpoint for categories (without throttle middleware for debugging)
 Route::get('/telegram/test-categories', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'categories']);
 
-// Debug endpoint to check Telegram bot configuration
-Route::get('/telegram/debug', function () {
+// FIX Issue #1: Debug endpoints wrapped in environment check - ONLY available in local/testing
+if (app()->environment(['local', 'testing'])) {
+    // Debug endpoint to check Telegram bot configuration
+    Route::get('/telegram/debug', function () {
     $token = config('telegram.bot_token', env('TELEGRAM_BOT_TOKEN', ''));
     $hasToken = !empty($token);
     $tokenPreview = $hasToken ? substr($token, 0, 10) . '...' : 'NOT SET';
@@ -762,6 +764,8 @@ Route::get('/telegram/debug/migrate', function () {
         ], 500);
     }
 });
+
+} // End of debug routes - Only available in local/testing
 
 // ============================================================================
 // TELEGRAM BOT API ROUTES (For bot to call)

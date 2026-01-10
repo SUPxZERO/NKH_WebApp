@@ -10,6 +10,7 @@ class Ingredient extends Model
 
     protected $fillable = [
         'code',
+        'location_id', // Added location_id
         'name',
         'description',
         'category',
@@ -34,6 +35,7 @@ class Ingredient extends Model
         'reorder_point' => 'decimal:3',
         'is_active' => 'boolean',
         'shelf_life_days' => 'integer',
+        'allergens' => 'array',
     ];
 
     public function unit()

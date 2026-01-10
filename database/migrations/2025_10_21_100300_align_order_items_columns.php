@@ -12,9 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            $table->renameColumn('total', 'total_price');
-            $table->renameColumn('notes', 'special_instructions');
-            $table->renameColumn('kitchen_status', 'status');
+            if (Schema::hasColumn('order_items', 'total')) {
+                $table->renameColumn('total', 'total_price');
+            }
+            if (Schema::hasColumn('order_items', 'notes')) {
+                $table->renameColumn('notes', 'special_instructions');
+            }
+            if (Schema::hasColumn('order_items', 'kitchen_status')) {
+                if (Schema::hasColumn('order_items', 'status')) {
+                    $table->dropColumn('kitchen_status');
+                } else {
+                    $table->renameColumn('kitchen_status', 'status');
+                }
+            }
         });
     }
 

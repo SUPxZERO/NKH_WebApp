@@ -77,9 +77,15 @@ class TelegramWebhookController extends Controller
                 return;
             }
 
-            // Only handle /start command
-            if (trim($text) === '/start') {
-                $this->cmdStart($user, $chatId);
+            // FIX Issue #8: Handle /start command with optional deep link parameters
+            // Supports: /start, /start table_TB001, /start order_123, etc.
+            if (str_starts_with(trim($text), '/start')) {
+                // Parse deep link payload (text after "/start ")
+                $payload = null;
+                if (strlen(trim($text)) > 6) {
+                    $payload = trim(substr(trim($text), 7)); // Extract everything after "/start "
+                }
+                $this->cmdStart($user, $chatId, $payload);
             } elseif (
                 $text === '🍔 Start Ordering' || 
                 $text === 'Start Ordering' || 
@@ -185,8 +191,46 @@ class TelegramWebhookController extends Controller
     /**
      * Start Command - Welcome Message
      */
-    private function cmdStart(TelegramUser $user, int $chatId): void
+    private function cmdStart(TelegramUser $user, int $chatId, ?string $payload = null): void
     {
+        // FIX Issue #8: Handle deep link payloads (e.g., table_TB001, order_123)
+        if ($payload) {
+            \Log::info("📱 Telegram Deep Link: /start {$payload}", [
+                'user_id' => $user->telegram_id,
+                'payload' => $payload,
+            ]);
+            
+            // Parse deep link type (format: type_value or just value)
+            if (str_starts_with($payload, 'table_')) {
+                $tableCode = substr($payload, 6);
+                $this->botService->sendMessage(
+                    $chatId,
+                    "🍽️ *Table: {$tableCode}*\n\nOpening menu for your table...",
+                    null,
+                    null,
+                    'Markdown'
+                );
+                // Then show order button with table context
+                $webAppUrl = config('app.url') . "/menu?table={$tableCode}&telegram_id={$user->telegram_id}";
+                $this->botService->sendInlineKeyboard($chatId, "Ready to order?", [
+                    'inline_keyboard' => [
+                        [['text' => '🍔 View Menu', 'web_app' => ['url' => $webAppUrl]]],
+                    ]
+                ]);
+                return;
+            } elseif (str_starts_with($payload, 'order_')) {
+                $orderId = substr($payload, 6);
+                $webAppUrl = config('app.url') . "/customer/orders/{$orderId}?telegram_id={$user->telegram_id}";
+                $this->botService->sendInlineKeyboard($chatId, "📦 View your order:", [
+                    'inline_keyboard' => [
+                        [['text' => '📋 Order Details', 'web_app' => ['url' => $webAppUrl]]],
+                    ]
+                ]);
+                return;
+            }
+            // If payload doesn't match known patterns, fall through to normal welcome
+        }
+        
         // SPRINT P16: Customized welcome based on phone verification
         $hasPhone = !empty($user->phone_number);
 

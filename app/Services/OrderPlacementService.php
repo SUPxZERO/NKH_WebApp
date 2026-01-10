@@ -150,10 +150,17 @@ class OrderPlacementService
             }
 
             // ==================== NOTIFICATIONS ====================
-            $this->sendNotifications($order);
+            // FIX Issue #7: Moved OUTSIDE transaction - see below
+            // (DB locks should not be held during external API calls)
 
             return $order;
         });
+        
+        // FIX Issue #7: Send notifications AFTER transaction commits
+        // This prevents holding DB locks during slow external API calls (Telegram, Email, Pusher)
+        $this->sendNotifications($order);
+        
+        return $order;
     }
 
     protected function handleTimeSlot(array $data): ?OrderTimeSlot
@@ -263,11 +270,9 @@ class OrderPlacementService
 
     protected function sendNotifications(Order $order): void
     {
-        try {
-            $this->notificationService->sendOrderNotification($order, 'placed');
-            \Log::info('📧 Order confirmation notification sent');
-        } catch (\Exception $e) {
-            \Log::warning('Failed to send order placed notification: ' . $e->getMessage());
-        }
+        // PHASE 19: Dispatch notification job to queue for async processing
+        // This improves order placement response time by ~200-500ms
+        \App\Jobs\SendOrderNotificationJob::dispatch($order, 'placed');
+        \Log::info('📤 Order notification job dispatched to queue');
     }
 }

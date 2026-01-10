@@ -212,28 +212,28 @@ class Order extends Model
 
     /**
      * Approve the order
+     * NOTE: status, approved_by, approved_at are guarded - must use direct assignment
      */
     public function approve(?int $userId): bool
     {
-        return $this->update([
-            'status' => 'received',
-            'approval_status' => self::APPROVAL_STATUS_APPROVED,
-            'approved_by' => $userId,
-            'approved_at' => now(),
-            'rejection_reason' => null,
-        ]);
+        $this->status = 'received';
+        $this->approval_status = self::APPROVAL_STATUS_APPROVED;
+        $this->approved_by = $userId;
+        $this->approved_at = now();
+        $this->rejection_reason = null;
+        return $this->save();
     }
 
     /**
      * Reject the order
+     * NOTE: status is guarded - must use direct assignment
      */
     public function reject(string $reason): bool
     {
-        return $this->update([
-            'status' => 'cancelled',
-            'approval_status' => self::APPROVAL_STATUS_REJECTED,
-            'rejection_reason' => $reason,
-        ]);
+        $this->status = 'cancelled';
+        $this->approval_status = self::APPROVAL_STATUS_REJECTED;
+        $this->rejection_reason = $reason;
+        return $this->save();
     }
 
     // ==================== PAYMENT HELPERS ====================
@@ -292,15 +292,15 @@ class Order extends Model
 
     /**
      * Mark payment as collected (by delivery/staff)
+     * NOTE: payment_status, payment_collected_by/at are guarded - must use direct assignment
      */
     public function collectPayment(int $userId, ?string $notes = null): bool
     {
-        return $this->update([
-            'payment_status' => self::PAYMENT_STATUS_PAID,
-            'payment_collected_by' => $userId,
-            'payment_collected_at' => now(),
-            'payment_collection_notes' => $notes,
-        ]);
+        $this->payment_status = self::PAYMENT_STATUS_PAID;
+        $this->payment_collected_by = $userId;
+        $this->payment_collected_at = now();
+        $this->payment_collection_notes = $notes;
+        return $this->save();
     }
 
     /**

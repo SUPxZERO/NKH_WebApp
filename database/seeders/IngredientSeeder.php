@@ -47,7 +47,7 @@ class IngredientSeeder extends Seeder
             
             // Dairy
             ['code' => 'DAI-001', 'name' => 'Whole Milk', 'category' => 'dairy', 'unit_id' => $lUnit->id, 'supplier_id' => $suppliers[1]->id, 'cost_per_unit' => 1.20, 'current_stock' => 50, 'min_stock_level' => 10, 'max_stock_level' => 100, 'reorder_point' => 20, 'shelf_life_days' => 7],
-            ['code' => 'DAI-002', 'name' => 'Cheddar Cheese', 'category' => 'dairy', 'unit_id' => $kgUnit->id, 'supplier_id' => $suppliers[1]->id, 'cost_per_unit' => 8.50, 'current_stock' => 12, 'min_stock_level' => 3, 'max_stock_level' => 25, 'reorder_point' => 5, 'allergens' => 'dairy'],
+            ['code' => 'DAI-002', 'name' => 'Cheddar Cheese', 'category' => 'dairy', 'unit_id' => $kgUnit->id, 'supplier_id' => $suppliers[1]->id, 'cost_per_unit' => 8.50, 'current_stock' => 12, 'min_stock_level' => 3, 'max_stock_level' => 25, 'reorder_point' => 5, 'allergens' => ['dairy']],
             ['code' => 'DAI-003', 'name' => 'Heavy Cream', 'category' => 'dairy', 'unit_id' => $lUnit->id, 'supplier_id' => $suppliers[1]->id, 'cost_per_unit' => 4.20, 'current_stock' => 8, 'min_stock_level' => 2, 'max_stock_level' => 20, 'reorder_point' => 4],
             
             // Meat
@@ -57,7 +57,7 @@ class IngredientSeeder extends Seeder
             
             // Grains
             ['code' => 'GRA-001', 'name' => 'Rice', 'category' => 'grains', 'unit_id' => $kgUnit->id, 'supplier_id' => $suppliers[0]->id, 'cost_per_unit' => 2.50, 'current_stock' => 100, 'min_stock_level' => 20, 'max_stock_level' => 200, 'reorder_point' => 40],
-            ['code' => 'GRA-002', 'name' => 'Pasta', 'category' => 'grains', 'unit_id' => $kgUnit->id, 'supplier_id' => $suppliers[0]->id, 'cost_per_unit' => 3.00, 'current_stock' => 60, 'min_stock_level' => 15, 'max_stock_level' => 100, 'reorder_point' => 25, 'allergens' => 'gluten'],
+            ['code' => 'GRA-002', 'name' => 'Pasta', 'category' => 'grains', 'unit_id' => $kgUnit->id, 'supplier_id' => $suppliers[0]->id, 'cost_per_unit' => 3.00, 'current_stock' => 60, 'min_stock_level' => 15, 'max_stock_level' => 100, 'reorder_point' => 25, 'allergens' => ['gluten']],
             
             // Spices
             ['code' => 'SPI-001', 'name' => 'Black Pepper', 'category' => 'spices', 'unit_id' => $gUnit->id, 'supplier_id' => $suppliers[0]->id, 'cost_per_unit' => 0.05, 'current_stock' => 500, 'min_stock_level' => 100, 'max_stock_level' => 1000, 'reorder_point' => 200],
@@ -72,10 +72,19 @@ class IngredientSeeder extends Seeder
             ['code' => 'BEV-002', 'name' => 'Coffee Beans', 'category' => 'beverages', 'unit_id' => $kgUnit->id, 'supplier_id' => $suppliers[0]->id, 'cost_per_unit' => 18.00, 'current_stock' => 10, 'min_stock_level' => 2, 'max_stock_level' => 25, 'reorder_point' => 5],
         ];
 
+        $location = \App\Models\Location::first();
+        $locationId = $location ? $location->id : 1;
+
         foreach ($ingredients as $ingredient) {
+            $data = array_diff_key($ingredient, ['code' => '']);
+            $data['location_id'] = $locationId;
+
             Ingredient::updateOrCreate(
-                ['code' => $ingredient['code']], // Unique key
-                array_diff_key($ingredient, ['code' => '']) // All other fields
+                [
+                    'code' => $ingredient['code'],
+                    'location_id' => $locationId
+                ], 
+                $data
             );
         }
 

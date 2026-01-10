@@ -96,11 +96,13 @@ class KitchenController extends Controller
             $newStatus = $validated['status'];
             $oldStatus = $order->status;
 
-            // Update order status
-            $order->update([
-                'status' => $newStatus,
-                'updated_at' => now(), // Touch timestamp
-            ]);
+            // FIX: Use direct assignment instead of update() because 'status' is in $guarded
+        // Mass assignment via update() silently ignores guarded fields
+        $order->status = $newStatus;
+        $order->save();
+
+            // Broadcast real-time update for Kitchen Display and other listeners
+            event(new \App\Events\OrderStatusUpdated($order->fresh()));
 
             // If completed, we might want to record completion time or perform other actions
             // But for now, simple status update is sufficient for KDS

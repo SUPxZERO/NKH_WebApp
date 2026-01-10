@@ -41,18 +41,19 @@ export default function Cart() {
   const { auth } = usePage().props as { auth?: { user?: any } };
   const isAuthenticated = !!auth?.user;
 
-  // Sync cart with server on mount
+  // FIX Issue #12: Sync cart with server on mount (SERVER WINS strategy)
+  // This prevents data loss when user switches devices (e.g., Telegram -> Desktop)
   React.useEffect(() => {
     if (isAuthenticated) {
       apiGet('/customer/cart')
         .then((res: any) => {
-          if (res.data && Array.isArray(res.data)) {
-            // Only sync from server if local cart is empty to avoid overwriting new items
-            if (cart.items.length === 0 && res.data.length > 0) {
-              console.log('Syncing cart from server:', res.data);
-              cart.setItems(res.data);
-            }
+          if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+            // SERVER WINS: If server has items, use server cart
+            // This ensures items added on mobile (Telegram) are preserved
+            console.log('📱 Syncing cart from server (server wins):', res.data);
+            cart.setItems(res.data);
           }
+          // If server cart is empty, keep local cart (user just added items)
         })
         .catch(err => {
           console.error('Failed to sync cart:', err);

@@ -86,13 +86,9 @@ class DriverOrderController extends Controller
         
         // If delivered, we might want to trigger payment collection if unpaid?
         // Or marked as completed depending on workflow?
-        // For now, just update status. 
-        // If status is 'delivered', we might implicitly mark order as 'completed' if paid?
-        // Let's keep it simple: update status.
-        
-        $order->update([
-            'status' => $request->status
-        ]);
+        // NOTE: status is guarded - must use direct assignment
+        $order->status = $request->status;
+        $order->save();
         
         if ($request->status === 'delivered') {
              // Maybe log delivered_at?

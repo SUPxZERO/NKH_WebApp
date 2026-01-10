@@ -185,8 +185,8 @@ class OrderManagementTest extends TestCase
             'menu_item_id' => $this->menuItem->id,
             'quantity' => 1,
             'unit_price' => $this->menuItem->price,
-            'total' => $this->menuItem->price,
-            'kitchen_status' => 'pending',
+            'total_price' => $this->menuItem->price,
+            'status' => 'pending',
         ]);
 
         $response = $this->actingAs($this->employee->user, 'sanctum')
@@ -200,7 +200,7 @@ class OrderManagementTest extends TestCase
         $this->assertDatabaseHas('order_items', [
             'id' => $orderItem->id,
             'quantity' => 3,
-            'notes' => 'Updated notes',
+            'special_instructions' => 'Updated notes',
         ]);
     }
 
@@ -222,8 +222,8 @@ class OrderManagementTest extends TestCase
             'menu_item_id' => $this->menuItem->id,
             'quantity' => 1,
             'unit_price' => $this->menuItem->price,
-            'total' => $this->menuItem->price,
-            'kitchen_status' => 'pending',
+            'total_price' => $this->menuItem->price,
+            'status' => 'pending',
         ]);
 
         $response = $this->actingAs($this->employee->user, 'sanctum')
@@ -255,8 +255,8 @@ class OrderManagementTest extends TestCase
             'menu_item_id' => $this->menuItem->id,
             'quantity' => 1,
             'unit_price' => $this->menuItem->price,
-            'total' => $this->menuItem->price,
-            'kitchen_status' => 'pending',
+            'total_price' => $this->menuItem->price,
+            'status' => 'pending',
         ]);
 
         $response = $this->actingAs($this->employee->user, 'sanctum')

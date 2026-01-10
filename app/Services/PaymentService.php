@@ -134,6 +134,12 @@ class PaymentService
         $payment = Payment::where('qr_reference', $ref)
             ->orWhere('reference_number', $ref)
             ->firstOrFail();
+        
+        // FIX Issue #9: Idempotency - Prevent double-processing completed payments
+        if ($payment->isCompleted()) {
+            \Log::info("⚠️ Payment {$payment->id} already completed, skipping duplicate webhook.");
+            return $payment;
+        }
             
         $status = $payload['status'] ?? 'pending';
         
