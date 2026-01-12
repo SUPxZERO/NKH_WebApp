@@ -46,7 +46,7 @@ export function CartEmpty({ onBrowseMenu }: CartEmptyProps) {
             {/* CTA Button */}
             <Button
                 size="lg"
-                onClick={onBrowseMenu || (() => (window.location.href = '/menu'))}
+                onClick={onBrowseMenu}
             >
                 Browse Menu
             </Button>

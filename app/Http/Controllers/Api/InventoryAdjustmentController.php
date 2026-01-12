@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse; // FIX: Phase 4
 use App\Models\InventoryAdjustment;
 use App\Models\Inventory;
 use App\Models\InventoryTransaction;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 class InventoryAdjustmentController extends Controller
 {
+    use ApiResponse; // FIX: Phase 4 - Standardized responses
+
     public function index(Request $request): JsonResponse
     {
         $query = InventoryAdjustment::with(['ingredient.unit', 'location', 'adjustedBy', 'adjusted_by_employee']);
@@ -77,8 +80,20 @@ class InventoryAdjustmentController extends Controller
             'approval_notes' => 'nullable|string'
         ]);
 
-        // Use authenticated user ID, default to 1 if not authenticated
-        $approvedBy = auth()->id() ?? 1;
+        // Enforce authentication
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $user = auth()->user();
+        $approvedBy = $user->id;
+
+        // Prevent self-approval (Fraud Prevention)
+        if ($adjustment->adjusted_by === $approvedBy) {
+            // Allow Super Admin to bypass (optional, but safer to enforce "four-eyes principle")
+            // For now, strict enforcement:
+            return response()->json(['message' => 'Self-approval is not allowed. Another manager must approve this.'], 403);
+        }
 
         if (!$adjustment->location_id || !$adjustment->ingredient_id) {
             return response()->json(['message' => 'Adjustment record is incomplete (missing location or ingredient)'], 422);

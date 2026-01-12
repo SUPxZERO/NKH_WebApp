@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse; // FIX: Phase 4 - Standardized responses
 use App\Models\Customer;
 use App\Models\DiningTable;
 use App\Models\TableSession;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Log;
  */
 class QrTableController extends Controller
 {
+    use ApiResponse; // FIX: Phase 4 - Standardized responses
+
     public function __construct(
         protected QrTableService $qrService
     ) {}
@@ -96,6 +99,18 @@ class QrTableController extends Controller
             'ip' => $ipAddress,
         ]);
 
+        $cookie = cookie(
+            'table_session',
+            $session->session_token,
+            240, // 4 hours
+            '/',
+            null,
+            true, // Secure
+            true, // HttpOnly
+            false, // Raw
+            'Strict' // SameSite
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Welcome! You are seated at ' . $table->display_name,
@@ -117,7 +132,7 @@ class QrTableController extends Controller
                     'order_id' => $session->order_id,
                 ],
             ],
-        ]);
+        ])->withCookie($cookie);
     }
 
     /**

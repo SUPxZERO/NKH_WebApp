@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Category\StoreCategoryRequest;
 use App\Http\Requests\Api\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
+use App\Http\Responses\ApiResponse; // Sprint 2A
 use App\Models\Category;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
+    use ApiResponse; // Sprint 2A
     // GET /api/categories (public) and /api/admin/categories
     public function index(Request $request): JsonResponse
     {

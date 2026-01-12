@@ -18,15 +18,18 @@ class PaymentService
     protected $invoiceService;
     protected $notificationService;
     protected $loyaltyService;
+    protected $inventoryDeductionService;
 
     public function __construct(
         InvoiceService $invoiceService,
         NotificationService $notificationService,
-        LoyaltyService $loyaltyService
+        LoyaltyService $loyaltyService,
+        InventoryDeductionService $inventoryDeductionService
     ) {
         $this->invoiceService = $invoiceService;
         $this->notificationService = $notificationService;
         $this->loyaltyService = $loyaltyService;
+        $this->inventoryDeductionService = $inventoryDeductionService;
     }
 
     /**
@@ -258,6 +261,28 @@ class PaymentService
                      $this->notificationService->sendOrderNotification($order, 'paid');
                  } catch (\Exception $e) {
                      // ignore
+                 }
+                 
+                 // FIX D0.1: Auto-deduct inventory if order is completed
+                 if ($order->status === 'completed') {
+                     try {
+                         $deductionResult = $this->inventoryDeductionService->processOrderDeductions(
+                             $order,
+                             $processedByUserId ?? 1
+                         );
+                         
+                         \Log::info('Inventory auto-deduction completed', [
+                             'order_id' => $order->id,
+                             'deductions_count' => $deductionResult['deductions_count'],
+                             'success' => $deductionResult['success']
+                         ]);
+                     } catch (\Exception $e) {
+                         \Log::error('Inventory deduction failed', [
+                             'order_id' => $order->id,
+                             'error' => $e->getMessage()
+                         ]);
+                         // Don't fail the payment, just log the error
+                     }
                  }
              } else {
                  $order->update(['payment_status' => Order::PAYMENT_STATUS_PARTIAL]);

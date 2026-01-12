@@ -6,6 +6,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { Eye, EyeOff, Mail, Lock, User, Shield, Sparkles, ArrowRight, UtensilsCrossed } from 'lucide-react';
 import { PageProps } from '@/types';
 import { Button } from '@/app/components/ui/Button';
+import { LoadingButton } from '@/Components/ui/LoadingButton'; // Sprint 3 Phase 2
 import { cn } from '@/app/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -94,7 +95,11 @@ export default function SignIn() {
 
             // Redirect to checkout
             setTimeout(() => {
-              window.location.href = redirectUrl;
+              // Sprint 3: Use router.visit instead of window.location.href
+              router.visit(redirectUrl, {
+                replace: true,
+                preserveScroll: false
+              });
             }, 500);
           }
           // Otherwise, default Inertia redirect will happen
@@ -322,35 +327,22 @@ export default function SignIn() {
               </div>
 
               {/* Submit Button */}
-              <motion.button
+              <LoadingButton
                 type="submit"
-                disabled={isLoading}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
+                loading={isLoading}
+                loadingText="Signing in..."
                 className={cn(
-                  "relative w-full h-12 sm:h-14 rounded-xl font-semibold text-white overflow-hidden group transition-all text-sm sm:text-base",
+                  "w-full h-12 sm:h-14 rounded-xl font-semibold text-white transition-all text-sm sm:text-base",
                   "bg-gradient-to-r from-fuchsia-600 via-purple-600 to-pink-600",
-                  "hover:shadow-xl hover:shadow-fuchsia-500/25",
-                  isLoading && "opacity-70 cursor-not-allowed"
+                  "hover:shadow-xl hover:shadow-fuchsia-500/25"
                 )}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="relative flex items-center justify-center gap-2">
-                  {isLoading ? (
-                    <>
-                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span className="hidden sm:inline">Signing in...</span>
-                      <span className="sm:hidden">Loading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="hidden sm:inline">Sign in as {currentRoleConfig.label}</span>
-                      <span className="sm:hidden">Sign in</span>
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
+                <span className="flex items-center justify-center gap-2">
+                  <span className="hidden sm:inline">Sign in as {currentRoleConfig.label}</span>
+                  <span className="sm:hidden">Sign in</span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </span>
-              </motion.button>
+              </LoadingButton>
             </form>
 
             {/* Register Link */}
@@ -380,7 +372,7 @@ export default function SignIn() {
             {[
               { role: 'customer', email: 'demo@customer.com', color: 'emerald' },
               { role: 'employee', email: 'demo@employee.com', color: 'blue' },
-              { role: 'admin', email: 'admin_test@example.com', color: 'purple' },
+              { role: 'admin', email: 'demo@admin.com', color: 'purple' },
             ].map(({ role, email, color }) => (
               <motion.button
                 key={role}
@@ -390,7 +382,7 @@ export default function SignIn() {
                 onClick={() => {
                   setValue('role', role as any);
                   setValue('email', email);
-                  setValue('password', 'password');
+                  setValue('password', 'demo123');
                 }}
                 className={cn(
                   `p-2 sm:p-3 rounded-lg sm:rounded-xl border transition-all group`,
@@ -408,7 +400,6 @@ export default function SignIn() {
               </motion.button>
             ))}
           </div>
-          <p className="text-center text-gray-600 text-[9px] sm:text-[10px] mt-2 sm:mt-3">Password: password</p>
         </motion.div>
       </motion.div>
     </div>

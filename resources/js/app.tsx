@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { AppProviders } from '@/app/providers/AppProviders';
 import { InertiaWrapper } from '@/app/components/InertiaWrapper';
+import { ErrorBoundary } from '@/Components/ErrorBoundary'; // Sprint 3 Phase 2
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -29,7 +30,7 @@ router.on('before', (event) => {
 });
 
 createInertiaApp({
-  title: (title) => `${title} - ${appName}`,
+  title: (title) => `${title} - ${appName} `,
   resolve: async (name) => {
     const page = await resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')) as any;
     // Wrap the page component with InertiaWrapper to provide global components
@@ -45,9 +46,11 @@ createInertiaApp({
   setup({ el, App, props }) {
     const root = createRoot(el);
     root.render(
-      <AppProviders>
-        <App {...props} />
-      </AppProviders>
+      <ErrorBoundary>
+        <AppProviders>
+          <App {...props} />
+        </AppProviders>
+      </ErrorBoundary>
     );
   },
   progress: { color: '#4B5563' },

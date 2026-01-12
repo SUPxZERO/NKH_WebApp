@@ -114,6 +114,7 @@ class DatabaseSeeder extends Seeder
             CustomerAddressesSeeder::class,       // customer_addresses -> customers
             EmployeeSeeder::class,                // employees -> users, positions, locations
             LeaveRequestSeeder::class,            // leave_requests -> employees, locations
+            TelegramUserSeeder::class,            // telegram_users
         ]);
         $this->command->info('✅ Customer and employee profiles seeded.');
         $this->command->info('');

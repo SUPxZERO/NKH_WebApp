@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\CacheService; // Sprint 1: Cache invalidation
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property int $id
@@ -41,34 +43,23 @@ class MenuItem extends Model
     protected $appends = ['name', 'description'];
     protected $with = ['translations'];
 
-    protected $fillable = [
-        'location_id',
-        'category_id',
-        'sku',
-        'slug',
-        'price',
-        'cost',
-        'image_path',
-        'image',
-        'is_popular',
-        'is_featured',
-        'featured_order',
-        'badge',
-        'is_active',
-        'display_order',
-        'prep_time',
-        'cook_time',
-        'calories',
-        'rating',
-        'reviews_count',
-        'nutrition',
-        'ingredients',
-        'allergens',
-        'dietary_tags',
-        'serving_size',
-        'spice_level',
-        'availability_status',
-        'availability_note',
+    /**
+     * SECURITY: Use $guarded instead of $fillable to protect sensitive fields
+     * 
+     * These fields MUST NOT be settable via user input:
+     * - Financial: cost (internal pricing)
+     * - System-derived: rating, reviews_count
+     * 
+     * Admin/Manager can edit most fields, but cost should be admin-only
+     */
+    protected $guarded = [
+        'id',
+        'cost',                    // ⚠️ CRITICAL: Internal cost (profit margin calc)
+        'rating',                  // ⚠️ System-calculated from reviews
+        'reviews_count',           // ⚠️ System-counted
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
     
     protected static function boot()

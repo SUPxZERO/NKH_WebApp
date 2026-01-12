@@ -351,7 +351,9 @@ Route::prefix('customer')
     Route::get('orders/{order}', [App\Http\Controllers\Api\CustomerDashboardController::class, 'show']);
     Route::post('orders/{order}/reorder', [App\Http\Controllers\Api\CustomerDashboardController::class, 'reorder']);
     Route::post('orders/{order}/cancel', [App\Http\Controllers\Api\CustomerDashboardController::class, 'cancel']);
-    Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store']);
+    // FIX: Phase 4 - Retry middleware for critical order placement
+    Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store'])
+        ->middleware('retry:3');
     
     // Favorites
     Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);

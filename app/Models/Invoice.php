@@ -17,23 +17,31 @@ class Invoice extends Model
     const STATUS_OVERDUE = 'overdue';
     const STATUS_CANCELLED = 'cancelled';
 
-    protected $fillable = [
-        'order_id',
-        'location_id',
-        'invoice_number',
-        'subtotal',
-        'tax_amount',
-        'discount_amount',
-        'service_charge',
-        'total_amount',
-        'amount_paid',
-        'amount_due',
-        'currency',
-        'status',
-        'issued_at',
-        'due_at',
-        'paid_at',
-        'notes'
+    /**
+     * SECURITY: Use $guarded instead of $fil lable to protect sensitive fields
+     * 
+     * These fields MUST NOT be settable via user input/API requests:
+     * - Financial: All amount fields (subtotal, tax, discount, total, amount_paid, amount_due)
+     * - System: invoice_number, status, paid_at, issued_at
+     * - Only InvoiceService/PaymentService should modify these
+     * 
+     * Attack prevented: User sending {"amount_due": 0, "status": "paid"}
+     */
+    protected $guarded = [
+        'id',
+        'invoice_number',          // ⚠️ System-generated
+        'subtotal',                // ⚠️ CRITICAL: Calculated from order items
+        'tax_amount',              // ⚠️ CRITICAL: Calculated
+        'discount_amount',         // ⚠️ CRITICAL: Calculated
+        'service_charge',          // ⚠️ CRITICAL: Calculated
+        'total_amount',            // ⚠️ CRITICAL: Sum of all amounts
+        'amount_paid',             // ⚠️ CRITICAL: Updated by PaymentService only
+        'amount_due',              // ⚠️ CRITICAL: Calculated (total - paid)
+        'status',                  // ⚠️ Updated by workflow only
+        'issued_at',               // ⚠️ System timestamp
+        'paid_at',                 // ⚠️ System timestamp
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

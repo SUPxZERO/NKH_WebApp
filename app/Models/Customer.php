@@ -9,36 +9,35 @@ class Customer extends Model
 {
     use HasFactory, \Illuminate\Notifications\Notifiable;
 
-    protected $fillable = [
-        'user_id',
-        'preferred_location_id',
-        'customer_code',
-        'name',
-        'email',
-        'phone',
-        'avatar', // Added for Telegram user profile pictures
-        'birth_date',
-        'gender',
-        'loyalty_points',
-        'total_spent',
-        'preferred_language',
-        'dietary_preferences',
-        'marketing_consent',
-        'preferences',
-        'points_balance',
-        'notes',
-        // New CRM fields
-        'last_visit_date',
-        'last_purchase_date',
-        'visit_count',
-        'average_order_value',
-        'customer_tier',
-        'referral_code',
-        'email_verified_at',
-        'phone_verified_at',
-        'communication_preferences',
-        'tags',
-        'no_show_count',
+    /**
+     * SECURITY: Use $guarded instead of $fillable to protect sensitive fields
+     * 
+     * These fields MUST NOT be settable via user input/API requests:
+     * - Financial: loyalty_points, points_balance, total_spent, average_order_value
+     * - System-derived: customer_tier, visit_count, last_visit_date, last_purchase_date
+     * - System-generated: customer_code, referral_code
+     * - Verification timestamps: email_verified_at, phone_verified_at
+     * - Audit fields: no_show_count
+     * 
+     * Attack prevented: User sending {"loyalty_points": 999999, "customer_tier": "platinum"}
+     */
+    protected $guarded = [
+        'id',
+        'loyalty_points',           // ⚠️ CRITICAL: Points manipulation
+        'points_balance',           // ⚠️ CRITICAL: Points manipulation
+        'total_spent',              // ⚠️ CRITICAL: Financial manipulation
+        'average_order_value',      // ⚠️ System-calculated metric
+        'customer_tier',            // ⚠️ System-calculated or admin-override only
+        'visit_count',              // ⚠️ System-tracked engagement
+        'last_visit_date',          // ⚠️ System-tracked timestamp
+        'last_purchase_date',       // ⚠️ System-tracked timestamp
+        'customer_code',            // ⚠️ System-generated identifier
+        'referral_code',            // ⚠️ System-generated code
+        'email_verified_at',        // ⚠️ Verification flow only
+        'phone_verified_at',        // ⚠️ Verification flow only
+        'no_show_count',            // ⚠️ System-tracked reliability
+        'created_at',
+        'updated_at',
     ];
 
 

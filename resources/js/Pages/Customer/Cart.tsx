@@ -1,5 +1,5 @@
-import React from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { Head, router, usePage } from '@inertiajs/react'; // Sprint 3: Added router import
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useCartStore } from '@/app/store/cart';
@@ -99,11 +99,17 @@ export default function Cart() {
       localStorage.setItem('pendingCheckout', 'true');
       localStorage.setItem('checkoutRedirectUrl', '/checkout');
       toastInfo('Please sign in to complete your order');
-      window.location.href = '/login?redirect=/checkout';
+      // Sprint 3: Use router.visit for smooth navigation
+      router.visit('/login?redirect=/checkout', {
+        preserveScroll: false
+      });
       return;
     }
 
-    window.location.href = '/checkout';
+    // Sprint 3: Use router.visit instead of window.location.href
+    router.visit('/checkout', {
+      preserveScroll: false
+    });
   };
 
   const isEmpty = cart.items.length === 0;
@@ -202,7 +208,7 @@ export default function Cart() {
 
         {/* Main Content */}
         {isEmpty ? (
-          <CartEmpty onBrowseMenu={() => (window.location.href = '/menu')} />
+          <CartEmpty onBrowseMenu={() => router.visit('/menu')} />
         ) : (
           <div className="space-y-4 sm:space-y-6">
             {/* Mobile: Compact Mode Selector */}
@@ -264,7 +270,7 @@ export default function Cart() {
             <motion.div variants={itemVariants} className="hidden sm:block pt-2">
               <Button
                 variant="outline"
-                onClick={() => (window.location.href = '/menu')}
+                onClick={() => router.visit('/menu')}
                 leftIcon={<ShoppingBag className="w-4 h-4" />}
               >
                 Continue Shopping

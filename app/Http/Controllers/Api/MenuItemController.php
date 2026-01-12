@@ -7,6 +7,7 @@ use App\Http\Requests\Api\MenuItem\StoreMenuItemRequest;
 use App\Http\Requests\Api\MenuItem\UpdateMenuItemRequest;
 use App\Http\Resources\MenuItemResource;
 use App\Models\MenuItem;
+use App\Services\CacheService; // Sprint 1: Caching
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
@@ -17,15 +18,38 @@ class MenuItemController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+            // Sprint 1: Use caching for simple menu list without filters
+            $hasFilters = $request->filled(['category', 'search']) || $request->boolean('active_only', false);
+            
+            if (!$hasFilters) {
+                // Default to the first active location if not provided
+                $locationId = $request->input('location_id');
+                if (!$locationId) {
+                    $defaultLocation = \App\Models\Location::where('is_active', true)->first();
+                    $locationId = $defaultLocation ? $defaultLocation->id : 1; 
+                }
+                
+                // Use cached menu for better performance
+                $menuItems = app(CacheService::class)->getMenu($locationId);
+                
+                return response()->json([
+                    'status' => 'success',
+                    'data' => MenuItemResource::collection($menuItems),
+                    'meta' => [
+                        'total' => $menuItems->count(),
+                        'cached' => true
+                    ]
+                ]);
+            }
+            
+            // Fallback: Query with filters (non-cached)
             $query = MenuItem::query()
                 ->withoutGlobalScope('active')
                 ->with(['translations', 'category.translations']);
 
             // CRITICAL FIX: Filter by location
-            // Default to the first active location if not provided (instead of hardcoded 1)
             $locationId = $request->input('location_id');
             if (!$locationId) {
-                // Find first active location
                 $defaultLocation = \App\Models\Location::where('is_active', true)->first();
                 $locationId = $defaultLocation ? $defaultLocation->id : 1; 
             }
@@ -68,7 +92,8 @@ class MenuItemController extends Controller
                     'current_page' => $menuItems->currentPage(),
                     'last_page' => $menuItems->lastPage(),
                     'total' => $menuItems->total(),
-                    'per_page' => $menuItems->perPage()
+                    'per_page' => $menuItems->perPage(),
+                    'cached' => false // Filtered query, not cached
                 ]
             ]);
         } catch (\Exception $e) {

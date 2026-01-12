@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse; // Sprint 2A: API Standardization
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PaymentService;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    use ApiResponse; // Sprint 2A
     protected PaymentService $paymentService;
 
     public function __construct(PaymentService $paymentService)
@@ -41,10 +43,7 @@ class PaymentController extends Controller
                 ];
             });
 
-        return response()->json([
-            'success' => true,
-            'data' => $methods,
-        ]);
+        return $this->success($methods, 'Payment methods retrieved');
     }
 
     /**

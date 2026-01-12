@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { usePage, router } from '@inertiajs/react'; // Sprint 3
 import Modal from '@/app/components/ui/Modal';
 import Button from '@/app/components/ui/Button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/app/components/ui/Card';
@@ -37,7 +37,7 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
     }
   }, [open, mode]);
 
-  const filteredMenu = useMemo(() => {
+  const filteredMenu = React.useMemo(() => {
     if (!menu) return [];
 
     let filtered = menu;
@@ -82,11 +82,14 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
       // Save pending state and redirect to login
       localStorage.setItem('pendingCheckout', 'true');
       localStorage.setItem('checkoutRedirectUrl', '/cart');
-      toastInfo('Please sign in to continue');
-      window.location.href = '/login?redirect=/cart';
+      // Sprint 3: Use router.visit
+      router.visit('/login?redirect=/cart', {
+        preserveScroll: false
+      });
     } else {
-      // Go directly to cart
-      window.location.href = '/cart';
+      router.visit('/cart', {
+        preserveScroll: false
+      });
     }
   }
 

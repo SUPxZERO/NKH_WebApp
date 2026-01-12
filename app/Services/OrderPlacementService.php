@@ -155,11 +155,11 @@ class OrderPlacementService
 
             return $order;
         });
-        
+
         // FIX Issue #7: Send notifications AFTER transaction commits
         // This prevents holding DB locks during slow external API calls (Telegram, Email, Pusher)
         $this->sendNotifications($order);
-        
+
         return $order;
     }
 

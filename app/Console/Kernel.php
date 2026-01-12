@@ -27,6 +27,12 @@ class Kernel extends ConsoleKernel
             ->daily()
             ->at('00:01')
             ->appendOutputTo(storage_path('logs/timeslots.log'));
+        
+        // Sprint 1: Clean up expired sessions daily
+        $schedule->command('sessions:cleanup --hours=24')
+            ->daily()
+            ->at('02:00')
+            ->withoutOverlapping();
     }
 
     /**

@@ -72,17 +72,13 @@ class IngredientSeeder extends Seeder
             ['code' => 'BEV-002', 'name' => 'Coffee Beans', 'category' => 'beverages', 'unit_id' => $kgUnit->id, 'supplier_id' => $suppliers[0]->id, 'cost_per_unit' => 18.00, 'current_stock' => 10, 'min_stock_level' => 2, 'max_stock_level' => 25, 'reorder_point' => 5],
         ];
 
-        $location = \App\Models\Location::first();
-        $locationId = $location ? $location->id : 1;
-
         foreach ($ingredients as $ingredient) {
             $data = array_diff_key($ingredient, ['code' => '']);
-            $data['location_id'] = $locationId;
+            // Ingredients are global, not per-location
 
             Ingredient::updateOrCreate(
                 [
                     'code' => $ingredient['code'],
-                    'location_id' => $locationId
                 ], 
                 $data
             );

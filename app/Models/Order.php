@@ -140,6 +140,14 @@ class Order extends Model
     }
 
     /**
+     * Inventory deductions linked to this order (for audit trail)
+     */
+    public function inventoryDeductions()
+    {
+        return $this->hasMany(InventoryOrderDeduction::class);
+    }
+
+    /**
      * Check if this is a guest order (via Telegram without customer account)
      */
     public function isGuestOrder(): bool

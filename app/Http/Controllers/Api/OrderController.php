@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse; // FIX: Phase 4 - Standardized responses
 use App\Http\Requests\Api\Order\StoreOrderItemRequest;
 use App\Http\Requests\Api\Order\StoreOrderRequest;
 use App\Http\Requests\Api\Order\UpdateOrderItemRequest;
@@ -27,6 +28,7 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
+    use ApiResponse; // FIX: Phase 4 - Standardized responses
     protected $loyaltyService;
     protected $calculationService;
 
@@ -48,13 +50,22 @@ class OrderController extends Controller
         }
 
         $employee = Employee::where('user_id', $request->user()->id)->firstOrFail();
-        $table = DiningTable::findOrFail($data['table_id']);
+        $employee = Employee::where('user_id', $request->user()->id)->firstOrFail();
+        
+        // FIX Issue #14: Race Condition - Lock the table row to prevent double booking
+        // Must happen inside the transaction, so we move table retrieval inside
+        
+        $order = DB::transaction(function () use ($employee, $data) {
+            // Lock table for update to prevent concurrent bookings
+            $table = DiningTable::where('id', $data['table_id'])->lockForUpdate()->find($data['table_id']);
+            
+            if (!$table) {
+                abort(404, 'Table not found.');
+            }
 
-        if ($table->status !== 'available') {
-            return response()->json(['message' => 'Table is currently occupied.'], 409);
-        }
-
-        $order = DB::transaction(function () use ($employee, $table, $data) {
+            if ($table->status !== 'available') {
+                abort(409, 'Table is currently occupied.');
+            }
             $isEmployeeOrder = !empty($employee->id);
 
             $order = Order::create([
@@ -530,6 +541,14 @@ class OrderController extends Controller
     // DELETE /api/admin/orders/{order}
     public function destroy(Order $order): JsonResponse
     {
+        // FIX Issue #15: Missing Authorization
+        $this->authorize('delete', $order);
+
+        // Prevent deleting completed or paid orders (Data Integrity)
+        if ($order->status === 'completed' || $order->payment_status === 'paid') {
+            return response()->json(['message' => 'Cannot delete a completed or paid order.'], 409);
+        }
+
         $order->delete();
         return response()->json(['message' => 'Order deleted successfully.']);
     }

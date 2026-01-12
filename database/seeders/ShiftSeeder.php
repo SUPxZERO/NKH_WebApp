@@ -50,8 +50,8 @@ class ShiftSeeder extends Seeder
             $location = $locations->random();
             $position = $positions->isNotEmpty() ? $positions->random() : null;
             
-            // Create 5-7 shifts per employee in the next 14 days
-            $shiftDays = collect(range(0, 13))->random(rand(5, 7));
+            // Create shifts for past 30 days and future 14 days
+            $shiftDays = collect(range(-30, 13))->random(rand(20, 25));
             
             foreach ($shiftDays as $dayOffset) {
                 $date = $today->copy()->addDays($dayOffset);

@@ -26,21 +26,40 @@ class OrderItemSeeder extends Seeder
             foreach ($selectedItems as $menuItem) {
                 $quantity = rand(1, 3);
                 $unitPrice = $menuItem->price;
+                $costPrice = $menuItem->cost; // Capture cost at time of sale
                 $totalPrice = $unitPrice * $quantity;
                 
+                // 10% chance of internal notes (e.g., void, spill, complaint)
+                $notes = rand(1, 100) <= 5 ? $this->getInternalNotes() : null;
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'menu_item_id' => $menuItem->id,
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
+                    'cost_price' => $costPrice,
                     'total_price' => $totalPrice,
                     'special_instructions' => $this->getItemInstructions(),
+                    'notes' => $notes,
                 ]);
             }
             
             // Update order totals based on actual items
             $this->updateOrderTotals($order);
         }
+    }
+
+    private function getInternalNotes(): string
+    {
+        $notes = [
+            'Customer complained about temperature',
+            'Spilled in kitchen - remade',
+            'Complimentary item for birthday',
+            'Employee meal',
+            'Test order',
+            'Voided item re-entered',
+        ];
+        return $notes[array_rand($notes)];
     }
 
     private function getItemInstructions(): ?string

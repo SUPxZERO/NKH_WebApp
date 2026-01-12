@@ -1,4 +1,5 @@
 import React from 'react';
+import { router } from '@inertiajs/react'; // Sprint 3
 import { motion } from 'framer-motion';
 import { ArrowRight, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardFooter } from '@/app/components/ui/Card';
@@ -141,10 +142,9 @@ export function CartSummary({
                 </Button>
 
                 <Button
-                    variant="ghost"
-                    className="w-full"
+                    variant="outline"
                     size="sm"
-                    onClick={() => (window.location.href = '/menu')}
+                    onClick={() => router.visit('/menu')}
                 >
                     Continue Shopping
                 </Button>

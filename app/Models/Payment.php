@@ -18,34 +18,43 @@ class Payment extends Model
     const STATUS_REFUNDED = 'refunded';
     const STATUS_CANCELLED = 'cancelled';
 
-    protected $fillable = [
-        'uuid',
-        'invoice_id',
-        'payment_method_id',
-        'amount',
-        'tip',
-        'cash_received',
-        'change_given',
-        'confirmed_by',
-        'confirmed_at',
-        'currency',
-        'exchange_rate',
-        'amount_in_base_currency',
-        'transaction_id',
-        'reference_number',
-        'gateway_reference',
-        'qr_reference',
-        'status',
-        'failure_reason',
-        'initiated_at',
-        'processed_at',
-        'expires_at',
-        'ip_address',
-        'user_agent',
-        'device_fingerprint',
-        'metadata',
-        'retry_count',
-        'notes',
+    /**
+     * SECURITY: Use $guarded instead of $fillable to protect sensitive fields
+     * 
+     * These fields MUST NOT be settable via user input/API requests:
+     * - Financial: amount, tip, cash_received, change_given, amount_in_base_currency
+     * - Status: status (only service layer can update)
+     * - Confirmation: confirmed_by, confirmed_at (only authorized staff)
+     * - Gateway: gateway_reference, qr_reference (external system only)
+     * - System: uuid, processed_at, initiated_at, expires_at
+     * - Audit: retry_count, failure_reason
+     * - Security: ip_address, user_agent, device_fingerprint
+     * 
+     * Attack prevented: User sending {"status": "completed", "amount": 0.01}
+     */
+    protected $guarded = [
+        'id',
+        'uuid',                     // ⚠️ System-generated identifier
+        'amount',                   // ⚠️ CRITICAL: Cannot manipulate payment amount
+        'tip',                      // ⚠️ User input, but validated separately
+        'cash_received',            // ⚠️ Staff-only entry
+        'change_given',             // ⚠️ Calculated field
+        'confirmed_by',             // ⚠️ Set by auth system only
+        'confirmed_at',             // ⚠️ Set by auth system only
+        'amount_in_base_currency',  // ⚠️ Calculated based on exchange rate
+        'status',                   // ⚠️ CRITICAL: Only PaymentService can update
+        'failure_reason',           // ⚠️ System-set on failure
+        'processed_at',             // ⚠️ System timestamp
+        'initiated_at',             // ⚠️ System timestamp
+        'expires_at',               // ⚠️ System-calculated expiry
+        'retry_count',              // ⚠️ System-tracked retries
+        'gateway_reference',        // ⚠️ External system reference
+        'qr_reference',             // ⚠️ System-generated QR code
+        'ip_address',               // ⚠️ Server-captured
+        'user_agent',               // ⚠️ Server-captured
+        'device_fingerprint',       // ⚠️ Server-calculated
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

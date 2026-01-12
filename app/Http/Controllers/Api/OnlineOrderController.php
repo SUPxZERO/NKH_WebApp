@@ -7,17 +7,18 @@ use App\Http\Requests\Api\Customer\StoreAddressRequest;
 use App\Http\Requests\Api\OnlineOrder\StoreOnlineOrderRequest;
 use App\Http\Resources\CustomerAddressResource;
 use App\Http\Resources\OrderResource;
+use App\Http\Responses\ApiResponse; // Sprint 2A
 use App\Http\Traits\TelegramAwareAuth;
 use App\Models\Customer;
 use App\Models\TableSession;
 use App\Services\OrderPlacementService;
-use App\Services\TimeSlotService;
+ use App\Services\TimeSlotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class OnlineOrderController extends Controller
 {
-    use TelegramAwareAuth;
+    use TelegramAwareAuth, ApiResponse; // Sprint 2A
     
     protected $orderPlacementService;
     protected $timeSlotService;

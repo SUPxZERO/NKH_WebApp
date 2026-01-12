@@ -1,6 +1,7 @@
 
+
 import React from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useCartStore } from '@/app/store/cart';
@@ -12,14 +13,19 @@ import { Skeleton } from '@/app/components/ui/Loading';
 import { usePlaceOnlineOrder } from '@/app/hooks/useOrders';
 import { usePaymentModes } from '@/app/hooks/useOrderPayment';
 import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
-import { Banknote, CreditCard, ShoppingBag, Truck, ArrowLeft, ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import { Banknote, CreditCard, ShoppingBag, Truck, ArrowLeft, ChevronDown, ChevronUp, Clock, WifiOff } from 'lucide-react';
 import { OrderProgress } from '@/app/components/customer/OrderProgress';
 import { TimePicker } from '@/app/components/ui/TimePicker';
 import { useTableSession } from '@/app/hooks/useTableSession';
+import { useOnlineStatus } from '@/app/hooks/useOnlineStatus';
+import { useFormPersistence } from '@/app/hooks/useFormPersistence'; // Sprint 3 Phase 2
+import { LoadingButton } from '@/Components/ui/LoadingButton'; // Sprint 3 Phase 2
+
 
 export default function Checkout() {
   const cart = useCartStore();
   const { isTableOrder, session } = useTableSession();
+  const isOnline = useOnlineStatus(); // FIX: Phase 3 - Offline detection
 
   const { data: slots, isLoading: slotsLoading } = useTimeSlots(
     cart.mode === 'delivery' ? 'delivery' : 'pickup',
@@ -37,6 +43,16 @@ export default function Checkout() {
   const [scheduledTime, setScheduledTime] = React.useState<{ hour: number; minute: number; period: 'AM' | 'PM' } | null>(null);
 
   const placeOrder = usePlaceOnlineOrder();
+
+  // Sprint 3 Phase 2: Form persistence
+  const { restore, clear } = useFormPersistence({
+    key: 'checkout',
+    data: {
+      selectedPaymentMode,
+      scheduledTime
+    },
+    excludeFields: [] // No sensitive data in checkout
+  });
 
   // Helper to convert picker time to slot format
   const formatTimeForSlot = (time: { hour: number; minute: number; period: 'AM' | 'PM' }) => {
@@ -64,6 +80,20 @@ export default function Checkout() {
     // For pickup/delivery, paymentModes from backend will determine available options
     // Don't force pay_now - customer may want to pay at counter for pickup
   }, [cart.mode, isTableOrder]);
+
+  // Sprint 3 Phase 2: Restore form data on mount
+  React.useEffect(() => {
+    const saved = restore();
+    if (saved) {
+      if (saved.selectedPaymentMode && !isTableOrder) {
+        setSelectedPaymentMode(saved.selectedPaymentMode);
+      }
+      if (saved.scheduledTime) {
+        setScheduledTime(saved.scheduledTime);
+      }
+      toastSuccess('Checkout form restored');
+    }
+  }, []); // Only run once on mount
 
   // Initialize scheduled time when switching to "Schedule for Later"
   React.useEffect(() => {
@@ -163,21 +193,22 @@ export default function Checkout() {
       if (selectedPaymentMode === 'pay_now') {
         toastSuccess('Order placed! Redirecting to payment...');
         cart.clear(); // Clear cart immediately for pay_now
+        clear(); // Sprint 3 Phase 2: Clear saved form data
         setTimeout(() => {
-          window.location.href = `/payment?order_id=${orderId}`;
+          router.visit(`/payment?order_id=${orderId}`);
         }, 500);
       } else {
         // For pay later / pay at counter, redirect to order details/success page
         toastSuccess('Order placed successfully!');
         cart.clear(); // Clear cart (but session persists via cookie if table order)
+        clear(); // Sprint 3 Phase 2: Clear saved form data
         setTimeout(() => {
-          // If table order, go to status page or order details
-          window.location.href = `/customer/orders/${orderId}`;
+          router.visit(`/customer/orders/${orderId}`);
         }, 1000);
       }
 
     } catch (error: any) {
-      // ... existing error handling ...
+      // FIX: Phase 3 - Remove window.alert, show toast only
       console.error('❌ Order placement error:', error);
       console.error('Error response:', error?.response);
       console.error('Error data:', error?.response?.data);
@@ -194,8 +225,9 @@ export default function Checkout() {
         errorMsg = error.message;
       }
 
-      window.alert(`Order Failed: ${errorMsg}`);
+      // Removed: window.alert - use toast only
       toastError(errorMsg);
+      // Note: User can retry by clicking "Place Order" button again
     }
   }
 
@@ -501,16 +533,16 @@ export default function Checkout() {
                 </div>
               </CardContent>
               <CardFooter className="pt-0">
-                <Button
+                <LoadingButton
                   className="w-full"
                   size="lg"
                   onClick={onPlaceOrder}
                   disabled={isCheckoutDisabled}
+                  loading={placeOrder.isPending}
+                  loadingText="Placing Order..."
                 >
-                  {placeOrder.isPending ? 'Placing...' : (
-                    selectedPaymentMode === 'pay_now' ? 'Place & Pay Now' : 'Place Order'
-                  )}
-                </Button>
+                  {selectedPaymentMode === 'pay_now' ? 'Place & Pay Now' : 'Place Order'}
+                </LoadingButton>
               </CardFooter>
             </Card>
           </div>

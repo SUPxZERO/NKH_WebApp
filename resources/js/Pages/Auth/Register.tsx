@@ -124,7 +124,11 @@ export default function Register() {
 
             // Redirect to checkout
             setTimeout(() => {
-              window.location.href = redirectUrl;
+              // Sprint 3: Use router.visit instead of window.location.href
+              router.visit(redirectUrl, {
+                replace: true,
+                preserveScroll: false
+              });
             }, 500);
           }
           // Otherwise, default Inertia redirect will happen

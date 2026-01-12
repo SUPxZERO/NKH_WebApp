@@ -104,7 +104,9 @@ class UserSeeder extends Seeder
             ['name' => 'Sopheak Mao', 'email' => 'sopheak.mao@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Rachana Heng', 'email' => 'rachana.heng@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Sreyleak Kong', 'email' => 'sreyleak.kong@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Sreyleak Kong', 'email' => 'sreyleak.kong@nkhrestaurant.com', 'location' => 1],
             ['name' => 'Pisey Nhem', 'email' => 'pisey.nhem@nkhrestaurant.com', 'location' => 1],
+            ['name' => 'Head Chef', 'email' => 'chef@nkh.com', 'location' => 1], // Added for kitchen scenario
         ];
 
         foreach ($employees as $employeeData) {

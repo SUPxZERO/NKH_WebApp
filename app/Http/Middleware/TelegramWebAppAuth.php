@@ -39,10 +39,8 @@ class TelegramWebAppAuth
         $initData = $request->header('X-Telegram-Init-Data');
         
         if (!$initData) {
-            return response()->json([
-                'error' => 'Unauthorized',
-                'message' => 'Telegram authentication required'
-            ], 401);
+            // Allow request to proceed without Telegram auth (will be treated as guest)
+            return $next($request);
         }
 
         try {
@@ -125,8 +123,53 @@ class TelegramWebAppAuth
     {
         parse_str($initData, $data);
         
-        // In production, verify hash here
-        // For now, basic parsing
+        $botToken = config('services.telegram.bot_token');
+        
+        // Fail securely if bot token is not configured
+        if (!$botToken) {
+            Log::error('Telegram bot token not configured in services.telegram.bot_token');
+            return null;
+        }
+
+        // 1. Extract and remove hash
+        if (!isset($data['hash'])) {
+            Log::warning('Telegram auth data missing hash');
+            return null;
+        }
+        
+        $receivedHash = $data['hash'];
+        unset($data['hash']);
+        
+        // 2. Sort keys alphabetically
+        ksort($data);
+        
+        // 3. Create data check string: key=value\n
+        $dataCheckString = [];
+        foreach ($data as $key => $value) {
+            $dataCheckString[] = $key . '=' . $value;
+        }
+        $dataCheckString = implode("\n", $dataCheckString);
+        
+        // 4. Compute secret key: HMAC_SHA256(bot_token, "WebAppData")
+        $secretKey = hash_hmac('sha256', $botToken, "WebAppData", true);
+        
+        // 5. Compute hash: HMAC_SHA256(data_check_string, secret_key)
+        $computedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
+        
+        // 6. Verify hash timing-safe
+        if (!hash_equals($computedHash, $receivedHash)) {
+            Log::warning('Telegram auth hash mismatch', [
+                'computed' => $computedHash,
+                'received' => $receivedHash
+            ]);
+            return null;
+        }
+        
+        // 7. Verify auth_date (prevent replay attacks > 5 mins)
+        if (isset($data['auth_date']) && (time() - $data['auth_date'] > 300)) {
+            Log::warning('Telegram auth data expired');
+            return null;
+        }
         
         if (isset($data['user'])) {
             return json_decode($data['user'], true);
