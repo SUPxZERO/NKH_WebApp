@@ -9,7 +9,8 @@ class ShiftTemplate extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'location_id',
         'position_id',
         'name',
@@ -17,6 +18,8 @@ class ShiftTemplate extends Model
         'start_time',
         'end_time',
         'is_active',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

@@ -5136,4 +5136,16 @@ INSERT INTO `users` (`id`, `name`, `email`, `role`, `telegram_id`, `phone`, `add
 (27, 'Sokny Phan', 'sokny.phan@gmail.com', 'customer', NULL, '+855-89-374-156', NULL, NULL, NULL, NULL, NULL, '2026-01-12 09:56:04', NULL, '$2y$12$1uFp9F4DLvKc4nhvMNUX9...duHtRIyZzU6aZE5X4.qun/LVcZsCa', NULL, 1, 0, NULL, NULL, 0, NULL, NULL, 1, '2026-01-12 09:56:04', '2026-01-12 09:56:04', NULL),
 (28, 'Sothy Chan', 'sothy.chan@gmail.com', 'customer', NULL, '+855-35-376-753', NULL, NULL, NULL, NULL, NULL, '2026-01-12 09:56:04', NULL, '$2y$12$UgE1gqcsVSfuieOtQ1EgGeeT3/FK4nWoT8NsfyrVnlWHre4GnnADe', NULL, 1, 0, NULL, NULL, 0, NULL, NULL, 1, '2026-01-12 09:56:04', '2026-01-12 09:56:04', NULL),
 (29, 'Nita Heng', 'nita.heng@gmail.com', 'customer', NULL, '+855-41-397-840', NULL, NULL, NULL, NULL, NULL, '2026-01-12 09:56:04', NULL, '$2y$12$C8LAUZjJTrNmMHXvuW/JfuAjvk7DPIrtMY7U9lsM8k./mctv9p81i', NULL, 1, 0, NULL, NULL, 0, NULL, NULL, 1, '2026-01-12 09:56:04', '2026-01-12 09:56:04', NULL),
-(30, 'Alex Johnson', 'alex.johnson@gmail.com', 'customer', NULL, '+855-39-664-130', NULL, NULL, NULL, NULL, NULL, '2026-01-12
+(30, 'Alex Johnson', 'alex.johnson@gmail.com', 'customer', NULL, '+855-39-664-130', NULL, NULL, NULL, NULL, NULL, '2026-01-12 09:56:05', NULL, '$2y$12$oZTydKmFlrZDzT7Puu8P2uzYMQUixZ3aW1V.N8jPZgVvKw2HGNxTi', NULL, 1, 0, NULL, NULL, 0, NULL, NULL, 2, '2026-01-12 09:56:05', '2026-01-12 09:56:05', NULL),
+(31, 'Vanna Oum', 'vanna.oum@gmail.com', 'customer', NULL, '+855-36-801-530', NULL, NULL, NULL, NULL, NULL, '2026-01-12 09:56:05', NULL, '$2y$12$CQPea5D.k8uGGt4ornOfq.j1UwsTLZOdlbqwlGzPuJaz7C81cjaFq', NULL, 1, 0, NULL, NULL, 0, NULL, NULL, 1, '2026-01-12 09:56:05', '2026-01-12 09:56:05', NULL),
+(32, 'Sample Customer', 'customer@example.com', 'customer', NULL, '+855 98 765 432', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '$2y$12$v6sbUkSaDZqqICgKC8OCruTkJ5R0MRQcl8hNRnRyzTnwoz6h6YHtK', NULL, 1, 0, NULL, NULL, 0, NULL, NULL, 1, '2026-01-12 09:56:05', '2026-01-12 09:56:05', NULL),
+(33, 'Ratha Meng', 'ratha.meng@nkhrestaurant.com', 'customer', NULL, '+855-69-115-557', NULL, NULL, NULL, NULL, NULL, '2026-01-12 09:56:06', NULL, '$2y$12$hDZ4zkBWBmlS300b3HsNnOzl93y4q/MM1HtJ.M8MLMFfiNbuyXWci', NULL, 1, 0, NULL, NULL, 0, NULL, NULL, 1, '2026-01-12 09:56:06', '2026-01-12 09:56:06', NULL);
+
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

@@ -9,11 +9,14 @@ class Floor extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'location_id',
         'name',
         'display_order',
         'is_active',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

@@ -13,19 +13,18 @@ class Expense extends Model
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
     
-    protected $fillable = [
-        'location_id',
-        'expense_category_id',
-        'created_by',
-        'expense_date',
-        'amount',
-        'currency',
-        'vendor_name',
-        'reference',
-        'description',
-        'attachment_path',
-        'status',
+    
+    /**
+     * SECURITY: Protect expense amounts and approval status
+     */
+    protected $guarded = [
+        'id',
+        'amount',               // ⚠️ CRITICAL: Expense amount
+        'status',               // ⚠️ Workflow (\u0026 approval)
+        'created_at',
+        'updated_at',
     ];
+
     
     public function scopeApproved($query)
     {

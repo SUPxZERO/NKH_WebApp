@@ -9,11 +9,14 @@ class MenuItemTranslation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'menu_item_id',
         'locale',
         'name',
         'description',
+            'created_at',
+        'updated_at',
     ];
 
     public function menuItem()

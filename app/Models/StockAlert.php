@@ -9,7 +9,8 @@ class StockAlert extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'type',
         'ingredient_id',
         'location_id',
@@ -18,6 +19,8 @@ class StockAlert extends Model
         'acknowledged',
         'acknowledged_at',
         'acknowledged_by'
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

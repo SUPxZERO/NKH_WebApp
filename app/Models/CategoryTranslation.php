@@ -9,11 +9,14 @@ class CategoryTranslation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'category_id',
         'locale',
         'name',
         'description',
+            'created_at',
+        'updated_at',
     ];
 
     public function category()

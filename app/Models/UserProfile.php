@@ -10,7 +10,8 @@ class UserProfile extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'user_id',
         'customer_code',
         'birth_date',
@@ -26,6 +27,8 @@ class UserProfile extends Model
         'last_order_at',
         'total_spent',
         'total_orders',
+            'created_at',
+        'updated_at',
     ];
 
     /**

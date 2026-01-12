@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SupportTicket extends Model
 {
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'user_id',
         'category',
         'subject',
@@ -16,6 +17,8 @@ class SupportTicket extends Model
         'admin_notes',
         'resolved_at',
         'resolved_by',
+            'created_at',
+        'updated_at',
     ];
     
     protected $casts = [

@@ -10,13 +10,16 @@ class TelegramOrderNotification extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'order_id',
         'telegram_user_id',
         'status',
         'message',
         'sent',
         'sent_at',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

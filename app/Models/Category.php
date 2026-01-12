@@ -14,13 +14,15 @@ class Category extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'location_id',
-        'parent_id',
-        'slug',
-        'display_order',
-        'is_active',
-        'image',
+    /**
+     * SECURITY: Minimal guarding for Category (mostly admin-editable)
+     * Only protect system-critical fields
+     */
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     protected $with = ['translations'];

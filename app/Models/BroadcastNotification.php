@@ -11,7 +11,8 @@ class BroadcastNotification extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'title',
         'message',
         'type',
@@ -20,6 +21,8 @@ class BroadcastNotification extends Model
         'action_url',
         'recipient_count',
         'created_by',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

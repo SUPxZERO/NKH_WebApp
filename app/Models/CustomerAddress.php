@@ -9,7 +9,8 @@ class CustomerAddress extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'customer_id',
         'telegram_user_id',
         'label',
@@ -22,6 +23,8 @@ class CustomerAddress extends Model
         'longitude',
         'delivery_instructions',
         'is_default',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

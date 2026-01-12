@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CartItem extends Model
 {
-    protected $fillable = [
-        'customer_id',
-        'menu_item_id',
-        'quantity',
-        'notes',
-        'customizations',
+    /**
+     * SECURITY: Minimal guarding for cart items (ephemeral data)
+     */
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

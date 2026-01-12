@@ -9,7 +9,8 @@ class TimeOffBalance extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'employee_id',
         'year',
         'vacation_hours_available',
@@ -18,6 +19,8 @@ class TimeOffBalance extends Model
         'sick_hours_used',
         'personal_hours_available',
         'personal_hours_used',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

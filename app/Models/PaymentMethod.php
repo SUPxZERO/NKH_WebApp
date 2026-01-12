@@ -9,7 +9,8 @@ class PaymentMethod extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'name',
         'code',
         'type',
@@ -17,6 +18,8 @@ class PaymentMethod extends Model
         'is_active',
         'processing_fee',
         'description'
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

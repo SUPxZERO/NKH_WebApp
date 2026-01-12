@@ -11,12 +11,15 @@ class Inventory extends Model
 
     protected $table = 'inventory';
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'ingredient_id',
         'location_id',
         'quantity',
         'batch_number',
         'expiration_date'
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

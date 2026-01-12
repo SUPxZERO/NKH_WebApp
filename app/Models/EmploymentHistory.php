@@ -13,7 +13,8 @@ class EmploymentHistory extends Model
 
     public $timestamps = false;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'employee_id',
         'action',
         'previous_value',
@@ -22,6 +23,8 @@ class EmploymentHistory extends Model
         'effective_date',
         'notes',
         'created_at',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

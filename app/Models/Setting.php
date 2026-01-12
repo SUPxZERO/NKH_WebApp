@@ -9,10 +9,13 @@ class Setting extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'location_id',
         'key',
         'value',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

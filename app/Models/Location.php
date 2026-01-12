@@ -20,23 +20,17 @@ class Location extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'code',
-        'name',
-        'address_line1',
-        'address_line2',
-        'city',
-        'state',
-        'postal_code',
-        'country',
-        'phone',
-        'is_active',
-        'accepts_online_orders',
-        'accepts_pickup',
-        'accepts_delivery',
-        'latitude',
-        'longitude',
+    /**
+     * SECURITY: Minimal guarding for Location (business configuration)
+     * Protect system-generated code
+     */
+    protected $guarded = [
+        'id',
+        'code',                 // ⚠️ System-generated location code
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'is_active' => 'boolean',

@@ -9,13 +9,16 @@ class PayrollDetail extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'payroll_id',
         'type',
         'description',
         'amount',
         'percentage',
         'notes',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

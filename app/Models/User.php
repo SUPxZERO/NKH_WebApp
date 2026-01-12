@@ -19,22 +19,22 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable (Phase 3 updated).
-     *
-     * @var list<string>
+     * SECURITY: Protect authentication and verification fields
+     * 
+     * Protected fields:
+     * - Auth: password, remember_token (Laravel auth)
+     * - Verification: email_verified_at, phone_verified_at
+     * - System: last_login_at
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'telegram_id',
-        'password',
-        'role',
-        'avatar',
-        'avatar_url',
-        'image_path',
-        'default_location_id',
-        'is_active',
+    protected $guarded = [
+        'id',
+        'password',                 // ⚠️ CRITICAL: Hashed password
+        'remember_token',           // ⚠️ CRITICAL: Auth token  
+        'email_verified_at',        // ⚠️ Verification system only
+        'phone_verified_at',        // ⚠️ Verification system only
+        'last_login_at',            // ⚠️ System-tracked
+        'created_at',
+        'updated_at',
     ];
 
     /**

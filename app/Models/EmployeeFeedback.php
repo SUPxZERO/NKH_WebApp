@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmployeeFeedback extends Model
 {
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'user_id',
         'shift_id',
         'type',
@@ -17,6 +18,8 @@ class EmployeeFeedback extends Model
         'admin_response',
         'reviewed_at',
         'reviewed_by',
+            'created_at',
+        'updated_at',
     ];
     
     protected $casts = [

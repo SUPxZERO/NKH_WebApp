@@ -9,12 +9,19 @@ class AuditLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'action',
-        'ip_address',
-        'user_agent',
-        'metadata',
+    /**
+     * SECURITY: Audit logs are append-only (never editable)
+     * All fields protected to ensure audit trail integrity
+     */
+    protected $guarded = [
+        'id',
+        'user_id',              // ⚠️ CRITICAL: Who performed action
+        'action',               // ⚠️ CRITICAL: What was done
+        'ip_address',           // ⚠️ Audit trail
+        'user_agent',           // ⚠️ Audit trail
+        'metadata',             // ⚠️ Audit details
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

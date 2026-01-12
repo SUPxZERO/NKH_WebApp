@@ -10,22 +10,22 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'location_id',
-        'table_id',
-        'customer_id',
-        'code',
-        'reservation_number',
-        'reserved_for',
-        'party_size',
-        'reservation_date',
-        'reservation_time',
-        'duration_minutes',
-        'guest_count',
-        'status',
-        'special_requests',
-        'notes',
+    /**
+     * SECURITY: Use $guarded to protect reservation system fields
+     * 
+     * Protected fields:
+     * - System: code, reservation_number (auto-generated)
+     * - Workflow: status (managed by reservation service)
+     */
+    protected $guarded = [
+        'id',
+        'code',                 // ⚠️ System-generated code
+        'reservation_number',   // ⚠️ System-generated number
+        'status',               // ⚠️ Workflow-managed (pending/confirmed/completed/cancelled/no-show)
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'reservation_date' => 'date',

@@ -10,7 +10,8 @@ class UserNotification extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'user_id',
         'broadcast_notification_id',
         'type',
@@ -21,6 +22,8 @@ class UserNotification extends Model
         'target_metadata',
         'read',
         'read_at',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

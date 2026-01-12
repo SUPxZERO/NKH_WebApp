@@ -20,16 +20,14 @@ class CustomerFactory extends Factory
         return [
             'user_id' => User::factory(),
             'preferred_location_id' => $location?->id,
-            'customer_code' => $this->faker->unique()->regexify('[A-Z]{2}[0-9]{4}'),
+            // customer_code auto-generated in model boot()
             'birth_date' => $this->faker->optional()->date(),
             'gender' => $this->faker->randomElement(['male','female','other']),
-            'loyalty_points' => $this->faker->numberBetween(0, 1000),
-            'total_spent' => $this->faker->randomFloat(2, 0, 5000),
-            'preferred_language' => $this->faker->randomElement(['en', 'es', 'fr']),
-            'dietary_preferences' => $this->faker->randomElements(['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'nut-free'], $this->faker->numberBetween(0, 3)),
+            // loyalty_points, total_spent, points_balance are guarded (system-managed)
+            'preferred_language' => $this->faker->randomElement(['en', 'km']),
+            'dietary_preferences' => $this->faker->randomElements(['vegetarian', 'vegan', 'gluten-free'], $this->faker->numberBetween(0, 2)),
             'marketing_consent' => $this->faker->boolean(),
             'preferences' => [],
-            'points_balance' => 0,
             'notes' => $this->faker->optional()->sentence(),
         ];
     }

@@ -8,19 +8,24 @@ class PaymentAuditLog extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = [
-        'payment_id',
-        'action',
-        'old_status',
-        'new_status',
-        'amount_change',
-        'performed_by',
-        'actor_type',
-        'ip_address',
-        'user_agent',
-        'metadata',
-        'notes',
-        'created_at',
+    /**
+     * SECURITY: Payment audit logs are append-only
+     * All fields protected for audit trail integrity
+     */
+    protected $guarded = [
+        'id',
+        'payment_id',           // ⚠️ CRITICAL: Which payment
+        'action',               // ⚠️ CRITICAL: What happened  
+        'old_status',           // ⚠️ Audit trail
+        'new_status',           // ⚠️ Audit trail
+        'amount_change',        // ⚠️ Financial audit
+        'performed_by',         // ⚠️ Who did it
+        'actor_type',           // ⚠️ User/system/webhook
+        'ip_address',           // ⚠️ Audit trail
+        'user_agent',           // ⚠️ Audit trail
+        'metadata',             // ⚠️ Audit details
+        'notes',                // ⚠️ Audit notes
+        'created_at',           // ⚠️ When
     ];
 
     protected $casts = [

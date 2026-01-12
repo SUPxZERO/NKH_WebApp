@@ -9,7 +9,8 @@ class InventoryAdjustment extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'ingredient_id',
         'location_id',
         'quantity_before',
@@ -25,6 +26,8 @@ class InventoryAdjustment extends Model
         'rejected_by',
         'rejected_at',
         'rejection_reason'
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

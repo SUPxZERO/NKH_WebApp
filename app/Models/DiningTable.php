@@ -20,15 +20,23 @@ class DiningTable extends Model
     const STATUS_OCCUPIED = 'occupied';
     const STATUS_UNAVAILABLE = 'unavailable';
 
-    protected $fillable = [
-        'floor_id',
-        'code',
-        'capacity',
-        'status',
-        'qr_token',
-        'qr_generated_at',
-        'qr_url',
+    /**
+     * SECURITY: Protect QR code security and table status workflow
+     * 
+     * Protected fields:
+     * - Security: qr_token, qr_generated_at (security-sensitive)
+     * - Workflow: status (occupancy management)
+     */
+    protected $guarded = [
+        'id',
+        'qr_token',             // ⚠️ CRITICAL: Security token (HMAC signed)
+        'qr_generated_at',      // ⚠️ Timestamp for QR validity
+        'qr_url',               // ⚠️ Generated URL
+        'status',               // ⚠️ Workflow-managed (available/reserved/occupied/unavailable)
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'qr_generated_at' => 'datetime',

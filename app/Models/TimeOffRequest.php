@@ -10,7 +10,8 @@ class TimeOffRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'employee_id',
         'type',
         'start_date',
@@ -22,6 +23,8 @@ class TimeOffRequest extends Model
         'approved_by',
         'approval_notes',
         'approved_at',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

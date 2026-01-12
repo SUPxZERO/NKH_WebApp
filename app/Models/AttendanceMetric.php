@@ -9,7 +9,8 @@ class AttendanceMetric extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'employee_id',
         'attendance_id',
         'minutes_late',
@@ -18,6 +19,8 @@ class AttendanceMetric extends Model
         'total_shift_hours',
         'overtime_hours',
         'notes',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

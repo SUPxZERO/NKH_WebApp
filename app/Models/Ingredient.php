@@ -8,24 +8,23 @@ use Illuminate\Database\Eloquent\Model;
 class Ingredient extends Model
 {
 
-    protected $fillable = [
-        'code',
-        'location_id', // Added location_id
-        'name',
-        'description',
-        'category',
-        'unit_id',
-        'supplier_id',
-        'cost_per_unit',
-        'current_stock',
-        'min_stock_level',
-        'max_stock_level',
-        'reorder_point',
-        'storage_requirements',
-        'allergens',
-        'shelf_life_days',
-        'is_active',
+    /**
+     * SECURITY: Use $guarded to protect inventory financial data
+     * 
+     * Protected fields:
+     * - Financial: cost_per_unit (pricing data)
+     * - Inventory: current_stock (system-tracked)
+     * - System: code (auto-generated)
+     */
+    protected $guarded = [
+        'id',
+        'code',                 // ⚠️ System-generated identifier
+        'cost_per_unit',        // ⚠️ CRITICAL: Supplier pricing
+        'current_stock',        // ⚠️ System-tracked (inventory transactions)
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'cost_per_unit' => 'decimal:2',

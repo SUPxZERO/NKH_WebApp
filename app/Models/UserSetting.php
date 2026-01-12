@@ -10,7 +10,8 @@ class UserSetting extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'user_id',
         // Notifications
         'notification_order_updates',
@@ -25,6 +26,8 @@ class UserSetting extends Model
         // Appearance & Language
         'theme',
         'language',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

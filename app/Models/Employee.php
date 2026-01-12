@@ -22,27 +22,25 @@ use Illuminate\Database\Eloquent\Model;
 class Employee extends Model
 {
 
-    protected $fillable = [
-        'user_id',
-        'position_id',
-        'location_id',
-        'employee_code',
-        'hire_date',
-        'salary_type',
-        'salary',
-        'address',
-        'status',
-        'employment_status',
-        // Work preferences
-        'preferred_stations',
-        'preferred_shifts',
-        'available_days',
-        'max_hours_per_week',
-        // Emergency contact
-        'emergency_contact_name',
-        'emergency_contact_phone',
-        'emergency_contact_relation',
+    /**
+     * SECURITY: Use $guarded to protect employee financial and HR data
+     * 
+     * Protected fields:
+     * - Financial: salary (sensitive compensation data)
+     * - System: employee_code (auto-generated identifier)
+     * - HR: employment_status (workflow-managed)
+     * - Audit: hire_date (HR records only)
+     */
+    protected $guarded = [
+        'id',
+        'employee_code',        // ⚠️ System-generated
+        'salary',               // ⚠️ CRITICAL: Compensation privacy
+        'hire_date',            // ⚠️ HR records only
+        'employment_status',    // ⚠️ Workflow-managed
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'hire_date' => 'date',

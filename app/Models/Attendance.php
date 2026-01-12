@@ -17,12 +17,15 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'employee_id',
         'location_id',
         'clock_in_at',
         'clock_out_at',
         'notes',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

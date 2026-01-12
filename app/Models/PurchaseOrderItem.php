@@ -9,7 +9,8 @@ class PurchaseOrderItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'purchase_order_id',
         'ingredient_id',
         'quantity_ordered',
@@ -19,6 +20,8 @@ class PurchaseOrderItem extends Model
         'discount_amount',
         'total',
         'status',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

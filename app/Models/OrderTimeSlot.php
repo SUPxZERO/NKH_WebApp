@@ -9,13 +9,16 @@ class OrderTimeSlot extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'location_id',
         'slot_date',
         'slot_start_time',
         'slot_type',
         'max_orders',
         'current_orders',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

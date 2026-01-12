@@ -9,7 +9,8 @@ class Recipe extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'menu_item_id',
         'name',
         'description',
@@ -20,6 +21,8 @@ class Recipe extends Model
         'yield_portions',
         'is_active',
         'total_cost',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

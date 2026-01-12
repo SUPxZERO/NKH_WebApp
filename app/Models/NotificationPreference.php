@@ -10,11 +10,14 @@ class NotificationPreference extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'user_id',
         'channel',
         'type',
         'enabled',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

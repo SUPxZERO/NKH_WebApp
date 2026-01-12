@@ -21,16 +21,20 @@ class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'employee_id',
-        'period_start',
-        'period_end',
-        'gross_pay',
-        'bonuses',
-        'deductions',
-        'net_pay',
-        'status',
-        'paid_at',
+    /**
+     * SECURITY: Protect payroll calculations
+     * All salary amounts are system-calculated and workflow-managed
+     */
+    protected $guarded = [
+        'id',
+        'gross_pay',            // ⚠️ CRITICAL: Calculated salary
+        'bonuses',              // ⚠️ CRITICAL: Bonus amounts
+        'deductions',           // ⚠️ CRITICAL: Deduction amounts
+        'net_pay',              // ⚠️ CRITICAL: Final pay (gross + bonuses - deductions)
+        'status',               // ⚠️ Workflow (draft/approved/paid)
+        'paid_at',              // ⚠️ Payment timestamp
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

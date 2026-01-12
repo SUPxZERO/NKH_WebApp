@@ -43,6 +43,8 @@ class Order extends Model
         'id',
         'payment_status',           // ⚠️ CRITICAL: Must be set by PaymentService only
         'status',                   // ⚠️ Set by workflow, not user
+        'order_type_id',            // ⚠️ Lookup ID
+        'order_status_id',          // ⚠️ Lookup ID
         'approved_by',              // ⚠️ Set by auth system
         'approved_at',
         'payment_collected_by',
@@ -91,6 +93,16 @@ class Order extends Model
     public function driver()
     {
         return $this->belongsTo(User::class, 'driver_id');
+    }
+
+    public function orderType()
+    {
+        return $this->belongsTo(OrderType::class);
+    }
+
+    public function orderStatus()
+    {
+        return $this->belongsTo(OrderStatus::class);
     }
 
     public function items()

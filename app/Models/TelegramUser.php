@@ -10,7 +10,8 @@ class TelegramUser extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'customer_id',
         'telegram_id',
         'telegram_username',
@@ -25,6 +26,8 @@ class TelegramUser extends Model
         'is_active',
         'notifications_enabled',
         'last_interaction_at',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

@@ -9,21 +9,24 @@ class Shift extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'employee_id',
-        'position_id',
-        'location_id',
-        'date',
-        'start_time',
-        'end_time',
-        'shift_type',
-        'status',
-        'notes',
-        'actual_start_time',
-        'actual_end_time',
-        'calculated_hours',
-        'published_at',
+    /**
+     * SECURITY: Use $guarded to protect shift payroll data
+     * 
+     * Protected fields:
+     * - Payroll: calculated_hours, actual_start_time, actual_end_time (time tracking system)
+     * - Workflow: status, published_at (manager-only actions)
+     */
+    protected $guarded = [
+        'id',
+        'calculated_hours',      // ⚠️ System-calculated for payroll
+        'actual_start_time',     // ⚠️ Time clock system only
+        'actual_end_time',       // ⚠️ Time clock system only
+        'status',                // ⚠️ Workflow-managed (scheduled/in-progress/completed/cancelled)
+        'published_at',          // ⚠️ Manager-only publish action
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $table = 'shifts';
 

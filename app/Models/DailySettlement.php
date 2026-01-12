@@ -9,26 +9,30 @@ class DailySettlement extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'location_id',
-        'settlement_date',
-        'total_orders',
-        'total_revenue',
-        'total_refunds',
-        'net_revenue',
-        'cash_total',
-        'card_total',
-        'qr_total',
-        'other_total',
-        'usd_total',
-        'khr_total',
-        'status',
-        'discrepancy_amount',
-        'reconciled_by',
-        'reconciled_at',
-        'notes',
-        'metadata',
+
+    /**
+     * SECURITY: Protect all financial totals (system-calculated)
+     */
+    protected $guarded = [
+        'id',
+        'total_orders',         // ⚠️ CRITICAL
+        'total_revenue',        // ⚠️ CRITICAL
+        'total_refunds',        // ⚠️ CRITICAL
+        'net_revenue',          // ⚠️ CRITICAL
+        'cash_total',           // ⚠️ CRITICAL
+        'card_total',           // ⚠️ CRITICAL
+        'qr_total',             // ⚠️ CRITICAL  
+        'other_total',          // ⚠️ CRITICAL
+        'usd_total',            // ⚠️ CRITICAL
+        'khr_total',            // ⚠️ CRITICAL
+        'discrepancy_amount',   // ⚠️ CRITICAL
+        'status',               // ⚠️ Workflow
+        'reconciled_by',        // ⚠️ Manager
+        'reconciled_at',        // ⚠️ Timestamp
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'settlement_date' => 'date',

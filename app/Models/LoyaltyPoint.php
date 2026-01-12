@@ -9,16 +9,22 @@ class LoyaltyPoint extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'customer_id',
-        'order_id',
-        'location_id',
-        'type',
-        'points',
-        'balance_after',
-        'occurred_at',
-        'notes',
+    /**
+     * SECURITY: Protect loyalty point balance calculations
+     * 
+     * Protected fields:
+     * - Financial: points, balance_after (system-calculated)
+     * - Audit: occurred_at (timestamp of transaction)
+     */
+    protected $guarded = [
+        'id',
+        'points',               // ⚠️ CRITICAL: Point amount (can be +/-)
+        'balance_after',        // ⚠️ CRITICAL: Running balance
+        'occurred_at',          // ⚠️ Transaction timestamp
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'occurred_at' => 'datetime',

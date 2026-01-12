@@ -9,7 +9,8 @@ class Unit extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'code',
         'name',
         'display_name', 
@@ -20,7 +21,9 @@ class Unit extends Model
         'for_volume', 
         'for_quantity',
         'for_packaging',
-        'for_produce'
+        'for_produce',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

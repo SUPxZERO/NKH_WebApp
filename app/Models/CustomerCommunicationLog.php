@@ -12,7 +12,8 @@ class CustomerCommunicationLog extends Model
     protected $table = 'customer_communication_log';
     public $timestamps = false;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'customer_id',
         'type',
         'category',
@@ -24,6 +25,8 @@ class CustomerCommunicationLog extends Model
         'clicked_at',
         'status',
         'metadata',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

@@ -28,6 +28,7 @@ class Customer extends Model
         'total_spent',              // ⚠️ CRITICAL: Financial manipulation
         'average_order_value',      // ⚠️ System-calculated metric
         'customer_tier',            // ⚠️ System-calculated or admin-override only
+        'loyalty_tier_id',          // ⚠️ Lookup table ID
         'visit_count',              // ⚠️ System-tracked engagement
         'last_visit_date',          // ⚠️ System-tracked timestamp
         'last_purchase_date',       // ⚠️ System-tracked timestamp
@@ -40,6 +41,11 @@ class Customer extends Model
         'updated_at',
     ];
 
+    
+    public function loyaltyTier()
+    {
+        return $this->belongsTo(LoyaltyTier::class);
+    }
 
     protected $casts = [
         'birth_date' => 'date',
@@ -60,6 +66,18 @@ class Customer extends Model
         'tags' => 'array',
         'no_show_count' => 'integer',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Auto-generate customer_code if not provided (since it's guarded)
+        static::creating(function ($customer) {
+            if (empty($customer->customer_code)) {
+                $customer->customer_code = static::generateCustomerCode();
+            }
+        });
+    }
 
     // Existing relationships
     public function user()

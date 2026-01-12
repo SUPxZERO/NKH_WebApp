@@ -9,7 +9,8 @@ class LeaveRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'employee_id',
         'location_id',
         'start_date',
@@ -17,6 +18,8 @@ class LeaveRequest extends Model
         'type',
         'reason',
         'status',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

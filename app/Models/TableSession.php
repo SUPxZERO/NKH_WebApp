@@ -26,7 +26,8 @@ class TableSession extends Model
     // Session expiry time in hours
     const EXPIRY_HOURS = 4;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'table_id',
         'session_token',
         'customer_id',
@@ -39,6 +40,8 @@ class TableSession extends Model
         'started_at',
         'last_activity_at',
         'closed_at',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

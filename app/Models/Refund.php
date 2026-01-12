@@ -9,20 +9,22 @@ class Refund extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'payment_id',
-        'amount',
-        'reason',
-        'status',
-        'initiated_by',
-        'approved_by',
-        'approved_at',
-        'processed_at',
-        'gateway_reference',
-        'rejection_reason',
-        'notes',
-        'metadata',
+
+    /**
+     * SECURITY: Protect refund workflow and amounts
+     */
+    protected $guarded = [
+        'id',
+        'amount',               // ⚠️ CRITICAL: Refund amount
+        'status',               // ⚠️ Workflow
+        'approved_by',          // ⚠️ Manager approval
+        'approved_at',          // ⚠️ Timestamp
+        'processed_at',         // ⚠️ Timestamp
+        'gateway_reference',    // ⚠️ Gateway response
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'amount' => 'decimal:2',

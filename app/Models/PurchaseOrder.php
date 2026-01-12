@@ -9,17 +9,17 @@ class PurchaseOrder extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'location_id',
-        'supplier_id',
-        'created_by',
-        'po_number',
-        'order_date',
-        'expected_delivery_date',
-        'received_date',
-        'status',
-        'total_amount',
-        'notes',
+    /**
+     * SECURITY: Protect purchase order amounts and tracking numbers
+     */
+    protected $guarded = [
+        'id',
+        'po_number',            // ⚠️ System-generated  
+        'total_amount',         // ⚠️ CRITICAL: Purchase total
+        'status',               // ⚠️ Workflow (draft/submitted/received)
+        'received_date',        // ⚠️ System timestamp
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

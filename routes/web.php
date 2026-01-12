@@ -131,11 +131,9 @@ Route::prefix('employee')->middleware('auth', 'role:employee,admin,manager,waite
 // Support multiple admin roles: super-admin, admin, and specific manager roles
 Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,service-manager,finance-manager,hr-manager,inventory-manager,operations-manager,viewer'])->group(function () {
     // Dashboard & Overview
-    Route::get('dashboard', fn() => Inertia::render('admin/Dashboard', [
-        'analyticsEndpoint' => '/api/admin/dashboard/analytics',
-        'orderStatsEndpoint' => '/api/admin/dashboard/orders/stats',
-        'revenueEndpoint' => '/api/admin/dashboard/revenue',
-    ]))->name('admin.dashboard');
+    Route::get('dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('dashboard/data', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'getData'])->name('admin.dashboard.data');
+
     Route::get('notifications', fn() => Inertia::render('admin/Notifications'))->name('admin.notifications');
     Route::get('audit-logs', fn() => Inertia::render('admin/AuditLogs'))->name('admin.audit-logs');
     
@@ -183,6 +181,10 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,servic
     Route::get('sales-analytics', fn() => Inertia::render('admin/SalesAnalytics'))->name('admin.sales-analytics');
     
     // Standardized Reports Routes
+    Route::get('reports/inventory/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'inventory'])->name('admin.reports.inventory.pdf');
+    Route::get('reports/sales/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('admin.reports.sales.pdf');
+
+    // UI Routes for Reports
     Route::get('reports/inventory', fn() => Inertia::render('admin/Reports/InventoryReport'))->name('admin.reports.inventory');
     Route::get('reports/sales', fn() => Inertia::render('admin/Reports/SalesReport'))->name('admin.reports.sales');
     
@@ -195,6 +197,14 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,servic
     Route::get('roles', fn() => Inertia::render('admin/Roles'))->name('admin.roles');
     Route::get('admins', fn() => Inertia::render('admin/Admins'))->name('admin.admins');
     Route::get('translations', fn() => Inertia::render('admin/Translations'))->name('admin.translations');
+    
+    // System Configuration (Lookup Tables)
+    Route::get('configuration', [\App\Http\Controllers\Admin\LookupTableController::class, 'index'])->name('admin.configuration.index');
+    Route::put('configuration/order-types/{orderType}', [\App\Http\Controllers\Admin\LookupTableController::class, 'updateOrderType'])->name('admin.configuration.order-types.update');
+    Route::put('configuration/order-statuses/{orderStatus}', [\App\Http\Controllers\Admin\LookupTableController::class, 'updateOrderStatus'])->name('admin.configuration.order-statuses.update');
+    Route::put('configuration/payment-statuses/{paymentStatus}', [\App\Http\Controllers\Admin\LookupTableController::class, 'updatePaymentStatus'])->name('admin.configuration.payment-statuses.update');
+    Route::put('configuration/loyalty-tiers/{loyaltyTier}', [\App\Http\Controllers\Admin\LookupTableController::class, 'updateLoyaltyTier'])->name('admin.configuration.loyalty-tiers.update');
+
     Route::get('settings', fn() => Inertia::render('admin/Settings'))->name('admin.settings');
 });
 Route::get('forgetPass', fn() => Inertia::render('Auth/ForgotPassword'))->name('auth.forgotpassword');

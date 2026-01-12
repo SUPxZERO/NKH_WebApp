@@ -9,12 +9,15 @@ class RecipeIngredient extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'recipe_id',
         'ingredient_id',
         'quantity',
         'unit',
         'notes',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

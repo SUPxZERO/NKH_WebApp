@@ -11,14 +11,17 @@ class Feedback extends Model
 
     protected $table = 'feedback';
 
-    protected $fillable = [
-        'location_id',
-        'order_id',
-        'customer_id',
-        'rating',
-        'comments',
-        'visibility',
+    /**
+     * SECURITY: Minimal guarding for Feedback (customer-generated)
+     * Protect visibility flag (admin-controlled)
+     */
+    protected $guarded = [
+        'id',
+        'visibility',           // ⚠️ Admin controls public/private
+        'created_at',
+        'updated_at',
     ];
+
 
     public function location()
     {

@@ -9,20 +9,16 @@ class Promotion extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'location_id',
-        'code',
-        'name',
-        'description',
-        'type',
-        'value',
-        'min_order_amount',
-        'usage_limit',
-        'per_customer_limit',
-        'start_at',
-        'end_at',
-        'is_active',
+    /**
+     * SECURITY: Protect promotion code from duplication
+     */
+    protected $guarded = [
+        'id',
+        'code',                 // ⚠️ Unique promotion code (prevent duplicates)
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'value' => 'decimal:2',

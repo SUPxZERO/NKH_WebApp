@@ -9,7 +9,8 @@ class InventoryOrderDeduction extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'order_id',
         'order_item_id',
         'ingredient_id',
@@ -22,6 +23,8 @@ class InventoryOrderDeduction extends Model
         'inventory_transaction_id',
         'deducted_by',
         'notes',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

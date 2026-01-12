@@ -9,17 +9,24 @@ class OrderItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'order_id',
-        'menu_item_id',
-        'quantity',
-        'unit_price',
-        'discount_amount',
-        'tax_amount',
-        'total_price',
-        'status',
-        'special_instructions',
+    /**
+     * SECURITY: Use $guarded to protect order item pricing
+     * 
+     * Protected fields:
+     * - Pricing: unit_price, discount_amount, tax_amount, total_price (calculated by OrderCalculationService)
+     * - Workflow: status (kitchen workflow)
+     */
+    protected $guarded = [
+        'id',
+        'unit_price',           // ⚠️ Calculated from menu item price at order time
+        'discount_amount',      // ⚠️ Calculated by promotion engine
+        'tax_amount',           // ⚠️ Calculated by tax service
+        'total_price',          // ⚠️ CRITICAL: Calculated (quantity × unit_price - discount + tax)
+        'status',               // ⚠️ Kitchen workflow (pending/preparing/ready)
+        'created_at',
+        'updated_at',
     ];
+
 
     protected $casts = [
         'unit_price' => 'decimal:2',

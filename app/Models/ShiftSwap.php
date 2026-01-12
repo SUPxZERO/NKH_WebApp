@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ShiftSwap extends Model
 {
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'requester_id',
         'shift_id',
         'recipient_id',
@@ -15,6 +16,8 @@ class ShiftSwap extends Model
         'reason',
         'manager_id',
         'approved_at',
+            'created_at',
+        'updated_at',
     ];
     
     protected $casts = [

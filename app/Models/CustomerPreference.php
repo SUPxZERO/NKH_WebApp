@@ -9,11 +9,14 @@ class CustomerPreference extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'customer_id',
         'category',
         'preference_key',
         'preference_value',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Supplier extends Model
 {
 
-    protected $fillable = [
+    protected $guarded = [
+        'id',
         'location_id',
         'code',
         'name',
@@ -21,6 +22,8 @@ class Supplier extends Model
         'notes',
         'tax_id',
         'is_active',
+            'created_at',
+        'updated_at',
     ];
 
     protected $casts = [
