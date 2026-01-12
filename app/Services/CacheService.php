@@ -38,7 +38,7 @@ class CacheService
             return MenuItem::with([
                 'category.translations',
                 'translations',
-                'recipe.ingredients.unit'
+                'recipe.ingredients'
             ])
             ->whereHas('category', fn($q) => $q->where('location_id', $locationId))
             ->where('is_active', true)
@@ -95,7 +95,7 @@ class CacheService
             return MenuItem::with([
                 'category.translations',
                 'translations',
-                'recipe.ingredients.unit'
+                'recipe.ingredients'
             ])->find($menuItemId);
         });
     }

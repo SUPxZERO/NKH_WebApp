@@ -18,8 +18,8 @@ class StockAlert extends Model
         'message',
         'acknowledged',
         'acknowledged_at',
-        'acknowledged_by'
-            'created_at',
+        'acknowledged_by',
+        'created_at',
         'updated_at',
     ];
 

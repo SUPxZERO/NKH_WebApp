@@ -12,21 +12,7 @@ class TelegramUser extends Model
 
     protected $guarded = [
         'id',
-        'customer_id',
-        'telegram_id',
-        'telegram_username',
-        'first_name',
-        'last_name',
-        'language_code',
-        'phone_number',
-        'delivery_address',
-        'saved_addresses',
-        'conversation_state',
-        'conversation_data',
-        'is_active',
-        'notifications_enabled',
-        'last_interaction_at',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

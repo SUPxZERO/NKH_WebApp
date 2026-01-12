@@ -25,8 +25,8 @@ class InventoryAdjustment extends Model
         'approval_notes',
         'rejected_by',
         'rejected_at',
-        'rejection_reason'
-            'created_at',
+        'rejection_reason',
+        'created_at',
         'updated_at',
     ];
 

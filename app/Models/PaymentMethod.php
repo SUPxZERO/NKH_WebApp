@@ -17,8 +17,8 @@ class PaymentMethod extends Model
         'display_order',
         'is_active',
         'processing_fee',
-        'description'
-            'created_at',
+        'description',
+        'created_at',
         'updated_at',
     ];
 
