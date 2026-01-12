@@ -10,19 +10,7 @@ class Supplier extends Model
 
     protected $guarded = [
         'id',
-        'location_id',
-        'code',
-        'name',
-        'contact_name',
-        'contact_phone',
-        'email',
-        'address',
-        'type',
-        'payment_terms',
-        'notes',
-        'tax_id',
-        'is_active',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 
@@ -38,5 +26,10 @@ class Supplier extends Model
     public function purchaseOrders()
     {
         return $this->hasMany(PurchaseOrder::class);
+    }
+
+    public function ingredients()
+    {
+        return $this->hasMany(Ingredient::class);
     }
 }

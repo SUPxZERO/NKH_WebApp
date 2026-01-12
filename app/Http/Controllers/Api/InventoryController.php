@@ -131,39 +131,31 @@ class InventoryController extends Controller
             'notes' => 'nullable|string'
         ]);
 
-        DB::transaction(function () use ($validated) {
+        try {
+            $ingredient = Ingredient::findOrFail($validated['ingredient_id']);
+            
+            // Use InventoryService for consistent wastage tracking
+            $inventoryService = app(\App\Services\Inventory\InventoryService::class);
+            $inventoryService->recordWastage(
+                $ingredient,
+                $validated['quantity'],
+                "Reason: {$validated['reason']}. " . ($validated['notes'] ?? ''),
+                auth()->user()
+            );
+
+            // Also update location-based Inventory record if it exists
             $inventory = Inventory::where('location_id', $validated['location_id'])
                 ->where('ingredient_id', $validated['ingredient_id'])
-                ->firstOrFail();
-
-            if ($inventory->quantity < $validated['quantity']) {
-                throw new \Exception('Insufficient stock to record wastage');
+                ->first();
+            
+            if ($inventory) {
+                $inventory->decrement('quantity', $validated['quantity']);
             }
 
-            $inventory->decrement('quantity', $validated['quantity']);
-
-            // Get ingredient for unit and total stock update - load unit relationship
-            $ingredient = Ingredient::with('unit')->findOrFail($validated['ingredient_id']);
-            $unitCode = $ingredient->unit?->code ?? 'unit';
-
-            InventoryTransaction::create([
-                'location_id' => $validated['location_id'],
-                'ingredient_id' => $validated['ingredient_id'],
-                'type' => 'wastage',
-                'movement_type' => 'wastage',
-                'quantity' => -$validated['quantity'],
-                'unit' => $unitCode,
-                'notes' => "Reason: {$validated['reason']}. " . ($validated['notes'] ?? ''),
-                'transacted_at' => now(),
-                'created_by' => auth()->id() ?? 1,
-                'user_id' => auth()->id() ?? 1
-            ]);
-
-            // Also update ingredient total stock
-            $ingredient->decrement('current_stock', $validated['quantity']);
-        });
-
-        return response()->json(['message' => 'Wastage recorded']);
+            return response()->json(['message' => 'Wastage recorded']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 
     public function movements(Ingredient $ingredient): JsonResponse

@@ -9,26 +9,17 @@ class InventoryTransaction extends Model
 {
     use HasFactory;
 
+    // Transaction Types
+    const TYPE_PURCHASE = 'purchase';
+    const TYPE_ADJUSTMENT = 'adjustment';
+    const TYPE_USAGE = 'usage';
+    const TYPE_WASTAGE = 'wastage';
+    const TYPE_TRANSFER = 'transfer';
+    const TYPE_RETURN = 'return';
+
     protected $guarded = [
         'id',
-        'location_id',
-        'ingredient_id',
-        'type',
-        'quantity',
-        'unit_cost',
-        'value',
-        'sourceable_type',
-        'sourceable_id',
-        'notes',
-        'transacted_at',
-        'created_by',
-        'user_id',
-        'movement_type',
-        'order_item_id',
-        'unit',
-        'reference_type',
-        'reference_id',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 
