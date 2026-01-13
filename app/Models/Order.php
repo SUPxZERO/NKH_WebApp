@@ -105,6 +105,21 @@ class Order extends Model
         return $this->belongsTo(OrderStatus::class);
     }
 
+    // ==================== ACCESSORS (Backward Compatibility) ====================
+
+    public function getStatusAttribute($value)
+    {
+        // If the column still exists and has value, return it (during migration transition)
+        if ($value !== null) return $value;
+        return $this->orderStatus?->code ?? 'pending';
+    }
+
+    public function getOrderTypeAttribute($value)
+    {
+        if ($value !== null) return $value;
+        return $this->orderType?->code ?? 'dine_in';
+    }
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

@@ -107,6 +107,14 @@ class Payment extends Model
         return $this->belongsTo(PaymentStatus::class, 'payment_status_id');
     }
 
+    // ==================== ACCESSORS (Backward Compatibility) ====================
+
+    public function getStatusAttribute($value)
+    {
+        if ($value !== null) return $value;
+        return $this->paymentStatus?->code ?? 'pending';
+    }
+
     public function location()
     {
         return $this->belongsTo(Location::class);

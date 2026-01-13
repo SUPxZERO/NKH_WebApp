@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Employee extends Model
 {
+    use HasFactory;
 
     /**
      * SECURITY: Use $guarded to protect employee financial and HR data

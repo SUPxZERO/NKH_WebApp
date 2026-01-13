@@ -92,7 +92,7 @@ class ShiftSeeder extends Seeder
                     ->exists();
                 
                 if (!$exists) {
-                    Shift::create([
+                    Shift::factory()->create([
                         'employee_id' => $employee->id,
                         'position_id' => $position?->id,
                         'location_id' => $location->id,

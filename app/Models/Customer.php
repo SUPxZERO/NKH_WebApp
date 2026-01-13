@@ -47,6 +47,14 @@ class Customer extends Model
         return $this->belongsTo(LoyaltyTier::class);
     }
 
+    // ==================== ACCESSORS (Backward Compatibility) ====================
+
+    public function getCustomerTierAttribute($value)
+    {
+        if ($value !== null) return $value;
+        return $this->loyaltyTier?->code ?? 'bronze';
+    }
+
     protected $casts = [
         'birth_date' => 'date',
         'preferences' => 'array',

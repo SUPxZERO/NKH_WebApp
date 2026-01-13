@@ -259,6 +259,9 @@ class TelegramUser extends Model
 
         $user = static::findByTelegramId($telegramId);
 
+        // Instantiate service
+        $customerService = app(\App\Services\Telegram\TelegramCustomerService::class);
+
         if (!$user) {
             // Create new TelegramUser
             $user = static::create([
@@ -269,63 +272,14 @@ class TelegramUser extends Model
                 'language_code' => $telegramData['language_code'] ?? 'en',
             ]);
 
-            // SPRINT P16: Auto-create Customer immediately
-            $customer = static::createCustomerForTelegramUser($user, $telegramData);
-            $user->update(['customer_id' => $customer->id]);
-
-            \Illuminate\Support\Facades\Log::info('TelegramUser: Created with auto-linked Customer', [
-                'telegram_id' => $telegramId,
-                'customer_id' => $customer->id,
-                'customer_code' => $customer->customer_code,
-            ]);
+            // Auto-create Customer
+            $customerService->createForTelegramUser($user, $telegramData);
         } elseif (!$user->customer_id) {
-            // SPRINT P16: Backfill - existing TelegramUser without Customer
-            $customer = static::createCustomerForTelegramUser($user, $telegramData);
-            $user->update(['customer_id' => $customer->id]);
-
-            // Migrate orphaned addresses to the new customer
-            CustomerAddress::where('telegram_user_id', $user->id)
-                ->whereNull('customer_id')
-                ->update(['customer_id' => $customer->id]);
-
-            // Migrate orphaned orders to the new customer
-            \App\Models\Order::where('telegram_user_id', $user->id)
-                ->whereNull('customer_id')
-                ->update(['customer_id' => $customer->id]);
-
-            \Illuminate\Support\Facades\Log::info('TelegramUser: Backfilled with Customer', [
-                'telegram_id' => $telegramId,
-                'telegram_user_id' => $user->id,
-                'customer_id' => $customer->id,
-            ]);
+            // Backfill existing user
+            $customerService->createForTelegramUser($user, $telegramData);
         }
 
         return $user->fresh(['customer']);
-    }
-
-    /**
-     * Create a Customer record for a TelegramUser
-     * Used by findOrCreate() for both new and backfill cases
-     */
-    protected static function createCustomerForTelegramUser(self $telegramUser, array $telegramData = []): Customer
-    {
-        $firstName = $telegramData['first_name'] ?? $telegramUser->first_name ?? '';
-        $lastName = $telegramData['last_name'] ?? $telegramUser->last_name ?? '';
-        $name = trim("{$firstName} {$lastName}") ?: 'Telegram User';
-
-        return Customer::create([
-            'user_id' => null, // No traditional User account
-            'name' => $name,
-            'phone' => $telegramUser->phone_number, // If already collected
-            'preferred_language' => $telegramData['language_code'] ?? $telegramUser->language_code ?? 'en',
-            'customer_code' => Customer::generateCustomerCode('TG'),
-            'customer_tier' => 'bronze',
-            'points_balance' => 0,
-            'loyalty_points' => 0,
-            'total_spent' => 0,
-            'visit_count' => 0,
-            'marketing_consent' => true, // Default for Telegram users
-        ]);
     }
 }
 

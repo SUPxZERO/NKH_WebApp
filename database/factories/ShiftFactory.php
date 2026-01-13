@@ -16,10 +16,12 @@ class ShiftFactory extends Factory
         $end = (clone $start)->modify('+8 hours');
         
         return [
-            'user_id' => User::factory(),
+            'employee_id' => \App\Models\Employee::factory(),
+            'location_id' => \App\Models\Location::factory(),
             'date' => $start->format('Y-m-d'),
             'start_time' => $start->format('H:i:s'),
             'end_time' => $end->format('H:i:s'),
+            'shift_type' => $this->faker->randomElement(['morning', 'afternoon', 'evening', 'night']),
             'status' => 'scheduled',
         ];
     }

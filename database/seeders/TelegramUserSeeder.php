@@ -46,26 +46,15 @@ class TelegramUserSeeder extends Seeder
         }
 
         // Create some random ones
-        for ($i = 0; $i < 10; $i++) {
-            TelegramUser::create([
-                'telegram_id' => rand(100000000, 999999999),
-                'telegram_username' => 'user_' . rand(1000, 9999),
-                'first_name' => 'User' . $i,
-                'last_name' => 'Test',
-                'language_code' => 'en',
-                'is_active' => true,
-            ]);
-        }
+        TelegramUser::factory()->count(10)->create();
         
         // Link some to customers to test "Registered Telegram User" scenario
-        $customers = Customer::doesntHave('telegramUser')->take(3)->get();
-        foreach ($customers as $customer) {
-            $tgUser = TelegramUser::whereNull('customer_id')->inRandomOrder()->first();
-            if ($tgUser) {
-                // TelegramUser belongs to Customer
-                $tgUser->customer()->associate($customer);
-                $tgUser->save();
-            }
+        // Ensure we have customers
+        if (Customer::exists()) {
+             TelegramUser::factory()
+                ->count(3)
+                ->linked()
+                ->create();
         }
     }
 }
