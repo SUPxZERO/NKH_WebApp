@@ -115,6 +115,25 @@ class MenuItemController extends Controller
             $imagePath = $request->file('image')->store('menu_images', 'public');
         }
 
+        // Check featured limit (max 4 items)
+        $isFeatured = $data['is_featured'] ?? false;
+        if ($isFeatured) {
+            $featuredCount = MenuItem::where('location_id', $data['location_id'])
+                ->where('is_featured', true)
+                ->count();
+
+            if ($featuredCount >= 4) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Maximum 4 featured items allowed. Please unfeature another item first.',
+                    'featured_items' => MenuItem::where('location_id', $data['location_id'])
+                        ->where('is_featured', true)
+                        ->with('translations')
+                        ->get(['id', 'slug', 'image_path', 'is_featured', 'featured_order', 'badge'])
+                ], 422);
+            }
+        }
+
         $menuItem = MenuItem::create([
             'location_id' => $data['location_id'],
             'category_id' => $data['category_id'] ?? null,
@@ -126,6 +145,9 @@ class MenuItemController extends Controller
             'is_popular' => $data['is_popular'] ?? false,
             'is_active' => $data['is_active'] ?? true,
             'display_order' => $data['display_order'] ?? 0,
+            'is_featured' => $isFeatured,
+            'featured_order' => $data['featured_order'] ?? 0,
+            'badge' => $data['badge'] ?? null,
         ]);
 
         // Save translation
@@ -169,6 +191,40 @@ class MenuItemController extends Controller
         // Explicitly handle is_active if present (for toggle status)
         if ($request->has('is_active')) {
             $modelData['is_active'] = $request->boolean('is_active');
+        }
+
+        // Handle is_featured with limit check
+        if ($request->has('is_featured')) {
+            $isFeatured = $request->boolean('is_featured');
+
+            // Only check limit when setting to featured (not when unfeaturing)
+            if ($isFeatured && !$menuItem->is_featured) {
+                $featuredCount = MenuItem::where('location_id', $menuItem->location_id)
+                    ->where('is_featured', true)
+                    ->where('id', '!=', $menuItem->id)
+                    ->count();
+
+                if ($featuredCount >= 4) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Maximum 4 featured items allowed. Please unfeature another item first.',
+                        'featured_items' => MenuItem::where('location_id', $menuItem->location_id)
+                            ->where('is_featured', true)
+                            ->with('translations')
+                            ->get(['id', 'slug', 'image_path', 'is_featured', 'featured_order', 'badge'])
+                    ], 422);
+                }
+            }
+
+            $modelData['is_featured'] = $isFeatured;
+        }
+
+        // Handle badge and featured_order
+        if ($request->has('badge')) {
+            $modelData['badge'] = $request->input('badge');
+        }
+        if ($request->has('featured_order')) {
+            $modelData['featured_order'] = $request->integer('featured_order');
         }
 
         $menuItem->update($modelData);

@@ -582,144 +582,163 @@ class ImprovedMenuItemSeeder extends Seeder
     private function getImagePath(string $slug): ?string
     {
         $imageMapping = [
-            // Spring Rolls & Appetizers
+            // APPETIZERS
             'fried-spring-rolls' => 'menu_images/spring-rolls.jpg',
             'fresh-spring-rolls' => 'menu_images/spring-rolls.jpg',
-            'veggie-spring-rolls' => 'menu_images/spring-rolls.jpg',
-            'pork-dumplings' => 'menu_images/spring-rolls.jpg',
-            'shrimp-dumplings' => 'menu_images/spring-rolls.jpg',
-            'mixed-appetizer-platter' => 'menu_images/mixed-appetizer-platter.jpg',
-
-            // Satay & Grilled Items
             'chicken-satay' => 'menu_images/chicken-satay.jpg',
-            'chicken-satay-skewers' => 'menu_images/chicken-satay.jpg',
-            'beef-satay' => 'menu_images/chicken-satay.jpg',
-            'pork-satay' => 'menu_images/chicken-satay.jpg',
             'fish-cakes' => 'menu_images/fish-cakes.jpg',
-            'crab-cakes' => 'menu_images/fish-cakes.jpg',
-            'stuffed-chicken-wings' => 'menu_images/grilled-chicken-wings.jpg',
-
-            // Salads
+            'crab-cakes' => 'menu_images/fish-cakes.jpg', // proxy
+            'stuffed-chicken-wings' => 'menu_images/grilled-chicken-wings.jpg', // proxy
+            
+            // COLD APPETIZERS
             'beef-salad-khmer' => 'menu_images/beef-salad.jpg',
-            'seafood-salad' => 'menu_images/beef-salad.jpg',
-            'cucumber-salad' => 'menu_images/beef-salad.jpg',
-            'century-egg-tofu' => 'menu_images/beef-salad.jpg',
-            'banana-flower-salad' => 'menu_images/beef-salad.jpg',
-            'lotus-stem-salad' => 'menu_images/lotus-stem-salad.jpg',
-            'papaya-salad-classic' => 'menu_images/papaya-salad.jpg',
-            'papaya-salad-seafood' => 'menu_images/papaya-salad.jpg',
-            'papaya-salad-dried-shrimp' => 'menu_images/papaya-salad.jpg',
-            'garden-salad' => 'menu_images/papaya-salad.jpg',
-            'caesar-salad' => 'menu_images/papaya-salad.jpg',
-            'mango-salad' => 'menu_images/papaya-salad.jpg',
+            'seafood-salad' => 'menu_images/beef-salad.jpg', // proxy
+            'cucumber-salad' => 'menu_images/lotus-stem-salad.jpg', // proxy
+            'century-egg-tofu' => 'menu_images/spring-rolls.jpg', // fallback
 
-            // Rice Dishes
-            'chicken-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
-            'shrimp-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
-            'crab-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
-            'pineapple-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
-            'vegetable-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
-            'special-fried-rice' => 'menu_images/mixed-appetizer-platter.jpg',
+            // DUMPLINGS
+            'pork-dumplings' => 'menu_images/spring-rolls.jpg', // fallback
+            'shrimp-dumplings' => 'menu_images/spring-rolls.jpg', // fallback
+            'veggie-spring-rolls' => 'menu_images/spring-rolls.jpg',
+
+            // PLATTERS
+            'mixed-appetizer-platter' => 'menu_images/mixed-appetizer-platter.jpg',
+            'seafood-platter' => 'menu_images/grilled-fish-banana-leaf.jpg', // proxy
+
+            // RICE
+            'chicken-fried-rice' => 'menu_images/grilled-pork-ribs.jpg', // proxy
+            'shrimp-fried-rice' => 'menu_images/pad-thai.jpg', // proxy
+            'crab-fried-rice' => 'menu_images/pad-thai.jpg', // proxy
+            'pineapple-fried-rice' => 'menu_images/pad-thai.jpg', // proxy
+            'vegetable-fried-rice' => 'menu_images/stir-fried-morning-glory.jpg', // proxy
+            'special-fried-rice' => 'menu_images/grilled-pork-ribs.jpg', // proxy
+            
             'grilled-pork-rice' => 'menu_images/grilled-pork-ribs.jpg',
             'grilled-chicken-rice' => 'menu_images/grilled-chicken-wings.jpg',
-            'crispy-pork-belly-rice' => 'menu_images/grilled-pork-ribs.jpg',
-            'duck-rice' => 'menu_images/grilled-chicken-wings.jpg',
-            'chicken-clay-pot-rice' => 'menu_images/mixed-appetizer-platter.jpg',
-            'seafood-clay-pot-rice' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'crispy-pork-belly-rice' => 'menu_images/grilled-pork-ribs.jpg', // proxy
+            'duck-rice' => 'menu_images/grilled-chicken-wings.jpg', // proxy
+            
+            'chicken-clay-pot-rice' => 'menu_images/steamed-fish-ginger.jpg', // proxy
+            'seafood-clay-pot-rice' => 'menu_images/steamed-fish-ginger.jpg', // proxy
 
-            // Noodles
-            'pad-thai' => 'menu_images/pad-thai.jpg',
-            'pad-see-ew' => 'menu_images/pad-thai.jpg',
-            'drunken-noodles' => 'menu_images/pad-thai.jpg',
-            'chow-mein' => 'menu_images/pad-thai.jpg',
-            'singapore-noodles' => 'menu_images/pad-thai.jpg',
-            'beef-pho' => 'menu_images/khmer-noodle-soup.jpg',
-            'chicken-pho' => 'menu_images/khmer-noodle-soup.jpg',
-            'wonton-noodle-soup' => 'menu_images/khmer-noodle-soup.jpg',
-            'wonton-noodles-dry' => 'menu_images/pad-thai.jpg',
-            'kuy-teav' => 'menu_images/khmer-noodle-soup.jpg',
-            'mi-kola' => 'menu_images/khmer-noodle-soup.jpg',
+            // NOODLES
             'num-banh-chok' => 'menu_images/khmer-noodle-soup.jpg',
-            'tom-yum-noodles' => 'menu_images/khmer-noodle-soup.jpg',
+            'kuy-teav' => 'menu_images/khmer-noodle-soup.jpg',
+            'beef-pho' => 'menu_images/khmer-noodle-soup.jpg',
+            'chicken-pho' => 'menu_images/khmer-noodle-soup.jpg', // proxy
+            'tom-yum-noodles' => 'menu_images/khmer-noodle-soup.jpg', // proxy
+            'wonton-noodle-soup' => 'menu_images/khmer-noodle-soup.jpg', // proxy
 
-            // Soups
-            'samlor-kako' => 'menu_images/khmer-noodle-soup.jpg',
-            'samlor-machu-kroeung' => 'menu_images/sour-soup-fish.jpg',
+            'pad-thai' => 'menu_images/pad-thai.jpg',
+            'pad-see-ew' => 'menu_images/pad-thai.jpg', // proxy
+            'drunken-noodles' => 'menu_images/pad-thai.jpg', // proxy
+            'singapore-noodles' => 'menu_images/pad-thai.jpg', // proxy
+            'chow-mein' => 'menu_images/pad-thai.jpg', // proxy
+
+            'mi-kola' => 'menu_images/pad-thai.jpg', // proxy
+            'wonton-noodles-dry' => 'menu_images/pad-thai.jpg', // proxy
+
+            // SOUPS
+            'samlor-kako' => 'menu_images/sour-soup-fish.jpg', // proxy
+            'samlor-machu-kroeung' => 'menu_images/sour-soup-fish.jpg', // proxy
             'chicken-coconut-soup' => 'menu_images/chicken-coconut-soup.jpg',
             'fish-sour-soup' => 'menu_images/sour-soup-fish.jpg',
-            'seafood-tom-yum' => 'menu_images/sour-soup-fish.jpg',
-            'prawn-soup' => 'menu_images/sour-soup-fish.jpg',
-            'seafood-hot-pot' => 'menu_images/prawns-tamarind-sauce.jpg',
-            'mixed-hot-pot' => 'menu_images/mixed-appetizer-platter.jpg',
+            'seafood-tom-yum' => 'menu_images/sour-soup-fish.jpg', // proxy
+            'prawn-soup' => 'menu_images/sour-soup-fish.jpg', // proxy
+            'seafood-hot-pot' => 'menu_images/steamed-fish-ginger.jpg', // proxy
+            'mixed-hot-pot' => 'menu_images/steamed-fish-ginger.jpg', // proxy
 
-            // Curries
+            // CURRIES
             'red-curry-chicken' => 'menu_images/tofu-curry.jpg',
             'red-curry-beef' => 'menu_images/tofu-curry.jpg',
             'red-curry-duck' => 'menu_images/tofu-curry.jpg',
             'green-curry-chicken' => 'menu_images/tofu-curry.jpg',
             'green-curry-seafood' => 'menu_images/tofu-curry.jpg',
             'green-curry-vegetables' => 'menu_images/tofu-curry.jpg',
-            'fish-amok' => 'menu_images/steamed-fish-ginger.jpg',
-            'chicken-amok' => 'menu_images/chicken-coconut-soup.jpg',
-            'seafood-amok' => 'menu_images/steamed-fish-ginger.jpg',
+            'fish-amok' => 'menu_images/steamed-fish-ginger.jpg', // proxy
+            'chicken-amok' => 'menu_images/steamed-fish-ginger.jpg', // proxy
+            'seafood-amok' => 'menu_images/steamed-fish-ginger.jpg', // proxy
 
-            // Grilled & BBQ
+            // GRILLED
             'grilled-beef' => 'menu_images/grilled-beef-lolot.jpg',
             'grilled-pork-ribs' => 'menu_images/grilled-pork-ribs.jpg',
-            'lemongrass-chicken' => 'menu_images/grilled-chicken-wings.jpg',
-            'grilled-pork-skewers' => 'menu_images/grilled-pork-ribs.jpg',
-            'grilled-prawns' => 'menu_images/prawns-tamarind-sauce.jpg',
-            'grilled-squid' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'lemongrass-chicken' => 'menu_images/grilled-chicken-wings.jpg', // proxy
+            'grilled-pork-skewers' => 'menu_images/grilled-pork-ribs.jpg', // proxy
+            'grilled-prawns' => 'menu_images/prawns-tamarind-sauce.jpg', // proxy
+            'grilled-squid' => 'menu_images/prawns-tamarind-sauce.jpg', // proxy
             'grilled-fish' => 'menu_images/grilled-fish-banana-leaf.jpg',
-            'grilled-crab' => 'menu_images/prawns-tamarind-sauce.jpg',
+            'grilled-crab' => 'menu_images/prawns-tamarind-sauce.jpg', // proxy
 
-            // Stir-Fry
-            'mixed-vegetables' => 'menu_images/stir-fried-morning-glory.jpg',
+            // SATAY
+            'chicken-satay-skewers' => 'menu_images/chicken-satay.jpg',
+            'beef-satay' => 'menu_images/chicken-satay.jpg', // proxy
+            'pork-satay' => 'menu_images/chicken-satay.jpg', // proxy
+
+            // STIR FRY
+            'mixed-vegetables' => 'menu_images/stir-fried-morning-glory.jpg', // proxy
             'morning-glory' => 'menu_images/stir-fried-morning-glory.jpg',
-            'chinese-broccoli-oyster' => 'menu_images/stir-fried-morning-glory.jpg',
-            'beef-black-pepper' => 'menu_images/grilled-beef-lolot.jpg',
-            'chicken-cashew-nuts' => 'menu_images/chicken-satay.jpg',
-            'pork-basil' => 'menu_images/grilled-pork-ribs.jpg',
-            'beef-oyster-sauce' => 'menu_images/grilled-beef-lolot.jpg',
+            'chinese-broccoli-oyster' => 'menu_images/stir-fried-morning-glory.jpg', // proxy
+            'beef-black-pepper' => 'menu_images/grilled-beef-lolot.jpg', // proxy
+            'chicken-cashew-nuts' => 'menu_images/chicken-satay.jpg', // proxy
+            'pork-basil' => 'menu_images/grilled-beef-lolot.jpg', // proxy
+            'beef-oyster-sauce' => 'menu_images/grilled-beef-lolot.jpg', // proxy
             'garlic-prawns' => 'menu_images/prawns-tamarind-sauce.jpg',
-            'squid-black-pepper' => 'menu_images/prawns-tamarind-sauce.jpg',
-            'crab-kampot-pepper' => 'menu_images/prawns-tamarind-sauce.jpg',
-            'sweet-sour-fish' => 'menu_images/steamed-fish-ginger.jpg',
+            'squid-black-pepper' => 'menu_images/prawns-tamarind-sauce.jpg', // proxy
+            'crab-kampot-pepper' => 'menu_images/prawns-tamarind-sauce.jpg', // proxy
+            'sweet-sour-fish' => 'menu_images/steamed-fish-ginger.jpg', // proxy
 
-            // Desserts
+            // SALADS
+            'banana-flower-salad' => 'menu_images/lotus-stem-salad.jpg', // proxy
+            'lotus-stem-salad' => 'menu_images/lotus-stem-salad.jpg',
+            'papaya-salad-classic' => 'menu_images/papaya-salad.jpg',
+            'papaya-salad-seafood' => 'menu_images/papaya-salad.jpg',
+            'papaya-salad-dried-shrimp' => 'menu_images/papaya-salad.jpg',
+            'garden-salad' => 'menu_images/beef-salad.jpg', // proxy
+            'caesar-salad' => 'menu_images/beef-salad.jpg', // proxy
+            'mango-salad' => 'menu_images/beef-salad.jpg', // proxy
+
+            // DESSERTS
             'sticky-rice-mango' => 'menu_images/sticky-rice-mango.jpg',
-            'num-ansom-chek' => 'menu_images/sticky-rice-mango.jpg',
-            'sweet-corn-pudding' => 'menu_images/coconut-custard.jpg',
+            'num-ansom-chek' => 'menu_images/sticky-rice-mango.jpg', // proxy
+            'sweet-corn-pudding' => 'menu_images/coconut-custard.jpg', // proxy
             'pumpkin-custard' => 'menu_images/coconut-custard.jpg',
-            'vanilla-ice-cream' => 'menu_images/coconut-ice-cream.jpg',
-            'chocolate-ice-cream' => 'menu_images/chocolate-cake.jpg',
-            'mango-ice-cream' => 'menu_images/mango-ice-cream.jpg',
-            'coconut-ice-cream' => 'menu_images/coconut-ice-cream.jpg',
+            'vanilla-ice-cream' => 'menu_images/coconut-ice-cream.jpg', // proxy
+            'chocolate-ice-cream' => 'menu_images/chocolate-cake.jpg', // proxy
             'mango-shake' => 'menu_images/mango-ice-cream.jpg',
-            'avocado-shake' => 'menu_images/coconut-ice-cream.jpg',
-            'fresh-fruit-platter' => 'menu_images/mango-ice-cream.jpg',
-            'dragonfruit-plate' => 'menu_images/mango-ice-cream.jpg',
+            'avocado-shake' => 'menu_images/coconut-ice-cream.jpg', // proxy
+            'fresh-fruit-platter' => 'menu_images/mango-ice-cream.jpg', // proxy
+            'dragonfruit-plate' => 'menu_images/mango-ice-cream.jpg', // proxy
 
-            // Beverages - Juices
+            // DRINKS
             'orange-juice' => 'menu_images/fresh-orange-juice.jpg',
             'watermelon-juice' => 'menu_images/watermelon-juice.jpg',
-            'sugarcane-juice' => 'menu_images/watermelon-juice.jpg',
+            'sugarcane-juice' => 'menu_images/fresh-orange-juice.jpg', // proxy
+            'lime-juice' => 'menu_images/fresh-orange-juice.jpg', // proxy
+            'coconut-water' => 'menu_images/fresh-orange-juice.jpg', // proxy
 
-            // Beverages - Coffee & Tea
+            'mango-smoothie' => 'menu_images/mango-ice-cream.jpg', // proxy
+            'strawberry-smoothie' => 'menu_images/watermelon-juice.jpg', // proxy
+            'mixed-berry-smoothie' => 'menu_images/watermelon-juice.jpg', // proxy
+            'green-smoothie' => 'menu_images/fresh-orange-juice.jpg', // proxy
+
             'cambodian-coffee' => 'menu_images/cambodian-coffee.jpg',
-            'iced-coffee' => 'menu_images/iced-coffee.jpg',
+            'espresso' => 'menu_images/cambodian-coffee.jpg', // proxy
+            'cappuccino' => 'menu_images/cambodian-coffee.jpg', // proxy
+            'latte' => 'menu_images/cambodian-coffee.jpg', // proxy
+            'green-tea' => 'menu_images/jasmine-tea.jpg', // proxy
             'jasmine-tea' => 'menu_images/jasmine-tea.jpg',
 
-            // Beverages - Alcohol
-            'angkor-beer' => 'menu_images/angkor-beer.jpg',
-            'anchor-beer' => 'menu_images/angkor-beer.jpg',
-            'heineken' => 'menu_images/angkor-beer.jpg',
-            'red-wine-glass' => 'menu_images/house-wine-red.jpg',
-            'white-wine-glass' => 'menu_images/house-wine-red.jpg',
-
-            // Others
+            'iced-coffee' => 'menu_images/iced-coffee.jpg',
+            'iced-latte' => 'menu_images/iced-coffee.jpg', // proxy
+            'thai-iced-tea' => 'menu_images/iced-coffee.jpg', // proxy
+            'iced-lemon-tea' => 'menu_images/iced-coffee.jpg', // proxy
             'soft-drinks' => 'menu_images/soft-drinks.jpg',
-            'seafood-platter' => 'menu_images/prawns-tamarind-sauce.jpg',
+
+            'angkor-beer' => 'menu_images/angkor-beer.jpg',
+            'anchor-beer' => 'menu_images/angkor-beer.jpg', // proxy
+            'heineken' => 'menu_images/angkor-beer.jpg', // proxy
+            'red-wine-glass' => 'menu_images/house-wine-red.jpg',
+            'white-wine-glass' => 'menu_images/house-wine-red.jpg', // proxy, use correct glass if visible
         ];
 
         return $imageMapping[$slug] ?? null;

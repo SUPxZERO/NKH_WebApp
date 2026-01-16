@@ -31,17 +31,20 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
         
-        // Check role column first (direct role assignment), then fall back to roles relationship
-        $userRole = $user?->role;
+        // Always fetch from roles() relationship for correct role assignment
+        // The 'role' column (if it exists) may be stale or null
+        $userRole = null;
+        $permissions = [];
         
-        // If no direct role, check roles relationship
-        if (!$userRole && $user) {
+        if ($user) {
             $roles = $user->roles()->with('permissions')->get();
             $userRole = $roles->first()?->slug;
             $permissions = $roles->pluck('permissions.*.slug')->flatten()->unique()->values()->all();
-        } else {
-            // User has direct role, no need to query relationships
-            $permissions = [];
+            
+            // Fallback to direct 'role' attribute only if no roles assigned via relationship
+            if (!$userRole && isset($user->role)) {
+                $userRole = $user->role;
+            }
         }
 
         return [

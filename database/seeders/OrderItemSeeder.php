@@ -14,6 +14,11 @@ class OrderItemSeeder extends Seeder
         $orders = Order::all();
         
         foreach ($orders as $order) {
+            // Skip if order already has items (handled by OrderSeeder)
+            if ($order->items()->exists()) {
+                continue;
+            }
+
             $itemCount = rand(1, 6); // 1 to 6 items per order
             $locationMenuItems = MenuItem::where('location_id', $order->location_id)->get();
             

@@ -67,7 +67,6 @@ class InvoiceService
             $invoice = new Invoice([
                 'order_id' => $order->id,
                 'location_id' => $order->location_id,
-                'invoice_number' => $this->generateInvoiceNumber($order->location_id),
                 'subtotal' => $order->subtotal,
                 'tax_amount' => $order->tax_amount,
                 'discount_amount' => $order->discount_amount,
@@ -79,6 +78,7 @@ class InvoiceService
                 'issued_at' => now(),
                 'status' => 'issued', // Default status
             ]);
+            $invoice->invoice_number = $this->generateInvoiceNumber($order->location_id);
             $order->invoice()->save($invoice);
         } else {
             // Update existing invoice amounts if order changed (assuming we want to sync)

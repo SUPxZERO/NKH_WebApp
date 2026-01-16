@@ -1,220 +1,449 @@
-import React, { useState, useEffect } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import React, { useState, useMemo } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import { useQuery } from '@tanstack/react-query';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
+import { AlertBanner, Alert } from '@/app/components/dashboard/AlertBanner';
+import { ApprovalQueue } from '@/app/components/dashboard/ApprovalQueue';
+import { TeamStatusBar } from '@/app/components/dashboard/TeamStatusBar';
+import { SystemHealthDisplay } from '@/app/components/dashboard/SystemHealthDisplay';
+import { OrderStatusDisplay } from '@/app/components/dashboard/OrderStatusDisplay';
+import { BoldStatCard } from '@/app/components/dashboard/BoldStatCard';
+import { BoldQuickActions } from '@/app/components/dashboard/BoldQuickActions';
+import { BoldRevenueChart } from '@/app/components/dashboard/BoldRevenueChart';
+import { BoldTopItemsChart } from '@/app/components/dashboard/BoldTopItemsChart';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, Legend
-} from 'recharts';
-import { Calendar, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
+  DollarSign, ShoppingCart, TrendingUp, Users, Package, Clock,
+  ReceiptText, BarChart3, Calendar, Settings, Shield, ClipboardList,
+  RefreshCw, Activity, Sparkles
+} from 'lucide-react';
 import { format, subDays } from 'date-fns';
-import axios from 'axios';
+import { motion } from 'framer-motion';
+import { apiGet } from '@/app/utils/api';
+import { cn } from '@/app/utils/cn';
+import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+
+// Types
+interface DashboardSummary {
+  user: {
+    name: string;
+    role: string;
+    roles: string[];
+  };
+  today: string;
+  greeting: string;
+  system_health?: {
+    api: { status: string; uptime: string };
+    database: { status: string; connections: string };
+    queue: { status: string; pending: number };
+  };
+  critical_alerts?: { type: string; severity: string; message: string; action: string }[];
+  performance?: {
+    revenue: number;
+    orders: number;
+    completed_orders: number;
+    completion_rate: number;
+  };
+  pending_approvals?: {
+    orders: number;
+    time_off: number;
+    inventory: number;
+  };
+  team_status?: {
+    total: number;
+    by_position: Record<string, number>;
+  };
+  my_tasks?: { id: number; order_number: string; status: string; table?: string }[];
+  my_performance?: { orders_this_week: number };
+  quick_actions?: { label: string; icon: string; href: string }[];
+}
+
+interface QuickStats {
+  revenue: { today: number; yesterday: number; change_percent: number };
+  orders: { today: number; yesterday: number; active: number; by_status: Record<string, number> };
+  last_updated: string;
+}
 
 interface DashboardProps {
-  initialKPIs: {
-    total_revenue: number;
-    total_orders: number;
-    avg_order_value: number;
-  };
-  initialRevenue: any[];
+  dashboardSummary: DashboardSummary;
+  alerts: Alert[];
+  quickStats: QuickStats;
+  activityFeed: any[];
+  initialKPIs: { total_revenue: number; total_orders: number; avg_order_value: number };
+  initialRevenue: any;
   initialOrderStatus: any[];
   initialTopItems: any[];
 }
 
-export default function Dashboard({ initialKPIs, initialRevenue, initialOrderStatus, initialTopItems }: DashboardProps) {
-  const [dateRange, setDateRange] = useState({
-    startDate: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
-    endDate: format(new Date(), 'yyyy-MM-dd')
+// Icon mapping utility
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'chart-bar': BarChart3,
+  'users': Users,
+  'settings': Settings,
+  'shield': Shield,
+  'clipboard-list': ClipboardList,
+  'receipt': ReceiptText,
+  'calendar': Calendar,
+  'grid': Package,
+  'clock': Clock,
+};
+
+// Format currency helper
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
+export default function Dashboard({
+  dashboardSummary,
+  alerts,
+  quickStats,
+  activityFeed,
+  initialKPIs,
+  initialRevenue,
+  initialOrderStatus,
+  initialTopItems
+}: DashboardProps) {
+  useSmartPolling(['dashboard'], 30000);
+
+  const isAdmin = useMemo(() =>
+    dashboardSummary?.user?.roles?.some(r => ['super-admin', 'admin'].includes(r)) ?? false
+    , [dashboardSummary]);
+
+  const isManager = useMemo(() =>
+    dashboardSummary?.user?.roles?.some(r => ['manager', 'service-manager', 'chief'].includes(r)) ?? false
+    , [dashboardSummary]);
+
+  const isEmployee = !isAdmin && !isManager;
+
+  // Fetch fresh quick stats
+  const { data: liveStats, refetch: refetchStats, isFetching } = useQuery({
+    queryKey: ['dashboard-quick-stats'],
+    queryFn: () => apiGet('/api/admin/dashboard/quick-stats'),
+    initialData: quickStats,
+    refetchInterval: 30000,
   });
 
-  const [kpis, setKpis] = useState(initialKPIs);
-  const [revenueData, setRevenueData] = useState(initialRevenue);
-  const [orderStatusData, setOrderStatusData] = useState(initialOrderStatus);
-  const [topItemsData, setTopItemsData] = useState(initialTopItems);
-  const [loading, setLoading] = useState(false);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(route('admin.dashboard.data'), {
-        params: {
-          start_date: dateRange.startDate,
-          end_date: dateRange.endDate
-        }
-      });
-      setKpis(response.data.kpis);
-      setRevenueData(response.data.revenue);
-      setOrderStatusData(response.data.order_status);
-      setTopItemsData(response.data.top_items);
-    } catch (error) {
-      console.error("Failed to fetch dashboard data", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Skip initial fetch as data is passed as props, only fetch on change
-    if (dateRange.endDate !== format(new Date(), 'yyyy-MM-dd')) {
-      fetchData();
-    }
-  }, [dateRange]);
-
-  const handleRangeChange = (days: number) => {
-    setDateRange({
-      startDate: format(subDays(new Date(), days), 'yyyy-MM-dd'),
-      endDate: format(new Date(), 'yyyy-MM-dd')
-    });
-    // Trigger fetch immediately or let effect handle it
-    setTimeout(fetchData, 100);
-  };
-
-  // Format currency
-  const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+  const stats = liveStats || quickStats;
 
   return (
     <AdminLayout>
-      <Head title="Admin Dashboard" />
-      <div className="p-6 space-y-6">
+      <Head title="Dashboard" />
 
-        {/* Header & Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-            <p className="text-muted-foreground">Welcome back! Here's what's happening today.</p>
-          </div>
-          <div className="flex items-center gap-2 bg-card p-1 rounded-lg border shadow-sm">
-            <button onClick={() => handleRangeChange(7)} className="px-3 py-1.5 text-sm font-medium rounded hover:bg-muted transition-colors">Last 7 Days</button>
-            <button onClick={() => handleRangeChange(30)} className="px-3 py-1.5 text-sm font-medium rounded hover:bg-muted transition-colors">Last 30 Days</button>
-            <button onClick={() => handleRangeChange(90)} className="px-3 py-1.5 text-sm font-medium rounded hover:bg-muted transition-colors">Last 3 Months</button>
-          </div>
-        </div>
+      {/* Light/Dark mode adaptive background */}
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-fuchsia-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950/50">
+        <div className="p-2 sm:p-4 md:p-6 lg:p-8 space-y-3 sm:space-y-4 md:space-y-6">
 
-        {/* KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(kpis.total_revenue)}</div>
-              <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{kpis.total_orders}</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Order Value</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(kpis.avg_order_value)}</div>
-              <p className="text-xs text-muted-foreground">+4% from last month</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts Area */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-
-          {/* Revenue Chart */}
-          <Card className="col-span-4">
-            <CardHeader>
-              <CardTitle>Revenue Overview</CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={revenueData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis
-                      dataKey="date"
-                      tickFormatter={(val) => format(new Date(val), 'MMM d')}
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                    />
-                    <YAxis
-                      tickFormatter={(val) => `$${val}`}
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                    />
-                    <Tooltip
-                      formatter={(val: number | undefined) => val !== undefined ? formatCurrency(val) : ''}
-                      labelFormatter={(label) => format(new Date(label), 'MMM d, yyyy')}
-                    />
-                    <Line type="monotone" dataKey="total" stroke="#8884d8" strokeWidth={2} activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+          {/* Bold Header Section */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4"
+          >
+            <div className="flex items-center gap-3 md:gap-4">
+              <motion.div
+                animate={{
+                  boxShadow: [
+                    '0 0 20px rgba(217, 70, 239, 0.4)',
+                    '0 0 40px rgba(217, 70, 239, 0.6)',
+                    '0 0 20px rgba(217, 70, 239, 0.4)',
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg sm:rounded-2xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl shadow-fuchsia-500/40"
+              >
+                <Activity className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
+              </motion.div>
+              <div>
+                <motion.h1
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-lg sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 dark:from-white dark:via-fuchsia-200 dark:to-purple-200 bg-clip-text text-transparent"
+                >
+                  {dashboardSummary?.greeting || 'Welcome'}, {dashboardSummary?.user?.name?.split(' ')[0] || 'Admin'}!
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-gray-400 flex items-center gap-2"
+                >
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fuchsia-400" />
+                  <span className="text-xs sm:text-base">
+                    {dashboardSummary?.today ? `${format(new Date(dashboardSummary.today), 'EEEE, MMMM d, yyyy')}` : 'Command Center'}
+                  </span>
+                </motion.p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Order Status Pie Chart */}
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle>Order Status Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={orderStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="count"
-                    >
-                      {orderStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Top Items Bar Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Selling Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topItemsData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 12 }} />
-                  <Tooltip cursor={{ fill: 'transparent' }} />
-                  <Bar dataKey="quantity" fill="#8884d8" radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
 
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => refetchStats()}
+                disabled={isFetching}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-3 rounded-xl",
+                  "bg-gradient-to-r from-gray-800 to-gray-900 border border-white/10",
+                  "text-white font-medium shadow-lg shadow-black/20",
+                  "hover:border-fuchsia-500/50 transition-all",
+                  isFetching && "opacity-50"
+                )}
+              >
+                <RefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
+                <span className="hidden sm:inline">Refresh</span>
+              </motion.button>
+
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/10 border border-emerald-500/30"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"
+                />
+                <span className="text-sm font-bold text-emerald-400">LIVE</span>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Alerts Section */}
+          {(isAdmin || isManager) && alerts && alerts.length > 0 && (
+            <AlertBanner alerts={alerts} />
+          )}
+
+          {/* Bold Quick Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+            <BoldStatCard
+              title="Today's Revenue"
+              value={formatCurrency(stats?.revenue?.today || 0)}
+              icon={DollarSign}
+              variant="revenue"
+              trend={stats?.revenue?.change_percent ? {
+                value: Math.abs(stats.revenue.change_percent),
+                isPositive: stats.revenue.change_percent > 0
+              } : undefined}
+            />
+            <BoldStatCard
+              title="Today's Orders"
+              value={String(stats?.orders?.today || 0)}
+              icon={ShoppingCart}
+              variant="orders"
+              trend={(stats?.orders?.yesterday && stats?.orders?.today !== undefined) ? {
+                value: Math.abs(Math.round((((stats.orders.today ?? 0) - (stats.orders.yesterday ?? 0)) / Math.max(stats.orders.yesterday ?? 1, 1)) * 100)),
+                isPositive: (stats.orders.today ?? 0) >= (stats.orders.yesterday ?? 0)
+              } : undefined}
+            />
+            <BoldStatCard
+              title="Active Orders"
+              value={String(stats?.orders?.active || 0)}
+              icon={Package}
+              variant="active"
+            />
+            <BoldStatCard
+              title="Avg Order Value"
+              value={formatCurrency(initialKPIs?.avg_order_value || 0)}
+              icon={TrendingUp}
+              variant="average"
+            />
+          </div>
+
+          {/* Role-Based Content */}
+          {isAdmin && (
+            <AdminDashboardContent
+              systemHealth={dashboardSummary?.system_health}
+              criticalAlerts={dashboardSummary?.critical_alerts || []}
+              quickActions={dashboardSummary?.quick_actions || []}
+              revenueData={initialRevenue}
+              orderStatusData={initialOrderStatus}
+              topItemsData={initialTopItems}
+            />
+          )}
+
+          {isManager && !isAdmin && (
+            <ManagerDashboardContent
+              pendingApprovals={dashboardSummary?.pending_approvals}
+              teamStatus={dashboardSummary?.team_status}
+              quickActions={dashboardSummary?.quick_actions || []}
+              revenueData={initialRevenue}
+              orderStatusData={initialOrderStatus}
+            />
+          )}
+
+          {isEmployee && (
+            <EmployeeDashboardContent
+              myTasks={dashboardSummary?.my_tasks || []}
+              myPerformance={dashboardSummary?.my_performance}
+              quickActions={dashboardSummary?.quick_actions || []}
+            />
+          )}
+
+        </div>
       </div>
     </AdminLayout>
+  );
+}
+
+// ==================== Admin Dashboard Content ====================
+function AdminDashboardContent({
+  systemHealth,
+  criticalAlerts,
+  quickActions,
+  revenueData,
+  orderStatusData,
+  topItemsData
+}: any) {
+  return (
+    <>
+      {/* System Health - Bold Display */}
+      {systemHealth && (
+        <SystemHealthDisplay health={systemHealth} />
+      )}
+
+      {/* Charts Grid */}
+      <div className="grid gap-6 lg:grid-cols-7">
+        <BoldRevenueChart
+          data={revenueData || []}
+          className="lg:col-span-4"
+        />
+        <OrderStatusDisplay
+          data={orderStatusData || []}
+          className="lg:col-span-3"
+        />
+      </div>
+
+      {/* Top Items */}
+      <BoldTopItemsChart data={topItemsData || []} />
+
+      {/* Quick Actions */}
+      <BoldQuickActions actions={quickActions} iconMap={iconMap} />
+
+    </>
+  );
+}
+
+// ==================== Manager Dashboard Content ====================
+function ManagerDashboardContent({
+  pendingApprovals,
+  teamStatus,
+  quickActions,
+  revenueData,
+  orderStatusData
+}: any) {
+  return (
+    <>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ApprovalQueue approvals={pendingApprovals} />
+        <TeamStatusBar
+          total={teamStatus?.total || 0}
+          byPosition={teamStatus?.by_position || {}}
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <BoldRevenueChart data={revenueData || []} />
+        <OrderStatusDisplay data={orderStatusData || []} />
+      </div>
+
+      <BoldQuickActions actions={quickActions} iconMap={iconMap} />
+    </>
+  );
+}
+
+// ==================== Employee Dashboard Content ====================
+function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any) {
+  return (
+    <>
+      {/* My Tasks */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/10 backdrop-blur-xl shadow-2xl"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 shadow-lg shadow-fuchsia-500/40">
+            <ClipboardList className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-white text-lg">My Active Tasks</h3>
+            <p className="text-sm text-gray-400">Assigned orders</p>
+          </div>
+        </div>
+
+        {myTasks && myTasks.length > 0 ? (
+          <div className="space-y-3">
+            {myTasks.map((task: any, index: number) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:border-fuchsia-500/30 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center">
+                    <ReceiptText className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white">Order #{task.order_number}</p>
+                    {task.table && <p className="text-sm text-gray-400">Table {task.table}</p>}
+                  </div>
+                </div>
+                <span className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-bold capitalize",
+                  task.status === 'ready' && "bg-emerald-500/20 text-emerald-400",
+                  task.status === 'preparing' && "bg-orange-500/20 text-orange-400",
+                  task.status === 'pending' && "bg-amber-500/20 text-amber-400",
+                  task.status === 'received' && "bg-blue-500/20 text-blue-400"
+                )}>
+                  {task.status}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Package className="w-16 h-16 mx-auto text-gray-600 mb-4" />
+            <p className="text-gray-400 text-lg">No active tasks assigned</p>
+          </div>
+        )}
+
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-fuchsia-500/20 to-purple-500/10 rounded-full blur-3xl" />
+      </motion.div>
+
+      {/* Performance */}
+      {myPerformance && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 border border-white/10 backdrop-blur-xl shadow-2xl"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/40">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-bold text-white text-lg">My Performance This Week</h3>
+          </div>
+
+          <div className="flex items-center justify-center py-6">
+            <div className="text-center">
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="text-6xl font-black bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent"
+              >
+                {myPerformance.orders_this_week || 0}
+              </motion.span>
+              <p className="text-gray-400 mt-2">Orders Completed</p>
+            </div>
+          </div>
+
+          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-emerald-500/20 to-teal-500/10 rounded-full blur-3xl" />
+        </motion.div>
+      )}
+
+      {/* Quick Actions */}
+      <BoldQuickActions actions={quickActions} iconMap={iconMap} />
+    </>
   );
 }

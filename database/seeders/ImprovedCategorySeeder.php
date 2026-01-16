@@ -16,7 +16,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'appetizers',
             'display_order' => 1,
-            'image' => null,
+            'image' => 'categories/appetizers.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Appetizers',
@@ -31,6 +31,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'hot-appetizers',
                     'display_order' => 1,
+                    'image' => 'categories/Hot Appetizers.jpg',
                     'translations' => [
                         'en' => ['name' => 'Hot Appetizers', 'description' => 'Warm and crispy starters'],
                         'km' => ['name' => 'បុព្វាហារក្តៅ', 'description' => 'បុព្វាហារក្តៅៗ និងគៀប'],
@@ -39,6 +40,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'cold-appetizers',
                     'display_order' => 2,
+                    'image' => 'categories/Cold Appetizers.jpg',
                     'translations' => [
                         'en' => ['name' => 'Cold Appetizers', 'description' => 'Fresh and refreshing cold starters'],
                         'km' => ['name' => 'បុព្វាហារត្រជាក់', 'description' => 'បុព្វាហារត្រជាក់ស្រស់ៗ'],
@@ -47,6 +49,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'spring-rolls-dumplings',
                     'display_order' => 3,
+                    'image' => 'categories/Spring Rolls & Dumplings.jpg',
                     'translations' => [
                         'en' => ['name' => 'Spring Rolls & Dumplings', 'description' => 'Handmade rolls and dumplings'],
                         'km' => ['name' => 'នំបញ្ចុក និងគុយទាវ', 'description' => 'នំបញ្ចុក និងគុយទាវធ្វើដោយដៃ'],
@@ -55,6 +58,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'sharing-platters',
                     'display_order' => 4,
+                    'image' => 'categories/Sharing Platters.jpg',
                     'translations' => [
                         'en' => ['name' => 'Sharing Platters', 'description' => 'Perfect for sharing with family and friends'],
                         'km' => ['name' => 'ចានចែករំលែក', 'description' => 'ល្អសម្រាប់ចែករំលែកជាមួយគ្រួសារ និងមិត្តភក្តិ'],
@@ -65,7 +69,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'rice-dishes',
             'display_order' => 2,
-            'image' => null,
+            'image' => 'categories/Rice Dishes.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Rice Dishes',
@@ -80,6 +84,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'fried-rice',
                     'display_order' => 1,
+                    'image' => 'categories/Fried Rice.jpg',
                     'translations' => [
                         'en' => ['name' => 'Fried Rice', 'description' => 'Wok-fried rice with your choice of protein'],
                         'km' => ['name' => 'បាយឆា', 'description' => 'បាយឆាជាមួយសាច់តាមជម្រើស'],
@@ -88,6 +93,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'steamed-rice-dishes',
                     'display_order' => 2,
+                    'image' => 'categories/Steamed Rice Dishes.jpg',
                     'translations' => [
                         'en' => ['name' => 'Steamed Rice Dishes', 'description' => 'Steamed rice with flavorful toppings'],
                         'km' => ['name' => 'បាយដំអិល', 'description' => 'បាយដំអិលជាមួយគ្រឿងទម្រង់ឆ្ងាញ់'],
@@ -96,6 +102,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'clay-pot-rice',
                     'display_order' => 3,
+                    'image' => 'categories/Clay Pot Rice.jpg',
                     'translations' => [
                         'en' => ['name' => 'Clay Pot Rice', 'description' => 'Rice cooked in traditional clay pot'],
                         'km' => ['name' => 'បាយឆ្នាំងដីឥដ្ឋ', 'description' => 'បាយដុតក្នុងឆ្នាំងដីឥដ្ឋប្រពៃណី'],
@@ -106,7 +113,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'noodles',
             'display_order' => 3,
-            'image' => null,
+            'image' => 'categories/Noodles.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Noodles',
@@ -121,6 +128,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'noodle-soups',
                     'display_order' => 1,
+                    'image' => 'categories/Noodle Soups.jpg',
                     'translations' => [
                         'en' => ['name' => 'Noodle Soups', 'description' => 'Hot and comforting noodle soups'],
                         'km' => ['name' => 'មីស៊ុប', 'description' => 'មីស៊ុបក្តៅៗ និងឆ្ងាញ់'],
@@ -129,6 +137,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'stir-fried-noodles',
                     'display_order' => 2,
+                    'image' => 'categories/Stir-fried Noodles.jpg',
                     'translations' => [
                         'en' => ['name' => 'Stir-Fried Noodles', 'description' => 'Wok-tossed noodles with savory sauce'],
                         'km' => ['name' => 'មីឆា', 'description' => 'មីឆាក្នុងខ្ទះជាមួយទឹកស៊ីុឆ្ងាញ់'],
@@ -137,6 +146,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'dry-noodles',
                     'display_order' => 3,
+                    'image' => 'categories/Dry Noodles.jpg',
                     'translations' => [
                         'en' => ['name' => 'Dry Noodles', 'description' => 'Noodles served with sauce on the side'],
                         'km' => ['name' => 'មីស្ងួត', 'description' => 'មីស្ងួតជាមួយទឹកស៊ីុ'],
@@ -147,7 +157,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'soups',
             'display_order' => 4,
-            'image' => null,
+            'image' => 'categories/Soups.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Soups',
@@ -162,6 +172,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'traditional-soups',
                     'display_order' => 1,
+                    'image' => 'categories/Traditional Soups.jpg',
                     'translations' => [
                         'en' => ['name' => 'Traditional Soups', 'description' => 'Classic Cambodian soups'],
                         'km' => ['name' => 'ស៊ុបប្រពៃណី', 'description' => 'ស៊ុបប្រពៃណីខ្មែរ'],
@@ -170,6 +181,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'seafood-soups',
                     'display_order' => 2,
+                    'image' => 'categories/Soups.jpg',
                     'translations' => [
                         'en' => ['name' => 'Seafood Soups', 'description' => 'Fresh seafood in flavorful broth'],
                         'km' => ['name' => 'ស៊ុបសមុទ្រ', 'description' => 'អាហារសមុទ្រស្រស់ក្នុងទឹកស៊ុបឆ្ងាញ់'],
@@ -178,6 +190,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'hot-pot',
                     'display_order' => 3,
+                    'image' => 'categories/Traditional Soups.jpg',
                     'translations' => [
                         'en' => ['name' => 'Hot Pot', 'description' => 'Interactive hot pot dining experience'],
                         'km' => ['name' => 'ម៉ូឡុក', 'description' => 'បទពិសោធន៍ញ៉ាំម៉ូឡុក'],
@@ -188,7 +201,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'curries',
             'display_order' => 5,
-            'image' => null,
+            'image' => 'categories/Curries.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Curries',
@@ -203,6 +216,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'red-curry',
                     'display_order' => 1,
+                    'image' => 'categories/Red Curry.jpg',
                     'translations' => [
                         'en' => ['name' => 'Red Curry', 'description' => 'Spicy and rich red curry'],
                         'km' => ['name' => 'ការីក្រហម', 'description' => 'ការីក្រហមហឹរ'],
@@ -211,6 +225,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'green-curry',
                     'display_order' => 2,
+                    'image' => 'categories/Green Curry.jpg',
                     'translations' => [
                         'en' => ['name' => 'Green Curry', 'description' => 'Fresh and aromatic green curry'],
                         'km' => ['name' => 'ការីបៃតង', 'description' => 'ការីបៃតងក្រអូប'],
@@ -219,6 +234,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'amok',
                     'display_order' => 3,
+                    'image' => 'categories/Curries.jpg',
                     'translations' => [
                         'en' => ['name' => 'Amok (Steamed Curry)', 'description' => 'Traditional Khmer steamed curry'],
                         'km' => ['name' => 'អាម៉ុក', 'description' => 'អាម៉ុកខ្មែរប្រពៃណី'],
@@ -229,7 +245,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'grilled-bbq',
             'display_order' => 6,
-            'image' => null,
+            'image' => 'categories/Grilled BBQ.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Grilled & BBQ',
@@ -244,6 +260,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'grilled-meats',
                     'display_order' => 1,
+                    'image' => 'categories/Grilled Meat.jpg',
                     'translations' => [
                         'en' => ['name' => 'Grilled Meats', 'description' => 'Marinated and grilled to perfection'],
                         'km' => ['name' => 'សាច់អាំង', 'description' => 'សាច់ចំអិនអាំងល្អឥតខ្ចោះ'],
@@ -252,6 +269,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'grilled-seafood',
                     'display_order' => 2,
+                    'image' => 'categories/Grilled Seafood.jpg',
                     'translations' => [
                         'en' => ['name' => 'Grilled Seafood', 'description' => 'Fresh seafood grilled over charcoal'],
                         'km' => ['name' => 'អាហារសមុទ្រអាំង', 'description' => 'អាហារសមុទ្រស្រស់អាំងលើធ្យូង'],
@@ -260,6 +278,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'satay-skewers',
                     'display_order' => 3,
+                    'image' => 'categories/Grilled BBQ.jpg',
                     'translations' => [
                         'en' => ['name' => 'Satay & Skewers', 'description' => 'Marinated skewers with peanut sauce'],
                         'km' => ['name' => 'សាច់ចាក់ និងសាតេ', 'description' => 'សាច់ចាក់ជាមួយទឹកស្វាយ'],
@@ -270,7 +289,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'stir-fry',
             'display_order' => 7,
-            'image' => null,
+            'image' => 'categories/Stir-fry.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Stir-Fry Dishes',
@@ -285,6 +304,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'vegetable-stir-fry',
                     'display_order' => 1,
+                    'image' => 'categories/Vegetable Stir-fry.jpg',
                     'translations' => [
                         'en' => ['name' => 'Vegetable Stir-Fry', 'description' => 'Fresh vegetables in savory sauce'],
                         'km' => ['name' => 'បន្លែឆា', 'description' => 'បន្លែស្រស់ឆាជាមួយទឹកស៊ីុ'],
@@ -293,6 +313,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'meat-stir-fry',
                     'display_order' => 2,
+                    'image' => 'categories/Meat Stir-fry.jpg',
                     'translations' => [
                         'en' => ['name' => 'Meat Stir-Fry', 'description' => 'Tender meat with vegetables'],
                         'km' => ['name' => 'សាច់ឆា', 'description' => 'សាច់ទន់ឆាជាមួយបន្លែ'],
@@ -301,6 +322,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'seafood-stir-fry',
                     'display_order' => 3,
+                    'image' => 'categories/Seafood Stir-fry.jpg',
                     'translations' => [
                         'en' => ['name' => 'Seafood Stir-Fry', 'description' => 'Fresh seafood stir-fried with vegetables'],
                         'km' => ['name' => 'អាហារសមុទ្រឆា', 'description' => 'អាហារសមុទ្រឆាជាមួយបន្លែ'],
@@ -311,7 +333,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'salads',
             'display_order' => 8,
-            'image' => null,
+            'image' => 'categories/Salads.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Salads',
@@ -326,6 +348,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'traditional-salads',
                     'display_order' => 1,
+                    'image' => 'categories/Traditional Salads.jpg',
                     'translations' => [
                         'en' => ['name' => 'Traditional Salads', 'description' => 'Classic Cambodian salads'],
                         'km' => ['name' => 'សាឡាត់ប្រពៃណី', 'description' => 'សាឡាត់ប្រពៃណីខ្មែរ'],
@@ -334,6 +357,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'papaya-salad',
                     'display_order' => 2,
+                    'image' => 'categories/Papaya Salad.jpg',
                     'translations' => [
                         'en' => ['name' => 'Papaya Salad', 'description' => 'Spicy green papaya salad'],
                         'km' => ['name' => 'បុកល្ហុង', 'description' => 'បុកល្ហុងហឹរ'],
@@ -342,6 +366,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'fresh-salads',
                     'display_order' => 3,
+                    'image' => 'categories/Fresh Salads.jpg',
                     'translations' => [
                         'en' => ['name' => 'Fresh Salads', 'description' => 'Light and refreshing salads'],
                         'km' => ['name' => 'សាឡាត់ស្រស់', 'description' => 'សាឡាត់ស្រស់ស្រួយ'],
@@ -352,7 +377,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'desserts',
             'display_order' => 9,
-            'image' => null,
+            'image' => 'categories/Desserts.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Desserts',
@@ -367,6 +392,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'traditional-desserts',
                     'display_order' => 1,
+                    'image' => 'categories/Traditional Desserts.jpg',
                     'translations' => [
                         'en' => ['name' => 'Traditional Desserts', 'description' => 'Classic Cambodian sweet treats'],
                         'km' => ['name' => 'បង្អែមប្រពៃណី', 'description' => 'បង្អែមប្រពៃណីខ្មែរ'],
@@ -375,6 +401,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'ice-cream-shakes',
                     'display_order' => 2,
+                    'image' => 'categories/Ice Cream & Shakes.jpg',
                     'translations' => [
                         'en' => ['name' => 'Ice Cream & Shakes', 'description' => 'Cool and creamy frozen treats'],
                         'km' => ['name' => 'ការ៉េម', 'description' => 'ការ៉េមត្រជាក់'],
@@ -383,6 +410,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'tropical-fruits',
                     'display_order' => 3,
+                    'image' => 'categories/Tropical Fruits.jpg',
                     'translations' => [
                         'en' => ['name' => 'Tropical Fruits', 'description' => 'Fresh seasonal fruits'],
                         'km' => ['name' => 'ផ្លែឈើត្រូពិច', 'description' => 'ផ្លែឈើស្រស់តាមរដូវកាល'],
@@ -393,7 +421,7 @@ class ImprovedCategorySeeder extends Seeder
         [
             'slug' => 'beverages',
             'display_order' => 10,
-            'image' => null,
+            'image' => 'categories/Beverages.jpg',
             'translations' => [
                 'en' => [
                     'name' => 'Beverages',
@@ -408,6 +436,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'fresh-juices',
                     'display_order' => 1,
+                    'image' => 'categories/Fresh Juices.jpg',
                     'translations' => [
                         'en' => ['name' => 'Fresh Juices', 'description' => 'Freshly squeezed fruit juices'],
                         'km' => ['name' => 'ទឹកផ្លែឈើ', 'description' => 'ទឹកផ្លែឈើច្របាច់ស្រស់ៗ'],
@@ -416,6 +445,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'smoothies',
                     'display_order' => 2,
+                    'image' => 'categories/Smoothies.jpg',
                     'translations' => [
                         'en' => ['name' => 'Smoothies', 'description' => 'Thick and creamy fruit smoothies'],
                         'km' => ['name' => 'ស្មូធី', 'description' => 'ស្មូធីផ្លែឈើក្រាស់'],
@@ -424,6 +454,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'hot-beverages',
                     'display_order' => 3,
+                    'image' => 'categories/Hot Beverages.jpg',
                     'translations' => [
                         'en' => ['name' => 'Hot Beverages', 'description' => 'Coffee, tea, and hot drinks'],
                         'km' => ['name' => 'ភេសជ្ជៈក្តៅ', 'description' => 'កាហ្វេ តែ និងភេសជ្ជៈក្តៅ'],
@@ -432,6 +463,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'cold-beverages',
                     'display_order' => 4,
+                    'image' => 'categories/Cold Beverages.jpg',
                     'translations' => [
                         'en' => ['name' => 'Cold Beverages', 'description' => 'Iced drinks and soft drinks'],
                         'km' => ['name' => 'ភេសជ្ជៈត្រជាក់', 'description' => 'ភេសជ្ជៈដាក់ទឹកកក'],
@@ -440,6 +472,7 @@ class ImprovedCategorySeeder extends Seeder
                 [
                     'slug' => 'beer-wine',
                     'display_order' => 5,
+                    'image' => 'categories/Beer & Wine.jpg',
                     'translations' => [
                         'en' => ['name' => 'Beer & Wine', 'description' => 'Alcoholic beverages'],
                         'km' => ['name' => 'ស្រាបៀរ និងស្រាទំពាំងបាយជូរ', 'description' => 'ភេសជ្ជៈមានជាតិស្រា'],

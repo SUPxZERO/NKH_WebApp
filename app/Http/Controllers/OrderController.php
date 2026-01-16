@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\CustomerRequest;
-use App\Enums\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,8 +38,8 @@ class OrderController extends Controller
         // Set approval status based on order type and user role
         $order->is_auto_approved = $isEmployeeOrder;
         $order->approval_status = $isEmployeeOrder 
-            ? OrderStatus::APPROVAL_STATUS_APPROVED 
-            : OrderStatus::APPROVAL_STATUS_PENDING;
+            ? Order::APPROVAL_STATUS_APPROVED 
+            : Order::APPROVAL_STATUS_PENDING;
 
         if ($isEmployeeOrder) {
             $order->approved_by = Auth::id();
@@ -80,7 +79,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $order->approval_status = OrderStatus::APPROVAL_STATUS_APPROVED;
+        $order->approval_status = Order::APPROVAL_STATUS_APPROVED;
         $order->approved_by = Auth::id();
         $order->approved_at = now();
         $order->save();
@@ -106,7 +105,7 @@ class OrderController extends Controller
             'rejection_reason' => 'required|string|max:500'
         ]);
 
-        $order->approval_status = OrderStatus::APPROVAL_STATUS_REJECTED;
+        $order->approval_status = Order::APPROVAL_STATUS_REJECTED;
         $order->rejection_reason = $validatedData['rejection_reason'];
         $order->save();
 

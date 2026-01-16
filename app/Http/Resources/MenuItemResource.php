@@ -13,25 +13,35 @@ class MenuItemResource extends JsonResource
         // Handle image URL
         $imagePath = $this->image_path;
         if ($imagePath) {
-            // Normalize slashes and remove leading slash/backslash
+            // Normalize slashes
             $originalPath = str_replace('\\', '/', $imagePath);
-            $storagePath = ltrim($originalPath, '/');
-
-            // If not absolute URL, use Storage::url() for files stored in public disk
-            if (!str_starts_with($storagePath, 'http')) {
-                // Ensure we use the configured APP_URL (Tunnel URL)
-                $baseUrl = config('app.url');
-
-                // Clean up path for URL construction
-                $urlPath = ltrim($storagePath, '/');
-                $urlPath = str_replace('storage/', '', $urlPath);
-
-                // Construct full URL
-                $imagePath = "{$baseUrl}/storage/{$urlPath}";
-
-                // Check if file exists using the original storage path
-                if (!Storage::disk('public')->exists($storagePath)) {
-                    $imagePath = null; // Will show default emoji in frontend
+            $cleanPath = ltrim($originalPath, '/');
+            
+            // 1. Check if it's already a full URL
+            if (str_starts_with($cleanPath, 'http')) {
+                // Keep as is
+            }
+            // 2. Check if it's in public/images/menu-items (Legacy/Seeded data)
+            // DB often has 'menu_images/filename.jpg', but files are in 'public/images/menu-items/filename.jpg'
+            else {
+                $filename = basename($cleanPath);
+                $publicMenuPath = 'images/menu-items/' . $filename;
+                
+                if (file_exists(public_path($publicMenuPath))) {
+                    $imagePath = url($publicMenuPath);
+                } 
+                // 3. Fallback to Storage (New uploads)
+                else {
+                    // Cleanup 'storage/' from path if present to avoid duplication
+                    $storageRelPath = str_replace('storage/', '', $cleanPath);
+                    
+                    // Check if exists in storage
+                    if (Storage::disk('public')->exists($storageRelPath)) {
+                        $imagePath = url("storage/{$storageRelPath}");
+                    } else {
+                        // If file not found in either location, return null or keep original (frontend often handles null)
+                        $imagePath = null;
+                    }
                 }
             }
         }

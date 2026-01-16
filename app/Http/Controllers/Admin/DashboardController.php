@@ -58,113 +58,147 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function quickStats()
+    {
+        $today = Carbon::today();
+        
+        $totalOrders = Order::whereDate('ordered_at', $today)->count();
+        $totalRevenue = Order::whereDate('ordered_at', $today)
+            ->where(function($query) {
+                $query->whereNotNull('completed_at')
+                      ->orWhere('payment_status', 'paid');
+            })
+            ->sum('total_amount');
+            
+        return response()->json([
+            'total_orders' => $totalOrders,
+            'total_revenue' => (float) $totalRevenue,
+            'pending_orders' => Order::where('payment_status', 'unpaid')->count(),
+            'active_drivers' => 0 // Simplified: Employee role column does not exist
+        ]);
+    }
+
     public function revenue($period)
     {
-        $now = Carbon::now();
-        $revenue = collect();
-        $driver = DB::connection()->getDriverName();
-        $isSqlite = $driver === 'sqlite';
+        try {
+            $now = Carbon::now();
+            $revenue = collect();
+            $driver = DB::connection()->getDriverName();
+            $isSqlite = $driver === 'sqlite';
 
-        // Use COALESCE to prefer completed_at, then ordered_at for determining revenue date
-        $dateColumn = "COALESCE(completed_at, ordered_at)";
+            // Use COALESCE to prefer completed_at, then ordered_at for determining revenue date
+            $dateColumn = "COALESCE(completed_at, ordered_at)";
 
-        switch ($period) {
-            case 'daily':
-                // Show hourly breakdown for today (6 AM to 11 PM)
-                $startHour = 6;
-                $endHour = 23;
+            switch ($period) {
+                case 'daily':
+                    // Show hourly breakdown for today (6 AM to 11 PM)
+                    $startHour = 6;
+                    $endHour = 23;
 
-                $hourSql = $isSqlite 
-                    ? "CAST(strftime('%H', $dateColumn) AS INTEGER)" 
-                    : "HOUR($dateColumn)";
+                    $hourSql = $isSqlite 
+                        ? "CAST(strftime('%H', $dateColumn) AS INTEGER)" 
+                        : "HOUR($dateColumn)";
 
-                $hourlyData = Order::select(
-                    DB::raw("$hourSql as hour"),
-                    DB::raw('SUM(total_amount) as total')
-                )
-                ->where(function($query) {
-                    $query->where('status', 'completed')
-                          ->orWhere('payment_status', 'paid');
-                })
-                ->whereDate(DB::raw($dateColumn), $now->toDateString())
-                ->groupBy('hour')
-                ->get()
-                ->keyBy('hour');
+                    $hourlyData = Order::select(
+                        DB::raw("$hourSql as hour"),
+                        DB::raw('SUM(total_amount) as total')
+                    )
+                    ->where(function($query) {
+                        $query->whereNotNull('completed_at')
+                              ->orWhere('payment_status', 'paid');
+                    })
+                    ->whereDate(DB::raw($dateColumn), $now->toDateString())
+                    ->groupBy('hour')
+                    ->get()
+                    ->keyBy('hour');
 
-                for ($hour = $startHour; $hour <= $endHour; $hour++) {
-                    $label = Carbon::today()->setHour($hour)->format('g A');
-                    $revenue->push([
-                        'label' => $label,
-                        'value' => (float) ($hourlyData->get($hour)?->total ?? 0)
-                    ]);
-                }
-                break;
+                    for ($hour = $startHour; $hour <= $endHour; $hour++) {
+                        $label = Carbon::today()->setHour($hour)->format('g A');
+                        $revenue->push([
+                            'label' => $label,
+                            'total' => (float) ($hourlyData->get($hour)?->total ?? 0)
+                        ]);
+                    }
+                    break;
 
-            case 'weekly':
-                // Show all 7 days of the current week
-                $startOfWeek = $now->copy()->startOfWeek();
-                $endOfWeek = $now->copy()->endOfWeek();
+                case 'weekly':
+                    // Show all 7 days of the current week
+                    $startOfWeek = $now->copy()->startOfWeek();
+                    $endOfWeek = $now->copy()->endOfWeek();
 
-                $dateSql = $isSqlite ? "date($dateColumn)" : "DATE($dateColumn)";
+                    // Use ordered_at for both filtering and grouping for consistency
+                    $dateSql = $isSqlite ? "date(ordered_at)" : "DATE(ordered_at)";
 
-                $dailyData = Order::select(
-                    DB::raw("$dateSql as date"),
-                    DB::raw('SUM(total_amount) as total')
-                )
-                ->where(function($query) {
-                    $query->where('status', 'completed')
-                          ->orWhere('payment_status', 'paid');
-                })
-                ->whereBetween(DB::raw($dateColumn), [$startOfWeek, $endOfWeek])
-                ->groupBy('date')
-                ->get()
-                ->keyBy('date');
+                    $dailyData = Order::select(
+                        DB::raw("$dateSql as date"),
+                        DB::raw('SUM(total_amount) as total')
+                    )
+                    ->where(function($query) {
+                        $query->whereNotNull('completed_at')
+                              ->orWhere('payment_status', 'paid');
+                    })
+                    ->whereBetween('ordered_at', [$startOfWeek->toDateTimeString(), $endOfWeek->toDateTimeString()])
+                    ->groupBy('date')
+                    ->get()
+                    ->keyBy('date');
 
-                for ($i = 0; $i < 7; $i++) {
-                    $date = $startOfWeek->copy()->addDays($i);
-                    // SQLite might return YYYY-MM-DD, so standardizing key
-                    $dateKey = $date->toDateString(); 
-                    $revenue->push([
-                        'label' => $date->format('D'),
-                        'value' => (float) ($dailyData->get($dateKey)?->total ?? 0)
-                    ]);
-                }
-                break;
+                    for ($i = 0; $i < 7; $i++) {
+                        $date = $startOfWeek->copy()->addDays($i);
+                        // SQLite might return YYYY-MM-DD, so standardizing key
+                        $dateKey = $date->toDateString(); 
+                        $revenue->push([
+                            'label' => $date->format('D'),
+                            'total' => (float) ($dailyData->get($dateKey)?->total ?? 0)
+                        ]);
+                    }
+                    break;
 
-            case 'monthly':
-                // Show all days of the current month
-                $startOfMonth = $now->copy()->startOfMonth();
-                $daysInMonth = $now->daysInMonth;
+                case 'monthly':
+                    // Show all days of the current month
+                    $startOfMonth = $now->copy()->startOfMonth();
+                    $endOfMonth = $now->copy()->endOfMonth();
+                    $daysInMonth = $now->daysInMonth;
 
-                $dateSql = $isSqlite ? "date($dateColumn)" : "DATE($dateColumn)";
+                    // Use ordered_at for both filtering and grouping for consistency
+                    $dateSql = $isSqlite ? "date(ordered_at)" : "DATE(ordered_at)";
 
-                $dailyData = Order::select(
-                    DB::raw("$dateSql as date"),
-                    DB::raw('SUM(total_amount) as total')
-                )
-                ->where(function($query) {
-                    $query->where('status', 'completed')
-                          ->orWhere('payment_status', 'paid');
-                })
-                ->whereMonth(DB::raw($dateColumn), $now->month)
-                ->whereYear(DB::raw($dateColumn), $now->year)
-                ->groupBy('date')
-                ->get()
-                ->keyBy('date');
+                    $dailyData = Order::select(
+                        DB::raw("$dateSql as date"),
+                        DB::raw('SUM(total_amount) as total')
+                    )
+                    ->where(function($query) {
+                        $query->whereNotNull('completed_at')
+                              ->orWhere('payment_status', 'paid');
+                    })
+                    ->whereBetween('ordered_at', [$startOfMonth->toDateTimeString(), $endOfMonth->toDateTimeString()])
+                    ->groupBy('date')
+                    ->get()
+                    ->keyBy('date');
 
-                for ($day = 1; $day <= $daysInMonth; $day++) {
-                    $date = $startOfMonth->copy()->addDays($day - 1);
-                    $dateKey = $date->toDateString();
-                    $revenue->push([
-                        'label' => (string) $day,
-                        'value' => (float) ($dailyData->get($dateKey)?->total ?? 0)
-                    ]);
-                }
-                break;
+                    for ($day = 1; $day <= $daysInMonth; $day++) {
+                        $date = $startOfMonth->copy()->addDays($day - 1);
+                        $dateKey = $date->toDateString();
+                        $revenue->push([
+                            'label' => (string) $day,
+                            'total' => (float) ($dailyData->get($dateKey)?->total ?? 0)
+                        ]);
+                    }
+                    break;
+            }
+
+            // Calculate grand total for the display header
+            $grandTotal = $revenue->sum('total');
+
+            return response()->json([
+                'data' => $revenue,
+                'total' => $grandTotal,
+                'range' => $period,
+                'count' => $revenue->count()
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Dashboard Revenue Error ($period): " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json([
-            'data' => $revenue
-        ]);
     }
 }

@@ -41,7 +41,12 @@
       "WebFetch(domain:api.telegram.org)",
       "Bash(composer dump-autoload:*)",
       "Bash(cloudflared:*)",
-      "Bash(mysql:*)"
+      "Bash(mysql:*)",
+      "Bash(find:*)",
+      "Bash(git diff:*)",
+      "Bash(task_output b816589)",
+      "Bash(php:*)",
+      "Bash(sqlite3:*)"
     ]
   }
 }

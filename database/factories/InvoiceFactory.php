@@ -35,6 +35,7 @@ class InvoiceFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => 'paid',
             'paid_at' => now(),
+            'amount_paid' => $attributes['total_amount'],
         ]);
     }
 }

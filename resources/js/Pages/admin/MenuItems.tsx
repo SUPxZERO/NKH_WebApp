@@ -93,7 +93,8 @@ export default function MenuItems() {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [formData, setFormData] = useState({
     name: '', description: '', slug: '', sku: '', price: '', cost: '',
-    category_id: '', is_popular: false, is_active: true, display_order: 0
+    category_id: '', is_popular: false, is_active: true, display_order: 0,
+    is_featured: false, badge: ''
   });
   const [image, setImage] = useState<File | null>(null);
   const qc = useQueryClient();
@@ -137,7 +138,8 @@ export default function MenuItems() {
     total: (menuItems as any)?.meta?.total || itemList.length,
     active: itemList.filter(i => i.is_active).length,
     inactive: itemList.filter(i => !i.is_active).length,
-    popular: itemList.filter(i => i.is_popular).length
+    popular: itemList.filter(i => i.is_popular).length,
+    featured: itemList.filter(i => i.is_featured).length
   }), [itemList, menuItems]);
 
   // Mutations
@@ -170,7 +172,7 @@ export default function MenuItems() {
   });
 
   const resetForm = () => {
-    setFormData({ name: '', description: '', slug: '', sku: '', price: '', cost: '', category_id: '', is_popular: false, is_active: true, display_order: 0 });
+    setFormData({ name: '', description: '', slug: '', sku: '', price: '', cost: '', category_id: '', is_popular: false, is_active: true, display_order: 0, is_featured: false, badge: '' });
     setImage(null);
     setEditingItem(null);
   };
@@ -179,7 +181,7 @@ export default function MenuItems() {
     e.preventDefault();
     const data = new FormData();
     Object.entries(formData).forEach(([key, val]) => {
-      if (key === 'is_popular' || key === 'is_active') data.append(key, val ? '1' : '0');
+      if (key === 'is_popular' || key === 'is_active' || key === 'is_featured') data.append(key, val ? '1' : '0');
       else if (key === 'category_id' && (val === '' || val === 'null' || val === undefined)) return;
       else data.append(key, String(val));
     });
@@ -197,7 +199,8 @@ export default function MenuItems() {
       description: item.description || '',
       slug: item.slug, sku: item.sku || '', price: item.price.toString(),
       cost: item.cost?.toString() || '', category_id: item.category_id?.toString() || '',
-      is_popular: item.is_popular, is_active: item.is_active, display_order: item.display_order
+      is_popular: item.is_popular, is_active: item.is_active, display_order: item.display_order,
+      is_featured: item.is_featured || false, badge: item.badge || ''
     });
     setImage(null);
     setOpenEdit(true);
@@ -573,7 +576,7 @@ export default function MenuItems() {
             <ImageUploader onChange={(file) => setImage(file)}
               value={editingItem?.image_path || null} />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <Input label="Order" type="number" value={formData.display_order}
               onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
             <div className="flex items-center gap-2 pt-6">
@@ -588,7 +591,27 @@ export default function MenuItems() {
                 className="w-4 h-4 sm:w-5 sm:h-5 rounded-md border-2 border-border bg-card text-primary cursor-pointer" />
               <label htmlFor="is_active" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Active</label>
             </div>
+            <div className="flex items-center gap-2 pt-6">
+              <input type="checkbox" id="is_featured" checked={formData.is_featured}
+                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                className="w-4 h-4 sm:w-5 sm:h-5 rounded-md border-2 border-amber-500 bg-card text-amber-500 cursor-pointer" />
+              <label htmlFor="is_featured" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Featured</label>
+            </div>
           </div>
+
+          {formData.is_featured && (
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">Badge Text (optional)</label>
+              <input
+                type="text"
+                value={formData.badge}
+                onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
+                placeholder="e.g. Best Seller, Chef's Choice"
+                className="w-full h-10 sm:h-11 bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Max 4 featured items allowed. {stats.featured}/4 featured.</p>
+            </div>
+          )}
 
           <div className="flex gap-3 pt-3 sm:pt-4">
             <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1 h-10 sm:h-11">Cancel</Button>

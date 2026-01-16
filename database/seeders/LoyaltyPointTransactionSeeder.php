@@ -38,7 +38,9 @@ class LoyaltyPointTransactionSeeder extends Seeder
 
             // Optionally link to a completed order
             $order = Order::where('customer_id', $customer->id)
-                ->whereIn('status', ['completed','ready'])
+                ->whereHas('orderStatus', function($q) {
+                    $q->whereIn('code', ['completed', 'ready']);
+                })
                 ->inRandomOrder()
                 ->first();
 

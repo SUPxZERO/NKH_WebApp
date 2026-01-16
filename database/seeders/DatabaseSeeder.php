@@ -64,6 +64,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ComprehensiveRolesPermissionsSeeder::class,  // NEW: Comprehensive roles & permissions with multi-role support
             UnitSeeder::class,                           // units table (measurement units)
+            OrderTypeSeeder::class,                      // order_types lookup
+            OrderStatusSeeder::class,                    // order_statuses lookup
+            PaymentStatusSeeder::class,                  // payment_statuses lookup
+            LoyaltyTierSeeder::class,                    // loyalty_tiers lookup
         ]);
         $this->command->info('✅ Foundation tables seeded.');
         $this->command->info('');

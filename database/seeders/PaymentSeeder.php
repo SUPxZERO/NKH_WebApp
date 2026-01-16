@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Payment;
 use App\Models\Invoice;
 use App\Models\PaymentMethod;
+use App\Models\PaymentStatus;
 use Illuminate\Support\Str;
 
 class PaymentSeeder extends Seeder
@@ -35,13 +36,15 @@ class PaymentSeeder extends Seeder
             
             $paymentDate = $this->getPaymentDate($invoice);
             
+            $statusInfo = $this->getPaymentStatusId();
+            
             Payment::create([
                 'invoice_id' => $invoice->id,
                 'payment_method_id' => $paymentMethod->id,
                 'amount' => $paymentAmount,
                 'transaction_id' => $this->generateTransactionId($paymentMethod),
                 'reference_number' => $this->generateReferenceNumber(),
-                'status' => $this->getPaymentStatus(),
+                'payment_status_id' => $statusInfo['id'],
                 'processed_at' => $paymentDate,
                 'notes' => $this->getPaymentNotes($paymentMethod),
             ]);
@@ -95,10 +98,15 @@ class PaymentSeeder extends Seeder
         return $ref;
     }
 
-    private function getPaymentStatus(): string
+    private function getPaymentStatusId(): array
     {
-        $statuses = ['completed', 'completed', 'completed', 'completed', 'pending', 'failed'];
-        return $statuses[array_rand($statuses)];
+        // Default to 'completed' for seeded payments/invoices
+        $status = PaymentStatus::where('code', 'completed')->first();
+        if (!$status) {
+             $status = PaymentStatus::first();
+        }
+        
+        return ['id' => $status->id, 'code' => $status->code];
     }
 
     private function getPaymentNotes(PaymentMethod $paymentMethod): ?string

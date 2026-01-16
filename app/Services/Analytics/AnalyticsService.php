@@ -26,7 +26,13 @@ class AnalyticsService
             ->selectRaw('DATE(created_at) as date, SUM(amount) as total')
             ->groupBy('date')
             ->orderBy('date')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'total' => (float) $item->total,
+                ];
+            });
     }
 
     /**
@@ -63,8 +69,8 @@ class AnalyticsService
             ->map(function ($item) {
                 return [
                     'name' => $item->menuItem->name ?? 'Unknown Item',
-                    'quantity' => $item->total_quantity,
-                    'revenue' => $item->total_revenue
+                    'quantity' => (int) $item->total_quantity,
+                    'revenue' => (float) $item->total_revenue,
                 ];
             });
     }

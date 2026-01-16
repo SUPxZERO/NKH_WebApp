@@ -9,7 +9,7 @@ class LookupTableController extends Controller
 {
     public function index()
     {
-        return inertia('Admin/Configuration/Index', [
+        return inertia('admin/Configuration/Index', [
             'orderTypes' => \App\Models\OrderType::orderBy('display_order')->get(),
             'orderStatuses' => \App\Models\OrderStatus::orderBy('display_order')->get(),
             'paymentStatuses' => \App\Models\PaymentStatus::orderBy('display_order')->get(),

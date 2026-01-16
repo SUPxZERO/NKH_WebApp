@@ -74,7 +74,8 @@ class OrderController extends Controller
                 'employee_id' => $employee->id,
                 'order_number' => $this->generateOrderNumber($employee->location_id, 'DIN'),
                 'order_type' => 'dine-in',
-                'status' => $isEmployeeOrder ? 'received' : 'pending',
+                'order_type' => 'dine-in',
+                // 'status' => $isEmployeeOrder ? 'received' : 'pending', // REMOVED
                 'approval_status' => $isEmployeeOrder ? 'approved' : 'pending',
                 'is_auto_approved' => $isEmployeeOrder,
                 'payment_status' => 'unpaid',
@@ -83,6 +84,10 @@ class OrderController extends Controller
                 'approved_at' => $isEmployeeOrder ? now() : null,
                 'special_instructions' => $data['notes'] ?? null,
             ]);
+            
+            // Set status using helper
+            $order->setStatus($isEmployeeOrder ? 'received' : 'pending');
+            $order->save();
 
             // Mark table as occupied
             $table->update(['status' => 'occupied']);
@@ -216,7 +221,8 @@ class OrderController extends Controller
             // Re-fetch invoice status
             if ($order->invoice->amount_due <= 0) {
                 // NOTE: status is guarded - must use direct assignment
-                $order->status = 'completed';
+                //$order->status = 'completed';
+                $order->setStatus('completed');
                 $order->completed_at = now();
                 $order->save();
 
@@ -271,7 +277,10 @@ class OrderController extends Controller
         if ($request->filled('status')) {
             $status = (string) $request->string('status');
             if ($status !== 'all') {
-                $query->where('status', $status);
+                // FIX: Use relationship to filter by status code (column 'status' removed)
+                $query->whereHas('orderStatus', function ($q) use ($status) {
+                    $q->where('code', $status);
+                });
             }
         }
         
@@ -362,7 +371,8 @@ class OrderController extends Controller
         }
         
         // NOTE: status is guarded - must use direct assignment
-        $order->status = 'preparing';
+        // $order->status = 'preparing'; 
+        $order->setStatus('preparing');
         $order->kitchen_submitted_at = now();
         $order->save();
         
@@ -515,7 +525,8 @@ class OrderController extends Controller
         }
 
         // NOTE: status is guarded - must use direct assignment
-        $order->status = $newStatus;
+        //$order->status = $newStatus;
+        $order->setStatus($newStatus);
         $order->save();
 
         // Send status update notification to customer

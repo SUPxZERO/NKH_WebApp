@@ -47,6 +47,11 @@ class Ingredient extends Model
         return $this->belongsTo(Supplier::class);
     }
 
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
     public function recipeIngredients()
     {
         return $this->hasMany(RecipeIngredient::class);

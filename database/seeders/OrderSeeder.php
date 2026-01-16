@@ -21,26 +21,49 @@ class OrderSeeder extends Seeder
         
         $this->command->info('Creating 50 random orders with items and invoices...');
 
-        // Create orders with items and invoices
+        // Create 30 PAID orders with paid invoices
         \App\Models\Order::factory()
-            ->count(50)
-            ->has(\App\Models\OrderItem::factory()->count(3), 'items') // Create 3 items per order
-            ->has(\App\Models\Invoice::factory(), 'invoice')           // Create an invoice
+            ->count(30)
+            ->has(\App\Models\Invoice::factory()->paid(), 'invoice')
             ->create([
                 'customer_id' => \App\Models\Customer::inRandomOrder()->first()->id,
                 'location_id' => \App\Models\Location::inRandomOrder()->first()->id,
+                'payment_status' => 'paid', // Explicitly set order status to paid
             ]);
 
-        // Create some orders for Telegram users (Guest scenario)
+        // Create 20 UNPAID orders with issued invoices
+        \App\Models\Order::factory()
+            ->count(20)
+            ->has(\App\Models\Invoice::factory(), 'invoice')
+            ->create([
+                'customer_id' => \App\Models\Customer::inRandomOrder()->first()->id,
+                'location_id' => \App\Models\Location::inRandomOrder()->first()->id,
+                'payment_status' => 'unpaid',
+            ]);
+
+        // Create some orders for Telegram users (Guest scenario) - Mixed paid/unpaid
         $this->command->info('Creating 10 Telegram guest orders...');
         if (\App\Models\TelegramUser::exists()) {
+             // 5 Paid Guest Orders
              \App\Models\Order::factory()
-                ->count(10)
-                ->has(\App\Models\OrderItem::factory()->count(2), 'items')
+                ->count(5)
+                ->has(\App\Models\Invoice::factory()->paid(), 'invoice')
                 ->create([
                     'customer_id' => null,
                     'telegram_user_id' => \App\Models\TelegramUser::inRandomOrder()->first()->id,
                     'location_id' => \App\Models\Location::inRandomOrder()->first()->id,
+                    'payment_status' => 'paid',
+                ]);
+
+             // 5 Unpaid Guest Orders
+             \App\Models\Order::factory()
+                ->count(5)
+                ->has(\App\Models\Invoice::factory(), 'invoice')
+                ->create([
+                    'customer_id' => null,
+                    'telegram_user_id' => \App\Models\TelegramUser::inRandomOrder()->first()->id,
+                    'location_id' => \App\Models\Location::inRandomOrder()->first()->id,
+                    'payment_status' => 'unpaid',
                 ]);
         }
         

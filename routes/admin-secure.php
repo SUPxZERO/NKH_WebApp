@@ -294,10 +294,21 @@ Route::middleware('permission:users.delete')->delete('users/{user}', [\App\Http\
 // Dashboard - requires dashboard.view permission
 Route::middleware('permission:dashboard.view')
     ->group(function () {
+        // New role-aware dashboard endpoints
+        Route::get('dashboard/summary', [AdminDashboardController::class, 'summary']);
+        Route::get('dashboard/alerts', [AdminDashboardController::class, 'alerts']);
+        Route::get('dashboard/quick-stats', [AdminDashboardController::class, 'quickStats']);
+        Route::get('dashboard/activity', [AdminDashboardController::class, 'activity']);
+        
+        // Legacy analytics endpoints
         Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
         Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
         Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
+        
+        // New revenue by range endpoint
+        Route::get('dashboard/revenue-range', [AdminDashboardController::class, 'revenueByRange']);
     });
+
 
 // Sales Analytics - requires reports.view permission
 Route::middleware('permission:reports.view')

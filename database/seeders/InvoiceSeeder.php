@@ -10,7 +10,9 @@ class InvoiceSeeder extends Seeder
 {
     public function run(): void
     {
-        $completedOrders = Order::whereIn('status', ['completed', 'ready'])->get();
+        $completedOrders = Order::whereHas('orderStatus', function ($query) {
+            $query->whereIn('code', ['completed', 'ready']);
+        })->get();
 
         foreach ($completedOrders as $order) {
             if (Invoice::where('order_id', $order->id)->exists()) {

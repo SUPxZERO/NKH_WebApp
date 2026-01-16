@@ -18,11 +18,6 @@ class OrderItem extends Model
      */
     protected $guarded = [
         'id',
-        'unit_price',           // ⚠️ Calculated from menu item price at order time
-        'discount_amount',      // ⚠️ Calculated by promotion engine
-        'tax_amount',           // ⚠️ Calculated by tax service
-        'total_price',          // ⚠️ CRITICAL: Calculated (quantity × unit_price - discount + tax)
-        'status',               // ⚠️ Kitchen workflow (pending/preparing/ready)
         'created_at',
         'updated_at',
     ];

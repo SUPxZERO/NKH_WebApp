@@ -1,0 +1,114 @@
+=== Testing Revenue API Output (JSON format) ===
+
+DAILY:
+{
+    "range": "daily",
+    "data": [
+        {
+            "date": "2026-01-10",
+            "label": "Jan 10",
+            "total": 0
+        },
+        {
+            "date": "2026-01-11",
+            "label": "Jan 11",
+            "total": 0
+        },
+        {
+            "date": "2026-01-12",
+            "label": "Jan 12",
+            "total": 0
+        },
+        {
+            "date": "2026-01-13",
+            "label": "Jan 13",
+            "total": 3806.05
+        },
+        {
+            "date": "2026-01-14",
+            "label": "Jan 14",
+            "total": 0
+        },
+        {
+            "date": "2026-01-15",
+            "label": "Jan 15",
+            "total": 0
+        },
+        {
+            "date": "2026-01-16",
+            "label": "Jan 16",
+            "total": 0
+        }
+    ],
+    "total": 3806.05,
+    "count": 7
+}
+
+WEEKLY:
+{
+    "range": "weekly",
+    "data": [
+        {
+            "date": "2025-12-22",
+            "label": "Week 52",
+            "total": 0
+        },
+        {
+            "date": "2025-12-29",
+            "label": "Week 1",
+            "total": 0
+        },
+        {
+            "date": "2026-01-05",
+            "label": "Week 2",
+            "total": 0
+        },
+        {
+            "date": "2026-01-12",
+            "label": "Week 3",
+            "total": 3806.05
+        }
+    ],
+    "total": 3806.05,
+    "count": 4
+}
+
+MONTHLY:
+{
+    "range": "monthly",
+    "data": [
+        {
+            "date": "2025-08-01",
+            "label": "Aug 2025",
+            "total": 0
+        },
+        {
+            "date": "2025-09-01",
+            "label": "Sep 2025",
+            "total": 0
+        },
+        {
+            "date": "2025-10-01",
+            "label": "Oct 2025",
+            "total": 0
+        },
+        {
+            "date": "2025-11-01",
+            "label": "Nov 2025",
+            "total": 0
+        },
+        {
+            "date": "2025-12-01",
+            "label": "Dec 2025",
+            "total": 0
+        },
+        {
+            "date": "2026-01-01",
+            "label": "Jan 2026",
+            "total": 3806.05
+        }
+    ],
+    "total": 3806.05,
+    "count": 6
+}
+
