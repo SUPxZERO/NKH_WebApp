@@ -46,7 +46,11 @@ class PollHelperController extends Controller
 
                 case 'kitchen':
                     // Kitchen only cares about active orders
-                    $query = Order::query()->whereIn('status', ['pending', 'received', 'preparing', 'ready']);
+                    // Use relationship since 'status' column doesn't exist
+                    $query = Order::query()->whereHas('orderStatus', function ($q) {
+                        $q->whereIn('code', ['pending', 'received', 'preparing', 'ready']);
+                    });
+                    
                     if ($locationId) {
                         $query->where('location_id', $locationId);
                     }

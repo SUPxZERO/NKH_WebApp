@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -18,11 +19,14 @@ class KitchenController extends Controller
     public function index(): JsonResponse
     {
         try {
-            // statuses to fetch
-            $statuses = ['pending', 'received', 'preparing', 'ready'];
+            // Status codes to fetch for kitchen display
+            $statusCodes = ['pending', 'received', 'preparing', 'ready'];
 
-            $orders = Order::with(['items.menuItem', 'table', 'customer.user', 'customerAddress'])
-                ->whereIn('status', $statuses)
+            // Query using the orderStatus relationship
+            $orders = Order::with(['items.menuItem', 'table', 'customer.user', 'customerAddress', 'orderStatus'])
+                ->whereHas('orderStatus', function ($query) use ($statusCodes) {
+                    $query->whereIn('code', $statusCodes);
+                })
                 ->orderBy('created_at', 'asc') // Oldest first for kitchen
                 ->get();
 
@@ -50,8 +54,8 @@ class KitchenController extends Controller
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'table_number' => $order->table ? $order->table->table_number : null,
-                    'type' => $order->order_type ?? 'dine-in', // Default to dine-in if null
-                    'status' => $order->status,
+                    'type' => $order->order_type ?? 'dine-in', // Uses accessor
+                    'status' => $order->orderStatus?->code ?? 'pending', // Use relationship
                     'created_at' => $order->created_at->toIso8601String(),
                     'notes' => $order->special_instructions,
                     'customer_name' => $customerName,
@@ -93,26 +97,22 @@ class KitchenController extends Controller
                 'status' => 'required|string|in:preparing,ready,completed,cancelled'
             ]);
 
-            $newStatus = $validated['status'];
-            $oldStatus = $order->status;
+            $newStatusCode = $validated['status'];
+            $oldStatus = $order->orderStatus?->code ?? 'unknown';
 
-            // FIX: Use direct assignment instead of update() because 'status' is in $guarded
-        // Mass assignment via update() silently ignores guarded fields
-        $order->status = $newStatus;
-        $order->save();
+            // Use the setStatus helper which properly updates order_status_id
+            $order->setStatus($newStatusCode);
+            $order->save();
 
             // Broadcast real-time update for Kitchen Display and other listeners
             event(new \App\Events\OrderStatusUpdated($order->fresh()));
 
-            // If completed, we might want to record completion time or perform other actions
-            // But for now, simple status update is sufficient for KDS
-
             // Log transition
-            Log::info("Order #{$order->order_number} status updated from {$oldStatus} to {$newStatus} by Kitchen");
+            Log::info("Order #{$order->order_number} status updated from {$oldStatus} to {$newStatusCode} by Kitchen");
 
             // Notify Customer (Telegram etc)
             try {
-                app(\App\Services\NotificationService::class)->sendOrderNotification($order, $newStatus);
+                app(\App\Services\NotificationService::class)->sendOrderNotification($order, $newStatusCode);
             } catch (\Exception $e) {
                 Log::warning("Failed to send notification via KitchenController: " . $e->getMessage());
             }
@@ -122,7 +122,7 @@ class KitchenController extends Controller
                 'message' => 'Order status updated successfully',
                 'data' => [
                     'id' => $order->id,
-                    'status' => $newStatus
+                    'status' => $newStatusCode
                 ]
             ]);
 
@@ -132,3 +132,4 @@ class KitchenController extends Controller
         }
     }
 }
+

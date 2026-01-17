@@ -43,6 +43,8 @@ class TableSeeder extends Seeder
             'Second Floor' => 10,
             'Terrace' => 8,
             'VIP Floor' => 6,
+            'Garden' => 14,
+            'Riverside Deck' => 12,
             default => 10,
         };
     }
@@ -54,6 +56,8 @@ class TableSeeder extends Seeder
             'Second Floor' => '2F',
             'Terrace' => 'TR',
             'VIP Floor' => 'VIP',
+            'Garden' => 'GD',
+            'Riverside Deck' => 'RD',
             default => 'FL',
         };
         

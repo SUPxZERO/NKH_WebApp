@@ -326,7 +326,28 @@ class OrderController extends Controller
             'showing' => $orders->count()
         ]);
 
-        return OrderResource::collection($orders);
+        // Calculate global stats (showing all orders regardless of pagination/search)
+        // Respect location filter if present
+        $statsQuery = Order::query();
+        if ($request->filled('location_id')) {
+            $statsQuery->where('location_id', $request->location_id);
+        }
+        
+        // Helper to get count by status code
+        $getCountByStatus = function($code) use ($statsQuery) {
+            return (clone $statsQuery)->whereHas('orderStatus', function($q) use ($code) {
+                $q->where('code', $code);
+            })->count();
+        };
+
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'pending' => $getCountByStatus('pending'),
+            'preparing' => $getCountByStatus('preparing'),
+            'ready' => $getCountByStatus('ready'),
+        ];
+
+        return OrderResource::collection($orders)->additional(['stats' => $stats]);
     }
 
     // GET /api/admin/orders/pending-approval

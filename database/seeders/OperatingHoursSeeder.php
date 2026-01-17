@@ -41,11 +41,13 @@ class OperatingHoursSeeder extends Seeder
             }
 
             foreach (range(0, 6) as $day) { // 0 (Sun) .. 6 (Sat)
+                $isWeekend = in_array($day, [5, 6, 0]); // Fri, Sat, Sun
+
                 foreach ($serviceTypes as $type) {
                     [$open, $close] = match ($type) {
-                        'pickup' => ['09:30:00', '20:30:00'],
-                        'delivery' => ['10:00:00', '20:00:00'],
-                        default => ['09:00:00', '21:00:00'],
+                        'pickup' => $isWeekend ? ['09:00:00', '21:30:00'] : ['09:30:00', '20:30:00'],
+                        'delivery' => $isWeekend ? ['09:30:00', '21:00:00'] : ['10:00:00', '20:00:00'],
+                        default => $isWeekend ? ['08:30:00', '22:00:00'] : ['09:00:00', '21:00:00'],
                     };
 
                     OperatingHour::updateOrCreate(

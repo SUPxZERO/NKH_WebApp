@@ -19,9 +19,9 @@ class Reservation extends Model
      */
     protected $guarded = [
         'id',
-        'code',                 // ⚠️ System-generated code
-        'reservation_number',   // ⚠️ System-generated number
-        'status',               // ⚠️ Workflow-managed (pending/confirmed/completed/cancelled/no-show)
+        // 'code',                 // ⚠️ System-generated code (Handled by Controller)
+        // 'reservation_number',   // ⚠️ System-generated number (Handled by Controller)
+        // 'status',               // ⚠️ Workflow-managed (Handled by Controller)
         'created_at',
         'updated_at',
     ];

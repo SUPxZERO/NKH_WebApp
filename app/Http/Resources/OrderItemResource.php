@@ -9,6 +9,12 @@ class OrderItemResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        // Get image_path from the related menu_item if loaded
+        $imagePath = null;
+        if ($this->relationLoaded('menuItem') && $this->menuItem) {
+            $imagePath = $this->menuItem->image_path;
+        }
+
         return [
             'id' => $this->id,
             'order_id' => $this->order_id,
@@ -24,6 +30,8 @@ class OrderItemResource extends JsonResource
             'status' => $this->status,
             'special_instructions' => $this->special_instructions,
             'notes' => $this->special_instructions,
+            'image_path' => $imagePath,
+            'name' => $this->whenLoaded('menuItem') ? $this->menuItem->name : null,
         ];
     }
 }

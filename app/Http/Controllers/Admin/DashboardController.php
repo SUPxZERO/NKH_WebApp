@@ -91,96 +91,69 @@ class DashboardController extends Controller
 
             switch ($period) {
                 case 'daily':
-                    // Show hourly breakdown for today (6 AM to 11 PM)
-                    $startHour = 6;
-                    $endHour = 23;
+                    // Last 7 days (matching DashboardDataService pattern)
+                    for ($i = 6; $i >= 0; $i--) {
+                        $date = $now->copy()->subDays($i);
+                        
+                        $total = Order::whereDate('ordered_at', $date->toDateString())
+                            ->where(function($query) {
+                                $query->whereNotNull('completed_at')
+                                      ->orWhere('payment_status', 'paid');
+                            })
+                            ->sum('total_amount');
 
-                    $hourSql = $isSqlite 
-                        ? "CAST(strftime('%H', $dateColumn) AS INTEGER)" 
-                        : "HOUR($dateColumn)";
-
-                    $hourlyData = Order::select(
-                        DB::raw("$hourSql as hour"),
-                        DB::raw('SUM(total_amount) as total')
-                    )
-                    ->where(function($query) {
-                        $query->whereNotNull('completed_at')
-                              ->orWhere('payment_status', 'paid');
-                    })
-                    ->whereDate(DB::raw($dateColumn), $now->toDateString())
-                    ->groupBy('hour')
-                    ->get()
-                    ->keyBy('hour');
-
-                    for ($hour = $startHour; $hour <= $endHour; $hour++) {
-                        $label = Carbon::today()->setHour($hour)->format('g A');
                         $revenue->push([
-                            'label' => $label,
-                            'total' => (float) ($hourlyData->get($hour)?->total ?? 0)
+                            'date' => $date->format('Y-m-d'),
+                            'label' => $date->format('M d'),
+                            'total' => (float) $total
                         ]);
                     }
                     break;
 
                 case 'weekly':
-                    // Show all 7 days of the current week
-                    $startOfWeek = $now->copy()->startOfWeek();
-                    $endOfWeek = $now->copy()->endOfWeek();
+                    // Last 4 weeks (matching DashboardDataService pattern)
+                    for ($i = 3; $i >= 0; $i--) {
+                        $weekStart = $now->copy()->subWeeks($i)->startOfWeek();
+                        $weekEnd = $now->copy()->subWeeks($i)->endOfWeek();
+                        
+                        $total = Order::whereBetween('ordered_at', [
+                                $weekStart->toDateTimeString(), 
+                                $weekEnd->toDateTimeString()
+                            ])
+                            ->where(function($query) {
+                                $query->whereNotNull('completed_at')
+                                      ->orWhere('payment_status', 'paid');
+                            })
+                            ->sum('total_amount');
 
-                    // Use ordered_at for both filtering and grouping for consistency
-                    $dateSql = $isSqlite ? "date(ordered_at)" : "DATE(ordered_at)";
-
-                    $dailyData = Order::select(
-                        DB::raw("$dateSql as date"),
-                        DB::raw('SUM(total_amount) as total')
-                    )
-                    ->where(function($query) {
-                        $query->whereNotNull('completed_at')
-                              ->orWhere('payment_status', 'paid');
-                    })
-                    ->whereBetween('ordered_at', [$startOfWeek->toDateTimeString(), $endOfWeek->toDateTimeString()])
-                    ->groupBy('date')
-                    ->get()
-                    ->keyBy('date');
-
-                    for ($i = 0; $i < 7; $i++) {
-                        $date = $startOfWeek->copy()->addDays($i);
-                        // SQLite might return YYYY-MM-DD, so standardizing key
-                        $dateKey = $date->toDateString(); 
                         $revenue->push([
-                            'label' => $date->format('D'),
-                            'total' => (float) ($dailyData->get($dateKey)?->total ?? 0)
+                            'date' => $weekStart->format('Y-m-d'),
+                            'label' => 'Week ' . $weekStart->weekOfYear,
+                            'total' => (float) $total
                         ]);
                     }
                     break;
 
                 case 'monthly':
-                    // Show all days of the current month
-                    $startOfMonth = $now->copy()->startOfMonth();
-                    $endOfMonth = $now->copy()->endOfMonth();
-                    $daysInMonth = $now->daysInMonth;
+                    // Last 6 months (matching DashboardDataService pattern)
+                    for ($i = 5; $i >= 0; $i--) {
+                        $monthStart = $now->copy()->subMonths($i)->startOfMonth();
+                        $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
+                        
+                        $total = Order::whereBetween('ordered_at', [
+                                $monthStart->toDateTimeString(), 
+                                $monthEnd->toDateTimeString()
+                            ])
+                            ->where(function($query) {
+                                $query->whereNotNull('completed_at')
+                                      ->orWhere('payment_status', 'paid');
+                            })
+                            ->sum('total_amount');
 
-                    // Use ordered_at for both filtering and grouping for consistency
-                    $dateSql = $isSqlite ? "date(ordered_at)" : "DATE(ordered_at)";
-
-                    $dailyData = Order::select(
-                        DB::raw("$dateSql as date"),
-                        DB::raw('SUM(total_amount) as total')
-                    )
-                    ->where(function($query) {
-                        $query->whereNotNull('completed_at')
-                              ->orWhere('payment_status', 'paid');
-                    })
-                    ->whereBetween('ordered_at', [$startOfMonth->toDateTimeString(), $endOfMonth->toDateTimeString()])
-                    ->groupBy('date')
-                    ->get()
-                    ->keyBy('date');
-
-                    for ($day = 1; $day <= $daysInMonth; $day++) {
-                        $date = $startOfMonth->copy()->addDays($day - 1);
-                        $dateKey = $date->toDateString();
                         $revenue->push([
-                            'label' => (string) $day,
-                            'total' => (float) ($dailyData->get($dateKey)?->total ?? 0)
+                            'date' => $monthStart->format('Y-m-d'),
+                            'label' => $monthStart->format('M Y'),
+                            'total' => (float) $total
                         ]);
                     }
                     break;
@@ -201,4 +174,5 @@ class DashboardController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 }

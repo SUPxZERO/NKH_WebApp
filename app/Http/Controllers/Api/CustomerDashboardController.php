@@ -427,12 +427,7 @@ class CustomerDashboardController extends Controller
                     // Order items summary
                     'items_count' => $order->items->count(),
                     'items' => $order->items->map(function ($item) {
-                        // Build image URL
-                        $imagePath = null;
-                        if ($item->menuItem && $item->menuItem->image_path) {
-                            $storagePath = ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/');
-                            $imagePath = config('app.url') . '/storage/' . $storagePath;
-                        }
+                        $imagePath = $this->getImageForItem($item->menuItem);
                         return [
                             'id' => $item->id,
                             'menu_item_id' => $item->menu_item_id,
@@ -446,6 +441,9 @@ class CustomerDashboardController extends Controller
                                 'name' => $item->menuItem?->name ?? 'Unknown Item',
                                 'image_path' => $imagePath,
                             ],
+                            // Direct fields for convenience
+                            'image_path' => $imagePath,
+                            'name' => $item->menuItem?->name ?? 'Unknown Item',
                         ];
                     })->toArray(),
                     
@@ -556,18 +554,52 @@ class CustomerDashboardController extends Controller
     }
 
     /**
+     * Helper to get properly formatted image URL for a menu item
+     */
+    private function getImageForItem($menuItem): ?string
+    {
+        if (!$menuItem || !$menuItem->image_path) {
+            return null;
+        }
+
+        $imagePath = $menuItem->image_path;
+
+        // Normalize slashes
+        $originalPath = str_replace('\\', '/', $imagePath);
+        $cleanPath = ltrim($originalPath, '/');
+
+        // 1. Check if it's already a full URL
+        if (str_starts_with($cleanPath, 'http')) {
+            return $cleanPath;
+        }
+
+        // 2. Check if it's in public/images/menu-items (Legacy/Seeded data)
+        $filename = basename($cleanPath);
+        $publicMenuPath = 'images/menu-items/' . $filename;
+
+        if (file_exists(public_path($publicMenuPath))) {
+            return url($publicMenuPath);
+        }
+
+        // 3. Fallback to Storage (New uploads)
+        $storageRelPath = str_replace('storage/', '', $cleanPath);
+
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($storageRelPath)) {
+            return url("storage/{$storageRelPath}");
+        }
+
+        // If file not found, return null
+        return null;
+    }
+
+    /**
      * Helper to format order response
      */
     private function formatOrderResponse($order)
     {
         $previewImage = null;
         if ($firstItem = $order->items->first()) {
-            if ($menuItem = $firstItem->menuItem) {
-                if ($menuItem->image_path) {
-                    $storagePath = ltrim(str_replace('\\', '/', $menuItem->image_path), '/');
-                    $previewImage = config('app.url') . '/storage/' . $storagePath;
-                }
-            }
+            $previewImage = $this->getImageForItem($firstItem->menuItem);
         }
 
         $data = [
@@ -623,12 +655,7 @@ class CustomerDashboardController extends Controller
             // Items
             'items_count' => $order->items->count(),
             'items' => $order->items->map(function ($item) {
-                // Build image URL
-                $imagePath = null;
-                if ($item->menuItem && $item->menuItem->image_path) {
-                    $storagePath = ltrim(str_replace('\\', '/', $item->menuItem->image_path), '/');
-                    $imagePath = config('app.url') . '/storage/' . $storagePath;
-                }
+                $imagePath = $this->getImageForItem($item->menuItem);
                 return [
                     'id' => $item->id,
                     'menu_item_id' => $item->menu_item_id,

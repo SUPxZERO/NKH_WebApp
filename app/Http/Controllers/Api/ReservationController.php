@@ -52,7 +52,29 @@ class ReservationController extends Controller
                      ->orderByDesc('id')
                      ->paginate($request->integer('per_page', 12));
 
-        return ReservationResource::collection($res);
+        // Stats Calculation (Global count, not affected by current page/filters)
+        $statsQuery = Reservation::query();
+        
+        $countByStatus = function($status) use ($statsQuery) {
+            return (clone $statsQuery)->where('status', $status)->count();
+        };
+
+        // Late: Pending or Confirmed AND > 15 mins past reservation time
+        $lateThreshold = now()->subMinutes(15);
+        $lateCount = (clone $statsQuery)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where(DB::raw("TIMESTAMP(reservation_date, reservation_time)"), '<', $lateThreshold)
+            ->count();
+
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'pending' => $countByStatus('pending'),
+            'confirmed' => $countByStatus('confirmed'),
+            'seated' => $countByStatus('seated'),
+            'late' => $lateCount,
+        ];
+
+        return ReservationResource::collection($res)->additional(['stats' => $stats]);
     }
 
     public function store(Request $request): ReservationResource

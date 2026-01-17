@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -218,6 +218,11 @@ export default function Orders() {
   const [page, setPage] = useState(1);
   const [perPage] = useState(15);
 
+  // Phase 4 Fix: Reset pagination when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, typeFilter]);
+
   const getAmount = (value: any): number => {
     if (value === null || value === undefined || value === '') return 0;
     const num = parseFloat(String(value));
@@ -245,13 +250,19 @@ export default function Orders() {
 
   // Stats calculation
   const stats = useMemo(() => {
+    // Phase 4 Fix: Use server-side stats if available
+    if ((ordersData as any)?.stats) {
+      return (ordersData as any).stats;
+    }
+
+    // Fallback for loading state or if stats missing
     return {
-      total: ordersData?.meta?.total || orderList.length,
-      pending: orderList.filter((o: Order) => o.status === 'pending').length,
-      preparing: orderList.filter((o: Order) => o.status === 'preparing').length,
-      ready: orderList.filter((o: Order) => o.status === 'ready').length,
+      total: ordersData?.meta?.total || 0,
+      pending: 0,
+      preparing: 0,
+      ready: 0,
     };
-  }, [orderList, ordersData]);
+  }, [ordersData]);
 
   // Mutations
   const updateStatusMutation = useMutation({

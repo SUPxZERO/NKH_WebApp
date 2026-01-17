@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -67,6 +67,11 @@ export default function Reservations() {
   const [page, setPage] = useState(1);
   const [perPage] = useState(15);
 
+  // Phase 4 Fix: Reset pagination when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, dateFilter]);
+
   const [formData, setFormData] = useState({
     location_id: '', floor_id: '', table_id: '', customer_id: '', reserved_for: '',
     duration_minutes: '60', guest_count: '2', status: 'pending' as 'pending' | 'confirmed' | 'seated' | 'cancelled' | 'completed' | 'no_show', notes: ''
@@ -96,6 +101,11 @@ export default function Reservations() {
   }, [reservations]);
 
   const stats = useMemo(() => {
+    // Phase 4 Fix: Use server-side stats if available
+    if ((reservations as any)?.stats) {
+      return (reservations as any).stats;
+    }
+
     const list = reservationList;
     const now = new Date();
     const lateThreshold = new Date(now.getTime() - 15 * 60000);

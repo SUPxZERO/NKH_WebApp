@@ -21,3 +21,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Archived debug/test scripts (development artifacts)
+/docs/archived-debug-scripts/

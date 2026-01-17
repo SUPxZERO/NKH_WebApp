@@ -40,6 +40,24 @@ class FloorSeeder extends Seeder
                 ];
             }
 
+            // Add Garden for Siem Reap
+            if ($location->code === 'NKH-SR') {
+                $floors[] = [
+                    'name' => 'Garden',
+                    'display_order' => 0, // Ground level outside
+                    'is_active' => true,
+                ];
+            }
+
+             // Add Riverside Deck for Kampot
+             if ($location->code === 'NKH-KP') {
+                $floors[] = [
+                    'name' => 'Riverside Deck',
+                    'display_order' => 0,
+                    'is_active' => true,
+                ];
+            }
+
             foreach ($floors as $floor) {
                 Floor::updateOrCreate(
                     [
