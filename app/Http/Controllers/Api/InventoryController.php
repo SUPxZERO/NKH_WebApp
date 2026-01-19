@@ -192,7 +192,11 @@ class InventoryController extends Controller
             ->count();
 
         return response()->json([
-            'total_value' => $totalValue,
+            'totalValue' => $totalValue,
+            'lowStock' => $lowStockCount,
+            'expiringSoon' => $expiringSoon,
+            'totalItems' => Inventory::count(),
+            'total_value' => $totalValue, // Keep snake_case for compatibility if needed
             'low_stock_count' => $lowStockCount,
             'expiring_soon' => $expiringSoon
         ]);

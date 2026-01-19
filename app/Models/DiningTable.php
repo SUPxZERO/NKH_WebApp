@@ -32,7 +32,7 @@ class DiningTable extends Model
         'qr_token',             // ⚠️ CRITICAL: Security token (HMAC signed)
         'qr_generated_at',      // ⚠️ Timestamp for QR validity
         'qr_url',               // ⚠️ Generated URL
-        'status',               // ⚠️ Workflow-managed (available/reserved/occupied/unavailable)
+        // status is workflow managed but needs to be seeded
         'created_at',
         'updated_at',
     ];
@@ -59,10 +59,12 @@ class DiningTable extends Model
         return $this->hasMany(Reservation::class, 'table_id');
     }
 
+    /* DEAD CODE: table_sessions does not exist
     public function sessions(): HasMany
     {
         return $this->hasMany(TableSession::class, 'table_id');
     }
+    */
 
     // ==================== SCOPES ====================
 
@@ -170,32 +172,32 @@ class DiningTable extends Model
 
     // ==================== SESSION METHODS ====================
 
-    /**
-     * Get active sessions for this table
-     */
+    /* DEAD CODE
     public function activeSessions(): HasMany
     {
         return $this->sessions()
             ->active()
             ->notExpired();
     }
+    */
 
-    /**
-     * Get the most recent active session
-     */
+    /* DEAD CODE
     public function activeSession(): ?TableSession
     {
         return $this->activeSessions()
             ->orderBy('last_activity_at', 'desc')
             ->first();
     }
+    */
 
     /**
      * Check if table has any active session
+     * DEAD CODE: Always false as table_sessions does not exist
      */
     public function hasActiveSession(): bool
     {
-        return $this->activeSessions()->exists();
+        // return $this->activeSessions()->exists();
+        return false;
     }
 
     /**

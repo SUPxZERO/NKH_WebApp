@@ -207,10 +207,10 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,servic
 
     Route::get('settings', fn() => Inertia::render('admin/Settings'))->name('admin.settings');
     
-    // Inventory Management
-    Route::get('inventory', [\App\Http\Controllers\Admin\InventoryController::class, 'index'])->name('admin.inventory.index');
-    Route::post('inventory/adjust', [\App\Http\Controllers\Admin\InventoryController::class, 'adjust'])->name('admin.inventory.adjust');
-    Route::post('inventory/wastage', [\App\Http\Controllers\Admin\InventoryController::class, 'wastage'])->name('admin.inventory.wastage');
+    //     // Inventory Management
+    //     Route::get('inventory', [\App\Http\Controllers\Admin\InventoryController::class, 'index'])->name('admin.inventory.index');
+    //     Route::post('inventory/adjust', [\App\Http\Controllers\Admin\InventoryController::class, 'adjust'])->name('admin.inventory.adjust');
+    //     Route::post('inventory/wastage', [\App\Http\Controllers\Admin\InventoryController::class, 'wastage'])->name('admin.inventory.wastage');
 });
 Route::get('forgetPass', fn() => Inertia::render('Auth/ForgotPassword'))->name('auth.forgotpassword');
 Route::get('VerifyEmail', fn() => Inertia::render('Auth/VerifyEmail'))->name('auth.verify_email');

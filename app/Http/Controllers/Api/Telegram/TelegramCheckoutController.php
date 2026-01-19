@@ -290,7 +290,6 @@ class TelegramCheckoutController extends Controller
                     'ordered_at' => now(),
                     'special_instructions' => $validated['special_instructions'] ?? null,
                     'delivery_instructions' => $validated['delivery_address'] ?? $user->delivery_address,
-                    'approval_status' => 'pending',
                 ]);
 
                 // Create order items

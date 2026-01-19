@@ -1,425 +1,368 @@
-# 🍽️ **NKH Restaurant Web Application**
+<div align="center">
 
-A full-stack restaurant management system built with **Laravel**, **React + TypeScript**, **Inertia.js**, **TailwindCSS**, and **MySQL** — designed for restaurant owners, managers, cashiers, and kitchen staff to efficiently manage orders, menus, invoices, reservations, customers, inventory, staff schedules, and more.
+# 🍜 NKH Restaurant Management System
 
----
+### Enterprise-Grade Full-Stack Restaurant Operations Platform
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Laravel-11-red" />
-  <img src="https://img.shields.io/badge/React-18-blue" />
-  <img src="https://img.shields.io/badge/Inertia.js-purple" />
-  <img src="https://img.shields.io/badge/TailwindCSS-3.4-38bdf8" />
-  <img src="https://img.shields.io/badge/MySQL-8.0-yellow" />
-  <img src="https://img.shields.io/badge/Docker-ready-2496ED" />
-  <img src="https://img.shields.io/badge/License-MIT-green" />
-</p>
+[![Laravel 11](https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![MySQL 8](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
 
----
+**A comprehensive restaurant management ecosystem built for modern hospitality businesses — from quick-service cafés to multi-location restaurant chains.**
 
-# 📌 **Table of Contents**
+[Features](#-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Documentation](#-documentation) • [Contributing](#-contributing)
 
-* [Overview](#overview)
-* [Key Features](#key-features)
-* [Screenshots](#screenshots)
-* [System Architecture](#system-architecture)
-* [Tech Stack](#tech-stack)
-* [Database Schema](#database-schema)
-* [Project Structure](#project-structure)
-* [Installation](#installation)
-* [Environment Setup](#environment-setup)
-* [Database Seeding](#database-seeding)
-* [Running with Docker](#running-with-docker)
-* [API Documentation](#api-documentation)
-* [User Roles & Permissions](#user-roles--permissions)
-* [Testing](#testing)
-* [Troubleshooting](#troubleshooting)
-* [Contributing](#contributing)
-* [License](#license)
+</div>
 
 ---
 
-# 🌟 **Overview**
+## 🎯 Why NKH?
 
-The **NKH Restaurant Web App** is a complete end-to-end management system for restaurants.
-It includes a modern dashboard, POS system, order management, reservations, menu control, customer tracking, loyalty points, promo management, and staff administration.
+NKH Restaurant is not just another POS system — it's a **complete digital transformation platform** designed to handle every aspect of restaurant operations:
 
-The UI is clean, dark-themed, and optimized for productivity — minimizing clicks and speeding up daily operations.
+| Challenge | NKH Solution |
+|-----------|--------------|
+| Slow order processing | ⚡ Real-time POS with <100ms response |
+| Staff scheduling chaos | 📅 Automated shift management with conflict detection |
+| Inventory wastage | 📊 Recipe-based auto-deduction + predictive alerts |
+| Customer retention | 💎 Built-in loyalty program with tier progression |
+| Multi-location complexity | 🏢 Centralized dashboard with per-location analytics |
 
 ---
 
-# 🚀 **Key Features**
+## ✨ Features
 
-### 🔧 **Admin Dashboard**
-
-* Overview of sales, revenue, active orders, reservations, staff, and more.
-* Role-based analytics based on user permissions.
-
-### 🛒 **Point of Sale (POS)**
-
-* Fast item selection.
-* Category-based filtering.
-* Cart management (add, remove, increase, decrease qty).
-* Customer selection + loyalty point system.
-* Apply promotions/discounts.
-* Supports dine-in, takeaway, delivery.
+### 🖥️ **Point of Sale (POS)**
+- Lightning-fast menu browsing with category filtering
+- Cart management with modifiers and special instructions
+- Multiple payment methods: Cash, Card, QR (Stripe integration)
+- Split payments and partial refunds
+- Table QR code ordering for dine-in customers
 
 ### 📦 **Order Management**
+- Real-time order tracking: `Pending → Preparing → Ready → Completed`
+- Kitchen Display System (KDS) ready
+- Order type badges: Dine-in, Takeaway, Delivery
+- Scheduled orders and time slot management
+- Telegram bot notifications for staff
 
-* Track all orders in real time.
-* Status workflow: `received → preparing → ready → completed`.
-* Order type badges: **pickup**, **delivery**, **dine-in**.
-* Edit, view, cancel, or complete orders.
-* Sort + filter by status or type.
+### 🍔 **Menu & Recipe Management**
+- Multi-language support (English, Khmer)
+- Ingredient-level recipe building with cost calculation
+- Allergen and dietary tagging
+- Featured items and promotional pricing
+- Image upload with automatic optimization
 
-> **Screenshot Placeholder**
-> *Insert screenshot: /screenshots/orders.png*
+### 📊 **Inventory Control**
+- Real-time stock tracking per location
+- Purchase order workflow with supplier management
+- Automatic inventory deduction on order completion
+- Low stock alerts with configurable thresholds
+- Adjustment logs with approval workflow
 
-### 🍔 **Menu Items**
-
-* CRUD menu items.
-* Upload images.
-* Manage ingredients & cost.
-* Assign to multiple categories.
-
-### 📂 **Categories**
-
-* Supports parent/child category hierarchy.
-* Prevents deletion if subcategories or items exist.
+### 👥 **Human Resources**
+- Employee profiles with position and department hierarchy
+- Shift scheduling with drag-and-drop calendar
+- Time-off request management
+- Attendance tracking with clock-in/out
+- Payroll generation with hourly/monthly rates
 
 ### 📅 **Reservations**
+- Online table booking with availability calendar
+- Party size and special request handling
+- SMS/Email confirmation (configurable)
+- No-show tracking and customer behavior analytics
 
-* Schedule tables.
-* Automatically block time slots.
-* Assign customers & tables.
+### 💎 **Customer Loyalty**
+- Points-based reward system
+- Tiered membership (Bronze → Silver → Gold → Platinum)
+- Referral code generation
+- Order history and preferences tracking
+- Targeted promotional campaigns
 
-### 👤 **Customers**
+### 📈 **Analytics & Reporting**
+- Real-time dashboard with KPIs
+- Sales analytics by time period, category, item
+- Employee performance metrics
+- Financial reports with expense tracking
+- Exportable reports (PDF/Excel)
 
-* Customer profile.
-* Order history.
-* Loyalty points tracking.
+### 🔐 **Security & Access Control**
+- Role-based access control (RBAC) with granular permissions
+- Multi-factor authentication (MFA)
+- Audit logs for all critical operations
+- Session management and device tracking
+- API token management via Laravel Sanctum
 
-### 🏷️ **Promotions**
-
-* Auto apply percentage/fixed discounts.
-* Date & time-based activation.
-
-### 👥 **Employees**
-
-* Role management.
-* Work schedule.
-* Permissions.
-
-### 🧾 **Invoices**
-
-* Auto-generated invoice numbers.
-* Export to PDF.
-* Tax configuration.
-
-### 💰 **Expenses**
-
-* Track daily restaurant expenses.
-* Attach receipts.
-
-### 🗂️ **Floors & Tables**
-
-* Manage restaurant floor plans.
-* Assign tables to orders.
+### 🤖 **Telegram Integration**
+- Customer ordering via Telegram bot
+- Real-time order notifications for staff
+- Admin commands for quick operations
+- Guest ordering without login
 
 ---
 
-# 🖼️ **Screenshots**
-
-(Replace these with your real images)
+## 🏗️ Architecture
 
 ```
-/screenshots/dashboard.png
-/screenshots/orders.png
-/screenshots/pos.png
-/screenshots/menu.png
-/screenshots/customers.png
+┌─────────────────────────────────────────────────────────────────┐
+│                         Frontend Layer                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
+│  │   React 18  │──│ TypeScript  │──│  TailwindCSS + Shadcn   │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────────┘  │
+│              │           │                    │                  │
+│              └───────────┴────────────────────┘                  │
+│                          │                                       │
+│                   ┌──────▼──────┐                                │
+│                   │ Inertia.js  │ (SPA Bridge)                   │
+│                   └──────┬──────┘                                │
+└──────────────────────────┼───────────────────────────────────────┘
+                           │
+┌──────────────────────────▼───────────────────────────────────────┐
+│                        Backend Layer                              │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │                    Laravel 11                               │  │
+│  │  ┌─────────┐ ┌─────────┐ ┌──────────┐ ┌─────────────────┐  │  │
+│  │  │ Sanctum │ │ Eloquent│ │ Jobs/    │ │ Event           │  │  │
+│  │  │ Auth    │ │ ORM     │ │ Queues   │ │ Broadcasting    │  │  │
+│  │  └─────────┘ └─────────┘ └──────────┘ └─────────────────┘  │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                          │                                       │
+│              ┌───────────┴───────────┐                           │
+│              ▼                       ▼                           │
+│       ┌────────────┐          ┌────────────┐                     │
+│       │  MySQL 8.0 │          │   Redis    │                     │
+│       │  (70 Tables)│          │  (Cache)   │                     │
+│       └────────────┘          └────────────┘                     │
+└──────────────────────────────────────────────────────────────────┘
 ```
+
+### Key Technologies
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Frontend** | React 18 + TypeScript | Type-safe, component-driven UI |
+| **Styling** | TailwindCSS + Shadcn/UI | Utility-first design system |
+| **State** | Zustand + React Query | Client state & server cache |
+| **Routing** | Inertia.js | SPA experience without API boilerplate |
+| **Backend** | Laravel 11 | Enterprise PHP framework |
+| **Auth** | Laravel Sanctum | SPA + API token authentication |
+| **Database** | MySQL 8.0 | Relational data with 70 normalized tables |
+| **Payments** | Stripe | Card & QR payments |
+| **PDF** | DomPDF | Invoice & receipt generation |
+| **Charts** | Recharts + Nivo | Data visualization |
 
 ---
 
-# 🏗️ **System Architecture**
+## 🚀 Quick Start
 
-```
-┌──────────────────┐       ┌──────────────────────┐
-│   React (TS)      │ ◀───▶ │   Inertia.js Bridge   │
-└──────────────────┘       └──────────────────────┘
-             ▲                      │
-             │                      ▼
-┌──────────────────┐       ┌──────────────────────┐
-│   TailwindCSS     │       │   Laravel 11 (API)   │
-└──────────────────┘       └──────────────────────┘
-                                     │
-                                     ▼
-                           ┌───────────────────┐
-                           │    MySQL 8.0       │
-                           └───────────────────┘
-```
+### Prerequisites
+- PHP 8.2+
+- Node.js 18+
+- MySQL 8.0+
+- Composer 2.x
 
----
-
-# 🛠️ **Tech Stack**
-
-### **Frontend**
-
-* React 18
-* TypeScript
-* Inertia.js
-* TailwindCSS
-* ShadCN UI
-* Axios
-* Zustand / Redux (if used)
-
-### **Backend**
-
-* Laravel 11
-* Laravel Sanctum (Auth)
-* MySQL 8
-* Eloquent ORM
-* Spatie Permission (if used)
-
-### **DevOps**
-
-* Docker & Docker Compose
-* NGINX
-* GitHub Actions CI/CD (optional)
-
----
-
-# 🗄️ **Database Schema (Summary)**
-
-### Core Tables
-
-| Table          | Description                      |
-| -------------- | -------------------------------- |
-| users          | Admins, managers, waiters, chefs |
-| roles          | Role-based access                |
-| categories     | Menu categories                  |
-| menu_items     | Menu items                       |
-| orders         | Customer orders                  |
-| order_items    | Order line items                 |
-| reservations   | Table reservations               |
-| customers      | Customer profile                 |
-| invoices       | Sales invoices                   |
-| expenses       | Cost tracking                    |
-| loyalty_points | Customer reward system           |
-
----
-
-# 📁 **Project Structure**
-
-```
-project/
-├── app/
-│   ├── Models/
-│   ├── Http/
-│   └── ...
-├── resources/
-│   ├── js/
-│   │   ├── Pages/
-│   │   ├── Components/
-│   │   └── ...
-│   ├── views/
-├── routes/
-│   ├── api.php
-│   ├── web.php
-│   └── admin.php
-├── database/
-│   ├── migrations/
-│   ├── seeders/
-└── docker/
-    ├── nginx/
-    ├── php/
-    ├── mysql/
-```
-
----
-
-# ⚙️ **Installation**
-
-### 1️⃣ Clone the Repo
+### Installation
 
 ```bash
-git clone https://github.com/yourname/nkh-restaurant.git
+# Clone the repository
+git clone https://github.com/your-org/nkh-restaurant.git
 cd nkh-restaurant
-```
 
-### 2️⃣ Install Backend Dependencies
-
-```bash
+# Install PHP dependencies
 composer install
-```
 
-### 3️⃣ Install Frontend Dependencies
-
-```bash
+# Install Node dependencies
 npm install
-```
 
-### 4️⃣ Build Frontend
+# Environment setup
+cp .env.example .env
+php artisan key:generate
 
-```bash
+# Configure your database in .env, then:
+php artisan migrate:fresh --seed
+
+# Build frontend assets
 npm run build
+
+# Start development servers
+composer dev   # Runs PHP + Vite + Queue + Logs concurrently
 ```
 
-### 5️⃣ Run Migrations
+### Demo Credentials
 
-```bash
-php artisan migrate
-```
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `demo@admin.com` | `Demo123` |
+| **Manager** | `manager@nkhrestaurant.com` | `manager123` |
+| **Employee** | `staff@restaurant.com` | `Demo123` |
+| **Customer** | `customer@example.com` | `Demo123` |
 
 ---
 
-# 🔧 **Environment Setup (.env)**
-
-Example `.env` configuration:
-
-```
-APP_NAME=NKH Restaurant
-APP_URL=http://localhost
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=nkh_db
-DB_USERNAME=root
-DB_PASSWORD=
-
-SANCTUM_STATEFUL_DOMAINS=localhost
-SESSION_DOMAIN=localhost
-```
-
----
-
-# 🌱 **Database Seeding**
+## 🐳 Docker Deployment
 
 ```bash
-php artisan db:seed
-```
-
-Seeds:
-
-* Admin account
-* Roles
-* Sample menu categories
-* Demo menu items
-
----
-
-# 🐳 **Running with Docker**
-
-### Run full stack
-
-```bash
+# Production build
 docker compose up -d
-```
 
-### Rebuild
+# View logs
+docker compose logs -f app
 
-```bash
-docker compose build --no-cache
-```
-
-### View logs
-
-```bash
-docker compose logs -f
+# Reset database
+docker compose exec app php artisan migrate:fresh --seed
 ```
 
 ---
 
-# 📡 **API Documentation**
-
-### Example: **GET Orders**
+## 📁 Project Structure
 
 ```
-GET /api/admin/orders?status=preparing
-```
-
-Response:
-
-```json
-{
-  "id": 12,
-  "customer": "Sample Customer",
-  "total": 69.85,
-  "status": "preparing"
-}
-```
-
-### Example: **POST Create Order**
-
-```
-POST /api/orders
+nkh-restaurant/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── Api/              # 87 API controllers
+│   │   │   ├── OrderController.php
+│   │   │   ├── PaymentController.php
+│   │   │   ├── InventoryController.php
+│   │   │   └── ...
+│   │   └── Auth/             # Authentication controllers
+│   ├── Models/               # 59 Eloquent models
+│   └── Services/             # Business logic
+├── resources/
+│   └── js/
+│       ├── Pages/
+│       │   ├── admin/        # 37+ admin views
+│       │   ├── Customer/     # 19 customer-facing views
+│       │   └── Employee/     # 14 employee portal views
+│       └── Components/       # Reusable UI components
+├── database/
+│   ├── migrations/           # 70 table migrations
+│   └── seeders/              # Comprehensive demo data
+├── routes/
+│   ├── api.php              # ~45KB of API routes
+│   ├── web.php              # Web routes with Inertia
+│   └── admin-secure.php     # Protected admin routes
+└── tests/
+    ├── Feature/              # 23 feature tests
+    └── Unit/                 # 7 unit tests
 ```
 
 ---
 
-# 🔐 **User Roles & Permissions**
+## 🗄️ Database Schema
 
-| Role    | Abilities                    |
-| ------- | ---------------------------- |
-| Admin   | Full system access           |
-| Manager | Manage staff, menu, orders   |
-| Chef    | View & update kitchen orders |
-| Cashier | POS, payments                |
-| Waiter  | Create orders, reservations  |
+The system uses **70 normalized tables** organized into these domains:
+
+| Domain | Tables | Description |
+|--------|--------|-------------|
+| **Core** | `users`, `roles`, `permissions`, `locations` | Authentication & multi-tenancy |
+| **Menu** | `categories`, `menu_items`, `recipes`, `ingredients` | Product catalog with costing |
+| **Orders** | `orders`, `order_items`, `invoices`, `payments` | Transaction processing |
+| **Inventory** | `inventory`, `purchase_orders`, `suppliers` | Stock management |
+| **HR** | `employees`, `shifts`, `attendances`, `payrolls` | Workforce management |
+| **CRM** | `customers`, `loyalty_points`, `reservations` | Customer relationship |
+| **System** | `audit_logs`, `settings`, `notifications` | Platform operations |
 
 ---
 
-# 🧪 **Testing**
+## 🔐 Role-Based Access
 
-### Backend tests
+| Role | Dashboard | POS | Orders | Menu | Inventory | HR | Reports | Settings |
+|------|:---------:|:---:|:------:|:----:|:---------:|:--:|:-------:|:--------:|
+| **Super Admin** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Admin** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| **Manager** | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ❌ |
+| **Chef** | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ❌ | ❌ | ❌ |
+| **Cashier** | ⚠️ | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Waiter** | ⚠️ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+✅ Full Access | ⚠️ Limited | ❌ No Access
+
+---
+
+## 📡 API Reference
+
+All API endpoints are prefixed with `/api/` and require authentication via Sanctum.
+
+### Core Endpoints
+
+```http
+# Orders
+GET    /api/orders              # List orders with filters
+POST   /api/orders              # Create new order
+PATCH  /api/orders/{id}/status  # Update order status
+DELETE /api/orders/{id}         # Cancel order
+
+# Menu
+GET    /api/menu-items          # List menu items
+POST   /api/menu-items          # Create menu item
+PUT    /api/menu-items/{id}     # Update menu item
+
+# Payments
+POST   /api/payments            # Process payment
+POST   /api/payments/split      # Split payment
+POST   /api/refunds             # Issue refund
+
+# Inventory
+GET    /api/inventory           # Stock levels
+POST   /api/inventory/adjust    # Adjust stock
+POST   /api/purchase-orders     # Create PO
+```
+
+See [docs/API.md](docs/) for complete API documentation.
+
+---
+
+## 🧪 Testing
 
 ```bash
+# Run all tests
 php artisan test
-```
 
-### Frontend tests
+# Run with coverage
+php artisan test --coverage
 
-```bash
-npm run test
-```
-
----
-
-# 🩺 **Troubleshooting**
-
-### 401 / 403 Errors
-
-* Check Sanctum configuration
-* Verify CSRF token
-* Confirm your SPA domain matches `.env`
-
-### Docker MySQL not connecting
-
-```bash
-docker compose down -v
-docker compose up -d
-```
-
-### Node build failing
-
-```bash
-rm -rf node_modules
-npm install
+# Run specific suite
+php artisan test --testsuite=Feature
 ```
 
 ---
 
-# 🤝 **Contributing**
+## 📋 Roadmap
 
-1. Fork repo
-2. Create feature branch
-3. Submit PR
+- [ ] Kitchen Display System (KDS) real-time board
+- [ ] Mobile app (React Native)
+- [ ] AI-powered demand forecasting
+- [ ] Multi-currency support
+- [ ] Accounting software integrations (QuickBooks, Xero)
+- [ ] Advanced analytics with ML insights
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-# 📄 **License**
+## 📄 License
 
-MIT License — free to use and modify.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
+
+<div align="center">
+
+**Built with ❤️ for the hospitality industry**
+
+[Report Bug](https://github.com/your-org/nkh-restaurant/issues) • [Request Feature](https://github.com/your-org/nkh-restaurant/issues)
+
+</div>

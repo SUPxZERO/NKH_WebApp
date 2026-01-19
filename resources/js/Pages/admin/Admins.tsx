@@ -66,7 +66,7 @@ export default function Admins() {
     const { data: adminsData, isLoading } = useQuery({
         queryKey: ['admin/users', page, search, statusFilter],
         queryFn: async () => {
-            let url = `/admin/admin-users?page=${page}&per_page=${perPage}`;
+            let url = `admin/users?page=${page}&per_page=${perPage}`;
             if (search) url += `&search=${search}`;
             if (statusFilter !== 'all') url += `&status=${statusFilter}`;
             console.log('Fetching admins from:', url);
@@ -83,7 +83,7 @@ export default function Admins() {
 
     const { data: stats } = useQuery({
         queryKey: ['admin/users/stats'],
-        queryFn: () => apiGet('/admin/admin-users/stats')
+        queryFn: () => apiGet('admin/users/stats')
     });
 
     const adminList = useMemo(() => {
@@ -101,7 +101,7 @@ export default function Admins() {
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/admin/admin-users', data),
+        mutationFn: (data: any) => apiPost('admin/users', data),
         onSuccess: () => {
             toastSuccess('Admin created successfully');
             setOpenCreate(false);
@@ -113,7 +113,7 @@ export default function Admins() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`/api/admin/admin-users/${id}`, data),
+        mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`admin/users/${id}`, data),
         onSuccess: () => {
             toastSuccess('Admin updated successfully');
             setOpenEdit(false);
@@ -125,7 +125,7 @@ export default function Admins() {
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/admin/admin-users/${id}`),
+        mutationFn: (id: number) => apiDelete(`admin/users/${id}`),
         onSuccess: () => {
             toastSuccess('Admin deactivated');
             qc.invalidateQueries({ queryKey: ['admin/users'] });

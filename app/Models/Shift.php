@@ -51,10 +51,12 @@ class Shift extends Model
         return $this->belongsTo(Location::class);
     }
 
+    /* DEAD CODE: AttendanceMetric class missing & no shift_id in attendances table
     public function attendanceMetrics()
     {
         return $this->hasMany(AttendanceMetric::class);
     }
+    */
 
     // Scopes
     public function scopePublished($query)

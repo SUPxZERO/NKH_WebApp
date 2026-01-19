@@ -10,10 +10,6 @@ class Order extends Model
 {
     use HasFactory;
 
-    const APPROVAL_STATUS_PENDING = 'pending';
-    const APPROVAL_STATUS_APPROVED = 'approved';
-    const APPROVAL_STATUS_REJECTED = 'rejected';
-
     // Payment modes
     const PAYMENT_MODE_PAY_NOW = 'pay_now';
     const PAYMENT_MODE_PAY_ON_DELIVERY = 'pay_on_delivery';
@@ -32,12 +28,11 @@ class Order extends Model
      * SECURITY: Use $guarded to protect sensitive fields that should not be mass-assigned
      *
      * Fields that MUST NOT be settable via user input/API requests:
-     * - approved_by: Only auth system sets this
      * - payment_collected_by/at: Only payment collection flow
      * - order_type_id: Lookup ID (should not be modified after creation)
      * - order_status_id: Lookup ID (should not be modified after creation)
      *
-     * NOTE: Fields like status, payment_status, and is_auto_approved are NOT guarded
+     * NOTE: Fields like status, payment_status are NOT guarded
      * because they need to be set during order creation. Protection is provided by
      * authorization policies (OrderPolicy) which check permissions before allowing updates.
      *
@@ -47,8 +42,6 @@ class Order extends Model
         'id',
         'order_type_id',            // ⚠️ Lookup ID - set via order_type string field
         'order_status_id',          // ⚠️ Lookup ID - managed by approval flow
-        'approved_by',              // ⚠️ Set by auth system during approval
-        'approved_at',              // ⚠️ Set by auth system during approval
         'payment_collected_by',     // ⚠️ Set by payment collection flow
         'payment_collected_at',     // ⚠️ Set by payment collection flow
         'created_at',
@@ -67,7 +60,6 @@ class Order extends Model
         'pickup_time' => 'datetime',
         'completed_at' => 'datetime',
         'estimated_ready_time' => 'datetime',
-        'is_auto_approved' => 'boolean',
         'payment_collected_at' => 'datetime',
     ];
 
@@ -152,14 +144,6 @@ class Order extends Model
     }
 
     /**
-     * User who approved this order (admin/manager)
-     */
-    public function approvedBy()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    /**
      * Telegram user for guest orders (without customer account)
      */
     public function telegramUser()
@@ -167,13 +151,13 @@ class Order extends Model
         return $this->belongsTo(TelegramUser::class);
     }
 
-    /**
-     * Inventory deductions linked to this order (for audit trail)
-     */
+    /*
+     * DEAD CODE: Table inventory_order_deductions does not exist in nkh_restaurant.sql
     public function inventoryDeductions()
     {
         return $this->hasMany(InventoryOrderDeduction::class);
     }
+    */
 
     /**
      * Check if this is a guest order (via Telegram without customer account)
@@ -209,67 +193,6 @@ class Order extends Model
             return $this->telegramUser->phone_number;
         }
         return null;
-    }
-
-    // ==================== HELPER METHODS ====================
-
-    /**
-     * Check if order requires manual approval
-     */
-    public function requiresApproval(): bool
-    {
-        return in_array($this->order_type, ['delivery', 'pickup']) 
-            && !$this->is_auto_approved;
-    }
-
-    /**
-     * Check if order is pending approval
-     */
-    public function isPendingApproval(): bool
-    {
-        return $this->approval_status === self::APPROVAL_STATUS_PENDING;
-    }
-
-    /**
-     * Check if order is approved
-     */
-    public function isApproved(): bool
-    {
-        return $this->approval_status === self::APPROVAL_STATUS_APPROVED;
-    }
-
-    /**
-     * Check if order is rejected
-     */
-    public function isRejected(): bool
-    {
-        return $this->approval_status === self::APPROVAL_STATUS_REJECTED;
-    }
-
-    /**
-     * Approve the order
-     * NOTE: status, approved_by, approved_at are guarded - must use direct assignment
-     */
-    public function approve(?int $userId): bool
-    {
-        $this->setStatus('received');
-        $this->approval_status = self::APPROVAL_STATUS_APPROVED;
-        $this->approved_by = $userId;
-        $this->approved_at = now();
-        $this->rejection_reason = null;
-        return $this->save();
-    }
-
-    /**
-     * Reject the order
-     * NOTE: status is guarded - must use direct assignment
-     */
-    public function reject(string $reason): bool
-    {
-        $this->setStatus('cancelled');
-        $this->approval_status = self::APPROVAL_STATUS_REJECTED;
-        $this->rejection_reason = $reason;
-        return $this->save();
     }
 
     // ==================== PAYMENT HELPERS ====================

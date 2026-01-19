@@ -1,0 +1,600 @@
+{
+    "attendance_metrics": {
+        "type": "app",
+        "table": "attendance_metrics",
+        "model": "AttendanceMetric",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "attendances": {
+        "type": "app",
+        "table": "attendances",
+        "model": "Attendance",
+        "model_exists": true,
+        "usage_count": 13
+    },
+    "audit_logs": {
+        "type": "app",
+        "table": "audit_logs",
+        "model": "AuditLog",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "authentication_methods": {
+        "type": "app",
+        "table": "authentication_methods",
+        "model": "AuthenticationMethod",
+        "model_exists": false,
+        "usage_count": 0
+    },
+    "broadcast_notifications": {
+        "type": "app",
+        "table": "broadcast_notifications",
+        "model": "BroadcastNotification",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "cache": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "cache_locks": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "cart_items": {
+        "type": "app",
+        "table": "cart_items",
+        "model": "CartItem",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "categories": {
+        "type": "app",
+        "table": "categories",
+        "model": "Category",
+        "model_exists": true,
+        "usage_count": 388
+    },
+    "category_translations": {
+        "type": "app",
+        "table": "category_translations",
+        "model": "CategoryTranslation",
+        "model_exists": true,
+        "usage_count": 16
+    },
+    "customer_addresses": {
+        "type": "app",
+        "table": "customer_addresses",
+        "model": "CustomerAddresse",
+        "model_exists": false,
+        "usage_count": 3
+    },
+    "customer_communication_log": {
+        "type": "app",
+        "table": "customer_communication_log",
+        "model": "CustomerCommunicationLog",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "customer_favorites": {
+        "type": "app",
+        "table": "customer_favorites",
+        "model": "CustomerFavorite",
+        "model_exists": false,
+        "usage_count": 9
+    },
+    "customer_login_history": {
+        "type": "app",
+        "table": "customer_login_history",
+        "model": "CustomerLoginHistory",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "customer_preferences": {
+        "type": "app",
+        "table": "customer_preferences",
+        "model": "CustomerPreference",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "customers": {
+        "type": "app",
+        "table": "customers",
+        "model": "Customer",
+        "model_exists": true,
+        "usage_count": 195
+    },
+    "daily_settlements": {
+        "type": "app",
+        "table": "daily_settlements",
+        "model": "DailySettlement",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "employee_feedback": {
+        "type": "app",
+        "table": "employee_feedback",
+        "model": "EmployeeFeedback",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "employees": {
+        "type": "app",
+        "table": "employees",
+        "model": "Employee",
+        "model_exists": true,
+        "usage_count": 213
+    },
+    "employment_history": {
+        "type": "app",
+        "table": "employment_history",
+        "model": "EmploymentHistory",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "expense_categories": {
+        "type": "app",
+        "table": "expense_categories",
+        "model": "ExpenseCategory",
+        "model_exists": true,
+        "usage_count": 16
+    },
+    "expenses": {
+        "type": "app",
+        "table": "expenses",
+        "model": "Expense",
+        "model_exists": true,
+        "usage_count": 100
+    },
+    "failed_jobs": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "feedback": {
+        "type": "app",
+        "table": "feedback",
+        "model": "Feedback",
+        "model_exists": true,
+        "usage_count": 34
+    },
+    "floors": {
+        "type": "app",
+        "table": "floors",
+        "model": "Floor",
+        "model_exists": true,
+        "usage_count": 112
+    },
+    "ingredients": {
+        "type": "app",
+        "table": "ingredients",
+        "model": "Ingredient",
+        "model_exists": true,
+        "usage_count": 277
+    },
+    "inventory": {
+        "type": "app",
+        "table": "inventory",
+        "model": "Inventory",
+        "model_exists": true,
+        "usage_count": 277
+    },
+    "inventory_adjustments": {
+        "type": "app",
+        "table": "inventory_adjustments",
+        "model": "InventoryAdjustment",
+        "model_exists": true,
+        "usage_count": 6
+    },
+    "inventory_order_deductions": {
+        "type": "app",
+        "table": "inventory_order_deductions",
+        "model": "InventoryOrderDeduction",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "inventory_transactions": {
+        "type": "app",
+        "table": "inventory_transactions",
+        "model": "InventoryTransaction",
+        "model_exists": true,
+        "usage_count": 25
+    },
+    "invoices": {
+        "type": "app",
+        "table": "invoices",
+        "model": "Invoice",
+        "model_exists": true,
+        "usage_count": 54
+    },
+    "job_batches": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "jobs": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "leave_requests": {
+        "type": "app",
+        "table": "leave_requests",
+        "model": "LeaveRequest",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "locations": {
+        "type": "app",
+        "table": "locations",
+        "model": "Location",
+        "model_exists": true,
+        "usage_count": 340
+    },
+    "loyalty_points": {
+        "type": "app",
+        "table": "loyalty_points",
+        "model": "LoyaltyPoint",
+        "model_exists": true,
+        "usage_count": 34
+    },
+    "loyalty_tiers": {
+        "type": "app",
+        "table": "loyalty_tiers",
+        "model": "LoyaltyTier",
+        "model_exists": true,
+        "usage_count": 4
+    },
+    "menu_item_translations": {
+        "type": "app",
+        "table": "menu_item_translations",
+        "model": "MenuItemTranslation",
+        "model_exists": true,
+        "usage_count": 21
+    },
+    "menu_items": {
+        "type": "app",
+        "table": "menu_items",
+        "model": "MenuItem",
+        "model_exists": true,
+        "usage_count": 88
+    },
+    "migrations": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "notification_preferences": {
+        "type": "app",
+        "table": "notification_preferences",
+        "model": "NotificationPreference",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "notifications": {
+        "type": "app",
+        "table": "notifications",
+        "model": "Notification",
+        "model_exists": false,
+        "usage_count": 293
+    },
+    "operating_hours": {
+        "type": "app",
+        "table": "operating_hours",
+        "model": "OperatingHour",
+        "model_exists": true,
+        "usage_count": 33
+    },
+    "order_holds": {
+        "type": "app",
+        "table": "order_holds",
+        "model": "OrderHold",
+        "model_exists": false,
+        "usage_count": 0
+    },
+    "order_items": {
+        "type": "app",
+        "table": "order_items",
+        "model": "OrderItem",
+        "model_exists": true,
+        "usage_count": 53
+    },
+    "order_statuses": {
+        "type": "app",
+        "table": "order_statuses",
+        "model": "OrderStatuse",
+        "model_exists": false,
+        "usage_count": 8
+    },
+    "order_time_slots": {
+        "type": "app",
+        "table": "order_time_slots",
+        "model": "OrderTimeSlot",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "order_types": {
+        "type": "app",
+        "table": "order_types",
+        "model": "OrderType",
+        "model_exists": true,
+        "usage_count": 4
+    },
+    "orders": {
+        "type": "app",
+        "table": "orders",
+        "model": "Order",
+        "model_exists": true,
+        "usage_count": 844
+    },
+    "password_reset_tokens": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "payment_audit_logs": {
+        "type": "app",
+        "table": "payment_audit_logs",
+        "model": "PaymentAuditLog",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "payment_methods": {
+        "type": "app",
+        "table": "payment_methods",
+        "model": "PaymentMethod",
+        "model_exists": true,
+        "usage_count": 17
+    },
+    "payment_statuses": {
+        "type": "app",
+        "table": "payment_statuses",
+        "model": "PaymentStatuse",
+        "model_exists": false,
+        "usage_count": 4
+    },
+    "payments": {
+        "type": "app",
+        "table": "payments",
+        "model": "Payment",
+        "model_exists": true,
+        "usage_count": 230
+    },
+    "payroll_details": {
+        "type": "app",
+        "table": "payroll_details",
+        "model": "PayrollDetail",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "payrolls": {
+        "type": "app",
+        "table": "payrolls",
+        "model": "Payroll",
+        "model_exists": true,
+        "usage_count": 38
+    },
+    "permissions": {
+        "type": "app",
+        "table": "permissions",
+        "model": "Permission",
+        "model_exists": true,
+        "usage_count": 187
+    },
+    "personal_access_tokens": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "positions": {
+        "type": "app",
+        "table": "positions",
+        "model": "Position",
+        "model_exists": true,
+        "usage_count": 63
+    },
+    "promotions": {
+        "type": "app",
+        "table": "promotions",
+        "model": "Promotion",
+        "model_exists": true,
+        "usage_count": 60
+    },
+    "purchase_order_items": {
+        "type": "app",
+        "table": "purchase_order_items",
+        "model": "PurchaseOrderItem",
+        "model_exists": true,
+        "usage_count": 2
+    },
+    "purchase_orders": {
+        "type": "app",
+        "table": "purchase_orders",
+        "model": "PurchaseOrder",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "recipe_ingredients": {
+        "type": "app",
+        "table": "recipe_ingredients",
+        "model": "RecipeIngredient",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "recipes": {
+        "type": "app",
+        "table": "recipes",
+        "model": "Recipe",
+        "model_exists": true,
+        "usage_count": 70
+    },
+    "refunds": {
+        "type": "app",
+        "table": "refunds",
+        "model": "Refund",
+        "model_exists": true,
+        "usage_count": 88
+    },
+    "reservations": {
+        "type": "app",
+        "table": "reservations",
+        "model": "Reservation",
+        "model_exists": true,
+        "usage_count": 135
+    },
+    "role_permission": {
+        "type": "app",
+        "table": "role_permission",
+        "model": "RolePermission",
+        "model_exists": false,
+        "usage_count": 2
+    },
+    "role_user": {
+        "type": "app",
+        "table": "role_user",
+        "model": "RoleUser",
+        "model_exists": false,
+        "usage_count": 2
+    },
+    "roles": {
+        "type": "app",
+        "table": "roles",
+        "model": "Role",
+        "model_exists": true,
+        "usage_count": 223
+    },
+    "sessions": {
+        "type": "system",
+        "usage_count": 999,
+        "model_exists": false
+    },
+    "settings": {
+        "type": "app",
+        "table": "settings",
+        "model": "Setting",
+        "model_exists": true,
+        "usage_count": 194
+    },
+    "shift_swaps": {
+        "type": "app",
+        "table": "shift_swaps",
+        "model": "ShiftSwap",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "shift_templates": {
+        "type": "app",
+        "table": "shift_templates",
+        "model": "ShiftTemplate",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "shifts": {
+        "type": "app",
+        "table": "shifts",
+        "model": "Shift",
+        "model_exists": true,
+        "usage_count": 171
+    },
+    "stock_alerts": {
+        "type": "app",
+        "table": "stock_alerts",
+        "model": "StockAlert",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "suppliers": {
+        "type": "app",
+        "table": "suppliers",
+        "model": "Supplier",
+        "model_exists": true,
+        "usage_count": 95
+    },
+    "support_tickets": {
+        "type": "app",
+        "table": "support_tickets",
+        "model": "SupportTicket",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "table_sessions": {
+        "type": "app",
+        "table": "table_sessions",
+        "model": "TableSession",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "tables": {
+        "type": "app",
+        "table": "tables",
+        "model": "Table",
+        "model_exists": false,
+        "usage_count": 259
+    },
+    "telegram_order_notifications": {
+        "type": "app",
+        "table": "telegram_order_notifications",
+        "model": "TelegramOrderNotification",
+        "model_exists": true,
+        "usage_count": 5
+    },
+    "telegram_users": {
+        "type": "app",
+        "table": "telegram_users",
+        "model": "TelegramUser",
+        "model_exists": true,
+        "usage_count": 7
+    },
+    "time_off_balances": {
+        "type": "app",
+        "table": "time_off_balances",
+        "model": "TimeOffBalance",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "time_off_requests": {
+        "type": "app",
+        "table": "time_off_requests",
+        "model": "TimeOffRequest",
+        "model_exists": true,
+        "usage_count": 11
+    },
+    "units": {
+        "type": "app",
+        "table": "units",
+        "model": "Unit",
+        "model_exists": true,
+        "usage_count": 54
+    },
+    "user_notifications": {
+        "type": "app",
+        "table": "user_notifications",
+        "model": "UserNotification",
+        "model_exists": true,
+        "usage_count": 1
+    },
+    "user_profiles": {
+        "type": "app",
+        "table": "user_profiles",
+        "model": "UserProfile",
+        "model_exists": true,
+        "usage_count": 2
+    },
+    "user_settings": {
+        "type": "app",
+        "table": "user_settings",
+        "model": "UserSetting",
+        "model_exists": true,
+        "usage_count": 0
+    },
+    "users": {
+        "type": "app",
+        "table": "users",
+        "model": "User",
+        "model_exists": true,
+        "usage_count": 287
+    }
+}

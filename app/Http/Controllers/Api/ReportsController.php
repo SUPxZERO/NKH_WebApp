@@ -52,6 +52,7 @@ class ReportsController extends Controller
         $dates = $this->getDateRange($range);
         // FIXED: Use safe getGroupByFormat which returns whitelisted SQL
         $groupBy = $this->getGroupByFormat($range);
+        $groupBy = str_replace('created_at', 'inventory_transactions.created_at', $groupBy);
 
         $usage = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
             ->where('inventory_transactions.type', 'usage')
@@ -59,8 +60,8 @@ class ReportsController extends Controller
                 DB::raw($groupBy . ' as date'), // Safe: $groupBy comes from getGroupByFormat whitelist
                 DB::raw('SUM(quantity) as usage')
             ])
-            ->groupBy('date')
-            ->orderBy('date')
+            ->groupBy(DB::raw($groupBy))
+            ->orderBy(DB::raw($groupBy))
             ->get();
 
         return response()->json(['data' => $usage]);
@@ -215,8 +216,8 @@ class ReportsController extends Controller
                 DB::raw($groupBy . ' as date'), // Safe: $groupBy comes from getGroupByFormat whitelist
                 DB::raw('SUM(orders.total_amount) as revenue')
             ])
-            ->groupBy('date')
-            ->orderBy('date')
+            ->groupBy(DB::raw($groupBy))
+            ->orderBy(DB::raw($groupBy))
             ->get()
             ->map(function ($item) use ($dates, $groupBy) {
                 // Get expenses for the same date

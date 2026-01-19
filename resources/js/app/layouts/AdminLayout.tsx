@@ -51,7 +51,7 @@ const navigationTree = [
     children: [
       { name: 'Purchase Orders', href: '/admin/purchase-orders' },
       { name: 'Inventory', href: '/admin/inventory' },
-      { name: 'Inventory Reports', href: '/admin/inventory-reports' },
+      { name: 'Inventory Reports', href: '/admin/reports/inventory' },
       { name: 'Ingredients', href: '/admin/ingredients' },
       { name: 'Adjustments', href: '/admin/inventory-adjustments' },
       { name: 'Stock Alerts', href: '/admin/stock-alerts' },
@@ -307,10 +307,10 @@ const isUrlMatchFn = (href: string, url: string) => {
 
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 import { useRouteHotkeys } from '@/app/hooks/useShortcuts';
-import { 
-  ADMIN_NAVIGATION_SHORTCUTS, 
+import {
+  ADMIN_NAVIGATION_SHORTCUTS,
   ADMIN_EXTENDED_NAVIGATION_SHORTCUTS,
-  ADMIN_PAGE_ACTION_SHORTCUTS 
+  ADMIN_PAGE_ACTION_SHORTCUTS
 } from '@/app/config/shortcuts.config';
 
 export default function AdminLayout({ children }: Props) {

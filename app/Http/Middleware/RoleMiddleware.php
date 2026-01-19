@@ -57,6 +57,12 @@ class RoleMiddleware
         }
 
         $hasAny = $user->hasAnyRole($roles);
+        
+        // Fallback for legacy role column
+        if (!$hasAny && !empty($user->role)) {
+            $hasAny = in_array($user->role, $roles);
+        }
+
         if (!$hasAny) {
             throw new HttpException(403, 'Forbidden: insufficient role.');
         }

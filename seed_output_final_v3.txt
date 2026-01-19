@@ -1,0 +1,85 @@
+
+  [37;44m INFO [39;49m Seeding database.  
+
+
+[32m🌱 NKH Seeder Strategy: Initializing...[39m
+
+[32m📦 Seeding Reference Data (Ref)...[39m
+  Database\Seeders\Ref\UnitSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\UnitSeeder  [90m72 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\OrderStatusSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\OrderStatusSeeder  [90m52 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\OrderTypeSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\OrderTypeSeeder  [90m28 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\PaymentStatusSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\PaymentStatusSeeder  [90m43 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\LoyaltyTierSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\LoyaltyTierSeeder  [90m62 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\RolePermissionSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\RolePermissionSeeder  [90m270 ms[39m [32;1mDONE[39;22m  
+
+[32m   ✅ Reference data secured.[39m
+
+[32m🏢 Seeding Production Environment (Prod)...[39m
+  Database\Seeders\Prod\LocationSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\LocationSeeder  [90m10 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\FloorSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\FloorSeeder  [90m35 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\TableSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\TableSeeder  [90m1,399 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\PaymentMethodSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\PaymentMethodSeeder  [90m16 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\SupplierSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\SupplierSeeder  [90m12 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\CategorySeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\CategorySeeder  [90m2,070 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\IngredientSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\IngredientSeeder  [90m116 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\InventorySeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\InventorySeeder  [90m785 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\MenuItemSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\MenuItemSeeder  [90m6,126 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\UserSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\UserSeeder  [90m2,528 ms[39m [32;1mDONE[39;22m  
+
+[32m   ✅ Environment established.[39m
+
+[32m🎬 Running Operational Scenarios (Demo)...[39m
+  Database\Seeders\Demo\DayInLifeSeeder  [33;1mRUNNING[39;22m  
+[32m   Simulating Orders for Today...[39m
+
+  [41;1m Illuminate\Database\QueryException [49;22m
+
+[39;1m  SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tax_total' in 'field list' (Connection: mysql, SQL: insert into `orders` (`location_id`, `customer_id`, `employee_id`, `table_id`, `order_number`, `order_type_id`, `order_status_id`, `subtotal`, `tax_total`, `discount_total`, `total`, `created_at`, `updated_at`, `payment_status`) values (1, ?, 1, 6, ORD-696B22AA2D8A3, 2, 6, 0, 0, 0, 0, 2026-01-17 02:48:26, 2026-01-17 02:48:26, paid))[39;22m
+
+  at [32mvendor\laravel\framework\src\Illuminate\Database\Connection.php[39m:[32m825[39m
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+  [33m1   [39m[39;1mvendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php[39;22m:[39;1m47[39;22m
+  [90m    PDOException::("SQLSTATE[42S22]: Column not found: 1054 Unknown column 'tax_total' in 'field list'")[39m
+
+  [33m2   [39m[39;1mvendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php[39;22m:[39;1m47[39;22m
+  [90m    PDO::prepare("insert into `orders` (`location_id`, `customer_id`, `employee_id`, `table_id`, `order_number`, `order_type_id`, `order_status_id`, `subtotal`, `tax_total`, `discount_total`, `total`, `created_at`, `updated_at`, `payment_status`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")[39m
+

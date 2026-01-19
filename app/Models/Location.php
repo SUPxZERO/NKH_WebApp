@@ -26,7 +26,7 @@ class Location extends Model
      */
     protected $guarded = [
         'id',
-        'code',                 // ⚠️ System-generated location code
+        // code is guarded but needed for seeding
         'created_at',
         'updated_at',
     ];
@@ -79,5 +79,60 @@ class Location extends Model
     public function orderTimeSlots()
     {
         return $this->hasMany(OrderTimeSlot::class);
+    }
+
+    // ============================================
+    // BUSINESS RELATIONSHIPS
+    // ============================================
+
+    public function floors()
+    {
+        return $this->hasMany(Floor::class);
+    }
+
+    public function tables()
+    {
+        // Model is DiningTable, table is 'tables'
+        return $this->hasMany(DiningTable::class);
+    }
+
+    public function menuItems()
+    {
+        return $this->hasMany(MenuItem::class);
+    }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
+
+    public function feedback()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function inventory()
+    {
+        return $this->hasMany(Inventory::class);
     }
 }

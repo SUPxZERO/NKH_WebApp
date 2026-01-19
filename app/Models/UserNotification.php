@@ -10,7 +10,7 @@ class UserNotification extends Model
 {
     use HasFactory;
 
-    protected $guarded = [
+    protected $fillable = [
         'id',
         'user_id',
         'broadcast_notification_id',
@@ -22,7 +22,7 @@ class UserNotification extends Model
         'target_metadata',
         'read',
         'read_at',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 
@@ -76,7 +76,7 @@ class UserNotification extends Model
             'user_id' => $userId,
             'type' => 'order',
             'title' => $title,
-            'message' => $message,
+            'message' => $message, 
             'action_url' => $actionUrl,
         ]);
     }

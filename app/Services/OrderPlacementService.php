@@ -107,8 +107,6 @@ class OrderPlacementService
                 'order_number' => $this->generateOrderNumber($data['location_id'], $isQrTableOrder ? 'TBL' : 'ONL'),
                 'order_type' => $data['order_type'],
                 'status' => $isQrTableOrder ? 'received' : 'pending',
-                'approval_status' => $isQrTableOrder ? 'approved' : 'pending',
-                'is_auto_approved' => $isQrTableOrder,
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
                 'service_charge' => $serviceCharge, 

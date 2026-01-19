@@ -39,6 +39,11 @@ class PermissionMiddleware
             $permissions = array_map('trim', explode(',', $permissions[0]));
         }
 
+        // Super-admin bypass - has all permissions
+        if ($user->hasRole('super-admin')) {
+            return $next($request);
+        }
+
         // Check if user has ANY of the required permissions
         foreach ($permissions as $permission) {
             if ($user->hasPermission($permission)) {

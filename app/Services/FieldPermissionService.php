@@ -154,7 +154,7 @@ class FieldPermissionService
         }
 
         // Approval: Admin + Manager
-        if (in_array($field, ['approval_status', 'approved_by', 'approved_at', 'rejection_reason'])) {
+        if (in_array($field, [])) {
             return in_array($role, ['admin', 'manager']);
         }
 

@@ -74,19 +74,6 @@ class DashboardDataService
         $roles = $user->roles->pluck('slug')->toArray();
         $alerts = [];
 
-        // Orders pending approval
-        if ($this->hasPermission($user, 'orders.approve')) {
-            $pendingOrders = Order::where('approval_status', 'pending')->count();
-            if ($pendingOrders > 0) {
-                $alerts[] = [
-                    'type' => 'order_approval',
-                    'severity' => 'high',
-                    'count' => $pendingOrders,
-                    'message' => "{$pendingOrders} order(s) pending approval",
-                    'action' => '/admin/orders?status=pending',
-                ];
-            }
-        }
 
         // Stock alerts
         if ($this->hasPermission($user, 'inventory.view')) {
@@ -356,7 +343,7 @@ class DashboardDataService
     private function getAllPendingApprovals(): array
     {
         return [
-            'orders' => Order::where('approval_status', 'pending')->count(),
+            'orders' => 0,
             'time_off' => TimeOffRequest::where('status', 'pending')->count(),
             'inventory' => InventoryAdjustment::where('status', 'pending')->count(),
         ];

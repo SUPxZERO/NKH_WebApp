@@ -90,11 +90,9 @@ class EmployeePOSController extends Controller
                 'employee_id' => $employee?->id,
                 'customer_id' => $validated['customer_id'] ?? null,
                 'status' => 'received', // POS orders are immediately received/valid
-                'approval_status' => 'approved',
                 'payment_status' => 'unpaid',
                 'order_type' => $orderType,
                 'ordered_at' => now(),
-                'approved_at' => now(),
                 'currency' => 'USD',
                 'special_instructions' => $validated['notes'] ?? null,
             ]);

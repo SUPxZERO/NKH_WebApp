@@ -76,12 +76,10 @@ class OrderController extends Controller
                 'order_type' => 'dine-in',
                 'order_type' => 'dine-in',
                 // 'status' => $isEmployeeOrder ? 'received' : 'pending', // REMOVED
-                'approval_status' => $isEmployeeOrder ? 'approved' : 'pending',
-                'is_auto_approved' => $isEmployeeOrder,
+                'status' => $isEmployeeOrder ? 'received' : 'pending',
                 'payment_status' => 'unpaid',
                 'currency' => 'USD',
                 'ordered_at' => now(),
-                'approved_at' => $isEmployeeOrder ? now() : null,
                 'special_instructions' => $data['notes'] ?? null,
             ]);
             
@@ -260,13 +258,7 @@ class OrderController extends Controller
             'promotion',                 // Applied promotion
         ]);
         
-        // ✅ FIX: Show ALL orders by default (removed hardcoded exclusion of pending approval orders)
-        // Admin can filter by approval_status if needed via query parameter
         
-        // Filter by approval status (optional filter - defaults to showing all)
-        if ($request->filled('approval_status') && $request->approval_status !== 'all') {
-            $query->where('approval_status', $request->approval_status);
-        }
         
         // Filter by location
         if ($request->has('location_id')) {
@@ -310,7 +302,7 @@ class OrderController extends Controller
         
         // ✅ Add diagnostic logging
         \Log::info('📊 Admin Orders Query', [
-            'filters' => $request->only(['status', 'type', 'approval_status', 'location_id', 'search', 'start_date', 'end_date']),
+            'filters' => $request->only(['status', 'type', 'location_id', 'search', 'start_date', 'end_date']),
             'sql' => $query->toSql(),
             'bindings' => $query->getBindings()
         ]);
@@ -350,35 +342,6 @@ class OrderController extends Controller
         return OrderResource::collection($orders)->additional(['stats' => $stats]);
     }
 
-    // GET /api/admin/orders/pending-approval
-    // List all orders pending approval (replaces CustomerRequestController::index)
-    public function pendingApproval(Request $request)
-    {
-        $query = Order::with(['customer.user', 'items.menuItem', 'customerAddress', 'timeSlot'])
-            ->where('approval_status', Order::APPROVAL_STATUS_PENDING)
-            ->whereIn('order_type', ['delivery', 'pickup']);
-
-        // Optional filters
-        if ($request->filled('location_id')) {
-            $query->where('location_id', $request->location_id);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->string('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhereHas('customer.user', function ($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%")
-                         ->orWhere('email', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        $orders = $query->orderBy('ordered_at', 'desc')
-                       ->paginate($request->get('per_page', 15));
-
-        return OrderResource::collection($orders);
-    }
 
     // POST /api/orders/{order}/submit (Submit to kitchen)
     public function submitToKitchen(Order $order): OrderResource
@@ -403,94 +366,6 @@ class OrderController extends Controller
         return new OrderResource($order->fresh(['items.menuItem', 'table']));
     }
 
-    // PATCH /api/admin/orders/{order}/approve (Admin approval for online orders)
-    public function approve(Request $request, Order $order): JsonResponse|OrderResource
-    {
-        // Validation
-        if ($order->approval_status !== Order::APPROVAL_STATUS_PENDING) {
-            return response()->json([
-                'message' => 'Order is not pending approval.',
-                'current_status' => $order->approval_status
-            ], 409);
-        }
-
-        // Get user ID if authenticated, otherwise use null (system approval)
-        $userId = $request->user() ? $request->user()->id : null;
-
-        // Use the model method for approval
-        $success = $order->approve($userId);
-
-        if (!$success) {
-            return response()->json([
-                'message' => 'Failed to approve order.',
-            ], 500);
-        }
-
-        // Log the approval action
-        \Log::info('Order approved', [
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-            'approved_by' => $userId,
-            'approved_by_name' => $request->user() ? $request->user()->name : 'System',
-        ]);
-
-        // Send notification to customer
-        try {
-            $notificationService = app(NotificationService::class);
-            $notificationService->sendOrderNotification($order, 'approved');
-        } catch (\Exception $e) {
-            \Log::warning('Failed to send order approval notification: ' . $e->getMessage());
-        }
-
-        return new OrderResource($order->fresh(['items.menuItem', 'customerAddress', 'approvedBy']));
-    }
-
-    // PATCH /api/admin/orders/{order}/reject (Admin rejection for online orders)
-    public function reject(Request $request, Order $order): JsonResponse|OrderResource
-    {
-        // Validation
-        if ($order->approval_status !== Order::APPROVAL_STATUS_PENDING) {
-            return response()->json([
-                'message' => 'Order is not pending approval.',
-                'current_status' => $order->approval_status
-            ], 409);
-        }
-
-        $validated = $request->validate([
-            'rejection_reason' => 'required|string|min:10|max:500'
-        ]);
-
-        // Use the model method for rejection
-        $success = $order->reject($validated['rejection_reason']);
-
-        if (!$success) {
-            return response()->json([
-                'message' => 'Failed to reject order.',
-            ], 500);
-        }
-
-        // Log the rejection action
-        \Log::info('Order rejected', [
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-            'rejected_by' => $request->user()?->id,
-            'rejection_reason' => $validated['rejection_reason'],
-        ]);
-
-        // Send notification to customer with rejection reason
-        try {
-            $notificationService = app(NotificationService::class);
-            $notificationService->sendOrderNotification(
-                $order, 
-                'rejected', 
-                "Your order was declined: {$validated['rejection_reason']}"
-            );
-        } catch (\Exception $e) {
-            \Log::warning('Failed to send order rejection notification: ' . $e->getMessage());
-        }
-
-        return new OrderResource($order->fresh(['items.menuItem', 'customerAddress']));
-    }
 
     private function recalculateTotals(Order $order): void
     {
@@ -506,32 +381,6 @@ class OrderController extends Controller
         ]);
         $newStatus = $request->status;
 
-        // Auto-approve online orders when transitioning from pending to received
-        if ($order->approval_status === Order::APPROVAL_STATUS_PENDING 
-            && in_array($order->order_type, ['delivery', 'pickup'])
-            && $newStatus === 'received') {
-            // Auto-approve the order
-            $userId = $request->user() ? $request->user()->id : null;
-            $order->update([
-                'approval_status' => Order::APPROVAL_STATUS_APPROVED,
-                'approved_by' => $userId,
-                'approved_at' => now(),
-            ]);
-            
-            // Send approval notification
-            try {
-                $notificationService = app(NotificationService::class);
-                $notificationService->sendOrderNotification($order, 'approved');
-            } catch (\Exception $e) {
-                \Log::warning('Failed to send order approval notification: ' . $e->getMessage());
-            }
-            
-            \Log::info('Order auto-approved via status update', [
-                'order_id' => $order->id,
-                'order_number' => $order->order_number,
-                'approved_by' => $userId,
-            ]);
-        }
 
         // Automatically serve all items if completing the order
         if ($newStatus === 'completed') {

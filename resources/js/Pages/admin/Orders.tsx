@@ -209,9 +209,8 @@ export default function Orders() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
   const [openView, setOpenView] = useState(false);
-  const [openReject, setOpenReject] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [rejectionReason, setRejectionReason] = useState('');
+  // State for rejection modal - REMOVED
   const [showFilters, setShowFilters] = useState(false);
 
   const qc = useQueryClient();
@@ -286,29 +285,6 @@ export default function Orders() {
     onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
   });
 
-  const handleApprove = async (order: Order) => {
-    try {
-      await apiPatch(`/api/admin/orders/${order.id}/approve`, {});
-      toastSuccess('Approved');
-      qc.invalidateQueries({ queryKey: ['admin/orders'] });
-    } catch (error: any) { toastError(error.response?.data?.message || 'Failed'); }
-  };
-
-  const handleReject = () => {
-    if (!selectedOrder || rejectionReason.length < 10) {
-      toastError('Reason must be 10+ chars');
-      return;
-    }
-    apiPatch(`/api/admin/orders/${selectedOrder.id}/reject`, { rejection_reason: rejectionReason })
-      .then(() => {
-        toastSuccess('Rejected');
-        qc.invalidateQueries({ queryKey: ['admin/orders'] });
-        setOpenReject(false);
-        setSelectedOrder(null);
-        setRejectionReason('');
-      })
-      .catch((e: any) => toastError(e.response?.data?.message || 'Failed'));
-  };
 
   const handleQuickStatus = (id: number, status: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -576,16 +552,9 @@ export default function Orders() {
                   onClick={() => { setSelectedOrder(order); setOpenView(true); }}
                 >
                   {/* Approval Alert Banner */}
-                  {(order as any).approval_status === 'pending' && (
-                    <div className="absolute inset-x-0 top-0 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-medium py-1.5 px-4 rounded-t-2xl flex items-center gap-2 justify-center">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      Requires Approval
-                    </div>
-                  )}
 
                   <div className={cn(
                     "flex flex-col lg:flex-row lg:items-center gap-4",
-                    (order as any).approval_status === 'pending' && "mt-6"
                   )}>
                     {/* Checkbox + Order Info */}
                     <div className="flex items-start lg:items-center gap-4 flex-1">
@@ -737,36 +706,6 @@ export default function Orders() {
         </div>
       </div>
 
-      {/* Reject Modal */}
-      <Modal open={openReject} onClose={() => setOpenReject(false)} title={`Reject Order #${selectedOrder?.order_number}`} size="sm">
-        <div className="space-y-4">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-            <div className="flex items-center gap-2 text-red-700 dark:text-red-400 font-medium mb-1">
-              <AlertTriangle className="w-4 h-4" />
-              Warning
-            </div>
-            <p className="text-red-600 dark:text-red-300 text-sm">Customer will be notified of the rejection.</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rejection Reason</label>
-            <textarea
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder="Please provide a reason for rejection..."
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent resize-none"
-            />
-            <p className="text-xs text-gray-400 mt-2">{rejectionReason.length}/500 characters (minimum 10)</p>
-          </div>
-          <div className="flex gap-3 pt-2">
-            <Button variant="secondary" onClick={() => setOpenReject(false)} className="flex-1">Cancel</Button>
-            <Button variant="destructive" onClick={handleReject} className="flex-1" disabled={rejectionReason.length < 10}>
-              <XCircle className="w-4 h-4 mr-2" />
-              Reject Order
-            </Button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Order Detail Modal */}
       <AnimatePresence>

@@ -35,15 +35,9 @@ class OrderController extends Controller
         $order->payment_status = 'pending';
         $order->currency = 'USD'; // You might want to make this configurable
 
-        // Set approval status based on order type and user role
-        $order->is_auto_approved = $isEmployeeOrder;
-        $order->approval_status = $isEmployeeOrder 
-            ? Order::APPROVAL_STATUS_APPROVED 
-            : Order::APPROVAL_STATUS_PENDING;
-
         if ($isEmployeeOrder) {
-            $order->approved_by = Auth::id();
-            $order->approved_at = now();
+            // $order->approved_by = Auth::id(); // REMOVED
+            // $order->approved_at = now(); // REMOVED
         }
 
         $order->save();
@@ -57,73 +51,9 @@ class OrderController extends Controller
             ]);
         }
 
-        // If this is a customer order that needs approval, create a customer request
-        if (!$order->is_auto_approved) {
-            CustomerRequest::create([
-                'order_id' => $order->id,
-                'user_id' => Auth::id(),
-                'status' => 'pending',
-                'request_type' => $order->order_type,
-            ]);
-        }
-
         return response()->json([
             'message' => 'Order created successfully',
             'order' => $order->load('items'),
         ]);
-    }
-
-    public function approve(Order $order)
-    {
-        if (!Auth::user()->employee) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $order->approval_status = Order::APPROVAL_STATUS_APPROVED;
-        $order->approved_by = Auth::id();
-        $order->approved_at = now();
-        $order->save();
-
-        // Update the associated customer request
-        if ($order->customerRequest) {
-            $order->customerRequest->update(['status' => 'approved']);
-        }
-
-        // Send notification to customer about order approval
-        $order->customer->user->notify(new \App\Notifications\OrderStatusChanged($order, 'approved'));
-        
-        return response()->json(['message' => 'Order approved successfully']);
-    }
-
-    public function reject(Order $order, Request $request)
-    {
-        if (!Auth::user()->employee) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $validatedData = $request->validate([
-            'rejection_reason' => 'required|string|max:500'
-        ]);
-
-        $order->approval_status = Order::APPROVAL_STATUS_REJECTED;
-        $order->rejection_reason = $validatedData['rejection_reason'];
-        $order->save();
-
-        // Update the associated customer request
-        if ($order->customerRequest) {
-            $order->customerRequest->update([
-                'status' => 'rejected',
-                'rejection_reason' => $validatedData['rejection_reason']
-            ]);
-        }
-
-        // Send notification to customer about order rejection
-        $order->customer->user->notify(new \App\Notifications\OrderStatusChanged(
-            $order, 
-            'rejected',
-            $validatedData['rejection_reason']
-        ));
-        
-        return response()->json(['message' => 'Order rejected successfully']);
     }
 }

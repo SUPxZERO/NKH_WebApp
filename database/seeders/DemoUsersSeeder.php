@@ -30,19 +30,19 @@ class DemoUsersSeeder extends Seeder
             ['email' => 'demo@admin.com'],
             [
                 'name' => 'Demo Admin',
-                'password' => Hash::make('Demo123'),
+                'password' => Hash::make('demo123'),
                 'email_verified_at' => now(),
                 'role' => 'admin',
             ]
         );
-        $this->command->info('✅ Created Demo Admin: demo@admin.com / Demo123');
+        $this->command->info('✅ Created Demo Admin: demo@admin.com / demo123');
 
         // 2. Demo Customer User
         $customerUser = User::updateOrCreate(
-            ['email' => 'customer@example.com'],
+            ['email' => 'demo@customer.com'],
             [
                 'name' => 'Demo Customer',
-                'password' => Hash::make('Demo123'),
+                'password' => Hash::make('demo123'),
                 'email_verified_at' => now(),
                 'role' => 'customer',
             ]
@@ -56,14 +56,14 @@ class DemoUsersSeeder extends Seeder
                 'loyalty_points' => 100,
             ]
         );
-        $this->command->info('✅ Created Demo Customer: customer@example.com / Demo123');
+        $this->command->info('✅ Created Demo Customer: demo@customer.com / demo123');
 
         // 3. Demo Employee User
         $employeeUser = User::updateOrCreate(
-            ['email' => 'staff@restaurant.com'],
+            ['email' => 'demo@employee.com'],
             [
-                'name' => 'Demo Staff',
-                'password' => Hash::make('Demo123'),
+                'name' => 'Demo Employee',
+                'password' => Hash::make('demo123'),
                 'email_verified_at' => now(),
                 'role' => 'employee',
             ]
@@ -80,16 +80,16 @@ class DemoUsersSeeder extends Seeder
                 'status' => 'active',
             ]
         );
-        $this->command->info('✅ Created Demo Employee: staff@restaurant.com / Demo123');
+        $this->command->info('✅ Created Demo Employee: demo@employee.com / demo123');
 
         $this->command->info('');
         $this->command->info('🎉 Demo users seeded successfully!');
         $this->command->info('');
         $this->command->line('Login Credentials:');
         $this->command->line('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        $this->command->line('Admin:    demo@admin.com / Demo123');
-        $this->command->line('Customer: customer@example.com / Demo123');
-        $this->command->line('Employee: staff@restaurant.com / Demo123');
+        $this->command->line('Admin:    demo@admin.com / demo123');
+        $this->command->line('Customer: demo@customer.com / demo123');
+        $this->command->line('Employee: demo@employee.com / demo123');
         $this->command->line('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
 }

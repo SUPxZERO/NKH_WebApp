@@ -397,7 +397,7 @@ Route::middleware('permission:promotions.manage')
 Route::middleware('permission:inventory.view')
     ->group(function () {
         Route::get('purchase-orders', [PurchaseOrderController::class, 'index']);
-        Route::get('purchase-orders-stats', [PurchaseOrderController::class, 'stats']);
+        Route::get('purchase-orders/stats', [PurchaseOrderController::class, 'stats']);
         Route::get('purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'show']);
     });
 Route::middleware('permission:inventory.adjust')

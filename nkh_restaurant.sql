@@ -7,27 +7,6 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-DROP TABLE IF EXISTS `attendance_metrics`;
-CREATE TABLE `attendance_metrics` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `employee_id` bigint unsigned NOT NULL,
-  `attendance_id` bigint unsigned NOT NULL,
-  `minutes_late` int unsigned NOT NULL DEFAULT '0',
-  `minutes_early_departure` int unsigned NOT NULL DEFAULT '0',
-  `break_duration_minutes` int unsigned NOT NULL DEFAULT '0',
-  `total_shift_hours` decimal(10,2) NOT NULL,
-  `overtime_hours` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `attendance_metrics_employee_id_index` (`employee_id`),
-  KEY `attendance_metrics_attendance_id_index` (`attendance_id`),
-  KEY `attendance_metrics_employee_id_created_at_index` (`employee_id`,`created_at`),
-  CONSTRAINT `attendance_metrics_attendance_id_foreign` FOREIGN KEY (`attendance_id`) REFERENCES `attendances` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `attendance_metrics_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `attendances`;
 CREATE TABLE `attendances` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -65,22 +44,6 @@ CREATE TABLE `audit_logs` (
   KEY `audit_logs_created_at_index` (`created_at`),
   KEY `audit_logs_action_index` (`action`),
   CONSTRAINT `audit_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `authentication_methods`;
-CREATE TABLE `authentication_methods` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
-  `method` enum('email_password','phone_otp','telegram','qr_guest') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'email_password',
-  `identifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `last_used_at` timestamp NULL DEFAULT NULL,
-  `use_count` int NOT NULL DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `authentication_methods_user_id_method_index` (`user_id`,`method`),
-  KEY `authentication_methods_last_used_at_index` (`last_used_at`),
-  CONSTRAINT `authentication_methods_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `broadcast_notifications`;
@@ -271,7 +234,6 @@ CREATE TABLE `customers` (
   `last_purchase_date` datetime DEFAULT NULL,
   `visit_count` int unsigned NOT NULL DEFAULT '0',
   `average_order_value` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `customer_tier` enum('bronze','silver','gold','platinum') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'bronze',
   `referral_code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `preferred_language` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dietary_preferences` json DEFAULT NULL,
@@ -299,72 +261,15 @@ CREATE TABLE `customers` (
   UNIQUE KEY `customers_user_id_unique` (`user_id`),
   UNIQUE KEY `customers_referral_code_unique` (`referral_code`),
   KEY `customers_preferred_location_id_index` (`preferred_location_id`),
-  KEY `customers_customer_tier_index` (`customer_tier`),
   KEY `customers_last_visit_date_index` (`last_visit_date`),
-  KEY `customers_customer_tier_total_spent_index` (`customer_tier`,`total_spent`),
+  KEY `customers_customer_tier_total_spent_index` (`total_spent`),
+  KEY `customers_loyalty_tier_id_foreign` (`loyalty_tier_id`),
   KEY `idx_customers_email` (`email`),
   KEY `idx_customers_phone` (`phone`),
-  KEY `customers_loyalty_tier_id_foreign` (`loyalty_tier_id`),
   CONSTRAINT `customers_loyalty_tier_id_foreign` FOREIGN KEY (`loyalty_tier_id`) REFERENCES `loyalty_tiers` (`id`) ON DELETE SET NULL,
   CONSTRAINT `customers_preferred_location_id_foreign` FOREIGN KEY (`preferred_location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `customers_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `daily_settlements`;
-CREATE TABLE `daily_settlements` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `location_id` bigint unsigned NOT NULL,
-  `settlement_date` date NOT NULL,
-  `total_orders` int unsigned NOT NULL DEFAULT '0',
-  `total_revenue` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `total_refunds` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `net_revenue` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `cash_total` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `card_total` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `qr_total` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `other_total` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `usd_total` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `khr_total` decimal(14,2) NOT NULL DEFAULT '0.00',
-  `status` enum('pending','reconciled','discrepancy','closed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `discrepancy_amount` decimal(14,2) DEFAULT NULL,
-  `reconciled_by` bigint unsigned DEFAULT NULL,
-  `reconciled_at` timestamp NULL DEFAULT NULL,
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `metadata` json DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_settlement_location_date` (`location_id`,`settlement_date`),
-  KEY `daily_settlements_reconciled_by_foreign` (`reconciled_by`),
-  KEY `idx_settlement_date_status` (`settlement_date`,`status`),
-  CONSTRAINT `daily_settlements_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `daily_settlements_reconciled_by_foreign` FOREIGN KEY (`reconciled_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `employee_feedback`;
-CREATE TABLE `employee_feedback` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned DEFAULT NULL,
-  `shift_id` bigint unsigned DEFAULT NULL,
-  `type` enum('general','suggestion','complaint','shift_rating') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'general',
-  `rating` tinyint unsigned DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `is_anonymous` tinyint(1) NOT NULL DEFAULT '0',
-  `status` enum('pending','reviewed','actioned') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `admin_response` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `reviewed_at` timestamp NULL DEFAULT NULL,
-  `reviewed_by` bigint unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `employee_feedback_user_id_foreign` (`user_id`),
-  KEY `employee_feedback_shift_id_foreign` (`shift_id`),
-  KEY `employee_feedback_reviewed_by_foreign` (`reviewed_by`),
-  KEY `employee_feedback_type_status_index` (`type`,`status`),
-  CONSTRAINT `employee_feedback_reviewed_by_foreign` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `employee_feedback_shift_id_foreign` FOREIGN KEY (`shift_id`) REFERENCES `shifts` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `employee_feedback_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `employees`;
 CREATE TABLE `employees` (
@@ -511,43 +416,47 @@ DROP TABLE IF EXISTS `floors`;
 CREATE TABLE `floors` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `location_id` bigint unsigned NOT NULL,
-  `name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `display_order` int unsigned NOT NULL DEFAULT '0',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `display_order` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `map_width` int NOT NULL DEFAULT '800',
+  `map_height` int NOT NULL DEFAULT '600',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `floors_location_id_foreign` (`location_id`),
-  KEY `floors_is_active_index` (`is_active`),
-  CONSTRAINT `floors_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `floors_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `ingredients`;
 CREATE TABLE `ingredients` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `location_id` bigint unsigned DEFAULT NULL,
   `code` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'other',
+  `current_stock` decimal(12,3) NOT NULL DEFAULT '0.000',
+  `reorder_point` decimal(12,3) NOT NULL DEFAULT '0.000',
+  `cost_per_unit` decimal(12,2) DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `unit_id` bigint unsigned DEFAULT NULL,
   `supplier_id` bigint unsigned DEFAULT NULL,
-  `cost_per_unit` decimal(10,2) DEFAULT NULL,
-  `current_stock` decimal(10,3) NOT NULL DEFAULT '0.000',
-  `min_stock_level` decimal(10,3) NOT NULL DEFAULT '0.000',
-  `max_stock_level` decimal(10,3) NOT NULL DEFAULT '100.000',
-  `reorder_point` decimal(10,3) NOT NULL DEFAULT '10.000',
-  `shelf_life_days` int DEFAULT NULL,
+  `min_stock_level` decimal(10,3) DEFAULT NULL,
+  `max_stock_level` decimal(10,3) DEFAULT NULL,
   `storage_requirements` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `allergens` json DEFAULT NULL,
+  `allergens` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `shelf_life_days` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ingredients_location_id_sku_unique` (`code`),
   KEY `ingredients_is_active_index` (`is_active`),
   KEY `ingredients_unit_id_foreign` (`unit_id`),
   KEY `ingredients_supplier_id_foreign` (`supplier_id`),
+  KEY `ingredients_location_id_foreign` (`location_id`),
+  CONSTRAINT `ingredients_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL,
   CONSTRAINT `ingredients_supplier_id_foreign` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE SET NULL,
   CONSTRAINT `ingredients_unit_id_foreign` FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -600,46 +509,13 @@ CREATE TABLE `inventory_adjustments` (
   CONSTRAINT `inventory_adjustments_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `inventory_order_deductions`;
-CREATE TABLE `inventory_order_deductions` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `order_id` bigint unsigned NOT NULL,
-  `order_item_id` bigint unsigned NOT NULL,
-  `ingredient_id` bigint unsigned NOT NULL,
-  `location_id` bigint unsigned NOT NULL,
-  `quantity_deducted` decimal(10,3) NOT NULL,
-  `unit` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` enum('pending','deducted','reverted','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `deducted_at` timestamp NULL DEFAULT NULL,
-  `reverted_at` timestamp NULL DEFAULT NULL,
-  `inventory_transaction_id` bigint unsigned DEFAULT NULL,
-  `deducted_by` bigint unsigned DEFAULT NULL,
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `inventory_order_deductions_order_item_id_foreign` (`order_item_id`),
-  KEY `inventory_order_deductions_location_id_foreign` (`location_id`),
-  KEY `inventory_order_deductions_inventory_transaction_id_foreign` (`inventory_transaction_id`),
-  KEY `inventory_order_deductions_deducted_by_foreign` (`deducted_by`),
-  KEY `idx_inv_ded_order_status` (`order_id`,`status`),
-  KEY `idx_inv_ded_ing_loc_status` (`ingredient_id`,`location_id`,`status`),
-  KEY `idx_inv_ded_deducted_at` (`deducted_at`),
-  CONSTRAINT `inventory_order_deductions_deducted_by_foreign` FOREIGN KEY (`deducted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `inventory_order_deductions_ingredient_id_foreign` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `inventory_order_deductions_inventory_transaction_id_foreign` FOREIGN KEY (`inventory_transaction_id`) REFERENCES `inventory_transactions` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `inventory_order_deductions_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `inventory_order_deductions_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `inventory_order_deductions_order_item_id_foreign` FOREIGN KEY (`order_item_id`) REFERENCES `order_items` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `inventory_transactions`;
 CREATE TABLE `inventory_transactions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `ingredient_id` bigint unsigned NOT NULL,
   `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `location_id` bigint unsigned NOT NULL,
-  `user_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
   `movement_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `quantity` decimal(10,2) NOT NULL,
   `unit_cost` decimal(12,2) DEFAULT NULL,
@@ -733,28 +609,6 @@ CREATE TABLE `jobs` (
   KEY `jobs_queue_index` (`queue`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `leave_requests`;
-CREATE TABLE `leave_requests` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `employee_id` bigint unsigned NOT NULL,
-  `location_id` bigint unsigned NOT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date NOT NULL,
-  `type` enum('annual','sick','unpaid','other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'annual',
-  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `status` enum('pending','approved','rejected','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `leave_requests_location_id_foreign` (`location_id`),
-  KEY `leave_requests_employee_id_start_date_index` (`employee_id`,`start_date`),
-  KEY `leave_requests_start_date_index` (`start_date`),
-  KEY `leave_requests_end_date_index` (`end_date`),
-  KEY `leave_requests_status_index` (`status`),
-  CONSTRAINT `leave_requests_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `leave_requests_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `locations`;
 CREATE TABLE `locations` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -778,7 +632,7 @@ CREATE TABLE `locations` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `locations_code_unique` (`code`),
   KEY `locations_is_active_index` (`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `loyalty_points`;
 CREATE TABLE `loyalty_points` (
@@ -811,10 +665,10 @@ CREATE TABLE `loyalty_points` (
 DROP TABLE IF EXISTS `loyalty_tiers`;
 CREATE TABLE `loyalty_tiers` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `min_spent` decimal(10,2) NOT NULL DEFAULT '0.00',
   `max_spent` decimal(10,2) DEFAULT NULL,
   `discount_percent` decimal(5,2) NOT NULL DEFAULT '0.00',
@@ -822,7 +676,7 @@ CREATE TABLE `loyalty_tiers` (
   `benefits` json DEFAULT NULL,
   `display_order` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -896,22 +750,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=182 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `notification_preferences`;
-CREATE TABLE `notification_preferences` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
-  `channel` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `notification_pref_unique` (`user_id`,`channel`,`type`),
-  KEY `notification_preferences_user_id_enabled_index` (`user_id`,`enabled`),
-  CONSTRAINT `notification_preferences_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=190 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE `notifications` (
@@ -942,14 +781,6 @@ CREATE TABLE `operating_hours` (
   CONSTRAINT `operating_hours_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `order_holds`;
-CREATE TABLE `order_holds` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `order_items`;
 CREATE TABLE `order_items` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -963,7 +794,7 @@ CREATE TABLE `order_items` (
   `total_price` decimal(12,2) NOT NULL,
   `status` enum('pending','preparing','ready','served','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `special_instructions` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `notes` text COLLATE utf8mb4_unicode_ci COMMENT 'Internal notes for staff (e.g., reason for void)',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'Internal notes for staff (e.g., reason for void)',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -979,16 +810,16 @@ CREATE TABLE `order_items` (
 DROP TABLE IF EXISTS `order_statuses`;
 CREATE TABLE `order_statuses` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_terminal` tinyint(1) NOT NULL DEFAULT '0',
   `workflow_position` int NOT NULL DEFAULT '0',
   `display_order` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `show_to_customer` tinyint(1) NOT NULL DEFAULT '1',
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -996,7 +827,7 @@ CREATE TABLE `order_statuses` (
   KEY `order_statuses_code_index` (`code`),
   KEY `order_statuses_is_terminal_index` (`is_terminal`),
   KEY `order_statuses_workflow_position_index` (`workflow_position`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `order_time_slots`;
 CREATE TABLE `order_time_slots` (
@@ -1019,23 +850,23 @@ CREATE TABLE `order_time_slots` (
 DROP TABLE IF EXISTS `order_types`;
 CREATE TABLE `order_types` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `allows_delivery` tinyint(1) NOT NULL DEFAULT '0',
   `allows_table` tinyint(1) NOT NULL DEFAULT '0',
   `allows_pickup` tinyint(1) NOT NULL DEFAULT '0',
   `display_order` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `order_types_code_unique` (`code`),
   KEY `order_types_code_index` (`code`),
   KEY `order_types_is_active_index` (`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
@@ -1050,9 +881,7 @@ CREATE TABLE `orders` (
   `order_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `preparation_status` enum('pending','preparing','ready','served') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `priority` int NOT NULL DEFAULT '0',
-  `status` enum('pending','received','preparing','ready','completed','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `order_status_id` bigint unsigned DEFAULT NULL,
-  `approval_status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `subtotal` decimal(12,2) NOT NULL DEFAULT '0.00',
   `tax_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
   `discount_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
@@ -1067,7 +896,6 @@ CREATE TABLE `orders` (
   `estimated_ready_time` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `order_type` enum('dine-in','pickup','delivery') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'dine-in',
   `order_type_id` bigint unsigned DEFAULT NULL,
   `promotion_id` bigint unsigned DEFAULT NULL,
   `customer_address_id` bigint unsigned DEFAULT NULL,
@@ -1079,10 +907,6 @@ CREATE TABLE `orders` (
   `scheduled_at` timestamp NULL DEFAULT NULL,
   `pickup_time` timestamp NULL DEFAULT NULL,
   `kitchen_submitted_at` timestamp NULL DEFAULT NULL,
-  `approved_by` bigint unsigned DEFAULT NULL,
-  `approved_at` timestamp NULL DEFAULT NULL,
-  `rejection_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `is_auto_approved` tinyint(1) NOT NULL DEFAULT '0',
   `time_slot_id` bigint unsigned DEFAULT NULL,
   `driver_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1091,19 +915,15 @@ CREATE TABLE `orders` (
   KEY `orders_table_id_foreign` (`table_id`),
   KEY `orders_employee_id_foreign` (`employee_id`),
   KEY `orders_customer_id_index` (`customer_id`),
-  KEY `orders_status_index` (`status`),
   KEY `orders_placed_at_index` (`ordered_at`),
   KEY `orders_closed_at_index` (`completed_at`),
   KEY `orders_customer_address_id_foreign` (`customer_address_id`),
-  KEY `orders_order_type_index` (`order_type`),
   KEY `orders_payment_status_index` (`payment_status`),
   KEY `orders_scheduled_at_index` (`scheduled_at`),
   KEY `orders_preparation_status_index` (`preparation_status`),
-  KEY `orders_approved_by_foreign` (`approved_by`),
   KEY `orders_time_slot_id_foreign` (`time_slot_id`),
-  KEY `idx_orders_status_type` (`status`,`order_type`),
-  KEY `idx_orders_customer_status` (`customer_id`,`status`),
-  KEY `idx_orders_location_status` (`location_id`,`status`),
+  KEY `idx_orders_customer_status` (`customer_id`),
+  KEY `idx_orders_location_status` (`location_id`),
   KEY `idx_orders_scheduled` (`scheduled_at`),
   KEY `orders_promotion_id_foreign` (`promotion_id`),
   KEY `orders_payment_collected_by_foreign` (`payment_collected_by`),
@@ -1113,13 +933,12 @@ CREATE TABLE `orders` (
   KEY `idx_orders_location_created` (`location_id`,`created_at`),
   KEY `idx_orders_customer_created` (`customer_id`,`created_at`),
   KEY `idx_orders_customer_date` (`customer_id`,`ordered_at`),
-  KEY `idx_orders_status_date` (`status`,`ordered_at`),
+  KEY `idx_orders_status_date` (`ordered_at`),
   KEY `orders_reservation_id_foreign` (`reservation_id`),
   KEY `orders_shift_id_foreign` (`shift_id`),
   KEY `orders_order_type_id_foreign` (`order_type_id`),
   KEY `orders_order_status_id_foreign` (`order_status_id`),
   CONSTRAINT `fk_orders_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `orders_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `orders_customer_address_id_foreign` FOREIGN KEY (`customer_address_id`) REFERENCES `customer_addresses` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `orders_driver_id_foreign` FOREIGN KEY (`driver_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `orders_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -1143,30 +962,6 @@ CREATE TABLE `password_reset_tokens` (
   PRIMARY KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `payment_audit_logs`;
-CREATE TABLE `payment_audit_logs` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `payment_id` bigint unsigned NOT NULL,
-  `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `old_status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `new_status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `amount_change` decimal(12,2) DEFAULT NULL,
-  `performed_by` bigint unsigned DEFAULT NULL,
-  `actor_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'system',
-  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `metadata` json DEFAULT NULL,
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `payment_audit_logs_performed_by_foreign` (`performed_by`),
-  KEY `idx_payment_audit_action` (`payment_id`,`action`),
-  KEY `idx_payment_audit_date` (`created_at`),
-  KEY `idx_payment_audit_action_date` (`action`,`created_at`),
-  CONSTRAINT `payment_audit_logs_payment_id_foreign` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `payment_audit_logs_performed_by_foreign` FOREIGN KEY (`performed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `payment_methods`;
 CREATE TABLE `payment_methods` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -1188,15 +983,15 @@ CREATE TABLE `payment_methods` (
 DROP TABLE IF EXISTS `payment_statuses`;
 CREATE TABLE `payment_statuses` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_successful` tinyint(1) NOT NULL DEFAULT '0',
   `is_terminal` tinyint(1) NOT NULL DEFAULT '0',
   `display_order` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1224,7 +1019,6 @@ CREATE TABLE `payments` (
   `reference_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `gateway_reference` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `qr_reference` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment_status_id` bigint unsigned DEFAULT NULL,
   `failure_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `processed_at` timestamp NULL DEFAULT NULL,
@@ -1247,34 +1041,17 @@ CREATE TABLE `payments` (
   UNIQUE KEY `payments_uuid_unique` (`uuid`),
   UNIQUE KEY `payments_idempotency_key_unique` (`idempotency_key`),
   KEY `payments_payment_method_id_foreign` (`payment_method_id`),
-  KEY `payments_status_processed_at_index` (`status`,`processed_at`),
+  KEY `payments_status_processed_at_index` (`processed_at`),
   KEY `idx_payments_qr` (`qr_reference`),
   KEY `idx_payments_initiated` (`initiated_at`),
   KEY `payments_confirmed_by_foreign` (`confirmed_by`),
-  KEY `idx_payments_invoice_status` (`invoice_id`,`status`),
-  KEY `idx_payments_status_created` (`status`,`created_at`),
+  KEY `idx_payments_invoice_status` (`invoice_id`),
+  KEY `idx_payments_status_created` (`created_at`),
   KEY `payments_payment_status_id_foreign` (`payment_status_id`),
   CONSTRAINT `payments_confirmed_by_foreign` FOREIGN KEY (`confirmed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `payments_invoice_id_foreign` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `payments_payment_method_id_foreign` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `payments_payment_status_id_foreign` FOREIGN KEY (`payment_status_id`) REFERENCES `payment_statuses` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `payroll_details`;
-CREATE TABLE `payroll_details` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `payroll_id` bigint unsigned NOT NULL,
-  `type` enum('earning','deduction') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `amount` decimal(12,2) NOT NULL,
-  `percentage` decimal(5,2) DEFAULT NULL,
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `payroll_details_payroll_id_index` (`payroll_id`),
-  KEY `payroll_details_type_index` (`type`),
-  CONSTRAINT `payroll_details_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `payrolls`;
@@ -1310,7 +1087,7 @@ CREATE TABLE `permissions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `permissions_name_unique` (`name`),
   UNIQUE KEY `permissions_slug_unique` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `personal_access_tokens`;
 CREATE TABLE `personal_access_tokens` (
@@ -1557,7 +1334,7 @@ CREATE TABLE `roles` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `roles_name_unique` (`name`),
   UNIQUE KEY `roles_slug_unique` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `sessions`;
 CREATE TABLE `sessions` (
@@ -1584,50 +1361,6 @@ CREATE TABLE `settings` (
   UNIQUE KEY `settings_location_id_key_unique` (`location_id`,`key`),
   KEY `settings_key_index` (`key`),
   CONSTRAINT `settings_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `shift_swaps`;
-CREATE TABLE `shift_swaps` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `requester_id` bigint unsigned NOT NULL,
-  `shift_id` bigint unsigned NOT NULL,
-  `recipient_id` bigint unsigned DEFAULT NULL,
-  `type` enum('give_away','trade') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'give_away',
-  `status` enum('pending','accepted_by_peer','approved','rejected','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `manager_id` bigint unsigned DEFAULT NULL,
-  `approved_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `shift_swaps_requester_id_foreign` (`requester_id`),
-  KEY `shift_swaps_shift_id_foreign` (`shift_id`),
-  KEY `shift_swaps_recipient_id_foreign` (`recipient_id`),
-  KEY `shift_swaps_manager_id_foreign` (`manager_id`),
-  CONSTRAINT `shift_swaps_manager_id_foreign` FOREIGN KEY (`manager_id`) REFERENCES `users` (`id`),
-  CONSTRAINT `shift_swaps_recipient_id_foreign` FOREIGN KEY (`recipient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `shift_swaps_requester_id_foreign` FOREIGN KEY (`requester_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `shift_swaps_shift_id_foreign` FOREIGN KEY (`shift_id`) REFERENCES `shifts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `shift_templates`;
-CREATE TABLE `shift_templates` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `location_id` bigint unsigned NOT NULL,
-  `position_id` bigint unsigned DEFAULT NULL,
-  `name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `day_of_week` tinyint unsigned NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `shift_templates_location_id_index` (`location_id`),
-  KEY `shift_templates_position_id_index` (`position_id`),
-  KEY `shift_templates_day_of_week_index` (`day_of_week`),
-  CONSTRAINT `shift_templates_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `shift_templates_position_id_foreign` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `shifts`;
@@ -1659,28 +1392,6 @@ CREATE TABLE `shifts` (
   CONSTRAINT `shifts_position_id_foreign` FOREIGN KEY (`position_id`) REFERENCES `positions` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `stock_alerts`;
-CREATE TABLE `stock_alerts` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ingredient_id` bigint unsigned NOT NULL,
-  `location_id` bigint unsigned DEFAULT NULL,
-  `severity` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `message` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `acknowledged` tinyint(1) NOT NULL DEFAULT '0',
-  `acknowledged_at` timestamp NULL DEFAULT NULL,
-  `acknowledged_by` bigint unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `stock_alerts_ingredient_id_foreign` (`ingredient_id`),
-  KEY `stock_alerts_location_id_foreign` (`location_id`),
-  KEY `stock_alerts_acknowledged_by_foreign` (`acknowledged_by`),
-  CONSTRAINT `stock_alerts_acknowledged_by_foreign` FOREIGN KEY (`acknowledged_by`) REFERENCES `users` (`id`),
-  CONSTRAINT `stock_alerts_ingredient_id_foreign` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `stock_alerts_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `suppliers`;
 CREATE TABLE `suppliers` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -1707,75 +1418,29 @@ CREATE TABLE `suppliers` (
   CONSTRAINT `suppliers_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `support_tickets`;
-CREATE TABLE `support_tickets` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
-  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subject` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `priority` enum('low','medium','high','critical') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'low',
-  `status` enum('open','in_progress','resolved','closed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'open',
-  `admin_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `resolved_at` timestamp NULL DEFAULT NULL,
-  `resolved_by` bigint unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `support_tickets_user_id_foreign` (`user_id`),
-  KEY `support_tickets_resolved_by_foreign` (`resolved_by`),
-  CONSTRAINT `support_tickets_resolved_by_foreign` FOREIGN KEY (`resolved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `support_tickets_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `table_sessions`;
-CREATE TABLE `table_sessions` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `table_id` bigint unsigned NOT NULL,
-  `session_token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `customer_id` bigint unsigned DEFAULT NULL,
-  `telegram_user_id` bigint unsigned DEFAULT NULL,
-  `device_fingerprint` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('active','ordering','payment_pending','completed','expired') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
-  `order_id` bigint unsigned DEFAULT NULL,
-  `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_activity_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `closed_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `table_sessions_session_token_unique` (`session_token`),
-  KEY `table_sessions_order_id_foreign` (`order_id`),
-  KEY `table_sessions_table_id_status_index` (`table_id`,`status`),
-  KEY `table_sessions_session_token_index` (`session_token`),
-  KEY `table_sessions_last_activity_at_index` (`last_activity_at`),
-  KEY `table_sessions_customer_id_status_index` (`customer_id`,`status`),
-  KEY `table_sessions_telegram_user_id_status_index` (`telegram_user_id`,`status`),
-  CONSTRAINT `table_sessions_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `table_sessions_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `table_sessions_table_id_foreign` FOREIGN KEY (`table_id`) REFERENCES `tables` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `table_sessions_telegram_user_id_foreign` FOREIGN KEY (`telegram_user_id`) REFERENCES `telegram_users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `tables`;
 CREATE TABLE `tables` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `location_id` bigint unsigned NOT NULL,
   `floor_id` bigint unsigned NOT NULL,
   `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `table_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `capacity` int unsigned NOT NULL DEFAULT '2',
   `status` enum('available','reserved','occupied','unavailable') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'available',
   `qr_token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `qr_generated_at` timestamp NULL DEFAULT NULL,
   `qr_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `x_position` int NOT NULL DEFAULT '0',
+  `y_position` int NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tables_floor_id_code_unique` (`floor_id`,`code`),
   UNIQUE KEY `tables_qr_token_unique` (`qr_token`),
+  KEY `tables_location_id_foreign` (`location_id`),
   KEY `tables_status_index` (`status`),
-  CONSTRAINT `tables_floor_id_foreign` FOREIGN KEY (`floor_id`) REFERENCES `floors` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `tables_floor_id_foreign` FOREIGN KEY (`floor_id`) REFERENCES `floors` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `tables_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `telegram_order_notifications`;
@@ -1818,24 +1483,6 @@ CREATE TABLE `telegram_users` (
   KEY `telegram_users_is_active_notifications_enabled_index` (`is_active`,`notifications_enabled`),
   KEY `telegram_users_customer_id_index` (`customer_id`),
   KEY `telegram_users_conversation_state_index` (`conversation_state`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `time_off_balances`;
-CREATE TABLE `time_off_balances` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `employee_id` bigint unsigned NOT NULL,
-  `year` int unsigned NOT NULL,
-  `vacation_hours_available` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `vacation_hours_used` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `sick_hours_available` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `sick_hours_used` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `personal_hours_available` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `personal_hours_used` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `time_off_balances_employee_id_year_unique` (`employee_id`,`year`),
-  CONSTRAINT `time_off_balances_employee_id_foreign` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `time_off_requests`;
@@ -1937,27 +1584,6 @@ CREATE TABLE `user_profiles` (
   CONSTRAINT `user_profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `user_settings`;
-CREATE TABLE `user_settings` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
-  `notification_order_updates` tinyint(1) NOT NULL DEFAULT '1',
-  `notification_promotions` tinyint(1) NOT NULL DEFAULT '1',
-  `notification_newsletter` tinyint(1) NOT NULL DEFAULT '0',
-  `notification_sms` tinyint(1) NOT NULL DEFAULT '0',
-  `notification_push` tinyint(1) NOT NULL DEFAULT '1',
-  `privacy_show_profile` tinyint(1) NOT NULL DEFAULT '1',
-  `privacy_share_order_history` tinyint(1) NOT NULL DEFAULT '0',
-  `privacy_allow_analytics` tinyint(1) NOT NULL DEFAULT '1',
-  `theme` enum('light','dark','system') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'system',
-  `language` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `user_settings_user_id_unique` (`user_id`),
-  CONSTRAINT `user_settings_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -1994,13 +1620,7 @@ CREATE TABLE `users` (
   KEY `users_is_active_index` (`is_active`),
   KEY `users_lockout_index` (`email`,`locked_until`),
   CONSTRAINT `users_default_location_id_foreign` FOREIGN KEY (`default_location_id`) REFERENCES `locations` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-
-
-
-
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 
@@ -2203,19 +1823,28 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (165, '2026_01_08_093500_add_role_column_to_users_table', 1),
 (166, '2026_01_10_111819_add_deleted_at_to_categories_and_menu_items', 1),
 (167, '2026_01_10_112100_add_missing_columns_to_menu_items', 1),
-(169, '2026_01_10_114840_fix_ingredients_schema', 2),
-(170, '2026_01_12_065418_create_inventory_order_deductions_table', 3),
-(171, '2026_01_12_065855_add_composite_indexes_for_performance', 4),
-(172, '2026_01_13_000000_add_missing_performance_indexes', 5),
-(173, '2026_01_12_094516_enhance_order_items_and_orders_schema', 6),
-(174, '2026_01_12_110335_create_order_types_table', 6),
-(175, '2026_01_12_110337_create_order_statuses_table', 6),
-(176, '2026_01_12_110338_create_payment_statuses_table', 6),
-(177, '2026_01_12_110340_create_loyalty_tiers_table', 6),
-(178, '2026_01_12_111423_add_lookup_foreign_keys_to_orders_table', 6),
-(179, '2026_01_12_111426_add_payment_status_id_to_payments_table', 6),
-(180, '2026_01_12_111428_add_loyalty_tier_id_to_customers_table', 6),
-(181, '2026_01_12_112000_backfill_lookup_ids_from_enums', 6);
+(168, '2026_01_10_114840_fix_ingredients_schema', 1),
+(169, '2026_01_12_065418_create_inventory_order_deductions_table', 1),
+(170, '2026_01_12_065855_add_composite_indexes_for_performance', 1),
+(171, '2026_01_12_094516_enhance_order_items_and_orders_schema', 1),
+(172, '2026_01_12_110335_create_order_types_table', 1),
+(173, '2026_01_12_110337_create_order_statuses_table', 1),
+(174, '2026_01_12_110338_create_payment_statuses_table', 1),
+(175, '2026_01_12_110340_create_loyalty_tiers_table', 1),
+(176, '2026_01_12_111423_add_lookup_foreign_keys_to_orders_table', 1),
+(177, '2026_01_12_111426_add_payment_status_id_to_payments_table', 1),
+(178, '2026_01_12_111428_add_loyalty_tier_id_to_customers_table', 1),
+(179, '2026_01_12_112000_backfill_lookup_ids_from_enums', 1),
+(180, '2026_01_12_200000_ensure_location_id_in_inventory_transactions', 1),
+(181, '2026_01_12_200500_ensure_location_id_in_ingredients', 1),
+(182, '2026_01_12_201000_make_user_id_nullable_in_inventory_transactions', 1),
+(183, '2026_01_13_000000_add_missing_performance_indexes', 1),
+(184, '2026_01_13_083021_remove_obsolete_enum_columns', 1),
+(185, '2025_01_18_000000_sync_notification_schema', 2),
+(186, '2026_01_17_062957_remove_approval_columns_from_orders_table', 2),
+(187, '2026_01_17_062959_remove_approval_columns_from_inventory_adjustments_table', 2),
+(188, '2026_01_17_113005_drop_unused_tables', 2),
+(189, '2026_01_18_000000_seed_notification_permissions', 2);
 
 
 
@@ -2228,25 +1857,15 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 
 
 
+INSERT INTO `permissions` (`id`, `name`, `slug`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'View Notifications', 'notifications.view', 'Can view admin notifications', '2026-01-17 11:34:12', '2026-01-17 11:34:12'),
+(2, 'Send Notifications', 'notifications.send', 'Can create and send broadcast notifications', '2026-01-17 11:34:12', '2026-01-17 11:34:12');
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('PGZNRC4tduc9ujOpBooQFVcn2KBfH4C9dVsKBsSo', NULL, '203.95.199.106', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YToyOntzOjY6Il90b2tlbiI7czo0MDoiSE9GY1ZFYWhGeTY0eUFORWVEeDJnQ25vRVR3RDU2SnpyYUxxYnk5RCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1768219461);
 
 
 

@@ -37,9 +37,29 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
 
         // Determine role from explicit attribute or from roles relationship helpers.
-        $isAdmin = $user && (data_get($user, 'role') === 'admin' || method_exists($user, 'hasRole') && $user->hasRole('admin'));
-        $isEmployee = $user && (data_get($user, 'role') === 'employee' || method_exists($user, 'hasRole') && $user->hasRole('employee'));
+        $adminRoles = ['super-admin', 'admin', 'manager', 'chief', 'service-manager', 'finance-manager', 'hr-manager', 'inventory-manager', 'operations-manager', 'viewer'];
+        $employeeRoles = ['employee', 'waiter', 'chef', 'cashier', 'driver'];
 
+        $isAdmin = false;
+        $isEmployee = false;
+
+        if ($user) {
+            // Check for Admin roles (RBAC or Legacy Column)
+            if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole($adminRoles)) {
+                $isAdmin = true;
+            } elseif (in_array($user->role, $adminRoles)) {
+                $isAdmin = true;
+            }
+
+            // Check for Employee roles if not admin
+            if (!$isAdmin) {
+                if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole($employeeRoles)) {
+                    $isEmployee = true;
+                } elseif (in_array($user->role, $employeeRoles)) {
+                    $isEmployee = true;
+                }
+            }
+        }
         // Preferred role-based targets
         $adminTarget = route('admin.dashboard', absolute: false);
         $employeeTarget = route('employee.pos', absolute: false);

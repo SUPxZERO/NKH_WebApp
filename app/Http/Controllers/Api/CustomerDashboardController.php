@@ -332,11 +332,6 @@ class CustomerDashboardController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        // Filter by approval_status
-        if ($request->filled('approval_status')) {
-            $query->where('approval_status', $request->input('approval_status'));
-        }
-
         // Filter by order type
         if ($request->filled('order_type')) {
             $query->where('order_type', $request->input('order_type'));
@@ -384,7 +379,6 @@ class CustomerDashboardController extends Controller
                     'order_number' => $order->order_number,
                     'order_type' => $order->order_type,
                     'status' => $order->status,
-                    'approval_status' => $order->approval_status,
                     'payment_status' => $order->payment_status,
                     
                     // Amounts
@@ -607,7 +601,6 @@ class CustomerDashboardController extends Controller
             'order_number' => $order->order_number,
             'order_type' => $order->order_type,
             'status' => $order->status,
-            'approval_status' => $order->approval_status,
             'payment_status' => $order->payment_status,
             'payment_mode' => $order->payment_mode,
             

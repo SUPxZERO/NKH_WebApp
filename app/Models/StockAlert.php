@@ -4,41 +4,52 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockAlert extends Model
 {
     use HasFactory;
 
-    protected $guarded = [
-        'id',
-        'type',
+    protected $fillable = [
         'ingredient_id',
         'location_id',
+        'type',
         'severity',
         'message',
+        'threshold_value',
+        'current_value',
         'acknowledged',
-        'acknowledged_at',
         'acknowledged_by',
-        'created_at',
-        'updated_at',
+        'acknowledged_at',
     ];
 
     protected $casts = [
         'acknowledged' => 'boolean',
         'acknowledged_at' => 'datetime',
+        'threshold_value' => 'decimal:2',
+        'current_value' => 'decimal:2',
     ];
 
-    public function ingredient()
+    /**
+     * Get the ingredient that this alert is for.
+     */
+    public function ingredient(): BelongsTo
     {
         return $this->belongsTo(Ingredient::class);
     }
 
-    public function location()
+    /**
+     * Get the location where this alert occurred.
+     */
+    public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
-    public function acknowledgedBy()
+    /**
+     * Get the user who acknowledged this alert.
+     */
+    public function acknowledgedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acknowledged_by');
     }

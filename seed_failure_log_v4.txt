@@ -1,0 +1,6 @@
+
+  [37;44m INFO [39;49m Seeding database.  
+
+[32m   Simulating Realistic Shop Activity...[39m
+[32m   📅 Creating Reservations...[39m
+[32m   🍳 Creating Orders for Today...[39m

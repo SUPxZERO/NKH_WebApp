@@ -21,10 +21,10 @@ class OrderStatusSeeder extends Seeder
                 'is_terminal' => false,
             ],
             [
-                'code' => 'confirmed',
-                'name' => 'Confirmed',
-                'description' => 'Order confirmed and being prepared',
-                'color' => '#4CAF50', // Green
+                'code' => 'received',
+                'name' => 'Received',
+                'description' => 'Order received and confirmed by staff',
+                'color' => '#2196F3', // Blue
                 'icon' => 'check_circle',
                 'display_order' => 2,
                 'workflow_position' => 2,

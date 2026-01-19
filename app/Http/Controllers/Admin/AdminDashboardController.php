@@ -44,8 +44,9 @@ class AdminDashboardController extends Controller
             'initialKPIs' => $this->analytics->getKPIs(Carbon::now()->subDays($defaultDays), Carbon::now()),
             // Use NEW dashboard service for consistent initial revenue data
             'initialRevenue' => $this->dashboard->getRevenueByRange('daily'),
-            'initialOrderStatus' => $this->analytics->getOrderStatusCounts(Carbon::now()->subDays($defaultDays), Carbon::now()),
-            'initialTopItems' => $this->analytics->getTopSellingItems(Carbon::now()->subDays($defaultDays), Carbon::now()),
+            // Fetch All-Time stats for Order Status widget (start from 2000-01-01 to End of Today)
+            'initialOrderStatus' => $this->analytics->getOrderStatusCounts(Carbon::create(2000, 1, 1), Carbon::now()->endOfDay()),
+            'initialTopItems' => $this->analytics->getTopSellingItems(Carbon::now()->subDays($defaultDays), Carbon::now()->endOfDay()),
         ]);
     }
 
