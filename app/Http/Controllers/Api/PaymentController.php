@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -73,7 +75,7 @@ class PaymentController extends Controller
 
         try {
             $order = Order::findOrFail($validated['order_id']);
-            
+
             // Check if user can pay for this order
             if ($order->customer_id && auth()->check()) {
                 $user = auth()->user();
@@ -244,8 +246,8 @@ class PaymentController extends Controller
                 'image_svg' => $qrGenerator->generateSvg($qrData['qr_data']),
                 'image_base64' => $qrGenerator->generateBase64($qrData['qr_data']),
                 'expires_at' => $payment->expires_at?->toIso8601String(),
-                'expires_in_seconds' => $payment->expires_at 
-                    ? max(0, now()->diffInSeconds($payment->expires_at, false)) 
+                'expires_in_seconds' => $payment->expires_at
+                    ? max(0, now()->diffInSeconds($payment->expires_at, false))
                     : null,
             ],
         ]);
@@ -312,7 +314,7 @@ class PaymentController extends Controller
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -378,7 +380,7 @@ class PaymentController extends Controller
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),

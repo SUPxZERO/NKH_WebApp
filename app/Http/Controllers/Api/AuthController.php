@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\Customer;
 use App\Models\Role;
 use App\Models\User;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
     public function register(RegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -41,7 +43,7 @@ class AuthController extends Controller
 
         // Create access token (expires per sanctum config, default 60 min)
         $accessToken = $user->createToken('api', ['*'])->plainTextToken;
-        
+
         // Create refresh token (7 day expiry)
         $refreshToken = $user->createToken('refresh', ['refresh'], now()->addDays(7))->plainTextToken;
 
@@ -59,7 +61,7 @@ class AuthController extends Controller
     {
         $credentials = $request->validated();
 
-        if (! Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+        if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
             // Record failed attempt for lockout tracking
             \App\Http\Middleware\AccountLockout::recordFailedAttempt($credentials['email']);
             return response()->json(['message' => 'Invalid credentials.'], 401);
@@ -67,13 +69,13 @@ class AuthController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        
+
         // Clear lockout counters on successful login
         \App\Http\Middleware\AccountLockout::clearAttempts($user);
-        
+
         // Create access token (expires per sanctum config, default 60 min)
         $accessToken = $user->createToken('api', ['*'])->plainTextToken;
-        
+
         // Create refresh token (7 day expiry)
         $refreshToken = $user->createToken('refresh', ['refresh'], now()->addDays(7))->plainTextToken;
 

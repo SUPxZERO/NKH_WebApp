@@ -16,7 +16,7 @@ class OrderResource extends JsonResource
             'customer_id' => $this->customer_id,
             'employee_id' => $this->employee_id,
             'order_number' => $this->order_number,
-            'order_type' => $this->order_type,
+            'order_type' => $this->order_type_code,
             'status' => $this->status,
             'payment_status' => $this->payment_status,
             'subtotal' => $this->subtotal,
@@ -53,6 +53,22 @@ class OrderResource extends JsonResource
                     'type' => $this->timeSlot->slot_type,
                 ];
             }),
+            
+            // Map-related fields for Driver Mode
+            'delivery_latitude' => $this->when(
+                $this->customerAddress,
+                $this->customerAddress?->latitude
+            ),
+            'delivery_longitude' => $this->when(
+                $this->customerAddress,
+                $this->customerAddress?->longitude
+            ),
+            'has_coordinates' => (bool) ($this->customerAddress?->latitude && $this->customerAddress?->longitude),
+            'customer_phone' => $this->contact_phone, // Use existing accessor
+            'delivery_address' => $this->when(
+                $this->order_type_code === 'delivery',
+                $this->customerAddress?->full_address ?? $this->delivery_instructions
+            ),
         ];
     }
 }

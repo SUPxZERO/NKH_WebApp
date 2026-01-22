@@ -14,19 +14,19 @@ class OperatingHoursController extends Controller
     public function index(Request $request): JsonResponse
     {
         $locationId = $request->get('location_id');
-        
+
         $query = OperatingHours::with('location:id,name');
-        
+
         if ($locationId) {
             $query->where('location_id', $locationId);
         }
-        
+
         $hours = $query->orderBy('location_id')
             ->orderBy('day_of_week')
             ->orderBy('service_type')
             ->get()
             ->groupBy(['location_id', 'day_of_week', 'service_type']);
-        
+
         return response()->json(['data' => $hours]);
     }
 
@@ -37,7 +37,7 @@ class OperatingHoursController extends Controller
             ->orderBy('service_type')
             ->get()
             ->groupBy('day_of_week');
-        
+
         return response()->json(['data' => $hours]);
     }
 
@@ -63,8 +63,8 @@ class OperatingHoursController extends Controller
             ], 422);
         }
 
-        $hours = OperatingHours::create($request->all());
-        
+        $hours = OperatingHours::create($request->only(['location_id', 'day_of_week', 'service_type', 'opening_time', 'closing_time']));
+
         return response()->json([
             'message' => 'Operating hours created successfully',
             'data' => $hours
@@ -92,7 +92,7 @@ class OperatingHoursController extends Controller
     public function destroy(OperatingHours $operatingHour): JsonResponse
     {
         $operatingHour->delete();
-        
+
         return response()->json([
             'message' => 'Operating hours deleted successfully'
         ]);
@@ -166,7 +166,8 @@ class OperatingHoursController extends Controller
         DB::beginTransaction();
         try {
             for ($day = 0; $day <= 6; $day++) {
-                if ($day == $request->source_day) continue;
+                if ($day == $request->source_day)
+                    continue;
 
                 OperatingHours::updateOrCreate(
                     [

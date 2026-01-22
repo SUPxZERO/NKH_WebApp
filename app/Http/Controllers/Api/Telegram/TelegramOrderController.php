@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Telegram;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Models\CustomerAddress;
 use App\Models\MenuItem;
 use App\Models\Order;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class TelegramOrderController extends Controller
 {
+    use ApiResponse;
     /**
      * Get available time slots
      */
@@ -96,11 +98,11 @@ class TelegramOrderController extends Controller
 
         // Query orders by telegram_user_id OR customer_id (supports guest orders)
         $orders = Order::where(function ($query) use ($user) {
-                $query->where('telegram_user_id', $user->id);
-                if ($user->customer_id) {
-                    $query->orWhere('customer_id', $user->customer_id);
-                }
-            })
+            $query->where('telegram_user_id', $user->id);
+            if ($user->customer_id) {
+                $query->orWhere('customer_id', $user->customer_id);
+            }
+        })
             ->with(['location', 'items'])
             ->orderBy('created_at', 'desc')
             ->limit(20)

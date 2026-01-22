@@ -54,7 +54,7 @@ class KitchenController extends Controller
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'table_number' => $order->table ? $order->table->table_number : null,
-                    'type' => $order->order_type ?? 'dine-in', // Uses accessor
+                    'type' => $order->order_type_code ?? 'dine-in', // Uses accessor
                     'status' => $order->orderStatus?->code ?? 'pending', // Use relationship
                     'created_at' => $order->created_at->toIso8601String(),
                     'notes' => $order->special_instructions,

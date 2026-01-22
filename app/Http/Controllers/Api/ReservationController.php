@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReservationResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\Reservation;
 use App\Models\DiningTable;
 use App\Models\Customer;
@@ -16,6 +17,7 @@ use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
+    use ApiResponse;
     // GET /api/admin/reservations
     public function index(Request $request)
     {
@@ -25,10 +27,10 @@ class ReservationController extends Controller
             $s = $request->string('search');
             $query->where(function ($q) use ($s) {
                 $q->where('code', 'like', "%{$s}%")
-                  ->orWhere('reservation_number', 'like', "%{$s}%")
-                  ->orWhereHas('customer.user', function ($uq) use ($s) {
-                      $uq->where('name', 'like', "%{$s}%");
-                  });
+                    ->orWhere('reservation_number', 'like', "%{$s}%")
+                    ->orWhereHas('customer.user', function ($uq) use ($s) {
+                        $uq->where('name', 'like', "%{$s}%");
+                    });
             });
         }
 
@@ -48,14 +50,14 @@ class ReservationController extends Controller
         }
 
         $res = $query->orderByDesc('reservation_date')
-                     ->orderByDesc('reservation_time')
-                     ->orderByDesc('id')
-                     ->paginate($request->integer('per_page', 12));
+            ->orderByDesc('reservation_time')
+            ->orderByDesc('id')
+            ->paginate($request->integer('per_page', 12));
 
         // Stats Calculation (Global count, not affected by current page/filters)
         $statsQuery = Reservation::query();
-        
-        $countByStatus = function($status) use ($statsQuery) {
+
+        $countByStatus = function ($status) use ($statsQuery) {
             return (clone $statsQuery)->where('status', $status)->count();
         };
 
@@ -93,7 +95,7 @@ class ReservationController extends Controller
         $customer = Customer::findOrFail($validated['customer_id']);
 
         $floor = $table->floor;
-        if (! $floor) {
+        if (!$floor) {
             abort(422, 'Selected table is not assigned to a floor.');
         }
 
@@ -176,12 +178,12 @@ class ReservationController extends Controller
                 ? DiningTable::with('floor')->findOrFail($validated['table_id'])
                 : $reservation->table()->with('floor')->first();
 
-            if (! $table) {
+            if (!$table) {
                 abort(422, 'Selected table could not be found.');
             }
 
             $floor = $table->floor;
-            if (! $floor) {
+            if (!$floor) {
                 abort(422, 'Selected table is not assigned to a floor.');
             }
 
@@ -199,10 +201,10 @@ class ReservationController extends Controller
             if (isset($validated['reserved_for'])) {
                 $reservedAt = Carbon::parse($validated['reserved_for']);
             } else {
-                $dateStr = $reservation->reservation_date instanceof \Carbon\Carbon 
-                    ? $reservation->reservation_date->format('Y-m-d') 
-                    : substr((string)$reservation->reservation_date, 0, 10);
-                    
+                $dateStr = $reservation->reservation_date instanceof \Carbon\Carbon
+                    ? $reservation->reservation_date->format('Y-m-d')
+                    : substr((string) $reservation->reservation_date, 0, 10);
+
                 $reservedAt = Carbon::parse($dateStr . ' ' . $reservation->reservation_time);
             }
 
@@ -267,7 +269,7 @@ class ReservationController extends Controller
         if ($reservation->status !== 'cancelled') {
             $reservation->status = 'cancelled';
             $reservation->save();
-            
+
             // Notify customer of cancellation
             $this->sendReservationStatusNotification($reservation, 'cancelled');
         }
@@ -288,7 +290,7 @@ class ReservationController extends Controller
 
             $notificationService = app(NotificationService::class);
             $reservedAt = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
-            
+
             $messages = [
                 'confirmed' => [
                     'title' => 'Reservation Confirmed! ✅',

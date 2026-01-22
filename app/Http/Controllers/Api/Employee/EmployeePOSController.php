@@ -8,6 +8,7 @@ use App\Models\DiningTable;
 use App\Models\Employee;
 use App\Models\MenuItem;
 use App\Models\Order;
+use App\Services\TableStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -72,13 +73,11 @@ class EmployeePOSController extends Controller
             $table = null;
             if (!empty($validated['table_id'])) {
                 $table = DiningTable::lockForUpdate()->find($validated['table_id']);
-                if ($table->status === 'occupied') {
-                     // Check if there is an active order for this table?
-                     // For POS, maybe we want to append to it?
-                     // For simplicity: if occupied, warn, but maybe allow "adding to tab".
-                     // Let's stick to: Create new order.
+                if (!$table) {
+                    abort(404, 'Table not found.');
                 }
-                $table->update(['status' => 'occupied']);
+
+                app(TableStatusService::class)->occupyForStaff($table, $user->id);
             }
 
             $orderType = $table ? 'dine-in' : 'takeout';

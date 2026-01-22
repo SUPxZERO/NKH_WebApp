@@ -17,21 +17,39 @@ class DriverOrderController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        $driverLat = $request->query('driver_lat');
+        $driverLng = $request->query('driver_lng');
 
-        // My active deliveries
-        $myDeliveries = Order::with(['items.menuItem', 'customer.user', 'customerAddress'])
+        // My active deliveries - orders assigned to me that are not completed/cancelled/delivered
+        $myDeliveries = Order::with(['items.menuItem', 'customer.user', 'customerAddress', 'orderStatus'])
             ->where('driver_id', $user->id)
-            ->whereNotIn('status', ['completed', 'cancelled', 'delivered']) // 'delivered' might be final status before completed? Or just completed.
+            ->whereHas('orderStatus', function ($q) {
+                $q->whereNotIn('code', ['completed', 'cancelled', 'delivered']);
+            })
             ->latest()
             ->get();
 
         // Available deliveries (Ready for pickup by driver)
-        $availableDeliveries = Order::with(['items.menuItem', 'customer.user', 'customerAddress'])
+        $availableQuery = Order::with(['items.menuItem', 'customer.user', 'customerAddress', 'orderStatus', 'orderType'])
             ->whereNull('driver_id')
-            ->where('order_type', 'delivery')
-            ->where('status', 'ready') // Kitchen has marked it ready
-            ->latest()
-            ->get();
+            ->whereHas('orderType', function ($q) {
+                $q->where('code', 'delivery');
+            })
+            ->whereHas('orderStatus', function ($q) {
+                $q->where('code', 'ready');
+            });
+
+        // Get available deliveries
+        $availableDeliveries = $availableQuery->latest()->get();
+
+        // Sort by distance if driver location provided
+        if ($driverLat && $driverLng) {
+            $availableDeliveries = $this->sortByProximity(
+                $availableDeliveries,
+                (float) $driverLat,
+                (float) $driverLng
+            );
+        }
 
         return response()->json([
             'my_deliveries' => OrderResource::collection($myDeliveries),
@@ -44,20 +62,26 @@ class DriverOrderController extends Controller
      */
     public function claim(Request $request, Order $order)
     {
+        $order->load(['orderType', 'orderStatus']);
         $user = $request->user();
+
+        \Log::info("Driver {$user->id} attempting to claim order {$order->id}", [
+            'current_driver' => $order->driver_id,
+            'type' => $order->order_type_code,
+            'status' => $order->status_code
+        ]);
 
         if ($order->driver_id) {
             return response()->json(['message' => 'Order is already assigned to a driver.'], 409);
         }
 
-        if ($order->order_type !== 'delivery') {
+        if ($order->order_type_code !== 'delivery') {
              return response()->json(['message' => 'Only delivery orders can be claimed.'], 422);
         }
 
-        if ($order->status !== 'ready' && $order->status !== 'preparing') { // Allow claiming while preparing too? Maybe just ready.
-             // Let's stick to 'ready' essentially, or 'preparing' if they want to wait. 
-             // Actually, usually drivers claim when it's ready or almost ready. Let's allow if not cancelled/completed.
-             if (in_array($order->status, ['completed', 'cancelled', 'delivered'])) {
+        // Use status_code for safe comparison
+        if ($order->status_code !== 'ready' && $order->status_code !== 'preparing') { 
+             if (in_array($order->status_code, ['completed', 'cancelled', 'delivered'])) {
                  return response()->json(['message' => 'Order is not available.'], 422);
              }
         }
@@ -66,7 +90,7 @@ class DriverOrderController extends Controller
             'driver_id' => $user->id
         ]);
 
-        return new OrderResource($order->load(['items.menuItem', 'customer.user', 'customerAddress']));
+        return new OrderResource($order->load(['items.menuItem', 'customer.user', 'customerAddress', 'orderStatus', 'orderType']));
     }
 
     /**
@@ -95,5 +119,117 @@ class DriverOrderController extends Controller
         }
 
         return new OrderResource($order->fresh(['items.menuItem', 'customer.user', 'customerAddress']));
+    }
+
+    /**
+     * Get map data for driver interface
+     * Returns GeoJSON format data for all delivery locations
+     */
+    public function getMapData(Request $request)
+    {
+        $user = $request->user();
+
+        // My active deliveries
+        $myDeliveries = Order::with(['customerAddress'])
+            ->where('driver_id', $user->id)
+            ->whereHas('orderStatus', function ($q) {
+                $q->whereNotIn('code', ['completed', 'cancelled', 'delivered']);
+            })
+            ->get();
+
+        // Available deliveries
+        $availableDeliveries = Order::with(['customerAddress'])
+            ->whereNull('driver_id')
+            ->whereHas('orderType', function ($q) {
+                $q->where('code', 'delivery');
+            })
+            ->whereHas('orderStatus', function ($q) {
+                $q->where('code', 'ready');
+            })
+            ->get();
+
+        return response()->json([
+            'type' => 'FeatureCollection',
+            'features' => [
+                ...$this->ordersToGeoJSON($myDeliveries, 'my_delivery'),
+                ...$this->ordersToGeoJSON($availableDeliveries, 'available'),
+            ]
+        ]);
+    }
+
+    /**
+     * Sort orders by proximity to driver location
+     */
+    protected function sortByProximity($orders, float $driverLat, float $driverLng)
+    {
+        return $orders->sortBy(function ($order) use ($driverLat, $driverLng) {
+            if (!$order->customerAddress || !$order->customerAddress->latitude) {
+                return PHP_FLOAT_MAX; // Put orders without coordinates at the end
+            }
+
+            return $this->calculateDistance(
+                $driverLat,
+                $driverLng,
+                $order->customerAddress->latitude,
+                $order->customerAddress->longitude
+            );
+        })->values();
+    }
+
+    /**
+     * Calculate distance between two coordinates using Haversine formula
+     * Returns distance in kilometers
+     */
+    protected function calculateDistance(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $earthRadius = 6371; // km
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLng / 2) * sin($dLng / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
+
+    /**
+     * Convert orders to GeoJSON features
+     */
+    protected function ordersToGeoJSON($orders, string $type): array
+    {
+        $features = [];
+
+        foreach ($orders as $order) {
+            if (!$order->customerAddress || !$order->customerAddress->latitude) {
+                continue; // Skip orders without coordinates
+            }
+
+            $features[] = [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [
+                        $order->customerAddress->longitude,
+                        $order->customerAddress->latitude
+                    ]
+                ],
+                'properties' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'delivery_type' => $type,
+                    'status' => $order->status_code,
+                    'customer_name' => $order->owner_name,
+                    'customer_phone' => $order->contact_phone,
+                    'total_amount' => $order->total_amount,
+                    'payment_status' => $order->payment_status,
+                ]
+            ];
+        }
+
+        return $features;
     }
 }

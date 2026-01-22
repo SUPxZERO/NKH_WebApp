@@ -202,7 +202,7 @@ export default function Units() {
                     <div className="absolute bottom-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl opacity-50" />
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto space-y-4 sm:space-y-6">
+                <div className="relative z-10 w-full mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0">

@@ -11,6 +11,7 @@ use App\Models\PaymentMethod;
 use App\Models\TableSession;
 use App\Services\InvoiceService;
 use App\Services\LoyaltyService;
+use App\Services\TableStatusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -124,7 +125,7 @@ class OrderPaymentController extends Controller
                     'change_given' => $changeGiven,
                     'notes' => $validated['notes'] ?? null,
                     'mode' => 'collect_payment',
-                ], $request->user()->id);
+                ], $request->user()?->id);
 
                 // ==================== TABLE SESSION CLOSE (Sprint P17) ====================
                 // If this was a QR table order, close the session and reset table
@@ -138,7 +139,11 @@ class OrderPaymentController extends Controller
 
                     if ($tableSession) {
                         $tableSession->close();
-                        $tableSession->table->resetStatus();
+                        app(TableStatusService::class)->attemptResetStatus($tableSession->table, $request->user()?->id, [
+                            'order_id' => $order->id,
+                            'session_id' => $tableSession->id,
+                            'source' => 'payment_collect_close_session',
+                        ]);
 
                         Log::info('Table session closed after payment', [
                             'order_id' => $order->id,
@@ -148,6 +153,9 @@ class OrderPaymentController extends Controller
                     }
                 }
                 // ==================== END TABLE SESSION CLOSE ====================
+
+                // Centralized release after payment (covers non-session dine-in too)
+                app(TableStatusService::class)->completeAndReleaseAfterPayment($order, $request->user()?->id);
             });
 
             $order->refresh();
@@ -196,11 +204,11 @@ class OrderPaymentController extends Controller
         }
 
         // Validate payment mode is allowed for this order type
-        $allowedModes = Order::getPaymentModesForOrderType($order->order_type);
+        $allowedModes = Order::getPaymentModesForOrderType($order->order_type_code);
         if (!in_array($validated['payment_mode'], $allowedModes)) {
             return response()->json([
                 'success' => false,
-                'error' => 'This payment mode is not available for ' . $order->order_type . ' orders',
+                'error' => 'This payment mode is not available for ' . $order->order_type_code . ' orders',
                 'allowed_modes' => $allowedModes,
             ], 400);
         }
@@ -293,7 +301,7 @@ class OrderPaymentController extends Controller
                     'change_given' => $changeGiven,
                     'notes' => $validated['notes'] ?? 'POS Quick Pay',
                     'mode' => 'pos_quick_pay',
-                ], $request->user()->id);
+                ], $request->user()?->id);
             });
 
             $order->refresh();
@@ -332,13 +340,21 @@ class OrderPaymentController extends Controller
      */
     public function pendingCollection(Request $request): JsonResponse
     {
-        $orders = Order::with(['customer.user', 'customerAddress', 'location'])
+        $orders = Order::with(['customer.user', 'customerAddress', 'location', 'orderType', 'orderStatus', 'invoice'])
             ->whereIn('payment_mode', [
                 Order::PAYMENT_MODE_PAY_ON_DELIVERY,
                 Order::PAYMENT_MODE_PAY_ON_PICKUP,
             ])
-            ->where('payment_status', Order::PAYMENT_STATUS_UNPAID)
-            ->whereIn('status', ['preparing', 'ready', 'out_for_delivery'])
+            // Unpaid invoices only
+            ->where(function ($query) {
+                $query->whereHas('invoice', function ($subQuery) {
+                    $subQuery->whereIn('status', ['draft', 'issued']);
+                })->orWhereDoesntHave('invoice');
+            })
+            // Active orders (preparing, ready, out_for_delivery)
+            ->whereHas('orderStatus', function ($query) {
+                $query->whereIn('code', ['preparing', 'ready', 'out_for_delivery']);
+            })
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($order) {
@@ -346,10 +362,10 @@ class OrderPaymentController extends Controller
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'total_amount' => (float) $order->total_amount,
-                    'currency' => $order->currency,
-                    'order_type' => $order->order_type,
-                    'payment_mode' => $order->payment_mode,
-                    'status' => $order->status,
+                    'currency' => $order->currency ?? 'USD',
+                    'order_type' => $order->order_type_code,
+                    'payment_mode' => $order->payment_mode ?? 'pay_now',
+                    'status' => $order->status_code,
                     'customer_name' => $order->customer?->user?->name ?? 'Guest',
                     'customer_phone' => $order->customer?->user?->phone,
                     'delivery_address' => $order->customerAddress?->full_address,
@@ -370,22 +386,41 @@ class OrderPaymentController extends Controller
      */
     public function activeOrders(Request $request): JsonResponse
     {
-        $orders = Order::with(['customer.user'])
+        // Join with order_statuses to filter by status code
+        // Join with invoices to check payment status
+        $orders = Order::with(['customer.user', 'orderType', 'orderStatus', 'invoice'])
             ->withCount('items')
-            ->whereIn('payment_status', [Order::PAYMENT_STATUS_UNPAID, Order::PAYMENT_STATUS_PARTIAL])
-            ->whereNotIn('status', ['cancelled', 'completed', 'refunded'])
+            ->whereHas('orderStatus', function ($query) {
+                $query->whereNotIn('code', ['cancelled', 'completed', 'refunded']);
+            })
+            ->where(function ($query) {
+                // Include orders where invoice is not fully paid OR no invoice exists yet
+                $query->whereHas('invoice', function ($subQuery) {
+                    $subQuery->whereIn('status', ['draft', 'issued', 'partial']);
+                })->orWhereDoesntHave('invoice');
+            })
             ->orderByDesc('created_at')
             ->limit(50)
             ->get()
             ->map(function ($order) {
+                // Determine payment status from invoice
+                $paymentStatus = 'unpaid';
+                if ($order->invoice) {
+                    $paymentStatus = match($order->invoice->status) {
+                        'paid' => 'paid',
+                        'partial' => 'partial',
+                        default => 'unpaid'
+                    };
+                }
+                
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'total_amount' => (float) $order->total_amount,
-                    'order_type' => $order->order_type,
-                    'payment_status' => $order->payment_status,
-                    'payment_mode' => $order->payment_mode,
-                    'status' => $order->status,
+                    'order_type' => $order->order_type_code,
+                    'payment_status' => $paymentStatus,
+                    'payment_mode' => $order->payment_mode ?? 'pay_now',
+                    'status' => $order->status_code,
                     'customer_name' => $order->customer?->user?->name ?? 'Guest',
                     'created_at' => $order->created_at->toIso8601String(),
                     'items_count' => $order->items_count,

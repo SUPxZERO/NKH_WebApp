@@ -45,7 +45,7 @@ class InvoiceResource extends JsonResource
                 return [
                     'id' => $this->order->id,
                     'order_number' => $this->order->order_number,
-                    'type' => $this->order->order_type,
+                    'type' => $this->order->order_type_code,
                     'status' => $this->order->status,
                     // Backward-compat alias for older UI
                     'placed_at' => $this->order->ordered_at?->toISOString(),

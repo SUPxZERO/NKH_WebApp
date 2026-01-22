@@ -394,7 +394,7 @@ class TelegramBotService
         $details .= "\n─────────────────────";
 
         // Order type and location
-        if ($order->order_type === 'delivery') {
+        if ($order->order_type_code === 'delivery') {
             $details .= "\n📍 Delivery to your address";
         } else {
             $details .= "\n📍 Pickup at: " . ($order->location?->name ?? 'Main Branch');
@@ -412,7 +412,7 @@ class TelegramBotService
         if ($order->payment_status === 'paid') {
             $details .= " (Paid ✅)";
         } elseif ($order->payment_mode === 'pay_on_pickup' || $order->payment_mode === 'pay_on_delivery') {
-            $details .= " (Pay on " . ($order->order_type === 'delivery' ? 'Delivery' : 'Pickup') . ")";
+            $details .= " (Pay on " . ($order->order_type_code === 'delivery' ? 'Delivery' : 'Pickup') . ")";
         }
 
         return $details;

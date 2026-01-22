@@ -8,6 +8,7 @@ use App\Http\Requests\Api\Customer\StoreCustomerRequest;
 use App\Http\Requests\Api\Customer\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\OrderResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\Customer;
 use App\Models\TelegramUser;
 use App\Models\User;
@@ -21,6 +22,7 @@ use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
+    use ApiResponse;
     /**
      * Get customer from authenticated user OR from Telegram session
      * Returns [Customer|null, TelegramUser|null, error_message|null]
@@ -35,13 +37,13 @@ class CustomerController extends Controller
         // Check for any Telegram session (guest or webapp)
         $telegramUserId = session('telegram_user_id');
         $telegramData = session('telegram_user');
-        
+
         // Try to get telegram_id from either source
         $telegramId = $telegramUserId ?? ($telegramData['telegram_id'] ?? null);
-        
+
         if ($telegramId) {
             $telegramUser = TelegramUser::where('telegram_id', $telegramId)->first();
-            
+
             if ($telegramUser) {
                 // If Telegram user has a linked customer, use that
                 if ($telegramUser->customer_id) {
@@ -50,7 +52,7 @@ class CustomerController extends Controller
                         return [$customer, $telegramUser, null];
                     }
                 }
-                
+
                 // Return TelegramUser for guest operations
                 return [null, $telegramUser, null];
             }
@@ -63,22 +65,22 @@ class CustomerController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Customer::query()->with(['user', 'preferredLocation', 'addresses']);
-        
+
         // Search functionality
         if ($request->has('search')) {
             $search = $request->search;
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
-        
+
         // Filter by location if provided
         if ($request->has('location_id')) {
             $query->where('preferred_location_id', $request->location_id);
         }
-        
+
         $customers = $query->paginate($request->get('per_page', 15));
         return CustomerResource::collection($customers);
     }
@@ -87,7 +89,7 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request): CustomerResource
     {
         $data = $request->validated();
-        
+
         $customer = DB::transaction(function () use ($data) {
             // Create user account
             $user = User::create([
@@ -97,15 +99,15 @@ class CustomerController extends Controller
                 'password' => Hash::make($data['password']),
                 'is_active' => $data['is_active'] ?? true,
             ]);
-            
+
             // Assign customer role
             $role = Role::where('slug', 'customer')->firstOrFail();
             $user->roles()->attach($role->id);
-            
+
             // Create customer record
             $customer = Customer::create([
                 'user_id' => $user->id,
-                'customer_code' => 'CUST-'.strtoupper(Str::random(6)),
+                'customer_code' => 'CUST-' . strtoupper(Str::random(6)),
                 'preferred_location_id' => $data['preferred_location_id'] ?? null,
                 'birth_date' => $data['birth_date'] ?? null,
                 'gender' => $data['gender'] ?? null,
@@ -113,10 +115,10 @@ class CustomerController extends Controller
                 'points_balance' => $data['points_balance'] ?? 0,
                 'notes' => $data['notes'] ?? null,
             ]);
-            
+
             return $customer->load(['user', 'preferredLocation', 'addresses']);
         });
-        
+
         return new CustomerResource($customer);
     }
 
@@ -130,38 +132,48 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer): CustomerResource
     {
         $data = $request->validated();
-        
+
         DB::transaction(function () use ($customer, $data) {
             // Update user information
             if (isset($data['name']) || isset($data['email']) || isset($data['phone'])) {
                 $userUpdate = [];
-                if (isset($data['name'])) $userUpdate['name'] = $data['name'];
-                if (isset($data['email'])) $userUpdate['email'] = $data['email'];
-                if (isset($data['phone'])) $userUpdate['phone'] = $data['phone'];
-                if (isset($data['is_active'])) $userUpdate['is_active'] = $data['is_active'];
-                
+                if (isset($data['name']))
+                    $userUpdate['name'] = $data['name'];
+                if (isset($data['email']))
+                    $userUpdate['email'] = $data['email'];
+                if (isset($data['phone']))
+                    $userUpdate['phone'] = $data['phone'];
+                if (isset($data['is_active']))
+                    $userUpdate['is_active'] = $data['is_active'];
+
                 $customer->user()->update($userUpdate);
             }
-            
+
             // Update password if provided
             if (isset($data['password'])) {
                 $customer->user()->update(['password' => Hash::make($data['password'])]);
             }
-            
+
             // Update customer record
             $customerUpdate = [];
-            if (isset($data['preferred_location_id'])) $customerUpdate['preferred_location_id'] = $data['preferred_location_id'];
-            if (isset($data['birth_date'])) $customerUpdate['birth_date'] = $data['birth_date'];
-            if (isset($data['gender'])) $customerUpdate['gender'] = $data['gender'];
-            if (isset($data['preferences'])) $customerUpdate['preferences'] = $data['preferences'];
-            if (isset($data['points_balance'])) $customerUpdate['points_balance'] = $data['points_balance'];
-            if (isset($data['notes'])) $customerUpdate['notes'] = $data['notes'];
-            
+            if (isset($data['preferred_location_id']))
+                $customerUpdate['preferred_location_id'] = $data['preferred_location_id'];
+            if (isset($data['birth_date']))
+                $customerUpdate['birth_date'] = $data['birth_date'];
+            if (isset($data['gender']))
+                $customerUpdate['gender'] = $data['gender'];
+            if (isset($data['preferences']))
+                $customerUpdate['preferences'] = $data['preferences'];
+            if (isset($data['points_balance']))
+                $customerUpdate['points_balance'] = $data['points_balance'];
+            if (isset($data['notes']))
+                $customerUpdate['notes'] = $data['notes'];
+
             if (!empty($customerUpdate)) {
                 $customer->update($customerUpdate);
             }
         });
-        
+
         return new CustomerResource($customer->fresh(['user', 'preferredLocation', 'addresses']));
     }
 
@@ -172,7 +184,7 @@ class CustomerController extends Controller
             // Deactivate instead of hard delete to preserve data integrity
             $customer->user()->update(['is_active' => false]);
         });
-        
+
         return response()->json(['message' => 'Customer deactivated successfully.']);
     }
 
@@ -208,9 +220,12 @@ class CustomerController extends Controller
             // Update user table fields (only if customer has a linked User)
             if ($customer->user) {
                 $userUpdate = [];
-                if (isset($validated['name'])) $userUpdate['name'] = $validated['name'];
-                if (isset($validated['email'])) $userUpdate['email'] = $validated['email'];
-                if (isset($validated['phone'])) $userUpdate['phone'] = $validated['phone'];
+                if (isset($validated['name']))
+                    $userUpdate['name'] = $validated['name'];
+                if (isset($validated['email']))
+                    $userUpdate['email'] = $validated['email'];
+                if (isset($validated['phone']))
+                    $userUpdate['phone'] = $validated['phone'];
 
                 if (!empty($userUpdate)) {
                     $customer->user()->update($userUpdate);
@@ -221,10 +236,12 @@ class CustomerController extends Controller
                 if (isset($validated['name'])) {
                     $names = explode(' ', $validated['name'], 2);
                     $telegramUpdate['first_name'] = $names[0];
-                    if (isset($names[1])) $telegramUpdate['last_name'] = $names[1];
+                    if (isset($names[1]))
+                        $telegramUpdate['last_name'] = $names[1];
                 }
-                if (isset($validated['phone'])) $telegramUpdate['phone_number'] = $validated['phone'];
-                
+                if (isset($validated['phone']))
+                    $telegramUpdate['phone_number'] = $validated['phone'];
+
                 if (!empty($telegramUpdate)) {
                     $telegramUser->update($telegramUpdate);
                 }
@@ -232,13 +249,20 @@ class CustomerController extends Controller
 
             // Update customer table fields (works for both auth types)
             $customerUpdate = [];
-            if (isset($validated['name'])) $customerUpdate['name'] = $validated['name'];
-            if (isset($validated['email'])) $customerUpdate['email'] = $validated['email'];
-            if (isset($validated['phone'])) $customerUpdate['phone'] = $validated['phone'];
-            if (isset($validated['birth_date'])) $customerUpdate['birth_date'] = $validated['birth_date'];
-            if (isset($validated['gender'])) $customerUpdate['gender'] = $validated['gender'];
-            if (isset($validated['preferred_language'])) $customerUpdate['preferred_language'] = $validated['preferred_language'];
-            if (isset($validated['marketing_consent'])) $customerUpdate['marketing_consent'] = $validated['marketing_consent'];
+            if (isset($validated['name']))
+                $customerUpdate['name'] = $validated['name'];
+            if (isset($validated['email']))
+                $customerUpdate['email'] = $validated['email'];
+            if (isset($validated['phone']))
+                $customerUpdate['phone'] = $validated['phone'];
+            if (isset($validated['birth_date']))
+                $customerUpdate['birth_date'] = $validated['birth_date'];
+            if (isset($validated['gender']))
+                $customerUpdate['gender'] = $validated['gender'];
+            if (isset($validated['preferred_language']))
+                $customerUpdate['preferred_language'] = $validated['preferred_language'];
+            if (isset($validated['marketing_consent']))
+                $customerUpdate['marketing_consent'] = $validated['marketing_consent'];
 
             if (!empty($customerUpdate)) {
                 $customer->update($customerUpdate);
@@ -317,7 +341,7 @@ class CustomerController extends Controller
             'points_balance' => $customer->points_balance,
             'no_show_count' => $customer->no_show_count,
             'favorite_items' => $customer->orders()
-                ->join('order_items',' orders.id', '=', 'order_items.order_id')
+                ->join('order_items', ' orders.id', '=', 'order_items.order_id')
                 ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
                 ->select('menu_items.id', 'menu_items.name', DB::raw('COUNT(*) as order_count'))
                 ->groupBy('menu_items.id', 'menu_items.name')
@@ -334,7 +358,7 @@ class CustomerController extends Controller
     public function updateTier(Customer $customer): JsonResponse
     {
         $customer->updateEngagementMetrics();
-        
+
         return response()->json([
             'message' => 'Customer tier updated successfully',
             'data' => [
@@ -348,7 +372,7 @@ class CustomerController extends Controller
     public function getAddresses(Request $request): JsonResponse
     {
         [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
-        
+
         // For Telegram guests without customer account, return empty addresses
         // They can still place orders with address entered at checkout
         if (!$customer && $telegramUser) {
@@ -358,9 +382,9 @@ class CustomerController extends Controller
                 'message' => 'Telegram guests can enter address during checkout',
             ]);
         }
-        
+
         abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
-        
+
         $addresses = $customer->addresses()->get();
         return response()->json(['data' => $addresses]);
     }
@@ -369,7 +393,7 @@ class CustomerController extends Controller
     public function storeAddress(Request $request): JsonResponse
     {
         [$customer, $telegramUser, $error] = $this->getCustomerOrTelegram($request);
-        
+
         // For Telegram guests without customer account, store address in session for checkout
         if (!$customer && $telegramUser) {
             $validated = $request->validate([
@@ -400,7 +424,7 @@ class CustomerController extends Controller
                 'telegram_guest' => true,
             ], 201);
         }
-        
+
         abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $validated = $request->validate([
@@ -485,10 +509,10 @@ class CustomerController extends Controller
         abort_if(!$customer, 404, $error ?? 'Customer profile not found.');
 
         $address = $customer->addresses()->findOrFail($addressId);
-        
+
         // Unset all defaults
         $customer->addresses()->update(['is_default' => false]);
-        
+
         // Set this one as default
         $address->update(['is_default' => true]);
 
@@ -564,7 +588,7 @@ class CustomerController extends Controller
     public function aggregateStats(): JsonResponse
     {
         $total = Customer::count();
-        $active = Customer::whereHas('user', function($q) {
+        $active = Customer::whereHas('user', function ($q) {
             $q->where('is_active', true);
         })->count();
         $vip = Customer::where('customer_tier', 'gold')

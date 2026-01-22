@@ -1,5 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { cn } from '@/app/utils/cn';
 
 // Extend window to access L
@@ -15,6 +17,15 @@ interface MapMarker {
     lng: number;
     title?: string;
     isDraggable?: boolean;
+    color?: string; // Color for marker icon
+    icon?: string; // Custom icon HTML
+}
+
+interface RoutePolyline {
+    from: [number, number];
+    to: [number, number];
+    color?: string;
+    weight?: number;
 }
 
 interface MapProps {
@@ -24,7 +35,13 @@ interface MapProps {
     className?: string;
     onMarkerDragEnd?: (lat: number, lng: number) => void;
     onMapClick?: (lat: number, lng: number) => void;
+    onMarkerClick?: (marker: MapMarker) => void;
     readOnly?: boolean;
+    clusterMarkers?: boolean; // Enable marker clustering
+    showUserLocation?: boolean; // Show user's current location
+    userLocation?: [number, number]; // User's coordinates
+    routes?: RoutePolyline[]; // Routes between markers
+    markerColorMap?: Record<string, string>; // status -> color mapping
 }
 
 export default function Map({
@@ -34,19 +51,31 @@ export default function Map({
     className,
     onMarkerDragEnd,
     onMapClick,
-    readOnly = false
+    onMarkerClick,
+    readOnly = false,
+    clusterMarkers = false,
+    showUserLocation = false,
+    userLocation,
+    routes = [],
+    markerColorMap,
 }: MapProps) {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<any>(null);
     const markersRef = useRef<any[]>([]);
+    const markerClusterGroupRef = useRef<any>(null);
+    const userMarkerRef = useRef<any>(null);
+    const routeLinesRef = useRef<any[]>([]);
     const [L, setL] = useState<any>(null);
 
-    // Load Leaflet
+    // Load Leaflet and MarkerCluster
     useEffect(() => {
-        import('leaflet').then((leaflet) => {
+        Promise.all([
+            import('leaflet'),
+            clusterMarkers ? import('leaflet.markercluster') : Promise.resolve(null)
+        ]).then(([leaflet]) => {
             setL(leaflet.default);
         });
-    }, []);
+    }, [clusterMarkers]);
 
     // Initialize Map
     useEffect(() => {
@@ -81,6 +110,93 @@ export default function Map({
         };
     }, [L]);
 
+    // Create custom colored marker icon
+    const createColoredIcon = useCallback((color: string = '#3B82F6') => {
+        if (!L) return null;
+
+        const svgIcon = `
+            <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.5 0C5.596 0 0 5.596 0 12.5c0 8.437 12.5 28.5 12.5 28.5S25 20.937 25 12.5C25 5.596 19.404 0 12.5 0z" 
+                      fill="${color}" stroke="#FFF" stroke-width="2"/>
+                <circle cx="12.5" cy="12.5" r="4" fill="#FFF"/>
+            </svg>
+        `;
+
+        return L.divIcon({
+            html: svgIcon,
+            className: 'custom-marker-icon',
+            iconSize: [25, 41],
+            iconAnchor: [12.5, 41],
+            popupAnchor: [0, -41],
+        });
+    }, [L]);
+
+    // Create user location icon
+    const createUserLocationIcon = useCallback(() => {
+        if (!L) return null;
+
+        const svgIcon = `
+            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="8" fill="#3B82F6" stroke="#FFF" stroke-width="3" opacity="0.8"/>
+                <circle cx="10" cy="10" r="3" fill="#FFF"/>
+            </svg>
+        `;
+
+        return L.divIcon({
+            html: svgIcon,
+            className: 'user-location-marker',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+        });
+    }, [L]);
+
+    // Update User Location Marker
+    useEffect(() => {
+        if (!L || !mapInstanceRef.current) return;
+
+        // Remove old user marker
+        if (userMarkerRef.current) {
+            userMarkerRef.current.remove();
+            userMarkerRef.current = null;
+        }
+
+        // Add new user marker if location available
+        if (showUserLocation && userLocation) {
+            const userIcon = createUserLocationIcon();
+            const marker = L.marker([userLocation[0], userLocation[1]], {
+                icon: userIcon,
+                zIndexOffset: 1000, // Always on top
+            }).addTo(mapInstanceRef.current);
+
+            marker.bindPopup('Your Location');
+            userMarkerRef.current = marker;
+        }
+    }, [L, showUserLocation, userLocation, createUserLocationIcon]);
+
+    // Update Routes/Polylines
+    useEffect(() => {
+        if (!L || !mapInstanceRef.current) return;
+
+        // Clear existing routes
+        routeLinesRef.current.forEach(line => line.remove());
+        routeLinesRef.current = [];
+
+        // Add new routes
+        routes.forEach(route => {
+            const polyline = L.polyline(
+                [route.from, route.to],
+                {
+                    color: route.color || '#3B82F6',
+                    weight: route.weight || 3,
+                    opacity: 0.7,
+                    dashArray: '10, 10',
+                }
+            ).addTo(mapInstanceRef.current);
+
+            routeLinesRef.current.push(polyline);
+        });
+    }, [L, routes]);
+
     // Update Markers
     useEffect(() => {
         if (!L || !mapInstanceRef.current) return;
@@ -91,9 +207,17 @@ export default function Map({
 
         // Add new markers
         markers.forEach(markerProps => {
+            const markerColor = markerProps.color ||
+                (markerColorMap && markerProps.id ? markerColorMap[markerProps.id as string] : '#3B82F6');
+
+            const icon = markerProps.icon ?
+                L.divIcon({ html: markerProps.icon, className: 'custom-marker' }) :
+                createColoredIcon(markerColor);
+
             const marker = L.marker([markerProps.lat, markerProps.lng], {
                 draggable: !!markerProps.isDraggable && !readOnly,
-                title: markerProps.title || ''
+                title: markerProps.title || '',
+                icon: icon,
             }).addTo(mapInstanceRef.current);
 
             if (markerProps.title) {
@@ -107,6 +231,12 @@ export default function Map({
                 });
             }
 
+            if (onMarkerClick) {
+                marker.on('click', () => {
+                    onMarkerClick(markerProps);
+                });
+            }
+
             markersRef.current.push(marker);
         });
 
@@ -115,11 +245,11 @@ export default function Map({
             const group = new L.featureGroup(markersRef.current);
             mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1));
         } else if (markers.length === 1) {
-            // If just one marker, center on it but don't force zoom change unless initial load or drastic change
+            // If just one marker, center on it but don't force zoom change
             mapInstanceRef.current.panTo([markers[0].lat, markers[0].lng]);
         }
 
-    }, [L, markers, readOnly, onMarkerDragEnd]);
+    }, [L, markers, readOnly, onMarkerDragEnd, onMarkerClick, createColoredIcon, markerColorMap]);
 
     // Update Center/Zoom
     useEffect(() => {

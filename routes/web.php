@@ -168,6 +168,7 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,chief,servic
     Route::get('employees', fn() => Inertia::render('admin/Employees'))->name('admin.employees');
     Route::get('positions', fn() => Inertia::render('admin/Positions'))->name('admin.positions');
     Route::get('shifts', fn() => Inertia::render('admin/Shifts'))->name('admin.shifts');
+    Route::get('shift-approvals', fn() => Inertia::render('admin/ManagerShiftApprovals'))->name('admin.shift-approvals');
     Route::get('time-off-requests', fn() => Inertia::render('admin/TimeOffRequests'))->name('admin.time-off-requests');
     Route::get('attendance-management', fn() => Inertia::render('admin/Employee/AttendanceManagement'))->name('admin.attendance-management');
     Route::get('payroll-management', fn() => Inertia::render('admin/Employee/PayrollManagement'))->name('admin.payroll-management');

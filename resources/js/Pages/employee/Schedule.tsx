@@ -10,6 +10,7 @@ import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { toastSuccess, toastError } from '@/app/utils/toast';
+import MyRequestsTab from './components/MyRequestsTab';
 import {
     Calendar as CalendarIcon,
     Clock,
@@ -20,6 +21,9 @@ import {
     CheckCircle,
     XCircle,
     Coffee,
+    RefreshCw,
+    UserCheck,
+    Ban,
 } from 'lucide-react';
 
 interface Shift {
@@ -41,6 +45,36 @@ interface TimeOffRequest {
     reason: string;
     status: 'pending' | 'approved' | 'denied';
     created_at: string;
+}
+
+interface ShiftSwap {
+    id: number;
+    shift_id: number;
+    requester_id: number;
+    recipient_id: number | null;
+    type: 'give_away' | 'trade';
+    status: 'pending' | 'accepted_by_peer' | 'approved' | 'denied' | 'cancelled';
+    reason: string | null;
+    created_at: string;
+    approved_at: string | null;
+    approved_by: number | null;
+    denial_reason: string | null;
+    shift: {
+        id: number;
+        date: string;
+        start_time: string;
+        end_time: string;
+        position: { name: string };
+        location: { name: string };
+    };
+    requester: {
+        id: number;
+        user: { name: string };
+    };
+    recipient?: {
+        id: number;
+        user: { name: string };
+    } | null;
 }
 
 export default function Schedule() {
@@ -225,13 +259,20 @@ export default function Schedule() {
     };
 
     // Tab state
-    const [activeTab, setActiveTab] = useState<'schedule' | 'marketplace'>('schedule');
+    const [activeTab, setActiveTab] = useState<'schedule' | 'marketplace' | 'my_requests'>('schedule');
 
     // Fetch marketplace shifts (available swaps)
-    const { data: marketplaceShifts, isLoading: marketplaceLoading } = useQuery<any[]>({
+    const { data: marketplaceShifts, isLoading: marketplaceLoading } = useQuery<{ data: ShiftSwap[] }>({
         queryKey: ['shift-swaps.available'],
         queryFn: () => apiGet('/employee/shift-swaps?view=available'),
         enabled: activeTab === 'marketplace',
+    });
+
+    // Fetch my shift swap requests
+    const { data: myRequests, isLoading: myRequestsLoading } = useQuery<{ data: ShiftSwap[] }>({
+        queryKey: ['shift-swaps.my_requests'],
+        queryFn: () => apiGet('/employee/shift-swaps?view=my_requests'),
+        enabled: activeTab === 'my_requests',
     });
 
     // Claim Shift Mutation
@@ -250,6 +291,25 @@ export default function Schedule() {
     const handleClaimShift = (id: number) => {
         if (confirm('Are you sure you want to claim this shift?')) {
             claimMutation.mutate(id);
+        }
+    };
+
+    // Cancel Request Mutation
+    const cancelMutation = useMutation({
+        mutationFn: (id: number) => apiPost(`/employee/shift-swaps/${id}`, { _method: 'PUT', action: 'cancel' }),
+        onSuccess: () => {
+            toastSuccess('Request cancelled successfully.');
+            qc.invalidateQueries({ queryKey: ['shift-swaps.my_requests'] });
+            qc.invalidateQueries({ queryKey: ['shift-swaps.available'] });
+        },
+        onError: (err: any) => {
+            toastError(err?.response?.data?.message || 'Failed to cancel request');
+        }
+    });
+
+    const handleCancelRequest = (id: number) => {
+        if (confirm('Are you sure you want to cancel this swap request?')) {
+            cancelMutation.mutate(id);
         }
     };
 
@@ -305,10 +365,10 @@ export default function Schedule() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            {activeTab === 'schedule' ? 'My Schedule' : 'Shift Marketplace'}
+                            {activeTab === 'schedule' ? 'My Schedule' : activeTab === 'marketplace' ? 'Shift Marketplace' : 'My Requests'}
                         </h1>
                         <p className="text-gray-400 mt-1">
-                            {activeTab === 'schedule' ? 'View your shifts and manage time off' : 'Pick up extra shifts from colleagues'}
+                            {activeTab === 'schedule' ? 'View your shifts and manage time off' : activeTab === 'marketplace' ? 'Pick up extra shifts from colleagues' : 'Track your shift swap requests'}
                         </p>
                     </div>
                     <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 self-start md:self-auto">
@@ -329,6 +389,15 @@ export default function Schedule() {
                                 }`}
                         >
                             Marketplace
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('my_requests')}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'my_requests'
+                                ? 'bg-fuchsia-600 text-white shadow-lg shadow-fuchsia-900/50'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            My Requests
                         </button>
                     </div>
                     {activeTab === 'schedule' && (
@@ -365,7 +434,7 @@ export default function Schedule() {
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <Briefcase className="w-5 h-5 text-fuchsia-400" />
-                                                        <span>{nextShift.position}</span>
+                                                        <span>{typeof nextShift.position === 'object' ? (nextShift.position as any).title || (nextShift.position as any).name : nextShift.position}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <MapPin className="w-5 h-5 text-fuchsia-400" />
@@ -486,7 +555,9 @@ export default function Schedule() {
                                                                                 <Clock className="w-4 h-4 text-fuchsia-400" />
                                                                                 <span className="font-medium">{shift.start_time} - {shift.end_time}</span>
                                                                                 <span className="text-gray-400">•</span>
-                                                                                <span className="text-gray-300">{shift.position}</span>
+                                                                                <span className="text-gray-300">
+                                                                                    {typeof shift.position === 'object' ? (shift.position as any).title || (shift.position as any).name : shift.position}
+                                                                                </span>
                                                                                 <span className="text-gray-400">•</span>
                                                                                 <span className="text-gray-400 text-sm">{shift.location_name}</span>
                                                                             </button>
@@ -582,7 +653,7 @@ export default function Schedule() {
                             </Card>
                         )}
                     </>
-                ) : (
+                ) : activeTab === 'marketplace' ? (
                     <div className="grid gap-4">
                         <Card className="bg-white/5 border-white/10">
                             <CardHeader>
@@ -594,9 +665,9 @@ export default function Schedule() {
                                     <div className="space-y-4">
                                         {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
                                     </div>
-                                ) : marketplaceShifts && marketplaceShifts.length > 0 ? (
+                                ) : marketplaceShifts && marketplaceShifts?.data?.length > 0 ? (
                                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                        {marketplaceShifts.map((swap: any) => (
+                                        {marketplaceShifts.data.map((swap: any) => (
                                             <div key={swap.id} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-fuchsia-500/50 transition-colors">
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div>
@@ -608,7 +679,7 @@ export default function Schedule() {
                                                         </div>
                                                     </div>
                                                     <div className="px-2 py-1 rounded text-xs bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
-                                                        {swap.shift.position}
+                                                        {typeof swap.shift.position === 'object' ? (swap.shift.position as any).title || (swap.shift.position as any).name : swap.shift.position}
                                                     </div>
                                                 </div>
 
@@ -642,7 +713,14 @@ export default function Schedule() {
                             </CardContent>
                         </Card>
                     </div>
-                )}
+                ) : activeTab === 'my_requests' ? (
+                    <MyRequestsTab
+                        myRequests={myRequests}
+                        isLoading={myRequestsLoading}
+                        onCancelRequest={handleCancelRequest}
+                        isCancelling={cancelMutation.isPending}
+                    />
+                ) : null}
             </div>
 
             {/* Time Off Request Modal */}
@@ -776,10 +854,10 @@ export default function Schedule() {
                         <select
                             value={swapType}
                             onChange={(e) => setSwapType(e.target.value as any)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 dark:text-white"
                         >
-                            <option value="give_away">Give Away (Drop)</option>
-                            <option value="trade">Trade Request</option>
+                            <option className="dark:text-black" value="give_away">Give Away (Drop)</option>
+                            <option className="dark:text-black" value="trade">Trade Request</option>
                         </select>
                     </div>
 

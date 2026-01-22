@@ -9,6 +9,7 @@ use App\Models\DiningTable;
 use App\Models\TableSession;
 use App\Models\TelegramUser;
 use App\Services\QrTableService;
+use App\Services\TableStatusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -85,10 +86,8 @@ class QrTableController extends Controller
             $ipAddress
         );
 
-        // Mark table as occupied if not already
-        if ($table->status === DiningTable::STATUS_AVAILABLE) {
-            $table->markOccupied();
-        }
+        // Mark table as occupied if not already (centralized rules)
+        app(TableStatusService::class)->occupyForQrScan($table);
 
         Log::info("Table QR scanned", [
             'table_id' => $table->id,
@@ -221,7 +220,11 @@ class QrTableController extends Controller
         $session->close();
 
         // Try to reset table status
-        $table->resetStatus();
+        app(TableStatusService::class)->attemptResetStatus($table, $request->user()?->id, [
+            'session_id' => $session->id,
+            'order_id' => $session->order_id,
+            'source' => 'qr_close_session',
+        ]);
 
         Log::info("Table session closed", [
             'session_id' => $session->id,

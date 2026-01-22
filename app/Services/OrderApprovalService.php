@@ -77,7 +77,9 @@ class OrderApprovalService
     {
         $query = Order::with(['customer.user', 'items.menuItem', 'customerAddress'])
             ->where('approval_status', Order::APPROVAL_STATUS_PENDING)
-            ->whereIn('order_type', ['delivery', 'pickup']);
+            ->whereHas('orderType', function ($q) {
+                $q->whereIn('code', ['delivery', 'pickup']);
+            });
 
         if ($locationId) {
             $query->where('location_id', $locationId);

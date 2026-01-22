@@ -312,7 +312,7 @@ class TelegramOrderNotificationService
         $title = $statusInfo['title'];
         $statusMessage = $statusInfo['message'];
 
-        $orderType = $order->order_type === 'delivery' ? '🚗 Delivery' : '🏪 Pickup';
+        $orderType = $order->order_type_code === 'delivery' ? '🚗 Delivery' : '🏪 Pickup';
         $orderTime = $order->scheduled_time
             ? $order->scheduled_time->format('M d, g:i A')
             : 'ASAP';

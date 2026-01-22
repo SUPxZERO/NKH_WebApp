@@ -17,8 +17,10 @@ class VerifyWebhookSignature
      */
     public function handle(Request $request, Closure $next, string $provider = 'generic'): Response
     {
-        // Skip verification in development if not configured
-        if (app()->environment('local') && !config('payment.enforce_webhook_verification', false)) {
+        // SECURITY: Webhook verification is now enforced in ALL environments by default
+        // To disable in local dev, set PAYMENT_ENFORCE_WEBHOOK_VERIFICATION=false in .env
+        if (app()->environment('local') && !config('payment.security.enforce_webhook_verification', true)) {
+            Log::info('Webhook verification skipped in local environment (PAYMENT_ENFORCE_WEBHOOK_VERIFICATION=false)');
             return $next($request);
         }
 
@@ -50,7 +52,7 @@ class VerifyWebhookSignature
     protected function verifyStripe(Request $request): bool
     {
         $secret = config('services.stripe.webhook_secret');
-        
+
         if (!$secret) {
             // No secret configured, skip verification (but log warning)
             Log::warning('Stripe webhook secret not configured');
@@ -58,7 +60,7 @@ class VerifyWebhookSignature
         }
 
         $signature = $request->header('Stripe-Signature');
-        
+
         if (!$signature) {
             return false;
         }
@@ -81,7 +83,7 @@ class VerifyWebhookSignature
             $expectedSignature = $parts['v1'];
 
             // Verify timestamp tolerance (5 minutes)
-            if (abs(time() - (int)$timestamp) > 300) {
+            if (abs(time() - (int) $timestamp) > 300) {
                 Log::warning('Stripe webhook timestamp too old', [
                     'timestamp' => $timestamp,
                     'current' => time(),
@@ -109,13 +111,13 @@ class VerifyWebhookSignature
     protected function verifyBakong(Request $request): bool
     {
         $secret = config('payment.webhook_secret');
-        
+
         if (!$secret) {
             return true;
         }
 
         $signature = $request->header('X-Bakong-Signature');
-        
+
         if (!$signature) {
             return false;
         }
@@ -133,17 +135,17 @@ class VerifyWebhookSignature
     protected function verifyGeneric(Request $request): bool
     {
         $secret = config('payment.webhook_secret');
-        
+
         if (!$secret) {
             return true;
         }
 
         // Check for signature in common header locations
-        $signature = $request->header('X-Webhook-Signature') 
+        $signature = $request->header('X-Webhook-Signature')
             ?? $request->header('X-Signature')
             ?? $request->header('X-Hub-Signature-256')
             ?? $request->input('signature');
-        
+
         if (!$signature) {
             return false;
         }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\MenuItem\StoreMenuItemRequest;
 use App\Http\Requests\Api\MenuItem\UpdateMenuItemRequest;
 use App\Http\Resources\MenuItemResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\MenuItem;
 use App\Services\CacheService; // Sprint 1: Caching
 use Illuminate\Http\JsonResponse;
@@ -15,23 +16,24 @@ use Illuminate\Http\Request;
 
 class MenuItemController extends Controller
 {
+    use ApiResponse;
     public function index(Request $request): JsonResponse
     {
         try {
             // Sprint 1: Use caching for simple menu list without filters
             $hasFilters = $request->filled(['category', 'search']) || $request->boolean('active_only', false);
-            
+
             if (!$hasFilters) {
                 // Default to the first active location if not provided
                 $locationId = $request->input('location_id');
                 if (!$locationId) {
                     $defaultLocation = \App\Models\Location::where('is_active', true)->first();
-                    $locationId = $defaultLocation ? $defaultLocation->id : 1; 
+                    $locationId = $defaultLocation ? $defaultLocation->id : 1;
                 }
-                
+
                 // Use cached menu for better performance
                 $menuItems = app(CacheService::class)->getMenu($locationId);
-                
+
                 return response()->json([
                     'status' => 'success',
                     'data' => MenuItemResource::collection($menuItems),
@@ -41,7 +43,7 @@ class MenuItemController extends Controller
                     ]
                 ]);
             }
-            
+
             // Fallback: Query with filters (non-cached)
             $query = MenuItem::query()
                 ->withoutGlobalScope('active')
@@ -51,9 +53,9 @@ class MenuItemController extends Controller
             $locationId = $request->input('location_id');
             if (!$locationId) {
                 $defaultLocation = \App\Models\Location::where('is_active', true)->first();
-                $locationId = $defaultLocation ? $defaultLocation->id : 1; 
+                $locationId = $defaultLocation ? $defaultLocation->id : 1;
             }
-            
+
             $query->where('location_id', $locationId);
 
             // Filter by category if provided
@@ -69,10 +71,10 @@ class MenuItemController extends Controller
             // Search functionality
             if ($request->filled('search')) {
                 $searchTerm = $request->input('search');
-                $query->where(function($q) use ($searchTerm) {
+                $query->where(function ($q) use ($searchTerm) {
                     $q->whereHas('translations', function ($trans) use ($searchTerm) {
                         $trans->where('name', 'like', "%{$searchTerm}%")
-                             ->orWhere('description', 'like', "%{$searchTerm}%");
+                            ->orWhere('description', 'like', "%{$searchTerm}%");
                     })->orWhere('sku', 'like', "%{$searchTerm}%");
                 });
             }
@@ -104,7 +106,7 @@ class MenuItemController extends Controller
             ], 500);
         }
     }
-        
+
     // POST /api/menu-items (role:admin,manager)
     public function store(StoreMenuItemRequest $request): MenuItemResource
     {
@@ -231,8 +233,10 @@ class MenuItemController extends Controller
 
         // Update translation
         $translationData = [];
-        if ($request->has('name')) $translationData['name'] = $request->input('name');
-        if ($request->has('description')) $translationData['description'] = $request->input('description');
+        if ($request->has('name'))
+            $translationData['name'] = $request->input('name');
+        if ($request->has('description'))
+            $translationData['description'] = $request->input('description');
 
         if (!empty($translationData)) {
             $menuItem->translations()->updateOrCreate(
@@ -249,19 +253,19 @@ class MenuItemController extends Controller
     {
         // Check if item has existing orders - inform user but still soft delete
         $orderCount = $menuItem->orderItems()->count();
-        
+
         if ($menuItem->image_path) {
             Storage::disk('public')->delete($menuItem->image_path);
         }
-        
+
         // Soft delete the item (SoftDeletes trait is used)
         $menuItem->delete();
-        
+
         $message = 'Menu item deleted.';
         if ($orderCount > 0) {
             $message = "Menu item archived (has {$orderCount} historical orders).";
         }
-        
+
         return response()->json(['message' => $message]);
     }
 }

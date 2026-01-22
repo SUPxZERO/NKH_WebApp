@@ -13,6 +13,7 @@ use App\Models\TelegramUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\OrderType;
 
 class OrderPlacementService
 {
@@ -105,7 +106,7 @@ class OrderPlacementService
                 'table_id' => $tableId,
                 'customer_id' => $customer->id,
                 'order_number' => $this->generateOrderNumber($data['location_id'], $isQrTableOrder ? 'TBL' : 'ONL'),
-                'order_type' => $data['order_type'],
+                'order_type_id' => OrderType::where('code', $data['order_type'])->value('id') ?? 2, // Default to dine-in
                 'status' => $isQrTableOrder ? 'received' : 'pending',
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
@@ -139,7 +140,7 @@ class OrderPlacementService
             // ==================== TABLE SESSION LINKING ====================
             if ($tableSession && $isQrTableOrder) {
                 $tableSession->linkOrder($order);
-                $tableSession->table->markOccupied();
+                app(TableStatusService::class)->occupyForQrScan($tableSession->table);
                 
                 \Log::info('🍽️ Order linked to table session', [
                     'order_id' => $order->id,

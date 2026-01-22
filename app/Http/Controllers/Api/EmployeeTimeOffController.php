@@ -69,7 +69,7 @@ class EmployeeTimeOffController extends Controller
         // Validate request
         $validator = Validator::make($request->all(), [
             'request_type' => 'nullable|string|in:vacation,sick,personal',
-            'start_date' => 'required|date|after_or_equal:today',
+            'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'nullable|string|max:500',
         ]);
@@ -78,6 +78,17 @@ class EmployeeTimeOffController extends Controller
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
+            ], 422);
+        }
+        
+        // Additional validation: check if dates are in the future
+        $startDate = new \DateTime($request->start_date);
+        $today = new \DateTime('today');
+        
+        if ($startDate < $today) {
+            return response()->json([
+                'message' => 'Start date must be today or in the future',
+                'errors' => ['start_date' => ['The start date must be today or a future date.']]
             ], 422);
         }
 

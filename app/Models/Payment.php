@@ -217,23 +217,30 @@ class Payment extends Model
 
     public function scopePending($query)
     {
-        return $query->where('status', self::STATUS_PENDING);
+        return $query->whereHas('paymentStatus', function ($q) {
+            $q->where('code', self::STATUS_PENDING);
+        });
     }
 
     public function scopeCompleted($query)
     {
-        return $query->where('status', self::STATUS_COMPLETED);
+        return $query->whereHas('paymentStatus', function ($q) {
+            $q->where('code', self::STATUS_COMPLETED);
+        });
     }
 
     public function scopeFailed($query)
     {
-        return $query->where('status', self::STATUS_FAILED);
+        return $query->whereHas('paymentStatus', function ($q) {
+            $q->where('code', self::STATUS_FAILED);
+        });
     }
 
     public function scopeExpired($query)
     {
-        return $query->where('status', self::STATUS_PENDING)
-            ->where('expires_at', '<', now());
+        return $query->whereHas('paymentStatus', function ($q) {
+            $q->where('code', self::STATUS_PENDING);
+        })->where('expires_at', '<', now());
     }
 
     public function scopeForInvoice($query, $invoiceId)

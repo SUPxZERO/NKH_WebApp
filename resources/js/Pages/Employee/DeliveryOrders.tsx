@@ -19,6 +19,7 @@ import Button from '@/app/components/ui/Button';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { usePendingCollection, useCollectPayment } from '@/app/hooks/useOrderPayment';
 import { cn } from '@/app/utils/cn';
+import DriverMapView from './DriverMapView';
 
 interface CollectionModalProps {
     order: any;
@@ -202,18 +203,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 // ... (Existing CollectionModal ...)
 
 // Driver Mode Component
-function DriverMode() {
+interface DriverModeProps {
+    onCollectPayment: (order: any) => void;
+}
+
+function DriverMode({ onCollectPayment }: DriverModeProps) {
     const qc = useQueryClient();
     const [subTab, setSubTab] = useState<'my_deliveries' | 'available'>('my_deliveries');
+    const [viewType, setViewType] = useState<'list' | 'map'>('list');
 
     const { data, isLoading } = useQuery<{ my_deliveries: any[], available_deliveries: any[] }>({
         queryKey: ['driver.orders'],
-        queryFn: () => apiGet('/api/employee/driver/orders'),
+        queryFn: () => apiGet('/employee/driver/orders'),
         refetchInterval: 15000 // Poll every 15s for new orders
     });
 
     const claimMutation = useMutation({
-        mutationFn: (orderId: number) => apiPost(`/api/employee/driver/orders/${orderId}/claim`, {}),
+        mutationFn: (orderId: number) => apiPost(`/employee/driver/orders/${orderId}/claim`, {}),
         onSuccess: () => {
             toastSuccess('Order claimed!');
             qc.invalidateQueries({ queryKey: ['driver.orders'] });
@@ -222,7 +228,7 @@ function DriverMode() {
     });
 
     const statusMutation = useMutation({
-        mutationFn: (vars: { id: number, status: string }) => apiPut(`/api/employee/driver/orders/${vars.id}/status`, { status: vars.status }),
+        mutationFn: (vars: { id: number, status: string }) => apiPut(`/employee/driver/orders/${vars.id}/status`, { status: vars.status }),
         onSuccess: () => {
             toastSuccess('Status updated!');
             qc.invalidateQueries({ queryKey: ['driver.orders'] });
@@ -241,28 +247,77 @@ function DriverMode() {
         }
     };
 
+    const handleComplete = (order: any) => {
+        // limit logic to pay_on_delivery or pay_on_pickup AND unpaid
+        const needsPayment = order.payment_status === 'unpaid' &&
+            ['pay_on_delivery', 'pay_on_pickup', 'cod'].includes(order.payment_mode);
+
+        if (needsPayment) {
+            onCollectPayment(order);
+        } else {
+            if (confirm('Complete this delivery?')) {
+                statusMutation.mutate({ id: order.id, status: 'delivered' });
+            }
+        }
+    };
+
     const orders = subTab === 'my_deliveries' ? data?.my_deliveries : data?.available_deliveries;
 
+    // If map view selected, render DriverMapView
+    if (viewType === 'map') {
+        return (
+            <div className="space-y-4">
+                {/* View Toggle */}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setViewType('list')}
+                        className={cn(
+                            "px-4 py-2 rounded-md text-sm font-medium transition-all",
+                            "text-gray-400 hover:text-white hover:bg-white/5"
+                        )}
+                    >
+                        ← Back to List
+                    </button>
+                </div>
+
+                <DriverMapView onCollectPayment={onCollectPayment} />
+            </div>
+        );
+    }
+
+    // List View
     return (
         <div className="space-y-4">
-            <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 w-fit">
+            {/* Tabs + View Toggle */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 w-fit">
+                    <button
+                        onClick={() => setSubTab('my_deliveries')}
+                        className={cn(
+                            "px-4 py-2 rounded-md text-sm font-medium transition-all",
+                            subTab === 'my_deliveries' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
+                        )}
+                    >
+                        My Active Deliveries
+                    </button>
+                    <button
+                        onClick={() => setSubTab('available')}
+                        className={cn(
+                            "px-4 py-2 rounded-md text-sm font-medium transition-all",
+                            subTab === 'available' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
+                        )}
+                    >
+                        Available to Claim
+                    </button>
+                </div>
+
+                {/* View Type Toggle */}
                 <button
-                    onClick={() => setSubTab('my_deliveries')}
-                    className={cn(
-                        "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                        subTab === 'my_deliveries' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
-                    )}
+                    onClick={() => setViewType('map')}
+                    className="px-4 py-2 rounded-md text-sm font-medium bg-purple-600 hover:bg-purple-500 text-white transition-all flex items-center gap-2"
                 >
-                    My Active Deliveries
-                </button>
-                <button
-                    onClick={() => setSubTab('available')}
-                    className={cn(
-                        "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                        subTab === 'available' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
-                    )}
-                >
-                    Available to Claim
+                    <MapPin className="w-4 h-4" />
+                    Map View
                 </button>
             </div>
 
@@ -307,6 +362,13 @@ function DriverMode() {
                                         <Phone className="w-4 h-4 text-gray-500" />
                                         <span>{order.customer_phone || "No phone"}</span>
                                     </div>
+                                    {/* Show Payment Status */}
+                                    <div className="flex items-center gap-2 text-gray-300">
+                                        <Banknote className="w-4 h-4 text-gray-500" />
+                                        <span className={order.payment_status === 'paid' ? 'text-green-400' : 'text-orange-400'}>
+                                            {order.payment_status?.toUpperCase() || 'UNPAID'}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {subTab === 'available' ? (
@@ -337,7 +399,7 @@ function DriverMode() {
                                         ) : order.status === 'out_for_delivery' ? (
                                             <Button
                                                 className="flex-1 bg-green-600 hover:bg-green-500"
-                                                onClick={() => statusMutation.mutate({ id: order.id, status: 'delivered' })}
+                                                onClick={() => handleComplete(order)}
                                                 disabled={statusMutation.isPending}
                                             >
                                                 Complete
@@ -355,6 +417,7 @@ function DriverMode() {
 }
 
 export default function DeliveryOrders() {
+    const qc = useQueryClient();
     const [viewMode, setViewMode] = useState<'collection' | 'driver'>('collection');
 
     // Existing collection logic
@@ -364,6 +427,7 @@ export default function DeliveryOrders() {
     const handleSuccess = () => {
         setSelectedOrder(null);
         refetch();
+        qc.invalidateQueries({ queryKey: ['driver.orders'] });
     };
 
     return (
@@ -405,7 +469,7 @@ export default function DeliveryOrders() {
                 </div>
 
                 {viewMode === 'driver' ? (
-                    <DriverMode />
+                    <DriverMode onCollectPayment={setSelectedOrder} />
                 ) : (
                     <>
                         {/* Existing Collection Grid */}

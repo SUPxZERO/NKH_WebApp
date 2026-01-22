@@ -63,6 +63,12 @@ class Order extends Model
         'payment_collected_at' => 'datetime',
     ];
 
+    /**
+     * Append virtual attributes to JSON/array output.
+     * These accessors provide backward-compatible string codes.
+     */
+    protected $appends = ['order_type_code', 'status_code'];
+
     public function location()
     {
         return $this->belongsTo(Location::class);
@@ -99,18 +105,56 @@ class Order extends Model
     }
 
     // ==================== ACCESSORS (Backward Compatibility) ====================
+    // IMPORTANT: These are named *_code to avoid shadowing the relationship methods.
+    // Use $order->order_type_code and $order->status_code to get string codes.
+    // Use $order->orderType and $order->orderStatus to get the related models.
 
-    public function getStatusAttribute($value)
+    /**
+     * Get order type code string (e.g., 'delivery', 'pickup', 'dine_in').
+     * Access via: $order->order_type_code
+     */
+    public function getOrderTypeCodeAttribute(): string
     {
-        // If the column still exists and has value, return it (during migration transition)
-        if ($value !== null) return $value;
+        return $this->orderType?->code ?? 'dine_in';
+    }
+
+    /**
+     * Get order status code string (e.g., 'pending', 'preparing', 'ready').
+     * Access via: $order->status_code
+     */
+    public function getStatusCodeAttribute(): string
+    {
         return $this->orderStatus?->code ?? 'pending';
     }
 
-    public function getOrderTypeAttribute($value)
+    /**
+     * Legacy Accessor: Get status code.
+     * Fixes usage of $order->status in Resources and frontend.
+     */
+    public function getStatusAttribute(): string
     {
-        if ($value !== null) return $value;
-        return $this->orderType?->code ?? 'dine_in';
+        return $this->getStatusCodeAttribute();
+    }
+
+    /**
+     * Legacy Mutator: Set status code.
+     * Maps $order->status = 'code' to order_status_id.
+     * Fixes "Unknown column 'status'" errors during update.
+     */
+    public function setStatusAttribute($value)
+    {
+        if ($value) {
+            // optimized: cache statuses or just lookup?
+            // Static cache might be overkill, just look up.
+            $status = \App\Models\OrderStatus::where('code', $value)->first();
+            if ($status) {
+                $this->attributes['order_status_id'] = $status->id;
+            } else { 
+                // Fallback for non-existent status? Or just ignore? 
+                // Ignoring might fail silently. But usually codes are valid.
+                \Log::warning("Attempted to set invalid status code: $value");
+            }
+        }
     }
 
     public function items()

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Customer;
@@ -25,7 +27,7 @@ class OrderCalculationService
             $menuItem = MenuItem::findOrFail($item['menu_item_id']);
             $qty = $item['quantity'];
             $lineTotal = (float) $menuItem->price * $qty;
-            
+
             $orderItemsData[] = [
                 'menu_item_id' => $menuItem->id,
                 'quantity' => $qty,
@@ -36,7 +38,7 @@ class OrderCalculationService
                 'status' => 'pending',
                 'special_instructions' => $item['special_instructions'] ?? null,
             ];
-            
+
             $subtotal += $lineTotal;
         }
 
@@ -62,7 +64,7 @@ class OrderCalculationService
         $taxRate = $this->getTaxRate($locationId);
         $taxableBase = max(0, $subtotal - $discountAmount);
         $taxAmount = round($taxableBase * $taxRate, 2);
-        
+
         $serviceCharge = 0; // TODO: Fetch from settings if needed
 
         $totalAmount = $taxableBase + $taxAmount + $serviceCharge + $deliveryFee;
@@ -85,27 +87,27 @@ class OrderCalculationService
     public function recalculateOrder(Order $order): Order
     {
         $order->loadMissing('items');
-        
+
         $subtotal = $order->items->sum(function ($i) {
-             // Ensure we use the latest pricing logic or keep existing? 
-             // Ideally we should re-fetch unit prices if status is still draft, but usually we respect existing lines.
-             // For simplicity, sum the total_price which should be kept up to date by line item updates.
-             return (float) $i->total_price;
+            // Ensure we use the latest pricing logic or keep existing? 
+            // Ideally we should re-fetch unit prices if status is still draft, but usually we respect existing lines.
+            // For simplicity, sum the total_price which should be kept up to date by line item updates.
+            return (float) $i->total_price;
         });
 
         // For existing orders, we might want to preserve the delivery fee unless explicitly changed
         // But for tax/service charge, we might want to re-evaluate.
-        
+
         // Simpler implementation mimicking OrderController logic but centralized
         $taxRate = $this->getTaxRate($order->location_id);
-        
+
         // Re-evaluate discount if promotion exists? 
         // Logic might be complex if promotion expired. Let's keep existing discount unless recalculated explicitly.
-        $discountAmount = $order->discount_amount; 
+        $discountAmount = $order->discount_amount;
 
         $taxableBase = max(0, $subtotal - $discountAmount);
         $taxAmount = round($taxableBase * $taxRate, 2);
-        
+
         $totalAmount = $taxableBase + $taxAmount + $order->service_charge + $order->delivery_fee;
 
         $order->update([
@@ -113,13 +115,14 @@ class OrderCalculationService
             'tax_amount' => $taxAmount,
             'total_amount' => $totalAmount,
         ]);
-        
+
         return $order;
     }
 
     public function applyPromotion(?string $code, ?Customer $customer, float $subtotal, int $locationId): array
     {
-        if (!$code) return [0.0, null];
+        if (!$code)
+            return [0.0, null];
 
         $promotion = Promotion::query()
             ->where('code', $code)
@@ -138,21 +141,21 @@ class OrderCalculationService
         if (!$promotion) {
             throw ValidationException::withMessages(['promotion_code' => 'Invalid or expired promotion code.']);
         }
-        
+
         if (!is_null($promotion->min_order_amount) && $subtotal < (float) $promotion->min_order_amount) {
-             throw ValidationException::withMessages(['promotion_code' => 'Order does not meet the minimum amount for this promotion.']);
+            throw ValidationException::withMessages(['promotion_code' => 'Order does not meet the minimum amount for this promotion.']);
         }
 
         // Check limits
         if (!is_null($promotion->usage_limit)) {
             if (Order::where('promotion_id', $promotion->id)->count() >= $promotion->usage_limit) {
-                 throw ValidationException::withMessages(['promotion_code' => 'This promotion has reached its usage limit.']);
+                throw ValidationException::withMessages(['promotion_code' => 'This promotion has reached its usage limit.']);
             }
         }
-        
+
         if ($customer && !is_null($promotion->per_customer_limit)) {
             if (Order::where('promotion_id', $promotion->id)->where('customer_id', $customer->id)->count() >= $promotion->per_customer_limit) {
-                 throw ValidationException::withMessages(['promotion_code' => 'You have already used this promotion the maximum number of times.']);
+                throw ValidationException::withMessages(['promotion_code' => 'You have already used this promotion the maximum number of times.']);
             }
         }
 

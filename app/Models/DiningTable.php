@@ -196,8 +196,14 @@ class DiningTable extends Model
      */
     public function hasActiveSession(): bool
     {
-        // return $this->activeSessions()->exists();
-        return false;
+        return \App\Models\TableSession::query()
+            ->where('table_id', $this->id)
+            ->whereIn('status', [
+                \App\Models\TableSession::STATUS_ACTIVE,
+                \App\Models\TableSession::STATUS_ORDERING,
+                \App\Models\TableSession::STATUS_PAYMENT_PENDING,
+            ])
+            ->exists();
     }
 
     /**
@@ -206,7 +212,12 @@ class DiningTable extends Model
     public function hasActiveOrders(): bool
     {
         return $this->orders()
-            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->where(function ($q) {
+                $q->whereNull('order_status_id')
+                    ->orWhereHas('orderStatus', function ($sq) {
+                        $sq->whereNotIn('code', ['completed', 'cancelled']);
+                    });
+            })
             ->exists();
     }
 

@@ -231,7 +231,7 @@ export default function StockAlerts() {
                     <div className="absolute bottom-20 left-10 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl opacity-50" />
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto space-y-4 sm:space-y-6">
+                <div className="relative z-10 w-full mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}

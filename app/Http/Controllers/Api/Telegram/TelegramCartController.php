@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Telegram;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Models\TelegramUser;
 use App\Services\Telegram\TelegramCartSessionManager;
 use Illuminate\Http\JsonResponse;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 
 class TelegramCartController extends Controller
 {
+    use ApiResponse;
     /**
      * Get cart contents
      */

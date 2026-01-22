@@ -239,14 +239,14 @@ export default function PurchaseOrders() {
 
     return (
         <AdminLayout>
-            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 transition-colors relative overflow-x-hidden">
+            <div className="min-h-screen w-full bg-background p-3 sm:p-4 md:p-6 transition-colors relative overflow-x-hidden">
                 {/* Decorative Background - Hidden on mobile */}
                 <div className="fixed inset-0 overflow-hidden pointer-events-none hidden sm:block">
                     <div className="absolute top-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl opacity-50" />
                     <div className="absolute bottom-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl opacity-50" />
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto space-y-4 sm:space-y-6">
+                <div className="relative z-10 w-full mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
                     <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">

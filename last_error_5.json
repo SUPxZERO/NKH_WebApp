@@ -1,0 +1,1 @@
+{"success":false,"error":"Failed to initiate split payment: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'where clause' (Connection: mysql, SQL: select sum(`amount`) as aggregate from `payments` where `payments`.`invoice_id` = 12 and `payments`.`invoice_id` is not null and `status` = completed)"}

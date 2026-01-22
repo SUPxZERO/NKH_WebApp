@@ -138,7 +138,7 @@ class ReceiptService
             
             // Order Info
             'order_number' => $order?->order_number,
-            'order_type' => $order?->order_type,
+            'order_type' => $order?->order_type_code,
             'table_number' => $order?->table?->table_number,
             
             // Customer Info

@@ -231,14 +231,14 @@ class TelegramAdminService
         }
 
         $statusIcon = $this->getStatusIcon($order->status);
-        $typeIcon = $order->order_type === 'delivery' ? '🚗' : '🏪';
+        $typeIcon = $order->order_type_code === 'delivery' ? '🚗' : '🏪';
 
         $message = "📋 Order #{$order->order_number}\n";
         $message .= "━━━━━━━━━━━━━━━━━━━\n\n";
 
         // Status and type
         $message .= "{$statusIcon} Status: {$order->status}\n";
-        $message .= "{$typeIcon} Type: " . ucfirst($order->order_type) . "\n\n";
+        $message .= "{$typeIcon} Type: " . ucfirst($order->order_type_code) . "\n\n";
 
         // Customer info
         $customerName = $order->customer->name ?? 'N/A';

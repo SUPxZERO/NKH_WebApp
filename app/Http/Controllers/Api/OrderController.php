@@ -17,6 +17,7 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Services\TableStatusService;
 use App\Services\InvoiceService;
 use App\Services\LoyaltyService;
 use App\Services\NotificationService;
@@ -63,9 +64,7 @@ class OrderController extends Controller
                 abort(404, 'Table not found.');
             }
 
-            if ($table->status !== 'available') {
-                abort(409, 'Table is currently occupied.');
-            }
+            app(TableStatusService::class)->occupyForStaff($table, $employee->user_id);
             $isEmployeeOrder = !empty($employee->id);
 
             $order = Order::create([
@@ -86,9 +85,6 @@ class OrderController extends Controller
             // Set status using helper
             $order->setStatus($isEmployeeOrder ? 'received' : 'pending');
             $order->save();
-
-            // Mark table as occupied
-            $table->update(['status' => 'occupied']);
 
             return $order;
         });
@@ -217,17 +213,7 @@ class OrderController extends Controller
 
             // Close order & free table only when fully paid (Controller specific logic)
             // Re-fetch invoice status
-            if ($order->invoice->amount_due <= 0) {
-                // NOTE: status is guarded - must use direct assignment
-                //$order->status = 'completed';
-                $order->setStatus('completed');
-                $order->completed_at = now();
-                $order->save();
-
-                if ($order->table) {
-                    $order->table->update(['status' => 'available']);
-                }
-            }
+            app(TableStatusService::class)->completeAndReleaseAfterPayment($order, $request->user()->id);
         });
 
         return new OrderResource($order->fresh()->load(['items.menuItem', 'invoice']));
@@ -277,8 +263,11 @@ class OrderController extends Controller
         }
         
         // Filter by order type (frontend sends ?type=)
-        if ($request->has('type') && $request->type !== 'all') {
-            $query->where('order_type', $request->type);
+        if ($request->filled('type')) {
+            $type = $request->type;
+            $query->whereHas('orderType', function ($q) use ($type) {
+                $q->where('code', $type);
+            });
         }
         
         // Search by order number or customer name/email

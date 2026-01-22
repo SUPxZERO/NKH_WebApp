@@ -74,10 +74,10 @@ return [
     'default_currency' => env('PAYMENT_DEFAULT_CURRENCY', 'USD'),
     'supported_currencies' => ['USD', 'KHR'],
     'khr_exchange_rate' => env('PAYMENT_KHR_EXCHANGE_RATE', 4100), // USD to KHR
-    
+
     // QR Code expiration in minutes
     'qr_expiration_minutes' => env('PAYMENT_QR_EXPIRATION_MINUTES', 15),
-    
+
     // Webhook secret for verifying payment callbacks
     'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET'),
 
@@ -97,7 +97,7 @@ return [
         'phone' => env('RECEIPT_PHONE', ''),
         'thank_you' => env('RECEIPT_THANK_YOU', 'Thank you for dining with us!'),
         'footer' => env('RECEIPT_FOOTER', 'Please come again'),
-        
+
         // Auto-send email receipt on payment complete
         'auto_email' => env('RECEIPT_AUTO_EMAIL', false),
     ],
@@ -129,7 +129,7 @@ return [
     'monitoring' => [
         // Failure rate threshold to trigger alerts (percentage)
         'failure_threshold' => env('PAYMENT_FAILURE_THRESHOLD', 10),
-        
+
         // Minimum payments before monitoring kicks in
         'min_payments_for_alert' => 10,
     ],
@@ -143,12 +143,12 @@ return [
     |
     */
     'security' => [
-        // Enforce webhook signature verification (auto-enabled in production)
-        'enforce_webhook_verification' => env('PAYMENT_ENFORCE_WEBHOOK_VERIFICATION', false),
-        
+        // Enforce webhook signature verification in all environments
+        'enforce_webhook_verification' => env('PAYMENT_ENFORCE_WEBHOOK_VERIFICATION', true),
+
         // Enable idempotency key checking
         'idempotency_enabled' => env('PAYMENT_IDEMPOTENCY_ENABLED', true),
-        
+
         // Max payment age before considered suspicious (hours)
         'max_pending_age_hours' => 24,
     ],

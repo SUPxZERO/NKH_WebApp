@@ -63,7 +63,7 @@ Route::get('/health', function () {
 
 // DEBUG: Session and Auth diagnostic endpoint (only available in local/testing)
 if (app()->environment(['local', 'testing'])) {
-    Route::get('/debug-auth', function (\Illuminate\Http\Request $request) {
+    Route::get('/debug-auth', function (Request $request) {
         return response()->json([
             'auth_check' => auth()->check(),
             'user_id' => auth()->id(),
@@ -106,7 +106,7 @@ Route::middleware(['throttle.api:auth', 'account.lockout'])->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/auth/refresh', [\App\Http\Controllers\Api\RefreshTokenController::class, 'refresh']);
     Route::post('/auth/revoke-all', [\App\Http\Controllers\Api\RefreshTokenController::class, 'revokeAll']);
-    
+
     // MFA endpoints
     Route::prefix('auth/mfa')->group(function () {
         Route::get('/status', [\App\Http\Controllers\Api\MfaController::class, 'status']);
@@ -153,7 +153,7 @@ Route::prefix('payments')->group(function () {
         ->middleware('payment.rate:status');
     Route::post('/{payment}/cancel', [\App\Http\Controllers\Api\PaymentController::class, 'cancel'])
         ->middleware('payment.rate:default');
-    
+
     // Split Payment Routes (Sprint P7)
     Route::prefix('split')->group(function () {
         Route::get('/{order}/status', [\App\Http\Controllers\Api\SplitPaymentController::class, 'status']);
@@ -162,7 +162,7 @@ Route::prefix('payments')->group(function () {
         Route::post('/{order}/cancel/{payment}', [\App\Http\Controllers\Api\SplitPaymentController::class, 'cancelPayment']);
         Route::post('/{order}/complete', [\App\Http\Controllers\Api\SplitPaymentController::class, 'complete']);
     });
-    
+
     // Development/testing only routes
     Route::post('/{payment}/simulate-success', [\App\Http\Controllers\Api\PaymentController::class, 'simulateSuccess'])
         ->middleware('payment.rate:simulate');
@@ -190,25 +190,26 @@ Route::prefix('orders')->group(function () {
 Route::prefix('orders')->group(function () {
     // Get order payment status
     Route::get('/{order}/payment-status', [\App\Http\Controllers\Api\OrderPaymentController::class, 'paymentStatus']);
-    
+
     // Update payment mode for an order
     Route::post('/{order}/payment-mode', [\App\Http\Controllers\Api\OrderPaymentController::class, 'updatePaymentMode']);
-    
+
     // Collect payment (for delivery drivers/staff)
     Route::post('/{order}/collect-payment', [\App\Http\Controllers\Api\OrderPaymentController::class, 'collectPayment']);
-    
+
     // Orders pending payment collection
     Route::get('/pending-collection', [\App\Http\Controllers\Api\OrderPaymentController::class, 'pendingCollection']);
-    
+
     // POS Active Orders
     Route::get('/pos/active', [\App\Http\Controllers\Api\OrderPaymentController::class, 'activeOrders']);
 });
 
 // POS Quick Pay (for employees)
 Route::prefix('pos')
+    ->middleware(['auth:sanctum', 'role:admin,manager,cashier,employee,super-admin'])
     ->group(function () {
-    Route::post('/orders/{order}/quick-pay', [\App\Http\Controllers\Api\OrderPaymentController::class, 'quickPay']);
-});
+        Route::post('/orders/{order}/quick-pay', [\App\Http\Controllers\Api\OrderPaymentController::class, 'quickPay']);
+    });
 
 
 // Public reference data
@@ -225,9 +226,9 @@ Route::prefix('webhooks')->group(function () {
 Route::get('/timeslots', [TimeSlotController::class, 'index']);
 Route::get('/timeslots/stats', [TimeSlotController::class, 'stats']);
 Route::post('/timeslots/regenerate', [TimeSlotController::class, 'regenerate'])
-->middleware('auth');
+    ->middleware('auth');
 Route::post('/timeslots/cleanup', [TimeSlotController::class, 'cleanup'])
-->middleware('auth');
+    ->middleware('auth');
 
 
 // Poll Helper for Smart Polling
@@ -264,9 +265,9 @@ if (app()->environment(['local', 'testing'])) {
 
 
 Route::get('/user', [AuthController::class, 'me'])
-->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
+    ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 Route::post('/logout', [AuthController::class, 'logout'])
-->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
+    ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum']);
 
 // Admin routes - always need session for user() to work, auth is optional in local
 // SECURITY: Admin routes ALWAYS require authentication
@@ -290,7 +291,7 @@ Route::prefix('admin')
 
 // Kitchen Display System Routes
 Route::prefix('kitchen')
-    ->middleware(['auth:sanctum', 'role:admin,manager,chef,employee,super-admin']) 
+    ->middleware(['auth:sanctum', 'role:admin,manager,chef,employee,super-admin'])
     ->group(function () {
         Route::get('orders', [\App\Http\Controllers\Api\KitchenController::class, 'index']);
         Route::put('orders/{order}/status', [\App\Http\Controllers\Api\KitchenController::class, 'updateStatus']);
@@ -298,29 +299,29 @@ Route::prefix('kitchen')
 
 // In-store operations for staff (Employee)
 Route::prefix('employee')
-->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter,employee,chef,cashier,driver'])
-->group(function () {
-    // POS menu
-    Route::get('menu', [MenuItemController::class, 'index']);
-    // POS Orders (dine-in, auto-approved)
-    Route::post('orders', [OrderController::class, 'store']);
-    Route::get('orders/{order}', [OrderController::class, 'show']);
-    Route::post('orders/{order}/items', [OrderController::class, 'addItem']);
-    Route::put('order-items/{orderItem}', [OrderController::class, 'updateItem']);
-    
-    // Employee Dashboard
-    Route::get('dashboard/stats', [\App\Http\Controllers\Api\EmployeeDashboardController::class, 'stats']);
+    ->middleware([\Illuminate\Session\Middleware\StartSession::class, 'auth:sanctum', 'role:admin,manager,waiter,employee,chef,cashier,driver'])
+    ->group(function () {
+        // POS menu
+        Route::get('menu', [MenuItemController::class, 'index']);
+        // POS Orders (dine-in, auto-approved)
+        Route::post('orders', [OrderController::class, 'store']);
+        Route::get('orders/{order}', [OrderController::class, 'show']);
+        Route::post('orders/{order}/items', [OrderController::class, 'addItem']);
+        Route::put('order-items/{orderItem}', [OrderController::class, 'updateItem']);
 
-    // Employee Schedule
-    Route::get('shifts', [EmployeeScheduleController::class, 'shifts']);
-    Route::get('shifts/{id}', [EmployeeScheduleController::class, 'showShift']);
-    
-    // Cash Payment Management
-    Route::get('payments/pending-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'pendingCashPayments']);
-    Route::post('payments/{payment}/confirm-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'confirmCashPayment']);
-    Route::post('payments/{payment}/reject-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'rejectCashPayment']);
-    Route::get('payments/cash-stats', [\App\Http\Controllers\Api\CashPaymentController::class, 'cashStats']);
-});
+        // Employee Dashboard
+        Route::get('dashboard/stats', [\App\Http\Controllers\Api\EmployeeDashboardController::class, 'stats']);
+
+        // Employee Schedule
+        Route::get('shifts', [EmployeeScheduleController::class, 'shifts']);
+        Route::get('shifts/{id}', [EmployeeScheduleController::class, 'showShift']);
+
+        // Cash Payment Management
+        Route::get('payments/pending-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'pendingCashPayments']);
+        Route::post('payments/{payment}/confirm-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'confirmCashPayment']);
+        Route::post('payments/{payment}/reject-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'rejectCashPayment']);
+        Route::get('payments/cash-stats', [\App\Http\Controllers\Api\CashPaymentController::class, 'cashStats']);
+    });
 
 // Customer Dashboard Routes - MOVED TO WEB.PHP to share session state
 // See routes/web.php for 'api/customer' routes
@@ -341,150 +342,163 @@ Route::prefix('order-holds')
 Route::prefix('customer')
     ->middleware(['auth.customer'])
     ->group(function () {
-    // Profile & Dashboard
-    Route::get('profile', [App\Http\Controllers\Api\CustomerDashboardController::class, 'profile']);
-    Route::put('profile', [App\Http\Controllers\Api\CustomerController::class, 'updateProfile']);
-    Route::get('dashboard/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'dashboardStats']);
-    
-    // Orders
-    Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
-    Route::get('orders/{order}', [App\Http\Controllers\Api\CustomerDashboardController::class, 'show']);
-    Route::post('orders/{order}/reorder', [App\Http\Controllers\Api\CustomerDashboardController::class, 'reorder']);
-    Route::post('orders/{order}/cancel', [App\Http\Controllers\Api\CustomerDashboardController::class, 'cancel']);
+        // Profile & Dashboard
+        Route::get('profile', [App\Http\Controllers\Api\CustomerDashboardController::class, 'profile']);
+        Route::put('profile', [App\Http\Controllers\Api\CustomerController::class, 'updateProfile']);
+        Route::get('dashboard/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'dashboardStats']);
 
-    Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store']);
+        // Orders
+        Route::get('orders', [App\Http\Controllers\Api\CustomerDashboardController::class, 'orders']);
+        Route::get('orders/{order}', [App\Http\Controllers\Api\CustomerDashboardController::class, 'show']);
+        Route::post('orders/{order}/reorder', [App\Http\Controllers\Api\CustomerDashboardController::class, 'reorder']);
+        Route::post('orders/{order}/cancel', [App\Http\Controllers\Api\CustomerDashboardController::class, 'cancel'])
+            ->middleware('throttle:sensitive');
 
-    // Favorites
-    Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);
-    Route::get('favorites/ids', [App\Http\Controllers\Api\CustomerDashboardController::class, 'getExplicitFavorites']);
-    Route::post('favorites/toggle', [App\Http\Controllers\Api\CustomerDashboardController::class, 'toggleFavorite']);
-    
-    // Notifications
-    Route::get('notifications', [App\Http\Controllers\Api\CustomerDashboardController::class, 'notifications']);
+        Route::post('online-orders', [App\Http\Controllers\Api\OnlineOrderController::class, 'store']);
 
-    // Loyalty
-    Route::get('loyalty/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'loyaltyStats']);
-    Route::get('loyalty/history', [App\Http\Controllers\Api\CustomerDashboardController::class, 'loyaltyHistory']);
+        // Favorites
+        Route::get('favorites', [App\Http\Controllers\Api\CustomerDashboardController::class, 'favorites']);
+        Route::get('favorites/ids', [App\Http\Controllers\Api\CustomerDashboardController::class, 'getExplicitFavorites']);
+        Route::post('favorites/toggle', [App\Http\Controllers\Api\CustomerDashboardController::class, 'toggleFavorite']);
 
-    // CRM Data
-    Route::get('stats', [App\Http\Controllers\Api\CustomerController::class, 'customerStats']);
-    Route::get('history', [App\Http\Controllers\Api\CustomerController::class, 'customerHistory']);
-    
-    // Address Management
-    Route::get('addresses', [App\Http\Controllers\Api\CustomerController::class, 'getAddresses']);
-    Route::post('addresses', [App\Http\Controllers\Api\CustomerController::class, 'storeAddress']);
-    Route::put('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'updateAddress']);
-    Route::delete('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'destroyAddress']);
-    Route::post('addresses/{address}/set-default', [App\Http\Controllers\Api\CustomerController::class, 'setDefaultAddress']);
-    
-    // Cart
-    Route::get('cart', [App\Http\Controllers\Api\CartController::class, 'index']);
-    Route::post('cart', [App\Http\Controllers\Api\CartController::class, 'store']);
-    Route::put('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'update']);
-    Route::delete('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
-    Route::delete('cart', [App\Http\Controllers\Api\CartController::class, 'clear']);
-    Route::post('cart/sync', [App\Http\Controllers\Api\CartController::class, 'sync']);
-    
-    // Reservations
-    Route::get('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'index']);
-    Route::post('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'store']);
-    Route::get('reservations/availability', [App\Http\Controllers\Api\CustomerReservationController::class, 'availability']);
-    Route::get('reservations/floors', [App\Http\Controllers\Api\CustomerReservationController::class, 'floors']);
-    Route::get('reservations/tables', [App\Http\Controllers\Api\CustomerReservationController::class, 'tables']);
-    Route::delete('reservations/{reservation}', [App\Http\Controllers\Api\CustomerReservationController::class, 'destroy']);
-    
-    // Rewards
-    Route::get('rewards', [App\Http\Controllers\Api\RewardController::class, 'index']);
-    Route::post('rewards/redeem', [App\Http\Controllers\Api\RewardController::class, 'redeem']);
-    Route::get('rewards/history', [App\Http\Controllers\Api\RewardController::class, 'history']);
-    
-    // Notification Preferences
-    Route::get('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
-    Route::put('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
-    Route::post('notification-preferences/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
-    Route::post('notification-preferences/disable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'disableAll']);
-    Route::post('notification-preferences/enable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'enableAll']);
-    
-    // User Settings (for customer portal)
-    Route::get('settings', [App\Http\Controllers\Api\UserSettingsController::class, 'show']);
-    Route::put('settings', [App\Http\Controllers\Api\UserSettingsController::class, 'update']);
-    Route::put('settings/notifications', [App\Http\Controllers\Api\UserSettingsController::class, 'updateNotifications']);
-    Route::put('settings/privacy', [App\Http\Controllers\Api\UserSettingsController::class, 'updatePrivacy']);
-    Route::put('settings/theme', [App\Http\Controllers\Api\UserSettingsController::class, 'updateTheme']);
-    Route::put('settings/language', [App\Http\Controllers\Api\UserSettingsController::class, 'updateLanguage']);
-    Route::post('change-password', [App\Http\Controllers\Api\UserSettingsController::class, 'changePassword']);
-    Route::put('phone', [App\Http\Controllers\Api\UserSettingsController::class, 'updatePhone']);
-    
-    // Profile Avatar (supports both Auth and Telegram guests - Sprint P15)
-    Route::get('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
-    Route::post('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar']);
-    Route::delete('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
-});
+        // Notifications
+        Route::get('notifications', [App\Http\Controllers\Api\CustomerDashboardController::class, 'notifications']);
+
+        // Loyalty
+        Route::get('loyalty/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'loyaltyStats']);
+        Route::get('loyalty/history', [App\Http\Controllers\Api\CustomerDashboardController::class, 'loyaltyHistory']);
+
+        // CRM Data
+        Route::get('stats', [App\Http\Controllers\Api\CustomerController::class, 'customerStats']);
+        Route::get('history', [App\Http\Controllers\Api\CustomerController::class, 'customerHistory']);
+
+        // Address Management
+        Route::get('addresses', [App\Http\Controllers\Api\CustomerController::class, 'getAddresses']);
+        Route::post('addresses', [App\Http\Controllers\Api\CustomerController::class, 'storeAddress'])
+            ->middleware('throttle:sensitive');
+        Route::put('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'updateAddress'])
+            ->middleware('throttle:sensitive');
+        Route::delete('addresses/{address}', [App\Http\Controllers\Api\CustomerController::class, 'destroyAddress']);
+        Route::post('addresses/{address}/set-default', [App\Http\Controllers\Api\CustomerController::class, 'setDefaultAddress']);
+
+        // Cart
+        Route::get('cart', [App\Http\Controllers\Api\CartController::class, 'index']);
+        Route::post('cart', [App\Http\Controllers\Api\CartController::class, 'store']);
+        Route::put('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'update']);
+        Route::delete('cart/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
+        Route::delete('cart', [App\Http\Controllers\Api\CartController::class, 'clear']);
+        Route::post('cart/sync', [App\Http\Controllers\Api\CartController::class, 'sync']);
+
+        // Reservations
+        Route::get('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'index']);
+        Route::post('reservations', [App\Http\Controllers\Api\CustomerReservationController::class, 'store']);
+        Route::get('reservations/availability', [App\Http\Controllers\Api\CustomerReservationController::class, 'availability']);
+        Route::get('reservations/floors', [App\Http\Controllers\Api\CustomerReservationController::class, 'floors']);
+        Route::get('reservations/tables', [App\Http\Controllers\Api\CustomerReservationController::class, 'tables']);
+        Route::delete('reservations/{reservation}', [App\Http\Controllers\Api\CustomerReservationController::class, 'destroy']);
+
+        // Rewards
+        Route::get('rewards', [App\Http\Controllers\Api\RewardController::class, 'index']);
+        Route::post('rewards/redeem', [App\Http\Controllers\Api\RewardController::class, 'redeem']);
+        Route::get('rewards/history', [App\Http\Controllers\Api\RewardController::class, 'history']);
+
+        // Notification Preferences
+        Route::get('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
+        Route::put('notification-preferences', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
+        Route::post('notification-preferences/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
+        Route::post('notification-preferences/disable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'disableAll']);
+        Route::post('notification-preferences/enable-all', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'enableAll']);
+
+        // User Settings (for customer portal)
+        Route::get('settings', [App\Http\Controllers\Api\UserSettingsController::class, 'show']);
+        Route::put('settings', [App\Http\Controllers\Api\UserSettingsController::class, 'update']);
+        Route::put('settings/notifications', [App\Http\Controllers\Api\UserSettingsController::class, 'updateNotifications']);
+        Route::put('settings/privacy', [App\Http\Controllers\Api\UserSettingsController::class, 'updatePrivacy']);
+        Route::put('settings/theme', [App\Http\Controllers\Api\UserSettingsController::class, 'updateTheme']);
+        Route::put('settings/language', [App\Http\Controllers\Api\UserSettingsController::class, 'updateLanguage']);
+        Route::post('change-password', [App\Http\Controllers\Api\UserSettingsController::class, 'changePassword']);
+        Route::put('phone', [App\Http\Controllers\Api\UserSettingsController::class, 'updatePhone']);
+
+        // Profile Avatar (supports both Auth and Telegram guests - Sprint P15)
+        Route::get('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
+        Route::post('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar']);
+        Route::delete('avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
+    });
 
 // USER API ROUTES
 Route::prefix('user')
     ->middleware(['auth:sanctum'])
     ->group(function () {
-    Route::put('profile', [App\Http\Controllers\Api\UserProfileController::class, 'update']);
-    Route::post('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar']);
-    Route::delete('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
-    Route::get('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
-    Route::post('change-password', [App\Http\Controllers\Api\UserProfileController::class, 'changePassword']);
-});
+        Route::put('profile', [App\Http\Controllers\Api\UserProfileController::class, 'update']);
+        Route::post('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'uploadAvatar'])
+            ->middleware('throttle:sensitive');
+        Route::delete('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'deleteAvatar']);
+        Route::get('profile/avatar', [App\Http\Controllers\Api\UserProfileController::class, 'getAvatarUrl']);
+        Route::post('change-password', [App\Http\Controllers\Api\UserProfileController::class, 'changePassword'])
+            ->middleware('throttle:sensitive');
+    });
 
 // EMPLOYEE API ROUTES
 Route::prefix('employee')
     ->middleware(['auth:sanctum'])
     ->group(function () {
-    // Dashboard
-    Route::get('dashboard/stats', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'stats']);
-    Route::get('dashboard/shifts', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'upcomingShifts']);
-    Route::get('dashboard/announcements', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'announcements']);
-    
-    // Notifications
-    Route::get('notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
-    Route::get('notifications/unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
-    Route::put('notifications/read-all', [App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
-    Route::put('notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
-    
-    // Settings
-    Route::get('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
-    Route::put('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
-    Route::post('settings/notifications/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
-    Route::get('settings/work-preferences', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'getWorkPreferences']);
-    Route::put('settings/work-preferences', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'updateWorkPreferences']);
-    Route::get('settings/emergency-contact', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'getEmergencyContact']);
-    Route::put('settings/emergency-contact', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'updateEmergencyContact']);
-    
-    // Support & Feedback
-    Route::get('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'index']);
-    Route::post('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'store']);
-    Route::get('support-tickets/{id}', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'show']);
-    Route::post('feedback', [App\Http\Controllers\Api\Employee\EmployeeFeedbackController::class, 'store']);
-    
-    // Performance
-    Route::get('performance', [App\Http\Controllers\Api\Employee\EmployeePerformanceController::class, 'stats']);
-    
-    // Schedule & Shifts
-    Route::get('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'index']);
-    Route::post('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'store']);
-    Route::put('shift-swaps/{id}', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'update']);
-    
-    // Time Off Requests (available to all authenticated employees)
-    Route::get('time-off-requests', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'index']);
-    Route::post('time-off-requests', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'store']);
-    Route::delete('time-off-requests/{id}', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'destroy']);
-    
-    // POS Operations
-    Route::get('pos/tables', [App\Http\Controllers\Api\Employee\EmployeePOSController::class, 'getTables']);
-    Route::post('pos/orders', [App\Http\Controllers\Api\Employee\EmployeePOSController::class, 'store']);
-    
-    // Delivery Driver
-    Route::get('driver/orders', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'index']);
-    Route::post('driver/orders/{order}/claim', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'claim']);
-    Route::put('driver/orders/{order}/status', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'updateStatus']);
+        // Dashboard
+        Route::get('dashboard/stats', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'stats']);
+        Route::get('dashboard/shifts', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'upcomingShifts']);
+        Route::get('dashboard/announcements', [App\Http\Controllers\Api\Employee\EmployeeDashboardController::class, 'announcements']);
 
-});
+        // Notifications
+        Route::get('notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
+        Route::put('notifications/read-all', [App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
+        Route::put('notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+
+        // Settings
+        Route::get('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'index']);
+        Route::put('settings/notifications', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'update']);
+        Route::post('settings/notifications/toggle', [App\Http\Controllers\Api\NotificationPreferenceController::class, 'toggle']);
+        Route::get('settings/work-preferences', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'getWorkPreferences']);
+        Route::put('settings/work-preferences', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'updateWorkPreferences']);
+        Route::get('settings/emergency-contact', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'getEmergencyContact']);
+        Route::put('settings/emergency-contact', [App\Http\Controllers\Api\Employee\EmployeeSettingsController::class, 'updateEmergencyContact']);
+
+        // Support & Feedback
+        Route::get('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'index']);
+        Route::post('support-tickets', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'store']);
+        Route::get('support-tickets/{id}', [App\Http\Controllers\Api\Employee\SupportTicketController::class, 'show']);
+        Route::post('feedback', [App\Http\Controllers\Api\Employee\EmployeeFeedbackController::class, 'store']);
+
+        // Performance
+        Route::get('performance', [App\Http\Controllers\Api\Employee\EmployeePerformanceController::class, 'stats']);
+
+        // Schedule & Shifts
+        Route::get('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'index']);
+        Route::post('shift-swaps', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'store']);
+        Route::put('shift-swaps/{id}', [App\Http\Controllers\Api\Employee\ShiftSwapController::class, 'update']);
+
+        // Time Off Requests (available to all authenticated employees)
+        Route::get('time-off-requests', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'index']);
+        Route::post('time-off-requests', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'store']);
+        Route::delete('time-off-requests/{id}', [App\Http\Controllers\Api\EmployeeTimeOffController::class, 'destroy']);
+
+        // POS Operations
+        Route::get('pos/tables', [App\Http\Controllers\Api\Employee\EmployeePOSController::class, 'getTables']);
+        Route::post('pos/orders', [App\Http\Controllers\Api\Employee\EmployeePOSController::class, 'store']);
+        Route::put('pos/tables/{table}/status', [App\Http\Controllers\Api\TableController::class, 'updateStatus'])
+            ->middleware('permission:tables.manage');
+
+        // Delivery Driver
+        Route::get('driver/orders', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'index']);
+        Route::get('driver/orders/map-data', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'getMapData']);
+        Route::post('driver/orders/{order}/claim', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'claim'])
+            ->middleware('throttle:sensitive');
+        Route::put('driver/orders/{order}/status', [App\Http\Controllers\Api\Employee\DriverOrderController::class, 'updateStatus']);
+
+        // Route Optimization
+        Route::post('driver/orders/optimize-route', [App\Http\Controllers\Api\Employee\RouteOptimizationController::class, 'optimizeRoute']);
+        Route::post('driver/route', [App\Http\Controllers\Api\Employee\RouteOptimizationController::class, 'getRoute']);
+
+    });
 
 
 // ============================================================================
@@ -493,7 +507,7 @@ Route::prefix('employee')
 // Telegram webhook endpoint - no authentication required (verified by secret token)
 Route::post('/telegram/webhook', [App\Http\Controllers\Api\Telegram\TelegramWebhookController::class, 'handle'])
     ->withoutMiddleware([
-        \Illuminate\Session\Middleware\StartSession::class, 
+        \Illuminate\Session\Middleware\StartSession::class,
         'auth:sanctum',
         \App\Http\Middleware\TelegramWebAppAuth::class, // Exclude: webhook uses secret token verification
         \App\Http\Middleware\EncryptCookies::class,
@@ -507,264 +521,250 @@ Route::get('/telegram/test-categories', [App\Http\Controllers\Api\Telegram\Teleg
 if (app()->environment(['local', 'testing'])) {
     // Debug endpoint to check Telegram bot configuration
     Route::get('/telegram/debug', function () {
-    $token = config('telegram.bot_token', env('TELEGRAM_BOT_TOKEN', ''));
-    $hasToken = !empty($token);
-    $tokenPreview = $hasToken ? substr($token, 0, 10) . '...' : 'NOT SET';
-    
-    // Test Telegram Connection
-    $telegramStatus = 'SKIPPED';
-    $telegramInfo = null;
-    $telegramError = null;
-    
-    if ($hasToken) {
-        try {
-            $response = \Illuminate\Support\Facades\Http::timeout(5)->get("https://api.telegram.org/bot{$token}/getMe");
-            if ($response->successful()) {
-                $telegramStatus = 'OK';
-                $telegramInfo = $response->json('result');
-            } else {
-                $telegramStatus = 'FAILED';
-                $telegramError = $response->body();
+        $token = config('telegram.bot_token', env('TELEGRAM_BOT_TOKEN', ''));
+        $hasToken = !empty($token);
+        $tokenPreview = $hasToken ? substr($token, 0, 10) . '...' : 'NOT SET';
+
+        // Test Telegram Connection
+        $telegramStatus = 'SKIPPED';
+        $telegramInfo = null;
+        $telegramError = null;
+
+        if ($hasToken) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(5)->get("https://api.telegram.org/bot{$token}/getMe");
+                if ($response->successful()) {
+                    $telegramStatus = 'OK';
+                    $telegramInfo = $response->json('result');
+                } else {
+                    $telegramStatus = 'FAILED';
+                    $telegramError = $response->body();
+                }
+            } catch (\Exception $e) {
+                $telegramStatus = 'ERROR';
+                $telegramError = $e->getMessage();
             }
+        }
+
+        // Test Database
+        $dbStatus = 'UNKNOWN';
+        $tables = [];
+        try {
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+            $dbStatus = 'CONNECTED';
+
+            // Check for key tables
+            $tables['telegram_users'] = \Illuminate\Support\Facades\Schema::hasTable('telegram_users');
+            $tables['users'] = \Illuminate\Support\Facades\Schema::hasTable('users');
         } catch (\Exception $e) {
-            $telegramStatus = 'ERROR';
-            $telegramError = $e->getMessage();
-        }
-    }
-
-    // Test Database
-    $dbStatus = 'UNKNOWN';
-    $tables = [];
-    try {
-        \Illuminate\Support\Facades\DB::connection()->getPdo();
-        $dbStatus = 'CONNECTED';
-        
-        // Check for key tables
-        $tables['telegram_users'] = \Illuminate\Support\Facades\Schema::hasTable('telegram_users');
-        $tables['users'] = \Illuminate\Support\Facades\Schema::hasTable('users');
-    } catch (\Exception $e) {
-        $dbStatus = 'FAILED: ' . $e->getMessage();
-    }
-    
-    // Test keyboard builder methods
-    $methodTests = [];
-    try {
-        \App\Services\Telegram\TelegramKeyboardBuilder::orderType();
-        $methodTests['orderType'] = 'OK';
-    } catch (\Throwable $e) {
-        $methodTests['orderType'] = 'ERROR: ' . $e->getMessage();
-    }
-    try {
-        \App\Services\Telegram\TelegramKeyboardBuilder::locations(collect([]));
-        $methodTests['locations'] = 'OK';
-    } catch (\Throwable $e) {
-        $methodTests['locations'] = 'ERROR: ' . $e->getMessage();
-    }
-    try {
-        \App\Services\Telegram\TelegramKeyboardBuilder::timeSlots(collect([]), now()->format('Y-m-d'), false);
-        $methodTests['timeSlots'] = 'OK';
-    } catch (\Throwable $e) {
-        $methodTests['timeSlots'] = 'ERROR: ' . $e->getMessage();
-    }
-    try {
-        \App\Services\Telegram\TelegramKeyboardBuilder::paymentMethods(false);
-        $methodTests['paymentMethods'] = 'OK';
-    } catch (\Throwable $e) {
-        $methodTests['paymentMethods'] = 'ERROR: ' . $e->getMessage();
-    }
-    try {
-        \App\Services\Telegram\TelegramKeyboardBuilder::welcomeKeyboard();
-        $methodTests['welcomeKeyboard'] = 'OK';
-    } catch (\Throwable $e) {
-        $methodTests['welcomeKeyboard'] = 'ERROR: ' . $e->getMessage();
-    }
-    
-    // Test categories query (the problematic endpoint)
-    try {
-        $cats = \App\Models\Category::active()
-            ->with('translations')
-            ->orderBy('display_order')
-            ->take(5)
-            ->get()
-            ->map(function ($category) {
-                return [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    'slug' => $category->slug,
-                    'image' => $category->image,
-                ];
-            });
-        $methodTests['categories'] = 'OK (count: ' . $cats->count() . ')';
-    } catch (\Throwable $e) {
-        $methodTests['categories'] = 'ERROR: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine();
-    }
-    
-    // Test if controller class can be loaded
-    try {
-        $controller = new \App\Http\Controllers\Api\Telegram\TelegramMenuController();
-        $methodTests['controller_load'] = 'OK';
-    } catch (\Throwable $e) {
-        $methodTests['controller_load'] = 'ERROR: ' . $e->getMessage();
-    }
-
-    return response()->json([
-        'token_configured' => $hasToken,
-        'token_preview' => $tokenPreview,
-        'telegram_api_check' => $telegramStatus,
-        'telegram_info' => $telegramInfo,
-        'telegram_error' => $telegramError,
-        'webhook_url_env' => env('TELEGRAM_WEBHOOK_URL', 'NOT SET'),
-        'database_status' => $dbStatus,
-        'tables_exist' => $tables,
-        'method_tests' => $methodTests,
-    ]);
-});
-
-// TEST WEBHOOK ROUTE - Simulates /start command to debug errors
-Route::get('/telegram/debug/test-start', function () {
-    try {
-        $botService = app(\App\Services\Telegram\TelegramBotService::class);
-
-        // Simulate a user sending /start
-        $testData = [
-            'id' => 123456789,
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'username' => 'testuser',
-            'language_code' => 'en',
-        ];
-
-        // Try to create/find user
-        $user = \App\Models\TelegramUser::findOrCreate($testData);
-
-        // Check if user has linked account
-        $hasLinked = $user->hasLinkedAccount();
-
-        // Test keyboard builder methods that might be missing
-        $tests = [];
-
-        // Test orderType method
-        try {
-            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::orderType();
-            $tests['orderType'] = 'EXISTS';
-        } catch (\Error $e) {
-            $tests['orderType'] = 'MISSING: ' . $e->getMessage();
+            $dbStatus = 'FAILED: ' . $e->getMessage();
         }
 
-        // Test locations method
+        // Test keyboard builder methods
+        $methodTests = [];
         try {
-            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::locations(collect([]));
-            $tests['locations'] = 'EXISTS';
-        } catch (\Error $e) {
-            $tests['locations'] = 'MISSING: ' . $e->getMessage();
+            \App\Services\Telegram\TelegramKeyboardBuilder::orderTypeSelection();
+            $methodTests['orderType'] = 'OK';
+        } catch (\Throwable $e) {
+            $methodTests['orderType'] = 'ERROR: ' . $e->getMessage();
+        }
+        try {
+            \App\Services\Telegram\TelegramKeyboardBuilder::locationSelection([]);
+            $methodTests['locations'] = 'OK';
+        } catch (\Throwable $e) {
+            $methodTests['locations'] = 'ERROR: ' . $e->getMessage();
+        }
+        try {
+            \App\Services\Telegram\TelegramKeyboardBuilder::paymentModeSelection('pickup');
+            $methodTests['paymentMethods'] = 'OK';
+        } catch (\Throwable $e) {
+            $methodTests['paymentMethods'] = 'ERROR: ' . $e->getMessage();
+        }
+        try {
+            \App\Services\Telegram\TelegramKeyboardBuilder::welcomeWithSetup();
+            $methodTests['welcomeKeyboard'] = 'OK';
+        } catch (\Throwable $e) {
+            $methodTests['welcomeKeyboard'] = 'ERROR: ' . $e->getMessage();
         }
 
-        // Test timeSlots method
+        // Test categories query (the problematic endpoint)
         try {
-            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::timeSlots(collect([]), now()->format('Y-m-d'), false);
-            $tests['timeSlots'] = 'EXISTS';
-        } catch (\Error $e) {
-            $tests['timeSlots'] = 'MISSING: ' . $e->getMessage();
+            $cats = \App\Models\Category::active()
+                ->with('translations')
+                ->orderBy('display_order')
+                ->take(5)
+                ->get()
+                ->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug,
+                        'image' => $category->image,
+                    ];
+                });
+            $methodTests['categories'] = 'OK (count: ' . $cats->count() . ')';
+        } catch (\Throwable $e) {
+            $methodTests['categories'] = 'ERROR: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine();
         }
 
-        // Test paymentMethods method
+        // Test if controller class can be loaded
         try {
-            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::paymentMethods(false);
-            $tests['paymentMethods'] = 'EXISTS';
-        } catch (\Error $e) {
-            $tests['paymentMethods'] = 'MISSING: ' . $e->getMessage();
-        }
-
-        // Test welcomeKeyboard method
-        try {
-            $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::welcomeKeyboard();
-            $tests['welcomeKeyboard'] = 'EXISTS';
-        } catch (\Error $e) {
-            $tests['welcomeKeyboard'] = 'MISSING: ' . $e->getMessage();
+            $controller = new \App\Http\Controllers\Api\Telegram\TelegramMenuController();
+            $methodTests['controller_load'] = 'OK';
+        } catch (\Throwable $e) {
+            $methodTests['controller_load'] = 'ERROR: ' . $e->getMessage();
         }
 
         return response()->json([
-            'status' => 'success',
-            'user_created' => $user->id,
-            'has_linked_account' => $hasLinked,
-            'method_tests' => $tests,
+            'token_configured' => $hasToken,
+            'token_preview' => $tokenPreview,
+            'telegram_api_check' => $telegramStatus,
+            'telegram_info' => $telegramInfo,
+            'telegram_error' => $telegramError,
+            'webhook_url_env' => env('TELEGRAM_WEBHOOK_URL', 'NOT SET'),
+            'database_status' => $dbStatus,
+            'tables_exist' => $tables,
+            'method_tests' => $methodTests,
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => array_slice($e->getTrace(), 0, 5),
-        ], 500);
-    }
-});
+    });
 
-// EMERGENCY MIGRATION ROUTE - Creates telegram tables directly
-Route::get('/telegram/debug/migrate', function () {
-    $results = [];
+    // TEST WEBHOOK ROUTE - Simulates /start command to debug errors
+    Route::get('/telegram/debug/test-start', function () {
+        try {
+            $botService = app(\App\Services\Telegram\TelegramBotService::class);
 
-    try {
-        // Reset any stuck transactions first
-        \Illuminate\Support\Facades\DB::reconnect();
-        $results['reconnect'] = 'OK';
+            // Simulate a user sending /start
+            $testData = [
+                'id' => 123456789,
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'username' => 'testuser',
+                'language_code' => 'en',
+            ];
 
-        // Check if telegram_users table exists
-        if (!\Illuminate\Support\Facades\Schema::hasTable('telegram_users')) {
-            \Illuminate\Support\Facades\Schema::create('telegram_users', function ($table) {
-                $table->id();
-                $table->unsignedBigInteger('customer_id')->nullable();
-                $table->bigInteger('telegram_id')->unique();
-                $table->string('telegram_username', 100)->nullable();
-                $table->string('first_name', 100)->nullable();
-                $table->string('last_name', 100)->nullable();
-                $table->string('language_code', 10)->default('en');
-                $table->string('conversation_state', 50)->default('none');
-                $table->json('conversation_data')->nullable();
-                $table->boolean('is_active')->default(true);
-                $table->boolean('notifications_enabled')->default(true);
-                $table->timestamp('last_interaction_at')->nullable();
-                $table->timestamps();
-                $table->index(['is_active', 'notifications_enabled']);
-                $table->index('customer_id');
-                $table->index('conversation_state');
-            });
-            $results['telegram_users'] = 'CREATED';
-        } else {
-            $results['telegram_users'] = 'EXISTS';
+            // Try to create/find user
+            $user = \App\Models\TelegramUser::findOrCreate($testData);
+
+            // Check if user has linked account
+            $hasLinked = $user->hasLinkedAccount();
+
+            // Test keyboard builder methods that might be missing
+            $tests = [];
+
+            // Test orderType method
+            try {
+                $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::orderTypeSelection();
+                $tests['orderType'] = 'EXISTS';
+            } catch (\Error $e) {
+                $tests['orderType'] = 'MISSING: ' . $e->getMessage();
+            }
+
+            // Test locations method
+            try {
+                $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::locationSelection([]);
+                $tests['locations'] = 'EXISTS';
+            } catch (\Error $e) {
+                $tests['locations'] = 'MISSING: ' . $e->getMessage();
+            }
+
+            // Test paymentMethods method
+            try {
+                $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::paymentModeSelection('pickup');
+                $tests['paymentMethods'] = 'EXISTS';
+            } catch (\Error $e) {
+                $tests['paymentMethods'] = 'MISSING: ' . $e->getMessage();
+            }
+
+            // Test welcomeKeyboard method
+            try {
+                $keyboard = \App\Services\Telegram\TelegramKeyboardBuilder::welcomeWithSetup();
+                $tests['welcomeKeyboard'] = 'EXISTS';
+            } catch (\Error $e) {
+                $tests['welcomeKeyboard'] = 'MISSING: ' . $e->getMessage();
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'user_created' => $user->id,
+                'has_linked_account' => $hasLinked,
+                'method_tests' => $tests,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => array_slice($e->getTrace(), 0, 5),
+            ], 500);
         }
+    });
 
-        // Check if telegram_order_notifications table exists
-        if (!\Illuminate\Support\Facades\Schema::hasTable('telegram_order_notifications')) {
-            \Illuminate\Support\Facades\Schema::create('telegram_order_notifications', function ($table) {
-                $table->id();
-                $table->unsignedBigInteger('order_id');
-                $table->unsignedBigInteger('telegram_user_id');
-                $table->string('status', 50);
-                $table->text('message')->nullable();
-                $table->boolean('sent')->default(false);
-                $table->timestamp('sent_at')->nullable();
-                $table->timestamps();
-                $table->index(['order_id', 'telegram_user_id']);
-                $table->index('sent');
-            });
-            $results['telegram_order_notifications'] = 'CREATED';
-        } else {
-            $results['telegram_order_notifications'] = 'EXISTS';
+    // EMERGENCY MIGRATION ROUTE - Creates telegram tables directly
+    Route::get('/telegram/debug/migrate', function () {
+        $results = [];
+
+        try {
+            // Reset any stuck transactions first
+            \Illuminate\Support\Facades\DB::reconnect();
+            $results['reconnect'] = 'OK';
+
+            // Check if telegram_users table exists
+            if (!\Illuminate\Support\Facades\Schema::hasTable('telegram_users')) {
+                \Illuminate\Support\Facades\Schema::create('telegram_users', function ($table) {
+                    $table->id();
+                    $table->unsignedBigInteger('customer_id')->nullable();
+                    $table->bigInteger('telegram_id')->unique();
+                    $table->string('telegram_username', 100)->nullable();
+                    $table->string('first_name', 100)->nullable();
+                    $table->string('last_name', 100)->nullable();
+                    $table->string('language_code', 10)->default('en');
+                    $table->string('conversation_state', 50)->default('none');
+                    $table->json('conversation_data')->nullable();
+                    $table->boolean('is_active')->default(true);
+                    $table->boolean('notifications_enabled')->default(true);
+                    $table->timestamp('last_interaction_at')->nullable();
+                    $table->timestamps();
+                    $table->index(['is_active', 'notifications_enabled']);
+                    $table->index('customer_id');
+                    $table->index('conversation_state');
+                });
+                $results['telegram_users'] = 'CREATED';
+            } else {
+                $results['telegram_users'] = 'EXISTS';
+            }
+
+            // Check if telegram_order_notifications table exists
+            if (!\Illuminate\Support\Facades\Schema::hasTable('telegram_order_notifications')) {
+                \Illuminate\Support\Facades\Schema::create('telegram_order_notifications', function ($table) {
+                    $table->id();
+                    $table->unsignedBigInteger('order_id');
+                    $table->unsignedBigInteger('telegram_user_id');
+                    $table->string('status', 50);
+                    $table->text('message')->nullable();
+                    $table->boolean('sent')->default(false);
+                    $table->timestamp('sent_at')->nullable();
+                    $table->timestamps();
+                    $table->index(['order_id', 'telegram_user_id']);
+                    $table->index('sent');
+                });
+                $results['telegram_order_notifications'] = 'CREATED';
+            } else {
+                $results['telegram_order_notifications'] = 'EXISTS';
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'results' => $results,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'results' => $results,
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'results' => $results,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'results' => $results,
-        ], 500);
-    }
-});
+    });
 
 } // End of debug routes - Only available in local/testing
 
@@ -775,75 +775,75 @@ Route::prefix('telegram')
     // Note: throttle:api removed - was causing 500 errors on production (rate limiter config issue)
     ->group(function () {
 
-    // Public endpoints for menu browsing
-    Route::get('/menu/categories', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'categories']);
-    Route::get('/menu/items/{categoryId}', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'items']);
-    Route::get('/menu/items/{categoryId}/paginated', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'itemsPaginated']);
-    Route::get('/menu/item/{itemId}', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'itemDetail']);
+        // Public endpoints for menu browsing
+        Route::get('/menu/categories', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'categories']);
+        Route::get('/menu/items/{categoryId}', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'items']);
+        Route::get('/menu/items/{categoryId}/paginated', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'itemsPaginated']);
+        Route::get('/menu/item/{itemId}', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'itemDetail']);
 
-    // Locations
-    Route::get('/locations', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'locations']);
+        // Locations
+        Route::get('/locations', [App\Http\Controllers\Api\Telegram\TelegramMenuController::class, 'locations']);
 
-    // Time slots
-    Route::get('/time-slots', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'timeSlots']);
+        // Time slots
+        Route::get('/time-slots', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'timeSlots']);
 
-    // Payment modes
-    Route::get('/payment-modes/{orderType}', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'paymentModes']);
+        // Payment modes
+        Route::get('/payment-modes/{orderType}', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'paymentModes']);
 
-    // Cart endpoints (require Telegram user session)
-    Route::middleware([\App\Http\Middleware\TelegramAuth::class])
-        ->group(function () {
+        // Cart endpoints (require Telegram user session)
+        Route::middleware([\App\Http\Middleware\TelegramAuth::class])
+            ->group(function () {
 
-        // Cart management
-        Route::get('/cart', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'get']);
-        Route::post('/cart/add', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'add']);
-        Route::put('/cart/update/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'update']);
-        Route::delete('/cart/remove/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'remove']);
-        Route::delete('/cart/clear', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'clear']);
-        Route::get('/cart/total', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'total']);
+            // Cart management
+            Route::get('/cart', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'get']);
+            Route::post('/cart/add', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'add']);
+            Route::put('/cart/update/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'update']);
+            Route::delete('/cart/remove/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'remove']);
+            Route::delete('/cart/clear', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'clear']);
+            Route::get('/cart/total', [App\Http\Controllers\Api\Telegram\TelegramCartController::class, 'total']);
 
-        // Order management
-        Route::get('/orders', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'list']);
-        Route::get('/orders/{orderId}', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'detail']);
-        Route::post('/orders/{orderId}/cancel', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'cancel']);
+            // Order management
+            Route::get('/orders', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'list']);
+            Route::get('/orders/{orderId}', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'detail']);
+            Route::post('/orders/{orderId}/cancel', [App\Http\Controllers\Api\Telegram\TelegramOrderController::class, 'cancel']);
 
-        // Guest Checkout (Sprint P15)
-        Route::post('/checkout/validate', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'validate']);
-        Route::post('/checkout/guest-info', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'saveGuestInfo']);
-        Route::post('/checkout/place-order', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'placeOrder']);
-        Route::get('/checkout/confirm/{orderId}', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'confirm']);
-        Route::get('/checkout/saved-addresses', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'getSavedAddresses']);
+            // Guest Checkout (Sprint P15)
+            Route::post('/checkout/validate', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'validate']);
+            Route::post('/checkout/guest-info', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'saveGuestInfo']);
+            Route::post('/checkout/place-order', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'placeOrder']);
+            Route::get('/checkout/confirm/{orderId}', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'confirm']);
+            Route::get('/checkout/saved-addresses', [App\Http\Controllers\Api\Telegram\TelegramCheckoutController::class, 'getSavedAddresses']);
 
-        // Account management
-        Route::get('/me', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'me']);
-        Route::post('/link-account', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'linkByPhone']);
-        Route::post('/link-account/email', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'linkByEmail']);
+            // Account management
+            Route::get('/me', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'me']);
+            Route::post('/link-account', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'linkByPhone']);
+            Route::post('/link-account/email', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'linkByEmail']);
 
-        // Addresses
-        Route::get('/addresses', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'addresses']);
-        Route::post('/addresses', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'addAddress']);
-        Route::put('/addresses/{index}', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateAddress']);
-        Route::delete('/addresses/{index}', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'deleteAddress']);
-        Route::post('/addresses/{index}/set-default', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'setDefaultAddress']);
+            // Addresses
+            Route::get('/addresses', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'addresses']);
+            Route::post('/addresses', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'addAddress']);
+            Route::put('/addresses/{index}', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateAddress']);
+            Route::delete('/addresses/{index}', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'deleteAddress']);
+            Route::post('/addresses/{index}/set-default', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'setDefaultAddress']);
 
-        // Profile management
-        Route::put('/profile', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateProfile']);
+            // Profile management
+            Route::put('/profile', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateProfile']);
 
-        // Loyalty
-        Route::get('/loyalty/stats', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'loyaltyStats']);
+            // Loyalty
+            Route::get('/loyalty/stats', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'loyaltyStats']);
 
-        // Notification preferences
-        Route::get('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'notificationPreferences']);
-        Route::put('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateNotificationPreferences']);
+            // Notification preferences
+            Route::get('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'notificationPreferences']);
+            Route::put('/notifications/preferences', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateNotificationPreferences']);
 
-        // Sprint P16: Favorites (using auto-created Customer)
-        Route::get('/favorites', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'index']);
-        Route::post('/favorites/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'store']);
-        Route::delete('/favorites/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'destroy']);
-        Route::get('/favorites/{menuItemId}/check', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'check']);
-        Route::post('/favorites/{menuItemId}/toggle', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'toggle']);
+            // Sprint P16: Favorites (using auto-created Customer)
+            Route::get('/favorites', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'index']);
+            Route::post('/favorites/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'store']);
+            Route::delete('/favorites/{menuItemId}', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'destroy']);
+            Route::get('/favorites/{menuItemId}/check', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'check']);
+            Route::post('/favorites/{menuItemId}/toggle', [App\Http\Controllers\Api\Telegram\TelegramFavoritesController::class, 'toggle']);
+        });
     });
-});
 
 
 // ============================================================================
@@ -852,12 +852,12 @@ Route::prefix('telegram')
 Route::prefix('admin/telegram')
     ->middleware(['auth:sanctum', 'role:super-admin,admin'])
     ->group(function () {
-    Route::get('/stats', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'stats']);
-    Route::get('/users', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'users']);
-    Route::post('/set-webhook', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'setWebhook']);
-    Route::get('/webhook-info', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'webhookInfo']);
-    Route::post('/broadcast', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'broadcast']);
-});
+        Route::get('/stats', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'stats']);
+        Route::get('/users', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'users']);
+        Route::post('/set-webhook', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'setWebhook']);
+        Route::get('/webhook-info', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'webhookInfo']);
+        Route::post('/broadcast', [App\Http\Controllers\Api\Telegram\TelegramAdminController::class, 'broadcast']);
+    });
 
 
 

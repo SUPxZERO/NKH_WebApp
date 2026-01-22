@@ -89,15 +89,17 @@ class SplitPaymentController extends Controller
         $validated = $request->validate([
             'payment_method' => 'required|string|exists:payment_methods,code',
             'amount' => 'required|numeric|min:0.01',
+            'tip' => 'nullable|numeric|min:0',
         ]);
 
+        // Get or create invoice for this order
         $invoice = $order->invoice;
 
         if (!$invoice) {
-            return response()->json([
-                'success' => false,
-                'error' => 'No invoice found for this order',
-            ], 404);
+            // Create invoice on-demand using InvoiceService
+            $invoiceService = app(\App\Services\InvoiceService::class);
+            $invoice = $invoiceService->createOrUpdateForOrder($order);
+            $order->refresh(); // Reload relationship
         }
 
         if (!$invoice->canAcceptPayment()) {
@@ -264,7 +266,9 @@ class SplitPaymentController extends Controller
 
         // Check for pending payments
         $pendingPayments = $invoice->payments()
-            ->where('status', Payment::STATUS_PENDING)
+            ->whereHas('paymentStatus', function ($q) {
+                $q->where('code', Payment::STATUS_PENDING);
+            })
             ->count();
 
         if ($pendingPayments > 0) {
@@ -280,7 +284,9 @@ class SplitPaymentController extends Controller
             'data' => [
                 'invoice_status' => $invoice->status,
                 'total_paid' => (float) $invoice->completed_amount,
-                'payment_count' => $invoice->payments()->where('status', Payment::STATUS_COMPLETED)->count(),
+                'payment_count' => $invoice->payments()->whereHas('paymentStatus', function ($q) {
+                    $q->where('code', Payment::STATUS_COMPLETED);
+                })->count(),
             ],
         ]);
     }

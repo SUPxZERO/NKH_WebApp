@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Table\UpdateTableStatusRequest;
 use App\Http\Resources\DiningTableResource;
 use App\Models\DiningTable;
+use App\Services\TableStatusService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -124,7 +125,11 @@ class TableController extends Controller
     // PUT /api/tables/{table}/status (role:admin,manager,waiter)
     public function updateStatus(UpdateTableStatusRequest $request, DiningTable $table)
     {
-        $table->update(['status' => $request->validated()['status']]);
+        app(TableStatusService::class)->setStatusManually(
+            $table,
+            $request->validated()['status'],
+            $request->user()?->id
+        );
         return new DiningTableResource($table);
     }
 

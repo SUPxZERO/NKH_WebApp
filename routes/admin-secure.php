@@ -150,6 +150,15 @@ Route::middleware('permission:employees.update')
 Route::middleware('permission:employees.delete')
     ->delete('time-off-requests/{timeOffRequest}', [TimeOffRequestController::class, 'destroy']);
 
+// Shift Swap Approvals - using employees permissions
+Route::middleware('permission:employees.view')
+    ->get('shift-swaps/pending', [\App\Http\Controllers\Api\Admin\ShiftSwapApprovalController::class, 'index']);
+
+Route::middleware('permission:employees.update')
+    ->group(function () {
+        Route::put('shift-swaps/{id}/approve', [\App\Http\Controllers\Api\Admin\ShiftSwapApprovalController::class, 'approve']);
+        Route::put('shift-swaps/{id}/deny', [\App\Http\Controllers\Api\Admin\ShiftSwapApprovalController::class, 'deny']);
+    });
 
 // Customers - requires customers.* permissions
 Route::middleware('permission:customers.view')

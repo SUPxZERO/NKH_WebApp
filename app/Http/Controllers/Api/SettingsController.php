@@ -16,19 +16,19 @@ class SettingsController extends Controller
     public function index(Request $request): JsonResponse
     {
         $locationId = $request->get('location_id');
-        
+
         $query = Setting::query();
-        
+
         if ($locationId) {
-            $query->where(function($q) use ($locationId) {
+            $query->where(function ($q) use ($locationId) {
                 $q->where('location_id', $locationId)
-                  ->orWhereNull('location_id');
+                    ->orWhereNull('location_id');
             });
         } else {
             $query->whereNull('location_id');
         }
-        
-        $settings = $query->get()->map(function($setting) {
+
+        $settings = $query->get()->map(function ($setting) {
             // Extract category from key (e.g., "general.site_name" -> "general")
             $parts = explode('.', $setting->key, 2);
             return [
@@ -40,7 +40,7 @@ class SettingsController extends Controller
                 'location_id' => $setting->location_id,
             ];
         })->groupBy('category');
-        
+
         return response()->json(['data' => $settings]);
     }
 
@@ -50,11 +50,11 @@ class SettingsController extends Controller
     public function getByKey(string $key): JsonResponse
     {
         $setting = Setting::where('key', $key)->first();
-        
+
         if (!$setting) {
             return response()->json(['message' => 'Setting not found'], 404);
         }
-        
+
         return response()->json(['data' => $setting]);
     }
 
@@ -73,7 +73,7 @@ class SettingsController extends Controller
 
         // Clear cache
         Cache::forget("setting.{$setting->key}");
-        
+
         return response()->json([
             'message' => 'Setting updated successfully',
             'data' => $setting
@@ -94,7 +94,7 @@ class SettingsController extends Controller
 
         foreach ($request->settings as $settingData) {
             $setting = Setting::where('key', $settingData['key'])
-                ->where(function($q) use ($request) {
+                ->where(function ($q) use ($request) {
                     if ($request->location_id) {
                         $q->where('location_id', $request->location_id);
                     } else {
@@ -102,7 +102,7 @@ class SettingsController extends Controller
                     }
                 })
                 ->first();
-            
+
             if ($setting) {
                 $setting->update(['value' => $settingData['value']]);
                 Cache::forget("setting.{$setting->key}");
@@ -127,7 +127,7 @@ class SettingsController extends Controller
 
         // Check for existing setting
         $exists = Setting::where('key', $request->key)
-            ->where(function($q) use ($request) {
+            ->where(function ($q) use ($request) {
                 if ($request->location_id) {
                     $q->where('location_id', $request->location_id);
                 } else {
@@ -142,8 +142,8 @@ class SettingsController extends Controller
             ], 422);
         }
 
-        $setting = Setting::create($request->all());
-        
+        $setting = Setting::create($request->only(['key', 'value', 'location_id']));
+
         return response()->json([
             'message' => 'Setting created successfully',
             'data' => $setting
@@ -157,7 +157,7 @@ class SettingsController extends Controller
     {
         Cache::forget("setting.{$setting->key}");
         $setting->delete();
-        
+
         return response()->json([
             'message' => 'Setting deleted successfully'
         ]);

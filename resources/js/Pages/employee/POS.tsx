@@ -14,7 +14,7 @@ import { useActivePOSOrders } from '@/app/hooks/useOrderPayment';
 import POSOrderPaymentPanel from '@/app/components/pos/POSOrderPaymentPanel';
 import { POSMenuGrid } from '@/app/components/pos/POSMenuGrid';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiPost, apiGet } from '@/app/utils/api';
+import { apiPost, apiGet, apiPut } from '@/app/utils/api';
 import { toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
@@ -30,7 +30,7 @@ interface Floor {
 interface Table {
   id: number;
   code: string;
-  status: 'available' | 'occupied' | 'reserved';
+  status: 'available' | 'occupied' | 'reserved' | 'unavailable';
 }
 
 
@@ -79,7 +79,7 @@ export default function POS() {
   const [heldOrders, setHeldOrders] = useState<any[]>([]);
 
   // Fetch Tables & Floors
-  const { data: floorsData } = useQuery({
+  const { data: floorsData, refetch: refetchTables } = useQuery({
     queryKey: ['pos-tables'],
     queryFn: async () => {
       const res = await apiGet('/api/employee/pos/tables');
@@ -100,6 +100,15 @@ export default function POS() {
   const activeFloor = useMemo(() =>
     floorsData?.find(f => f.id === activeFloorId),
     [floorsData, activeFloorId]);
+
+  const selectedTableData = useMemo(() => {
+    if (!selectedTable) return undefined;
+    for (const floor of floorsData ?? []) {
+      const match = floor.tables?.find(t => t.id === selectedTable);
+      if (match) return match;
+    }
+    return undefined;
+  }, [floorsData, selectedTable]);
 
   const { data: categories, isLoading: catsLoading } = useCategories();
   const { data: menu, isLoading: menuLoading } = useMenuItems({ category_id: categoryId });
@@ -264,8 +273,35 @@ export default function POS() {
 
   const handleChargeOrder = () => {
     if (cart.items.length === 0) return;
+
+    if (selectedTableData && selectedTableData.status !== 'available') {
+      toastError(`Table ${selectedTableData.code} is ${selectedTableData.status}. Select an available table.`);
+      return;
+    }
     createOrderMutation.mutate();
   };
+
+  const updateTableStatusMutation = useMutation({
+    mutationFn: async (status: Table['status']) => {
+      if (!selectedTable) {
+        throw new Error('No table selected');
+      }
+
+      if (selectedTableData?.status === status) {
+        return;
+      }
+
+      return apiPut(`/api/employee/pos/tables/${selectedTable}/status`, { status });
+    },
+    onSuccess: () => {
+      toastSuccess('Table status updated');
+      refetchTables();
+    },
+    onError: (err: any) => {
+      toastError('Failed to update table status');
+      console.error(err);
+    },
+  });
 
   return (
     <EmployeeLayout>
@@ -589,24 +625,84 @@ export default function POS() {
                       Walk-in
                     </button>
 
-                    {activeFloor?.tables?.map((table) => (
-                      <button
-                        key={table.id}
-                        onClick={() => setSelectedTable(table.id)}
-                        className={cn(
-                          "h-12 rounded-lg border text-xs font-semibold transition-all flex flex-col items-center justify-center",
-                          selectedTable === table.id
-                            ? "bg-blue-600 text-white border-blue-600 shadow-md transform scale-105"
-                            : table.status === 'occupied'
-                              ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
-                              : "bg-white text-gray-800 border-gray-200 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
-                        )}
-                      >
-                        <span>{table.code}</span>
-                        {table.status === 'occupied' && <span className="text-[10px] opacity-75">Occupied</span>}
-                      </button>
-                    ))}
+                    {activeFloor?.tables?.map((table) => {
+                      const isSelected = selectedTable === table.id;
+                      const statusLabel = table.status === 'available'
+                        ? null
+                        : table.status === 'occupied'
+                          ? 'Occupied'
+                          : table.status === 'reserved'
+                            ? 'Reserved'
+                            : 'Unavailable';
+
+                      return (
+                        <button
+                          key={table.id}
+                          onClick={() => setSelectedTable(table.id)}
+                          className={cn(
+                            "h-12 rounded-lg border text-xs font-semibold transition-all flex flex-col items-center justify-center",
+                            isSelected
+                              ? "bg-blue-600 text-white border-blue-600 shadow-md transform scale-105"
+                              : table.status === 'occupied'
+                                ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
+                                : table.status === 'reserved'
+                                  ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800"
+                                  : table.status === 'unavailable'
+                                    ? "bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800/60 dark:text-gray-400 dark:border-gray-700"
+                                    : "bg-white text-gray-800 border-gray-200 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700",
+                            "cursor-pointer"
+                          )}
+                        >
+                          <span>{table.code}</span>
+                          {statusLabel && <span className="text-[10px] opacity-75">{statusLabel}</span>}
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {/* Quick Status Actions */}
+                  {selectedTableData && (
+                    <div className="space-y-2 pt-2">
+                      <div className="text-xs text-muted-foreground">
+                        Selected: <span className="font-semibold text-foreground">{selectedTableData.code}</span>
+                        {' '}• Status: <span className="font-semibold text-foreground">{selectedTableData.status}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          size="xs"
+                          variant="success"
+                          loading={updateTableStatusMutation.isPending}
+                          onClick={() => updateTableStatusMutation.mutate('available')}
+                        >
+                          Available
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="warning"
+                          loading={updateTableStatusMutation.isPending}
+                          onClick={() => updateTableStatusMutation.mutate('reserved')}
+                        >
+                          Reserved
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="danger"
+                          loading={updateTableStatusMutation.isPending}
+                          onClick={() => updateTableStatusMutation.mutate('occupied')}
+                        >
+                          Occupied
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="secondary"
+                          loading={updateTableStatusMutation.isPending}
+                          onClick={() => updateTableStatusMutation.mutate('unavailable')}
+                        >
+                          Unavailable
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

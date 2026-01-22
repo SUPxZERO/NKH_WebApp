@@ -9,9 +9,11 @@ use App\Models\Invoice;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
 use App\Services\LoyaltyService;
+use App\Services\TableStatusService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use App\Models\PaymentAuditLog; // Ensure this model exists or use logic
+use App\Models\PaymentStatus;
+// use App\Models\PaymentAuditLog; // Model does not exist
 
 class PaymentService
 {
@@ -34,26 +36,46 @@ class PaymentService
 
     /**
      * Initiate a payment via a gateway or method.
+     * 
+     * @param Order $order The order to pay for
+     * @param string $methodCode Payment method code (cash, card, qr, etc)
+     * @param float|null $amount Optional partial payment amount (defaults to full invoice amount)
+     * @param int|null $processedByUserId User processing the payment (for audit)
+     * @param float $tip Optional tip amount to add
      */
-    public function initiatePayment(Order $order, string $methodCode): array
+    public function initiatePayment(
+        Order $order,
+        string $methodCode,
+        ?float $amount = null,
+        ?int $processedByUserId = null,
+        float $tip = 0
+    ): array
     {
         $invoice = $this->invoiceService->createOrUpdateForOrder($order);
 
         // 1. Check if method exists
         $method = PaymentMethod::where('code', $methodCode)->firstOrFail();
+        
+        // 2. Determine payment amount (use provided amount or full invoice amount)
+        $paymentAmount = $amount ?? (float) $invoice->amount_due;
+        $totalWithTip = $paymentAmount + $tip;
 
-        // 2. Logic depends on method
+        // 3. Logic depends on method
         if (in_array($methodCode, ['qr', 'aba_pay', 'wing'])) {
+            $txnId = 'INIT-' . Str::random(12);
             // Create pending payment for QR
-            $payment = new Payment([
+            $payment = (new Payment())->forceFill([
                 'invoice_id' => $invoice->id,
                 'payment_method_id' => $method->id,
-                'amount' => $invoice->amount_due,
+                'amount' => $totalWithTip,
                 'currency' => $order->currency,
-                'status' => Payment::STATUS_PENDING,
+                'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_PENDING),
                 'uuid' => Str::uuid(),
-                'transaction_id' => 'INIT-' . Str::random(12),
-                'expires_at' => now()->addMinutes(15), 
+                'transaction_id' => $txnId,
+                'reference_number' => $txnId,
+                'expires_at' => now()->addMinutes(15),
+                'tip' => $tip,
+                'confirmed_by' => $processedByUserId,
             ]);
             
             // Generate QR reference (e.g. for KHQR)
@@ -71,15 +93,87 @@ class PaymentService
             ];
             
         } elseif ($methodCode === 'cash') {
-            // Cash flow is usually "Collect Payment" not "Initiate"
-            // But if user selects Cash on Checkout, we just create a pending payment?
-            // Or just return success.
-             return [
+            $txnId = 'CASH-' . Str::random(12);
+            // For POS cash payments, create a completed payment directly
+            $payment = (new Payment())->forceFill([
+                'invoice_id' => $invoice->id,
+                'payment_method_id' => $method->id,
+                'amount' => $totalWithTip,
+                'currency' => $order->currency,
+                'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_COMPLETED),
+                'uuid' => Str::uuid(),
+                'transaction_id' => $txnId,
+                'reference_number' => $txnId,
+                'processed_at' => now(),
+                'confirmed_by' => $processedByUserId,
+                'confirmed_at' => now(),
+                'tip' => $tip,
+            ]);
+            
+            $invoice->payments()->save($payment);
+            
+            // Reconcile invoice status after payment
+            $this->invoiceService->reconcileStatus($invoice);
+            
+            // Update order payment status
+            $order->refresh();
+            if ($invoice->amount_due <= 0) {
+                $order->update([
+                    'payment_status' => Order::PAYMENT_STATUS_PAID,
+                    'payment_collected_by' => $processedByUserId,
+                    'payment_collected_at' => now(),
+                ]);
+                
+                // Award loyalty points
+                if ($order->customer_id) {
+                    $this->loyaltyService->awardPoints($order);
+                }
+                
+                // Send notification
+                try {
+                    $this->notificationService->sendOrderNotification($order, 'paid');
+                } catch (\Exception $e) {
+                    // ignore
+                }
+            } else {
+                $order->update(['payment_status' => Order::PAYMENT_STATUS_PARTIAL]);
+            }
+            
+            return [
                 'success' => true,
-                'message' => 'Please proceed to counter or wait for delivery.',
-                'status' => 'pending_manual',
+                'payment_id' => $payment->id,
+                'uuid' => $payment->uuid,
+                'status' => 'completed',
+                'amount_paid' => $totalWithTip,
+                'message' => 'Cash payment recorded successfully.',
             ];
             
+        } elseif ($methodCode === 'card') {
+            $txnId = 'CARD-' . Str::random(12);
+            // Card payments - create pending payment (will be completed via webhook)
+            $payment = (new Payment())->forceFill([
+                'invoice_id' => $invoice->id,
+                'payment_method_id' => $method->id,
+                'amount' => $totalWithTip,
+                'currency' => $order->currency,
+                'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_PENDING),
+                'uuid' => Str::uuid(),
+                'transaction_id' => $txnId,
+                'reference_number' => $txnId,
+                'expires_at' => now()->addMinutes(15),
+                'tip' => $tip,
+                'confirmed_by' => $processedByUserId,
+            ]);
+            
+            $invoice->payments()->save($payment);
+            
+            return [
+                'success' => true,
+                'payment_id' => $payment->id,
+                'uuid' => $payment->uuid,
+                'status' => 'pending',
+                'message' => 'Card payment initiated. Waiting for terminal confirmation.',
+            ];
         }
         
         throw new \Exception("Payment method $methodCode not fully implemented in initiation.");
@@ -95,7 +189,7 @@ class PaymentService
         }
 
         $payment->update([
-            'status' => Payment::STATUS_CANCELLED,
+            'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_CANCELLED),
             'failure_reason' => $reason,
         ]);
         
@@ -113,7 +207,7 @@ class PaymentService
 
         // Reset status
         $payment->update([
-            'status' => Payment::STATUS_PENDING,
+            'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_PENDING),
             'failure_reason' => null,
             'expires_at' => now()->addMinutes(15),
         ]);
@@ -148,7 +242,7 @@ class PaymentService
         
         if ($status === 'success') {
             $payment->update([
-                'status' => Payment::STATUS_COMPLETED,
+                'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_COMPLETED),
                 'processed_at' => now(),
                 'gateway_reference' => $payload['gateway_reference'] ?? null,
             ]);
@@ -160,11 +254,21 @@ class PaymentService
             if ($order && $payment->invoice->amount_due <= 0) {
                  $this->loyaltyService->awardPoints($order);
                  $this->notificationService->sendOrderNotification($order, 'paid');
+
+                 // Free table if this is a dine-in order
+                 try {
+                     app(TableStatusService::class)->completeAndReleaseAfterPayment($order, null);
+                 } catch (\Throwable $e) {
+                     \Log::warning('Table release after webhook payment failed', [
+                         'order_id' => $order->id,
+                         'error' => $e->getMessage(),
+                     ]);
+                 }
             }
             
         } elseif ($status === 'failed') {
             $payment->update([
-                'status' => Payment::STATUS_FAILED,
+                'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_FAILED),
                 'failure_reason' => $payload['failure_reason'] ?? 'Gateway reported failure',
             ]);
         }
@@ -203,14 +307,14 @@ class PaymentService
             }
 
             // 3. Create Payment Record
-            $payment = new Payment([
+            $payment = (new Payment())->forceFill([
                 'invoice_id' => $invoice->id,
                 'payment_method_id' => $methodId,
                 'amount' => $paymentData['amount'],
                 'currency' => $order->currency,
-                'transaction_id' => $paymentData['transaction_id'] ?? 'TXN-' . Str::upper(Str::random(12)),
-                'reference_number' => $paymentData['reference_number'] ?? null,
-                'status' => Payment::STATUS_COMPLETED,
+                'transaction_id' => $txnId = ($paymentData['transaction_id'] ?? 'TXN-' . Str::upper(Str::random(12))),
+                'reference_number' => $paymentData['reference_number'] ?? $txnId,
+                'payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_COMPLETED),
                 'processed_at' => now(),
                 'confirmed_by' => $processedByUserId,
                 'confirmed_at' => now(),
@@ -226,7 +330,8 @@ class PaymentService
             
             $invoice->payments()->save($payment);
 
-            // Log Audit
+            // Log Audit (Skipped - Model missing)
+            /*
             if (class_exists(PaymentAuditLog::class)) {
                 PaymentAuditLog::log(
                     $payment,
@@ -237,6 +342,7 @@ class PaymentService
                     ['note' => 'Payment processed via service', 'mode' => $paymentData['mode'] ?? 'unknown']
                 );
             }
+            */
 
             // 4. Reconcile Invoice Status
             $this->invoiceService->reconcileStatus($invoice);
@@ -337,7 +443,7 @@ class PaymentService
              if ($invoice) {
                  foreach ($invoice->payments as $payment) {
                      if ($payment->status === 'completed') {
-                         $payment->update(['status' => 'cancelled']);
+                         $payment->update(['payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_CANCELLED)]);
                          
                          if (class_exists(PaymentAuditLog::class)) {
                              PaymentAuditLog::log($payment, 'admin_manual_unpay', 'completed', 'cancelled', $processedByUserId, ['note' => $note]);
@@ -347,5 +453,14 @@ class PaymentService
                  $this->invoiceService->reconcileStatus($invoice);
              }
         });
+    }
+    /**
+     * Helper to get payment status ID by code
+     */
+    protected function getPaymentStatusId(string $code): int
+    {
+        return PaymentStatus::where('code', $code)->value('id') 
+            ?? PaymentStatus::where('code', 'pending')->value('id')
+            ?? 1; // Fallback
     }
 }

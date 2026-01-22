@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Models\CartItem;
 use App\Models\Customer;
 use App\Models\MenuItem;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class CartController extends Controller
 {
+    use ApiResponse;
     /**
      * Helper to get current customer from Auth or Telegram Session
      */
@@ -26,7 +28,7 @@ class CartController extends Controller
         // 2. Telegram Session (set by TelegramWebAppAuth middleware)
         $telegramData = session('telegram_user');
         if ($telegramData && isset($telegramData['customer_id'])) {
-             return Customer::find($telegramData['customer_id']);
+            return Customer::find($telegramData['customer_id']);
         }
 
         return null;
@@ -49,7 +51,7 @@ class CartController extends Controller
         $cartItems = CartItem::where('customer_id', $customer->id)
             ->with(['menuItem.translations'])
             ->get();
-            
+
         \Log::info("Cart raw count: " . $cartItems->count());
 
         $data = $cartItems->map(function ($item) {
@@ -62,7 +64,7 @@ class CartController extends Controller
                 return null;
             }
 
-            $translation = $menuItem->translations->firstWhere('locale', app()->getLocale()) 
+            $translation = $menuItem->translations->firstWhere('locale', app()->getLocale())
                 ?? $menuItem->translations->first();
 
             // Build image URL
@@ -144,7 +146,8 @@ class CartController extends Controller
         ]);
 
         $customer = $this->getCurrentCustomer($request);
-        if (!$customer) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (!$customer)
+            return response()->json(['message' => 'Unauthenticated'], 401);
 
         // Verify ownership
         if ($cartItem->customer_id !== $customer->id) {
@@ -165,7 +168,8 @@ class CartController extends Controller
     public function destroy(CartItem $cartItem, Request $request)
     {
         $customer = $this->getCurrentCustomer($request);
-        if (!$customer) return response()->json(['message' => 'Unauthenticated'], 401);
+        if (!$customer)
+            return response()->json(['message' => 'Unauthenticated'], 401);
 
         // Verify ownership
         if ($cartItem->customer_id !== $customer->id) {

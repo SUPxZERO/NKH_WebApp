@@ -40,7 +40,16 @@ class PermissionMiddleware
         }
 
         // Super-admin bypass - has all permissions
+        // SECURITY: Log super-admin actions for audit trail
         if ($user->hasRole('super-admin')) {
+            \Log::info('Super-admin permission bypass', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'bypassed_permissions' => $permissions,
+                'path' => $request->path(),
+                'method' => $request->method(),
+                'ip' => $request->ip(),
+            ]);
             return $next($request);
         }
 

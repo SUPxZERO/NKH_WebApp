@@ -54,26 +54,13 @@ class CustomerApiAuth
             return $next($request);
         }
 
-        // Check 4: X-Telegram-User-Id header (fallback for iframe cookie issues)
-        $telegramUserId = $request->header('X-Telegram-User-Id');
-        if ($telegramUserId) {
-            $telegramUser = TelegramUser::where('telegram_id', $telegramUserId)->first();
-            if ($telegramUser && $telegramUser->is_active) {
-                // Store in session for this request
-                session(['telegram_user_id' => $telegramUserId]);
-                session(['telegram_webapp' => true]);
-                session(['telegram_guest' => true]);
-                session(['telegram_user' => [
-                    'id' => $telegramUser->id,
-                    'telegram_id' => $telegramUser->telegram_id,
-                    'first_name' => $telegramUser->first_name,
-                ]]);
-                return $next($request);
-            }
-        }
+        // SECURITY: X-Telegram-User-Id header authentication REMOVED
+        // This was a critical vulnerability allowing attackers to impersonate any Telegram user.
+        // Telegram authentication must use cryptographically verified initData from TelegramWebAppAuth.
+        // See: https://core.telegram.org/bots/webapps#validating-data-received-via-the-web-app
 
         // Check 5: Active Table Session (Qr Code Guest) - Handled here to allow API access
-        $tableSessionToken = $request->header('X-Table-Session') 
+        $tableSessionToken = $request->header('X-Table-Session')
             ?? $request->cookie('table_session')
             ?? $request->query('session_token');
 

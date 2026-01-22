@@ -78,15 +78,20 @@ class Invoice extends Model
 
     public function getCompletedAmountAttribute(): float
     {
+        // Use whereHas to join with payment_statuses table since payments uses payment_status_id FK
         return (float) $this->payments()
-            ->where('status', Payment::STATUS_COMPLETED)
+            ->whereHas('paymentStatus', function ($query) {
+                $query->where('code', Payment::STATUS_COMPLETED);
+            })
             ->sum('amount');
     }
 
     public function getPendingAmountAttribute(): float
     {
         return (float) $this->payments()
-            ->where('status', Payment::STATUS_PENDING)
+            ->whereHas('paymentStatus', function ($query) {
+                $query->where('code', Payment::STATUS_PENDING);
+            })
             ->sum('amount');
     }
 
@@ -151,7 +156,9 @@ class Invoice extends Model
     public function activePayments()
     {
         return $this->payments()
-            ->whereNotIn('status', [Payment::STATUS_FAILED, Payment::STATUS_CANCELLED]);
+            ->whereHas('paymentStatus', function ($q) {
+                $q->whereNotIn('code', [Payment::STATUS_FAILED, Payment::STATUS_CANCELLED]);
+            });
     }
 
     /**

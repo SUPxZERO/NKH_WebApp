@@ -1,14 +1,13 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import {
-    Activity,
-    TrendingUp,
-    Clock,
-    DollarSign,
-    Star,
-    Award
-} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import EmployeeLayout from '@/app/layouts/EmployeeLayout';
+import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
+import { Button } from '@/app/components/ui/Button';
+import { Skeleton } from '@/app/components/ui/Loading';
+import { apiGet } from '@/app/utils/api';
+import { cn } from '@/app/utils/cn';
 import {
     BarChart,
     Bar,
@@ -19,156 +18,251 @@ import {
     ResponsiveContainer,
     Cell
 } from 'recharts';
-import EmployeeLayout from '@/app/layouts/EmployeeLayout';
-import { apiGet } from '@/app/utils/api';
-import { cn } from '@/app/utils/cn';
+import {
+    Clock,
+    DollarSign,
+    TrendingUp,
+    Star,
+    Loader2,
+    Activity,
+} from 'lucide-react';
+
+type Period = 'day' | 'week' | 'month' | 'year';
+
+interface PerformanceStats {
+    hours_worked: number;
+    hours_goal: number;
+    earnings: number;
+    tips: number;
+    rating: number;
+    chart_data: { name: string; hours: number }[];
+    rank_percentile: number;
+    period: string;
+    period_label: string;
+}
 
 export default function Performance() {
-    // Fetch stats
-    const { data: stats, isLoading } = useQuery({
-        queryKey: ['employeePerformance'],
+    const [period, setPeriod] = useState<Period>('week');
+
+    const { data: stats, isLoading } = useQuery<PerformanceStats>({
+        queryKey: ['employeePerformance', period],
         queryFn: async () => {
-            const res = await apiGet('/api/employee/performance') as any;
-            // return res.data or just res depending on wrapper
-            // The controller returns direct JSON response()->json(...) without 'data' wrapper if not using Resource class
-            // But usually axios (apiGet) returns data directly if interceptor extracts it.
-            // If apiGet returns response.data, then this is the object.
+            const res = await apiGet(`/api/employee/performance?period=${period}`) as PerformanceStats;
             return res;
         },
     });
 
-    const StatCard = ({ title, value, subtext, icon: Icon, colorClass }: any) => (
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex items-start justify-between">
-            <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-2">{value}</h3>
-                {subtext && <p className="text-xs text-slate-400 mt-1">{subtext}</p>}
-            </div>
-            <div className={cn("p-3 rounded-xl bg-opacity-10", colorClass)}>
-                <Icon className={cn("w-6 h-6", colorClass.replace('bg-', 'text-'))} />
-            </div>
-        </div>
-    );
+    // Get today's index for chart highlight (Monday = 0)
+    const getTodayIndex = () => {
+        const day = new Date().getDay();
+        return (day + 6) % 7;
+    };
 
     return (
         <EmployeeLayout>
             <Head title="Performance" />
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6">
-                <div className="max-w-6xl mx-auto">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                            <Activity className="w-8 h-8 text-fuchsia-500" />
-                            Performance Dashboard
+
+            <div className="space-y-6 h-screen">
+                {/* Header with Period Tabs */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div>
+                        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <Activity className="w-5 h-5 sm:w-8 sm:h-8 text-purple-500" />
+                            Performance
                         </h1>
-                        <p className="text-slate-500 dark:text-slate-400 mt-1">
-                            Track your metrics, earnings, and achievements
+                        <p className="text-xs sm:text-base text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
+                            {stats?.period_label || 'Track your metrics and achievements'}
                         </p>
                     </div>
 
-                    {isLoading ? (
-                        <div className="h-64 flex items-center justify-center">
-                            <span className="text-slate-500">Loading metrics...</span>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <StatCard
-                                    title="Hours Worked"
-                                    value={stats?.hours_worked + 'h'}
-                                    subtext={`Goal: ${stats?.hours_goal}h / week`}
-                                    icon={Clock}
-                                    colorClass="text-blue-600 bg-blue-600"
-                                />
-                                <StatCard
-                                    title="Estimated Earnings"
-                                    value={`$${stats?.earnings}`}
-                                    subtext="Includes base wage only"
-                                    icon={DollarSign}
-                                    colorClass="text-green-600 bg-green-600"
-                                />
-                                <StatCard
-                                    title="Tips Earned"
-                                    value={`$${stats?.tips}`}
-                                    subtext="Estimated from sales"
-                                    icon={TrendingUp}
-                                    colorClass="text-purple-600 bg-purple-600"
-                                />
-                                <StatCard
-                                    title="Feedback Rating"
-                                    value={stats?.rating > 0 ? stats?.rating : 'N/A'}
-                                    subtext={`Top ${stats?.rank_percentile}% of staff`}
-                                    icon={Star}
-                                    colorClass="text-amber-500 bg-amber-500"
-                                />
-                            </div>
+                    {/* Period Tabs - Matches Schedule.tsx pattern */}
+                    <div className="flex bg-white/5 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700 self-start sm:self-auto">
+                        {(['day', 'week', 'month', 'year'] as Period[]).map((p) => (
+                            <button
+                                key={p}
+                                onClick={() => setPeriod(p)}
+                                className={cn(
+                                    'px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all',
+                                    period === p
+                                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                                )}
+                            >
+                                {p.charAt(0).toUpperCase() + p.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </motion.div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Chart Section */}
-                                <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-                                    <h3 className="text-lg font-semibold mb-6 text-slate-900 dark:text-white">Weekly Activity</h3>
-                                    <div className="h-80 w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={stats?.chart_data}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                                <XAxis
-                                                    dataKey="name"
-                                                    axisLine={false}
-                                                    tickLine={false}
-                                                    tick={{ fill: '#64748b' }}
-                                                    dy={10}
-                                                />
-                                                <YAxis
-                                                    axisLine={false}
-                                                    tickLine={false}
-                                                    tick={{ fill: '#64748b' }}
-                                                />
-                                                <Tooltip
-                                                    cursor={{ fill: '#f1f5f9' }}
-                                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                                />
-                                                <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
-                                                    {stats?.chart_data?.map((entry: any, index: number) => (
-                                                        <Cell key={`cell-${index}`} fill={index === new Date().getDay() - 1 ? '#d946ef' : '#94a3b8'} />
-                                                    ))}
-                                                </Bar>
-                                            </BarChart>
-                                        </ResponsiveContainer>
+                {isLoading ? (
+                    /* Loading State - Using Skeleton Component */
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                            {[...Array(4)].map((_, i) => (
+                                <Skeleton key={i} className="h-24 sm:h-28 rounded-xl" />
+                            ))}
+                        </div>
+                        <Skeleton className="h-80 rounded-xl" />
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {/* Stats Grid - Gradient Cards Matching Dashboard */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                            {/* Hours Card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                            >
+                                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-blue-500/10 relative overflow-hidden">
+                                    <Clock className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                                    <div className="relative z-10">
+                                        <p className="text-[10px] sm:text-xs font-medium text-blue-100 uppercase tracking-wide">Hours</p>
+                                        <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                            {stats?.hours_worked ?? 0}h
+                                        </p>
+                                        <p className="text-[10px] sm:text-xs text-blue-200 mt-1">
+                                            of {stats?.hours_goal ?? 40}h goal
+                                        </p>
                                     </div>
                                 </div>
+                            </motion.div>
 
-                                {/* Achievements / Goals */}
-                                <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Achievements</h3>
-                                        <Award className="w-5 h-5 text-amber-500" />
+                            {/* Earnings Card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.15 }}
+                            >
+                                <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-emerald-500/10 relative overflow-hidden">
+                                    <DollarSign className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                                    <div className="relative z-10">
+                                        <p className="text-[10px] sm:text-xs font-medium text-emerald-100 uppercase tracking-wide">Earnings</p>
+                                        <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                            ${stats?.earnings ?? 0}
+                                        </p>
+                                        <p className="text-[10px] sm:text-xs text-emerald-200 mt-1">
+                                            base wage
+                                        </p>
                                     </div>
-                                    <div className="space-y-4">
-                                        {[
-                                            { title: "Early Bird", desc: "Clocked in on time 5 days in a row", icon: "🌅", active: true },
-                                            { title: "Service Star", desc: "Maintained 5.0 rating for a week", icon: "⭐", active: false },
-                                            { title: "Speedster", desc: "Completed 50 orders in one shift", icon: "⚡", active: false },
-                                        ].map((badge, idx) => (
-                                            <div key={idx} className={cn(
-                                                "flex items-center gap-3 p-3 rounded-lg border",
-                                                badge.active
-                                                    ? "bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800"
-                                                    : "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 opacity-60"
-                                            )}>
-                                                <div className="text-2xl">{badge.icon}</div>
-                                                <div>
-                                                    <h4 className={cn("font-medium text-sm", badge.active ? "text-amber-900 dark:text-amber-100" : "text-slate-700 dark:text-slate-300")}>{badge.title}</h4>
-                                                    <p className="text-xs text-slate-500">{badge.desc}</p>
-                                                </div>
+                                </div>
+                            </motion.div>
+
+                            {/* Tips Card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-purple-500/10 relative overflow-hidden">
+                                    <TrendingUp className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                                    <div className="relative z-10">
+                                        <p className="text-[10px] sm:text-xs font-medium text-purple-100 uppercase tracking-wide">Tips</p>
+                                        <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                            ${stats?.tips ?? 0}
+                                        </p>
+                                        <p className="text-[10px] sm:text-xs text-purple-200 mt-1">
+                                            estimated
+                                        </p>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            {/* Rating Card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.25 }}
+                            >
+                                <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-amber-500/10 relative overflow-hidden">
+                                    <Star className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
+                                    <div className="relative z-10">
+                                        <p className="text-[10px] sm:text-xs font-medium text-amber-100 uppercase tracking-wide">Rating</p>
+                                        <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
+                                            {stats?.rating && stats.rating > 0 ? stats.rating : 'N/A'}
+                                        </p>
+                                        <p className="text-[10px] sm:text-xs text-amber-200 mt-1">
+                                            {stats?.rank_percentile ? `top ${stats.rank_percentile}%` : 'customer feedback'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+
+                        {/* Activity Chart - Simple Card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                                <CardHeader className="py-3 px-4 sm:px-6 border-b border-gray-100 dark:border-gray-700/50">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                            {period === 'week' ? 'Weekly' : period === 'month' ? 'Monthly' : period === 'year' ? 'Yearly' : 'Daily'} Activity
+                                        </h3>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            {stats?.period_label}
+                                        </span>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-4 sm:p-6">
+                                    {stats?.chart_data && stats.chart_data.length > 0 ? (
+                                        <div className="h-64 sm:h-80 w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={stats.chart_data}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" className="dark:opacity-20" />
+                                                    <XAxis
+                                                        dataKey="name"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#64748b', fontSize: 12 }}
+                                                        dy={10}
+                                                    />
+                                                    <YAxis
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#64748b', fontSize: 12 }}
+                                                        width={30}
+                                                    />
+                                                    <Tooltip
+                                                        cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                                                        contentStyle={{
+                                                            borderRadius: '8px',
+                                                            border: 'none',
+                                                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                                                            backgroundColor: 'white'
+                                                        }}
+                                                        formatter={(value: number | undefined) => [`${value ?? 0}h`, 'Hours']}
+                                                    />
+                                                    <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
+                                                        {stats.chart_data.map((entry, index) => (
+                                                            <Cell
+                                                                key={`cell-${index}`}
+                                                                fill={period === 'week' && index === getTodayIndex() ? '#a855f7' : '#cbd5e1'}
+                                                            />
+                                                        ))}
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    ) : (
+                                        <div className="h-64 flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                            <div className="text-center">
+                                                <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                                <p className="text-sm">No activity data for this period</p>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    </div>
+                )}
             </div>
         </EmployeeLayout>
     );

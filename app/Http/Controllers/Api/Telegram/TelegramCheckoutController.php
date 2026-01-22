@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Telegram;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Models\Location;
 use App\Models\MenuItem;
 use App\Models\Order;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class TelegramCheckoutController extends Controller
 {
+    use ApiResponse;
     protected $calculationService;
 
     public function __construct(OrderCalculationService $calculationService)
@@ -55,7 +57,7 @@ class TelegramCheckoutController extends Controller
                     'unit_price' => $menuItem->price,
                     'total_price' => $menuItem->price * $item['quantity'],
                 ];
-                
+
                 $calculationItems[] = [
                     'menu_item_id' => $menuItem->id,
                     'quantity' => $item['quantity'],
@@ -80,17 +82,17 @@ class TelegramCheckoutController extends Controller
         // But here we might just want raw subtotal/tax estimate.
         // Let's rely on basic calc if location unknown, or try to get it.
         $locationId = $user->conversation_data['location_id'] ?? 1; // Fallback
-        
+
         try {
             $totals = $this->calculationService->calculate(
-                $calculationItems, 
+                $calculationItems,
                 $locationId,
                 null, // No code
                 null, // No customer
                 null, // No address
                 'pickup' // Default to pickup for validation estimate (no delivery fee)
             );
-            
+
             return response()->json([
                 'success' => true,
                 'can_checkout' => true,
@@ -105,7 +107,7 @@ class TelegramCheckoutController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-             return response()->json([
+            return response()->json([
                 'success' => false,
                 'error' => 'Calculation error: ' . $e->getMessage(),
                 'can_checkout' => false,
@@ -134,27 +136,27 @@ class TelegramCheckoutController extends Controller
         $user = $request->user('telegram');
 
         $updates = [];
-        
+
         if (isset($validated['phone_number'])) {
             $updates['phone_number'] = $validated['phone_number'];
         }
-        
+
         if (isset($validated['delivery_address'])) {
             $updates['delivery_address'] = $validated['delivery_address'];
         }
-        
+
         // Save structured address to database if save_for_future is requested
         if (($validated['save_for_future'] ?? false) && isset($validated['address_line_1'])) {
             // Determine ownership - customer_id for linked, telegram_user_id for guests
             $ownerField = $user->hasLinkedAccount() ? 'customer_id' : 'telegram_user_id';
             $ownerId = $user->hasLinkedAccount() ? $user->customer_id : $user->id;
-            
+
             // Check if address already exists
             $existingAddress = \App\Models\CustomerAddress::where($ownerField, $ownerId)
                 ->where('address_line_1', $validated['address_line_1'])
                 ->where('city', $validated['city'] ?? '')
                 ->first();
-            
+
             if (!$existingAddress) {
                 \App\Models\CustomerAddress::create([
                     $ownerField => $ownerId,
@@ -242,11 +244,11 @@ class TelegramCheckoutController extends Controller
 
         try {
             $order = DB::transaction(function () use ($validated, $user, $cartData) {
-                
+
                 // Prepare items for calculation
                 $calculationItems = [];
                 foreach ($cartData['items'] as $item) {
-                     $calculationItems[] = [
+                    $calculationItems[] = [
                         'menu_item_id' => $item['menu_item_id'],
                         'quantity' => $item['quantity'],
                         'special_instructions' => $item['special_instructions'] ?? null,
@@ -262,7 +264,7 @@ class TelegramCheckoutController extends Controller
                     $validated['delivery_address'] ?? null, // Pass address string if available or null (service handles null but we might want string support? Service expects object or null. We pass null for now and let simple logic handle it, or we rely on the fact that service uses settings)
                     $validated['order_type']
                 );
-                
+
                 // Extract calculation results
                 $subtotal = $totals['subtotal'];
                 $taxAmount = $totals['tax_amount'];
@@ -312,7 +314,7 @@ class TelegramCheckoutController extends Controller
                     'total_amount' => $order->total_amount,
                     'status' => $order->status,
                     'payment_mode' => $order->payment_mode,
-                    'order_type' => $order->order_type,
+                    'order_type' => $order->order_type_code,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -359,7 +361,7 @@ class TelegramCheckoutController extends Controller
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
                 'payment_mode' => $order->payment_mode,
-                'order_type' => $order->order_type,
+                'order_type' => $order->order_type_code,
                 'subtotal' => (float) $order->subtotal,
                 'tax_amount' => (float) $order->tax_amount,
                 'delivery_fee' => (float) $order->delivery_fee,

@@ -37,7 +37,7 @@ class TelegramWebAppAuth
         }
 
         $initData = $request->header('X-Telegram-Init-Data');
-        
+
         if (!$initData) {
             // Allow request to proceed without Telegram auth (will be treated as guest)
             return $next($request);
@@ -46,14 +46,14 @@ class TelegramWebAppAuth
         try {
             // Parse Telegram init data
             $parsedData = $this->parseInitData($initData);
-            
+
             if (!$parsedData || !isset($parsedData['id'])) {
                 throw new \Exception('Invalid Telegram data');
             }
 
             // Phase 3: Find or create user by telegram_id
             $user = User::byTelegram($parsedData['id'])->first();
-            
+
             if (!$user) {
                 // Create new user from Telegram data
                 $user = User::create([
@@ -82,7 +82,7 @@ class TelegramWebAppAuth
             } else {
                 // Update last login
                 $user->update(['last_login_at' => now()]);
-                
+
                 // Ensure profile exists
                 if (!$user->profile) {
                     UserProfile::create([
@@ -97,7 +97,7 @@ class TelegramWebAppAuth
 
             // Authenticate the user
             Auth::login($user);
-            
+
             // Store Telegram data in request for downstream use
             $request->merge(['telegram_user' => $parsedData]);
 
@@ -122,9 +122,9 @@ class TelegramWebAppAuth
     protected function parseInitData(string $initData): ?array
     {
         parse_str($initData, $data);
-        
+
         $botToken = config('services.telegram.bot_token');
-        
+
         // Fail securely if bot token is not configured
         if (!$botToken) {
             Log::error('Telegram bot token not configured in services.telegram.bot_token');
@@ -136,26 +136,26 @@ class TelegramWebAppAuth
             Log::warning('Telegram auth data missing hash');
             return null;
         }
-        
+
         $receivedHash = $data['hash'];
         unset($data['hash']);
-        
+
         // 2. Sort keys alphabetically
         ksort($data);
-        
+
         // 3. Create data check string: key=value\n
         $dataCheckString = [];
         foreach ($data as $key => $value) {
             $dataCheckString[] = $key . '=' . $value;
         }
         $dataCheckString = implode("\n", $dataCheckString);
-        
+
         // 4. Compute secret key: HMAC_SHA256(bot_token, "WebAppData")
         $secretKey = hash_hmac('sha256', $botToken, "WebAppData", true);
-        
+
         // 5. Compute hash: HMAC_SHA256(data_check_string, secret_key)
         $computedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
-        
+
         // 6. Verify hash timing-safe
         if (!hash_equals($computedHash, $receivedHash)) {
             Log::warning('Telegram auth hash mismatch', [
@@ -164,17 +164,32 @@ class TelegramWebAppAuth
             ]);
             return null;
         }
-        
+
         // 7. Verify auth_date (prevent replay attacks > 5 mins)
         if (isset($data['auth_date']) && (time() - $data['auth_date'] > 300)) {
             Log::warning('Telegram auth data expired');
             return null;
         }
-        
+
         if (isset($data['user'])) {
             return json_decode($data['user'], true);
         }
-        
+
         return null;
+    }
+    /**
+     * Check if current session is a Telegram guest.
+     */
+    public static function isTelegramGuest(): bool
+    {
+        return session('telegram_guest') === true;
+    }
+
+    /**
+     * Check if current session is a pending Telegram session (not yet fully established).
+     */
+    public static function isTelegramPending(): bool
+    {
+        return session('telegram_pending') === true;
     }
 }

@@ -11,7 +11,7 @@ class UpdateTableStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required','in:available,occupied,reserved'],
+            'status' => ['required','in:available,occupied,reserved,unavailable'],
         ];
     }
 }

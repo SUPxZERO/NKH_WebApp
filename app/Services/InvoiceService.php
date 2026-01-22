@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Models\Payment;
 
 class InvoiceService
 {
@@ -12,7 +13,9 @@ class InvoiceService
     public function reconcileStatus(Invoice $invoice): void
     {
         $completedTotal = $invoice->payments()
-            ->where('status', 'completed')
+            ->whereHas('paymentStatus', function ($q) {
+                $q->where('code', Payment::STATUS_COMPLETED);
+            })
             ->sum('amount');
 
         $total = (float) $invoice->total_amount;
@@ -64,22 +67,22 @@ class InvoiceService
         $invoice = $order->invoice;
 
         if (!$invoice) {
-            $invoice = new Invoice([
+            $invoice = (new Invoice())->forceFill([
                 'order_id' => $order->id,
                 'location_id' => $order->location_id,
-                'subtotal' => $order->subtotal,
-                'tax_amount' => $order->tax_amount,
-                'discount_amount' => $order->discount_amount,
-                'service_charge' => $order->service_charge,
-                'total_amount' => $order->total_amount,
+                'subtotal' => $order->subtotal ?? 0,
+                'tax_amount' => $order->tax_amount ?? 0,
+                'discount_amount' => $order->discount_amount ?? 0,
+                'service_charge' => $order->service_charge ?? 0,
+                'total_amount' => $order->total_amount ?? 0,
                 'amount_paid' => 0,
-                'amount_due' => $order->total_amount, // Initially all due
-                'currency' => $order->currency,
+                'amount_due' => $order->total_amount ?? 0, // Initially all due
+                'currency' => $order->currency ?? 'USD',
                 'issued_at' => now(),
-                'status' => 'issued', // Default status
+                'status' => 'issued', // Default status - can accept payments
+                'invoice_number' => $this->generateInvoiceNumber($order->location_id ?? 1),
             ]);
-            $invoice->invoice_number = $this->generateInvoiceNumber($order->location_id);
-            $order->invoice()->save($invoice);
+            $invoice->save();
         } else {
             // Update existing invoice amounts if order changed (assuming we want to sync)
             // But be careful not to reset paid amounts if we just want to update totals
