@@ -42,6 +42,8 @@ class Order extends Model
         'id',
         'order_type_id',            // ⚠️ Lookup ID - set via order_type string field
         'order_status_id',          // ⚠️ Lookup ID - managed by approval flow
+        'payment_status',           // ⚠️ Security: Prevent direct manipulation, use collectPayment()
+        'status',                   // ⚠️ Security: Managed via order_status_id or specific transitions
         'payment_collected_by',     // ⚠️ Set by payment collection flow
         'payment_collected_at',     // ⚠️ Set by payment collection flow
         'created_at',
@@ -149,7 +151,7 @@ class Order extends Model
             $status = \App\Models\OrderStatus::where('code', $value)->first();
             if ($status) {
                 $this->attributes['order_status_id'] = $status->id;
-            } else { 
+            } else {
                 // Fallback for non-existent status? Or just ignore? 
                 // Ignoring might fail silently. But usually codes are valid.
                 \Log::warning("Attempted to set invalid status code: $value");
@@ -345,10 +347,10 @@ class Order extends Model
         if ($status) {
             $this->order_status_id = $status->id;
         } else {
-             // Fallback if status table is empty/missing? 
-             // Maybe log error? For now, do nothing or assume it might work if column existed?
-             // actually, better to throw exception or log
-             \Log::warning("Attempted to set invalid order status code: $statusCode");
+            // Fallback if status table is empty/missing? 
+            // Maybe log error? For now, do nothing or assume it might work if column existed?
+            // actually, better to throw exception or log
+            \Log::warning("Attempted to set invalid order status code: $statusCode");
         }
     }
 }

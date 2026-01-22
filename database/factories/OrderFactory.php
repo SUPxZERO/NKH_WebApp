@@ -24,7 +24,6 @@ class OrderFactory extends Factory
             'total_amount' => $this->faker->randomFloat(2, 10, 200),
             'currency' => 'USD',
             'ordered_at' => now(),
-            'approval_status' => 'approved',
         ];
     }
 }
