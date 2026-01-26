@@ -214,7 +214,7 @@ export default function ManagerShiftApprovals() {
 
                                         <div className="flex flex-col justify-center gap-2 min-w-[140px]">
                                             <Button
-                                                variant="default"
+                                                variant="success"
                                                 className="w-full bg-green-600 hover:bg-green-700"
                                                 onClick={() => handleApprove(swap.id)}
                                                 disabled={approveMutation.isPending}

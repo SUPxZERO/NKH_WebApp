@@ -34,8 +34,8 @@ export function useTableSession() {
                 const response = await apiGet('/api/table-session/current');
                 return response.data as TableSessionData;
             } catch (err: any) {
-                // If 401/404, session is invalid/expired
-                if (err.response?.status === 401 || err.response?.status === 404) {
+                // If 401/404 or 400 (no session reported by backend), session is invalid/inactive
+                if (err.response?.status === 401 || err.response?.status === 404 || err.response?.status === 400) {
                     return null;
                 }
                 throw err;

@@ -356,7 +356,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {[
               { label: 'Total Orders', value: profile?.total_orders || 0, icon: ShoppingBag, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' },
-              { label: 'Total Spent', value: `$${(profile?.total_spent || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-200 dark:border-green-800/50' },
+              { label: 'Total Spent', value: `$${Number(profile?.total_spent || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-200 dark:border-green-800/50' },
               { label: 'Points Earned', value: `+${stats?.points_earned_this_month || 0}`, icon: Zap, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-200 dark:border-amber-800/50', sub: 'This Month', hideOnMobile: true },
               { label: 'Available Rewards', value: stats?.available_rewards || 0, icon: Gift, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30', border: 'border-purple-200 dark:border-purple-800/50' }
             ].map((stat, idx) => (

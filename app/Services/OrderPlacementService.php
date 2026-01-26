@@ -53,23 +53,23 @@ class OrderPlacementService
             if ($tableSession) {
                 $tableId = $tableSession->table_id;
                 $isQrTableOrder = true;
-                
+
                 // Force order_type to dine-in for table orders
                 $data['order_type'] = 'dine-in';
-                
+
                 \Log::info('🍽️ QR Table Order detected', [
                     'session_id' => $tableSession->id,
                     'table_id' => $tableId,
                     'table_code' => $tableSession->table?->code,
                 ]);
-                
+
                 // Update table session status to 'ordering'
                 $tableSession->updateStatus(TableSession::STATUS_ORDERING);
             }
 
             // ==================== TIME SLOT LOGIC ====================
             $slot = $this->handleTimeSlot($data);
-            
+
             // ==================== ADDRESS & DELIVERY LOGIC ====================
             $address = null;
             if ($data['order_type'] === 'delivery') {
@@ -85,7 +85,7 @@ class OrderPlacementService
                 $address,
                 $data['order_type']
             );
-            
+
             // Extract calculation results
             $subtotal = $totals['subtotal'];
             $discountAmount = $totals['discount_amount'];
@@ -97,7 +97,7 @@ class OrderPlacementService
             $orderItemsData = $totals['items_data'];
 
             // ==================== ORDER CREATION ====================
-            $scheduledAt = $slot 
+            $scheduledAt = $slot
                 ? $slot->slot_date->format('Y-m-d') . ' ' . $slot->slot_start_time
                 : now()->format('Y-m-d H:i:s');
 
@@ -106,11 +106,11 @@ class OrderPlacementService
                 'table_id' => $tableId,
                 'customer_id' => $customer->id,
                 'order_number' => $this->generateOrderNumber($data['location_id'], $isQrTableOrder ? 'TBL' : 'ONL'),
-                'order_type_id' => OrderType::where('code', $data['order_type'])->value('id') ?? 2, // Default to dine-in
+                'order_type_id' => OrderType::where('code', $data['order_type'])->value('id') ?? OrderType::where('code', 'dine-in')->value('id'), // Default to dine-in
                 'status' => $isQrTableOrder ? 'received' : 'pending',
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
-                'service_charge' => $serviceCharge, 
+                'service_charge' => $serviceCharge,
                 'delivery_fee' => $deliveryFee,
                 'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
@@ -141,7 +141,7 @@ class OrderPlacementService
             if ($tableSession && $isQrTableOrder) {
                 $tableSession->linkOrder($order);
                 app(TableStatusService::class)->occupyForQrScan($tableSession->table);
-                
+
                 \Log::info('🍽️ Order linked to table session', [
                     'order_id' => $order->id,
                     'session_id' => $tableSession->id,
@@ -165,19 +165,19 @@ class OrderPlacementService
     protected function handleTimeSlot(array $data): ?OrderTimeSlot
     {
         $orderNow = $data['order_now'] ?? false;
-        
+
         if ($orderNow) {
             \Log::info('⚡ Order Now requested');
-            
+
             $earliestSlot = $this->timeSlotService->getEarliestAvailableSlot(
                 $data['location_id'],
                 $data['order_type']
             );
-            
+
             if (!$earliestSlot) {
                 abort(422, 'No available time slots found. The restaurant may be closed or fully booked.');
             }
-            
+
             $slot = $this->timeSlotService->getOrCreateTimeSlot(
                 $data['location_id'],
                 $earliestSlot['slot_date'],
@@ -185,25 +185,28 @@ class OrderPlacementService
                 $data['order_type'],
                 10
             );
-            
+
             // Lock and check
             $slot = OrderTimeSlot::where('id', $slot->id)->lockForUpdate()->first();
             if ($slot->current_orders >= $slot->max_orders) {
                 abort(409, 'The earliest time slot is now fully booked. Please try again.');
             }
-            
+
             return $slot;
-            
+
         } elseif ($data['order_type'] === 'dine-in') {
             return null;
         } elseif (isset($data['time_slot_id'])) {
             // Legacy
             $slot = OrderTimeSlot::where('id', $data['time_slot_id'])->lockForUpdate()->firstOrFail();
-            
-            if ($slot->slot_type !== $data['order_type']) abort(422, 'Selected time slot does not match order type.');
-            if ((int) $slot->location_id !== (int) $data['location_id']) abort(422, 'Selected time slot and location mismatch.');
-            if ($slot->current_orders >= $slot->max_orders) abort(409, 'Selected time slot is fully booked.');
-            
+
+            if ($slot->slot_type !== $data['order_type'])
+                abort(422, 'Selected time slot does not match order type.');
+            if ((int) $slot->location_id !== (int) $data['location_id'])
+                abort(422, 'Selected time slot and location mismatch.');
+            if ($slot->current_orders >= $slot->max_orders)
+                abort(409, 'Selected time slot is fully booked.');
+
             return $slot;
         } else {
             // New dynamic
@@ -213,9 +216,10 @@ class OrderPlacementService
                 $data['slot_time'],
                 $data['order_type']
             );
-            
-            if (!$validation['valid']) abort(422, $validation['message']);
-            
+
+            if (!$validation['valid'])
+                abort(422, $validation['message']);
+
             $slot = $this->timeSlotService->getOrCreateTimeSlot(
                 $data['location_id'],
                 $data['slot_date'],
@@ -223,10 +227,11 @@ class OrderPlacementService
                 $data['order_type'],
                 10
             );
-            
+
             $slot = OrderTimeSlot::where('id', $slot->id)->lockForUpdate()->first();
-            if ($slot->current_orders >= $slot->max_orders) abort(409, 'Selected time slot is fully booked.');
-            
+            if ($slot->current_orders >= $slot->max_orders)
+                abort(409, 'Selected time slot is fully booked.');
+
             return $slot;
         }
     }
@@ -234,21 +239,21 @@ class OrderPlacementService
     protected function validateDeliveryAddress(array $data, Customer $customer, ?string $telegramId): CustomerAddress
     {
         $addressQuery = CustomerAddress::where('id', $data['customer_address_id'] ?? 0);
-        
+
         $telegramUser = null;
         if ($telegramId) {
             $telegramUser = TelegramUser::where('telegram_id', $telegramId)->first();
         }
-        
+
         $addressQuery->where(function ($q) use ($customer, $telegramUser) {
             $q->where('customer_id', $customer->id);
             if ($telegramUser) {
                 $q->orWhere('telegram_user_id', $telegramUser->id);
             }
         });
-        
+
         $address = $addressQuery->first();
-            
+
         if (!$address) {
             abort(422, 'Invalid delivery address.');
         }

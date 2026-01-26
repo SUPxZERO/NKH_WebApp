@@ -230,7 +230,7 @@ class CustomerDashboardController extends Controller
         if (!$customer)
             return $this->error('Auth required', 401);
 
-        return $this->success($customer->notifications()->latest()->paginate(15));
+        return $this->success($customer->notifications()->latest()->limit(15)->get());
     }
 
     /**

@@ -34,7 +34,6 @@ class Employee extends Model
      */
     protected $guarded = [
         'id',
-        'employee_code',        // ⚠️ System-generated
         'salary',               // ⚠️ CRITICAL: Compensation privacy
         'hire_date',            // ⚠️ HR records only
         'employment_status',    // ⚠️ Workflow-managed
@@ -51,6 +50,21 @@ class Employee extends Model
         'available_days' => 'array',
         'max_hours_per_week' => 'integer',
     ];
+
+    /**
+     * Boot method to auto-generate employee_code if not provided
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->employee_code)) {
+                // Generate unique employee code
+                $model->employee_code = 'EMP-' . strtoupper(substr(md5($model->user_id . time()), 0, 8));
+            }
+        });
+    }
 
     public function user()
     {

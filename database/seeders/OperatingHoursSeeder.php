@@ -11,25 +11,8 @@ class OperatingHoursSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ensure at least one location exists for development/testing
-        if (Location::count() === 0) {
-            Location::create([
-                'code' => 'MAIN',
-                'name' => 'Main Branch',
-                'address_line1' => '123 Main St',
-                'city' => 'Phnom Penh',
-                'state' => 'Phnom Penh',
-                'postal_code' => '12000',
-                'country' => 'Cambodia',
-                'phone' => '+855 12 345 678',
-                'is_active' => true,
-                'accepts_online_orders' => true,
-                'accepts_pickup' => true,
-                'accepts_delivery' => true,
-            ]);
-        }
-
-        $locations = Location::all();
+        // Seed hours for all active locations
+        $locations = Location::where('is_active', true)->get();
 
         foreach ($locations as $location) {
             $serviceTypes = ['dine-in'];

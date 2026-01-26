@@ -43,15 +43,17 @@ class TableController extends Controller
     // GET /api/admin/tables/grouped - Returns tables grouped by floor
     public function grouped(Request $request): JsonResponse
     {
-        $query = \App\Models\Floor::query()->with(['tables' => function ($q) use ($request) {
-            if ($request->filled('status')) {
-                $q->where('status', $request->string('status'));
+        $query = \App\Models\Floor::query()->with([
+            'tables' => function ($q) use ($request) {
+                if ($request->filled('status')) {
+                    $q->where('status', $request->string('status'));
+                }
+                if ($request->filled('search')) {
+                    $s = $request->string('search');
+                    $q->where('code', 'like', "%{$s}%");
+                }
             }
-            if ($request->filled('search')) {
-                $s = $request->string('search');
-                $q->where('code', 'like', "%{$s}%");
-            }
-        }]);
+        ]);
 
         if ($request->filled('floor_id')) {
             $query->where('id', (int) $request->floor_id);
@@ -93,14 +95,18 @@ class TableController extends Controller
     public function store(Request $request): DiningTableResource
     {
         $data = $request->validate([
-            'floor_id' => ['required','exists:floors,id'],
-            'code' => ['required','string','max:50'],
-            'capacity' => ['required','integer','min:1'],
-            'status' => ['sometimes','in:available,reserved,occupied,unavailable'],
+            'floor_id' => ['required', 'exists:floors,id'],
+            'code' => ['required', 'string', 'max:50'],
+            'capacity' => ['required', 'integer', 'min:1'],
+            'status' => ['sometimes', 'in:available,reserved,occupied,unavailable'],
         ]);
+
+        // Get the floor to find the location_id
+        $floor = \App\Models\Floor::findOrFail($data['floor_id']);
 
         $table = DiningTable::create([
             'floor_id' => $data['floor_id'],
+            'location_id' => $floor->location_id,
             'code' => $data['code'],
             'capacity' => $data['capacity'],
             'status' => $data['status'] ?? 'available',
@@ -112,11 +118,16 @@ class TableController extends Controller
     public function update(Request $request, DiningTable $table): DiningTableResource
     {
         $data = $request->validate([
-            'floor_id' => ['sometimes','exists:floors,id'],
-            'code' => ['sometimes','string','max:50'],
-            'capacity' => ['sometimes','integer','min:1'],
-            'status' => ['sometimes','in:available,reserved,occupied,unavailable'],
+            'floor_id' => ['sometimes', 'exists:floors,id'],
+            'code' => ['sometimes', 'string', 'max:50'],
+            'capacity' => ['sometimes', 'integer', 'min:1'],
+            'status' => ['sometimes', 'in:available,reserved,occupied,unavailable'],
         ]);
+
+        if (isset($data['floor_id']) && $data['floor_id'] != $table->floor_id) {
+            $floor = \App\Models\Floor::findOrFail($data['floor_id']);
+            $data['location_id'] = $floor->location_id;
+        }
 
         $table->update($data);
         return new DiningTableResource($table->fresh('floor'));
@@ -148,10 +159,10 @@ class TableController extends Controller
     public function generateQr(DiningTable $table): JsonResponse
     {
         $service = app(\App\Services\QrTableService::class);
-        
+
         try {
             $token = $service->generateQrForTable($table);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'QR code generated successfully',
@@ -198,7 +209,7 @@ class TableController extends Controller
             }
 
             $imageBase64 = $service->getQrImageBase64($table, $size);
-            
+
             return response()->json([
                 'success' => true,
                 'format' => 'base64',
@@ -246,7 +257,7 @@ class TableController extends Controller
     public function qrStats(): JsonResponse
     {
         $service = app(\App\Services\QrTableService::class);
-        
+
         return response()->json([
             'success' => true,
             'data' => $service->getStatistics(),

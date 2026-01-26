@@ -24,43 +24,43 @@ class InventoryConsumptionService
             return;
         }
 
-        $orderItem->loadMissing('menuItem.recipe.ingredients.ingredient.unit', 'order');
+        $orderItem->loadMissing(['menuItem.recipe.ingredients.ingredient.unit', 'order.employee', 'order.customer']);
         $menuItem = $orderItem->menuItem;
-        $recipe   = $menuItem?->recipe;
+        $recipe = $menuItem?->recipe;
 
         if (!$recipe) {
             return;
         }
 
         foreach ($recipe->ingredients as $recipeIngredient) {
-            $ingredient   = $recipeIngredient->ingredient;
+            $ingredient = $recipeIngredient->ingredient;
             if (!$ingredient) {
                 continue;
             }
 
             $perItemQty = (float) $recipeIngredient->quantity;
-            $totalQty   = $perItemQty * $orderItem->quantity;
+            $totalQty = $perItemQty * $orderItem->quantity;
 
             if ($totalQty <= 0) {
                 continue;
             }
 
             $unitCost = (float) ($ingredient->cost ?? 0);
-            $value    = round($totalQty * $unitCost, 2);
+            $value = round($totalQty * $unitCost, 2);
 
             InventoryTransaction::create([
-                'ingredient_id'   => $ingredient->id,
-                'location_id'     => $orderItem->order->location_id,
-                'user_id'         => $orderItem->order->employee_id ?? $orderItem->order->customer_id ?? 1,
-                'type'            => 'out',
-                'movement_type'   => 'usage',
-                'quantity'        => $totalQty,
-                'unit'            => $ingredient->unit?->code ?? 'unit',
-                'reference_type'  => 'order',
-                'reference_id'    => $orderItem->order_id,
-                'order_item_id'   => $orderItem->id,
-                'notes'           => 'Auto-consumption for order item '.$orderItem->id,
-                'transacted_at'   => now(),
+                'ingredient_id' => $ingredient->id,
+                'location_id' => $orderItem->order->location_id,
+                'user_id' => $orderItem->order->employee?->user_id ?? $orderItem->order->customer?->user_id,
+                'type' => 'out',
+                'movement_type' => 'usage',
+                'quantity' => $totalQty,
+                'unit' => $ingredient->unit?->code ?? 'unit',
+                'reference_type' => 'order',
+                'reference_id' => $orderItem->order_id,
+                'order_item_id' => $orderItem->id,
+                'notes' => 'Auto-consumption for order item ' . $orderItem->id,
+                'transacted_at' => now(),
             ]);
         }
     }

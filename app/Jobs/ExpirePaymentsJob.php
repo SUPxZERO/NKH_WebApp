@@ -30,28 +30,13 @@ class ExpirePaymentsJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $expiredPayments = Payment::query()
-            ->where('status', Payment::STATUS_PENDING)
-            ->where('expires_at', '<', now())
-            ->get();
+        $expiredPayments = Payment::expired()->get();
 
         $count = 0;
 
         foreach ($expiredPayments as $payment) {
-            $oldStatus = $payment->status;
-
-            $payment->update([
-                'status' => Payment::STATUS_CANCELLED,
-                'failure_reason' => 'Payment expired',
-            ]);
-
-            PaymentAuditLog::log(
-                $payment, 
-                'expired', 
-                $oldStatus, 
-                Payment::STATUS_CANCELLED
-            );
-
+            // markAsFailed handles status update, failure reason, and audit logging
+            $payment->markAsFailed('Payment expired');
             $count++;
         }
 

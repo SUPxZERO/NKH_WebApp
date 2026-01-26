@@ -63,16 +63,73 @@ class CustomerProfileService
      */
     public function getDashboardStats(Customer $customer): array
     {
-        $activeOrdersCount = Order::where('customer_id', $customer->id)
-            ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
+        // 1. Orders metrics
+        $currentMonthOrders = Order::where('customer_id', $customer->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
             ->count();
 
+        $lastMonthOrders = Order::where('customer_id', $customer->id)
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+
+        // improved trend calculation (percentage increase/decrease)
+        $ordersTrend = 0;
+        if ($lastMonthOrders > 0) {
+            $ordersTrend = (($currentMonthOrders - $lastMonthOrders) / $lastMonthOrders) * 100;
+        } else {
+            $ordersTrend = $currentMonthOrders > 0 ? 100 : 0;
+        }
+
+        // 2. Points metrics
+        $pointsEarnedThisMonth = $customer->loyaltyPoints()
+            ->where('type', 'earned')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('points');
+
+        // 3. Rewards metrics
+        $pointsBalance = $customer->points_balance ?? 0;
+
+        // Hardcoded rewards list to match RewardController
+        $rewards = [
+            ['points_required' => 100], // Free Appetizer
+            ['points_required' => 200], // 20% Off
+            ['points_required' => 150], // Free Delivery
+            ['points_required' => 120], // Free Dessert
+            ['points_required' => 50],  // Free Drink
+            ['points_required' => 300], // 10% Off Next 5 Orders
+            ['points_required' => 250], // VIP Table Reservation
+            ['points_required' => 500], // Free Main Course
+        ];
+
+        $availableRewardsCount = 0;
+        foreach ($rewards as $reward) {
+            if ($pointsBalance >= $reward['points_required']) {
+                $availableRewardsCount++;
+            }
+        }
+
         return [
+            // Backend fields (kept for backward compatibility if needed)
             'points' => $customer->points_balance ?? 0,
             'tier' => $customer->customer_tier,
-            'active_orders' => $activeOrdersCount,
+            'active_orders' => Order::where('customer_id', $customer->id)
+                ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
+                ->count(),
             'total_orders' => $customer->orders()->count(),
-            'unread_notifications' => $customer->unreadNotifications()->count(),
+
+            // Frontend expected fields (DashboardStats interface)
+            'orders_this_month' => $currentMonthOrders,
+            'orders_trend' => round($ordersTrend), // Round to integer for cleaner UI
+            'points_earned_this_month' => (int) $pointsEarnedThisMonth,
+            'available_rewards' => $availableRewardsCount,
+
+            // Fix unread notifications safely
+            'unread_notifications' => method_exists($customer, 'unreadNotifications')
+                ? $customer->unreadNotifications()->count()
+                : 0,
         ];
     }
 }

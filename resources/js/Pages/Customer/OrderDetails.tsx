@@ -160,9 +160,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                             <div className="flex-1">
                                                 <div className="flex justify-between items-start mb-1">
                                                     <h4 className="font-semibold text-gray-900 dark:text-white">{item.name}</h4>
-                                                    <span className="font-medium">${item.total_price.toFixed(2)}</span>
+                                                    <span className="font-medium">${Number(item.total_price).toFixed(2)}</span>
                                                 </div>
-                                                <p className="text-sm text-gray-500 mb-2">{item.quantity} x ${item.unit_price.toFixed(2)}</p>
+                                                <p className="text-sm text-gray-500 mb-2">{item.quantity} x ${Number(item.unit_price).toFixed(2)}</p>
                                                 {item.special_instructions && (
                                                     <div className="text-xs bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 p-2 rounded-lg inline-block">
                                                         Note: {item.special_instructions}
@@ -184,26 +184,26 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                     <div className="space-y-2 pb-4 border-b border-gray-100 dark:border-gray-800">
                                         <div className="flex justify-between">
                                             <span className="text-gray-500">Subtotal</span>
-                                            <span>${order.subtotal.toFixed(2)}</span>
+                                            <span>${Number(order.subtotal).toFixed(2)}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-500">Delivery Fee</span>
-                                            <span>${order.delivery_fee.toFixed(2)}</span>
+                                            <span>${Number(order.delivery_fee).toFixed(2)}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-500">Tax</span>
-                                            <span>${order.tax_amount.toFixed(2)}</span>
+                                            <span>${Number(order.tax_amount).toFixed(2)}</span>
                                         </div>
-                                        {order.discount_amount > 0 && (
+                                        {Number(order.discount_amount) > 0 && (
                                             <div className="flex justify-between text-green-500">
                                                 <span>Discount</span>
-                                                <span>-${order.discount_amount.toFixed(2)}</span>
+                                                <span>-${Number(order.discount_amount).toFixed(2)}</span>
                                             </div>
                                         )}
                                     </div>
                                     <div className="flex justify-between font-bold text-lg pt-2">
                                         <span>Total</span>
-                                        <span className="text-fuchsia-600">${order.total_amount.toFixed(2)}</span>
+                                        <span className="text-fuchsia-600">${Number(order.total_amount).toFixed(2)}</span>
                                     </div>
                                     <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                                         <div className="flex justify-between items-center text-xs text-gray-500 uppercase tracking-wider mb-2">Payment Status</div>
@@ -214,7 +214,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                                 {order.is_paid ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                                                 {order.is_paid ? 'Paid' : 'Unpaid'}
                                             </span>
-                                            <span className="text-xs opacity-75 capitalize">{order.payment_mode.replace(/_/g, ' ')}</span>
+                                            <span className="text-xs opacity-75 capitalize">{(order.payment_mode || 'N/A').replace(/_/g, ' ')}</span>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -236,10 +236,10 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                         </>
                                     ) : (
                                         <>
-                                            <div className="font-medium text-fuchsia-600">{order.location.name}</div>
+                                            <div className="font-medium text-fuchsia-600">{order.location?.name || 'Local Store'}</div>
                                             <div className="text-gray-500 flex items-start gap-2">
                                                 <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                                                <span>{order.location.address}</span>
+                                                <span>{order.location?.address || 'Address not available'}</span>
                                             </div>
                                         </>
                                     )}

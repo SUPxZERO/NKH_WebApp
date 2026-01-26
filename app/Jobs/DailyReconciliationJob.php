@@ -45,7 +45,7 @@ class DailyReconciliationJob implements ShouldQueue
             'location_id' => $this->locationId,
         ]);
 
-        $locations = $this->locationId 
+        $locations = $this->locationId
             ? Location::where('id', $this->locationId)->get()
             : Location::where('is_active', true)->get();
 
@@ -85,11 +85,14 @@ class DailyReconciliationJob implements ShouldQueue
             ->whereHas('invoice', function ($q) use ($location) {
                 $q->where('location_id', $location->id);
             })
-            ->where('status', Payment::STATUS_COMPLETED)
+            ->completed()
             ->whereDate('processed_at', $this->date)
-            ->with(['paymentMethod', 'refunds' => function ($q) {
-                $q->where('status', 'completed');
-            }])
+            ->with([
+                'paymentMethod',
+                'refunds' => function ($q) {
+                    $q->where('status', 'completed');
+                }
+            ])
             ->get();
 
         // Calculate totals

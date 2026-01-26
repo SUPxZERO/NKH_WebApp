@@ -40,12 +40,16 @@ class Kernel extends HttpKernel
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             // Debug session/cookie info (local only)
             \App\Http\Middleware\LogSessionDebug::class,
+            // Audit middleware - captures request context
+            \App\Http\Middleware\AuditMiddleware::class,
         ],
 
         // API middleware is configured in bootstrap/app.php for Laravel 11
         'api' => [
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // Audit middleware - captures request context for API
+            \App\Http\Middleware\AuditMiddleware::class,
         ],
     ];
 
@@ -69,6 +73,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         'retry' => \App\Http\Middleware\RetryMiddleware::class, // FIX: Phase 4 - Retry middleware
     ];
 }

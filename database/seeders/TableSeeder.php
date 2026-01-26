@@ -11,17 +11,17 @@ class TableSeeder extends Seeder
     public function run(): void
     {
         $floors = Floor::all();
-        
+
         $tableStatuses = ['available', 'reserved', 'occupied', 'unavailable'];
         $capacities = [2, 4, 6, 8];
-        
+
         foreach ($floors as $floor) {
             $tableCount = $this->getTableCountForFloor($floor->name);
-            
+
             for ($i = 1; $i <= $tableCount; $i++) {
                 $capacity = $capacities[array_rand($capacities)];
                 $status = $this->getTableStatus($i, $tableCount);
-                
+
                 DiningTable::updateOrCreate(
                     [
                         'floor_id' => $floor->id,
@@ -38,7 +38,7 @@ class TableSeeder extends Seeder
 
     private function getTableCountForFloor(string $floorName): int
     {
-        return match($floorName) {
+        return match ($floorName) {
             'Ground Floor' => 12,
             'Second Floor' => 10,
             'Terrace' => 8,
@@ -51,7 +51,7 @@ class TableSeeder extends Seeder
 
     private function generateTableCode(Floor $floor, int $tableNumber): string
     {
-        $floorCode = match($floor->name) {
+        $floorCode = match ($floor->name) {
             'Ground Floor' => 'GF',
             'Second Floor' => '2F',
             'Terrace' => 'TR',
@@ -60,7 +60,7 @@ class TableSeeder extends Seeder
             'Riverside Deck' => 'RD',
             default => 'FL',
         };
-        
+
         return $floorCode . '-' . str_pad($tableNumber, 2, '0', STR_PAD_LEFT);
     }
 
@@ -68,12 +68,12 @@ class TableSeeder extends Seeder
     {
         // Create realistic distribution of table statuses
         $ratio = $tableNumber / $totalTables;
-        
-        if ($ratio <= 0.6) {
+
+        if ($ratio <= 0.8) {
             return 'available';
-        } elseif ($ratio <= 0.8) {
-            return 'occupied';
         } elseif ($ratio <= 0.9) {
+            return 'occupied';
+        } elseif ($ratio <= 0.95) {
             return 'reserved';
         } else {
             return rand(0, 1) ? 'available' : 'unavailable';

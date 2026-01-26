@@ -245,7 +245,7 @@ class RolePermissionSeeder extends Seeder
                 'purchase-orders.view', 'purchase-orders.manage',
                 'payments.view',
                 'expenses.view',
-                'employees.view', 'employees.create', 'employees.update',
+                'employees.view', 'employees.create', 'employees.update', 'employees.delete',
                 'attendance.view', 'shifts.view',
                 'locations.view', 'locations.manage',
                 'floors.manage', 'tables.manage',

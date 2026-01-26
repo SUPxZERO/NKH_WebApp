@@ -9,7 +9,9 @@ class UpdateEmployeeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasAnyRole(['admin', 'manager']) ?? false;
+        // Permission is checked via middleware, so always authorize here
+        // The route has permission:employees.update middleware
+        return true;
     }
 
     public function rules(): array

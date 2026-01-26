@@ -13,7 +13,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError, toastInfo } from '@/app/utils/toast';
-import { DiningTable, Floor } from '@/app/types/domain';
+import { DiningTable, Floor, Location } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
 
 // Stats Ribbon Component - Mobile optimized
@@ -75,6 +75,7 @@ export default function Tables() {
 
   const qc = useQueryClient();
   const [formData, setFormData] = useState({
+    location_id: '',
     floor_id: '',
     code: '',
     capacity: '2',
@@ -94,7 +95,12 @@ export default function Tables() {
 
   const { data: floors } = useQuery({
     queryKey: ['floors'],
-    queryFn: () => apiGet('/api/admin/floors')
+    queryFn: () => apiGet('/api/admin/floors?per_page=100')
+  });
+
+  const { data: locations } = useQuery({
+    queryKey: ['locations'],
+    queryFn: () => apiGet('/api/admin/locations?per_page=100')
   });
 
   // Flatten tables for list view
@@ -179,12 +185,16 @@ export default function Tables() {
     setOpenCreate(false);
     setOpenEdit(false);
     setEditingTable(null);
-    setFormData({ floor_id: '', code: '', capacity: '2', status: 'available' });
+    setFormData({ location_id: '', floor_id: '', code: '', capacity: '2', status: 'available' });
   };
 
   const handleEdit = (table: DiningTable) => {
     setEditingTable(table);
+    // Find floor to identify location
+    const floor = floors?.data?.find((f: Floor) => f.id === table.floor_id);
+
     setFormData({
+      location_id: floor?.location_id?.toString() || '',
       floor_id: table.floor_id.toString(),
       code: table.code,
       capacity: table.capacity.toString(),
@@ -549,143 +559,158 @@ export default function Tables() {
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
+              <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-1.5">Location</label>
+              <select
+                value={formData.location_id}
+                onChange={(e) => setFormData({ ...formData, location_id: e.target.value, floor_id: '' })}
+                required
+                className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground"
+              >
+                <option value="">Select Location</option>
+                {locations?.data?.map((l: Location) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-1.5">Floor</label>
               <select
                 value={formData.floor_id}
                 onChange={(e) => setFormData({ ...formData, floor_id: e.target.value })}
                 required
-                className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground"
+                disabled={!formData.location_id}
+                className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground disabled:opacity-50"
               >
                 <option value="">Select Floor</option>
-                {floors?.data?.map((f: Floor) => (
+                {floors?.data?.filter((f: Floor) => !formData.location_id || f.location_id === parseInt(formData.location_id)).map((f: Floor) => (
                   <option key={f.id} value={f.id}>{f.name}</option>
                 ))}
               </select>
             </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label="Table Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required className="bg-secondary border-border h-10 text-sm" />
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <Input label="Capacity" type="number" value={formData.capacity} onChange={(e) => setFormData({ ...formData, capacity: e.target.value })} required className="bg-secondary border-border h-10 text-sm" />
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-1.5">Status</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground"
-              >
-                <option value="available">Available</option>
-                <option value="reserved">Reserved</option>
-                <option value="occupied">Occupied</option>
-                <option value="unavailable">Unavailable</option>
-              </select>
-            </div>
           </div>
-          <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
-            <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700">Save</Button>
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-1.5">Status</label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground"
+            >
+              <option value="available">Available</option>
+              <option value="reserved">Reserved</option>
+              <option value="occupied">Occupied</option>
+              <option value="unavailable">Unavailable</option>
+            </select>
           </div>
         </form>
-      </Modal>
-
-      {/* QR Code Modal */}
-      <Modal
-        open={openQrModal}
-        onClose={() => { setOpenQrModal(false); setSelectedTableForQr(null); setQrImageData(null); }}
-        title={`QR Code - Table ${selectedTableForQr?.code || ''}`}
-      >
-        <div className="space-y-4">
-          {/* Table Info */}
-          <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-purple-500/20">
-              <LayoutGrid className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground text-lg">{selectedTableForQr?.code}</h3>
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <MapPin size={12} /> {selectedTableForQr?.floor_name || 'Main Floor'}
-                <span className="mx-2">•</span>
-                <Users size={12} /> {selectedTableForQr?.capacity} seats
-              </p>
-            </div>
-          </div>
-
-          {/* QR Code Display */}
-          <div className="flex flex-col items-center py-6">
-            {qrLoading ? (
-              <div className="w-48 h-48 bg-secondary rounded-xl flex items-center justify-center">
-                <RefreshCw className="w-8 h-8 text-muted-foreground animate-spin" />
-              </div>
-            ) : qrImageData ? (
-              <div className="bg-white p-4 rounded-xl shadow-lg">
-                <img src={qrImageData} alt="QR Code" className="w-48 h-48" />
-              </div>
-            ) : (
-              <div className="w-48 h-48 bg-secondary rounded-xl flex flex-col items-center justify-center text-muted-foreground">
-                <QrCode className="w-12 h-12 mb-2" />
-                <p className="text-sm">No QR code yet</p>
-              </div>
-            )}
-
-            {selectedTableForQr?.qr_url && (
-              <p className="mt-4 text-xs text-muted-foreground font-mono bg-secondary px-3 py-1.5 rounded-lg max-w-full break-all text-center">
-                {selectedTableForQr.qr_url}
-              </p>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            {selectedTableForQr?.qr_token ? (
-              <>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleGenerateQr(selectedTableForQr.id)}
-                  disabled={generateQrMutation.isPending}
-                  className="h-11"
-                >
-                  <RefreshCw size={16} className={cn("mr-2", generateQrMutation.isPending && "animate-spin")} />
-                  Regenerate
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={handleCopyQrUrl}
-                  className="h-11"
-                >
-                  <Copy size={16} className="mr-2" />
-                  Copy URL
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  onClick={handleDownloadQr}
-                  disabled={!qrImageData}
-                  className="h-11"
-                >
-                  <Download size={16} className="mr-2" />
-                  Download
-                </Button>
-                <Button
-                  onClick={handlePrintQr}
-                  disabled={!qrImageData}
-                  className="h-11 bg-purple-600 hover:bg-purple-700"
-                >
-                  <Printer size={16} className="mr-2" />
-                  Print
-                </Button>
-              </>
-            ) : (
-              <Button
-                onClick={() => handleGenerateQr(selectedTableForQr?.id)}
-                disabled={generateQrMutation.isPending || !selectedTableForQr}
-                className="col-span-2 h-11 bg-purple-600 hover:bg-purple-700"
-              >
-                <QrCode size={16} className="mr-2" />
-                {generateQrMutation.isPending ? 'Generating...' : 'Generate QR Code'}
-              </Button>
-            )}
-          </div>
+        <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
+          <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+          <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700">Save</Button>
         </div>
-      </Modal>
+    </Modal>
+
+      {/* QR Code Modal */ }
+  <Modal
+    open={openQrModal}
+    onClose={() => { setOpenQrModal(false); setSelectedTableForQr(null); setQrImageData(null); }}
+    title={`QR Code - Table ${selectedTableForQr?.code || ''}`}
+  >
+    <div className="space-y-4">
+      {/* Table Info */}
+      <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-purple-500/20">
+          <LayoutGrid className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-foreground text-lg">{selectedTableForQr?.code}</h3>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <MapPin size={12} /> {selectedTableForQr?.floor_name || 'Main Floor'}
+            <span className="mx-2">•</span>
+            <Users size={12} /> {selectedTableForQr?.capacity} seats
+          </p>
+        </div>
+      </div>
+
+      {/* QR Code Display */}
+      <div className="flex flex-col items-center py-6">
+        {qrLoading ? (
+          <div className="w-48 h-48 bg-secondary rounded-xl flex items-center justify-center">
+            <RefreshCw className="w-8 h-8 text-muted-foreground animate-spin" />
+          </div>
+        ) : qrImageData ? (
+          <div className="bg-white p-4 rounded-xl shadow-lg">
+            <img src={qrImageData} alt="QR Code" className="w-48 h-48" />
+          </div>
+        ) : (
+          <div className="w-48 h-48 bg-secondary rounded-xl flex flex-col items-center justify-center text-muted-foreground">
+            <QrCode className="w-12 h-12 mb-2" />
+            <p className="text-sm">No QR code yet</p>
+          </div>
+        )}
+
+        {selectedTableForQr?.qr_url && (
+          <p className="mt-4 text-xs text-muted-foreground font-mono bg-secondary px-3 py-1.5 rounded-lg max-w-full break-all text-center">
+            {selectedTableForQr.qr_url}
+          </p>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="grid grid-cols-2 gap-3">
+        {selectedTableForQr?.qr_token ? (
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => handleGenerateQr(selectedTableForQr.id)}
+              disabled={generateQrMutation.isPending}
+              className="h-11"
+            >
+              <RefreshCw size={16} className={cn("mr-2", generateQrMutation.isPending && "animate-spin")} />
+              Regenerate
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleCopyQrUrl}
+              className="h-11"
+            >
+              <Copy size={16} className="mr-2" />
+              Copy URL
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={handleDownloadQr}
+              disabled={!qrImageData}
+              className="h-11"
+            >
+              <Download size={16} className="mr-2" />
+              Download
+            </Button>
+            <Button
+              onClick={handlePrintQr}
+              disabled={!qrImageData}
+              className="h-11 bg-purple-600 hover:bg-purple-700"
+            >
+              <Printer size={16} className="mr-2" />
+              Print
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={() => handleGenerateQr(selectedTableForQr?.id)}
+            disabled={generateQrMutation.isPending || !selectedTableForQr}
+            className="col-span-2 h-11 bg-purple-600 hover:bg-purple-700"
+          >
+            <QrCode size={16} className="mr-2" />
+            {generateQrMutation.isPending ? 'Generating...' : 'Generate QR Code'}
+          </Button>
+        )}
+      </div>
+    </div>
+  </Modal>
     </AdminLayout >
   );
 }

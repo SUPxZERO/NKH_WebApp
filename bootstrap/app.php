@@ -6,15 +6,15 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Trust all proxies (for Render.com HTTPS support)
         $middleware->trustProxies(at: '*');
-        
+
         $middleware->encryptCookies(except: [
             'table_session',
         ]);
@@ -23,10 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(prepend: [
             // \App\Http\Middleware\TelegramWebAppAuth::class, // Sprint P15: MUST run before auth
         ]);
-        
+
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\AuditMiddleware::class, // Audit request tracing
         ]);
 
         // API middleware - enable session-based auth (same as web)
@@ -36,6 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \App\Http\Middleware\TelegramWebAppAuth::class, // Sprint P15: Auto-auth Telegram users for API
+        ]);
+
+        $middleware->api(append: [
+            \App\Http\Middleware\AuditMiddleware::class, // Audit request tracing
         ]);
 
         // Middleware aliases

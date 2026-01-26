@@ -13,6 +13,9 @@ class OrderItemResource extends JsonResource
         $imagePath = null;
         if ($this->relationLoaded('menuItem') && $this->menuItem) {
             $imagePath = $this->menuItem->image_path;
+            if ($imagePath && !str_starts_with($imagePath, 'http') && !str_starts_with($imagePath, '/')) {
+                $imagePath = '/storage/' . $imagePath;
+            }
         }
 
         return [

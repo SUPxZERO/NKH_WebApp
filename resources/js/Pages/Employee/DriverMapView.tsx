@@ -26,6 +26,11 @@ interface DriverMapViewProps {
     onCollectPayment: (order: any) => void;
 }
 
+interface DriverOrdersData {
+    my_deliveries: any[];
+    available_deliveries: any[];
+}
+
 // Color mapping for order statuses
 const STATUS_COLORS: Record<string, string> = {
     'ready': '#10B981', // Green
@@ -52,7 +57,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
     } = useRouteOptimization({ driverLocation });
 
     // Fetch driver orders with driver location for proximity sorting
-    const { data, isLoading, error, refetch } = useQuery({
+    const { data, isLoading, error, refetch } = useQuery<DriverOrdersData>({
         queryKey: ['driver.orders', driverLocation?.lat, driverLocation?.lng],
         queryFn: () => {
             const params = driverLocation
@@ -123,8 +128,8 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
         }
 
         if (markers.length > 0) {
-            const avgLat = markers.reduce((sum, m) => sum + m.lat, 0) / markers.length;
-            const avgLng = markers.reduce((sum, m) => sum + m.lng, 0) / markers.length;
+            const avgLat = markers.reduce((sum: number, m: { lat: number }) => sum + m.lat, 0) / markers.length;
+            const avgLng = markers.reduce((sum: number, m: { lng: number }) => sum + m.lng, 0) / markers.length;
             return [avgLat, avgLng];
         }
 

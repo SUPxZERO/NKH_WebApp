@@ -59,7 +59,7 @@ const itemVariants: Variants = {
   }
 };
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 15;
 
 export default function Menu() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();

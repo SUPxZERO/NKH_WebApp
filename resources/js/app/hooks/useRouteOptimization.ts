@@ -34,9 +34,9 @@ export function useRouteOptimization({ driverLocation }: UseRouteOptimizationPro
             return apiPost('/employee/driver/orders/optimize-route', {
                 order_ids: orderIds,
                 driver_location: driverLocation,
-            });
+            }) as Promise<{ data: OptimizedRoute }>;
         },
-        onSuccess: (response) => {
+        onSuccess: (response: { data: OptimizedRoute }) => {
             setOptimizedRoute(response.data);
             toastSuccess(`Route optimized! ${response.data.total_distance_km}km, ~${Math.round(response.data.total_duration_min)}min`);
         },

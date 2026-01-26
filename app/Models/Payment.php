@@ -111,7 +111,8 @@ class Payment extends Model
 
     public function getStatusAttribute($value)
     {
-        if ($value !== null) return $value;
+        if ($value !== null)
+            return $value;
         return $this->paymentStatus?->code ?? 'pending';
     }
 
@@ -263,58 +264,74 @@ class Payment extends Model
     public function markAsProcessing(): bool
     {
         $oldStatus = $this->status;
-        $result = $this->update(['status' => self::STATUS_PROCESSING]);
-        
+        $status = PaymentStatus::where('code', self::STATUS_PROCESSING)->first();
+        if (!$status)
+            return false;
+
+        $result = $this->update(['payment_status_id' => $status->id]);
+
         if ($result) {
             PaymentAuditLog::log($this, 'status_changed', $oldStatus, self::STATUS_PROCESSING);
         }
-        
+
         return $result;
     }
 
     public function markAsCompleted(?string $gatewayReference = null): bool
     {
         $oldStatus = $this->status;
+        $status = PaymentStatus::where('code', self::STATUS_COMPLETED)->first();
+        if (!$status)
+            return false;
+
         $result = $this->update([
-            'status' => self::STATUS_COMPLETED,
+            'payment_status_id' => $status->id,
             'processed_at' => now(),
             'gateway_reference' => $gatewayReference ?? $this->gateway_reference,
         ]);
-        
+
         if ($result) {
             PaymentAuditLog::log($this, 'completed', $oldStatus, self::STATUS_COMPLETED);
         }
-        
+
         return $result;
     }
 
     public function markAsFailed(string $reason): bool
     {
         $oldStatus = $this->status;
+        $status = PaymentStatus::where('code', self::STATUS_FAILED)->first();
+        if (!$status)
+            return false;
+
         $result = $this->update([
-            'status' => self::STATUS_FAILED,
+            'payment_status_id' => $status->id,
             'failure_reason' => $reason,
             'retry_count' => $this->retry_count + 1,
         ]);
-        
+
         if ($result) {
             PaymentAuditLog::log($this, 'failed', $oldStatus, self::STATUS_FAILED, null, [
                 'reason' => $reason,
             ]);
         }
-        
+
         return $result;
     }
 
     public function markAsCancelled(): bool
     {
         $oldStatus = $this->status;
-        $result = $this->update(['status' => self::STATUS_CANCELLED]);
-        
+        $status = PaymentStatus::where('code', self::STATUS_CANCELLED)->first();
+        if (!$status)
+            return false;
+
+        $result = $this->update(['payment_status_id' => $status->id]);
+
         if ($result) {
             PaymentAuditLog::log($this, 'cancelled', $oldStatus, self::STATUS_CANCELLED);
         }
-        
+
         return $result;
     }
 }

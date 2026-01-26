@@ -273,12 +273,22 @@ Route::middleware('permission:settings.update')
         Route::post('settings/bulk-update', [SettingsController::class, 'bulkUpdate']);
     });
 
-// Audit Logs - requires audit.* permissions
+// Audit Logs - requires audit.view permission
 Route::middleware('permission:audit.view')
+    ->prefix('audit-logs')
     ->group(function () {
-        Route::get('audit-logs', [AuditLogController::class, 'index']);
-        Route::get('audit-stats', [AuditLogController::class, 'stats']);
+        Route::get('', [AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::get('filters', [AuditLogController::class, 'filters'])->name('audit-logs.filters');
+        Route::get('{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
+        
+        // Export routes (may require separate permission)
+        Route::get('export/csv', [AuditLogController::class, 'exportCsv'])->name('audit-logs.export-csv');
+        Route::get('export/json', [AuditLogController::class, 'exportJson'])->name('audit-logs.export-json');
     });
+
+// Audit Stats - requires audit.view permission
+Route::middleware('permission:audit.view')
+    ->get('audit-stats', [AuditLogController::class, 'stats'])->name('audit-stats');
 
 // Roles & Permissions - requires roles.manage or permissions.manage
 Route::middleware('permission:roles.manage,permissions.manage')

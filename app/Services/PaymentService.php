@@ -337,6 +337,7 @@ class PaymentService
             }
 
             // 3. Create Payment Record
+            // 3. Create Payment Record
             $payment = (new Payment())->forceFill([
                 'invoice_id' => $invoice->id,
                 'payment_method_id' => $methodId,
@@ -360,10 +361,9 @@ class PaymentService
 
             $invoice->payments()->save($payment);
 
-            // Log Audit (Skipped - Model missing)
-            /*
-            if (class_exists(PaymentAuditLog::class)) {
-                PaymentAuditLog::log(
+            // Log Audit
+            if (class_exists(\App\Models\PaymentAuditLog::class)) {
+                \App\Models\PaymentAuditLog::log(
                     $payment,
                     'payment_received',
                     null,
@@ -372,7 +372,6 @@ class PaymentService
                     ['note' => 'Payment processed via service', 'mode' => $paymentData['mode'] ?? 'unknown']
                 );
             }
-            */
 
             // 4. Reconcile Invoice Status
             $this->invoiceService->reconcileStatus($invoice);
@@ -437,7 +436,11 @@ class PaymentService
             $order->loadMissing('invoice');
             $invoice = $this->invoiceService->createOrUpdateForOrder($order);
 
-            $existingPaid = $invoice->payments()->where('status', 'completed')->sum('amount');
+            $existingPaid = $invoice->payments()
+                ->whereHas('paymentStatus', function ($q) {
+                    $q->where('code', 'completed');
+                })
+                ->sum('amount');
 
             if ($existingPaid < $order->total_amount) {
                 $diff = $order->total_amount - $existingPaid;

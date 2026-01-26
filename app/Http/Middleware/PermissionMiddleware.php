@@ -55,7 +55,16 @@ class PermissionMiddleware
 
         // Check if user has ANY of the required permissions
         foreach ($permissions as $permission) {
-            if ($user->hasPermission($permission)) {
+            $hasPermission = $user->hasPermission($permission);
+            \Log::debug('Permission check', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'permission' => $permission,
+                'has_permission' => $hasPermission,
+                'user_roles' => $user->roles->pluck('slug')->toArray(),
+                'path' => $request->path(),
+            ]);
+            if ($hasPermission) {
                 return $next($request);
             }
         }
@@ -63,8 +72,11 @@ class PermissionMiddleware
         // Log the failed permission check for auditing
         \Log::warning('Permission denied', [
             'user_id' => $user->id,
+            'user_email' => $user->email,
             'required_permissions' => $permissions,
+            'user_roles' => $user->roles->pluck('slug')->toArray(),
             'path' => $request->path(),
+            'method' => $request->method(),
         ]);
 
         throw new HttpException(403, 'Forbidden: insufficient permissions.');

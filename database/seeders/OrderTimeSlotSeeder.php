@@ -10,36 +10,42 @@ class OrderTimeSlotSeeder extends Seeder
 {
     public function run(): void
     {
-        $locationId = 1;
-        $dates = [
-            Carbon::now()->format('Y-m-d'),
-            Carbon::now()->addDay()->format('Y-m-d'),
-            Carbon::now()->addDays(2)->format('Y-m-d'),
-        ];
-        $types = ['pickup', 'delivery'];
+        $locations = \App\Models\Location::where('is_active', true)->get();
+        $startDate = Carbon::now();
+        $days = 14;
 
-        foreach ($dates as $date) {
-            foreach ($types as $type) {
-                // Slots from 10 AM to 8 PM
-                for ($h = 10; $h < 20; $h++) {
-                    $time = sprintf('%02d:00:00', $h);
-                    
-                    // Check if exists
-                    $exists = OrderTimeSlot::where('location_id', $locationId)
-                        ->where('slot_date', $date)
-                        ->where('slot_start_time', $time)
-                        ->where('slot_type', $type)
-                        ->exists();
+        foreach ($locations as $location) {
+            $types = [];
+            if ($location->accepts_pickup)
+                $types[] = 'pickup';
+            if ($location->accepts_delivery)
+                $types[] = 'delivery';
 
-                    if (!$exists) {
-                        OrderTimeSlot::create([
-                            'location_id' => $locationId,
-                            'slot_date' => $date,
-                            'slot_start_time' => $time,
-                            'slot_type' => $type,
-                            'max_orders' => 5,
-                            'current_orders' => 0,
-                        ]);
+            if (empty($types))
+                continue;
+
+            for ($d = 0; $d < $days; $d++) {
+                $date = $startDate->copy()->addDays($d)->format('Y-m-d');
+
+                foreach ($types as $type) {
+                    // Slots from 8 AM to 10 PM (22:00)
+                    for ($h = 8; $h < 22; $h++) {
+                        // Create 30-minute intervals if needed, but for now hourly is fine
+                        // Actually, let's do hourly to match previous logic but extended range
+                        $time = sprintf('%02d:00:00', $h);
+
+                        OrderTimeSlot::updateOrCreate(
+                            [
+                                'location_id' => $location->id,
+                                'slot_date' => $date,
+                                'slot_start_time' => $time,
+                                'slot_type' => $type,
+                            ],
+                            [
+                                'max_orders' => 10, // Increased capacity for testing
+                                'current_orders' => 0,
+                            ]
+                        );
                     }
                 }
             }
