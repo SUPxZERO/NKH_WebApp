@@ -27,12 +27,6 @@ class Payroll extends Model
      */
     protected $guarded = [
         'id',
-        'gross_pay',            // ⚠️ CRITICAL: Calculated salary
-        'bonuses',              // ⚠️ CRITICAL: Bonus amounts
-        'deductions',           // ⚠️ CRITICAL: Deduction amounts
-        'net_pay',              // ⚠️ CRITICAL: Final pay (gross + bonuses - deductions)
-        'status',               // ⚠️ Workflow (draft/approved/paid)
-        'paid_at',              // ⚠️ Payment timestamp
         'created_at',
         'updated_at',
     ];

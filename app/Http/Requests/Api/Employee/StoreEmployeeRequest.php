@@ -24,12 +24,7 @@ class StoreEmployeeRequest extends FormRequest
             'role' => ['required', 'string', 'in:admin,manager,cashier,waiter,chef,employee'],
             'location_id' => ['required', 'exists:locations,id'],
             'position_id' => ['required', 'exists:positions,id'],
-            'employee_code' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('employees', 'employee_code')->where(fn($q) => $q->where('location_id', $this->location_id)),
-            ],
+            'employee_code' => ['nullable', 'string', 'max:50', 'unique:employees,employee_code'],
             'hire_date' => ['required', 'date'],
             'salary_type' => ['sometimes', 'in:hourly,monthly'],
             'salary' => ['nullable', 'numeric', 'min:0'],

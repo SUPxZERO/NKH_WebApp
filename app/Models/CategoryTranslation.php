@@ -11,11 +11,7 @@ class CategoryTranslation extends Model
 
     protected $guarded = [
         'id',
-        'category_id',
-        'locale',
-        'name',
-        'description',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

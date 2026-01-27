@@ -54,24 +54,23 @@ class MenuItem extends Model
      */
     protected $guarded = [
         'id',
-        'cost',                    // ⚠️ CRITICAL: Internal cost (profit margin calc)
         'rating',                  // ⚠️ System-calculated from reviews
         'reviews_count',           // ⚠️ System-counted
         'created_at',
         'updated_at',
         'deleted_at',
     ];
-    
+
     protected static function boot()
     {
         parent::boot();
-        
+
         /*
         static::addGlobalScope('active', function ($query) {
             $query->where('is_active', true);
         });
         */
-        
+
         static::addGlobalScope('ordered', function ($query) {
             $query->orderBy('display_order', 'asc');
         });

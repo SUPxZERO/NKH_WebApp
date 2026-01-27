@@ -11,11 +11,7 @@ class MenuItemTranslation extends Model
 
     protected $guarded = [
         'id',
-        'menu_item_id',
-        'locale',
-        'name',
-        'description',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

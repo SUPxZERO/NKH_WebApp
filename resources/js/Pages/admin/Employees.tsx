@@ -185,7 +185,9 @@ export default function Employees() {
       name: employee.user.name, email: employee.user.email, phone: employee.phone || '', password: '',
       employee_code: employee.employee_code, hire_date: employee.hire_date || '',
       salary_type: employee.salary_type, salary: employee.salary?.toString() || '',
-      address: employee.address || '', latitude: employee.user.latitude || null, longitude: employee.user.longitude || null,
+      address: employee.address || '',
+      latitude: employee.user.latitude ? parseFloat(String(employee.user.latitude)) : null,
+      longitude: employee.user.longitude ? parseFloat(String(employee.user.longitude)) : null,
       position_id: employee.position_id?.toString() || '', location_id: employee.location_id?.toString() || '',
       status: employee.status, role: employee.user.roles?.[0] || 'employee'
     });
@@ -565,11 +567,12 @@ export default function Employees() {
             <Input
               label="Code"
               value={formData.employee_code}
-              onChange={(e) => setFormData({ ...formData, employee_code: e.target.value })}
-              required
+              placeholder={editingEmployee ? '' : 'Auto-generated'}
+              onChange={() => { }} // Read-only
+              disabled
               leftIcon={<BadgeIcon className="w-4 h-4" />}
               variant="filled"
-              className="h-10 text-sm"
+              className="h-10 text-sm opacity-70 cursor-not-allowed"
             />
             <Input
               label="Hire Date"
@@ -656,6 +659,7 @@ export default function Employees() {
           {/* Address - Hidden on mobile for compactness */}
           <div className="hidden sm:block">
             <AddressPicker
+              key={editingEmployee ? `edit-${editingEmployee.id}` : 'create'}
               label="Address"
               initialAddress={formData.address}
               initialLat={formData.latitude || undefined}

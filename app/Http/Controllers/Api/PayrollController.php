@@ -35,6 +35,7 @@ class PayrollController extends Controller
             'period_start' => 'required_without:month|date_format:Y-m-d',
             'period_end' => 'required_without:month|date_format:Y-m-d|after:period_start',
             'include_overtime' => 'nullable|boolean',
+            'force_regenerate' => 'nullable|boolean',
         ]);
 
         try {
@@ -58,8 +59,14 @@ class PayrollController extends Controller
                         ->first();
 
                     if ($existing) {
-                        $payrolls[] = $existing;
-                        continue;
+                        // If force_regenerate is set, delete the old one
+                        if ($validated['force_regenerate'] ?? false) {
+                            $existing->details()->delete();
+                            $existing->delete();
+                        } else {
+                            $payrolls[] = $existing;
+                            continue;
+                        }
                     }
 
                     $employee = Employee::findOrFail($employeeId);
@@ -172,7 +179,7 @@ class PayrollController extends Controller
             if ($request->filled('month')) {
                 $date = Carbon::parse($validated['month']);
                 $query->whereYear('period_start', $date->year)
-                      ->whereMonth('period_start', $date->month);
+                    ->whereMonth('period_start', $date->month);
             }
 
             if ($validated['from'] ?? null) {
@@ -195,9 +202,9 @@ class PayrollController extends Controller
                         'period' => $payroll->period_start->format('M Y'),
                         'period_start' => $payroll->period_start->format('Y-m-d'),
                         'period_end' => $payroll->period_end->format('Y-m-d'),
-                        'base_pay' => (float) $payroll->base_pay ?? 0, // Ensure field exists
-                        'overtime_pay' => (float) $payroll->overtime_pay ?? 0, // Ensure field exists
-                        'taxes' => (float) $payroll->taxes ?? 0, // Ensure field exists
+                        'base_pay' => (float) $payroll->gross_pay, // Map gross_pay as base pay
+                        'overtime_pay' => 0, // TODO: Add overtime tracking column if needed
+                        'taxes' => 0, // TODO: Add tax calculation column if needed
                         'gross_pay' => (float) $payroll->gross_pay,
                         'bonuses' => (float) $payroll->bonuses,
                         'deductions' => (float) $payroll->deductions,
@@ -230,31 +237,45 @@ class PayrollController extends Controller
             $earnings = $payroll->details()->earnings()->get();
             $deductions = $payroll->details()->deductions()->get();
 
+            // If no details exist (old payrolls), create synthetic entries
+            $earningsData = $earnings->map(function ($detail) {
+                return [
+                    'description' => $detail->description,
+                    'amount' => (float) $detail->amount,
+                    'percentage' => $detail->percentage,
+                ];
+            })->toArray();
+
+            // Fallback: add base salary if no earnings exist
+            if (count($earningsData) === 0 && $payroll->gross_pay > 0) {
+                $earningsData[] = [
+                    'description' => 'Base Salary',
+                    'amount' => (float) $payroll->gross_pay,
+                    'percentage' => null,
+                ];
+            }
+
+            $deductionsData = $deductions->map(function ($detail) {
+                return [
+                    'description' => $detail->description,
+                    'amount' => (float) $detail->amount,
+                    'percentage' => $detail->percentage,
+                ];
+            })->toArray();
+
             return response()->json([
                 'payroll_id' => $payroll->id,
                 'employee_id' => $payroll->employee_id,
-                'employee_name' => $payroll->employee->user->name,
+                'employee_name' => $payroll->employee->user->name ?? 'Unknown',
                 'period_start' => $payroll->period_start->format('Y-m-d'),
                 'period_end' => $payroll->period_end->format('Y-m-d'),
-                'earnings' => $earnings->map(function ($detail) {
-                    return [
-                        'description' => $detail->description,
-                        'amount' => $detail->amount,
-                        'percentage' => $detail->percentage,
-                    ];
-                }),
-                'deductions' => $deductions->map(function ($detail) {
-                    return [
-                        'description' => $detail->description,
-                        'amount' => $detail->amount,
-                        'percentage' => $detail->percentage,
-                    ];
-                }),
+                'earnings' => $earningsData,
+                'deductions' => $deductionsData,
                 'totals' => [
-                    'gross_pay' => $payroll->gross_pay,
-                    'total_deductions' => $payroll->deductions,
-                    'total_bonuses' => $payroll->bonuses,
-                    'net_pay' => $payroll->net_pay,
+                    'gross_pay' => (float) $payroll->gross_pay,
+                    'total_deductions' => (float) $payroll->deductions,
+                    'total_bonuses' => (float) $payroll->bonuses,
+                    'net_pay' => (float) $payroll->net_pay,
                 ],
                 'status' => $payroll->status,
                 'paid_at' => $payroll->paid_at?->format('Y-m-d H:i:s'),
@@ -355,7 +376,7 @@ class PayrollController extends Controller
         if ($request->filled('month')) {
             $date = Carbon::parse($validated['month']);
             $query->whereYear('period_start', $date->year)
-                  ->whereMonth('period_start', $date->month);
+                ->whereMonth('period_start', $date->month);
         }
 
         $payrolls = $query->orderBy('period_start', 'desc')->get();
@@ -365,9 +386,9 @@ class PayrollController extends Controller
             'Content-Disposition' => 'attachment; filename="payroll-report-' . date('Y-m-d') . '.csv"',
         ];
 
-        $callback = function() use ($payrolls, $validated) {
+        $callback = function () use ($payrolls, $validated) {
             $file = fopen('php://output', 'w');
-            
+
             // Title & Period
             fputcsv($file, ['Payroll Report']);
             if (isset($validated['month'])) {
@@ -391,7 +412,7 @@ class PayrollController extends Controller
             // Payroll Details
             fputcsv($file, ['PAYROLL DETAILS']);
             fputcsv($file, ['Employee', 'Period', 'Base Pay', 'Overtime', 'Bonuses', 'Deductions', 'Net Pay', 'Status']);
-            
+
             foreach ($payrolls as $payroll) {
                 fputcsv($file, [
                     $payroll->employee->user->name ?? 'Unknown',
@@ -425,7 +446,7 @@ class PayrollController extends Controller
         if ($request->filled('month')) {
             $date = Carbon::parse($validated['month']);
             $query->whereYear('period_start', $date->year)
-                  ->whereMonth('period_start', $date->month);
+                ->whereMonth('period_start', $date->month);
         }
 
         $payrolls = $query->orderBy('period_start', 'desc')->get();
@@ -460,7 +481,7 @@ class PayrollController extends Controller
                 'total_bonuses' => $totalBonuses,
                 'avg_net_pay' => $avgNetPay,
             ],
-            'period' => isset($validated['month']) 
+            'period' => isset($validated['month'])
                 ? Carbon::parse($validated['month'])->format('F Y')
                 : 'All Records',
             'generated_at' => now()->format('F d, Y \a\t H:i'),

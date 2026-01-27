@@ -20,10 +20,15 @@ class MenuItemController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+            // Explicitly check for authenticated user (admin/staff)
+            // This is needed because this route might be accessed publicly (no auth middleware)
+            $user = auth('sanctum')->user();
+
             // Sprint 1: Use caching for simple menu list without filters
+            // Admins ($user) always bypass cache to see inactive/draft items
             $hasFilters = $request->filled(['category', 'search']) || $request->boolean('active_only', false);
 
-            if (!$hasFilters) {
+            if (!$hasFilters && !$user) {
                 // Default to the first active location if not provided
                 $locationId = $request->input('location_id');
                 if (!$locationId) {
@@ -32,13 +37,22 @@ class MenuItemController extends Controller
                 }
 
                 // Use cached menu for better performance
-                $menuItems = app(CacheService::class)->getMenu($locationId);
+                $allMenuItems = app(CacheService::class)->getMenu($locationId);
+
+                // Manual pagination for cached collection
+                $page = max((int) $request->input('page', 1), 1);
+                $perPage = min(max((int) $request->input('per_page', 16), 1), 100);
+
+                $paginatedItems = $allMenuItems->forPage($page, $perPage)->values();
 
                 return response()->json([
                     'status' => 'success',
-                    'data' => MenuItemResource::collection($menuItems),
+                    'data' => MenuItemResource::collection($paginatedItems),
                     'meta' => [
-                        'total' => $menuItems->count(),
+                        'current_page' => $page,
+                        'last_page' => ceil($allMenuItems->count() / $perPage),
+                        'total' => $allMenuItems->count(),
+                        'per_page' => $perPage,
                         'cached' => true
                     ]
                 ]);
@@ -108,7 +122,7 @@ class MenuItemController extends Controller
     }
 
     // POST /api/menu-items (role:admin,manager)
-    public function store(StoreMenuItemRequest $request): MenuItemResource
+    public function store(StoreMenuItemRequest $request): MenuItemResource|JsonResponse
     {
         $data = $request->validated();
 
@@ -148,8 +162,19 @@ class MenuItemController extends Controller
             'is_active' => $data['is_active'] ?? true,
             'display_order' => $data['display_order'] ?? 0,
             'is_featured' => $isFeatured,
-            'featured_order' => $data['featured_order'] ?? 0,
             'badge' => $data['badge'] ?? null,
+            // New comprehensive fields
+            'prep_time' => $data['prep_time'] ?? null,
+            'cook_time' => $data['cook_time'] ?? null,
+            'serving_size' => $data['serving_size'] ?? null,
+            'spice_level' => $data['spice_level'] ?? 0,
+            'calories' => $data['calories'] ?? null,
+            'nutrition' => $data['nutrition'] ?? null,
+            'ingredients' => $data['ingredients'] ?? null,
+            'allergens' => $data['allergens'] ?? null,
+            'dietary_tags' => $data['dietary_tags'] ?? null,
+            'availability_status' => $data['availability_status'] ?? 'available',
+            'availability_note' => $data['availability_note'] ?? null,
         ]);
 
         // Save translation
@@ -158,6 +183,9 @@ class MenuItemController extends Controller
             'name' => $request->input('name'),
             'description' => $request->input('description'),
         ]);
+
+        // Invalidate cache
+        app(CacheService::class)->invalidateMenu($menuItem->location_id);
 
         return new MenuItemResource($menuItem->load(['translations']));
     }
@@ -172,7 +200,7 @@ class MenuItemController extends Controller
     }
 
     // POST /api/menu-items/{item} with _method=PUT (role:admin,manager)
-    public function update(UpdateMenuItemRequest $request, MenuItem $menuItem): MenuItemResource
+    public function update(UpdateMenuItemRequest $request, MenuItem $menuItem): MenuItemResource|JsonResponse
     {
         $data = $request->validated();
 
@@ -221,12 +249,9 @@ class MenuItemController extends Controller
             $modelData['is_featured'] = $isFeatured;
         }
 
-        // Handle badge and featured_order
+        // Handle badge
         if ($request->has('badge')) {
             $modelData['badge'] = $request->input('badge');
-        }
-        if ($request->has('featured_order')) {
-            $modelData['featured_order'] = $request->integer('featured_order');
         }
 
         $menuItem->update($modelData);
@@ -245,6 +270,9 @@ class MenuItemController extends Controller
             );
         }
 
+        // Invalidate cache
+        app(CacheService::class)->invalidateMenu($menuItem->location_id);
+
         return new MenuItemResource($menuItem->fresh()->load(['translations']));
     }
 
@@ -260,6 +288,9 @@ class MenuItemController extends Controller
 
         // Soft delete the item (SoftDeletes trait is used)
         $menuItem->delete();
+
+        // Invalidate cache
+        app(CacheService::class)->invalidateMenu($menuItem->location_id);
 
         $message = 'Menu item deleted.';
         if ($orderCount > 0) {

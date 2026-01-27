@@ -60,7 +60,10 @@ class CustomerOrderService
 
         // Filter by status
         if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+            $status = $request->input('status');
+            $query->whereHas('orderStatus', function ($q) use ($status) {
+                $q->where('code', $status);
+            });
         }
 
         // Filter by order type
@@ -83,9 +86,13 @@ class CustomerOrderService
         $sortBy = $request->input('sort_by', 'ordered_at');
         $sortOrder = $request->input('sort_order', 'desc');
 
-        $allowedSorts = ['ordered_at', 'total_amount', 'status'];
+        $allowedSorts = ['ordered_at', 'total_amount']; // removed 'status' from direct sorts
         if (in_array($sortBy, $allowedSorts)) {
             $query->orderBy($sortBy, $sortOrder);
+        } elseif ($sortBy === 'status') {
+            $query->join('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
+                ->orderBy('order_statuses.code', $sortOrder)
+                ->select('orders.*'); // ensure we don't pick up order_statuses.id as primary
         } else {
             $query->orderBy('ordered_at', 'desc');
         }
@@ -171,12 +178,12 @@ class CustomerOrderService
         // Check cancelability
         $nonCancellableStatuses = ['preparing', 'ready', 'completed', 'delivered', 'cancelled'];
 
-        if (in_array($order->status, $nonCancellableStatuses)) {
+        if (in_array($order->status_code, $nonCancellableStatuses)) {
             throw new \Exception('This order cannot be cancelled.');
         }
 
+        $order->setStatus('cancelled');
         $order->update([
-            'status' => 'cancelled',
             'cancelled_at' => now(),
             'cancellation_reason' => $reason,
         ]);

@@ -60,10 +60,26 @@ interface Shift {
     start_time: string;
     end_time: string;
     shift_type: 'morning' | 'afternoon' | 'evening' | 'night' | 'split';
-    status: 'draft' | 'published' | 'completed' | 'cancelled';
+    status: 'draft' | 'published' | 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
     notes?: string;
     date?: string;
 }
+
+// ... existing StatCard code ...
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'draft': return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+        case 'scheduled': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+        case 'published': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        case 'in-progress': return 'bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse';
+        case 'completed': return 'bg-green-500/10 text-green-400 border-green-500/20';
+        case 'cancelled': return 'bg-red-500/10 text-red-500 border-red-500/20';
+        default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+    }
+};
+
+
 
 // Stats Card Component - Mobile optimized
 const StatCard = ({ title, value, color, index = 0 }: { title: string; value: number | string; color: string; index?: number }) => {
@@ -117,6 +133,7 @@ export default function Shifts() {
     const [openEdit, setOpenEdit] = React.useState(false);
     const [openCopy, setOpenCopy] = React.useState(false);
     const [selectedShift, setSelectedShift] = React.useState<Shift | null>(null);
+    const [expandedDay, setExpandedDay] = React.useState<{ date: Date; shifts: Shift[] } | null>(null);
     const [error, setError] = React.useState('');
 
     const qc = useQueryClient();
@@ -390,7 +407,48 @@ export default function Shifts() {
         return days;
     };
 
+    // Group shifts by day for Month view (Calendar Grid)
+    const getMonthDays = () => {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // First day of month
+        const firstDay = new Date(year, month, 1);
+        const startDayOfWeek = firstDay.getDay(); // 0 = Sunday
+
+        // Last day of month
+        const lastDay = new Date(year, month + 1, 0);
+        const totalDays = lastDay.getDate();
+
+        // Build calendar grid (6 weeks max = 42 cells)
+        const calendarDays: Array<{ date: Date | null; shifts: Shift[]; isCurrentMonth: boolean }> = [];
+
+        // Add empty cells for days before the 1st
+        for (let i = 0; i < startDayOfWeek; i++) {
+            calendarDays.push({ date: null, shifts: [], isCurrentMonth: false });
+        }
+
+        // Add actual days
+        for (let day = 1; day <= totalDays; day++) {
+            const date = new Date(year, month, day);
+            const dateStr = date.toISOString().split('T')[0];
+            const dayShifts = scheduleData?.shifts?.filter((s: Shift) => {
+                const shiftDate = s.date?.split('T')[0] || s.start_time.split('T')[0];
+                return shiftDate === dateStr;
+            }) || [];
+            calendarDays.push({ date, shifts: dayShifts, isCurrentMonth: true });
+        }
+
+        // Fill remaining cells to complete the grid (always 6 weeks = 42 cells for consistent layout)
+        while (calendarDays.length < 42) {
+            calendarDays.push({ date: null, shifts: [], isCurrentMonth: false });
+        }
+
+        return calendarDays;
+    };
+
     const groupedShifts = groupShiftsByDay();
+    const monthDays = getMonthDays();
 
     return (
         <AdminLayout>
@@ -648,27 +706,193 @@ export default function Shifts() {
                         </>
                     )}
 
-                    {/* Month View - Responsive grid */}
+                    {/* Month View - Calendar Grid */}
                     {view === 'month' && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-                            {scheduleData?.shifts?.map((shift: Shift) => (
-                                <Card key={shift.id} className="bg-card border-border hover:border-primary/50 transition-all cursor-pointer" onClick={() => handleEdit(shift)}>
-                                    <CardContent className="p-3 sm:p-4">
-                                        <div className="flex justify-between items-start mb-2 gap-2">
-                                            <div className="font-bold text-sm sm:text-base text-foreground truncate">{shift.employee?.user?.name}</div>
-                                            <Badge
-                                                className={cn(getStatusColor(shift.status), "cursor-pointer hover:opacity-80 transition-opacity text-[10px] sm:text-xs flex-shrink-0")}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleStatusMutation.mutate(shift);
-                                                }}
-                                            >
-                                                {shift.status.toUpperCase()}
-                                            </Badge>
+                        <>
+                            {/* Desktop: 7-column calendar grid */}
+                            <div className="hidden md:block bg-card rounded-xl border border-border overflow-hidden">
+                                {/* Day Headers */}
+                                <div className="grid grid-cols-7 bg-secondary/30 border-b border-border">
+                                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                                        <div key={day} className="p-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                            {day}
                                         </div>
-                                        <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
-                                            <div>{new Date(shift.date || shift.start_time).toLocaleDateString()}</div>
-                                            <div>
+                                    ))}
+                                </div>
+
+                                {/* Calendar Grid - 6 weeks */}
+                                <div className="grid grid-cols-7">
+                                    {monthDays.map((cell, idx) => {
+                                        const isToday = cell.date && new Date().toDateString() === cell.date.toDateString();
+                                        const hasShifts = cell.shifts.length > 0;
+
+                                        return (
+                                            <div
+                                                key={idx}
+                                                className={cn(
+                                                    "min-h-[100px] p-1.5 border-r border-b border-border last:border-r-0 transition-colors",
+                                                    !cell.isCurrentMonth && "bg-secondary/20",
+                                                    isToday && "bg-primary/5",
+                                                    hasShifts && "bg-card"
+                                                )}
+                                            >
+                                                {cell.date && (
+                                                    <>
+                                                        {/* Date Number */}
+                                                        <div className={cn(
+                                                            "text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full",
+                                                            isToday ? "bg-primary text-primary-foreground" : "text-foreground"
+                                                        )}>
+                                                            {cell.date.getDate()}
+                                                        </div>
+
+                                                        {/* Shifts */}
+                                                        <div className="space-y-1 max-h-[80px] overflow-y-auto scrollbar-thin">
+                                                            {cell.shifts.slice(0, 3).map((shift: Shift) => (
+                                                                <div
+                                                                    key={shift.id}
+                                                                    onClick={() => handleEdit(shift)}
+                                                                    className={cn(
+                                                                        "text-[10px] px-1.5 py-0.5 rounded truncate cursor-pointer hover:opacity-80 transition-opacity",
+                                                                        shift.status === 'published' ? "bg-blue-500/20 text-blue-600" :
+                                                                            shift.status === 'completed' ? "bg-green-500/20 text-green-600" :
+                                                                                shift.status === 'cancelled' ? "bg-red-500/20 text-red-500" :
+                                                                                    shift.status === 'scheduled' ? "bg-indigo-500/20 text-indigo-600" :
+                                                                                        "bg-gray-500/20 text-gray-500"
+                                                                    )}
+                                                                    title={`${shift.employee?.user?.name} - ${shift.start_time}`}
+                                                                >
+                                                                    {shift.employee?.user?.name?.split(' ')[0] || 'Shift'}
+                                                                </div>
+                                                            ))}
+                                                            {cell.shifts.length > 3 && (
+                                                                <div
+                                                                    className="text-[10px] text-primary px-1.5 cursor-pointer hover:underline font-medium"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setExpandedDay({ date: cell.date!, shifts: cell.shifts });
+                                                                    }}
+                                                                >
+                                                                    +{cell.shifts.length - 3} more
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Mobile: Vertical list grouped by day */}
+                            <div className="md:hidden space-y-3">
+                                {monthDays.filter(d => d.date && d.shifts.length > 0).map((day, idx) => {
+                                    const isToday = day.date && new Date().toDateString() === day.date.toDateString();
+                                    return (
+                                        <div key={idx} className={cn(
+                                            "rounded-xl border overflow-hidden",
+                                            isToday ? "bg-primary/5 border-primary/30" : "bg-card/50 border-border"
+                                        )}>
+                                            <div className={cn(
+                                                "px-3 py-2 flex items-center justify-between",
+                                                isToday ? "bg-primary/10" : "bg-secondary/20"
+                                            )}>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={cn("text-lg font-bold", isToday ? "text-primary" : "text-foreground")}>
+                                                        {day.date!.getDate()}
+                                                    </span>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {day.date!.toLocaleDateString('en-US', { weekday: 'short', month: 'short' })}
+                                                    </span>
+                                                </div>
+                                                <span className="text-xs text-muted-foreground">{day.shifts.length} shifts</span>
+                                            </div>
+                                            <div className="p-2 space-y-2">
+                                                {day.shifts.map((shift: Shift) => (
+                                                    <div
+                                                        key={shift.id}
+                                                        className="bg-card border border-border rounded-lg p-3 flex items-center justify-between gap-2"
+                                                        onClick={() => handleEdit(shift)}
+                                                    >
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <div className={cn(
+                                                                "w-1 h-10 rounded-full flex-shrink-0",
+                                                                shift.status === 'published' ? "bg-blue-500" :
+                                                                    shift.status === 'completed' ? "bg-green-500" :
+                                                                        shift.status === 'cancelled' ? "bg-red-500" : "bg-gray-500"
+                                                            )} />
+                                                            <div className="min-w-0">
+                                                                <div className="font-medium text-sm text-foreground truncate">
+                                                                    {shift.employee?.user?.name || 'Unknown'}
+                                                                </div>
+                                                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                                    <Clock className="w-3 h-3" />
+                                                                    {(() => {
+                                                                        const getDate = (timeStr: string, dateStr: string) => {
+                                                                            if (timeStr.includes('T') || timeStr.includes(' ')) return new Date(timeStr);
+                                                                            return new Date(`${dateStr.split('T')[0]}T${timeStr}`);
+                                                                        };
+                                                                        const start = getDate(shift.start_time, shift.date || new Date().toISOString());
+                                                                        const end = getDate(shift.end_time, shift.date || new Date().toISOString());
+                                                                        return `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                                                                    })()}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <Badge className={cn(getStatusColor(shift.status), "text-[10px]")}>
+                                                            {shift.status}
+                                                        </Badge>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {monthDays.every(d => !d.date || d.shifts.length === 0) && (
+                                    <div className="p-8 text-center bg-card/50 rounded-xl border border-border">
+                                        <CalendarIcon className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                                        <p className="text-muted-foreground text-sm">No shifts this month</p>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                    {/* Day Detail Modal - Shows all shifts for a selected day */}
+                    <Modal
+                        open={!!expandedDay}
+                        onClose={() => setExpandedDay(null)}
+                        title={expandedDay ? `Shifts for ${expandedDay.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}` : 'Day Shifts'}
+                        size="md"
+                    >
+                        <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                            {expandedDay?.shifts.map((shift: Shift) => (
+                                <div
+                                    key={shift.id}
+                                    className="bg-card border border-border rounded-lg p-3 flex items-center justify-between gap-2 hover:bg-secondary/20 cursor-pointer transition-colors"
+                                    onClick={() => {
+                                        setExpandedDay(null);
+                                        handleEdit(shift);
+                                    }}
+                                >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className={cn(
+                                            "w-1.5 h-12 rounded-full flex-shrink-0",
+                                            shift.status === 'published' ? "bg-blue-500" :
+                                                shift.status === 'completed' ? "bg-green-500" :
+                                                    shift.status === 'scheduled' ? "bg-indigo-500" :
+                                                        shift.status === 'cancelled' ? "bg-red-500" : "bg-gray-500"
+                                        )} />
+                                        <div className="min-w-0">
+                                            <div className="font-medium text-sm text-foreground truncate">
+                                                {shift.employee?.user?.name || 'Unknown Employee'}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground truncate">
+                                                {shift.position?.title || 'No Position'}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                                <Clock className="w-3 h-3" />
                                                 {(() => {
                                                     const getDate = (timeStr: string, dateStr: string) => {
                                                         if (timeStr.includes('T') || timeStr.includes(' ')) return new Date(timeStr);
@@ -680,11 +904,19 @@ export default function Shifts() {
                                                 })()}
                                             </div>
                                         </div>
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                    <Badge className={cn(getStatusColor(shift.status), "text-[10px] flex-shrink-0")}>
+                                        {shift.status}
+                                    </Badge>
+                                </div>
                             ))}
+                            {(!expandedDay?.shifts || expandedDay.shifts.length === 0) && (
+                                <div className="py-8 text-center text-muted-foreground text-sm">
+                                    No shifts for this day
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </Modal>
 
                     {/* Create/Edit Modal - Mobile optimized */}
                     <Modal open={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
@@ -758,7 +990,20 @@ export default function Shifts() {
                                 <div className="space-y-1.5">
                                     <label className="block text-xs sm:text-sm font-semibold text-foreground">Start <span className="text-red-500">*</span></label>
                                     <Input type="datetime-local" required value={formData.start_time}
-                                        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                                        onChange={(e) => {
+                                            const newStart = e.target.value;
+                                            let newEnd = formData.end_time;
+
+                                            // Auto-adjust end time if it's before start time or empty
+                                            if (newStart && (!newEnd || newEnd <= newStart)) {
+                                                const startDate = new Date(newStart);
+                                                const endDate = new Date(startDate.getTime() + 4 * 60 * 60 * 1000); // Add 4 hours
+                                                const pad = (n: number) => n.toString().padStart(2, '0');
+                                                newEnd = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`;
+                                            }
+
+                                            setFormData({ ...formData, start_time: newStart, end_time: newEnd });
+                                        }}
                                         className="h-10 text-sm rounded-lg" />
                                 </div>
 

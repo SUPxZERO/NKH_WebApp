@@ -22,21 +22,26 @@ class CategoryController extends Controller
         $search = $request->get('search', '');
         $status = $request->get('status', 'all');
 
-        // CRITICAL FIX: Filter by location (default to location_id = 1)
-        // This prevents showing duplicate categories from multiple locations
-        $locationId = $request->integer('location_id', 1);
+        // CRITICAL FIX: Filter by location
+        $locationId = $request->input('location_id');
+        if (!$locationId) {
+            $defaultLocation = \App\Models\Location::where('is_active', true)->first();
+            $locationId = $defaultLocation ? $defaultLocation->id : 1;
+        }
 
         // For customer menu: show only sub-categories (parent_id IS NOT NULL)
-        // This shows categories that actually have menu items attached
         $showSubCategoriesOnly = $request->boolean('sub_categories_only', false);
+
+        // Flattened list for admin dropdowns (shows both parents and children)
+        $flatList = $request->boolean('flat_list', false);
 
         $query = Category::query()
             ->where('location_id', $locationId)
             ->with(['translations'])
             ->withCount([
-                'menuItems' => function($query) use ($locationId) {
+                'menuItems' => function ($query) use ($locationId) {
                     $query->withoutGlobalScope('active')
-                          ->where('location_id', $locationId);
+                        ->where('location_id', $locationId);
                 }
             ])
             ->orderBy('display_order');
@@ -44,16 +49,20 @@ class CategoryController extends Controller
         // Show only sub-categories if requested (for customer menu filter)
         if ($showSubCategoriesOnly) {
             $query->whereNotNull('parent_id');
+        } elseif ($flatList) {
+            // Return ALL categories (Root + Children) flattened
+            // Useful for dropdowns where you want to pick any category
+            $query->with('parent.translations'); // Load parent for context if needed
         } else {
             // Only root categories for tree view (admin)
             $query->whereNull('parent_id')
-                  ->with([
-                      'children',
-                      'menuItems' => function($query) use ($locationId) {
-                          $query->withoutGlobalScope('active')
-                                ->where('location_id', $locationId);
-                      }
-                  ]);
+                ->with([
+                    'children',
+                    'menuItems' => function ($query) use ($locationId) {
+                        $query->withoutGlobalScope('active')
+                            ->where('location_id', $locationId);
+                    }
+                ]);
         }
 
         // Status filter
@@ -65,11 +74,11 @@ class CategoryController extends Controller
 
         // Search by slug or translated name
         if ($search !== '') {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('slug', 'like', "%{$search}%")
-                  ->orWhereHas('translations', function($t) use ($search) {
-                      $t->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('translations', function ($t) use ($search) {
+                        $t->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -82,14 +91,14 @@ class CategoryController extends Controller
         ]);
     }
 
-    
+
 
     // GET /api/admin/categories/hierarchy (admin)
     public function hierarchy(Request $request): JsonResponse
     {
         $search = $request->get('search', '');
         $status = $request->get('status', 'all');
-        
+
         $query = Category::withoutGlobalScope('active')
             ->with([
                 'translations',
@@ -97,34 +106,34 @@ class CategoryController extends Controller
                 'children.children.translations',
                 'children.children.children.translations',
                 'children.children.children.children.translations',
-                'menuItems' => function($query) {
+                'menuItems' => function ($query) {
                     $query->withoutGlobalScope('active');
                 }
             ])
             ->withCount([
-                'menuItems' => function($query) {
+                'menuItems' => function ($query) {
                     $query->withoutGlobalScope('active');
                 }
             ])
             ->whereNull('parent_id') // Only root categories
             ->orderBy('display_order');
-        
+
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('slug', 'like', "%{$search}%")
-                  ->orWhereHas('translations', function($t) use ($search) {
-                      $t->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('translations', function ($t) use ($search) {
+                        $t->where('name', 'like', "%{$search}%");
+                    });
             });
         }
-        
+
         // Status filter
         if ($status === 'active') {
             $query->where('is_active', true);
         } elseif ($status === 'inactive') {
             $query->where('is_active', false);
         }
-        
+
         $categories = $query->get();
 
         return response()->json([
@@ -142,7 +151,7 @@ class CategoryController extends Controller
         $active = Category::query()->where('is_active', true)->count();
         $parentCategories = Category::query()->whereNull('parent_id')->count();
         $subCategories = Category::query()->whereNotNull('parent_id')->count();
-        
+
         // Count all menu items including inactive ones (ignore any non-existent global scopes)
         $menuItemsQuery = MenuItem::query();
         try {
@@ -165,7 +174,7 @@ class CategoryController extends Controller
     public function store(StoreCategoryRequest $request): CategoryResource
     {
         $data = $request->validated();
-        
+
         // Handle image upload if present
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('categories', 'public');
@@ -174,15 +183,15 @@ class CategoryController extends Controller
 
         $category = Category::create($data);
 
-        // Save translation
+        // Save translation with explicit locale
         $category->translations()->create([
             'locale' => app()->getLocale(),
             'name' => $request->input('name'),
-            'description' => $request->input('description'),
+            'description' => $request->input('description') ?? '',
         ]);
 
         $category->load(['translations', 'parent', 'children']);
-        
+
         return new CategoryResource($category);
     }
 
@@ -192,16 +201,16 @@ class CategoryController extends Controller
         $category->load([
             'translations',
             'children.translations',
-            'menuItems' => function($query) {
+            'menuItems' => function ($query) {
                 $query->withoutGlobalScope('active');
             },
             'menuItems.translations',
-            'children.menuItems' => function($query) {
+            'children.menuItems' => function ($query) {
                 $query->withoutGlobalScope('active');
             },
             'children.menuItems.translations'
         ]);
-        
+
         return new CategoryResource($category);
     }
 
@@ -209,7 +218,7 @@ class CategoryController extends Controller
     public function update(UpdateCategoryRequest $request, Category $category): CategoryResource
     {
         $data = $request->validated();
-        
+
         // Handle image upload if present
         if ($request->hasFile('image')) {
             // Delete old image if exists
@@ -224,8 +233,10 @@ class CategoryController extends Controller
 
         // Update translation
         $translationData = [];
-        if ($request->has('name')) $translationData['name'] = $request->input('name');
-        if ($request->has('description')) $translationData['description'] = $request->input('description');
+        if ($request->has('name'))
+            $translationData['name'] = $request->input('name');
+        if ($request->has('description'))
+            $translationData['description'] = $request->input('description');
 
         if (!empty($translationData)) {
             $category->translations()->updateOrCreate(
@@ -235,7 +246,7 @@ class CategoryController extends Controller
         }
 
         $category->load(['translations', 'parent', 'children']);
-        
+
         return new CategoryResource($category);
     }
 
@@ -275,7 +286,7 @@ class CategoryController extends Controller
         }
 
         $category->delete();
-        
+
         return response()->json(['message' => 'Category deleted successfully.']);
     }
 }

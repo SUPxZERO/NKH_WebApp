@@ -360,25 +360,46 @@ export default function Positions() {
                 </div>
             </div>
 
-            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingPosition ? 'Edit' : 'New Position'}>
-                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                    <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="h-10 text-sm" />
-                    <div className="hidden sm:block">
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingPosition ? 'Edit Position' : 'New Position'}>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <Input
+                        label="Title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                        className="h-10 text-sm"
+                        placeholder="e.g. Head Chef"
+                    />
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">Description</label>
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            rows={2}
-                            className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                            rows={3}
+                            placeholder="Optional description of the role..."
+                            className="w-full bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none shadow-sm"
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20 text-purple-600 focus:ring-purple-500 w-4 h-4" />
-                        <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">Active</span>
+
+                    <div className="flex items-center gap-2 p-3 bg-secondary/30 rounded-lg border border-border/50">
+                        <input
+                            type="checkbox"
+                            id="is_active"
+                            checked={formData.is_active}
+                            onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                            className="rounded bg-background border-input text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
+                        />
+                        <label htmlFor="is_active" className="text-sm font-medium text-foreground cursor-pointer select-none">
+                            Active Status
+                        </label>
                     </div>
-                    <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
-                        <Button type="submit" variant="primary" className="flex-1 h-10 sm:h-11 text-sm">Save</Button>
+
+                    <div className="flex gap-3 pt-4">
+                        <Button type="button" variant="ghost" onClick={closeModal} className="flex-1">Cancel</Button>
+                        <Button type="submit" variant="primary" className="flex-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-md">
+                            {editingPosition ? 'Update Position' : 'Create Position'}
+                        </Button>
                     </div>
                 </form>
             </Modal>

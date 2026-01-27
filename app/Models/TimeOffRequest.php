@@ -12,18 +12,7 @@ class TimeOffRequest extends Model
 
     protected $guarded = [
         'id',
-        'employee_id',
-        'type',
-        'start_date',
-        'end_date',
-        'days_requested',
-        'reason',
-        'notes',
-        'status',
-        'approved_by',
-        'approval_notes',
-        'approved_at',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

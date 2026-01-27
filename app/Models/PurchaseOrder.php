@@ -14,10 +14,6 @@ class PurchaseOrder extends Model
      */
     protected $guarded = [
         'id',
-        'po_number',            // ⚠️ System-generated  
-        'total_amount',         // ⚠️ CRITICAL: Purchase total
-        'status',               // ⚠️ Workflow (draft/submitted/received)
-        'received_date',        // ⚠️ System timestamp
         'created_at',
         'updated_at',
     ];

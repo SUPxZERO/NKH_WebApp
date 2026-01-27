@@ -34,17 +34,17 @@ class CacheService
         // Removed tags() as database driver doesn't support them
         return Cache::remember("menu:{$locationId}", self::TTL_MENU, function () use ($locationId) {
             Log::debug("Cache MISS: menu:{$locationId}");
-            
+
             return MenuItem::with([
                 'category.translations',
                 'translations',
                 'recipe.ingredients'
             ])
-            ->whereHas('category', fn($q) => $q->where('location_id', $locationId))
-            ->where('is_active', true)
-            ->where('availability_status', 'available') // Fixed: was is_available (which is a method, not a column)
-            ->orderBy('display_order')
-            ->get();
+                ->whereHas('category', fn($q) => $q->where('location_id', $locationId))
+                ->where('is_active', true)
+                ->where('availability_status', 'available') // Fixed: was is_available (which is a method, not a column)
+                ->orderBy('display_order')
+                ->get();
         });
     }
 
@@ -54,10 +54,10 @@ class CacheService
     public function getCategories(?int $locationId = null): Collection
     {
         $cacheKey = $locationId ? "categories:{$locationId}" : "categories:all";
-        
+
         return Cache::remember($cacheKey, self::TTL_CATEGORIES, function () use ($locationId) {
             Log::debug("Cache MISS: {$locationId}");
-            
+
             $query = Category::with('translations')
                 ->where('is_active', true)
                 ->orderBy('display_order');
@@ -77,7 +77,7 @@ class CacheService
     {
         return Cache::remember('locations:all', self::TTL_LOCATIONS, function () {
             Log::debug("Cache MISS: locations:all");
-            
+
             return Location::where('is_active', true)
                 ->orderBy('name')
                 ->get();
@@ -91,7 +91,7 @@ class CacheService
     {
         return Cache::remember("menu_item:{$menuItemId}", self::TTL_MENU, function () use ($menuItemId) {
             Log::debug("Cache MISS: menu_item:{$menuItemId}");
-            
+
             return MenuItem::with([
                 'category.translations',
                 'translations',
@@ -113,6 +113,18 @@ class CacheService
             // or specific clears if we track keys. For now, specific invalidation is key.
             // If strictly needed, we could run a pattern match delete but that's expensive.
         }
+
+        // Also invalidate homepage since it shows featured items
+        $this->invalidateHomepage();
+    }
+
+    /**
+     * Invalidate homepage cache
+     */
+    public function invalidateHomepage(): void
+    {
+        Cache::forget('homepage_data');
+        Log::info("Cache invalidated: homepage_data");
     }
 
     /**

@@ -76,7 +76,7 @@ class ShiftController extends Controller
         $view = $request->get('view', 'week'); // day, week, month
 
         $startDate = Carbon::parse($date);
-        
+
         switch ($view) {
             case 'day':
                 $endDate = $startDate->copy()->endOfDay();
@@ -119,7 +119,7 @@ class ShiftController extends Controller
             'end_time' => 'required|date|after:start_time',
             'shift_type' => 'nullable|in:morning,afternoon,evening,night,split',
             'notes' => 'nullable|string',
-            'status' => 'nullable|in:draft,published,completed,cancelled'
+            'status' => 'nullable|in:draft,published,scheduled,in-progress,completed,cancelled'
         ]);
 
         // Check for conflicts
@@ -139,25 +139,31 @@ class ShiftController extends Controller
         // Check if employee is active
         $employee = Employee::find($validated['employee_id']);
         if (!$employee || $employee->status !== 'active') {
-             return response()->json(['message' => 'Cannot assign shift to inactive employee'], 422);
+            return response()->json(['message' => 'Cannot assign shift to inactive employee'], 422);
         }
 
         // Format dates for database
         $startTime = Carbon::parse($validated['start_time']);
         $endTime = Carbon::parse($validated['end_time']);
-        
+
         $shiftData = array_merge($validated, [
             'start_time' => $startTime->format('Y-m-d H:i:s'),
             'end_time' => $endTime->format('Y-m-d H:i:s'),
             'date' => $startTime->toDateString(),
             'position_id' => $validated['position_id'] ?? $employee->position_id,
             'shift_type' => $validated['shift_type'] ?? 'morning',
-            'status' => $validated['status'] ?? 'draft',
             'location_id' => $validated['location_id'] ?? null,
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        $shift = Shift::create($shiftData);
+        // Status is guarded, so we create with allowed fields then manually update status
+        // Or we use forceFill/new instance + save()
+        $shift = new Shift($shiftData);
+        $shift->status = $validated['status'] ?? 'draft';
+        if ($shift->status === 'published') {
+            $shift->published_at = now();
+        }
+        $shift->save();
 
         $shift->load(['employee.user', 'employee.position', 'location', 'position']);
 
@@ -173,7 +179,7 @@ class ShiftController extends Controller
     public function show(Shift $shift): JsonResponse
     {
         $shift->load(['employee.user', 'employee.position', 'location', 'position']);
-        
+
         return response()->json([
             'data' => new ShiftResource($shift)
         ]);
@@ -199,15 +205,15 @@ class ShiftController extends Controller
             'end_time' => 'required|date|after:start_time',
             'shift_type' => 'nullable|in:morning,afternoon,evening,night,split',
             'notes' => 'nullable|string',
-            'status' => 'nullable|in:draft,published,completed,cancelled'
+            'status' => 'nullable|in:draft,published,scheduled,in-progress,completed,cancelled'
         ]);
 
         if (isset($validated['employee_id'])) {
-             // Check if employee is active
+            // Check if employee is active
             $employee = Employee::find($validated['employee_id']);
-             if (!$employee || $employee->status !== 'active') {
-                 return response()->json(['message' => 'Cannot assign shift to inactive employee'], 422);
-             }
+            if (!$employee || $employee->status !== 'active') {
+                return response()->json(['message' => 'Cannot assign shift to inactive employee'], 422);
+            }
         }
 
         // Format dates for database
@@ -235,7 +241,17 @@ class ShiftController extends Controller
             ], 422);
         }
 
-        $shift->update($validated);
+        $shift->fill($validated);
+
+        // Manual handling of guarded status
+        if (isset($validated['status'])) {
+            $shift->status = $validated['status'];
+            if ($shift->status === 'published' && !$shift->published_at) {
+                $shift->published_at = now();
+            }
+        }
+
+        $shift->save();
         $shift->load(['employee.user', 'employee.position', 'location', 'position']);
 
         return response()->json([
@@ -273,8 +289,15 @@ class ShiftController extends Controller
             'shift_ids.*' => 'exists:shifts,id'
         ]);
 
+        // Manually update both status and published_at for multiple records
+        // Note: Eloquent mass update doesn't fire events, but here we just need to set values.
+        // However, status and published_at are guarded, so mass assignment might behave differently depending on how we call it.
+        // update() method on Builder ignores guarded attributes generally, which is good.
         Shift::whereIn('id', $validated['shift_ids'])
-            ->update(['status' => 'published']);
+            ->update([
+                'status' => 'published',
+                'published_at' => now()
+            ]);
 
         return response()->json([
             'message' => 'Shifts published successfully'
@@ -283,18 +306,29 @@ class ShiftController extends Controller
 
     /**
      * Check for shift conflicts
+     * 
+     * @param int $employeeId Employee ID
+     * @param string $startTime Full datetime string (e.g., "2026-02-27 07:00:00")
+     * @param string $endTime Full datetime string (e.g., "2026-02-27 21:00:00")
+     * @param int|null $excludeShiftId Shift ID to exclude (for updates)
      */
     private function checkConflicts($employeeId, $startTime, $endTime, $excludeShiftId = null)
     {
+        // Parse datetime inputs
+        $startDt = Carbon::parse($startTime);
+        $endDt = Carbon::parse($endTime);
+
+        // Extract date and time separately (DB stores them separately)
+        $date = $startDt->toDateString(); // "2026-02-27"
+        $startTimeOnly = $startDt->format('H:i:s'); // "07:00:00"
+        $endTimeOnly = $endDt->format('H:i:s'); // "21:00:00"
+
+        // Check for overlaps on the SAME DATE only
+        // Overlap condition: StartA < EndB AND EndA > StartB
         $query = Shift::where('employee_id', $employeeId)
-            ->where(function ($q) use ($startTime, $endTime) {
-                $q->whereBetween('start_time', [$startTime, $endTime])
-                    ->orWhereBetween('end_time', [$startTime, $endTime])
-                    ->orWhere(function ($q2) use ($startTime, $endTime) {
-                        $q2->where('start_time', '<=', $startTime)
-                            ->where('end_time', '>=', $endTime);
-                    });
-            })
+            ->where('date', $date) // <-- CRITICAL: Filter by date first!
+            ->where('start_time', '<', $endTimeOnly)
+            ->where('end_time', '>', $startTimeOnly)
             ->whereNotIn('status', ['cancelled']);
 
         if ($excludeShiftId) {
@@ -374,7 +408,7 @@ class ShiftController extends Controller
         $targetStart = Carbon::parse($validated['target_start_date'])->startOfWeek();
 
         $query = Shift::whereBetween('start_time', [$sourceStart, $sourceEnd]);
-        
+
         if (isset($validated['location_id'])) {
             $query->where('location_id', $validated['location_id']);
         }

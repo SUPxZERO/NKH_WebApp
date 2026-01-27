@@ -15,15 +15,7 @@ class EmploymentHistory extends Model
 
     protected $guarded = [
         'id',
-        'employee_id',
-        'action',
-        'previous_value',
-        'new_value',
-        'changed_by_user_id',
-        'effective_date',
-        'notes',
         'created_at',
-            'created_at',
         'updated_at',
     ];
 

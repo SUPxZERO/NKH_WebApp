@@ -17,10 +17,7 @@ class Position extends Model
 
     protected $guarded = [
         'id',
-        'title',
-        'description',
-        'is_active',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

@@ -18,8 +18,8 @@ class Ingredient extends Model
      */
     protected $guarded = [
         'id',
-        'code',                 // ⚠️ System-generated identifier
-        'cost_per_unit',        // ⚠️ CRITICAL: Supplier pricing
+        // 'code',              // REMOVED from guarded to allow manual entry
+        // 'cost_per_unit',     // REMOVED from guarded to allow updates
         'current_stock',        // ⚠️ System-tracked (inventory transactions)
         'created_at',
         'updated_at',

@@ -15,6 +15,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
+import { FeaturedManagerModal } from './FeaturedManagerModal';
+import MenuItemForm from '@/Pages/admin/components/MenuItemForm';
 
 // Enhanced Stats Card with Gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -73,13 +75,15 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Horizontal scroll on mobile
-const MenuStatsRibbon = ({ stats }: { stats: any }) => (
+const MenuStatsRibbon = ({ stats, onFilterChange }: { stats: any, onFilterChange: (filter: string) => void }) => (
   <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
     <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
       <StatCard title="Total" value={stats.total} icon={Package} color="purple" index={0} />
       <StatCard title="Active" value={stats.active} icon={Eye} color="emerald" index={1} />
       <StatCard title="Inactive" value={stats.inactive} icon={EyeOff} color="red" index={2} />
-      <StatCard title="Popular" value={stats.popular} icon={Star} color="amber" index={3} />
+      <div onClick={() => onFilterChange('featured')} className="cursor-pointer">
+        <StatCard title="Featured" value={stats.featured} icon={Sparkles} color="amber" index={3} />
+      </div>
     </div>
   </div>
 );
@@ -91,12 +95,6 @@ export default function MenuItems() {
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [formData, setFormData] = useState({
-    name: '', description: '', slug: '', sku: '', price: '', cost: '',
-    category_id: '', is_popular: false, is_active: true, display_order: 0,
-    is_featured: false, badge: ''
-  });
-  const [image, setImage] = useState<File | null>(null);
   const qc = useQueryClient();
 
   // Preview modal state
@@ -110,29 +108,50 @@ export default function MenuItems() {
 
   const [page, setPage] = useState(1);
   const [perPage] = useState(20);
+  const [featuredFilter, setFeaturedFilter] = useState(false);
+  const [openFeaturedManager, setOpenFeaturedManager] = useState(false);
+
+  // Fetch locations to get valid location_id
+  const { data: locations } = useQuery({
+    queryKey: ['locations'],
+    queryFn: () => apiGet('/locations')
+  });
+
+  const currentLocationId = useMemo(() => {
+    if (locations && Array.isArray(locations)) return locations[0]?.id;
+    if ((locations as any)?.data && Array.isArray((locations as any).data)) return (locations as any).data[0]?.id;
+    return 1; // Fallback
+  }, [locations]);
 
   // Fetch menu items
   const { data: menuItems, isLoading } = useQuery({
-    queryKey: ['menu-items', page, search, categoryFilter],
+    queryKey: ['menu-items', page, search, categoryFilter, currentLocationId, featuredFilter],
     queryFn: () => {
       let url = `/menu-items?page=${page}&per_page=${perPage}&search=${search}`;
       if (categoryFilter !== 'all') url += `&category_id=${categoryFilter}`;
+      if (currentLocationId) url += `&location_id=${currentLocationId}`;
       return apiGet(url);
     }
   });
 
-  // Fetch only sub-categories (leaf categories that can have menu items)
+  // Fetch all categories for selection (flat list)
   const { data: categories } = useQuery({
-    queryKey: ['categories-subcategories'],
-    queryFn: () => apiGet('/categories?sub_categories_only=true')
+    queryKey: ['categories-flat'],
+    queryFn: () => apiGet('/categories?flat_list=true')
   });
 
   const itemList: MenuItem[] = useMemo(() => {
     if (!menuItems) return [];
-    if (Array.isArray(menuItems)) return menuItems;
-    if ((menuItems as any)?.data && Array.isArray((menuItems as any).data)) return (menuItems as any).data;
-    return [];
-  }, [menuItems]);
+    let items = [];
+    if (Array.isArray(menuItems)) items = menuItems;
+    else if ((menuItems as any)?.data && Array.isArray((menuItems as any).data)) items = (menuItems as any).data;
+
+    // Client-side filter for featured if enabled
+    if (featuredFilter) {
+      return items.filter((i: MenuItem) => i.is_featured);
+    }
+    return items;
+  }, [menuItems, featuredFilter]);
 
   const stats = useMemo(() => ({
     total: (menuItems as any)?.meta?.total || itemList.length,
@@ -142,19 +161,7 @@ export default function MenuItems() {
     featured: itemList.filter(i => i.is_featured).length
   }), [itemList, menuItems]);
 
-  // Mutations
-  const createMutation = useMutation({
-    mutationFn: (data: FormData) => apiPost('/menu-items', data),
-    onSuccess: () => { toastSuccess('Item created'); setOpenCreate(false); resetForm(); qc.invalidateQueries({ queryKey: ['menu-items'] }); },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: FormData }) => apiPost(`/menu-items/${id}?_method=PUT`, data),
-    onSuccess: () => { toastSuccess('Item updated'); setOpenEdit(false); resetForm(); qc.invalidateQueries({ queryKey: ['menu-items'] }); },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
-  });
-
+  // Mutations (Keep Delete/Toggle)
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/menu-items/${id}`),
     onSuccess: () => { toastSuccess('Item deleted'); qc.invalidateQueries({ queryKey: ['menu-items'] }); },
@@ -171,38 +178,18 @@ export default function MenuItems() {
     onError: () => toastError('Failed to update status')
   });
 
-  const resetForm = () => {
-    setFormData({ name: '', description: '', slug: '', sku: '', price: '', cost: '', category_id: '', is_popular: false, is_active: true, display_order: 0, is_featured: false, badge: '' });
-    setImage(null);
-    setEditingItem(null);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, val]) => {
-      if (key === 'is_popular' || key === 'is_active' || key === 'is_featured') data.append(key, val ? '1' : '0');
-      else if (key === 'category_id' && (val === '' || val === 'null' || val === undefined)) return;
-      else data.append(key, String(val));
-    });
-    data.append('location_id', '1');
-    if (image) data.append('image', image);
-
-    if (editingItem) updateMutation.mutate({ id: editingItem.id, data });
-    else createMutation.mutate(data);
-  };
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: ({ id, is_featured }: { id: number; is_featured: boolean }) => {
+      const data = new FormData();
+      data.append('is_featured', is_featured ? '1' : '0');
+      return apiPost(`/menu-items/${id}?_method=PUT`, data);
+    },
+    onSuccess: () => { toastSuccess('Featured status updated'); qc.invalidateQueries({ queryKey: ['menu-items'] }); },
+    onError: (error: any) => toastError(error.response?.data?.message || 'Failed to update featured status')
+  });
 
   const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
-    setFormData({
-      name: item.name || '',
-      description: item.description || '',
-      slug: item.slug, sku: item.sku || '', price: item.price.toString(),
-      cost: item.cost?.toString() || '', category_id: item.category_id?.toString() || '',
-      is_popular: item.is_popular, is_active: item.is_active, display_order: item.display_order,
-      is_featured: item.is_featured || false, badge: item.badge || ''
-    });
-    setImage(null);
     setOpenEdit(true);
   };
 
@@ -260,18 +247,33 @@ export default function MenuItems() {
               Manage your restaurant's menu
             </p>
           </div>
-          <Button
-            onClick={() => { resetForm(); setOpenCreate(true); }}
-            variant="primary"
-            className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0"
-            leftIcon={<Plus className="w-4 h-4" />}
-          >
-            <span className="hidden sm:inline">Add Item</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setOpenFeaturedManager(true)}
+              variant="outline"
+              className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0"
+              leftIcon={<Sparkles className="w-4 h-4 text-amber-500" />}
+            >
+              <span className="hidden sm:inline">Manage Featured</span>
+            </Button>
+            <Button
+              onClick={() => { setEditingItem(null); setOpenCreate(true); }}
+              variant="primary"
+              className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0"
+              leftIcon={<Plus className="w-4 h-4" />}
+            >
+              <span className="hidden sm:inline">Add Item</span>
+            </Button>
+          </div>
         </motion.div>
 
         {/* Stats */}
-        <MenuStatsRibbon stats={stats} />
+        <MenuStatsRibbon stats={stats} onFilterChange={(filter) => {
+          if (filter === 'featured') {
+            setFeaturedFilter(!featuredFilter); // 4. Toggle featuredFilter state
+            setPage(1); // Reset to page 1 when filtering
+          }
+        }} />
 
         {/* Filters */}
         <motion.div
@@ -287,13 +289,13 @@ export default function MenuItems() {
                 type="text"
                 placeholder="Search..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="w-full h-10 sm:h-12 pl-9 sm:pl-12 pr-3 sm:pr-4 bg-secondary/50 border border-border rounded-lg sm:rounded-xl text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
             <select
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
               className="h-10 sm:h-12 px-3 sm:px-4 pr-8 sm:pr-10 bg-secondary/50 border border-border rounded-lg sm:rounded-xl text-foreground text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none min-w-[100px] sm:min-w-[200px]"
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', backgroundSize: '14px' }}
             >
@@ -357,7 +359,7 @@ export default function MenuItems() {
             <div className="col-span-3 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Item</div>
             <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Category</div>
             <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Price</div>
-            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Popular</div>
+            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-center">Highlights</div>
             <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Status</div>
             <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">Actions</div>
           </div>
@@ -458,9 +460,21 @@ export default function MenuItems() {
                     <div className="col-span-1">
                       <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">${item.price}</span>
                     </div>
-                    <div className="col-span-1">
+                    <div className="col-span-1 flex items-center justify-center gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleFeaturedMutation.mutate({ id: item.id, is_featured: !item.is_featured }); }}
+                        className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-amber-500/10"
+                        title="Toggle Featured"
+                      >
+                        {item.is_featured ? (
+                          <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+                        ) : (
+                          <Sparkles className="w-4 h-4 text-muted-foreground/30 hover:text-amber-500/50" />
+                        )}
+                      </button>
+
                       {item.is_popular ? (
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30">
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30" title="Popular Item">
                           <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                         </div>
                       ) : (
@@ -534,93 +548,13 @@ export default function MenuItems() {
       </div>
 
       {/* Create/Edit Modal */}
-      <Modal isOpen={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
-        title={editingItem ? 'Edit Menu Item' : 'Create Menu Item'} className="max-w-2xl">
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-            <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="SKU" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">Category</label>
-              <select value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full h-10 sm:h-11 bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                <option value="">Select Category</option>
-                {(categories as any)?.data?.map((cat: any) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name || cat.translations?.[0]?.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Price" type="number" step="0.01" value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
-            <Input label="Cost" type="number" step="0.01" value={formData.cost}
-              onChange={(e) => setFormData({ ...formData, cost: e.target.value })} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">Description</label>
-            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={2} className="w-full bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">Image</label>
-            <ImageUploader onChange={(file) => setImage(file)}
-              value={editingItem?.image_path || null} />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <Input label="Order" type="number" value={formData.display_order}
-              onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
-            <div className="flex items-center gap-2 pt-6">
-              <input type="checkbox" id="is_popular" checked={formData.is_popular}
-                onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })}
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded-md border-2 border-border bg-card text-primary cursor-pointer" />
-              <label htmlFor="is_popular" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Popular</label>
-            </div>
-            <div className="flex items-center gap-2 pt-6">
-              <input type="checkbox" id="is_active" checked={formData.is_active}
-                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded-md border-2 border-border bg-card text-primary cursor-pointer" />
-              <label htmlFor="is_active" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Active</label>
-            </div>
-            <div className="flex items-center gap-2 pt-6">
-              <input type="checkbox" id="is_featured" checked={formData.is_featured}
-                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded-md border-2 border-amber-500 bg-card text-amber-500 cursor-pointer" />
-              <label htmlFor="is_featured" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Featured</label>
-            </div>
-          </div>
-
-          {formData.is_featured && (
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">Badge Text (optional)</label>
-              <input
-                type="text"
-                value={formData.badge}
-                onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                placeholder="e.g. Best Seller, Chef's Choice"
-                className="w-full h-10 sm:h-11 bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Max 4 featured items allowed. {stats.featured}/4 featured.</p>
-            </div>
-          )}
-
-          <div className="flex gap-3 pt-3 sm:pt-4">
-            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1 h-10 sm:h-11">Cancel</Button>
-            <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 h-10 sm:h-11">
-              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingItem ? 'Update' : 'Create')}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+      <MenuItemForm
+        isOpen={openCreate || openEdit}
+        onClose={() => { setOpenCreate(false); setOpenEdit(false); setEditingItem(null); }}
+        editingItem={editingItem}
+        categories={(categories as any)?.data || []}
+        locationId={currentLocationId}
+      />
 
       {/* Preview Modal - Shows how item looks to customers */}
       <FoodDetailModal
@@ -631,6 +565,13 @@ export default function MenuItems() {
           setPreviewItemId(null);
         }}
         showAddToCart={false}
+      />
+
+      {/* Featured Manager Modal */}
+      <FeaturedManagerModal
+        isOpen={openFeaturedManager}
+        onClose={() => setOpenFeaturedManager(false)}
+        locationId={currentLocationId}
       />
     </AdminLayout>
   );

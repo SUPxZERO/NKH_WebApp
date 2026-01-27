@@ -98,6 +98,7 @@ export default function StockAlerts() {
     const [openSettings, setOpenSettings] = React.useState(false);
     const [selectedIngredient, setSelectedIngredient] = React.useState<Ingredient | null>(null);
     const [reorderQuantity, setReorderQuantity] = React.useState('');
+    const [locationId, setLocationId] = React.useState('');
 
     const qc = useQueryClient();
 
@@ -123,6 +124,12 @@ export default function StockAlerts() {
     const { data: stats } = useQuery({
         queryKey: ['alert-stats'],
         queryFn: () => apiGet('/api/admin/stock-alerts/stats')
+    });
+
+    // Fetch locations
+    const { data: locations } = useQuery({
+        queryKey: ['locations'],
+        queryFn: () => apiGet('/api/admin/locations')
     });
 
     // Fetch Settings
@@ -188,7 +195,8 @@ export default function StockAlerts() {
                 ingredient_id: selectedIngredient.id,
                 quantity: parseFloat(reorderQuantity),
                 unit_price: selectedIngredient.cost_per_unit || 0
-            }]
+            }],
+            location_id: locationId ? parseInt(locationId) : null
         };
         createPOMutation.mutate(data);
     };
@@ -491,6 +499,25 @@ export default function StockAlerts() {
                                     {selectedIngredient.unit?.code || 'Units'}
                                 </span>
                             </div>
+
+                            {/* Location Selector */}
+                            <div className="mt-3">
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
+                                    Destination Location
+                                </label>
+                                <select
+                                    className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm"
+                                    value={locationId}
+                                    onChange={(e) => setLocationId(e.target.value)}
+                                >
+                                    <option value="">Select Location (Default: {locations?.data?.[0]?.name || 'Main'})</option>
+                                    {locations?.data?.map((loc: any) => (
+                                        <option key={loc.id} value={loc.id}>{loc.name}</option>
+                                    ))}
+                                </select>
+                                <p className="text-[10px] text-muted-foreground mt-1">If unspecified, defaults to {locations?.data?.[0]?.name || 'Main Kitchen'}</p>
+                            </div>
+
                             <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3 text-[10px] sm:text-xs">
                                 <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-blue-500/10 text-blue-500 font-medium">
                                     Now: {selectedIngredient.current_stock}
@@ -591,6 +618,6 @@ export default function StockAlerts() {
                     </div>
                 </div>
             </Modal>
-        </AdminLayout>
+        </AdminLayout >
     );
 }

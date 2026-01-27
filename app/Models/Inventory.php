@@ -13,11 +13,9 @@ class Inventory extends Model
 
     protected $guarded = [
         'id',
-        'ingredient_id',
-        'location_id',
-        'quantity',
-        'batch_number',
-        'expiration_date',
+        // 'ingredient_id', // Allowed
+        // 'location_id',   // Allowed
+        // 'quantity',      // Allowed
         'created_at',
         'updated_at',
     ];

@@ -57,8 +57,14 @@ class StockAlertController extends Controller
     public function reorderRecommendations(): JsonResponse
     {
         // Find ingredients where current_stock <= reorder_point
+        // AND do not have an active purchase order item
         $recommendations = Ingredient::with('supplier')
             ->whereRaw('current_stock <= reorder_point')
+            ->whereDoesntHave('purchaseOrderItems', function ($q) {
+                $q->whereHas('purchaseOrder', function ($po) {
+                    $po->whereIn('status', ['draft', 'pending', 'approved', 'ordered', 'partially_received']);
+                });
+            })
             ->get()
             ->map(function ($ingredient) {
                 return [
@@ -104,15 +110,16 @@ class StockAlertController extends Controller
     private function generateAlerts()
     {
         // Helper to check if we should create an alert
-        $shouldCreateAlert = function($ingredientId, $type, $locationId = null) {
+        $shouldCreateAlert = function ($ingredientId, $type, $locationId = null) {
             // Check for any unacknowledged alert (Active)
             $activeExists = StockAlert::where('ingredient_id', $ingredientId)
                 ->where('type', $type)
                 ->where('location_id', $locationId)
                 ->where('acknowledged', false)
                 ->exists();
-            
-            if ($activeExists) return false;
+
+            if ($activeExists)
+                return false;
 
             // Check for recently acknowledged alert (e.g., within last 24 hours)
             // If we acknowledged it recently, we don't want to receive it again immediately

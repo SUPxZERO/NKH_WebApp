@@ -14,7 +14,6 @@ class Promotion extends Model
      */
     protected $guarded = [
         'id',
-        'code',                 // ⚠️ Unique promotion code (prevent duplicates)
         'created_at',
         'updated_at',
     ];

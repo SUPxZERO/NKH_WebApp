@@ -11,11 +11,7 @@ class ExpenseCategory extends Model
 
     protected $guarded = [
         'id',
-        'location_id',
-        'name',
-        'description',
-        'is_active',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

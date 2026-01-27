@@ -21,105 +21,45 @@ class AnalyticsController extends Controller
 {
     public function salesOverview(Request $request): JsonResponse
     {
-        $range = $request->get('range', '7days');
-        $dates = $this->getDateRange($range);
+        $dates = $this->getDateRangeFromRequest($request);
+        $data = $this->getSalesData($dates);
 
-        $stats = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
-            ->select([
-                DB::raw('COUNT(*) as total_orders'),
-                DB::raw('SUM(total_amount) as total_revenue'),
-                DB::raw('AVG(total_amount) as avg_order_value'),
-                DB::raw('COUNT(DISTINCT customer_id) as unique_customers')
-            ])
-            ->first();
-
-        return response()->json($stats);
+        return response()->json($data);
     }
 
     public function salesTrends(Request $request): JsonResponse
     {
-        $range = $request->get('range', '7days');
-        $dates = $this->getDateRange($range);
-        $groupBy = $this->getGroupByFormat($range);
-
-        $trends = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
-            ->select([
-                DB::raw($groupBy . ' as date'),
-                DB::raw('COUNT(*) as orders'),
-                DB::raw('SUM(total_amount) as revenue')
-            ])
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        $dates = $this->getDateRangeFromRequest($request);
+        $trends = $this->getTrendsData($dates);
 
         return response()->json(['data' => $trends]);
     }
 
     public function topSellingItems(Request $request): JsonResponse
     {
-        $range = $request->get('range', '7days');
-        $dates = $this->getDateRange($range);
-
-        $topItems = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('menu_item_translations', function($join) {
-                $join->on('menu_items.id', '=', 'menu_item_translations.menu_item_id')
-                     ->where('menu_item_translations.locale', '=', 'en');
-            })
-            ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
-            ->where('orders.status', '!=', 'cancelled')
-            ->select([
-                'menu_items.id',
-                'menu_item_translations.name',
-                DB::raw('SUM(order_items.quantity) as quantity_sold'),
-                DB::raw('SUM(order_items.total_price) as revenue')
-            ])
-            ->groupBy('menu_items.id', 'menu_item_translations.name')
-            ->orderByDesc('quantity_sold')
-            ->limit(10)
-            ->get();
+        $dates = $this->getDateRangeFromRequest($request);
+        $topItems = $this->getTopItemsData($dates);
 
         return response()->json(['data' => $topItems]);
     }
 
     public function salesByCategory(Request $request): JsonResponse
     {
-        $range = $request->get('range', '7days');
-        $dates = $this->getDateRange($range);
-
-        $categoryData = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('categories', 'menu_items.category_id', '=', 'categories.id')
-            ->join('category_translations', function($join) {
-                $join->on('categories.id', '=', 'category_translations.category_id')
-                     ->where('category_translations.locale', '=', 'en');
-            })
-            ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
-            ->where('orders.status', '!=', 'cancelled')
-            ->select([
-                'category_translations.name',
-                DB::raw('SUM(order_items.total_price) as value')
-            ])
-            ->groupBy('categories.id', 'category_translations.name')
-            ->get();
+        $dates = $this->getDateRangeFromRequest($request);
+        $categoryData = $this->getCategoryData($dates);
 
         return response()->json(['data' => $categoryData]);
     }
 
     public function peakHours(Request $request): JsonResponse
     {
-        $range = $request->get('range', '7days');
-        $dates = $this->getDateRange($range);
+        $dates = $this->getDateRangeFromRequest($request);
 
         $driver = DB::connection()->getDriverName();
         $hourSql = $driver === 'sqlite' ? "CAST(strftime('%H', created_at) AS INTEGER)" : "HOUR(created_at)";
 
         $peakHours = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw("$hourSql as hour"),
                 DB::raw('COUNT(*) as orders'),
@@ -129,8 +69,11 @@ class AnalyticsController extends Controller
             ->orderBy('hour')
             ->get()
             ->map(function ($item) {
-                $item->hour = sprintf('%02d:00', $item->hour);
-                return $item;
+                return [
+                    'hour' => sprintf('%02d:00', (int) $item->hour),
+                    'orders' => (int) $item->orders,
+                    'revenue' => (float) $item->revenue
+                ];
             });
 
         return response()->json(['data' => $peakHours]);
@@ -138,26 +81,31 @@ class AnalyticsController extends Controller
 
     public function salesByPaymentMethod(Request $request): JsonResponse
     {
-        $range = $request->get('range', '7days');
-        $dates = $this->getDateRange($range);
+        $dates = $this->getDateRangeFromRequest($request);
 
         $paymentData = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 'payment_method',
                 DB::raw('COUNT(*) as orders'),
                 DB::raw('SUM(total_amount) as revenue')
             ])
             ->groupBy('payment_method')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'payment_method' => $item->payment_method ?? 'Unknown',
+                    'orders' => (int) $item->orders,
+                    'revenue' => (float) $item->revenue
+                ];
+            });
 
         return response()->json(['data' => $paymentData]);
     }
 
     public function customerMetrics(Request $request): JsonResponse
     {
-        $range = $request->get('range', '7days');
-        $dates = $this->getDateRange($range);
+        $dates = $this->getDateRangeFromRequest($request);
 
         $metrics = [
             'new_customers' => Order::whereBetween('created_at', [$dates['start'], $dates['end']])
@@ -170,7 +118,7 @@ class AnalyticsController extends Controller
                 ->where('o2.created_at', '<', $dates['start'])
                 ->distinct('o1.customer_id')
                 ->count(),
-            'avg_orders_per_customer' => Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            'avg_orders_per_customer' => (float) Order::whereBetween('created_at', [$dates['start'], $dates['end']])
                 ->whereNotNull('customer_id')
                 ->select('customer_id', DB::raw('COUNT(*) as order_count'))
                 ->groupBy('customer_id')
@@ -186,7 +134,7 @@ class AnalyticsController extends Controller
         $date = $request->get('date', Carbon::today()->toDateString());
 
         $summary = Order::whereDate('created_at', $date)
-            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(total_amount) as total_revenue'),
@@ -196,7 +144,14 @@ class AnalyticsController extends Controller
             ])
             ->first();
 
-        return response()->json($summary);
+        $data = $summary->toArray();
+        $data['total_orders'] = (int) ($data['total_orders'] ?? 0);
+        $data['total_revenue'] = (float) ($data['total_revenue'] ?? 0);
+        $data['avg_order_value'] = (float) ($data['avg_order_value'] ?? 0);
+        $data['min_order'] = (float) ($data['min_order'] ?? 0);
+        $data['max_order'] = (float) ($data['max_order'] ?? 0);
+
+        return response()->json($data);
     }
 
     /**
@@ -210,7 +165,7 @@ class AnalyticsController extends Controller
         ]);
 
         $dates = $this->getDateRangeFromRequest($request);
-        
+
         $data = [
             'overview' => $this->getSalesData($dates),
             'trends' => $this->getTrendsData($dates),
@@ -239,7 +194,7 @@ class AnalyticsController extends Controller
         ]);
 
         $dates = $this->getDateRangeFromRequest($request);
-        
+
         // Gather data matching PDF structure
         $overview = $this->getSalesData($dates);
         $trends = $this->getTrendsData($dates);
@@ -251,9 +206,9 @@ class AnalyticsController extends Controller
             'Content-Disposition' => 'attachment; filename="sales-analytics-' . date('Y-m-d') . '.csv"',
         ];
 
-        $callback = function() use ($overview, $trends, $topItems, $categories, $dates) {
+        $callback = function () use ($overview, $trends, $topItems, $categories, $dates) {
             $file = fopen('php://output', 'w');
-            
+
             // 1. Title & Period
             fputcsv($file, ['Sales Analytics Report']);
             fputcsv($file, ['Period:', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
@@ -274,7 +229,7 @@ class AnalyticsController extends Controller
             fputcsv($file, ['SALES TRENDS']);
             fputcsv($file, ['Date', 'Orders', 'Revenue']);
             foreach ($trends as $trend) {
-                fputcsv($file, [$trend->date, $trend->orders, $trend->revenue]); // Trends is array of objects in getTrendsData -> check return type
+                fputcsv($file, [$trend['date'], $trend['orders'], $trend['revenue']]);
             }
             fputcsv($file, []);
 
@@ -291,7 +246,7 @@ class AnalyticsController extends Controller
             fputcsv($file, ['SALES BY CATEGORY']);
             fputcsv($file, ['Category', 'Revenue']);
             foreach ($categories as $cat) {
-                 // $cat is array from getCategoryData
+                // $cat is array from getCategoryData
                 fputcsv($file, [$cat['name'], $cat['value']]);
             }
 
@@ -311,7 +266,7 @@ class AnalyticsController extends Controller
         // 1. Valuation Data
         $currentValue = Inventory::join('ingredients', 'inventory.ingredient_id', '=', 'ingredients.id')
             ->sum(DB::raw('inventory.quantity * ingredients.cost_per_unit'));
-        
+
         $itemsCount = Inventory::count();
 
         $valuation = [
@@ -334,9 +289,9 @@ class AnalyticsController extends Controller
             ->value('rate');
 
         $turnoverByCategory = Ingredient::select([
-                'category',
-                DB::raw('AVG(CASE WHEN current_stock > 0 THEN (max_stock_level / current_stock) ELSE 0 END) as turnover_rate')
-            ])
+            'category',
+            DB::raw('AVG(CASE WHEN current_stock > 0 THEN (max_stock_level / current_stock) ELSE 0 END) as turnover_rate')
+        ])
             ->groupBy('category')
             ->get()
             ->toArray();
@@ -348,11 +303,11 @@ class AnalyticsController extends Controller
 
         // 4. Cost Analysis
         $topCostItems = Ingredient::select([
-                'ingredients.name',
-                'ingredients.current_stock as quantity',
-                'ingredients.cost_per_unit',
-                DB::raw('(ingredients.current_stock * ingredients.cost_per_unit) as total_cost')
-            ])
+            'ingredients.name',
+            'ingredients.current_stock as quantity',
+            'ingredients.cost_per_unit',
+            DB::raw('(ingredients.current_stock * ingredients.cost_per_unit) as total_cost')
+        ])
             ->with('unit:id,code')
             ->orderByDesc('total_cost')
             ->limit(10)
@@ -365,9 +320,9 @@ class AnalyticsController extends Controller
             ->toArray();
 
         $costCategories = Ingredient::select([
-                'ingredients.category as name',
-                DB::raw('SUM(ingredients.current_stock * ingredients.cost_per_unit) as value')
-            ])
+            'ingredients.category as name',
+            DB::raw('SUM(ingredients.current_stock * ingredients.cost_per_unit) as value')
+        ])
             ->groupBy('ingredients.category')
             ->get()
             ->toArray();
@@ -393,7 +348,7 @@ class AnalyticsController extends Controller
     public function exportInventoryCSV(Request $request)
     {
         $dates = $this->getDateRangeFromRequest($request);
-        
+
         $currentValue = Inventory::join('ingredients', 'inventory.ingredient_id', '=', 'ingredients.id')
             ->sum(DB::raw('inventory.quantity * ingredients.cost_per_unit'));
 
@@ -415,7 +370,7 @@ class AnalyticsController extends Controller
 
         // 1. Profit & Loss Data
         $revenue = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->sum('total_amount');
 
         $expenses = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
@@ -431,6 +386,18 @@ class AnalyticsController extends Controller
         $netProfit = $revenue - $totalExpenses;
         $margin = $revenue > 0 ? ($netProfit / $revenue) * 100 : 0;
 
+        // Calculate trends
+        $prevDates = [
+            'start' => (clone $dates['start'])->subDays($dates['start']->diffInDays($dates['end']) + 1),
+            'end' => (clone $dates['start'])->subSecond()
+        ];
+
+        $prevRevenue = Order::whereBetween('created_at', [$prevDates['start'], $prevDates['end']])
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
+            ->sum('total_amount');
+
+        $revenueChange = $prevRevenue > 0 ? (($revenue - $prevRevenue) / $prevRevenue) * 100 : 0;
+
         $expenseBreakdown = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
             ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
             ->select([
@@ -439,48 +406,55 @@ class AnalyticsController extends Controller
             ])
             ->groupBy('expense_categories.id', 'expense_categories.name')
             ->get()
-            ->map(function ($item) use ($expenses) {
+            ->map(function ($item) use ($totalExpenses) {
                 return [
                     'category' => $item->category,
-                    'amount' => $item->amount,
-                    'percentage' => $expenses > 0 ? ($item->amount / $expenses) * 100 : 0,
-                    'change' => 0 // Placeholder
+                    'amount' => (float) $item->amount,
+                    'percentage' => $totalExpenses > 0 ? ($item->amount / $totalExpenses) * 100 : 0,
+                    'change' => 0
                 ];
             })
             ->toArray();
 
         $profitLoss = [
-            'total_revenue' => $revenue,
-            'cogs' => $cogsValue,
-            'total_expenses' => $totalExpenses, // Operating + COGS
-            'net_profit' => $netProfit,
-            'profit_margin' => $margin,
+            'total_revenue' => (float) $revenue,
+            'cogs' => (float) $cogsValue,
+            'total_expenses' => (float) $totalExpenses,
+            'net_profit' => (float) $netProfit,
+            'profit_margin' => (float) $margin,
+            'revenue_change' => (float) $revenueChange,
             'expense_categories' => $expenseBreakdown
         ];
 
         // 2. Margins Data
         $marginsByCategory = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('categories', 'menu_items.category_id', '=', 'categories.id')
-            ->join('category_translations', function($join) {
+            ->leftJoin('categories', 'menu_items.category_id', '=', 'categories.id')
+            ->leftJoin('category_translations', function ($join) {
                 $join->on('categories.id', '=', 'category_translations.category_id')
-                     ->where('category_translations.locale', '=', 'en');
+                    ->where('category_translations.locale', '=', app()->getLocale());
             })
+            ->leftJoin('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
-            ->where('orders.status', '!=', 'cancelled')
+            ->where(function ($q) {
+                $q->where('order_statuses.code', '!=', 'cancelled')
+                    ->orWhereNull('order_statuses.code');
+            })
             ->select([
-                'category_translations.name as category',
+                DB::raw("COALESCE(category_translations.name, categories.slug, 'Uncategorized') as category"),
                 DB::raw('SUM(order_items.total_price) as revenue'),
                 DB::raw('SUM(order_items.total_price * 0.3) as cost'), // Mock cost 30%
             ])
-            ->groupBy('categories.id', 'category_translations.name')
+            ->groupBy('category')
             ->get()
             ->map(function ($item) {
-                $margin = $item->revenue > 0 ? (($item->revenue - $item->cost) / $item->revenue) * 100 : 0;
+                $rev = (float) $item->revenue;
+                $cst = (float) $item->cost;
+                $margin = $rev > 0 ? (($rev - $cst) / $rev) * 100 : 0;
                 return [
                     'category' => $item->category,
-                    'revenue' => $item->revenue,
-                    'cost' => $item->cost,
+                    'revenue' => $rev,
+                    'cost' => $cst,
                     'margin' => $margin
                 ];
             })
@@ -524,7 +498,7 @@ class AnalyticsController extends Controller
         // Reuse the logic from PDF export to ensure consistency
         // 1. Profit & Loss
         $revenue = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->sum('total_amount');
 
         $expenses = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
@@ -535,9 +509,20 @@ class AnalyticsController extends Controller
             ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
             ->sum(DB::raw('inventory_transactions.quantity * ingredients.cost_per_unit'));
 
-        $totalExpenses = $expenses + $cogsValue;
-        $netProfit = $revenue - $totalExpenses;
+        $totalExpenses = (float) $expenses + (float) $cogsValue;
+        $netProfit = (float) $revenue - (float) $totalExpenses;
         $margin = $revenue > 0 ? ($netProfit / $revenue) * 100 : 0;
+
+        $prevDates = [
+            'start' => (clone $dates['start'])->subDays($dates['start']->diffInDays($dates['end']) + 1),
+            'end' => (clone $dates['start'])->subSecond()
+        ];
+
+        $prevRevenue = Order::whereBetween('created_at', [$prevDates['start'], $prevDates['end']])
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
+            ->sum('total_amount');
+
+        $revenueChange = $prevRevenue > 0 ? (($revenue - $prevRevenue) / $prevRevenue) * 100 : 0;
 
         // Breakdown
         $expenseBreakdown = Expense::whereBetween('expense_date', [$dates['start'], $dates['end']])
@@ -550,14 +535,14 @@ class AnalyticsController extends Controller
             ->get();
 
         $cogsBreakdown = InventoryTransaction::whereBetween('inventory_transactions.created_at', [$dates['start'], $dates['end']])
-             ->where('type', 'usage')
-             ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
-             ->select([
-                 'ingredients.category as name',
-                 DB::raw('SUM(inventory_transactions.quantity * ingredients.cost_per_unit) as value')
-             ])
-             ->groupBy('ingredients.category')
-             ->get();
+            ->where('type', 'usage')
+            ->join('ingredients', 'inventory_transactions.ingredient_id', '=', 'ingredients.id')
+            ->select([
+                'ingredients.category as name',
+                DB::raw('SUM(inventory_transactions.quantity * ingredients.cost_per_unit) as value')
+            ])
+            ->groupBy('ingredients.category')
+            ->get();
 
 
         $headers = [
@@ -565,9 +550,9 @@ class AnalyticsController extends Controller
             'Content-Disposition' => 'attachment; filename="financial-report-' . date('Y-m-d') . '.csv"',
         ];
 
-        $callback = function() use ($dates, $revenue, $cogsValue, $expenses, $totalExpenses, $netProfit, $margin, $expenseBreakdown, $cogsBreakdown) {
+        $callback = function () use ($dates, $revenue, $revenueChange, $cogsValue, $expenses, $totalExpenses, $netProfit, $margin, $expenseBreakdown, $cogsBreakdown) {
             $file = fopen('php://output', 'w');
-            
+
             // 1. Title
             fputcsv($file, ['Financial Dashboard Report']);
             fputcsv($file, ['Period:', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
@@ -576,6 +561,7 @@ class AnalyticsController extends Controller
             // 2. Summary
             fputcsv($file, ['PROFIT & LOSS SUMMARY']);
             fputcsv($file, ['Total Revenue', number_format($revenue, 2)]);
+            fputcsv($file, ['Revenue Change (%)', number_format($revenueChange, 1) . '%']);
             fputcsv($file, ['Cost of Goods Sold (COGS)', number_format($cogsValue, 2)]);
             fputcsv($file, ['Operating Expenses', number_format($expenses, 2)]);
             fputcsv($file, ['Total Expenses', number_format($totalExpenses, 2)]);
@@ -591,13 +577,13 @@ class AnalyticsController extends Controller
             }
             fputcsv($file, []);
 
-             // 4. COGS Breakdown
+            // 4. COGS Breakdown
             fputcsv($file, ['COGS BREAKDOWN']);
             fputcsv($file, ['Category', 'Amount']);
             foreach ($cogsBreakdown as $cogs) {
-                fputcsv($file, [$cogs->name, number_format($cogs->value, 2)]);
+                fputcsv($file, [$cogs->name ?? 'Uncategorized', number_format((float) ($cogs->value ?? 0), 2)]);
             }
-            
+
             fclose($file);
         };
 
@@ -612,14 +598,14 @@ class AnalyticsController extends Controller
                 'end' => Carbon::parse($request->end_date)->endOfDay(),
             ];
         }
-        
+
         return $this->getDateRange($request->get('range', '7days'));
     }
 
     private function getSalesData($dates): array
     {
         $stats = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(total_amount) as total_revenue'),
@@ -628,7 +614,13 @@ class AnalyticsController extends Controller
             ])
             ->first();
 
-        return $stats->toArray();
+        $data = $stats->toArray();
+        $data['total_revenue'] = (float) ($data['total_revenue'] ?? 0);
+        $data['avg_order_value'] = (float) ($data['avg_order_value'] ?? 0);
+        $data['total_orders'] = (int) ($data['total_orders'] ?? 0);
+        $data['unique_customers'] = (int) ($data['unique_customers'] ?? 0);
+
+        return $data;
     }
 
     private function getTrendsData($dates): array
@@ -637,7 +629,7 @@ class AnalyticsController extends Controller
         $groupBy = $daysDiff > 60 ? "DATE_FORMAT(created_at, '%Y-%m')" : "DATE(created_at)";
 
         $trends = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
-            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw($groupBy . ' as date'),
                 DB::raw('COUNT(*) as orders'),
@@ -646,13 +638,20 @@ class AnalyticsController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'orders' => (int) $item->orders,
+                    'revenue' => (float) $item->revenue
+                ];
+            })
             ->toArray();
 
         // Convert to objects if needed or keep as array. 
         // Note: The main function expects objects in my previous thought, but I will adjust main function to handle arrays.
         // Actually, let's return objects or arrays consistently.
         // The original method returned arrays.
-        
+
         return $trends;
     }
 
@@ -661,13 +660,18 @@ class AnalyticsController extends Controller
         $topItems = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('menu_item_translations', function($join) {
+            ->join('menu_item_translations', function ($join) {
                 $join->on('menu_items.id', '=', 'menu_item_translations.menu_item_id')
-                     ->where('menu_item_translations.locale', '=', 'en');
+                    ->where('menu_item_translations.locale', '=', app()->getLocale());
             })
+            ->leftJoin('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
-            ->where('orders.status', '!=', 'cancelled')
+            ->where(function ($q) {
+                $q->where('order_statuses.code', '!=', 'cancelled')
+                    ->orWhereNull('order_statuses.code');
+            })
             ->select([
+                'menu_items.id',
                 'menu_item_translations.name',
                 DB::raw('SUM(order_items.quantity) as quantity_sold'),
                 DB::raw('SUM(order_items.total_price) as revenue')
@@ -676,7 +680,14 @@ class AnalyticsController extends Controller
             ->orderByDesc('quantity_sold')
             ->limit(10)
             ->get()
-            ->map(fn ($item) => (array) $item)
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'quantity_sold' => (int) ($item->quantity_sold ?? 0),
+                    'revenue' => (float) ($item->revenue ?? 0)
+                ];
+            })
             ->toArray();
 
         return $topItems;
@@ -687,20 +698,34 @@ class AnalyticsController extends Controller
         $categoryData = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
-            ->join('categories', 'menu_items.category_id', '=', 'categories.id')
-            ->join('category_translations', function($join) {
+            ->leftJoin('categories', 'menu_items.category_id', '=', 'categories.id')
+            ->leftJoin('category_translations', function ($join) {
                 $join->on('categories.id', '=', 'category_translations.category_id')
-                     ->where('category_translations.locale', '=', 'en');
+                    ->where('category_translations.locale', '=', app()->getLocale());
             })
+            ->leftJoin('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
-            ->where('orders.status', '!=', 'cancelled')
+            ->where(function ($q) {
+                $q->where('order_statuses.code', '!=', 'cancelled')
+                    ->orWhereNull('order_statuses.code');
+            })
             ->select([
-                'category_translations.name',
+                DB::raw("COALESCE(category_translations.name, categories.slug, 'Uncategorized') as name"),
                 DB::raw('SUM(order_items.total_price) as value')
             ])
-            ->groupBy('categories.id', 'category_translations.name')
+            ->groupBy('name')
             ->get()
-            ->map(fn ($item) => (array) $item)
+            ->map(function ($item) {
+                $val = (float) ($item->value ?? 0);
+                if ($val <= 0)
+                    return null;
+                return [
+                    'name' => $item->name,
+                    'value' => $val
+                ];
+            })
+            ->filter()
+            ->values()
             ->toArray();
 
         return $categoryData;
@@ -709,7 +734,7 @@ class AnalyticsController extends Controller
     private function getDateRange(string $range): array
     {
         $end = Carbon::now();
-        
+
         switch ($range) {
             case 'today':
                 $start = Carbon::today();

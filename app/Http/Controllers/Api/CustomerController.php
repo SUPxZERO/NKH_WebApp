@@ -86,6 +86,7 @@ class CustomerController extends Controller
     }
 
     // POST /api/admin/customers (role:admin,manager)
+    // POST /api/admin/customers (role:admin,manager)
     public function store(StoreCustomerRequest $request): CustomerResource
     {
         $data = $request->validated();
@@ -105,6 +106,7 @@ class CustomerController extends Controller
             $user->roles()->attach($role->id);
 
             // Create customer record
+            // points_balance is guarded, so we create without it first
             $customer = Customer::create([
                 'user_id' => $user->id,
                 'customer_code' => 'CUST-' . strtoupper(Str::random(6)),
@@ -112,9 +114,14 @@ class CustomerController extends Controller
                 'birth_date' => $data['birth_date'] ?? null,
                 'gender' => $data['gender'] ?? null,
                 'preferences' => $data['preferences'] ?? null,
-                'points_balance' => $data['points_balance'] ?? 0,
                 'notes' => $data['notes'] ?? null,
             ]);
+
+            // Manually set points if provided
+            if (isset($data['points_balance'])) {
+                $customer->points_balance = $data['points_balance'];
+                $customer->save();
+            }
 
             return $customer->load(['user', 'preferredLocation', 'addresses']);
         });
@@ -164,13 +171,18 @@ class CustomerController extends Controller
                 $customerUpdate['gender'] = $data['gender'];
             if (isset($data['preferences']))
                 $customerUpdate['preferences'] = $data['preferences'];
-            if (isset($data['points_balance']))
-                $customerUpdate['points_balance'] = $data['points_balance'];
             if (isset($data['notes']))
                 $customerUpdate['notes'] = $data['notes'];
 
+            // Handle updates if we have any mass-assignable fields
             if (!empty($customerUpdate)) {
                 $customer->update($customerUpdate);
+            }
+
+            // Manually set points if provided (because it is guarded)
+            if (isset($data['points_balance'])) {
+                $customer->points_balance = $data['points_balance'];
+                $customer->save();
             }
         });
 

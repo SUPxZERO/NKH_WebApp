@@ -17,7 +17,7 @@ class AdminUserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::where(function($q) {
+        $query = User::where(function ($q) {
             $q->whereHas('roles', function ($q2) {
                 $q2->whereIn('slug', ['super-admin', 'admin', 'manager']);
             });
@@ -27,16 +27,16 @@ class AdminUserController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         if ($request->has('status') && $request->status !== 'all') {
-             if ($request->status === 'active') {
-                 $query->where('is_active', true);
-             } elseif ($request->status === 'inactive') {
-                 $query->where('is_active', false);
-             }
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
         }
 
         $admins = $query->latest()->paginate($request->get('per_page', 15));
@@ -64,7 +64,6 @@ class AdminUserController extends Controller
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'phone' => $validated['phone'] ?? null,
-                'is_active' => $validated['is_active'] ?? true,
                 'is_active' => $validated['is_active'] ?? true,
             ]);
 
@@ -94,15 +93,20 @@ class AdminUserController extends Controller
             'password' => 'nullable|string|min:8',
             'phone' => 'nullable|string|max:20',
             'role' => 'sometimes|string|in:admin,manager,super-admin',
+            'is_active' => 'sometimes|boolean',
         ]);
 
         $user = DB::transaction(function () use ($validated, $user) {
             $updateData = [];
-            if (isset($validated['name'])) $updateData['name'] = $validated['name'];
-            if (isset($validated['email'])) $updateData['email'] = $validated['email'];
-            if (isset($validated['phone'])) $updateData['phone'] = $validated['phone'];
-            if (isset($validated['is_active'])) $updateData['is_active'] = $validated['is_active'];
-            
+            if (isset($validated['name']))
+                $updateData['name'] = $validated['name'];
+            if (isset($validated['email']))
+                $updateData['email'] = $validated['email'];
+            if (isset($validated['phone']))
+                $updateData['phone'] = $validated['phone'];
+            if (isset($validated['is_active']))
+                $updateData['is_active'] = $validated['is_active'];
+
             if (!empty($validated['password'])) {
                 $updateData['password'] = Hash::make($validated['password']);
             }
@@ -136,7 +140,7 @@ class AdminUserController extends Controller
         $user->update(['is_active' => false]);
         return response()->json(['message' => 'Admin deactivated successfully']);
     }
-    
+
     /**
      * Get basic stats for admin page
      */
@@ -144,10 +148,10 @@ class AdminUserController extends Controller
     {
         // Count users with any admin-capable role
         $adminRoles = ['super-admin', 'admin', 'manager'];
-        $query = User::where(function($q) use ($adminRoles) {
+        $query = User::where(function ($q) use ($adminRoles) {
             $q->whereHas('roles', fn($q2) => $q2->whereIn('slug', $adminRoles));
         });
-        
+
         return response()->json([
             'total' => (clone $query)->count(),
             'active' => (clone $query)->where('is_active', true)->count(),

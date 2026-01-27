@@ -122,7 +122,7 @@ export default function AddressPicker({
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(
         initialLat && initialLng
-            ? { address: initialAddress, lat: initialLat, lng: initialLng }
+            ? { address: initialAddress, lat: Number(initialLat), lng: Number(initialLng) }
             : null
     );
     const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -141,6 +141,18 @@ export default function AddressPicker({
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Sync state with props
+    useEffect(() => {
+        if (initialLat && initialLng) {
+            setSelectedAddress({
+                address: initialAddress || '',
+                lat: Number(initialLat),
+                lng: Number(initialLng)
+            });
+            setSearchQuery(initialAddress || '');
+        }
+    }, [initialAddress, initialLat, initialLng]);
 
     // Debounced search
     const handleSearchChange = useCallback((value: string) => {
@@ -212,9 +224,9 @@ export default function AddressPicker({
                 onChange(addressData);
             } else {
                 const addressData: AddressData = {
-                    address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-                    lat: latitude,
-                    lng: longitude,
+                    address: `${Number(latitude).toFixed(6)}, ${Number(longitude).toFixed(6)}`,
+                    lat: Number(latitude),
+                    lng: Number(longitude),
                 };
                 setSelectedAddress(addressData);
                 onChange(addressData);
@@ -242,9 +254,9 @@ export default function AddressPicker({
             onChange(addressData);
         } else {
             const addressData: AddressData = {
-                address: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-                lat,
-                lng,
+                address: `${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`,
+                lat: Number(lat),
+                lng: Number(lng),
             };
             setSelectedAddress(addressData);
             onChange(addressData);
@@ -256,7 +268,7 @@ export default function AddressPicker({
     const openExternalMap = () => {
         if (selectedAddress) {
             window.open(
-                `https://www.openstreetmap.org/?mlat=${selectedAddress.lat}&mlon=${selectedAddress.lng}#map=17/${selectedAddress.lat}/${selectedAddress.lng}`,
+                `https://www.openstreetmap.org/?mlat=${Number(selectedAddress.lat)}&mlon=${Number(selectedAddress.lng)}#map=17/${Number(selectedAddress.lat)}/${Number(selectedAddress.lng)}`,
                 '_blank'
             );
         }
@@ -402,7 +414,7 @@ export default function AddressPicker({
                                 </p>
                                 <div className="flex items-center gap-3 mt-2">
                                     <span className="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-600 dark:text-green-400 font-medium">
-                                        📍 GPS: {selectedAddress.lat.toFixed(6)}, {selectedAddress.lng.toFixed(6)}
+                                        📍 GPS: {Number(selectedAddress.lat).toFixed(6)}, {Number(selectedAddress.lng).toFixed(6)}
                                     </span>
                                 </div>
                             </div>
@@ -427,7 +439,7 @@ export default function AddressPicker({
                         height={mapHeight}
                         frameBorder="0"
                         scrolling="no"
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedAddress.lng - 0.01}%2C${selectedAddress.lat - 0.01}%2C${selectedAddress.lng + 0.01}%2C${selectedAddress.lat + 0.01}&layer=mapnik&marker=${selectedAddress.lat}%2C${selectedAddress.lng}`}
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(selectedAddress.lng) - 0.01}%2C${Number(selectedAddress.lat) - 0.01}%2C${Number(selectedAddress.lng) + 0.01}%2C${Number(selectedAddress.lat) + 0.01}&layer=mapnik&marker=${Number(selectedAddress.lat)}%2C${Number(selectedAddress.lng)}`}
                         style={{ border: 0 }}
                         title="Location Map"
                     />
@@ -634,7 +646,7 @@ function InteractiveMapModal({
                             <div className="text-sm">
                                 <span className="text-gray-500 dark:text-gray-400">Selected: </span>
                                 <span className="font-mono text-purple-600 dark:text-purple-400">
-                                    {currentPos.lat.toFixed(6)}, {currentPos.lng.toFixed(6)}
+                                    {Number(currentPos.lat).toFixed(6)}, {Number(currentPos.lng).toFixed(6)}
                                 </span>
                             </div>
 

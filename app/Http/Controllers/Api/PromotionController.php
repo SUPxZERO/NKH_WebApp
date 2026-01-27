@@ -9,6 +9,7 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\PromotionResource;
+use Illuminate\Support\Str;
 
 class PromotionController extends Controller
 {
@@ -21,7 +22,7 @@ class PromotionController extends Controller
             $s = $request->string('search');
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('code', 'like', "%{$s}%");
+                    ->orWhere('code', 'like', "%{$s}%");
             });
         }
 
@@ -89,7 +90,7 @@ class PromotionController extends Controller
 
         $promotion = Promotion::create([
             'location_id' => $data['location_id'] ?? null,
-            'code' => $data['code'] ?? null,
+            'code' => $data['code'] ?? 'PROMO-' . strtoupper(Str::random(8)),
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'type' => $dbType,

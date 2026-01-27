@@ -32,13 +32,28 @@ class Employee extends Model
      * - HR: employment_status (workflow-managed)
      * - Audit: hire_date (HR records only)
      */
-    protected $guarded = [
-        'id',
-        'salary',               // ⚠️ CRITICAL: Compensation privacy
-        'hire_date',            // ⚠️ HR records only
-        'employment_status',    // ⚠️ Workflow-managed
-        'created_at',
-        'updated_at',
+    protected $fillable = [
+        'user_id',
+        'location_id',
+        'position_id',
+        'employee_code',
+        'hire_date',
+        'salary_type',
+        'salary',
+        'hourly_rate',
+        'address',
+        'phone',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'date_of_birth',
+        'preferred_shift_start',
+        'status',
+        'department',
+        'preferred_stations',
+        'preferred_shifts',
+        'available_days',
+        'max_hours_per_week',
+        'emergency_contact_relation'
     ];
 
 
@@ -54,14 +69,42 @@ class Employee extends Model
     /**
      * Boot method to auto-generate employee_code if not provided
      */
+    /**
+     * Boot method to auto-generate employee_code if not provided
+     */
     protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            if (empty($model->employee_code)) {
-                // Generate unique employee code
-                $model->employee_code = 'EMP-' . strtoupper(substr(md5($model->user_id . time()), 0, 8));
+        static::creating(function ($employee) {
+            if (empty($employee->employee_code)) {
+                $position = $employee->position;
+                if ($position) {
+                    // Generate prefix (first 3 chars of position title title, uppercase)
+                    $prefix = strtoupper(substr($position->title, 0, 3));
+                    $year = date('y');
+                    $baseCode = "{$prefix}-{$year}";
+
+                    // Find last code with this prefix and year
+                    // Matches format: PRE-YYNNN
+                    $lastEmployee = static::where('employee_code', 'like', "{$baseCode}%")
+                        ->orderByDesc('id') // Using ID as proxy for creation order/sequence
+                        ->first();
+
+                    $sequence = 1;
+                    if ($lastEmployee && preg_match('/-(\d{2})(\d{3})$/', $lastEmployee->employee_code, $matches)) {
+                        // $matches[1] is year, $matches[2] is sequence
+                        if ($matches[1] === $year) {
+                            $sequence = intval($matches[2]) + 1;
+                        }
+                    }
+
+                    $employee->employee_code = sprintf("%s%03d", $baseCode, $sequence);
+                } else {
+                    // Fallback if no position found (should accept null/empty check in real app)
+                    // Or keep the old fallback:
+                    $employee->employee_code = 'EMP-' . strtoupper(uniqid());
+                }
             }
         });
     }

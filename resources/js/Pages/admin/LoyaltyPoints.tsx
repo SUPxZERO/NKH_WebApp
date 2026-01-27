@@ -176,10 +176,21 @@ export default function LoyaltyPoints() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const points = parseInt(formData.points);
+    let finalPoints = points;
+
+    if (formData.type === 'earn') {
+      finalPoints = Math.abs(points);
+    } else if (formData.type === 'redeem') {
+      finalPoints = -Math.abs(points); // Ensure it's negative
+    } else {
+      // For 'adjust', trust the sign the user entered
+      finalPoints = points;
+    }
+
     const data = {
       ...formData,
       customer_id: parseInt(formData.customer_id),
-      points: formData.type === 'redeem' ? -Math.abs(points) : Math.abs(points)
+      points: finalPoints
     };
     if (editingTransaction) updateMutation.mutate({ id: editingTransaction.id, data });
     else createMutation.mutate(data);
@@ -403,7 +414,7 @@ export default function LoyaltyPoints() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Points" type="number" min="1" value={formData.points} onChange={(e) => setFormData({ ...formData, points: e.target.value })} required className="h-10 text-sm" />
+            <Input label="Points" type="number" value={formData.points} onChange={(e) => setFormData({ ...formData, points: e.target.value })} required className="h-10 text-sm" placeholder={formData.type === 'adjust' ? 'e.g. 50 or -50' : 'e.g. 100'} />
             <Input label="Date" type="datetime-local" value={formData.occurred_at} onChange={(e) => setFormData({ ...formData, occurred_at: e.target.value })} required className="h-10 text-sm" />
           </div>
           <div className="hidden sm:block">

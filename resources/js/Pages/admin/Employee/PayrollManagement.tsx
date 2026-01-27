@@ -560,32 +560,69 @@ export default function PayrollManagement() {
             {/* Details Modal - Mobile optimized */}
             <Modal open={showDetailsModal} onClose={() => setShowDetailsModal(false)} title="Breakdown">
                 <div className="space-y-3 sm:space-y-4">
-                    {(detailsData as any)?.data?.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-4 text-sm">No additional details</p>
-                    ) : (
-                        <div className="space-y-2">
-                            {(detailsData as any)?.data?.map((detail: PayrollDetail) => (
-                                <div key={detail.id} className="flex items-center justify-between p-2.5 sm:p-3 bg-secondary/50 rounded-lg sm:rounded-xl border border-border/50">
-                                    <div className="min-w-0">
-                                        <p className="font-medium text-sm text-foreground truncate">{detail.category}</p>
-                                        <span className={cn("text-[10px] sm:text-xs uppercase font-bold", detail.type === 'earning' ? "text-emerald-600" : "text-red-500")}>
-                                            {detail.type}
+                    {/* Earnings Section */}
+                    {(detailsData as any)?.earnings?.length > 0 && (
+                        <div>
+                            <h4 className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">Earnings</h4>
+                            <div className="space-y-2">
+                                {(detailsData as any)?.earnings?.map((detail: any, idx: number) => (
+                                    <div key={idx} className="flex items-center justify-between p-2.5 sm:p-3 bg-emerald-500/10 rounded-lg sm:rounded-xl border border-emerald-500/20">
+                                        <div className="min-w-0">
+                                            <p className="font-medium text-sm text-foreground truncate">{detail.description}</p>
+                                        </div>
+                                        <span className="font-bold text-sm text-emerald-600 flex-shrink-0">
+                                            +${(detail.amount || 0).toFixed(2)}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                                        <span className={cn("font-bold text-sm", detail.type === 'earning' ? "text-emerald-600" : "text-red-600")}>
-                                            {detail.type === 'earning' ? '+' : '-'}${detail.amount.toFixed(2)}
-                                        </span>
-                                        {editingPayrollId && (
-                                            <button onClick={() => removeDetailMutation.mutate(detail.id)} className="text-muted-foreground hover:text-red-500 p-1">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     )}
+
+                    {/* Deductions Section */}
+                    {(detailsData as any)?.deductions?.length > 0 && (
+                        <div>
+                            <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider mb-2">Deductions</h4>
+                            <div className="space-y-2">
+                                {(detailsData as any)?.deductions?.map((detail: any, idx: number) => (
+                                    <div key={idx} className="flex items-center justify-between p-2.5 sm:p-3 bg-red-500/10 rounded-lg sm:rounded-xl border border-red-500/20">
+                                        <div className="min-w-0">
+                                            <p className="font-medium text-sm text-foreground truncate">{detail.description}</p>
+                                        </div>
+                                        <span className="font-bold text-sm text-red-600 flex-shrink-0">
+                                            -${(detail.amount || 0).toFixed(2)}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* No details message */}
+                    {(!(detailsData as any)?.earnings?.length && !(detailsData as any)?.deductions?.length) && (
+                        <p className="text-center text-muted-foreground py-4 text-sm">No breakdown details available</p>
+                    )}
+
+                    {/* Totals Summary */}
+                    {(detailsData as any)?.totals && (
+                        <div className="border-t border-border pt-3 mt-3">
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Gross Pay:</span>
+                                    <span className="font-medium">${((detailsData as any)?.totals?.gross_pay || 0).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Deductions:</span>
+                                    <span className="font-medium text-red-500">-${((detailsData as any)?.totals?.total_deductions || 0).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between col-span-2 pt-2 border-t border-border">
+                                    <span className="font-bold">Net Pay:</span>
+                                    <span className="font-bold text-emerald-600">${((detailsData as any)?.totals?.net_pay || 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <Button onClick={() => setShowDetailsModal(false)} variant="secondary" className="w-full h-10 sm:h-11 text-sm">Close</Button>
                 </div>
             </Modal>

@@ -101,6 +101,7 @@ export default function PurchaseOrders() {
     const [openReceive, setOpenReceive] = useState(false);
     const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
     const [receiveItems, setReceiveItems] = useState<{ item_id: number; quantity_received: number }[]>([]);
+    const [receiveLocationId, setReceiveLocationId] = useState('');
 
     const qc = useQueryClient();
     const [page, setPage] = useState(1);
@@ -165,6 +166,12 @@ export default function PurchaseOrders() {
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed to approve')
     });
 
+    const submitMutation = useMutation({
+        mutationFn: (id: number) => apiPost(`/api/admin/purchase-orders/${id}/submit`, {}),
+        onSuccess: () => { toastSuccess('Purchase order submitted'); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to submit')
+    });
+
     const markOrderedMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/api/admin/purchase-orders/${id}/mark-ordered`, {}),
         onSuccess: () => { toastSuccess('Marked as ordered'); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
@@ -172,7 +179,7 @@ export default function PurchaseOrders() {
     });
 
     const receiveMutation = useMutation({
-        mutationFn: ({ id, items }: { id: number; items: any[] }) => apiPost(`/api/admin/purchase-orders/${id}/receive`, { items }),
+        mutationFn: ({ id, items, location_id }: { id: number; items: any[]; location_id?: string }) => apiPost(`/api/admin/purchase-orders/${id}/receive`, { items, location_id }),
         onSuccess: () => { toastSuccess('Items received'); setOpenReceive(false); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); qc.invalidateQueries({ queryKey: ['inventory'] }); qc.invalidateQueries({ queryKey: ['ingredients'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || 'Failed to receive items')
     });
@@ -383,16 +390,21 @@ export default function PurchaseOrders() {
                                         <div className="col-span-2">{getStatusDisplay(po.status)}</div>
                                         <div className="col-span-1 font-bold text-emerald-600 dark:text-emerald-400">${parseFloat(String(po.total_amount)).toFixed(2)}</div>
                                         <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {po.status === 'pending' && <Button size="sm" onClick={() => approveMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-emerald-600 hover:bg-emerald-700 text-white"><CheckCircle size={14} /></Button>}
-                                            {po.status === 'approved' && <Button size="sm" onClick={() => markOrderedMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-purple-600 hover:bg-purple-700 text-white"><Send size={14} /></Button>}
-                                            {(po.status === 'ordered' || po.status === 'partially_received') && (
-                                                <Button size="sm" onClick={() => { setSelectedPO(po); setReceiveItems(po.items?.map(i => ({ item_id: i.id!, quantity_received: 0 })) || []); setOpenReceive(true); }} className="h-7 w-7 p-0 bg-blue-600 hover:bg-blue-700 text-white"><Package size={14} /></Button>
+                                            {po.status === 'draft' && (
+                                                <Button size="sm" onClick={() => submitMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-blue-600 hover:bg-blue-700 text-white" title="Submit for Approval">
+                                                    <Send size={14} />
+                                                </Button>
                                             )}
-                                            <Button size="sm" variant="ghost" onClick={() => { setSelectedPO(po); setOpenView(true); }} className="h-7 w-7 p-0 hover:text-blue-500"><Eye size={14} /></Button>
+                                            {po.status === 'pending' && <Button size="sm" onClick={() => approveMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-emerald-600 hover:bg-emerald-700 text-white" title="Approve"><CheckCircle size={14} /></Button>}
+                                            {po.status === 'approved' && <Button size="sm" onClick={() => markOrderedMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-purple-600 hover:bg-purple-700 text-white" title="Mark Ordered"><Send size={14} /></Button>}
+                                            {(po.status === 'ordered' || po.status === 'partially_received') && (
+                                                <Button size="sm" onClick={() => { setSelectedPO(po); setReceiveItems(po.items?.map(i => ({ item_id: i.id!, quantity_received: 0 })) || []); setOpenReceive(true); }} className="h-7 w-7 p-0 bg-blue-600 hover:bg-blue-700 text-white" title="Receive Items"><Package size={14} /></Button>
+                                            )}
+                                            <Button size="sm" variant="ghost" onClick={() => { setSelectedPO(po); setOpenView(true); }} className="h-7 w-7 p-0 hover:text-blue-500" title="View Details"><Eye size={14} /></Button>
                                             {['draft', 'pending'].includes(po.status) && (
                                                 <>
-                                                    <Button size="sm" variant="ghost" onClick={() => handleEdit(po)} className="h-7 w-7 p-0 hover:text-amber-500"><Edit size={14} /></Button>
-                                                    <Button size="sm" variant="ghost" onClick={() => confirm('Delete?') && deleteMutation.mutate(po.id)} className="h-7 w-7 p-0 hover:text-red-500"><Trash2 size={14} /></Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => handleEdit(po)} className="h-7 w-7 p-0 hover:text-amber-500" title="Edit"><Edit size={14} /></Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => confirm('Delete?') && deleteMutation.mutate(po.id)} className="h-7 w-7 p-0 hover:text-red-500" title="Delete"><Trash2 size={14} /></Button>
                                                 </>
                                             )}
                                         </div>
@@ -430,6 +442,17 @@ export default function PurchaseOrders() {
                                 <h3 className="font-semibold text-sm">Items</h3>
                                 <button type="button" onClick={addLineItem} className="bg-purple-600 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
                             </div>
+
+                            {/* Items Header */}
+                            {formData.items.length > 0 && (
+                                <div className="flex gap-2 mb-2 px-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                    <div className="flex-1 min-w-[120px]">Ingredient</div>
+                                    <div className="w-16 sm:w-20">Qty</div>
+                                    <div className="w-16 sm:w-24">Price</div>
+                                    <div className="w-8"></div>
+                                </div>
+                            )}
+
                             {formData.items.map((item, idx) => (
                                 <div key={idx} className="flex flex-wrap gap-2 mb-2 items-end">
                                     <div className="flex-1 min-w-[120px]">
@@ -456,6 +479,150 @@ export default function PurchaseOrders() {
                             <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white h-9 px-4 text-sm">Save</Button>
                         </div>
                     </form>
+                </Modal>
+
+                {/* View Modal */}
+                <Modal open={openView} onClose={() => setOpenView(false)} title="Purchase Order Details" size="lg">
+                    {selectedPO && (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">PO Number</h4>
+                                    <p className="text-lg font-mono">{selectedPO.po_number}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Status</h4>
+                                    <div>{getStatusDisplay(selectedPO.status)}</div>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Supplier</h4>
+                                    <p>{selectedPO.supplier?.name}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Location</h4>
+                                    <p>{selectedPO.location?.name || '-'}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Ordered Date</h4>
+                                    <p>{new Date(selectedPO.order_date).toLocaleDateString()}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Expected Delivery</h4>
+                                    <p>{selectedPO.expected_delivery_date ? new Date(selectedPO.expected_delivery_date).toLocaleDateString() : '-'}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Items</h4>
+                                <div className="border border-border rounded-lg overflow-hidden">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-secondary/50 text-left">
+                                            <tr>
+                                                <th className="p-2 font-medium">Ingredient</th>
+                                                <th className="p-2 font-medium text-right">Qty</th>
+                                                <th className="p-2 font-medium text-right">Price</th>
+                                                <th className="p-2 font-medium text-right">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border">
+                                            {selectedPO.items?.map((item: any) => (
+                                                <tr key={item.id}>
+                                                    <td className="p-2">{item.ingredient?.name}</td>
+                                                    <td className="p-2 text-right">{item.quantity_ordered}</td>
+                                                    <td className="p-2 text-right">${parseFloat(item.unit_price).toFixed(2)}</td>
+                                                    <td className="p-2 text-right font-medium">${(parseFloat(item.quantity_ordered) * parseFloat(item.unit_price)).toFixed(2)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                        <tfoot className="bg-secondary/20 font-bold border-t border-border">
+                                            <tr>
+                                                <td colSpan={3} className="p-2 text-right">Total:</td>
+                                                <td className="p-2 text-right text-emerald-600">${parseFloat(String(selectedPO.total_amount)).toFixed(2)}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {selectedPO.notes && (
+                                <div>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Notes</h4>
+                                    <p className="text-sm bg-secondary/30 p-3 rounded-lg">{selectedPO.notes}</p>
+                                </div>
+                            )}
+
+                            <div className="flex justify-end">
+                                <Button variant="secondary" onClick={() => setOpenView(false)}>Close</Button>
+                            </div>
+                        </div>
+                    )}
+                </Modal>
+
+                {/* Receive Modal */}
+                <Modal open={openReceive} onClose={() => setOpenReceive(false)} title="Receive Items" size="lg">
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Confirm quantities received for PO <span className="font-mono text-foreground font-medium">{selectedPO?.po_number}</span></p>
+
+                        <div className="border border-border rounded-lg overflow-hidden mb-4">
+                            <table className="w-full text-sm">
+                                <thead className="bg-secondary/50 text-left">
+                                    <tr>
+                                        <th className="p-2 font-medium">Ingredient</th>
+                                        <th className="p-2 font-medium text-right">Ordered</th>
+                                        <th className="p-2 font-medium text-right">Prev. Received</th>
+                                        <th className="p-2 font-medium w-32">Receive Now</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                    {selectedPO?.items?.map((item: any, idx) => (
+                                        <tr key={item.id}>
+                                            <td className="p-2">{item.ingredient?.name}</td>
+                                            <td className="p-2 text-right">{item.quantity_ordered}</td>
+                                            <td className="p-2 text-right">{item.quantity_received}</td>
+                                            <td className="p-2">
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    value={receiveItems.find(ri => ri.item_id === item.id)?.quantity_received || 0}
+                                                    onChange={(e) => {
+                                                        const val = parseFloat(e.target.value);
+                                                        setReceiveItems(prev => prev.map(ri => ri.item_id === item.id ? { ...ri, quantity_received: val } : ri));
+                                                    }}
+                                                    className="h-8 w-24 ml-auto"
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Location Selector */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Destination Location (Optional)</label>
+                            <select
+                                className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm"
+                                value={receiveLocationId}
+                                onChange={(e) => setReceiveLocationId(e.target.value)}
+                            >
+                                <option value="">Use Default / PO Location</option>
+                                {locationList.map((loc: any) => (
+                                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-2">
+                            <Button variant="secondary" onClick={() => setOpenReceive(false)}>Cancel</Button>
+                            <Button
+                                onClick={() => receiveMutation.mutate({ id: selectedPO!.id, items: receiveItems, location_id: receiveLocationId })}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                disabled={receiveMutation.isPending}
+                            >
+                                {receiveMutation.isPending ? 'Processing...' : 'Confirm Receipt'}
+                            </Button>
+                        </div>
+                    </div>
                 </Modal>
             </div>
         </AdminLayout>

@@ -41,7 +41,7 @@ class HomeController extends Controller
         $items = MenuItem::query()
             ->where('is_active', true)
             ->where('is_featured', true)
-            ->orderBy('featured_order')
+            ->orderBy('updated_at', 'desc')
             ->limit(4)
             ->get();
 
@@ -56,9 +56,11 @@ class HomeController extends Controller
         return Category::query()
             ->where('is_active', true)
             ->whereNot('parent_id', null)
-            ->withCount(['menuItems as count' => function ($query) {
-                $query->where('is_active', true);
-            }])
+            ->withCount([
+                'menuItems as count' => function ($query) {
+                    $query->where('is_active', true);
+                }
+            ])
             ->orderBy('display_order')
             ->limit(6)
             ->get()
@@ -69,7 +71,7 @@ class HomeController extends Controller
                     'slug' => $category->slug,
                     'icon' => $this->getCategoryIcon($category->name),
                     'count' => $category->count ?? 0,
-                    'color' => $this->getCategoryColor($category->name),    
+                    'color' => $this->getCategoryColor($category->name),
                 ];
             })
             ->toArray();

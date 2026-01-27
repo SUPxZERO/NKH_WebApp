@@ -30,7 +30,7 @@ class PayrollService
 
             foreach ($attendances as $attendance) {
                 $hours = $attendance->clock_in_at->diffInHours($attendance->clock_out_at);
-                
+
                 // Get metrics
                 $metric = $attendance->attendanceMetrics()->first();
                 if ($metric) {
@@ -43,29 +43,42 @@ class PayrollService
 
             // Calculate gross pay
             $grossPay = 0;
+            $basePay = 0;
+            $overtimePay = 0;
+
             if ($employee->salary_type === 'hourly' && $employee->hourly_rate) {
-                $grossPay = ($regularHours * $employee->hourly_rate);
+                // Hourly employees: calculate based on attendance hours
+                $basePay = $regularHours * $employee->hourly_rate;
                 if ($includeOvertime) {
-                    $grossPay += ($overtimeHours * $employee->hourly_rate * 1.5); // 1.5x for overtime
+                    $overtimePay = $overtimeHours * $employee->hourly_rate * 1.5; // 1.5x for overtime
                 }
+                $grossPay = $basePay + $overtimePay;
             } else {
-                // Monthly salary - prorate by days worked
+                // Monthly salary employees: use base salary (prorate if partial month)
                 $daysInPeriod = $periodStart->diffInDays($periodEnd) + 1;
-                $daysWorked = count($attendances);
-                $grossPay = ($employee->salary / 30) * $daysWorked; // Assume 30 days per month
+                $daysInMonth = $periodStart->daysInMonth;
+
+                // If full month, use full salary; otherwise prorate
+                if ($daysInPeriod >= $daysInMonth) {
+                    $basePay = $employee->salary ?? 0;
+                } else {
+                    // Prorate based on calendar days
+                    $basePay = (($employee->salary ?? 0) / $daysInMonth) * $daysInPeriod;
+                }
+                $grossPay = $basePay;
             }
 
-            // Create payroll record
-            $payroll = Payroll::create([
-                'employee_id' => $employee->id,
-                'period_start' => $periodStart,
-                'period_end' => $periodEnd,
-                'gross_pay' => $grossPay,
-                'bonuses' => 0,
-                'deductions' => 0,
-                'net_pay' => $grossPay,
-                'status' => 'draft',
-            ]);
+            // Create payroll record (Manual assignment to bypass mass-assignment issues)
+            $payroll = new Payroll();
+            $payroll->employee_id = $employee->id;
+            $payroll->period_start = $periodStart;
+            $payroll->period_end = $periodEnd;
+            $payroll->gross_pay = $grossPay;
+            $payroll->bonuses = 0;
+            $payroll->deductions = 0;
+            $payroll->net_pay = $grossPay;
+            $payroll->status = 'draft';
+            $payroll->save();
 
             // Add base salary as earning detail
             PayrollDetail::create([

@@ -169,6 +169,8 @@ Route::middleware('permission:customers.view')
         Route::get('customers/{customer}/history', [CustomerController::class, 'history']);
         Route::get('customers/{customer}/stats', [CustomerController::class, 'stats']);
     });
+Route::middleware('permission:customers.create')
+    ->post('customers', [CustomerController::class, 'store']);
 Route::middleware('permission:customers.update')
     ->group(function () {
         Route::match(['put', 'patch'], 'customers/{customer}', [CustomerController::class, 'update']);
@@ -280,7 +282,7 @@ Route::middleware('permission:audit.view')
         Route::get('', [AuditLogController::class, 'index'])->name('audit-logs.index');
         Route::get('filters', [AuditLogController::class, 'filters'])->name('audit-logs.filters');
         Route::get('{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
-        
+
         // Export routes (may require separate permission)
         Route::get('export/csv', [AuditLogController::class, 'exportCsv'])->name('audit-logs.export-csv');
         Route::get('export/json', [AuditLogController::class, 'exportJson'])->name('audit-logs.export-json');
@@ -318,12 +320,12 @@ Route::middleware('permission:dashboard.view')
         Route::get('dashboard/alerts', [AdminDashboardController::class, 'alerts']);
         Route::get('dashboard/quick-stats', [AdminDashboardController::class, 'quickStats']);
         Route::get('dashboard/activity', [AdminDashboardController::class, 'activity']);
-        
+
         // Legacy analytics endpoints
         Route::get('dashboard/analytics', [AdminDashboardController::class, 'analytics']);
         Route::get('dashboard/orders/stats', [AdminDashboardController::class, 'orderStats']);
         Route::get('dashboard/revenue/{period}', [AdminDashboardController::class, 'revenue'])->where('period', 'daily|weekly|monthly');
-        
+
         // New revenue by range endpoint
         Route::get('dashboard/revenue-range', [AdminDashboardController::class, 'revenueByRange']);
     });
@@ -429,6 +431,7 @@ Route::middleware('permission:inventory.adjust')
     });
 Route::middleware('permission:inventory.approve')
     ->group(function () {
+        Route::post('purchase-orders/{purchaseOrder}/submit', [PurchaseOrderController::class, 'submit']);
         Route::post('purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve']);
         Route::post('purchase-orders/{purchaseOrder}/mark-ordered', [PurchaseOrderController::class, 'markOrdered']);
     });
@@ -490,7 +493,7 @@ Route::middleware('permission:locations.manage')
         Route::put('tables/{table}', [TableController::class, 'update']);
         Route::delete('tables/{table}', [TableController::class, 'destroy']);
         Route::put('tables/{table}/status', [TableController::class, 'updateStatus']);
-        
+
         // QR Code Management (Sprint P17)
         Route::post('tables/{table}/generate-qr', [TableController::class, 'generateQr']);
         Route::get('tables/{table}/qr-image', [TableController::class, 'getQrImage']);

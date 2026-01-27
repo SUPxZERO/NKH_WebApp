@@ -23,10 +23,10 @@ class PurchaseOrderController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('po_number', 'like', "%{$search}%")
-                  ->orWhere('notes', 'like', "%{$search}%")
-                  ->orWhereHas('supplier', function ($sq) use ($search) {
-                      $sq->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('notes', 'like', "%{$search}%")
+                    ->orWhereHas('supplier', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -141,7 +141,7 @@ class PurchaseOrderController extends Controller
     public function show(PurchaseOrder $purchaseOrder): JsonResponse
     {
         $purchaseOrder->load(['supplier', 'location', 'items.ingredient.unit']);
-        
+
         return response()->json([
             'data' => $purchaseOrder
         ]);
@@ -258,6 +258,25 @@ class PurchaseOrderController extends Controller
     }
 
     /**
+     * Submit a purchase order for approval
+     */
+    public function submit(PurchaseOrder $purchaseOrder): JsonResponse
+    {
+        if ($purchaseOrder->status !== 'draft') {
+            return response()->json([
+                'message' => 'Can only submit draft purchase orders'
+            ], 422);
+        }
+
+        $purchaseOrder->update(['status' => 'pending']);
+
+        return response()->json([
+            'message' => 'Purchase order submitted successfully',
+            'data' => $purchaseOrder
+        ]);
+    }
+
+    /**
      * Approve a purchase order
      */
     public function approve(PurchaseOrder $purchaseOrder): JsonResponse
@@ -308,18 +327,24 @@ class PurchaseOrderController extends Controller
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|exists:purchase_order_items,id',
-            'items.*.quantity_received' => 'required|numeric|min:0'
+            'items.*.quantity_received' => 'required|numeric|min:0',
+            'location_id' => 'nullable|exists:locations,id'
         ]);
 
         DB::beginTransaction();
         try {
-            $locationId = $purchaseOrder->location_id;
-            
+            // Use provided location, or PO location, or default to first available location
+            $locationId = $validated['location_id'] ?? $purchaseOrder->location_id ?? \App\Models\Location::value('id');
+
+            if (!$locationId) {
+                throw new \Exception('No location available to receive items into.');
+            }
+
             foreach ($validated['items'] as $item) {
                 if ($item['quantity_received'] <= 0) {
                     continue; // Skip items with 0 or negative quantities
                 }
-                
+
                 $poItem = PurchaseOrderItem::with('ingredient')->find($item['item_id']);
                 $quantityToReceive = $item['quantity_received'];
                 $newReceived = $poItem->quantity_received + $quantityToReceive;
@@ -328,7 +353,7 @@ class PurchaseOrderController extends Controller
                 $poItem->update([
                     'quantity_received' => $newReceived
                 ]);
-                
+
                 // Update Inventory (per-location stock) if location is specified
                 if ($locationId) {
                     $inventory = \App\Models\Inventory::firstOrCreate(
@@ -340,13 +365,13 @@ class PurchaseOrderController extends Controller
                     );
                     $inventory->increment('quantity', $quantityToReceive);
                 }
-                
+
                 // Update Ingredient.current_stock (global stock)
                 $ingredient = \App\Models\Ingredient::find($poItem->ingredient_id);
                 if ($ingredient) {
                     $ingredient->increment('current_stock', $quantityToReceive);
                 }
-                
+
                 // Create InventoryTransaction for audit trail
                 \App\Models\InventoryTransaction::create([
                     'location_id' => $locationId,

@@ -11,17 +11,6 @@ class PurchaseOrderItem extends Model
 
     protected $guarded = [
         'id',
-        'purchase_order_id',
-        'ingredient_id',
-        'quantity_ordered',
-        'quantity_received',
-        'unit_price',
-        'tax_amount',
-        'discount_amount',
-        'total',
-        'status',
-            'created_at',
-        'updated_at',
     ];
 
     protected $casts = [

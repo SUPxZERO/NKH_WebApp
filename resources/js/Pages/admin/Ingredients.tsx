@@ -62,11 +62,11 @@ interface Ingredient {
     name: string;
     description?: string;
     category: string;
-    unit_id: number;
+    unit_id?: number;
     unit?: { id: number; name: string; code: string };
     supplier_id?: number;
     supplier?: { id: number; name: string };
-    cost_per_unit: number;
+    cost_per_unit?: number;
     current_stock?: number;
     min_stock_level?: number;
     max_stock_level?: number;
@@ -158,20 +158,20 @@ export default function Ingredients() {
     const handleEdit = (ingredient: Ingredient) => {
         setEditingIngredient(ingredient);
         setFormData({
-            code: ingredient.code,
-            name: ingredient.name,
+            code: ingredient.code || '',
+            name: ingredient.name || '',
             description: ingredient.description || '',
-            category: ingredient.category,
-            unit_id: ingredient.unit_id.toString(),
+            category: ingredient.category || 'vegetable',
+            unit_id: ingredient.unit_id?.toString() || '',
             supplier_id: ingredient.supplier_id?.toString() || '',
-            cost_per_unit: ingredient.cost_per_unit.toString(),
+            cost_per_unit: ingredient.cost_per_unit?.toString() || '',
             min_stock_level: ingredient.min_stock_level?.toString() || '',
             max_stock_level: ingredient.max_stock_level?.toString() || '',
             reorder_point: ingredient.reorder_point?.toString() || '',
             storage_requirements: ingredient.storage_requirements || '',
             allergens: ingredient.allergens || '',
             shelf_life_days: ingredient.shelf_life_days?.toString() || '',
-            is_active: ingredient.is_active
+            is_active: ingredient.is_active ?? true
         });
         setOpenEdit(true);
     };
@@ -184,9 +184,9 @@ export default function Ingredients() {
         e.preventDefault();
         const data = {
             ...formData,
-            unit_id: parseInt(formData.unit_id),
+            unit_id: formData.unit_id ? parseInt(formData.unit_id) : null,
             supplier_id: formData.supplier_id ? parseInt(formData.supplier_id) : null,
-            cost_per_unit: parseFloat(formData.cost_per_unit),
+            cost_per_unit: formData.cost_per_unit ? parseFloat(formData.cost_per_unit) : null,
             min_stock_level: formData.min_stock_level ? parseFloat(formData.min_stock_level) : null,
             max_stock_level: formData.max_stock_level ? parseFloat(formData.max_stock_level) : null,
             reorder_point: formData.reorder_point ? parseFloat(formData.reorder_point) : null,

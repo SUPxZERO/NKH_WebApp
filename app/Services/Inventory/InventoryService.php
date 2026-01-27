@@ -21,20 +21,35 @@ class InventoryService
      * @return InventoryTransaction
      */
     public function adjustStock(
-        Ingredient $item, 
-        float $quantity, 
-        string $type = InventoryTransaction::TYPE_ADJUSTMENT, 
+        Ingredient $item,
+        float $quantity,
+        string $type = InventoryTransaction::TYPE_ADJUSTMENT,
         ?string $reason = null,
         ?User $user = null
     ): InventoryTransaction {
         return DB::transaction(function () use ($item, $quantity, $type, $reason, $user) {
             // Calculate new stock level
             $newStock = $item->current_stock + $quantity;
-            
+
             // Prevent negative stock unless explicitly allowed (optional config)
             if ($newStock < 0) {
                 // For now, we allow negative stock but could throw exception here
                 // throw new Exception("Insufficient stock for item: {$item->name}");
+            }
+
+            // Determine location (fallback to user's location or first valid location)
+            $locationId = $item->location_id;
+            if (!$locationId && $user) {
+                $locationId = $user->default_location_id;
+            }
+            if (!$locationId) {
+                // Determine a fallback location ID (e.g. first active location)
+                $locationId = \App\Models\Location::query()->where('is_active', true)->value('id')
+                    ?? \App\Models\Location::value('id');
+            }
+
+            if (!$locationId) {
+                throw new Exception("Cannot record transaction: No valid location found in the system.");
             }
 
             // Update item stock
@@ -44,12 +59,12 @@ class InventoryService
             // Create transaction record
             return InventoryTransaction::create([
                 'ingredient_id' => $item->id,
-                'location_id' => $item->location_id, // Ensure we track where this stock is
+                'location_id' => $locationId, // Ensure we track where this stock is
                 'type' => $type,
                 'quantity' => $quantity,
                 'unit_cost' => $item->cost_per_unit,
                 'value' => abs($quantity) * $item->cost_per_unit,
-                'current_stock_after' => $newStock, 
+                'current_stock_after' => $newStock,
                 'user_id' => $user ? $user->id : null,
                 'notes' => $reason,
                 'transacted_at' => now(),

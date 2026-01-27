@@ -9,21 +9,18 @@ class Unit extends Model
 {
     use HasFactory;
 
-    protected $guarded = [
-        'id',
+    protected $fillable = [
         'code',
         'name',
-        'display_name', 
+        'display_name',
         'base_unit',
         'conversion_factor',
         'is_base_unit',
         'for_weight',
-        'for_volume', 
+        'for_volume',
         'for_quantity',
         'for_packaging',
         'for_produce',
-        'created_at',
-        'updated_at',
     ];
 
     protected $casts = [

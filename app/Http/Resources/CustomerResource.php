@@ -14,6 +14,12 @@ class CustomerResource extends JsonResource
             'user' => new UserResource($this->whenLoaded('user')),
             'customer_code' => $this->customer_code,
             'preferred_location_id' => $this->preferred_location_id,
+            'preferred_location' => $this->whenLoaded('preferredLocation', function () {
+                return [
+                    'id' => $this->preferredLocation->id,
+                    'name' => $this->preferredLocation->name,
+                ];
+            }),
             'birth_date' => optional($this->birth_date)->toDateString(),
             'gender' => $this->gender,
             'preferred_language' => $this->preferred_language ?? 'en',

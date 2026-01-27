@@ -11,23 +11,7 @@ class InventoryAdjustment extends Model
 
     protected $guarded = [
         'id',
-        'ingredient_id',
-        'location_id',
-        'quantity_before',
-        'quantity_after',
-        'quantity_change',
-        'reason',
-        'notes',
-        'status',
-        'adjusted_by',
-        'approved_by',
-        'approved_at',
-        'approval_notes',
-        'rejected_by',
-        'rejected_at',
-        'rejection_reason',
-        'created_at',
-        'updated_at',
+        // All other fields are fillable to allow workflow updates
     ];
 
     protected $casts = [
@@ -57,7 +41,7 @@ class InventoryAdjustment extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
-    
+
     // Alias for frontend compatibility
     public function adjusted_by_employee()
     {
