@@ -18,6 +18,24 @@ if (token && token.content) {
 }
 
 /**
+ * Helper to get cookie value
+ */
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
+/**
+ * Sprint: Multi-Language Support
+ * Attach the X-Inertia-Locale header to all requests based on the cookie.
+ * This ensures API requests return the correct language data.
+ */
+const locale = getCookie('NEXT_LOCALE') || 'en';
+window.axios.defaults.headers.common['X-Inertia-Locale'] = locale;
+
+/**
  * Sprint P15: Add Telegram user ID header for iframe authentication.
  * This ensures Inertia navigations and all axios requests include the Telegram user ID.
  */

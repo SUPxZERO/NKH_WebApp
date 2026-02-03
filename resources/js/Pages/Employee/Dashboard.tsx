@@ -9,6 +9,7 @@ import Modal from '@/app/components/ui/Modal';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/app/context/LanguageContext';
 import {
     Clock,
     Calendar,
@@ -68,6 +69,7 @@ interface Announcement {
 }
 
 export default function EmployeeDashboard() {
+    const { t } = useLanguage();
     const [showTimeOffModal, setShowTimeOffModal] = useState(false);
     const [timeOffData, setTimeOffData] = useState({
         request_type: 'vacation',
@@ -109,13 +111,13 @@ export default function EmployeeDashboard() {
             qc.invalidateQueries({ queryKey: ['employee.dashboard.stats'] });
         },
         onError: (error: any) => {
-            toastError(error.response?.data?.message || 'Failed to submit time off request');
+            toastError(error.response?.data?.message || t('employee.common.error'));
         },
     });
 
     const handleSubmitTimeOff = () => {
         if (!timeOffData.start_date || !timeOffData.end_date) {
-            toastError('Please fill all required fields');
+            toastError(t('employee.common.error'));
             return;
         }
         timeOffMutation.mutate(timeOffData);
@@ -140,7 +142,7 @@ export default function EmployeeDashboard() {
 
     return (
         <EmployeeLayout>
-            <Head title="Employee Dashboard" />
+            <Head title={t('employee.dashboard.title')} />
 
             <div className="min-h-screen p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
                 {/* Header - Compact Node */}
@@ -174,13 +176,13 @@ export default function EmployeeDashboard() {
                         <Link href="/employee/schedule">
                             <Button variant="outline" size="sm" className="gap-2">
                                 <Calendar className="w-4 h-4" />
-                                View Schedule
+                                {t('employee.dashboard.schedule')}
                             </Button>
                         </Link>
                         <Link href="/employee/pos">
                             <Button size="sm" className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
                                 <Zap className="w-4 h-4" />
-                                Start POS
+                                {t('employee.pos.start')}
                             </Button>
                         </Link>
                     </div>
@@ -196,7 +198,7 @@ export default function EmployeeDashboard() {
                         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-blue-500/10 relative overflow-hidden">
                             <Clock className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                             <div className="relative z-10">
-                                <p className="text-[10px] sm:text-xs font-medium text-blue-100 uppercase tracking-wide">This Week</p>
+                                <p className="text-[10px] sm:text-xs font-medium text-blue-100 uppercase tracking-wide">{t('employee.dashboard.hours')}</p>
                                 <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
                                     {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : `${stats?.hours_this_week || 0}h`}
                                 </p>
@@ -212,7 +214,7 @@ export default function EmployeeDashboard() {
                         <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-emerald-500/10 relative overflow-hidden">
                             <DollarSign className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                             <div className="relative z-10">
-                                <p className="text-[10px] sm:text-xs font-medium text-emerald-100 uppercase tracking-wide">Earnings</p>
+                                <p className="text-[10px] sm:text-xs font-medium text-emerald-100 uppercase tracking-wide">{t('employee.dashboard.earnings')}</p>
                                 <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
                                     {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : `$${stats?.recent_earnings || 0}`}
                                 </p>
@@ -228,7 +230,7 @@ export default function EmployeeDashboard() {
                         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-purple-500/10 relative overflow-hidden">
                             <Coffee className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                             <div className="relative z-10">
-                                <p className="text-[10px] sm:text-xs font-medium text-purple-100 uppercase tracking-wide">Leave</p>
+                                <p className="text-[10px] sm:text-xs font-medium text-purple-100 uppercase tracking-wide">{t('employee.dashboard.leave')}</p>
                                 <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
                                     {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : `${stats?.vacation_balance || 0}d`}
                                 </p>
@@ -272,7 +274,7 @@ export default function EmployeeDashboard() {
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="px-2 py-0.5 bg-white/20 rounded-md text-[10px] font-bold uppercase tracking-wider">Next Shift</span>
+                                                <span className="px-2 py-0.5 bg-white/20 rounded-md text-[10px] font-bold uppercase tracking-wider">{t('employee.dashboard.shift.next')}</span>
                                                 <span className="text-sm text-blue-100">{formatDate(stats.next_shift.date).split(',')[0]}</span>
                                             </div>
                                             <h3 className="text-xl sm:text-2xl font-bold leading-none mb-1">
@@ -287,10 +289,10 @@ export default function EmployeeDashboard() {
 
                                     <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                         <Button size="sm" variant="secondary" className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 border-0 text-white h-9">
-                                            Swap
+                                            {t('employee.dashboard.shift.swap')}
                                         </Button>
                                         <Button size="sm" variant="secondary" onClick={() => setShowTimeOffModal(true)} className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 border-0 text-white h-9">
-                                            Time Off
+                                            {t('employee.dashboard.time_off')}
                                         </Button>
                                     </div>
                                 </div>
@@ -304,7 +306,7 @@ export default function EmployeeDashboard() {
                         {/* Upcoming Shifts List - Integrated */}
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-1">
-                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Upcoming This Week</h3>
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('employee.dashboard.upcoming')}</h3>
                                 <Link href="/employee/schedule" className="text-xs text-blue-600 hover:underline">View All</Link>
                             </div>
                             {upcomingShifts.length === 0 ? (
@@ -367,7 +369,7 @@ export default function EmployeeDashboard() {
                         {/* Time Off Balance - Compact */}
                         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                             <div className="p-4">
-                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Time Off Balance</h3>
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('employee.dashboard.time_off_balance')}</h3>
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center p-2 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
                                         <span className="text-xs text-gray-600 dark:text-gray-400">Vacation</span>
@@ -494,7 +496,7 @@ export default function EmployeeDashboard() {
                     </div>
                     <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
                         <Button variant="outline" onClick={() => setShowTimeOffModal(false)} className="flex-1 text-sm sm:text-base py-2.5 sm:py-3">
-                            Cancel
+                            {t('employee.common.cancel')}
                         </Button>
                         <Button
                             onClick={handleSubmitTimeOff}
@@ -504,7 +506,7 @@ export default function EmployeeDashboard() {
                             {timeOffMutation.isPending ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
-                                'Submit'
+                                t('employee.common.submit')
                             )}
                         </Button>
                     </div>

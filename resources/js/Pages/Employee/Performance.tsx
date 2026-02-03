@@ -8,6 +8,7 @@ import { Button } from '@/app/components/ui/Button';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { apiGet } from '@/app/utils/api';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 import {
     BarChart,
     Bar,
@@ -42,6 +43,7 @@ interface PerformanceStats {
 }
 
 export default function Performance() {
+    const { t } = useLanguage();
     const [period, setPeriod] = useState<Period>('week');
 
     const { data: stats, isLoading } = useQuery<PerformanceStats>({
@@ -60,7 +62,7 @@ export default function Performance() {
 
     return (
         <EmployeeLayout>
-            <Head title="Performance" />
+            <Head title={t('employee.performance.title')} />
 
             <div className="space-y-6 h-screen">
                 {/* Header with Period Tabs */}
@@ -72,10 +74,10 @@ export default function Performance() {
                     <div>
                         <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                             <Activity className="w-5 h-5 sm:w-8 sm:h-8 text-purple-500" />
-                            Performance
+                            {t('employee.performance.title')}
                         </h1>
                         <p className="text-xs sm:text-base text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
-                            {stats?.period_label || 'Track your metrics and achievements'}
+                            {stats?.period_label || t('employee.performance.track')}
                         </p>
                     </div>
 
@@ -126,7 +128,7 @@ export default function Performance() {
                                             {stats?.hours_worked ?? 0}h
                                         </p>
                                         <p className="text-[10px] sm:text-xs text-blue-200 mt-1">
-                                            of {stats?.hours_goal ?? 40}h goal
+                                            {t('employee.performance.goal', { goal: stats?.hours_goal ?? 40 })}
                                         </p>
                                     </div>
                                 </div>

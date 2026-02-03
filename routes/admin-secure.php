@@ -383,6 +383,18 @@ Route::middleware('permission:payments.view')
 Route::middleware('permission:payments.refund')
     ->post('payments/{payment}/refund', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'refund']);
 
+// Payment Methods Management - requires manage_payment_methods permission (Sprint P17)
+Route::middleware('permission:manage_payment_methods')
+    ->prefix('payment-methods')
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'listPaymentMethods']);
+        Route::get('{paymentMethod}', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'showPaymentMethod']);
+        Route::put('{paymentMethod}', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'updatePaymentMethod']);
+        Route::post('{paymentMethod}/toggle', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'togglePaymentMethod']);
+        Route::get('{paymentMethod}/audit-log', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'paymentMethodAuditLog']);
+    });
+
+
 // Recipes - requires recipes.* permissions
 Route::middleware('permission:recipes.view')
     ->group(function () {
@@ -601,9 +613,18 @@ Route::middleware('permission:expenses.view')
         Route::get('expenses/{expense}', [ExpenseController::class, 'show']);
         Route::get('expense-categories', [ExpenseCategoryController::class, 'index']);
     });
-Route::middleware('permission:expenses.create')->post('expenses', [ExpenseController::class, 'store']);
-Route::middleware('permission:expenses.update')->match(['put', 'patch'], 'expenses/{expense}', [ExpenseController::class, 'update']);
-Route::middleware('permission:expenses.delete')->delete('expenses/{expense}', [ExpenseController::class, 'destroy']);
+Route::middleware('permission:expenses.create')->group(function () {
+    Route::post('expenses', [ExpenseController::class, 'store']);
+    Route::post('expense-categories', [ExpenseCategoryController::class, 'store']);
+});
+Route::middleware('permission:expenses.update')->group(function () {
+    Route::match(['put', 'patch'], 'expenses/{expense}', [ExpenseController::class, 'update']);
+    Route::match(['put', 'patch'], 'expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'update']);
+});
+Route::middleware('permission:expenses.delete')->group(function () {
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy']);
+    Route::delete('expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'destroy']);
+});
 
 // Invoices - requires invoices.* permissions
 Route::middleware('permission:invoices.view')

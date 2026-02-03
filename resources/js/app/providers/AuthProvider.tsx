@@ -8,7 +8,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'employee' | 'customer';
+  role: string; // Standardized to single string role
   permissions?: string[];
   phone?: string;
   email_verified_at?: string;
@@ -69,52 +69,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return user.role === role;
   };
 
-  // Check if user has permission (extend based on your permission system)
+  // Check if user has permission
   const hasPermission = (permission: string) => {
     if (!user) return false;
 
     const explicitPermissions = user.permissions;
     if (Array.isArray(explicitPermissions)) {
+      // Check for specific permission or universal bypass
       return explicitPermissions.includes(permission) || explicitPermissions.includes('*');
     }
 
-    // Role-based permissions
-    const rolePermissions = {
-      admin: [
-        'users.view', 'users.create', 'users.edit', 'users.delete',
-        'employees.view', 'employees.create', 'employees.edit', 'employees.delete',
-        'customers.view', 'customers.create', 'customers.edit', 'customers.delete',
-        'categories.view', 'categories.create', 'categories.edit', 'categories.delete',
-        'menu.view', 'menu.create', 'menu.edit', 'menu.delete',
-        'orders.view', 'orders.create', 'orders.edit', 'orders.delete', 'orders.approve',
-        'tables.view', 'tables.create', 'tables.edit', 'tables.delete',
-        'floors.view', 'floors.create', 'floors.edit', 'floors.delete',
-        'invoices.view', 'invoices.create', 'invoices.edit', 'invoices.delete',
-        'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete',
-        'reservations.view', 'reservations.create', 'reservations.edit', 'reservations.delete',
-        'settings.view', 'settings.edit',
-        'reports.view', 'analytics.view',
-        '*' // Admin has all permissions
-      ],
-      employee: [
-        'pos.access',
-        'orders.view', 'orders.create', 'orders.edit',
-        'tables.view', 'tables.edit',
-        'menu.view',
-        'customers.view',
-        'reservations.view', 'reservations.create',
-      ],
-      customer: [
-        'menu.view',
-        'orders.view', 'orders.create',
-        'profile.view', 'profile.edit',
-        'addresses.view', 'addresses.create', 'addresses.edit', 'addresses.delete',
-        'reservations.view', 'reservations.create',
-      ],
-    };
-
-    const userPermissions = rolePermissions[user.role] || [];
-    return userPermissions.includes('*') || userPermissions.includes(permission);
+    return false;
   };
 
   // Redirect to appropriate dashboard based on role
@@ -124,13 +89,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
-    const redirectPaths = {
-      admin: '/admin/dashboard',
-      employee: '/employee/pos',
-      customer: '/dashboard',
-    };
-
-    router.visit(redirectPaths[user.role]);
+    const role = user.role;
+    // Map roles to dashboard paths
+    if (role === 'admin' || role === 'super-admin' || role.includes('manager')) {
+      router.visit('/admin/dashboard');
+    } else if (role === 'employee' || role === 'chef' || role === 'waiter') {
+      router.visit('/employee/pos');
+    } else {
+      router.visit('/dashboard');
+    }
   };
 
   // Logout function
@@ -156,7 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const contextValue: AuthContextType = {
     user,
     isAuthenticated,
-    isLoading: combinedLoading, // Use combined loading to wait for Telegram auth
+    isLoading: combinedLoading,
     hasRole,
     hasPermission,
     redirectToDashboard,

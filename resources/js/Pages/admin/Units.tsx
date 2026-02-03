@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -72,6 +73,7 @@ interface Unit {
 }
 
 export default function Units() {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [typeFilter, setTypeFilter] = useState('all');
     const [baseUnitFilter, setBaseUnitFilter] = useState('all');
@@ -185,12 +187,12 @@ export default function Units() {
     };
 
     const getUnitType = (unit: Unit) => {
-        if (unit.for_weight) return 'Weight';
-        if (unit.for_volume) return 'Volume';
-        if (unit.for_quantity) return 'Quantity';
-        if (unit.for_packaging) return 'Packaging';
-        if (unit.for_produce) return 'Produce';
-        return 'General';
+        if (unit.for_weight) return t('admin.units.filters.weight');
+        if (unit.for_volume) return t('admin.units.filters.volume');
+        if (unit.for_quantity) return t('admin.units.table.quantity');
+        if (unit.for_packaging) return t('admin.units.table.packaging');
+        if (unit.for_produce) return t('admin.units.table.produce');
+        return t('admin.units.table.general');
     };
 
     return (
@@ -213,9 +215,9 @@ export default function Units() {
                                     animate={{ opacity: 1, x: 0 }}
                                     className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent truncate"
                                 >
-                                    Units
+                                    {t('admin.units.title')}
                                 </motion.h1>
-                                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Manage measurement units</p>
+                                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">{t('admin.units.subtitle')}</p>
                             </div>
                         </div>
                         <Button
@@ -223,16 +225,16 @@ export default function Units() {
                             className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20 h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                         >
                             <Plus className="w-4 h-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Add Unit</span>
+                            <span className="hidden sm:inline">{t('admin.units.add_unit')}</span>
                         </Button>
                     </div>
 
                     {/* Stats Ribbon - Horizontal scroll on mobile */}
                     <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
                         <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-                            <StatCard title="Total" value={stats.total} icon={Ruler} color="purple" index={0} />
-                            <StatCard title="Base" value={stats.base} icon={Scale} color="blue" index={1} subtext="Primary standards" />
-                            <StatCard title="Derived" value={stats.derived} icon={Hash} color="emerald" index={2} subtext="From base units" />
+                            <StatCard title={t('admin.units.stats.total')} value={stats.total} icon={Ruler} color="purple" index={0} />
+                            <StatCard title={t('admin.units.stats.base')} value={stats.base} icon={Scale} color="blue" index={1} subtext={t('admin.units.stats.primary_standards')} />
+                            <StatCard title={t('admin.units.stats.derived')} value={stats.derived} icon={Hash} color="emerald" index={2} subtext={t('admin.units.stats.from_base')} />
                         </div>
                     </div>
 
@@ -251,17 +253,17 @@ export default function Units() {
                             </div>
                             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
                                 className="bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none transition-all">
-                                <option value="all">Type</option>
-                                <option value="for_weight">Weight</option>
-                                <option value="for_volume">Volume</option>
-                                <option value="for_quantity">Qty</option>
-                                <option value="for_packaging">Pack</option>
+                                <option value="all">{t('admin.units.filters.type')}</option>
+                                <option value="for_weight">{t('admin.units.filters.weight')}</option>
+                                <option value="for_volume">{t('admin.units.filters.volume')}</option>
+                                <option value="for_quantity">{t('admin.units.filters.qty')}</option>
+                                <option value="for_packaging">{t('admin.units.filters.pack')}</option>
                             </select>
                             <select value={baseUnitFilter} onChange={(e) => setBaseUnitFilter(e.target.value)}
                                 className="hidden sm:block bg-background/50 border border-border/50 rounded-lg px-4 py-2 h-10 text-sm text-foreground focus:border-purple-500 outline-none transition-all">
-                                <option value="all">All Units</option>
-                                <option value="base">Base Only</option>
-                                <option value="derived">Derived Only</option>
+                                <option value="all">{t('admin.units.filters.all_units')}</option>
+                                <option value="base">{t('admin.units.filters.base_only')}</option>
+                                <option value="derived">{t('admin.units.filters.derived_only')}</option>
                             </select>
                         </div>
                     </motion.div>
@@ -274,12 +276,12 @@ export default function Units() {
                         className="hidden md:block bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
                         <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
-                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name / Code</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Type</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Base Unit</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Factor</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Usage</div>
-                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.units.table.name_code')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.units.table.type')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.units.table.base_unit')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.units.table.factor')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.units.table.usage')}</div>
+                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.units.table.actions')}</div>
                         </div>
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
@@ -289,7 +291,7 @@ export default function Units() {
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
                                         <Ruler className="w-8 h-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-muted-foreground">No units found matching your filters</p>
+                                    <p className="text-muted-foreground">{t('admin.units.table.empty_title')}</p>
                                 </div>
                             ) : unitList.map((unit: Unit, idx: number) => (
                                 <motion.div
@@ -314,7 +316,7 @@ export default function Units() {
                                     <div className="col-span-2 text-sm text-muted-foreground">
                                         {unit.is_base_unit ? (
                                             <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1">
-                                                <CheckCircle className="w-3 h-3" /> BASE
+                                                <CheckCircle className="w-3 h-3" /> {t('admin.units.table.base')}
                                             </span>
                                         ) : unit.base_unit}
                                     </div>
@@ -346,7 +348,7 @@ export default function Units() {
                                 <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-secondary/50 flex items-center justify-center">
                                     <Ruler className="w-6 h-6 text-muted-foreground" />
                                 </div>
-                                <p className="text-muted-foreground text-sm">No units found</p>
+                                <p className="text-muted-foreground text-sm">{t('admin.units.table.empty_mobile')}</p>
                             </div>
                         ) : unitList.map((unit: Unit, idx: number) => (
                             <motion.div
@@ -375,7 +377,7 @@ export default function Units() {
                                     </span>
                                     {unit.is_base_unit ? (
                                         <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded-md">
-                                            <CheckCircle className="w-3 h-3" /> BASE
+                                            <CheckCircle className="w-3 h-3" /> {t('admin.units.table.base')}
                                         </span>
                                     ) : (
                                         <>
@@ -394,20 +396,20 @@ export default function Units() {
             </div>
 
             {/* Modal */}
-            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingUnit ? 'Edit Unit' : 'New Unit'} size="lg">
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingUnit ? t('admin.units.edit_unit') : t('admin.units.new_unit')} size="lg">
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
-                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Kilogram" className="h-10 text-sm" />
+                        <Input label={t('admin.units.form.code') as string} value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
+                        <Input label={t('admin.units.form.name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Kilogram" className="h-10 text-sm" />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <Input label="Display" value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
+                        <Input label={t('admin.units.form.display') as string} value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
                         <div className="flex items-center sm:pt-6">
                             <label className="flex items-center gap-2 sm:gap-3 cursor-pointer p-2.5 sm:p-3 rounded-lg border border-border/50 bg-secondary/30 w-full hover:bg-secondary/50 transition-colors">
                                 <input type="checkbox" checked={formData.is_base_unit} onChange={(e) => setFormData({ ...formData, is_base_unit: e.target.checked })}
                                     className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                                <span className="text-xs sm:text-sm font-medium text-foreground">Is Base Unit?</span>
+                                <span className="text-xs sm:text-sm font-medium text-foreground">{t('admin.units.form.is_base_unit')}</span>
                             </label>
                         </div>
                     </div>
@@ -416,24 +418,24 @@ export default function Units() {
                         <div className="bg-secondary/30 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50">
                             <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-muted-foreground flex items-center gap-2">
                                 <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                                Conversion
+                                {t('admin.units.form.conversion')}
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div>
-                                    <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Base Unit</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.units.form.base_unit')}</label>
                                     <select value={formData.base_unit} onChange={(e) => setFormData({ ...formData, base_unit: e.target.value })}
                                         className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-purple-500/20 outline-none transition-all">
-                                        <option value="">Select</option>
+                                        <option value="">{t('admin.units.form.select')}</option>
                                         {baseUnits?.map((u: Unit) => <option key={u.code} value={u.code}>{u.name} ({u.code})</option>)}
                                     </select>
                                 </div>
-                                <Input label="Factor" type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} placeholder="1 = X base" className="h-10 text-sm" />
+                                <Input label={t('admin.units.form.factor') as string} type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} placeholder="1 = X base" className="h-10 text-sm" />
                             </div>
                         </div>
                     )}
 
                     <div className="border-t border-border/50 pt-3 sm:pt-4">
-                        <label className="block text-xs sm:text-sm font-medium text-foreground mb-2 sm:mb-3">Usage</label>
+                        <label className="block text-xs sm:text-sm font-medium text-foreground mb-2 sm:mb-3">{t('admin.units.form.usage')}</label>
                         <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
                             {['weight', 'volume', 'quantity', 'packaging', 'produce'].map(type => (
                                 <label key={type} className={cn(
@@ -443,16 +445,16 @@ export default function Units() {
                                     <input type="checkbox" checked={(formData as any)[`for_${type}`]}
                                         onChange={(e) => setFormData({ ...formData, [`for_${type}`]: e.target.checked })}
                                         className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 w-3 h-3 sm:w-4 sm:h-4" />
-                                    <span className="text-foreground capitalize truncate">{type.slice(0, 4)}</span>
+                                    <span className="text-foreground capitalize truncate">{t(`admin.units.usage_types.${type.slice(0, 4)}`)}</span>
                                 </label>
                             ))}
                         </div>
                     </div>
 
                     <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm hover:bg-secondary/80">Cancel</Button>
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm hover:bg-secondary/80">{t('admin.units.form.cancel')}</Button>
                         <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20">
-                            {editingUnit ? 'Save' : 'Create'}
+                            {editingUnit ? t('admin.units.form.save') : t('admin.units.form.create')}
                         </Button>
                     </div>
                 </form>

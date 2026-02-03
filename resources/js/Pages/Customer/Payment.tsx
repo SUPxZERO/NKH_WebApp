@@ -86,7 +86,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
         }
 
         // Update local payment data with new status
-        if (paymentData) {
+        if (paymentData && paymentData.payment) {
             setPaymentData({
                 ...paymentData,
                 payment: {
@@ -187,21 +187,21 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                 <Head>
                     <title>Payment - NKH Restaurant</title>
                 </Head>
-                <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4 sm:p-6">
+                <div className="flex flex-col items-center justify-center min-h-[80vh] w-full p-4 sm:p-6">
                     <div className="w-full max-w-md space-y-6">
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => step === 'processing' ? handleBack() : window.history.back()}
-                                className="p-2 -ml-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                className="p-2.5 -ml-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-800 dark:text-white transition-all hover:scale-105 active:scale-95 backdrop-blur-md"
                             >
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <div>
-                                <h1 className="text-xl sm:text-2xl font-bold">
+                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
                                     {step === 'select-method' ? 'Choose Payment' : 'Complete Payment'}
                                 </h1>
                                 {paymentData?.order && (
-                                    <p className="text-xs sm:text-sm text-gray-400">Order #{paymentData.order.order_number}</p>
+                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-200/80 font-medium">Order #{paymentData.order?.order_number}</p>
                                 )}
                             </div>
                         </div>
@@ -216,8 +216,9 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                     exit={{ opacity: 0, x: 20 }}
                                     className="space-y-4 sm:space-y-6"
                                 >
-                                    <Card className="overflow-hidden">
-                                        <CardContent className="p-4 sm:p-6">
+                                    {/* Glass Card */}
+                                    <div className="rounded-2xl overflow-hidden bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 shadow-xl">
+                                        <div className="p-4 sm:p-6">
                                             <PaymentMethodSelector
                                                 methods={paymentMethods || []}
                                                 selectedMethod={selectedMethod}
@@ -225,8 +226,8 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                                 isLoading={methodsLoading}
                                                 disabled={initPayment.isPending}
                                             />
-                                        </CardContent>
-                                    </Card>
+                                        </div>
+                                    </div>
 
                                     {/* Proceed Button */}
                                     {selectedMethod && (
@@ -237,14 +238,14 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                             <Button
                                                 onClick={handleProceed}
                                                 disabled={initPayment.isPending}
-                                                className="w-full py-3 sm:py-4 text-sm sm:text-lg"
+                                                className="w-full py-4 text-sm sm:text-lg bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white border-0 shadow-lg shadow-fuchsia-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] rounded-xl font-bold"
                                             >
                                                 {initPayment.isPending ? (
                                                     'Processing...'
                                                 ) : (
                                                     <>
                                                         Continue
-                                                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                                                        <ChevronRight className="w-5 h-5 ml-2" />
                                                     </>
                                                 )}
                                             </Button>
@@ -265,11 +266,11 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                     {/* QR Payment */}
                                     {(paymentData.type === 'qr' || paymentData.qr_code) && paymentData.qr_code && (
                                         <QRPaymentDisplay
-                                            qrImageBase64={paymentData.qr_code.image_base64}
-                                            qrReference={paymentData.qr_code.reference}
-                                            amount={paymentData.payment.amount}
-                                            currency={paymentData.payment.currency}
-                                            expiresAt={paymentData.payment.expires_at ?? null}
+                                            qrImageBase64={paymentData.qr_code?.image_base64 || ''}
+                                            qrReference={paymentData.qr_code?.reference || ''}
+                                            amount={paymentData.payment?.amount || 0}
+                                            currency={paymentData.payment?.currency || 'USD'}
+                                            expiresAt={paymentData.payment?.expires_at ?? null}
                                             status={statusData?.status || paymentData.payment?.status || 'pending'}
                                             onExpired={handleExpired}
                                             onRetry={handleRetry}
@@ -282,9 +283,9 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                     {/* Cash Payment */}
                                     {paymentData.type === 'cash' && (
                                         <CashPaymentDisplay
-                                            orderNumber={paymentData.order.order_number}
-                                            amount={paymentData.payment.amount}
-                                            currency={paymentData.payment.currency}
+                                            orderNumber={paymentData.order?.order_number || 'N/A'}
+                                            amount={paymentData.payment?.amount || 0}
+                                            currency={paymentData.payment?.currency || 'USD'}
                                             status={statusData?.status || paymentData.payment?.status || 'pending'}
                                             onCancel={handleBack}
                                             isPolling={isPolling}
@@ -297,9 +298,9 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                             <StripeCardForm
                                                 clientSecret={(paymentData as any).stripe.client_secret}
                                                 publishableKey={(paymentData as any).stripe.publishable_key}
-                                                amount={paymentData.payment.amount}
-                                                currency={paymentData.payment.currency}
-                                                orderNumber={paymentData.order.order_number}
+                                                amount={paymentData.payment?.amount || 0}
+                                                currency={paymentData.payment?.currency || 'USD'}
+                                                orderNumber={paymentData.order?.order_number || 'N/A'}
                                                 onSuccess={() => {
                                                     toastSuccess('Payment successful!');
                                                     setTimeout(() => {
@@ -313,61 +314,54 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                             />
                                         ) : (
                                             <CardPaymentPlaceholder
-                                                amount={paymentData.payment.amount}
-                                                currency={paymentData.payment.currency}
+                                                amount={paymentData.payment?.amount || 0}
+                                                currency={paymentData.payment?.currency || 'USD'}
                                                 onBack={handleBack}
                                             />
                                         )
                                     )}
 
                                     {/* Order Summary */}
-                                    <Card className="overflow-hidden">
-                                        <CardHeader className="pb-2">
-                                            <div className="text-sm sm:text-base font-semibold">Order Summary</div>
-                                        </CardHeader>
-                                        <CardContent className="pt-0">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-sm text-gray-400">Total Amount</span>
-                                                <span className="text-lg sm:text-xl font-bold">${paymentData.order.total.toFixed(2)}</span>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                    <div className="rounded-2xl overflow-hidden bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 shadow-lg">
+                                        <div className="p-4 sm:p-5 flex justify-between items-center">
+                                            <span className="text-sm sm:text-base text-gray-500 dark:text-gray-200 font-medium">Total Amount</span>
+                                            <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">${paymentData.order?.total?.toFixed(2) || '0.00'}</span>
+                                        </div>
+                                    </div>
 
                                     {/* Dev Mode Simulation for non-QR payments */}
-                                    {isDev && paymentData.type !== 'qr' && paymentData.payment.status === 'pending' && (
-                                        <Card className="overflow-hidden">
-                                            <CardContent className="p-3 sm:p-4">
-                                                <p className="text-xs text-gray-400 mb-2 sm:mb-3 text-center">Dev Mode</p>
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={handleSimulateSuccess}
-                                                        className="flex-1 text-emerald-400 border-emerald-400/30 text-xs"
-                                                    >
-                                                        Success
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={handleSimulateFailure}
-                                                        className="flex-1 text-red-400 border-red-400/30 text-xs"
-                                                    >
-                                                        Failure
-                                                    </Button>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                    {isDev && paymentData.type !== 'qr' && paymentData.payment?.status === 'pending' && (
+                                        <div className="rounded-2xl overflow-hidden bg-white/40 dark:bg-white/5 border border-white/10 p-4">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center uppercase tracking-wider font-semibold">Dev Mode</p>
+                                            <div className="flex gap-3">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={handleSimulateSuccess}
+                                                    className="flex-1 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 text-xs py-2"
+                                                >
+                                                    Simulate Success
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={handleSimulateFailure}
+                                                    className="flex-1 text-red-600 dark:text-red-400 border-red-500/30 hover:bg-red-500/10 text-xs py-2"
+                                                >
+                                                    Simulate Failure
+                                                </Button>
+                                            </div>
+                                        </div>
                                     )}
 
                                     {/* Cancel Payment (for non-completed) */}
-                                    {paymentData.payment.status === 'pending' && (
-                                        <div className="text-center">
+                                    {paymentData.payment?.status === 'pending' && (
+                                        <div className="text-center mt-4">
                                             <button
                                                 onClick={handleBack}
-                                                className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors"
+                                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hover:underline underline-offset-4"
                                             >
-                                                ← Choose another method
+                                                Change Payment Method
                                             </button>
                                         </div>
                                     )}

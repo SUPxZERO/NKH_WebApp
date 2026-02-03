@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -17,8 +18,12 @@ export function ImageUploader({
   accept = 'image/*',
   maxSize = 10,
   className,
-  placeholder = 'Click to upload or drag and drop'
+  placeholder
 }: ImageUploaderProps) {
+  const { t } = useTranslation();
+  // Default placeholder needs to be handled inside if not provided prop
+  const displayPlaceholder = placeholder || t('common.ui.image_uploader.placeholder');
+
   const [preview, setPreview] = useState<string | null>(value || null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +92,7 @@ export function ImageUploader({
           <div className="relative group">
             <img
               src={preview}
-              alt="Preview"
+              alt={t('common.ui.image_uploader.preview') as string}
               className="w-full h-48 object-cover rounded-xl"
             />
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
@@ -109,9 +114,9 @@ export function ImageUploader({
                 <ImageIcon className="w-full h-full" />
               )}
             </div>
-            <div className="text-sm text-gray-300 mb-2">{placeholder}</div>
+            <div className="text-sm text-gray-300 mb-2">{displayPlaceholder}</div>
             <div className="text-xs text-gray-500">
-              PNG, JPG, WebP up to {maxSize}MB
+              {(t('common.ui.image_uploader.help_text', { maxSize: maxSize.toString() }) as string)}
             </div>
           </div>
         )}

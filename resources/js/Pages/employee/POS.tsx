@@ -17,6 +17,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiPost, apiGet, apiPut } from '@/app/utils/api';
 import { toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { isUserInInputField } from '@/app/utils/shortcuts';
@@ -39,6 +40,7 @@ import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 export default function POS() {
   // Smart Polling for Orders and Tables
   useSmartPolling(['orders', 'tables'], 10000);
+  const { t } = useLanguage();
 
   const [categoryId, setCategoryId] = React.useState<number | undefined>();
   const [search, setSearch] = useState<string>('');
@@ -68,7 +70,7 @@ export default function POS() {
       quantity: qty,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(`${item.name} x${qty} added`);
+    toastSuccess(`${item.name} x${qty} ${t('employee.pos.added')}`);
     setIsDetailOpen(false);
     setDetailItemId(null);
   };
@@ -176,7 +178,7 @@ export default function POS() {
       quantity: qty,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(`${item.name} x${qty} added`);
+    toastSuccess(`${item.name} x${qty} ${t('employee.pos.added')}`);
     setQuantity('1');
   };
 
@@ -221,7 +223,7 @@ export default function POS() {
 
     cart.clear();
     setSelectedTable(undefined);
-    toastSuccess('Order held');
+    toastSuccess(t('employee.pos.order_held'));
   };
 
   const restoreHeldOrder = (holdId: number) => {
@@ -229,7 +231,7 @@ export default function POS() {
     if (!order) return;
 
     if (cart.items.length > 0) {
-      if (!confirm('This will replace your current cart. Continue?')) return;
+      if (!confirm(t('employee.pos.replace_cart_confirm'))) return;
     }
 
     cart.clear();
@@ -242,7 +244,7 @@ export default function POS() {
     const updated = heldOrders.filter(h => h.id !== holdId);
     setHeldOrders(updated);
     localStorage.setItem('pos_held_orders', JSON.stringify(updated));
-    toastSuccess('Held order restored');
+    toastSuccess(t('employee.pos.held_restored'));
   };
 
   // Charge Mutation
@@ -266,7 +268,7 @@ export default function POS() {
       setPaymentOrder(order); // Open payment modal
     },
     onError: (err) => {
-      toastError('Failed to create order');
+      toastError(t('employee.common.error'));
       console.error(err);
     }
   });
@@ -275,7 +277,7 @@ export default function POS() {
     if (cart.items.length === 0) return;
 
     if (selectedTableData && selectedTableData.status !== 'available') {
-      toastError(`Table ${selectedTableData.code} is ${selectedTableData.status}. Select an available table.`);
+      toastError(t('employee.pos.table_occupied', { code: selectedTableData.code, status: selectedTableData.status }));
       return;
     }
     createOrderMutation.mutate();
@@ -294,11 +296,11 @@ export default function POS() {
       return apiPut(`/api/employee/pos/tables/${selectedTable}/status`, { status });
     },
     onSuccess: () => {
-      toastSuccess('Table status updated');
+      toastSuccess(t('employee.pos.table_updated'));
       refetchTables();
     },
     onError: (err: any) => {
-      toastError('Failed to update table status');
+      toastError(t('employee.common.error'));
       console.error(err);
     },
   });
@@ -309,7 +311,7 @@ export default function POS() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Point of Sale</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('employee.pos.title')}</h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
               {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date().toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
@@ -326,7 +328,7 @@ export default function POS() {
               )}
             >
               <Plus className="w-4 h-4" />
-              New Order
+              {t('employee.pos.new_order')}
             </button>
             <button
               onClick={() => setActiveTab('orders')}
@@ -338,7 +340,7 @@ export default function POS() {
               )}
             >
               <Receipt className="w-4 h-4" />
-              Active
+              {t('employee.pos.active')}
               {activeOrders && activeOrders.length > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 text-xs font-bold bg-white/20 rounded-full">
                   {activeOrders.length}
@@ -357,7 +359,7 @@ export default function POS() {
               onClick={() => setViewMode('grid')}
               leftIcon={<Grid3x3 className="w-4 h-4" />}
             >
-              Grid
+              {t('employee.pos.grid')}
             </Button>
             <Button
               size="sm"
@@ -365,7 +367,7 @@ export default function POS() {
               onClick={() => setViewMode('list')}
               leftIcon={<List className="w-4 h-4" />}
             >
-              List
+              {t('employee.pos.list')}
             </Button>
             <Button
               size="sm"
@@ -373,7 +375,7 @@ export default function POS() {
               onClick={() => setShowNumpad(!showNumpad)}
               leftIcon={<Calculator className="w-4 h-4" />}
             >
-              Numpad
+              {t('employee.pos.numpad')}
             </Button>
           </div>
         )}
@@ -384,9 +386,9 @@ export default function POS() {
               <CardHeader className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <Receipt className="w-5 h-5 text-fuchsia-500" />
-                  <h3 className="font-semibold text-lg">Active Orders</h3>
+                  <h3 className="font-semibold text-lg">{t('employee.pos.active_orders')}</h3>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => refetchOrders()} leftIcon={<RefreshCw className="w-4 h-4" />}>Refresh</Button>
+                <Button size="sm" variant="ghost" onClick={() => refetchOrders()} leftIcon={<RefreshCw className="w-4 h-4" />}>{t('employee.common.refresh')}</Button>
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (
@@ -396,8 +398,8 @@ export default function POS() {
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                       <Receipt className="w-8 h-8 text-gray-400" />
                     </div>
-                    <p className="text-gray-500 font-medium">No active orders</p>
-                    <p className="text-sm text-gray-400 mt-1">Create a new order to get started</p>
+                    <p className="text-gray-500 font-medium">{t('employee.pos.no_active_orders')}</p>
+                    <p className="text-sm text-gray-400 mt-1">{t('employee.pos.create_new_order')}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -429,7 +431,7 @@ export default function POS() {
                         </div>
                         <div className="pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                           <div className="font-bold text-xl">${order.total_amount.toFixed(2)}</div>
-                          <Button size="sm" className="bg-blue-600 h-10 px-4">Pay</Button>
+                          <Button size="sm" className="bg-blue-600 h-10 px-4">{t('employee.pos.pay')}</Button>
                         </div>
                       </div>
                     ))}
@@ -447,7 +449,7 @@ export default function POS() {
                 <div className="mb-4">
                   <div className="flex items-center gap-2 mb-3 px-1">
                     <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Favorites</h3>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">{t('employee.pos.favorites')}</h3>
                   </div>
                   <div className="flex gap-3 overflow-x-auto pb-4 snap-x -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
                     {favoriteItems.map((item) => (
@@ -491,12 +493,12 @@ export default function POS() {
               <Card className="border-0 shadow-none sm:border sm:shadow-sm bg-transparent sm:bg-white sm:dark:bg-gray-800">
                 <CardHeader className="px-0 sm:px-6 pt-0 sm:pt-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                    <div className="text-lg font-bold hidden sm:block">Menu</div>
+                    <div className="text-lg font-bold hidden sm:block">{t('employee.pos.menu')}</div>
                     <div className="flex gap-2 w-full sm:w-auto sm:flex-1 sm:max-w-md">
                       <div className="relative flex-1">
                         <Input
                           ref={searchRef}
-                          placeholder="Search items..."
+                          placeholder={t('employee.pos.search_items')}
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
                           className="pl-9 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
@@ -521,7 +523,7 @@ export default function POS() {
                               : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
                           )}
                         >
-                          All
+                          {t('employee.pos.all')}
                         </button>
                         {categories?.map((c) => (
                           <button
@@ -562,7 +564,7 @@ export default function POS() {
                   <CardHeader>
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-amber-600" />
-                      <h3 className="text-lg font-semibold text-foreground">Held ({heldOrders.length})</h3>
+                      <h3 className="text-lg font-semibold text-foreground">{t('employee.pos.held')} ({heldOrders.length})</h3>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -570,13 +572,13 @@ export default function POS() {
                       {heldOrders.map((h) => (
                         <div key={h.id} className="flex justify-between items-center p-2 rounded bg-card border border-border text-sm">
                           <div>
-                            <div className="font-medium text-foreground">Table {h.tableId || 'Walk-in'}</div>
+                            <div className="font-medium text-foreground">{t('employee.pos.table')} {h.tableId || t('employee.pos.walk_in')}</div>
                             <div className="text-xs text-muted-foreground">
                               {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • ${h.total.toFixed(2)}
                             </div>
                           </div>
                           <Button size="sm" variant="secondary" onClick={() => restoreHeldOrder(h.id)}>
-                            Restore
+                            {t('employee.pos.restore')}
                           </Button>
                         </div>
                       ))}
@@ -586,7 +588,7 @@ export default function POS() {
               )}
               <Card>
                 <CardHeader>
-                  <div className="font-semibold">Table & Customer</div>
+                  <div className="font-semibold">{t('employee.pos.table_customer')}</div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Floor Selector */}
@@ -608,7 +610,7 @@ export default function POS() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-sm text-gray-500 italic">No floors found</div>
+                    <div className="text-sm text-gray-500 italic">{t('employee.pos.no_floors')}</div>
                   )}
 
                   {/* Table Selector */}
@@ -622,7 +624,7 @@ export default function POS() {
                           : "bg-white text-gray-600 border-gray-200 hover:border-blue-400 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
                       )}
                     >
-                      Walk-in
+                      {t('employee.pos.walk_in')}
                     </button>
 
                     {activeFloor?.tables?.map((table) => {
@@ -674,7 +676,7 @@ export default function POS() {
                           loading={updateTableStatusMutation.isPending}
                           onClick={() => updateTableStatusMutation.mutate('available')}
                         >
-                          Available
+                          {t('employee.pos.available')}
                         </Button>
                         <Button
                           size="xs"
@@ -682,7 +684,7 @@ export default function POS() {
                           loading={updateTableStatusMutation.isPending}
                           onClick={() => updateTableStatusMutation.mutate('reserved')}
                         >
-                          Reserved
+                          {t('employee.pos.reserved')}
                         </Button>
                         <Button
                           size="xs"
@@ -690,7 +692,7 @@ export default function POS() {
                           loading={updateTableStatusMutation.isPending}
                           onClick={() => updateTableStatusMutation.mutate('occupied')}
                         >
-                          Occupied
+                          {t('employee.pos.occupied')}
                         </Button>
                         <Button
                           size="xs"
@@ -698,7 +700,7 @@ export default function POS() {
                           loading={updateTableStatusMutation.isPending}
                           onClick={() => updateTableStatusMutation.mutate('unavailable')}
                         >
-                          Unavailable
+                          {t('employee.pos.unavailable')}
                         </Button>
                       </div>
                     </div>
@@ -711,7 +713,7 @@ export default function POS() {
                 <Card className="bg-info-muted dark:bg-info/5 border-info/20">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-foreground">Quantity</span>
+                      <span className="font-semibold text-foreground">{t('employee.pos.quantity')}</span>
                       <span className="text-3xl font-bold text-info">{quantity}</span>
                     </div>
                   </CardHeader>
@@ -748,10 +750,10 @@ export default function POS() {
                       <div className="w-8 h-8 rounded-lg bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center">
                         <ShoppingCart className="w-4 h-4 text-fuchsia-600" />
                       </div>
-                      <span className="font-semibold text-lg">Current Order</span>
+                      <span className="font-semibold text-lg">{t('employee.pos.current_order')}</span>
                     </div>
                     {cart.items.length > 0 && (
-                      <span className="text-sm text-muted-foreground">{cart.items.length} items</span>
+                      <span className="text-sm text-muted-foreground">{cart.items.length} {t('employee.pos.items')}</span>
                     )}
                   </div>
                 </CardHeader>
@@ -760,7 +762,7 @@ export default function POS() {
                     {cart.items.length === 0 ? (
                       <div className="text-sm text-muted-foreground text-center py-8 flex flex-col items-center justify-center h-full">
                         <ShoppingCart className="w-12 h-12 mb-2 opacity-30" />
-                        No items yet
+                        {t('employee.pos.no_items')}
                       </div>
                     ) : (
                       cart.items.map((it) => (
@@ -796,15 +798,15 @@ export default function POS() {
                   </div>
                   <div className="mt-4 space-y-2 text-base border-t border-border pt-4">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="text-muted-foreground">{t('employee.pos.subtotal')}</span>
                       <span className="font-semibold text-foreground">${cart.subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tax</span>
+                      <span className="text-muted-foreground">{t('employee.pos.tax')}</span>
                       <span className="font-semibold text-foreground">${cart.tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-xl mt-3 pt-3 border-t border-border">
-                      <span className="text-foreground">Total</span>
+                      <span className="text-foreground">{t('employee.pos.total')}</span>
                       <span className="text-primary">${cart.total.toFixed(2)}</span>
                     </div>
                   </div>
@@ -815,7 +817,7 @@ export default function POS() {
                       onClick={() => cart.clear()}
                       disabled={cart.items.length === 0}
                     >
-                      Clear
+                      {t('employee.pos.clear')}
                     </Button>
                     <Button
                       variant="secondary"
@@ -823,7 +825,7 @@ export default function POS() {
                       onClick={handleHoldOrder}
                       disabled={cart.items.length === 0}
                     >
-                      Hold
+                      {t('employee.pos.hold')}
                     </Button>
                     <Button
                       className="h-12 text-base"
@@ -832,7 +834,7 @@ export default function POS() {
                       disabled={cart.items.length === 0 || createOrderMutation.isPending}
                       loading={createOrderMutation.isPending}
                     >
-                      💳 Charge
+                      💳 {t('employee.pos.charge')}
                     </Button>
                   </div>
                 </CardContent>
@@ -851,7 +853,7 @@ export default function POS() {
                 )}
               >
                 <Grid3x3 className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium">Menu</span>
+                <span className="text-xs font-medium">{t('employee.pos.menu')}</span>
               </button>
               <button
                 onClick={() => setMobileTab('cart')}
@@ -870,7 +872,7 @@ export default function POS() {
                 <div className="flex flex-col items-center">
                   <ShoppingCart className="w-5 h-5 mb-1" />
                   <span className="text-xs font-medium flex items-center gap-1">
-                    Cart
+                    {t('employee.pos.cart')}
                     {cart.total > 0 && <span className="text-green-600 dark:text-green-400 font-bold">(${cart.total.toFixed(0)})</span>}
                   </span>
                 </div>

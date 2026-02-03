@@ -9,24 +9,35 @@ import { cn } from '@/app/utils/cn';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Logo } from '@/Components/brand';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
-const resetPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  password_confirmation: z.string(),
-  token: z.string().min(1, 'Reset token is required'),
-}).refine((data: any) => data.password === data.password_confirmation, {
-  message: "Passwords don't match",
-  path: ['password_confirmation'],
-});
-
-type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
+// Schema will be defined in component or just use generic validation which we can't easily translate in Zod outside hook
+// For now, we'll keep English validation in Zod and override if needed, or just let it be since it's client side fallback.
+// Actually, strict Zod usage makes dynamic error messages hard without moving schema inside component.
+// We'll move schema inside.
+type ResetPasswordForm = {
+  email: string;
+  password: string;
+  password_confirmation: string;
+  token: string;
+};
 
 export default function ResetPassword() {
   const { props } = usePage();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const resetPasswordSchema = z.object({
+    email: z.string().email(t('auth.validation.email_invalid') as string),
+    password: z.string().min(8, t('auth.validation.password_min_8') as string),
+    password_confirmation: z.string(),
+    token: z.string().min(1, 'Reset token is required'),
+  }).refine((data: any) => data.password === data.password_confirmation, {
+    message: t('auth.validation.password_mismatch') as string,
+    path: ['password_confirmation'],
+  });
 
   const token = (props.token as string) || '';
   const email = (props.email as string) || '';
@@ -49,17 +60,17 @@ export default function ResetPassword() {
     try {
       router.post('/reset-password', data, {
         onSuccess: () => {
-          toast.success('Password reset successfully! Please sign in with your new password.');
+          toast.success(t('auth.password_reset_success') as string);
           router.visit('/login');
         },
         onError: (errors) => {
           const firstError = Object.values(errors)[0] as string;
-          toast.error(firstError || 'Failed to reset password. Please try again.');
+          toast.error(firstError || t('auth.password_reset_failed') as string);
         },
         onFinish: () => setIsLoading(false),
       });
     } catch (error) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('auth.something_wrong') as string);
       setIsLoading(false);
     }
   };
@@ -77,7 +88,15 @@ export default function ResetPassword() {
   const passwordValue = watch('password') || '';
   const passwordStrength = getPasswordStrength(passwordValue);
   const strengthColors = ['bg-rose-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-fuchsia-500'];
-  const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+  // Using generic strength labels for now as they are harder to map dynamically efficiently without a loop
+  // But we can map them
+  const strengthLabels = [
+    t('auth.very_weak'),
+    t('auth.weak'),
+    t('auth.fair'),
+    t('auth.good'),
+    t('auth.strong')
+  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#0f0f13]">
@@ -109,7 +128,7 @@ export default function ResetPassword() {
             transition={{ delay: 0.3 }}
             className="text-4xl font-black text-white mb-3 tracking-tight font-display"
           >
-            New Password
+            {t('auth.new_password_title')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -117,7 +136,7 @@ export default function ResetPassword() {
             transition={{ delay: 0.4 }}
             className="text-gray-400 text-lg"
           >
-            Create a strong new password for your account
+            {t('auth.new_password_subtitle')}
           </motion.p>
         </div>
 
@@ -135,7 +154,7 @@ export default function ResetPassword() {
               <input {...register('token')} type="hidden" />
 
               <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
-                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-medium">Resetting password for</p>
+                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-medium">{t('auth.resetting_for')}</p>
                 <p className="text-white font-semibold text-lg">{email}</p>
                 <input {...register('email')} type="hidden" />
               </div>
@@ -143,7 +162,7 @@ export default function ResetPassword() {
               {/* Password Field */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300 ml-1">
-                  New Password
+                  {t('auth.new_password_title')}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
@@ -152,7 +171,7 @@ export default function ResetPassword() {
                     <input
                       {...register('password')}
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Create a strong password"
+                      placeholder={t('auth.password_create_placeholder') as string}
                       className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                     />
                     <button
@@ -186,7 +205,7 @@ export default function ResetPassword() {
                       "text-xs font-medium",
                       passwordStrength >= 4 ? 'text-fuchsia-400' : passwordStrength >= 3 ? 'text-blue-400' : 'text-amber-400'
                     )}>
-                      {strengthLabels[passwordStrength - 1] || 'Very Weak'} password
+                      {strengthLabels[passwordStrength - 1] || t('auth.very_weak')} {t('auth.password_strength')}
                     </p>
                   </div>
                 )}
@@ -198,7 +217,7 @@ export default function ResetPassword() {
               {/* Confirm Password */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-300 ml-1">
-                  Confirm New Password
+                  {t('auth.password_confirm_label')}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
@@ -207,7 +226,7 @@ export default function ResetPassword() {
                     <input
                       {...register('password_confirmation')}
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Confirm your new password"
+                      placeholder={t('auth.password_confirm_placeholder') as string}
                       className="w-full pl-12 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                     />
                     <button
@@ -241,12 +260,12 @@ export default function ResetPassword() {
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Updating Password...
+                      {t('auth.updating_password')}
                     </>
                   ) : (
                     <>
                       <Check className="w-5 h-5" />
-                      Update Password
+                      {t('auth.update_password')}
                     </>
                   )}
                 </span>
@@ -258,7 +277,7 @@ export default function ResetPassword() {
                 href="/login"
                 className="text-sm text-gray-400 hover:text-white transition-colors"
               >
-                Back to Sign In
+                {t('auth.back_to_sign_in')}
               </Link>
             </div>
           </div>
@@ -276,15 +295,15 @@ export default function ResetPassword() {
               <Shield className="w-5 h-5 text-fuchsia-400" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white mb-2">Security Tips</h3>
+              <h3 className="text-sm font-semibold text-white mb-2">{t('auth.security_tips')}</h3>
               <ul className="text-xs text-gray-500 space-y-1">
                 <li className="flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-gray-500" />
-                  Use 8+ characters with mixed case
+                  {t('auth.tip_length')}
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-gray-500" />
-                  Include numbers and special characters
+                  {t('auth.tip_chars')}
                 </li>
               </ul>
             </div>

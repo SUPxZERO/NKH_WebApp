@@ -26,32 +26,38 @@ import CartIcon from '@/app/components/ui/CartIcon';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import { GlobalSearch, useGlobalSearch, SearchTrigger } from '@/app/components/ui/GlobalSearch';
+import { LanguageSwitcher } from '@/app/components/common/LanguageSwitcher';
 import { useCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useTelegramAuth } from '@/app/hooks/useTelegramAuth';
 import { useTableSession } from '@/app/hooks/useTableSession';
+
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 type Props = {
   children: React.ReactNode;
   className?: string;
 };
 
-const navigation = [
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'Menu', href: '/menu', icon: Utensils },
-  { name: 'Dashboard', href: '/dashboard', icon: User },
-  // { name: 'Profile', href: '/customer/profile', icon: UserCircle },
-  { name: 'Cart', href: '/cart', icon: ShoppingCart },
-  { name: 'Order', href: '/customer/orders', icon: ClipboardList },
-  // { name: 'Favorites', href: '/customer/favorites', icon: Heart },
-  // { name: 'Rewards', href: '/customer/rewards', icon: Star },
-  { name: 'Book Table', href: '/reservation', icon: Calendar },
-];
+// Moved navigation array inside component to use translation hook
 
 export default function CustomerLayout({ children, className }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
   const search = useGlobalSearch();
+  const { t } = useTranslation();
+
+  const navigation = [
+    { name: t('layout.nav.home'), href: '/', icon: Home },
+    { name: t('layout.nav.menu'), href: '/menu', icon: Utensils },
+    { name: t('layout.nav.dashboard'), href: '/dashboard', icon: User },
+    // { name: t('layout.nav.profile'), href: '/customer/profile', icon: UserCircle },
+    { name: t('layout.nav.cart'), href: '/cart', icon: ShoppingCart },
+    { name: t('layout.nav.orders'), href: '/customer/orders', icon: ClipboardList },
+    // { name: t('layout.nav.favorites'), href: '/customer/favorites', icon: Heart },
+    // { name: t('layout.nav.rewards'), href: '/customer/rewards', icon: Star },
+    { name: t('layout.nav.book_table'), href: '/reservation', icon: Calendar },
+  ];
 
   // Get user from AuthContext (supports Telegram fallback)
   const { user } = useAuth();
@@ -70,9 +76,10 @@ export default function CustomerLayout({ children, className }: Props) {
   // Table Session Indicator
   const { isTableOrder, session } = useTableSession();
   // Fallback to cart store display values if session object isn't fully loaded but token exists
+  // Fallback to cart store display values if session object isn't fully loaded but token exists
   // (handled by hook matching logic, here we just use what the hook gives or cart store directly if accessible)
   // For display we'll trust the hook's sync or local session data
-  const tableDisplay = session?.table?.code || 'Table';
+  const tableDisplay = session?.table?.code || t('layout.table');
   const floorDisplay = session?.table?.floor?.name;
 
   const handleLogout = () => {
@@ -119,7 +126,7 @@ export default function CustomerLayout({ children, className }: Props) {
           >
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6 sm:mb-8">
-                <h2 className="text-lg sm:text-xl font-bold">Menu</h2>
+                <h2 className="text-lg sm:text-xl font-bold">{t('layout.nav.mobile_menu_title')}</h2>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"
@@ -152,7 +159,7 @@ export default function CustomerLayout({ children, className }: Props) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{userName}</p>
-                    <p className="text-xs text-gray-500 truncate">{userEmail || 'View account details'}</p>
+                    <p className="text-xs text-gray-500 truncate">{userEmail || t('layout.nav.view_account')}</p>
                   </div>
                 </Link>
 
@@ -183,7 +190,7 @@ export default function CustomerLayout({ children, className }: Props) {
                   className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 w-full mt-4"
                 >
                   <LogOut className="w-5 h-5" />
-                  Logout
+                  {t('layout.nav.logout')}
                 </button>
               </nav>
             </div>
@@ -211,9 +218,9 @@ export default function CustomerLayout({ children, className }: Props) {
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                  NKH Restaurant
+                  {t('layout.footer.brand_title')}
                 </h1>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Delicious & Fresh</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('layout.footer.subtitle')}</p>
               </div>
             </Link>
 
@@ -252,7 +259,7 @@ export default function CustomerLayout({ children, className }: Props) {
                     )}
                   >
                     <Icon className="w-4 h-4" />
-                    <span className="font-medium">{item.name}</span>
+                    <span className="font-medium">{item.name as string}</span>
                   </Link>
                 );
               })}
@@ -263,9 +270,11 @@ export default function CustomerLayout({ children, className }: Props) {
               {/* Mobile Table Indicator - Icon Only */}
               {isTableOrder && (
                 <div className="sm:hidden flex items-center justify-center w-9 h-9 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-600 dark:text-purple-400">
-                  <span className="text-xs font-bold">{tableDisplay.replace('Table ', '')}</span>
+                  <span className="text-xs font-bold">{String(tableDisplay).replace(t('layout.table') + ' ', '')}</span>
                 </div>
               )}
+
+              <LanguageSwitcher />
 
               {/* Search Button - Show on all sizes */}
               <button
@@ -361,13 +370,13 @@ export default function CustomerLayout({ children, className }: Props) {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">
-                    NKH Restaurant
+                    {t('layout.footer.brand_title')}
                   </h3>
-                  <p className="text-xs sm:text-sm text-fuchsia-400">Culinary Excellence</p>
+                  <p className="text-xs sm:text-sm text-fuchsia-400">{t('layout.footer.brand_subtitle')}</p>
                 </div>
               </div>
               <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6">
-                Serving delicious, fresh meals with love and passion since 2020.
+                {t('layout.footer.description')}
               </p>
               {/* Social Media Icons */}
               <div className="flex gap-2 sm:gap-3">
@@ -385,13 +394,13 @@ export default function CustomerLayout({ children, className }: Props) {
 
             {/* Quick Links - Hide on small mobile */}
             <div className="hidden sm:block">
-              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">Quick Links</h4>
+              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">{t('layout.footer.quick_links')}</h4>
               <ul className="space-y-2 sm:space-y-3">
                 {navigation.map((item) => (
-                  <li key={item.name}>
+                  <li key={item.name as string}>
                     <Link href={item.href} className="text-gray-400 hover:text-fuchsia-400 transition-colors flex items-center gap-2 group">
                       <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      {item.name}
+                      {item.name as string}
                     </Link>
                   </li>
                 ))}
@@ -400,44 +409,44 @@ export default function CustomerLayout({ children, className }: Props) {
 
             {/* Contact */}
             <div>
-              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">Contact Us</h4>
+              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">{t('layout.footer.contact_us')}</h4>
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
                     <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-fuchsia-500" />
                   </div>
-                  <span className="truncate">+1 (555) 123-4567</span>
+                  <span className="truncate">{t('layout.footer.phone')}</span>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
                     <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-fuchsia-500" />
                   </div>
-                  <span className="truncate">hello@nkhrestaurant.com</span>
+                  <span className="truncate">{t('layout.footer.email')}</span>
                 </li>
                 <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-fuchsia-500" />
                   </div>
-                  <span className="truncate">123 Food Street, City</span>
+                  <span className="truncate">{t('layout.footer.address')}</span>
                 </li>
               </ul>
             </div>
 
             {/* Hours */}
             <div>
-              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">Opening Hours</h4>
+              <h4 className="font-semibold text-white mb-3 sm:mb-4 text-sm sm:text-base">{t('layout.footer.opening_hours')}</h4>
               <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-400">
                 <li className="flex items-center justify-between">
-                  <span>Mon - Thu</span>
-                  <span className="text-white font-medium">11AM - 10PM</span>
+                  <span>{t('layout.footer.days.mon_thu')}</span>
+                  <span className="text-white font-medium">{t('layout.footer.hours.mon_thu')}</span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span>Fri - Sat</span>
-                  <span className="text-white font-medium">11AM - 11PM</span>
+                  <span>{t('layout.footer.days.fri_sat')}</span>
+                  <span className="text-white font-medium">{t('layout.footer.hours.fri_sat')}</span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span>Sunday</span>
-                  <span className="text-white font-medium">12PM - 9PM</span>
+                  <span>{t('layout.footer.days.sun')}</span>
+                  <span className="text-white font-medium">{t('layout.footer.hours.sun')}</span>
                 </li>
               </ul>
             </div>
@@ -446,13 +455,13 @@ export default function CustomerLayout({ children, className }: Props) {
           {/* Bottom Bar */}
           <div className="border-t border-white/10 pt-6 sm:pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             <p className="text-gray-400 text-xs sm:text-sm text-center sm:text-left">
-              &copy; 2025 NKH Restaurant. All rights reserved.
+              {t('layout.footer.rights_reserved', { year: String(new Date().getFullYear()) })}
             </p>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-fuchsia-600 text-gray-400 hover:text-white transition-all group"
             >
-              <span className="text-xs sm:text-sm font-medium">Back to top</span>
+              <span className="text-xs sm:text-sm font-medium">{t('layout.footer.back_to_top')}</span>
               <svg className="w-3 h-3 sm:w-4 sm:h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m18 15-6-6-6 6" />
               </svg>

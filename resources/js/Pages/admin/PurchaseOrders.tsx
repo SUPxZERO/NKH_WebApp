@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -16,6 +17,7 @@ import { cn } from '@/app/utils/cn';
 
 // Enhanced StatCard - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) => {
+    const { t } = useLanguage();
     const colorStyles: Record<string, any> = {
         purple: { gradient: 'from-purple-500/20 to-fuchsia-500/10', iconBg: 'bg-gradient-to-br from-purple-500 to-fuchsia-600', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/30', shadow: 'shadow-purple-500/20' },
         amber: { gradient: 'from-amber-500/20 to-orange-500/10', iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500/30', shadow: 'shadow-amber-500/20' },
@@ -82,7 +84,7 @@ interface PurchaseOrder {
 }
 
 const statusConfig: Record<string, { color: string; icon: React.ElementType; label: string }> = {
-    draft: { color: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20', icon: FileText, label: 'Draft' },
+    draft: { color: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20', icon: FileText, label: 'Draft' }, // Keys will be translated in component
     pending: { color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', icon: Clock, label: 'Pending' },
     approved: { color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', icon: CheckCircle, label: 'Approved' },
     ordered: { color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20', icon: Send, label: 'Ordered' },
@@ -92,6 +94,7 @@ const statusConfig: Record<string, { color: string; icon: React.ElementType; lab
 };
 
 export default function PurchaseOrders() {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [supplierFilter, setSupplierFilter] = useState('all');
@@ -150,50 +153,50 @@ export default function PurchaseOrders() {
     // Mutations
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/purchase-orders', data),
-        onSuccess: () => { toastSuccess('Purchase order created'); closeModal(); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to create PO')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`/api/admin/purchase-orders/${id}`, data),
-        onSuccess: () => { toastSuccess('Purchase order updated'); closeModal(); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to update PO')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const approveMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/api/admin/purchase-orders/${id}/approve`, {}),
-        onSuccess: () => { toastSuccess('Purchase order approved'); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to approve')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.approved') as string); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const submitMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/api/admin/purchase-orders/${id}/submit`, {}),
-        onSuccess: () => { toastSuccess('Purchase order submitted'); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to submit')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.submitted') as string); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const markOrderedMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/api/admin/purchase-orders/${id}/mark-ordered`, {}),
-        onSuccess: () => { toastSuccess('Marked as ordered'); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to mark ordered')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.marked_ordered') as string); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const receiveMutation = useMutation({
         mutationFn: ({ id, items, location_id }: { id: number; items: any[]; location_id?: string }) => apiPost(`/api/admin/purchase-orders/${id}/receive`, { items, location_id }),
-        onSuccess: () => { toastSuccess('Items received'); setOpenReceive(false); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); qc.invalidateQueries({ queryKey: ['inventory'] }); qc.invalidateQueries({ queryKey: ['ingredients'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to receive items')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.items_received') as string); setOpenReceive(false); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); qc.invalidateQueries({ queryKey: ['inventory'] }); qc.invalidateQueries({ queryKey: ['ingredients'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const cancelMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/api/admin/purchase-orders/${id}/cancel`, {}),
-        onSuccess: () => { toastSuccess('Purchase order cancelled'); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to cancel')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.cancelled') as string); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/purchase-orders/${id}`),
-        onSuccess: () => { toastSuccess('Purchase order deleted'); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to delete')
+        onSuccess: () => { toastSuccess(t('admin.purchase_orders.messages.deleted') as string); qc.invalidateQueries({ queryKey: ['purchase-orders'] }); qc.invalidateQueries({ queryKey: ['purchase-orders-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.purchase_orders.messages.failed') as string)
     });
 
     const closeModal = () => {
@@ -219,8 +222,8 @@ export default function PurchaseOrders() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.supplier_id) return toastError('Select a supplier');
-        if (formData.items.length === 0) return toastError('Add at least one item');
+        if (!formData.supplier_id) return toastError(t('admin.purchase_orders.messages.select_supplier') as string);
+        if (formData.items.length === 0) return toastError(t('admin.purchase_orders.messages.add_item') as string);
         const data = { ...formData, supplier_id: parseInt(formData.supplier_id), location_id: formData.location_id ? parseInt(formData.location_id) : null };
         if (openEdit && selectedPO) updateMutation.mutate({ id: selectedPO.id, data });
         else createMutation.mutate(data);
@@ -239,7 +242,7 @@ export default function PurchaseOrders() {
         const Icon = config.icon;
         return (
             <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", config.color)}>
-                <Icon size={12} /> {config.label}
+                <Icon size={12} /> {t(`admin.purchase_orders.status.${status}`)}
             </span>
         );
     };
@@ -263,26 +266,27 @@ export default function PurchaseOrders() {
                                 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3"
                             >
                                 <ShoppingCart className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600 flex-shrink-0" />
-                                <span className="truncate">Purchase Orders</span>
+                                <span className="truncate">{t('admin.purchase_orders.title')}</span>
                             </motion.h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">Manage supplier orders</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">{t('admin.purchase_orders.subtitle')}</p>
                         </div>
                         <Button
                             onClick={() => { closeModal(); setOpenCreate(true); }}
                             className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20 h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm flex-shrink-0"
                         >
-                            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Create PO</span>
+
+                            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('admin.purchase_orders.create_po')}</span>
                         </Button>
                     </div>
 
                     {/* Stats Ribbon - Horizontal scroll on mobile */}
                     <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
                         <div className="flex sm:grid sm:grid-cols-5 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-                            <StatCard title="Pending" value={stats.pendingApproval} icon={Clock} color="amber" index={0} />
-                            <StatCard title="Awaiting" value={stats.awaitingReceipt} icon={Truck} color="purple" index={1} />
-                            <StatCard title="Month" value={stats.thisMonth} icon={Calendar} color="blue" index={2} />
-                            <StatCard title="Value" value={`$${parseFloat(String(stats.totalValue)).toLocaleString()}`} icon={DollarSign} color="emerald" index={3} />
-                            <StatCard title="Total" value={stats.total} icon={FileText} color="rose" index={4} />
+                            <StatCard title={t('admin.purchase_orders.stats.pending')} value={stats.pendingApproval} icon={Clock} color="amber" index={0} />
+                            <StatCard title={t('admin.purchase_orders.stats.awaiting')} value={stats.awaitingReceipt} icon={Truck} color="purple" index={1} />
+                            <StatCard title={t('admin.purchase_orders.stats.month')} value={stats.thisMonth} icon={Calendar} color="blue" index={2} />
+                            <StatCard title={t('admin.purchase_orders.stats.value')} value={`$${parseFloat(String(stats.totalValue)).toLocaleString()}`} icon={DollarSign} color="emerald" index={3} />
+                            <StatCard title={t('admin.purchase_orders.stats.total')} value={stats.total} icon={FileText} color="rose" index={4} />
                         </div>
                     </div>
 
@@ -296,17 +300,17 @@ export default function PurchaseOrders() {
                         <div className="flex gap-2 sm:gap-4">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                <Input placeholder={t('admin.purchase_orders.filters.search')} value={search} onChange={(e) => setSearch(e.target.value)}
                                     className="pl-9 sm:pl-10 h-10 text-sm bg-background/50 border-border/50 focus:border-purple-500 text-foreground" />
                             </div>
                             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                                 className="bg-background/50 border border-border/50 rounded-lg sm:rounded-xl px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none transition-all">
-                                <option value="all">Status</option>
+                                <option value="all">{t('admin.purchase_orders.filters.status')}</option>
                                 {Object.entries(statusConfig).map(([key, config]) => <option key={key} value={key}>{config.label}</option>)}
                             </select>
                             <select value={supplierFilter} onChange={(e) => setSupplierFilter(e.target.value)}
                                 className="hidden sm:block bg-background/50 border border-border/50 rounded-xl px-4 py-2 h-10 text-sm text-foreground focus:border-purple-500 outline-none transition-all">
-                                <option value="all">All Suppliers</option>
+                                <option value="all">{t('admin.purchase_orders.filters.all_suppliers')}</option>
                                 {supplierList.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>
                         </div>
@@ -321,24 +325,24 @@ export default function PurchaseOrders() {
                     >
                         {/* Table Header - Desktop only */}
                         <div className="hidden lg:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-purple-500/10">
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">PO Number</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Supplier</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Location</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Date</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Total</div>
-                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.purchase_orders.table.po_number')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.purchase_orders.table.supplier')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.purchase_orders.table.location')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.purchase_orders.table.date')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.purchase_orders.table.status')}</div>
+                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.purchase_orders.table.total')}</div>
+                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.purchase_orders.table.actions')}</div>
                         </div>
 
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
-                                <div className="p-8 sm:p-12 text-center text-muted-foreground text-sm">Loading...</div>
+                                <div className="p-8 sm:p-12 text-center text-muted-foreground text-sm">{t('admin.purchase_orders.table.loading')}</div>
                             ) : poList.length === 0 ? (
                                 <div className="p-8 sm:p-12 text-center">
                                     <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
                                         <ShoppingCart className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-muted-foreground text-sm">No purchase orders found</p>
+                                    <p className="text-muted-foreground text-sm">{t('admin.purchase_orders.table.empty_title')}</p>
                                 </div>
                             ) : poList.map((po: PurchaseOrder, idx: number) => (
                                 <motion.div
@@ -416,22 +420,22 @@ export default function PurchaseOrders() {
                 </div>
 
                 {/* Create/Edit Modal */}
-                <Modal open={openCreate || openEdit} onClose={closeModal} title={openEdit ? "Edit PO" : "Create PO"} size="xl">
+                <Modal open={openCreate || openEdit} onClose={closeModal} title={openEdit ? t('admin.purchase_orders.edit_po') : t('admin.purchase_orders.create_po')} size="xl">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium mb-1">Supplier</label>
+                                <label className="block text-xs sm:text-sm font-medium mb-1">{t('admin.purchase_orders.form.supplier')}</label>
                                 <select value={formData.supplier_id} onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })} required
                                     className="w-full bg-background border border-border rounded-lg sm:rounded-xl px-3 py-2 h-10 text-sm">
-                                    <option value="">Select Supplier</option>
+                                    <option value="">{t('admin.purchase_orders.form.select_supplier')}</option>
                                     {supplierList.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium mb-1">Location</label>
+                                <label className="block text-xs sm:text-sm font-medium mb-1">{t('admin.purchase_orders.form.location')}</label>
                                 <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                                     className="w-full bg-background border border-border rounded-lg sm:rounded-xl px-3 py-2 h-10 text-sm">
-                                    <option value="">Select Location</option>
+                                    <option value="">{t('admin.purchase_orders.form.select_location')}</option>
                                     {locationList.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                                 </select>
                             </div>
@@ -439,16 +443,16 @@ export default function PurchaseOrders() {
 
                         <div className="border border-border rounded-lg sm:rounded-xl p-3 sm:p-4 bg-secondary/20">
                             <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-semibold text-sm">Items</h3>
-                                <button type="button" onClick={addLineItem} className="bg-purple-600 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
+                                <h3 className="font-semibold text-sm">{t('admin.purchase_orders.form.items')}</h3>
+                                <button type="button" onClick={addLineItem} className="bg-purple-600 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1"><Plus className="w-3 h-3" /> {t('admin.purchase_orders.form.add_item')}</button>
                             </div>
 
                             {/* Items Header */}
                             {formData.items.length > 0 && (
                                 <div className="flex gap-2 mb-2 px-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    <div className="flex-1 min-w-[120px]">Ingredient</div>
-                                    <div className="w-16 sm:w-20">Qty</div>
-                                    <div className="w-16 sm:w-24">Price</div>
+                                    <div className="flex-1 min-w-[120px]">{t('admin.purchase_orders.form.ingredient')}</div>
+                                    <div className="w-16 sm:w-20">{t('admin.purchase_orders.form.qty')}</div>
+                                    <div className="w-16 sm:w-24">{t('admin.purchase_orders.form.price')}</div>
                                     <div className="w-8"></div>
                                 </div>
                             )}
@@ -471,57 +475,57 @@ export default function PurchaseOrders() {
                                     <button type="button" onClick={() => removeLineItem(idx)} className="h-8 w-8 p-0 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20"><Trash2 size={12} /></button>
                                 </div>
                             ))}
-                            {formData.items.length === 0 && <p className="text-center text-muted-foreground text-xs sm:text-sm italic py-2">No items added</p>}
+                            {formData.items.length === 0 && <p className="text-center text-muted-foreground text-xs sm:text-sm italic py-2">{t('admin.purchase_orders.form.no_items')}</p>}
                         </div>
 
                         <div className="flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
-                            <Button type="button" variant="secondary" onClick={closeModal} className="h-9 px-3 text-sm">Cancel</Button>
-                            <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white h-9 px-4 text-sm">Save</Button>
+                            <Button type="button" variant="secondary" onClick={closeModal} className="h-9 px-3 text-sm">{t('admin.purchase_orders.form.cancel')}</Button>
+                            <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white h-9 px-4 text-sm">{t('admin.purchase_orders.form.save')}</Button>
                         </div>
                     </form>
                 </Modal>
 
                 {/* View Modal */}
-                <Modal open={openView} onClose={() => setOpenView(false)} title="Purchase Order Details" size="lg">
+                <Modal open={openView} onClose={() => setOpenView(false)} title={t('admin.purchase_orders.po_details')} size="lg">
                     {selectedPO && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">PO Number</h4>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t('admin.purchase_orders.table.po_number')}</h4>
                                     <p className="text-lg font-mono">{selectedPO.po_number}</p>
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Status</h4>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t('admin.purchase_orders.table.status')}</h4>
                                     <div>{getStatusDisplay(selectedPO.status)}</div>
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Supplier</h4>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t('admin.purchase_orders.table.supplier')}</h4>
                                     <p>{selectedPO.supplier?.name}</p>
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Location</h4>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t('admin.purchase_orders.table.location')}</h4>
                                     <p>{selectedPO.location?.name || '-'}</p>
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Ordered Date</h4>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t('admin.purchase_orders.table.date')}</h4>
                                     <p>{new Date(selectedPO.order_date).toLocaleDateString()}</p>
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Expected Delivery</h4>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t('admin.purchase_orders.form.expected_delivery')}</h4>
                                     <p>{selectedPO.expected_delivery_date ? new Date(selectedPO.expected_delivery_date).toLocaleDateString() : '-'}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Items</h4>
+                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t('admin.purchase_orders.form.items')}</h4>
                                 <div className="border border-border rounded-lg overflow-hidden">
                                     <table className="w-full text-sm">
                                         <thead className="bg-secondary/50 text-left">
                                             <tr>
-                                                <th className="p-2 font-medium">Ingredient</th>
-                                                <th className="p-2 font-medium text-right">Qty</th>
-                                                <th className="p-2 font-medium text-right">Price</th>
-                                                <th className="p-2 font-medium text-right">Total</th>
+                                                <th className="p-2 font-medium">{t('admin.purchase_orders.form.ingredient')}</th>
+                                                <th className="p-2 font-medium text-right">{t('admin.purchase_orders.form.qty')}</th>
+                                                <th className="p-2 font-medium text-right">{t('admin.purchase_orders.form.price')}</th>
+                                                <th className="p-2 font-medium text-right">{t('admin.purchase_orders.table.total')}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-border">
@@ -536,7 +540,7 @@ export default function PurchaseOrders() {
                                         </tbody>
                                         <tfoot className="bg-secondary/20 font-bold border-t border-border">
                                             <tr>
-                                                <td colSpan={3} className="p-2 text-right">Total:</td>
+                                                <td colSpan={3} className="p-2 text-right">{t('admin.purchase_orders.table.total')}:</td>
                                                 <td className="p-2 text-right text-emerald-600">${parseFloat(String(selectedPO.total_amount)).toFixed(2)}</td>
                                             </tr>
                                         </tfoot>
@@ -546,7 +550,7 @@ export default function PurchaseOrders() {
 
                             {selectedPO.notes && (
                                 <div>
-                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Notes</h4>
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t('admin.purchase_orders.form.notes')}</h4>
                                     <p className="text-sm bg-secondary/30 p-3 rounded-lg">{selectedPO.notes}</p>
                                 </div>
                             )}
@@ -559,18 +563,18 @@ export default function PurchaseOrders() {
                 </Modal>
 
                 {/* Receive Modal */}
-                <Modal open={openReceive} onClose={() => setOpenReceive(false)} title="Receive Items" size="lg">
+                <Modal open={openReceive} onClose={() => setOpenReceive(false)} title={t('admin.purchase_orders.receive_modal.title')} size="lg">
                     <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">Confirm quantities received for PO <span className="font-mono text-foreground font-medium">{selectedPO?.po_number}</span></p>
+                        <p className="text-sm text-muted-foreground">{t('admin.purchase_orders.receive_modal.description').replace(':po_number', '')} <span className="font-mono text-foreground font-medium">{selectedPO?.po_number}</span></p>
 
                         <div className="border border-border rounded-lg overflow-hidden mb-4">
                             <table className="w-full text-sm">
                                 <thead className="bg-secondary/50 text-left">
                                     <tr>
-                                        <th className="p-2 font-medium">Ingredient</th>
-                                        <th className="p-2 font-medium text-right">Ordered</th>
-                                        <th className="p-2 font-medium text-right">Prev. Received</th>
-                                        <th className="p-2 font-medium w-32">Receive Now</th>
+                                        <th className="p-2 font-medium">{t('admin.purchase_orders.form.ingredient')}</th>
+                                        <th className="p-2 font-medium text-right">{t('admin.purchase_orders.receive_modal.ordered')}</th>
+                                        <th className="p-2 font-medium text-right">{t('admin.purchase_orders.receive_modal.prev_received')}</th>
+                                        <th className="p-2 font-medium w-32">{t('admin.purchase_orders.receive_modal.receive_now')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">
@@ -599,13 +603,13 @@ export default function PurchaseOrders() {
 
                         {/* Location Selector */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">Destination Location (Optional)</label>
+                            <label className="block text-sm font-medium mb-1">{t('admin.purchase_orders.receive_modal.destination')}</label>
                             <select
                                 className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm"
                                 value={receiveLocationId}
                                 onChange={(e) => setReceiveLocationId(e.target.value)}
                             >
-                                <option value="">Use Default / PO Location</option>
+                                <option value="">{t('admin.purchase_orders.receive_modal.default_location')}</option>
                                 {locationList.map((loc: any) => (
                                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                                 ))}
@@ -613,13 +617,13 @@ export default function PurchaseOrders() {
                         </div>
 
                         <div className="flex justify-end gap-3 pt-2">
-                            <Button variant="secondary" onClick={() => setOpenReceive(false)}>Cancel</Button>
+                            <Button variant="secondary" onClick={() => setOpenReceive(false)}>{t('admin.purchase_orders.form.cancel')}</Button>
                             <Button
                                 onClick={() => receiveMutation.mutate({ id: selectedPO!.id, items: receiveItems, location_id: receiveLocationId })}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                 disabled={receiveMutation.isPending}
                             >
-                                {receiveMutation.isPending ? 'Processing...' : 'Confirm Receipt'}
+                                {receiveMutation.isPending ? t('admin.purchase_orders.receive_modal.processing') : t('admin.purchase_orders.receive_modal.confirm')}
                             </Button>
                         </div>
                     </div>

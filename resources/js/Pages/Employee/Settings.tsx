@@ -29,6 +29,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import SecuritySettings from './Settings/SecuritySettings';
 import NotificationPreferences from './Settings/NotificationPreferences';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface SettingSection {
     id: string;
@@ -70,6 +71,7 @@ const daysOfWeek = [
 ];
 
 export default function Settings() {
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
     const { props } = usePage<{ auth: { user: any } }>();
     const user = props.auth?.user;
@@ -180,10 +182,10 @@ export default function Settings() {
     const updateProfileMutation = useMutation({
         mutationFn: (data: any) => apiPut('/api/user/profile', data),
         onSuccess: () => {
-            toastSuccess('Profile updated successfully');
+            toastSuccess(t('employee.common.success'));
             queryClient.invalidateQueries({ queryKey: ['user'] });
         },
-        onError: () => toastError('Failed to update profile')
+        onError: () => toastError(t('employee.common.error'))
     });
 
     const handleSaveProfile = () => {
@@ -194,10 +196,10 @@ export default function Settings() {
     const saveWorkPrefsMutation = useMutation({
         mutationFn: (data: any) => apiPut('/api/employee/settings/work-preferences', data),
         onSuccess: () => {
-            toastSuccess('Work preferences saved');
+            toastSuccess(t('employee.settings.work_saved'));
             queryClient.invalidateQueries({ queryKey: ['employeeWorkPrefs'] });
         },
-        onError: () => toastError('Failed to save work preferences')
+        onError: () => toastError(t('employee.common.error'))
     });
 
     // Save emergency contact mutation
@@ -302,7 +304,7 @@ export default function Settings() {
                                 ) : (
                                     <Save className="w-4 h-4 mr-2" />
                                 )}
-                                {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
+                                {updateProfileMutation.isPending ? t('employee.common.loading') : t('employee.common.save')}
                             </Button>
                         </div>
 
@@ -359,7 +361,7 @@ export default function Settings() {
                                 ) : (
                                     <Save className="w-4 h-4 mr-2" />
                                 )}
-                                {saveEmergencyMutation.isPending ? 'Saving...' : 'Save Emergency Contact'}
+                                {saveEmergencyMutation.isPending ? t('employee.common.loading') : t('employee.settings.emergency_save')}
                             </Button>
                         </div>
                     </div>
@@ -506,7 +508,7 @@ export default function Settings() {
                             ) : (
                                 <Save className="w-4 h-4 mr-2" />
                             )}
-                            {saveWorkPrefsMutation.isPending ? 'Saving...' : 'Save Work Preferences'}
+                            {saveWorkPrefsMutation.isPending ? t('employee.common.loading') : t('employee.settings.work_save')}
                         </Button>
                     </div>
                 );
@@ -612,7 +614,7 @@ export default function Settings() {
                         </div>
                         Settings
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-2 ml-15">Manage your profile and preferences</p>
+                    <p className="text-gray-500 dark:text-gray-400 mt-2 ml-15">{t('employee.settings.title')}</p>
                 </div>
 
                 {/* Mobile Section Tabs */}

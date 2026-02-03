@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { Link, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -63,6 +64,7 @@ const getNotificationColor = (type: Notification['type'], variant: string) => {
 };
 
 export default function NotificationDropdown({ className, variant = 'customer' }: NotificationDropdownProps) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
@@ -197,10 +199,10 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                             <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Bell className={cn('w-5 h-5', getAccentColor())} />
-                                    <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('common.ui.notifications.title')}</h3>
                                     {unreadCount > 0 && (
                                         <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                                            {unreadCount} new
+                                            {t('common.ui.notifications.new', { count: unreadCount.toString() })}
                                         </span>
                                     )}
                                 </div>
@@ -210,7 +212,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                                             onClick={() => markAllReadMutation.mutate()}
                                             disabled={markAllReadMutation.isPending}
                                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
-                                            title="Mark all as read"
+                                            title={t('common.ui.notifications.mark_all_read') as string}
                                         >
                                             <CheckCheck className="w-4 h-4" />
                                         </button>
@@ -233,7 +235,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                                 ) : notifications.length === 0 ? (
                                     <div className="py-12 text-center">
                                         <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
-                                        <p className="text-gray-500 dark:text-gray-400">No notifications yet</p>
+                                        <p className="text-gray-500 dark:text-gray-400">{t('common.ui.notifications.empty')}</p>
                                     </div>
                                 ) : (
                                     <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -297,7 +299,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                                             getAccentColor()
                                         )}
                                     >
-                                        View All Notifications
+                                        {t('common.ui.notifications.view_all')}
                                     </Link>
                                 </div>
                             )}

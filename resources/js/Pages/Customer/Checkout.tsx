@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { Head, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
@@ -8,24 +6,22 @@ import { useCartStore } from '@/app/store/cart';
 import AddressManager from '@/app/components/customer/AddressManagerEnhanced';
 import { useTimeSlots } from '@/app/hooks/useCustomer';
 import { Card, CardContent, CardHeader, CardFooter } from '@/app/components/ui/Card';
-import Button from '@/app/components/ui/Button';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { usePlaceOnlineOrder } from '@/app/hooks/useOrders';
 import { usePaymentModes } from '@/app/hooks/useOrderPayment';
-import { toastLoading, toastSuccess, toastError } from '@/app/utils/toast';
-import { Banknote, CreditCard, ShoppingBag, Truck, ArrowLeft, ChevronDown, ChevronUp, Clock, WifiOff } from 'lucide-react';
+import { toastSuccess, toastError } from '@/app/utils/toast';
+import { Banknote, CreditCard, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { OrderProgress } from '@/app/components/customer/OrderProgress';
 import { TimePicker } from '@/app/components/ui/TimePicker';
 import { useTableSession } from '@/app/hooks/useTableSession';
-import { useOnlineStatus } from '@/app/hooks/useOnlineStatus';
-import { useFormPersistence } from '@/app/hooks/useFormPersistence'; // Sprint 3 Phase 2
-import { LoadingButton } from '@/Components/ui/LoadingButton'; // Sprint 3 Phase 2
-
+import { useFormPersistence } from '@/app/hooks/useFormPersistence';
+import { LoadingButton } from '@/Components/ui/LoadingButton';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export default function Checkout() {
   const cart = useCartStore();
-  const { isTableOrder, session } = useTableSession();
-  const isOnline = useOnlineStatus(); // FIX: Phase 3 - Offline detection
+  const { t } = useTranslation();
+  const { isTableOrder } = useTableSession();
 
   const { data: slots, isLoading: slotsLoading } = useTimeSlots(
     cart.mode === 'delivery' ? 'delivery' : 'pickup',
@@ -62,14 +58,6 @@ export default function Checkout() {
     return `${hour24.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}:00`;
   };
 
-  // Helper to get display label for selected time
-  const getTimeLabel = () => {
-    if (!scheduledTime) return null;
-    const displayHour = scheduledTime.hour;
-    const displayMin = scheduledTime.minute.toString().padStart(2, '0');
-    return `${displayHour}:${displayMin} ${scheduledTime.period}`;
-  };
-
   // FIX Issue #10: Reset payment mode based on order type (respect backend options)
   // - Table orders: Default to pay_at_counter
   // - Pickup/Delivery: Let backend decide available modes (don't force pay_now)
@@ -77,8 +65,6 @@ export default function Checkout() {
     if (isTableOrder) {
       setSelectedPaymentMode('pay_at_counter');
     }
-    // For pickup/delivery, paymentModes from backend will determine available options
-    // Don't force pay_now - customer may want to pay at counter for pickup
   }, [cart.mode, isTableOrder]);
 
   // Sprint 3 Phase 2: Restore form data on mount
@@ -91,7 +77,7 @@ export default function Checkout() {
       if (saved.scheduledTime) {
         setScheduledTime(saved.scheduledTime);
       }
-      toastSuccess('Checkout form restored');
+      toastSuccess(t('checkout.form_restored') as string);
     }
   }, []); // Only run once on mount
 
@@ -142,22 +128,22 @@ export default function Checkout() {
   async function onPlaceOrder() {
     // Validation
     if (cart.items.length === 0) {
-      toastError('Your cart is empty');
+      toastError(t('checkout.empty_cart') as string);
       return;
     }
 
     if (!cart.location_id) {
-      toastError('Please select a restaurant location');
+      toastError(t('checkout.select_location') as string);
       return;
     }
 
     if (!cart.orderNow && !cart.timeSlot) {
-      toastError('Please select a time slot');
+      toastError(t('checkout.select_time') as string);
       return;
     }
 
     if (cart.mode === 'delivery' && !cart.selectedAddress) {
-      toastError('Please select a delivery address');
+      toastError(t('checkout.select_address') as string);
       return;
     }
 
@@ -191,7 +177,7 @@ export default function Checkout() {
 
       // Determine next step based on payment mode
       if (selectedPaymentMode === 'pay_now') {
-        toastSuccess('Order placed! Redirecting to payment...');
+        toastSuccess(t('checkout.order_placed_pay') as string);
         cart.clear(); // Clear cart immediately for pay_now
         clear(); // Sprint 3 Phase 2: Clear saved form data
         setTimeout(() => {
@@ -199,7 +185,7 @@ export default function Checkout() {
         }, 500);
       } else {
         // For pay later / pay at counter, redirect to order details/success page
-        toastSuccess('Order placed successfully!');
+        toastSuccess(t('checkout.order_placed_success') as string);
         cart.clear(); // Clear cart (but session persists via cookie if table order)
         clear(); // Sprint 3 Phase 2: Clear saved form data
         setTimeout(() => {
@@ -208,12 +194,11 @@ export default function Checkout() {
       }
 
     } catch (error: any) {
-      // FIX: Phase 3 - Remove window.alert, show toast only
       console.error('❌ Order placement error:', error);
       console.error('Error response:', error?.response);
       console.error('Error data:', error?.response?.data);
 
-      let errorMsg = 'Failed to place order. Please try again.';
+      let errorMsg = t('checkout.failed_place') as string;
 
       if (error?.response?.data?.message) {
         errorMsg = error.response.data.message;
@@ -225,9 +210,7 @@ export default function Checkout() {
         errorMsg = error.message;
       }
 
-      // Removed: window.alert - use toast only
       toastError(errorMsg);
-      // Note: User can retry by clicking "Place Order" button again
     }
   }
 
@@ -236,7 +219,7 @@ export default function Checkout() {
   return (
     <CustomerLayout>
       <Head>
-        <title>Checkout - NKH Restaurant</title>
+        <title>{t('checkout.page_title')}</title>
       </Head>
 
       <motion.div className="space-y-4 sm:space-y-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -249,9 +232,9 @@ export default function Checkout() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Checkout</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('checkout.title')}</h1>
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {cart.items.length} {cart.items.length === 1 ? 'item' : 'items'} • ${cart.total.toFixed(2)}
+              {t('checkout.items_summary', { count: cart.items.length, unit: cart.items.length === 1 ? 'item' : 'items', total: `$${cart.total.toFixed(2)}` })}
             </p>
           </div>
         </motion.div>
@@ -267,7 +250,7 @@ export default function Checkout() {
               <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/20">
                 <CardHeader className="pb-2 sm:pb-3">
                   <div className="flex items-center gap-2 font-semibold text-purple-700 dark:text-purple-300">
-                    <span className="text-xl">🍽️</span> Dine-In at Table
+                    <span className="text-xl">🍽️</span> {t('checkout.dine_in_title')}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -281,7 +264,7 @@ export default function Checkout() {
                       </div>
                     </div>
                     <div className="text-right text-xs text-gray-500 max-w-[50%]">
-                      Your order will be linked to this table automatically.
+                      {t('checkout.table_linked')}
                     </div>
                   </div>
                 </CardContent>
@@ -291,7 +274,7 @@ export default function Checkout() {
             {!isTableOrder && cart.mode === 'delivery' && (
               <AddressManager
                 selected={cart.selectedAddress}
-                onSelect={(a) => cart.setAddress(a)}
+                onSelect={(a: any) => cart.setAddress(a)}
                 allowAdd={true}
                 allowEdit={true}
                 allowDelete={true}
@@ -303,12 +286,12 @@ export default function Checkout() {
             {!isTableOrder && (
               <Card className="overflow-hidden">
                 <CardHeader className="pb-2 sm:pb-3">
-                  <div className="text-sm sm:text-base font-semibold">When do you want your order?</div>
+                  <div className="text-sm sm:text-base font-semibold">{t('checkout.when_title')}</div>
                 </CardHeader>
                 <CardContent className="pt-0 space-y-3">
                   {!cart.location_id ? (
                     <div className="text-xs sm:text-sm text-gray-400 p-3 sm:p-4 text-center border border-white/10 rounded-lg bg-white/5">
-                      Please select a restaurant location first
+                      {t('checkout.select_location_first')}
                     </div>
                   ) : (
                     <>
@@ -329,10 +312,10 @@ export default function Checkout() {
                             <div>
                               <div className={`font-semibold text-sm sm:text-base ${cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
                                 }`}>
-                                Order Now
+                                {t('checkout.order_now')}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {cart.mode === 'delivery' ? 'Fastest delivery available' : 'Ready in ~15-20 mins'}
+                                {cart.mode === 'delivery' ? t('checkout.fastest_delivery') : t('checkout.ready_in_mins')}
                               </div>
                             </div>
                           </div>
@@ -368,10 +351,10 @@ export default function Checkout() {
                               <div>
                                 <div className={`font-semibold text-sm sm:text-base ${!cart.orderNow ? 'text-fuchsia-300' : 'text-gray-300'
                                   }`}>
-                                  Schedule for Later
+                                  {t('checkout.schedule_later')}
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {cart.timeSlot ? cart.timeSlot.label : 'Pick a specific time'}
+                                  {cart.timeSlot ? cart.timeSlot.label : t('checkout.pick_time')}
                                 </div>
                               </div>
                             </div>
@@ -393,8 +376,8 @@ export default function Checkout() {
                             <Skeleton className="h-14 w-full" />
                           ) : (!slots || slots.length === 0) ? (
                             <div className="text-sm text-gray-400 py-4 text-center">
-                              <div className="font-medium text-gray-300">Restaurant Closed</div>
-                              <div className="text-xs mt-1">No times available for {cart.mode}.</div>
+                              <div className="font-medium text-gray-300">{t('checkout.restaurant_closed')}</div>
+                              <div className="text-xs mt-1">{t('checkout.no_times_available', { mode: cart.mode })}</div>
                             </div>
                           ) : (
                             <div className="space-y-3">
@@ -423,7 +406,10 @@ export default function Checkout() {
 
                               {scheduledTime && (
                                 <div className="text-center text-sm text-fuchsia-400 font-medium">
-                                  ✓ {cart.mode === 'pickup' ? 'Pickup' : 'Delivery'} at {scheduledTime.hour}:{scheduledTime.minute.toString().padStart(2, '0')} {scheduledTime.period}
+                                  ✓ {cart.mode === 'pickup'
+                                    ? t('checkout.pickup_at', { time: `${scheduledTime.hour}:${scheduledTime.minute.toString().padStart(2, '0')} ${scheduledTime.period}` })
+                                    : t('checkout.delivery_at', { time: `${scheduledTime.hour}:${scheduledTime.minute.toString().padStart(2, '0')} ${scheduledTime.period}` })
+                                  }
                                 </div>
                               )}
                             </div>
@@ -440,7 +426,7 @@ export default function Checkout() {
             {/* Payment Option */}
             <Card className="overflow-hidden">
               <CardHeader className="pb-2 sm:pb-3">
-                <div className="text-sm sm:text-base font-semibold">Payment</div>
+                <div className="text-sm sm:text-base font-semibold">{t('checkout.payment_title')}</div>
               </CardHeader>
               <CardContent className="pt-0">
                 {modesLoading ? (
@@ -501,7 +487,7 @@ export default function Checkout() {
           <div className="hidden lg:block lg:col-span-4">
             <Card className="sticky top-24">
               <CardHeader className="pb-2">
-                <div className="font-semibold">Order Summary</div>
+                <div className="font-semibold">{t('checkout.order_summary')}</div>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -517,18 +503,18 @@ export default function Checkout() {
                 </div>
                 <div className="mt-4 space-y-1.5 text-sm border-t border-gray-200 dark:border-gray-700 pt-3">
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                    <span>Subtotal</span><span>${cart.subtotal.toFixed(2)}</span>
+                    <span>{t('checkout.subtotal')}</span><span>${cart.subtotal.toFixed(2)}</span>
                   </div>
                   {cart.mode === 'delivery' && cart.deliveryFee > 0 && (
                     <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                      <span>Delivery</span><span>${cart.deliveryFee.toFixed(2)}</span>
+                      <span>{t('checkout.delivery')}</span><span>${cart.deliveryFee.toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                    <span>Tax</span><span>${cart.tax.toFixed(2)}</span>
+                    <span>{t('checkout.tax')}</span><span>${cart.tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-base mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <span>Total</span><span className="text-fuchsia-600">${cart.total.toFixed(2)}</span>
+                    <span>{t('checkout.total')}</span><span className="text-fuchsia-600">${cart.total.toFixed(2)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -539,9 +525,9 @@ export default function Checkout() {
                   onClick={onPlaceOrder}
                   disabled={isCheckoutDisabled}
                   loading={placeOrder.isPending}
-                  loadingText="Placing Order..."
+                  loadingText={t('checkout.placing_order') as string}
                 >
-                  {selectedPaymentMode === 'pay_now' ? 'Place & Pay Now' : 'Place Order'}
+                  {selectedPaymentMode === 'pay_now' ? t('checkout.pay_now') : t('checkout.place_order')}
                 </LoadingButton>
               </CardFooter>
             </Card>
@@ -587,18 +573,18 @@ export default function Checkout() {
             </div>
             <div className="pt-2 space-y-1 text-xs border-t border-gray-100 dark:border-gray-800">
               <div className="flex justify-between text-gray-500">
-                <span>Subtotal</span><span>${cart.subtotal.toFixed(2)}</span>
+                <span>{t('checkout.subtotal')}</span><span>${cart.subtotal.toFixed(2)}</span>
               </div>
               {cart.mode === 'delivery' && cart.deliveryFee > 0 && (
                 <div className="flex justify-between text-gray-500">
-                  <span>Delivery</span><span>${cart.deliveryFee.toFixed(2)}</span>
+                  <span>{t('checkout.delivery')}</span><span>${cart.deliveryFee.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-gray-500">
-                <span>Tax</span><span>${cart.tax.toFixed(2)}</span>
+                <span>{t('checkout.tax')}</span><span>${cart.tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-semibold text-sm pt-1">
-                <span>Total</span><span className="text-fuchsia-600">${cart.total.toFixed(2)}</span>
+                <span>{t('checkout.total')}</span><span className="text-fuchsia-600">${cart.total.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -611,8 +597,8 @@ export default function Checkout() {
             disabled={isCheckoutDisabled}
             className="w-full py-3 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white font-bold rounded-xl shadow-lg active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {placeOrder.isPending ? 'Placing...' : (
-              selectedPaymentMode === 'pay_now' ? 'Place & Pay Now' : 'Place Order'
+            {placeOrder.isPending ? t('checkout.placing_order') : (
+              selectedPaymentMode === 'pay_now' ? t('checkout.pay_now') : t('checkout.place_order')
             )}
           </button>
         </div >

@@ -5,6 +5,7 @@ import { Location } from '@/app/types/domain';
 import { MapPin, Clock, Phone } from 'lucide-react';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface LocationSelectorProps {
     selectedId?: number;
@@ -12,6 +13,7 @@ interface LocationSelectorProps {
 }
 
 export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps) {
+    const { t } = useTranslation();
     const { data: locations, isLoading, error } = useQuery({
         queryKey: ['locations'],
         queryFn: async () => {
@@ -24,7 +26,7 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
         return (
             <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
                 <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
-                    Select Location
+                    {t('cart.select_location_title')}
                 </h3>
                 <div className="space-y-2">
                     <Skeleton className="h-14 sm:h-20 w-full rounded-lg" />
@@ -37,7 +39,7 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
     if (error) {
         return (
             <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-red-200 dark:border-red-700">
-                <p className="text-red-600 text-center text-sm">Failed to load locations</p>
+                <p className="text-red-600 text-center text-sm">{t('cart.failed_load_locations')}</p>
             </div>
         );
     }
@@ -45,7 +47,7 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
     if (!locations || locations.length === 0) {
         return (
             <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-                <p className="text-gray-600 text-center text-sm">No locations available</p>
+                <p className="text-gray-600 text-center text-sm">{t('cart.no_locations')}</p>
             </div>
         );
     }
@@ -54,11 +56,11 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
         <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-2 sm:mb-4">
                 <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white">
-                    Select Location
+                    {t('cart.select_location_title')}
                 </h3>
                 {selectedId && (
                     <span className="text-xs text-fuchsia-600 font-medium hidden sm:inline">
-                        ✓ Selected
+                        ✓ {t('cart.selected')}
                     </span>
                 )}
             </div>
@@ -75,8 +77,8 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
                             transition={{ duration: 0.2 }}
                             onClick={() => onSelect(location.id, location.name)}
                             className={`w-full p-2.5 sm:p-4 rounded-lg border-2 transition-all text-left ${selectedId === location.id
-                                    ? 'border-fuchsia-500 bg-fuchsia-500/10'
-                                    : 'border-gray-200 dark:border-gray-700 hover:border-fuchsia-300'
+                                ? 'border-fuchsia-500 bg-fuchsia-500/10'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-fuchsia-300'
                                 }`}
                         >
                             <div className="flex items-center gap-2 sm:gap-3">
@@ -98,8 +100,8 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
                                         {location.is_active && (
                                             <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-0.5">
                                                 <Clock className="w-2.5 h-2.5" />
-                                                <span className="hidden sm:inline">Open</span>
-                                                <span className="sm:hidden">Now</span>
+                                                <span className="hidden sm:inline">{t('cart.open')}</span>
+                                                <span className="sm:hidden">{t('cart.now')}</span>
                                             </div>
                                         )}
                                         <span className="text-xs text-gray-400 hidden sm:flex items-center gap-0.5">
@@ -129,7 +131,7 @@ export function LocationSelector({ selectedId, onSelect }: LocationSelectorProps
 
             {!selectedId && (
                 <p className="mt-3 text-xs sm:text-sm text-amber-600 dark:text-amber-400 text-center bg-amber-500/10 rounded-lg py-2">
-                    Please select a location
+                    {t('cart.please_select_location')}
                 </p>
             )}
         </div>

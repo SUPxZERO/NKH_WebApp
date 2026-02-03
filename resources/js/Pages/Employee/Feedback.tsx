@@ -15,8 +15,10 @@ import { Button } from '@/app/components/ui/Button';
 import { apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 export default function Feedback() {
+    const { t } = useLanguage();
     const [rating, setRating] = useState<number>(0);
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [type, setType] = useState('general');
@@ -26,12 +28,12 @@ export default function Feedback() {
     const submitFeedbackMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/employee/feedback', data),
         onSuccess: () => {
-            toastSuccess('Thank you for your feedback!');
+            toastSuccess(t('employee.feedback.messages.thank_you'));
             setRating(0);
             setComment('');
             setType('general');
         },
-        onError: () => toastError('Failed to submit feedback'),
+        onError: () => toastError(t('employee.common.error')),
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -47,7 +49,7 @@ export default function Feedback() {
 
     return (
         <EmployeeLayout>
-            <Head title="Feedback" />
+            <Head title={t('employee.feedback.title')} />
             <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6">
                 <div className="max-w-2xl mx-auto">
                     {/* Header */}
@@ -56,10 +58,10 @@ export default function Feedback() {
                             <MessageSquare className="w-8 h-8" />
                         </div>
                         <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                            Share Your Thoughts
+                            {t('employee.feedback.submit')}
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-md mx-auto">
-                            We value your input. Help us improve the workplace environment and operations.
+                            {t('employee.feedback.messages.thank_you')}
                         </p>
                     </div>
 
@@ -78,10 +80,10 @@ export default function Feedback() {
                                 {isAnonymous ? <Shield className="w-5 h-5 text-green-400" /> : <ShieldOff className="w-5 h-5 text-slate-400" />}
                                 <div>
                                     <p className="font-semibold text-sm">
-                                        {isAnonymous ? "Anonymous Mode Active" : "Public Mode"}
+                                        {isAnonymous ? t('employee.settings.privacy') : "Public Mode"}
                                     </p>
                                     <p className="text-xs opacity-80">
-                                        {isAnonymous ? "Your identity will be hidden from admins." : "Your name will be attached to this feedback."}
+                                        {isAnonymous ? "Your identity will be hidden" : "Your name will be attached"}
                                     </p>
                                 </div>
                             </div>
@@ -101,9 +103,9 @@ export default function Feedback() {
                             {/* Type Selector */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 {[
-                                    { id: 'general', label: 'General' },
-                                    { id: 'suggestion', label: 'Suggestion' },
-                                    { id: 'complaint', label: 'Complaint' },
+                                    { id: 'general', label: t('employee.common.confirm') },
+                                    { id: 'suggestion', label: t('employee.feedback.type.suggestion') },
+                                    { id: 'complaint', label: t('employee.feedback.type.issue') },
                                     { id: 'shift_rating', label: 'Rate Shift' },
                                 ].map((t) => (
                                     <button
@@ -158,7 +160,7 @@ export default function Feedback() {
                             {/* Comment Area */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Additional Comments <span className="text-slate-400 font-normal">(Optional)</span>
+                                    {t('employee.feedback.message')}
                                 </label>
                                 <textarea
                                     className="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700 p-4 min-h-[120px] focus:ring-2 focus:ring-purple-500"
@@ -177,7 +179,7 @@ export default function Feedback() {
                                 disabled={submitFeedbackMutation.isPending}
                                 className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
                             >
-                                {submitFeedbackMutation.isPending ? 'Sending...' : 'Submit Feedback'}
+                                {submitFeedbackMutation.isPending ? `${t('employee.feedback.submit')}...` : t('employee.feedback.submit')}
                                 <Send className="w-5 h-5 ml-2" />
                             </Button>
                         </form>

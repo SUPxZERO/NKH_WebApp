@@ -9,27 +9,29 @@ class ExpenseCategorySeeder extends Seeder
 {
     public function run(): void
     {
+        $locationId = \App\Models\Location::first()?->id ?? 1;
+
         $categories = [
             [
-                'location_id' => 1,
+                'location_id' => $locationId,
                 'name' => 'Food Supplies',
                 'description' => 'Ingredients, raw materials, and food products.',
                 'is_active' => 1,
             ],
             [
-                'location_id' => 1,
+                'location_id' => $locationId,
                 'name' => 'Utilities',
                 'description' => 'Electricity, water, and internet services.',
                 'is_active' => 1,
             ],
             [
-                'location_id' => 1,
+                'location_id' => $locationId,
                 'name' => 'Maintenance',
                 'description' => 'Equipment repairs and services.',
                 'is_active' => 1,
             ],
             [
-                'location_id' => 1,
+                'location_id' => $locationId,
                 'name' => 'Staff Salaries',
                 'description' => 'Monthly employee salary expenses.',
                 'is_active' => 1,
@@ -37,7 +39,7 @@ class ExpenseCategorySeeder extends Seeder
         ];
 
         foreach ($categories as $cat) {
-            ExpenseCategory::create($cat);
+            ExpenseCategory::firstOrCreate(['name' => $cat['name'], 'location_id' => $cat['location_id']], $cat);
         }
     }
 }

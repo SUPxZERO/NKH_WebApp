@@ -17,7 +17,8 @@ import { Button } from '@/app/components/ui/Button';
 import { apiGet, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
-import { Badge } from '@/app/components/ui/Badge'; // You might need to create or import this if it exists, otherwise standard span
+import { Badge } from '@/app/components/ui/Badge';
+import { useLanguage } from '@/app/context/LanguageContext'; // You might need to create or import this if it exists, otherwise standard span
 
 // Types
 interface Ticket {
@@ -51,6 +52,7 @@ const faqs = [
 ];
 
 export default function HelpSupport() {
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<'faq' | 'tickets' | 'new'>('faq');
     const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -77,12 +79,12 @@ export default function HelpSupport() {
     const createTicketMutation = useMutation({
         mutationFn: (data: typeof form) => apiPost('/api/employee/support-tickets', data),
         onSuccess: () => {
-            toastSuccess('Support ticket created successfully');
+            toastSuccess(t('employee.help.contact'));
             setForm({ subject: '', category: 'it_support', priority: 'low', description: '' });
             setActiveTab('tickets');
             queryClient.invalidateQueries({ queryKey: ['myTickets'] });
         },
-        onError: () => toastError('Failed to create ticket'),
+        onError: () => toastError(t('employee.common.error')),
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -112,24 +114,24 @@ export default function HelpSupport() {
 
     return (
         <EmployeeLayout>
-            <Head title="Help & Support" />
+            <Head title={t('employee.help.title')} />
             <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
                             <HelpCircle className="w-8 h-8 text-fuchsia-500" />
-                            Help & Support
+                            {t('employee.help.title')}
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 mt-1">
-                            Find answers or contact the support team
+                            {t('employee.help.contact')}
                         </p>
                     </div>
 
                     {/* Navigation Tabs */}
                     <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                         {[
-                            { id: 'faq', label: 'FAQ', icon: Search },
+                            { id: 'faq', label: t('employee.help.faq'), icon: Search },
                             { id: 'tickets', label: 'My Tickets', icon: FileText },
                             { id: 'new', label: 'New Ticket', icon: Plus },
                         ].map((tab) => (
@@ -183,7 +185,7 @@ export default function HelpSupport() {
                             <div>
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Track your requests</h2>
-                                    <Button size="sm" onClick={() => setActiveTab('new')} variant="outline">Create New</Button>
+                                    <Button size="sm" onClick={() => setActiveTab('new')} variant="outline">{t('employee.common.next')}</Button>
                                 </div>
 
                                 {ticketsLoading ? (
@@ -288,14 +290,14 @@ export default function HelpSupport() {
                                             variant="ghost"
                                             onClick={() => setActiveTab('faq')}
                                         >
-                                            Cancel
+                                            {t('employee.common.cancel')}
                                         </Button>
                                         <Button
                                             type="submit"
                                             disabled={createTicketMutation.isPending}
                                             className="bg-fuchsia-600 hover:bg-fuchsia-700"
                                         >
-                                            {createTicketMutation.isPending ? 'Submitting...' : 'Submit Ticket'}
+                                            {createTicketMutation.isPending ? 'Submitting...' : t('employee.help.contact')}
                                             <Send className="w-4 h-4 ml-2" />
                                         </Button>
                                     </div>

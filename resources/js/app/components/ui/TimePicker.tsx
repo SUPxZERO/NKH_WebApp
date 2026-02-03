@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface TimePickerProps {
     value: { hour: number; minute: number; period: 'AM' | 'PM' } | null;
@@ -9,6 +10,7 @@ interface TimePickerProps {
 }
 
 export function TimePicker({ value, onChange, minHour24 = 0, maxHour24 = 24, disabled }: TimePickerProps) {
+    const { t } = useTranslation();
     const [hour, setHour] = React.useState(value?.hour ?? 12);
     const [minute, setMinute] = React.useState(value?.minute ?? 0);
     const [period, setPeriod] = React.useState<'AM' | 'PM'>(value?.period ?? 'PM');
@@ -150,7 +152,7 @@ export function TimePicker({ value, onChange, minHour24 = 0, maxHour24 = 24, dis
                                 : 'bg-gray-700/80 text-gray-400 hover:bg-gray-600/80'
                             } ${isPeriodDisabled('AM') ? 'opacity-50 cursor-not-allowed hover:bg-gray-700/80' : ''}`}
                     >
-                        AM
+                        {t('common.ui.time_picker.am')}
                     </button>
                     <button
                         type="button"
@@ -165,7 +167,7 @@ export function TimePicker({ value, onChange, minHour24 = 0, maxHour24 = 24, dis
                                 : 'bg-gray-700/80 text-gray-400 hover:bg-gray-600/80'
                             } ${isPeriodDisabled('PM') ? 'opacity-50 cursor-not-allowed hover:bg-gray-700/80' : ''}`}
                     >
-                        PM
+                        {t('common.ui.time_picker.pm')}
                     </button>
                 </div>
             </div>

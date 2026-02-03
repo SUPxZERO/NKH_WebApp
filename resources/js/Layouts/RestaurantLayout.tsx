@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Link, usePage } from '@inertiajs/react';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { RestaurantButton } from '@/Components/ui/RestaurantButton';
 import { RestaurantCard } from '@/Components/ui/RestaurantCard';
 import { animationVariants } from '@/design-system/animations';
@@ -47,67 +48,67 @@ const navigationConfig: Record<UserRole, {
 }> = {
   admin: {
     primary: [
-      { icon: <BarChart3 className="w-5 h-5" />, label: 'Dashboard', href: '/admin/dashboard' },
-      { icon: <Utensils className="w-5 h-5" />, label: 'Menu Management', href: '/admin/menu' },
-      { icon: <ShoppingBag className="w-5 h-5" />, label: 'Orders', href: '/admin/orders', badge: 5 },
-      { icon: <Users className="w-5 h-5" />, label: 'Staff', href: '/admin/employees' },
-      { icon: <MapPin className="w-5 h-5" />, label: 'Locations', href: '/admin/locations' },
-      { icon: <CreditCard className="w-5 h-5" />, label: 'Payments', href: '/admin/payments' },
+      { icon: <BarChart3 className="w-5 h-5" />, label: 'layout.restaurant.dashboard', href: '/admin/dashboard' },
+      { icon: <Utensils className="w-5 h-5" />, label: 'layout.restaurant.menu_management', href: '/admin/menu' },
+      { icon: <ShoppingBag className="w-5 h-5" />, label: 'layout.restaurant.orders', href: '/admin/orders', badge: 5 },
+      { icon: <Users className="w-5 h-5" />, label: 'layout.restaurant.staff', href: '/admin/employees' },
+      { icon: <MapPin className="w-5 h-5" />, label: 'layout.restaurant.locations', href: '/admin/locations' },
+      { icon: <CreditCard className="w-5 h-5" />, label: 'layout.restaurant.payments', href: '/admin/payments' },
     ],
     secondary: [
-      { icon: <Calendar className="w-5 h-5" />, label: 'Scheduling', href: '/admin/scheduling' },
-      { icon: <Star className="w-5 h-5" />, label: 'Reviews', href: '/admin/reviews' },
-      { icon: <Settings className="w-5 h-5" />, label: 'Settings', href: '/admin/settings' },
+      { icon: <Calendar className="w-5 h-5" />, label: 'layout.restaurant.scheduling', href: '/admin/scheduling' },
+      { icon: <Star className="w-5 h-5" />, label: 'layout.restaurant.reviews', href: '/admin/reviews' },
+      { icon: <Settings className="w-5 h-5" />, label: 'layout.restaurant.settings', href: '/admin/settings' },
     ],
     theme: 'from-purple-600 to-purple-700'
   },
   manager: {
     primary: [
-      { icon: <BarChart3 className="w-5 h-5" />, label: 'Dashboard', href: '/manager/dashboard' },
-      { icon: <ShoppingBag className="w-5 h-5" />, label: 'Orders', href: '/manager/orders', badge: 3 },
-      { icon: <Users className="w-5 h-5" />, label: 'Staff', href: '/manager/staff' },
-      { icon: <Calendar className="w-5 h-5" />, label: 'Scheduling', href: '/manager/scheduling' },
+      { icon: <BarChart3 className="w-5 h-5" />, label: 'layout.restaurant.dashboard', href: '/manager/dashboard' },
+      { icon: <ShoppingBag className="w-5 h-5" />, label: 'layout.restaurant.orders', href: '/manager/orders', badge: 3 },
+      { icon: <Users className="w-5 h-5" />, label: 'layout.restaurant.staff', href: '/manager/staff' },
+      { icon: <Calendar className="w-5 h-5" />, label: 'layout.restaurant.scheduling', href: '/manager/scheduling' },
     ],
     secondary: [
-      { icon: <Star className="w-5 h-5" />, label: 'Reviews', href: '/manager/reviews' },
-      { icon: <Settings className="w-5 h-5" />, label: 'Settings', href: '/manager/settings' },
+      { icon: <Star className="w-5 h-5" />, label: 'layout.restaurant.reviews', href: '/manager/reviews' },
+      { icon: <Settings className="w-5 h-5" />, label: 'layout.restaurant.settings', href: '/manager/settings' },
     ],
     theme: 'from-primary-600 to-primary-700'
   },
   chef: {
     primary: [
-      { icon: <ChefHat className="w-5 h-5" />, label: 'Kitchen', href: '/chef/kitchen' },
-      { icon: <ShoppingBag className="w-5 h-5" />, label: 'Orders', href: '/chef/orders', badge: 8 },
-      { icon: <Utensils className="w-5 h-5" />, label: 'Menu', href: '/chef/menu' },
+      { icon: <ChefHat className="w-5 h-5" />, label: 'layout.restaurant.kitchen', href: '/chef/kitchen' },
+      { icon: <ShoppingBag className="w-5 h-5" />, label: 'layout.restaurant.orders', href: '/chef/orders', badge: 8 },
+      { icon: <Utensils className="w-5 h-5" />, label: 'layout.restaurant.menu', href: '/chef/menu' },
     ],
     secondary: [
-      { icon: <Calendar className="w-5 h-5" />, label: 'Schedule', href: '/chef/schedule' },
-      { icon: <Settings className="w-5 h-5" />, label: 'Settings', href: '/chef/settings' },
+      { icon: <Calendar className="w-5 h-5" />, label: 'layout.restaurant.schedule', href: '/chef/schedule' },
+      { icon: <Settings className="w-5 h-5" />, label: 'layout.restaurant.settings', href: '/chef/settings' },
     ],
     theme: 'from-secondary-600 to-secondary-700'
   },
   waiter: {
     primary: [
-      { icon: <ShoppingBag className="w-5 h-5" />, label: 'Orders', href: '/waiter/orders', badge: 4 },
-      { icon: <MapPin className="w-5 h-5" />, label: 'Tables', href: '/waiter/tables' },
-      { icon: <Utensils className="w-5 h-5" />, label: 'Menu', href: '/waiter/menu' },
+      { icon: <ShoppingBag className="w-5 h-5" />, label: 'layout.restaurant.orders', href: '/waiter/orders', badge: 4 },
+      { icon: <MapPin className="w-5 h-5" />, label: 'layout.restaurant.tables', href: '/waiter/tables' },
+      { icon: <Utensils className="w-5 h-5" />, label: 'layout.restaurant.menu', href: '/waiter/menu' },
     ],
     secondary: [
-      { icon: <Calendar className="w-5 h-5" />, label: 'Schedule', href: '/waiter/schedule' },
-      { icon: <Settings className="w-5 h-5" />, label: 'Settings', href: '/waiter/settings' },
+      { icon: <Calendar className="w-5 h-5" />, label: 'layout.restaurant.schedule', href: '/waiter/schedule' },
+      { icon: <Settings className="w-5 h-5" />, label: 'layout.restaurant.settings', href: '/waiter/settings' },
     ],
     theme: 'from-blue-600 to-blue-700'
   },
   customer: {
     primary: [
-      { icon: <Utensils className="w-5 h-5" />, label: 'Menu', href: '/menu' },
-      { icon: <ShoppingBag className="w-5 h-5" />, label: 'My Orders', href: '/orders' },
-      { icon: <Heart className="w-5 h-5" />, label: 'Favorites', href: '/favorites' },
-      { icon: <Star className="w-5 h-5" />, label: 'Rewards', href: '/rewards' },
+      { icon: <Utensils className="w-5 h-5" />, label: 'layout.restaurant.menu', href: '/menu' },
+      { icon: <ShoppingBag className="w-5 h-5" />, label: 'layout.restaurant.my_orders', href: '/orders' },
+      { icon: <Heart className="w-5 h-5" />, label: 'layout.restaurant.favorites', href: '/favorites' },
+      { icon: <Star className="w-5 h-5" />, label: 'layout.restaurant.rewards', href: '/rewards' },
     ],
     secondary: [
-      { icon: <MapPin className="w-5 h-5" />, label: 'Locations', href: '/locations' },
-      { icon: <Settings className="w-5 h-5" />, label: 'Settings', href: '/settings' },
+      { icon: <MapPin className="w-5 h-5" />, label: 'layout.restaurant.locations', href: '/locations' },
+      { icon: <Settings className="w-5 h-5" />, label: 'layout.restaurant.settings', href: '/settings' },
     ],
     theme: 'from-emerald-600 to-emerald-700'
   }
@@ -132,6 +133,7 @@ export function RestaurantLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(initialCollapsed);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
+  const { t } = useLanguage();
 
   const navigation = navigationConfig[role];
   const themeClass = roleThemes[role];
@@ -182,7 +184,7 @@ export function RestaurantLayout({
               exit={{ opacity: 0, width: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {item.label}
+              {t(item.label)}
             </motion.span>
           )}
         </AnimatePresence>
@@ -395,7 +397,7 @@ export function RestaurantLayout({
             {/* 🎯 Page Title */}
             <div className="flex-1 lg:flex-none">
               <h1 className="text-xl font-display font-semibold text-neutral-900 dark:text-neutral-100">
-                Dashboard
+                {t('layout.restaurant.dashboard')}
               </h1>
             </div>
 

@@ -30,7 +30,7 @@ class DashboardDataService
     public function getSummary(User $user): array
     {
         $roles = $user->roles->pluck('slug')->toArray();
-        
+
         $data = [
             'user' => [
                 'name' => $user->name,
@@ -46,7 +46,9 @@ class DashboardDataService
             $data['system_health'] = $this->getSystemHealth();
             $data['critical_alerts'] = $this->getCriticalAlerts();
             $data['performance'] = $this->getTodayPerformance();
+            // Merge Manager operational data for Admins
             $data['pending_approvals'] = $this->getAllPendingApprovals();
+            $data['team_status'] = $this->getTeamOnDuty();
             $data['quick_actions'] = $this->getAdminQuickActions();
         }
         // Manager - Operations focus
@@ -152,27 +154,27 @@ class DashboardDataService
         $todayPaymentRevenue = Payment::whereDate('created_at', $today)
             ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
             ->sum('amount');
-        
+
         // If no payments, use order totals (for confirmed/completed orders)
-        $todayRevenue = $todayPaymentRevenue > 0 
+        $todayRevenue = $todayPaymentRevenue > 0
             ? (float) $todayPaymentRevenue
             : (float) Order::whereDate('created_at', $today)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->doesntHave('orderStatus')
-                      ->orWhereHas('orderStatus', fn($sq) => $sq->whereNotIn('code', ['cancelled', 'rejected']));
+                        ->orWhereHas('orderStatus', fn($sq) => $sq->whereNotIn('code', ['cancelled', 'rejected']));
                 })
                 ->sum('total_amount');
 
         $yesterdayPaymentRevenue = Payment::whereDate('created_at', $yesterday)
             ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
             ->sum('amount');
-        
+
         $yesterdayRevenue = $yesterdayPaymentRevenue > 0
             ? (float) $yesterdayPaymentRevenue
             : (float) Order::whereDate('created_at', $yesterday)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->doesntHave('orderStatus')
-                      ->orWhereHas('orderStatus', fn($sq) => $sq->whereNotIn('code', ['cancelled', 'rejected']));
+                        ->orWhereHas('orderStatus', fn($sq) => $sq->whereNotIn('code', ['cancelled', 'rejected']));
                 })
                 ->sum('total_amount');
 
@@ -181,7 +183,7 @@ class DashboardDataService
         $yesterdayOrders = Order::whereDate('created_at', $yesterday)->count();
 
         // Active orders (not completed/cancelled) - use orderStatus relationship
-        $activeOrders = Order::whereHas('orderStatus', function($q) {
+        $activeOrders = Order::whereHas('orderStatus', function ($q) {
             $q->whereIn('code', ['pending', 'received', 'preparing', 'ready']);
         })->count();
 
@@ -197,8 +199,8 @@ class DashboardDataService
             'revenue' => [
                 'today' => (float) $todayRevenue,
                 'yesterday' => (float) $yesterdayRevenue,
-                'change_percent' => $yesterdayRevenue > 0 
-                    ? round((($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 1) 
+                'change_percent' => $yesterdayRevenue > 0
+                    ? round((($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 1)
                     : 0,
             ],
             'orders' => [
@@ -262,8 +264,10 @@ class DashboardDataService
     private function getGreeting(): string
     {
         $hour = (int) now()->format('H');
-        if ($hour < 12) return 'Good morning';
-        if ($hour < 17) return 'Good afternoon';
+        if ($hour < 12)
+            return 'Good morning';
+        if ($hour < 17)
+            return 'Good afternoon';
         return 'Good evening';
     }
 
@@ -317,13 +321,13 @@ class DashboardDataService
         $paymentRevenue = Payment::whereDate('created_at', $today)
             ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
             ->sum('amount');
-        
+
         $revenue = $paymentRevenue > 0
             ? (float) $paymentRevenue
             : (float) Order::whereDate('created_at', $today)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->doesntHave('orderStatus')
-                      ->orWhereHas('orderStatus', fn($sq) => $sq->whereNotIn('code', ['cancelled', 'rejected']));
+                        ->orWhereHas('orderStatus', fn($sq) => $sq->whereNotIn('code', ['cancelled', 'rejected']));
                 })
                 ->sum('total_amount');
 
@@ -359,7 +363,7 @@ class DashboardDataService
         $today = Carbon::today();
 
         // Get employees with shifts today
-        $shiftsToday = Shift::whereDate('shift_date', $today)
+        $shiftsToday = Shift::whereDate('date', $today)
             ->with(['employee.user', 'employee.position'])
             ->get();
 
@@ -382,7 +386,8 @@ class DashboardDataService
     {
         // Get active orders assigned to this employee
         $employee = $user->employee;
-        if (!$employee) return [];
+        if (!$employee)
+            return [];
 
         $activeOrders = Order::where('employee_id', $employee->id)
             ->whereHas('orderStatus', fn($q) => $q->whereIn('code', ['pending', 'received', 'preparing', 'ready']))
@@ -400,7 +405,8 @@ class DashboardDataService
     private function getEmployeePerformance(User $user): array
     {
         $employee = $user->employee;
-        if (!$employee) return [];
+        if (!$employee)
+            return [];
 
         $thisWeek = Carbon::now()->startOfWeek();
         $ordersThisWeek = Order::where('employee_id', $employee->id)
@@ -459,7 +465,7 @@ class DashboardDataService
                 for ($i = 3; $i >= 0; $i--) {
                     $weekStart = Carbon::now()->subWeeks($i)->startOfWeek();
                     $weekEnd = Carbon::now()->subWeeks($i)->endOfWeek();
-                    
+
                     $revenue = Payment::whereBetween('created_at', [$weekStart, $weekEnd])
                         ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
                         ->sum('amount');
@@ -477,7 +483,7 @@ class DashboardDataService
                 for ($i = 5; $i >= 0; $i--) {
                     $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
                     $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
-                    
+
                     $revenue = Payment::whereBetween('created_at', [$monthStart, $monthEnd])
                         ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
                         ->sum('amount');
@@ -495,10 +501,20 @@ class DashboardDataService
                 // Last 7 days
                 for ($i = 6; $i >= 0; $i--) {
                     $date = Carbon::now()->subDays($i);
-                    
-                    $revenue = Payment::whereDate('created_at', $date)
+
+                    $paymentRevenue = Payment::whereDate('created_at', $date)
                         ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
                         ->sum('amount');
+
+                    // Fallback to order totals if no payments found
+                    $revenue = $paymentRevenue > 0
+                        ? (float) $paymentRevenue
+                        : (float) Order::whereDate('created_at', $date)
+                            ->where(function ($q) {
+                                $q->doesntHave('orderStatus')
+                                    ->orWhereHas('orderStatus', fn($sq) => $sq->whereNotIn('code', ['cancelled', 'rejected']));
+                            })
+                            ->sum('total_amount');
 
                     $data[] = [
                         'date' => $date->format('Y-m-d'),

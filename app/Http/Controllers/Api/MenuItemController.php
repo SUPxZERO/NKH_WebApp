@@ -22,6 +22,8 @@ class MenuItemController extends Controller
         try {
             // Explicitly check for authenticated user (admin/staff)
             // This is needed because this route might be accessed publicly (no auth middleware)
+            // Explicitly check for authenticated user (admin/staff)
+            // This is needed because this route might be accessed publicly (no auth middleware)
             $user = auth('sanctum')->user();
 
             // Sprint 1: Use caching for simple menu list without filters

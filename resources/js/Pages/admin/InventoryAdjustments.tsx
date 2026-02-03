@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     Search,
@@ -129,6 +130,7 @@ export default function InventoryAdjustments() {
     const [selectedAdjustment, setSelectedAdjustment] = React.useState<Adjustment | null>(null);
     const [error, setError] = React.useState('');
     const [approvalNotes, setApprovalNotes] = React.useState('');
+    const { t } = useLanguage();
 
     const qc = useQueryClient();
     const [page, setPage] = React.useState(1);
@@ -144,14 +146,14 @@ export default function InventoryAdjustments() {
     });
 
     const reasons = {
-        damaged: 'Damaged',
-        expired: 'Expired',
-        theft: 'Theft',
-        count_error: 'Count Error',
-        spillage: 'Spillage',
-        returned: 'Returned to Supplier',
-        correction: 'Correction',
-        other: 'Other'
+        damaged: t('admin.inventory.adjustments.reasons.damaged'),
+        expired: t('admin.inventory.adjustments.reasons.expired'),
+        theft: t('admin.inventory.adjustments.reasons.theft'),
+        count_error: t('admin.inventory.adjustments.reasons.count_error'),
+        spillage: t('admin.inventory.adjustments.reasons.spillage'),
+        returned: t('admin.inventory.adjustments.reasons.returned'),
+        correction: t('admin.inventory.adjustments.reasons.correction'),
+        other: t('admin.inventory.adjustments.reasons.other')
     };
 
     // Fetch adjustments
@@ -334,9 +336,9 @@ export default function InventoryAdjustments() {
                     >
                         <div className="min-w-0">
                             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent truncate">
-                                Adjustments
+                                {t('admin.inventory.adjustments.title')}
                             </h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Stock corrections and audit trail</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.inventory.adjustments.subtitle')}</p>
                         </div>
 
                         <Button
@@ -344,7 +346,7 @@ export default function InventoryAdjustments() {
                             className="bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700 h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                         >
                             <Plus className="w-4 h-4 sm:mr-2" />
-                            <span className="hidden sm:inline">New Adjustment</span>
+                            <span className="hidden sm:inline">{t('admin.inventory.adjustments.create_btn')}</span>
                         </Button>
                     </motion.div>
                 </div>
@@ -352,9 +354,9 @@ export default function InventoryAdjustments() {
                 {/* Stats Cards - Horizontal scroll on mobile */}
                 <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
                     <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-                        <StatCard title="Pending" value={stats?.pending || 0} icon={Clock} color="yellow" index={0} />
-                        <StatCard title="Approved" value={stats?.approved || 0} icon={CheckCircle} color="emerald" index={1} />
-                        <StatCard title="This Month" value={stats?.this_month || 0} icon={AlertCircle} color="fuchsia" index={2} />
+                        <StatCard title={t('admin.inventory.adjustments.stats.pending')} value={stats?.pending || 0} icon={Clock} color="yellow" index={0} />
+                        <StatCard title={t('admin.inventory.adjustments.stats.approved')} value={stats?.approved || 0} icon={CheckCircle} color="emerald" index={1} />
+                        <StatCard title={t('admin.inventory.adjustments.stats.month')} value={stats?.this_month || 0} icon={AlertCircle} color="fuchsia" index={2} />
                     </div>
                 </div>
 
@@ -368,7 +370,7 @@ export default function InventoryAdjustments() {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                             <Input
-                                placeholder="Search..."
+                                placeholder={t('admin.common.search')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="pl-9 sm:pl-10 h-10 text-sm"
@@ -378,15 +380,15 @@ export default function InventoryAdjustments() {
 
                         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                             className="bg-card border border-border rounded-lg px-2 sm:px-3 py-2 h-10 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50">
-                            <option value="all">Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
+                            <option value="all">{t('admin.common.status')}</option>
+                            <option value="pending">{t('admin.inventory.adjustments.stats.pending')}</option>
+                            <option value="approved">{t('admin.inventory.adjustments.stats.approved')}</option>
+                            <option value="rejected">{t('admin.inventory.adjustments.actions.reject')}</option>
                         </select>
 
                         <select value={reasonFilter} onChange={(e) => setReasonFilter(e.target.value)}
                             className="hidden sm:block bg-card border border-border rounded-lg px-2 sm:px-3 py-2 h-10 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50">
-                            <option value="all">Reason</option>
+                            <option value="all">{t('admin.inventory.adjustments.table.reason')}</option>
                             {Object.entries(reasons).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
                             ))}
@@ -426,12 +428,12 @@ export default function InventoryAdjustments() {
                                         <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                                             <div className="flex items-center justify-between bg-secondary/50 rounded-lg p-2 sm:p-3">
                                                 <div className="text-center">
-                                                    <div className="text-[10px] sm:text-xs text-muted-foreground">Before</div>
+                                                    <div className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.inventory.adjustments.table.before')}</div>
                                                     <div className="text-foreground font-semibold text-sm sm:text-base">{adjustment.quantity_before}</div>
                                                 </div>
                                                 <div className="text-muted-foreground text-xs">→</div>
                                                 <div className="text-center">
-                                                    <div className="text-[10px] sm:text-xs text-muted-foreground">After</div>
+                                                    <div className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.inventory.adjustments.table.after')}</div>
                                                     <div className="text-foreground font-semibold text-sm sm:text-base">{adjustment.quantity_after}</div>
                                                 </div>
                                                 <div className="flex items-center gap-1">
@@ -463,19 +465,19 @@ export default function InventoryAdjustments() {
                                                 <Button size="sm" variant="primary"
                                                     onClick={() => { setSelectedAdjustment(adjustment); setOpenApprove(true); }}
                                                     className="flex-1 bg-green-600 hover:bg-green-700 h-8 sm:h-9 text-xs sm:text-sm">
-                                                    <CheckCircle className="w-3 h-3 sm:mr-1" /><span className="hidden sm:inline">Approve</span>
+                                                    <CheckCircle className="w-3 h-3 sm:mr-1" /><span className="hidden sm:inline">{t('admin.inventory.adjustments.actions.approve')}</span>
                                                 </Button>
                                                 <Button size="sm" variant="danger"
                                                     onClick={() => { setSelectedAdjustment(adjustment); setOpenReject(true); }}
                                                     className="flex-1 bg-red-600 hover:bg-red-700 h-8 sm:h-9 text-xs sm:text-sm">
-                                                    <XCircle className="w-3 h-3 sm:mr-1" /><span className="hidden sm:inline">Reject</span>
+                                                    <XCircle className="w-3 h-3 sm:mr-1" /><span className="hidden sm:inline">{t('admin.inventory.adjustments.actions.reject')}</span>
                                                 </Button>
                                             </div>
                                         )}
 
                                         <Button size="sm" variant="secondary" onClick={() => { setSelectedAdjustment(adjustment); setOpenView(true); }}
                                             className="w-full h-8 sm:h-9 text-xs sm:text-sm">
-                                            <Eye className="w-3 h-3 mr-1" />Details
+                                            <Eye className="w-3 h-3 mr-1" />{t('admin.inventory.adjustments.table.details')}
                                         </Button>
                                     </CardContent>
                                 </Card>
@@ -486,7 +488,7 @@ export default function InventoryAdjustments() {
 
                 {/* Create Modal */}
                 <Modal open={openCreate} onClose={() => { setOpenCreate(false); resetForm(); }}
-                    title="New Adjustment" size="lg">
+                    title={t('admin.inventory.adjustments.form.title')} size="lg">
                     <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                         {error && (
                             <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-400 text-xs sm:text-sm">
@@ -496,10 +498,10 @@ export default function InventoryAdjustments() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Ingredient *</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.inventory.adjustments.form.ingredient')} *</label>
                                 <select required value={formData.ingredient_id} onChange={(e) => setFormData({ ...formData, ingredient_id: e.target.value })}
                                     className="w-full bg-card border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50">
-                                    <option value="">Select</option>
+                                    <option value="">{t('admin.common.dashboard.select') || 'Select'}</option>
                                     {ingredients?.data?.map((ing: Ingredient) => (
                                         <option key={ing.id} value={ing.id}>{ing.name}</option>
                                     ))}
@@ -507,10 +509,10 @@ export default function InventoryAdjustments() {
                             </div>
 
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Location *</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.inventory.adjustments.form.location')} *</label>
                                 <select required value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                                     className="w-full bg-card border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50">
-                                    <option value="">Select</option>
+                                    <option value="">{t('admin.common.dashboard.select') || 'Select'}</option>
                                     {locations?.data?.map((loc: Location) => (
                                         <option key={loc.id} value={loc.id}>{loc.name}</option>
                                     ))}
@@ -518,19 +520,19 @@ export default function InventoryAdjustments() {
                             </div>
 
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Qty Before *</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.inventory.adjustments.form.qty_before')} *</label>
                                 <Input type="number" step="0.01" required value={formData.quantity_before}
                                     onChange={(e) => setFormData({ ...formData, quantity_before: e.target.value })} className="h-10 text-sm" />
                             </div>
 
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Qty After *</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.inventory.adjustments.form.qty_after')} *</label>
                                 <Input type="number" step="0.01" required value={formData.quantity_after}
                                     onChange={(e) => setFormData({ ...formData, quantity_after: e.target.value })} className="h-10 text-sm" />
                             </div>
 
                             <div className="sm:col-span-2">
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Reason *</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.inventory.adjustments.form.reason')} *</label>
                                 <select required value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                                     className="w-full bg-card border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50">
                                     {Object.entries(reasons).map(([key, label]) => (
@@ -540,19 +542,19 @@ export default function InventoryAdjustments() {
                             </div>
 
                             <div className="sm:col-span-2">
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Notes</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.inventory.adjustments.form.notes')}</label>
                                 <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                     className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50" rows={2}
-                                    placeholder="Details..." />
+                                    placeholder={t('admin.common.details') + '...'} />
                             </div>
                         </div>
 
                         <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
                             <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); resetForm(); }}
-                                className="flex-1 h-9 sm:h-10 text-sm">Cancel</Button>
+                                className="flex-1 h-9 sm:h-10 text-sm">{t('admin.inventory.adjustments.form.cancel')}</Button>
                             <Button type="submit" variant="primary" disabled={createMutation.isPending}
                                 className="flex-1 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-700 hover:to-purple-700 h-9 sm:h-10 text-sm">
-                                Create
+                                {t('admin.inventory.adjustments.form.create')}
                             </Button>
                         </div>
                     </form>
@@ -560,92 +562,92 @@ export default function InventoryAdjustments() {
 
                 {/* View Modal */}
                 <Modal open={openView} onClose={() => { setOpenView(false); setSelectedAdjustment(null); }}
-                    title="Details" size="lg">
+                    title={t('admin.inventory.adjustments.table.details')} size="lg">
                     {selectedAdjustment && (
                         <div className="space-y-4 sm:space-y-6">
                             <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">Ingredient</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.inventory.adjustments.form.ingredient')}</h3>
                                     <p className="text-foreground font-semibold text-sm sm:text-base">{selectedAdjustment.ingredient?.name}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">Location</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.inventory.adjustments.form.location')}</h3>
                                     <p className="text-foreground text-sm sm:text-base">{selectedAdjustment.location?.name}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">Before</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.inventory.adjustments.table.before')}</h3>
                                     <p className="text-foreground font-semibold text-sm sm:text-base">{selectedAdjustment.quantity_before}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">After</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.inventory.adjustments.table.after')}</h3>
                                     <p className="text-foreground font-semibold text-sm sm:text-base">{selectedAdjustment.quantity_after}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">Change</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.inventory.adjustments.table.change')}</h3>
                                     <p className={cn("font-semibold text-sm sm:text-base", selectedAdjustment.quantity_change > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')}>
                                         {selectedAdjustment.quantity_change > 0 ? '+' : ''}{selectedAdjustment.quantity_change}
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">Status</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.common.status')}</h3>
                                     <Badge className={cn(getStatusColor(selectedAdjustment.status), "text-[10px] sm:text-xs")}>
                                         {selectedAdjustment.status.toUpperCase()}
                                     </Badge>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">Reason</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.inventory.adjustments.table.reason')}</h3>
                                     <p className="text-foreground text-sm">{reasons[selectedAdjustment.reason as keyof typeof reasons]}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground">Adjusted By</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.inventory.adjustments.table.adjusted_by')}</h3>
                                     <p className="text-foreground text-sm">{selectedAdjustment.adjusted_by_employee?.name || 'Unknown'}</p>
                                 </div>
                             </div>
 
                             {selectedAdjustment.notes && (
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">Notes</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">{t('admin.inventory.adjustments.form.notes')}</h3>
                                     <p className="text-foreground text-xs sm:text-sm bg-secondary/50 p-2 sm:p-3 rounded-lg">{selectedAdjustment.notes}</p>
                                 </div>
                             )}
 
                             {selectedAdjustment.approval_notes && (
                                 <div>
-                                    <h3 className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">Approval Notes</h3>
+                                    <h3 className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">{t('admin.inventory.adjustments.table.approval_notes')}</h3>
                                     <p className="text-foreground text-xs sm:text-sm bg-secondary/50 p-2 sm:p-3 rounded-lg">{selectedAdjustment.approval_notes}</p>
                                 </div>
                             )}
 
                             <Button variant="secondary" onClick={() => { setOpenView(false); setSelectedAdjustment(null); }}
-                                className="w-full h-9 sm:h-10 text-sm">Close</Button>
+                                className="w-full h-9 sm:h-10 text-sm">{t('admin.inventory.adjustments.form.cancel')}</Button>
                         </div>
                     )}
                 </Modal>
 
                 {/* Approve Modal */}
                 <Modal open={openApprove} onClose={() => { setOpenApprove(false); setApprovalNotes(''); }}
-                    title="Approve Adjustment" size="md">
+                    title={t('admin.inventory.adjustments.actions.approve_title')} size="md">
                     <div className="space-y-4">
                         <p className="text-muted-foreground">
-                            Approve adjustment for <span className="font-semibold text-foreground">{selectedAdjustment?.ingredient?.name}</span>?
+                            {t('admin.inventory.adjustments.actions.confirm_approve')} <span className="font-semibold text-foreground">{selectedAdjustment?.ingredient?.name}</span>?
                         </p>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Approval Notes (optional)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('admin.inventory.adjustments.table.approval_notes')}</label>
                             <textarea value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)}
                                 className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50" rows={3} />
                         </div>
                         <div className="flex gap-3 pt-4">
                             <Button variant="secondary" onClick={() => { setOpenApprove(false); setApprovalNotes(''); }}
-                                className="flex-1">Cancel</Button>
+                                className="flex-1">{t('admin.inventory.adjustments.form.cancel')}</Button>
                             <Button variant="primary" onClick={handleApprove} disabled={approveMutation.isPending}
-                                className="flex-1 bg-green-600 hover:bg-green-700">Approve</Button>
+                                className="flex-1 bg-green-600 hover:bg-green-700">{t('admin.inventory.adjustments.actions.approve')}</Button>
                         </div>
                     </div>
                 </Modal>
 
                 {/* Reject Modal */}
                 <Modal open={openReject} onClose={() => { setOpenReject(false); setApprovalNotes(''); setError(''); }}
-                    title="Reject Adjustment" size="md">
+                    title={t('admin.inventory.adjustments.actions.reject_title')} size="md">
                     <div className="space-y-4">
                         {error && (
                             <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-3 text-red-600 dark:text-red-400 text-sm">
@@ -653,19 +655,19 @@ export default function InventoryAdjustments() {
                             </div>
                         )}
                         <p className="text-muted-foreground">
-                            Reject adjustment for <span className="font-semibold text-foreground">{selectedAdjustment?.ingredient?.name}</span>?
+                            {t('admin.inventory.adjustments.actions.confirm_reject')} <span className="font-semibold text-foreground">{selectedAdjustment?.ingredient?.name}</span>?
                         </p>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rejection Reason *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('admin.inventory.adjustments.actions.rejection_reason')}</label>
                             <textarea required value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)}
                                 className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50" rows={3}
-                                placeholder="Please provide a reason..." />
+                                placeholder={t('admin.inventory.adjustments.actions.rejection_reason') + '...'} />
                         </div>
                         <div className="flex gap-3 pt-4">
                             <Button variant="secondary" onClick={() => { setOpenReject(false); setApprovalNotes(''); setError(''); }}
-                                className="flex-1">Cancel</Button>
+                                className="flex-1">{t('admin.inventory.adjustments.form.cancel')}</Button>
                             <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending}
-                                className="flex-1 bg-red-600 hover:bg-red-700">Reject</Button>
+                                className="flex-1 bg-red-600 hover:bg-red-700">{t('admin.inventory.adjustments.actions.reject')}</Button>
                         </div>
                     </div>
                 </Modal>

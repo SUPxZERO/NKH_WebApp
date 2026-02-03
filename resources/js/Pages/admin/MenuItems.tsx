@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/app/layouts/AdminLayout';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
 import { MenuItem, Category } from '@/app/types/domain';
@@ -75,18 +76,21 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Horizontal scroll on mobile
-const MenuStatsRibbon = ({ stats, onFilterChange }: { stats: any, onFilterChange: (filter: string) => void }) => (
-  <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
-    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-      <StatCard title="Total" value={stats.total} icon={Package} color="purple" index={0} />
-      <StatCard title="Active" value={stats.active} icon={Eye} color="emerald" index={1} />
-      <StatCard title="Inactive" value={stats.inactive} icon={EyeOff} color="red" index={2} />
-      <div onClick={() => onFilterChange('featured')} className="cursor-pointer">
-        <StatCard title="Featured" value={stats.featured} icon={Sparkles} color="amber" index={3} />
+const MenuStatsRibbon = ({ stats, onFilterChange }: { stats: any, onFilterChange: (filter: string) => void }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+      <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+        <StatCard title={t('admin.menu.stats.total')} value={stats.total} icon={Package} color="purple" index={0} />
+        <StatCard title={t('admin.menu.stats.active')} value={stats.active} icon={Eye} color="emerald" index={1} />
+        <StatCard title={t('admin.menu.stats.inactive')} value={stats.inactive} icon={EyeOff} color="red" index={2} />
+        <div onClick={() => onFilterChange('featured')} className="cursor-pointer">
+          <StatCard title={t('admin.menu.stats.featured')} value={stats.featured} icon={Sparkles} color="amber" index={3} />
+        </div>
       </div>
     </div>
-  </div>
-);
+  )
+};
 
 export default function MenuItems() {
   const [search, setSearch] = useState('');
@@ -96,6 +100,7 @@ export default function MenuItems() {
   const [openEdit, setOpenEdit] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const qc = useQueryClient();
+  const { t } = useTranslation();
 
   // Preview modal state
   const [previewItemId, setPreviewItemId] = useState<number | null>(null);
@@ -194,7 +199,7 @@ export default function MenuItems() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Delete this menu item?')) deleteMutation.mutate(id);
+    if (confirm(t('admin.menu.actions.confirm_delete') as string)) deleteMutation.mutate(id);
   };
 
   const toggleSelectItem = (id: number) => {
@@ -239,12 +244,12 @@ export default function MenuItems() {
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl md:text-4xl font-extrabold tracking-tight truncate">
               <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Menu Items
+                {t('admin.menu.title')}
               </span>
             </h1>
             <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:flex items-center gap-2">
               <Utensils className="w-4 h-4 text-fuchsia-500" />
-              Manage your restaurant's menu
+              {t('admin.menu.subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -254,7 +259,7 @@ export default function MenuItems() {
               className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0"
               leftIcon={<Sparkles className="w-4 h-4 text-amber-500" />}
             >
-              <span className="hidden sm:inline">Manage Featured</span>
+              <span className="hidden sm:inline">{t('admin.menu.actions.manage_featured')}</span>
             </Button>
             <Button
               onClick={() => { setEditingItem(null); setOpenCreate(true); }}
@@ -262,7 +267,7 @@ export default function MenuItems() {
               className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0"
               leftIcon={<Plus className="w-4 h-4" />}
             >
-              <span className="hidden sm:inline">Add Item</span>
+              <span className="hidden sm:inline">{t('admin.menu.actions.add_item')}</span>
             </Button>
           </div>
         </motion.div>
@@ -287,7 +292,7 @@ export default function MenuItems() {
               <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={(t('admin.menu.search_placeholder') as string) || "Search..."}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="w-full h-10 sm:h-12 pl-9 sm:pl-12 pr-3 sm:pr-4 bg-secondary/50 border border-border rounded-lg sm:rounded-xl text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -299,7 +304,7 @@ export default function MenuItems() {
               className="h-10 sm:h-12 px-3 sm:px-4 pr-8 sm:pr-10 bg-secondary/50 border border-border rounded-lg sm:rounded-xl text-foreground text-xs sm:text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none min-w-[100px] sm:min-w-[200px]"
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', backgroundSize: '14px' }}
             >
-              <option value="all">All</option>
+              <option value="all">{t('admin.common.search')}</option>
               {(categories as any)?.data?.map((cat: Category) => (
                 <option key={cat.id} value={cat.id}>{cat.name || cat.translations?.[0]?.name}</option>
               ))}
@@ -325,10 +330,10 @@ export default function MenuItems() {
                 </div>
                 <div className="flex gap-1.5 sm:gap-3">
                   <Button size="sm" onClick={handleBulkEnable} variant="success" className="h-8 sm:h-10 px-2 sm:px-4">
-                    <Eye className="w-4 h-4" /><span className="hidden sm:inline ml-2">Enable</span>
+                    <Eye className="w-4 h-4" /><span className="hidden sm:inline ml-2">{t('admin.menu.actions.enable')}</span>
                   </Button>
                   <Button size="sm" onClick={handleBulkDisable} variant="danger" className="h-8 sm:h-10 px-2 sm:px-4">
-                    <EyeOff className="w-4 h-4" /><span className="hidden sm:inline ml-2">Disable</span>
+                    <EyeOff className="w-4 h-4" /><span className="hidden sm:inline ml-2">{t('admin.menu.actions.disable')}</span>
                   </Button>
                   <Button size="sm" onClick={() => setSelectedItems(new Set())} className="h-8 sm:h-10 px-2 bg-white/20 text-white hover:bg-white/30 border-0">
                     <X className="w-4 h-4" />
@@ -356,12 +361,12 @@ export default function MenuItems() {
                 className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
               />
             </div>
-            <div className="col-span-3 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Item</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Category</div>
-            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Price</div>
-            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-center">Highlights</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Status</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">Actions</div>
+            <div className="col-span-3 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.menu.table.item')}</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.menu.table.category')}</div>
+            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.menu.table.price')}</div>
+            <div className="col-span-1 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-center">{t('admin.menu.table.highlights')}</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.menu.table.status')}</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">{t('admin.menu.table.actions')}</div>
           </div>
 
           {/* Table Body */}
@@ -371,15 +376,15 @@ export default function MenuItems() {
                 <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
                   <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 sm:border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-muted-foreground font-medium text-sm sm:text-base">Loading...</p>
+                <p className="text-muted-foreground font-medium text-sm sm:text-base">{t('admin.menu.empty.loading')}</p>
               </div>
             ) : itemList.length === 0 ? (
               <div className="p-8 sm:p-16 text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-secondary to-muted mb-4">
                   <Package className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
                 </div>
-                <h3 className="text-foreground font-bold text-base sm:text-lg mb-1">No items found</h3>
-                <p className="text-muted-foreground text-xs sm:text-sm">Try adjusting filters or add an item</p>
+                <h3 className="text-foreground font-bold text-base sm:text-lg mb-1">{t('admin.menu.empty.no_items')}</h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">{t('admin.menu.empty.try_adjusting')}</p>
               </div>
             ) : (
               itemList.map((item, index) => (
@@ -493,7 +498,7 @@ export default function MenuItems() {
                             : "bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-600 dark:text-red-400 border-red-500/30"
                         )}
                       >
-                        {item.is_active ? <><Eye className="w-3.5 h-3.5" /> Active</> : <><EyeOff className="w-3.5 h-3.5" /> Inactive</>}
+                        {item.is_active ? <><Eye className="w-3.5 h-3.5" /> {t('admin.menu.stats.active')}</> : <><EyeOff className="w-3.5 h-3.5" /> {t('admin.menu.stats.inactive')}</>}
                       </button>
                     </div>
                     <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">

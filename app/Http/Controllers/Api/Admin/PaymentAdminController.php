@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Admin\PaymentMethodRequest;
 use App\Models\DailySettlement;
 use App\Models\Payment;
 use App\Models\PaymentAuditLog;
+use App\Models\PaymentMethod;
+use App\Models\PaymentMethodAuditLog;
 use App\Models\Refund;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +36,7 @@ class PaymentAdminController extends Controller
         }
 
         $allPayments = $query->get();
-        
+
         $completed = $allPayments->where('status', 'completed');
         $failed = $allPayments->where('status', 'failed');
         $pending = $allPayments->where('status', 'pending');
@@ -44,11 +47,11 @@ class PaymentAdminController extends Controller
             'completed_count' => $completed->count(),
             'failed_count' => $failed->count(),
             'pending_count' => $pending->count(),
-            'success_rate' => $allPayments->count() > 0 
-                ? round(($completed->count() / $allPayments->count()) * 100, 1) 
+            'success_rate' => $allPayments->count() > 0
+                ? round(($completed->count() / $allPayments->count()) * 100, 1)
                 : 0,
-            'average_amount' => $completed->count() > 0 
-                ? round($completed->avg('amount'), 2) 
+            'average_amount' => $completed->count() > 0
+                ? round($completed->avg('amount'), 2)
                 : 0,
             'period' => $period,
         ]);
@@ -82,8 +85,8 @@ class PaymentAdminController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('reference_number', 'like', "%{$search}%")
-                  ->orWhere('transaction_id', 'like', "%{$search}%")
-                  ->orWhere('qr_reference', 'like', "%{$search}%");
+                    ->orWhere('transaction_id', 'like', "%{$search}%")
+                    ->orWhere('qr_reference', 'like', "%{$search}%");
             });
         }
 
@@ -306,7 +309,7 @@ class PaymentAdminController extends Controller
     {
         $now = now();
 
-        return match($period) {
+        return match ($period) {
             'today' => [
                 'start' => $now->copy()->startOfDay(),
                 'end' => $now->copy()->endOfDay(),
@@ -333,4 +336,204 @@ class PaymentAdminController extends Controller
             ],
         };
     }
+
+    /**
+     * List all payment methods (active and inactive).
+     * 
+     * GET /api/admin/payment-methods
+     */
+    public function listPaymentMethods(Request $request): JsonResponse
+    {
+        $query = PaymentMethod::orderBy('display_order');
+
+        // Optional filter by active status
+        if ($request->has('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        $methods = $query->get()->map(function ($method) {
+            return [
+                'id' => $method->id,
+                'name' => $method->name,
+                'code' => $method->code,
+                'type' => $method->type,
+                'description' => $method->description,
+                'processing_fee' => (float) $method->processing_fee,
+                'display_order' => $method->display_order,
+                'configuration' => $method->configuration,
+                'is_active' => $method->is_active,
+                'can_be_disabled' => $method->canBeDisabled(),
+                'created_at' => $method->created_at?->toIso8601String(),
+                'updated_at' => $method->updated_at?->toIso8601String(),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $methods,
+        ]);
+    }
+
+    /**
+     * Get single payment method details.
+     * 
+     * GET /api/admin/payment-methods/{id}
+     */
+    public function showPaymentMethod(PaymentMethod $paymentMethod): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $paymentMethod->id,
+                'name' => $paymentMethod->name,
+                'code' => $paymentMethod->code,
+                'type' => $paymentMethod->type,
+                'description' => $paymentMethod->description,
+                'processing_fee' => (float) $paymentMethod->processing_fee,
+                'display_order' => $paymentMethod->display_order,
+                'configuration' => $paymentMethod->configuration,
+                'is_active' => $paymentMethod->is_active,
+                'can_be_disabled' => $paymentMethod->canBeDisabled(),
+                'created_at' => $paymentMethod->created_at?->toIso8601String(),
+                'updated_at' => $paymentMethod->updated_at?->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * Update payment method configuration.
+     * 
+     * PUT /api/admin/payment-methods/{id}
+     */
+    public function updatePaymentMethod(
+        PaymentMethodRequest $request,
+        PaymentMethod $paymentMethod
+    ): JsonResponse {
+        // Track changes for audit log
+        $changes = [];
+        $originalData = $paymentMethod->getOriginal();
+
+        // Update allowed fields
+        $fillableFields = ['description', 'processing_fee', 'display_order', 'configuration'];
+
+        foreach ($fillableFields as $field) {
+            if ($request->has($field)) {
+                $oldValue = $paymentMethod->{$field};
+                $newValue = $request->input($field);
+
+                if ($field === 'configuration') {
+                    // Compare arrays properly (json encode is a simple way)
+                    if (json_encode($oldValue) !== json_encode($newValue)) {
+                        $changes[$field] = [
+                            'old' => $oldValue,
+                            'new' => $newValue,
+                        ];
+                        $paymentMethod->{$field} = $newValue;
+                    }
+                } elseif ($oldValue != $newValue) {
+                    $changes[$field] = [
+                        'old' => $oldValue,
+                        'new' => $newValue,
+                    ];
+                    $paymentMethod->{$field} = $newValue;
+                }
+            }
+        }
+
+        if (!empty($changes)) {
+            $paymentMethod->save();
+            $paymentMethod->logUpdate($changes);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment method updated successfully',
+            'data' => [
+                'id' => $paymentMethod->id,
+                'name' => $paymentMethod->name,
+                'code' => $paymentMethod->code,
+                'type' => $paymentMethod->type,
+                'description' => $paymentMethod->description,
+                'processing_fee' => (float) $paymentMethod->processing_fee,
+                'display_order' => $paymentMethod->display_order,
+                'configuration' => $paymentMethod->configuration,
+                'is_active' => $paymentMethod->is_active,
+                'can_be_disabled' => $paymentMethod->canBeDisabled(),
+            ],
+        ]);
+    }
+
+    /**
+     * Toggle payment method active status.
+     * 
+     * POST /api/admin/payment-methods/{id}/toggle
+     */
+    public function togglePaymentMethod(PaymentMethod $paymentMethod): JsonResponse
+    {
+        if (!$paymentMethod->canBeDisabled() && $paymentMethod->is_active) {
+            $reason = $paymentMethod->code === 'cash'
+                ? 'Cannot disable cash payment method (safety fallback)'
+                : 'Cannot disable the last active payment method';
+
+            return response()->json([
+                'success' => false,
+                'error' => $reason,
+            ], 400);
+        }
+
+        $success = $paymentMethod->toggle();
+
+        if (!$success) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to toggle payment method',
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $paymentMethod->is_active
+                ? 'Payment method enabled successfully'
+                : 'Payment method disabled successfully',
+            'data' => [
+                'id' => $paymentMethod->id,
+                'name' => $paymentMethod->name,
+                'is_active' => $paymentMethod->is_active,
+                'can_be_disabled' => $paymentMethod->canBeDisabled(),
+            ],
+        ]);
+    }
+
+    /**
+     * Get audit log for a payment method.
+     * 
+     * GET /api/admin/payment-methods/{id}/audit-log
+     */
+    public function paymentMethodAuditLog(PaymentMethod $paymentMethod): JsonResponse
+    {
+        $logs = $paymentMethod->auditLogs()
+            ->with('user:id,name,email')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'action' => $log->action,
+                    'changes' => $log->changes,
+                    'user' => $log->user ? [
+                        'id' => $log->user->id,
+                        'name' => $log->user->name,
+                        'email' => $log->user->email,
+                    ] : null,
+                    'ip_address' => $log->ip_address,
+                    'created_at' => $log->created_at?->toIso8601String(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $logs,
+        ]);
+    }
 }
+

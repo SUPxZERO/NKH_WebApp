@@ -10,13 +10,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Logo } from '@/Components/brand';
 
+import { useTranslation } from '@/app/hooks/useTranslation';
+
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().email(), // Email validation message will be handled dynamically if possible or in schema builder
 });
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -35,15 +38,15 @@ export default function ForgotPassword() {
       router.post('/forgot-password', data, {
         onSuccess: () => {
           setEmailSent(true);
-          toast.success('Password reset link sent to your email!');
+          toast.success(t('auth.reset_link_sent') as string);
         },
         onError: (errors) => {
-          toast.error(errors.email || 'Failed to send reset link. Please try again.');
+          toast.error(errors.email || t('auth.reset_link_failed') as string);
         },
         onFinish: () => setIsLoading(false),
       });
     } catch (error) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('auth.something_wrong') as string);
       setIsLoading(false);
     }
   };
@@ -87,7 +90,7 @@ export default function ForgotPassword() {
             transition={{ delay: 0.3 }}
             className="text-4xl font-black text-white mb-3 tracking-tight font-display"
           >
-            Reset Password
+            {t('auth.forgot_password_title')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -96,8 +99,8 @@ export default function ForgotPassword() {
             className="text-gray-400 text-lg"
           >
             {emailSent
-              ? 'Check your email for reset instructions'
-              : 'Enter your email to receive a reset link'
+              ? t('auth.check_email')
+              : t('auth.enter_email_reset')
             }
           </motion.p>
         </div>
@@ -124,7 +127,7 @@ export default function ForgotPassword() {
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-300 ml-1">
-                        Email Address
+                        {t('auth.email_label')}
                       </label>
                       <div className="relative group">
                         <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
@@ -133,13 +136,13 @@ export default function ForgotPassword() {
                           <input
                             {...register('email')}
                             type="email"
-                            placeholder="Enter your email address"
+                            placeholder={t('auth.email_placeholder') as string}
                             className="w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                           />
                         </div>
                       </div>
                       {errors.email && (
-                        <p className="text-xs text-rose-400 ml-1">{errors.email.message}</p>
+                        <p className="text-xs text-rose-400 ml-1">{errors.email.message || t('auth.validation.email_invalid')}</p>
                       )}
                     </div>
 
@@ -160,12 +163,12 @@ export default function ForgotPassword() {
                         {isLoading ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Sending...
+                            {t('auth.sending')}
                           </>
                         ) : (
                           <>
                             <Send className="w-5 h-5" />
-                            Send Reset Link
+                            {t('auth.send_reset_link')}
                           </>
                         )}
                       </span>
@@ -178,7 +181,7 @@ export default function ForgotPassword() {
                       className="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors group"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                      Back to Sign In
+                      {t('auth.back_to_sign_in')}
                     </Link>
                   </div>
                 </motion.div>
@@ -203,13 +206,8 @@ export default function ForgotPassword() {
                   </motion.div>
 
                   <div>
-                    <h3 className="text-2xl font-bold text-white mb-3">Email Sent!</h3>
-                    <p className="text-gray-400 leading-relaxed">
-                      We've sent a password reset link to{' '}
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">
-                        {getValues('email')}
-                      </span>
-                      . Check your inbox and follow the instructions.
+                    <h3 className="text-2xl font-bold text-white mb-3">{t('auth.email_sent_title')}</h3>
+                    <p className="text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: t('auth.email_sent_desc', { email: getValues('email') }) }}>
                     </p>
                   </div>
 
@@ -225,12 +223,12 @@ export default function ForgotPassword() {
                       {isLoading ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Resending...
+                          {t('auth.resending')}
                         </>
                       ) : (
                         <>
                           <RefreshCw className="w-4 h-4" />
-                          Resend Email
+                          {t('auth.resend_email')}
                         </>
                       )}
                     </motion.button>
@@ -239,7 +237,7 @@ export default function ForgotPassword() {
                       href="/login"
                       className="block w-full text-center text-sm text-fuchsia-400 hover:text-fuchsia-300 transition-colors font-medium py-2"
                     >
-                      Back to Sign In
+                      {t('auth.back_to_sign_in')}
                     </Link>
                   </div>
                 </motion.div>
@@ -256,7 +254,7 @@ export default function ForgotPassword() {
           className="mt-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl"
         >
           <p className="text-xs text-gray-500 text-center">
-            💡 Didn't receive the email? Check your spam folder or contact{' '}
+            💡 {t('auth.didnt_receive_email')}{' '}
             <a href="mailto:support@nkhrestaurant.com" className="text-fuchsia-400 hover:text-fuchsia-300 font-medium">
               support@nkhrestaurant.com
             </a>

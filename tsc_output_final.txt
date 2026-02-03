@@ -1,0 +1,1 @@
+resources/js/Pages/admin/PaymentsDashboard.tsx(107,66): error TS2554: Expected 1-2 arguments, but got 3.

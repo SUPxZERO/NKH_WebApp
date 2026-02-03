@@ -1,0 +1,45 @@
+╔══════════════════════════════════════════════════════════════╗
+║             KHQR DIAGNOSTIC REPORT                          ║
+╚══════════════════════════════════════════════════════════════╝
+
+Payment Information:
+  ID: 183
+  Reference: INIT-lYKqFdGhPFKn
+  QR Reference: NKH-4X4VPVBJ
+  Amount: 11.30 USD
+  Status: pending
+
+KHQR Generation Result:
+  Account ID: test@aclb
+  Currency: USD
+  Amount: 11.3
+  MD5 Hash: 2ed604c497c16a5c223abb86b3fa8cdc
+
+KHQR String:
+──────────────────────────────────────────────────────────────────
+00020101021229130009test@aclb520458125303840540511.305802KH5914NKH
+Restaurant6010Phnom Penh62160512NKH-4X4VPVBJ6304BAB7
+──────────────────────────────────────────────────────────────────
+Length: 119 characters
+
+KHQR Structure Analysis:
+  Tag 00 (Length: 2): 01
+  Tag 01 (Length: 2): 12
+  Tag 29 (Length: 13): 0009test@aclb
+    └─ Merchant Account Info:
+       Sub-Tag 00: test@aclb
+  Tag 52 (Length: 4): 5812
+  Tag 53 (Length: 3): 840
+  Tag 54 (Length: 5): 11.30
+  Tag 58 (Length: 2): KH
+  Tag 59 (Length: 14): NKH Restaurant
+  Tag 60 (Length: 10): Phnom Penh
+  Tag 62 (Length: 16): 0512NKH-4X4VPVBJ
+    └─ Additional Data:
+       Sub-Tag 05: NKH-4X4VPVBJ
+
+CRC-16 Checksum: BAB7
+
+✅ KHQR generated successfully!
+   You can now test scanning this QR with ABA Mobile app.
+

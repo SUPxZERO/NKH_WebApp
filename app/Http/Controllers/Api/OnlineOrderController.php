@@ -12,14 +12,14 @@ use App\Http\Traits\TelegramAwareAuth;
 use App\Models\Customer;
 use App\Models\TableSession;
 use App\Services\OrderPlacementService;
- use App\Services\TimeSlotService;
+use App\Services\TimeSlotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class OnlineOrderController extends Controller
 {
     use TelegramAwareAuth, ApiResponse; // Sprint 2A
-    
+
     protected $orderPlacementService;
     protected $timeSlotService;
 
@@ -37,10 +37,10 @@ class OnlineOrderController extends Controller
     public function timeSlots(Request $request)
     {
         $validated = $request->validate([
-            'date' => ['nullable','date_format:Y-m-d'],
-            'mode' => ['required','in:pickup,delivery'],
-            'location_id' => ['required','integer','exists:locations,id'],
-            'interval' => ['nullable','integer','in:15,30,60'],
+            'date' => ['nullable', 'date_format:Y-m-d'],
+            'mode' => ['required', 'in:pickup,delivery'],
+            'location_id' => ['required', 'integer', 'exists:locations,id'],
+            'interval' => ['nullable', 'integer', 'in:15,30,60'],
         ]);
 
         $date = $validated['date'] ?? now()->format('Y-m-d');
@@ -80,7 +80,7 @@ class OnlineOrderController extends Controller
     {
         $customer = $this->getCurrentCustomer($request);
         if (!$customer) {
-            abort(404, 'Customer profile not found');
+            abort(404, __('messages.api.errors.profile_not_found'));
         }
 
         return CustomerAddressResource::collection($customer->addresses()->latest()->paginate());
@@ -91,7 +91,7 @@ class OnlineOrderController extends Controller
     {
         $customer = $this->getCurrentCustomer($request);
         if (!$customer) {
-            abort(404, 'Customer profile not found');
+            abort(404, __('messages.api.errors.profile_not_found'));
         }
 
         $payload = $request->validated();
@@ -109,9 +109,9 @@ class OnlineOrderController extends Controller
     public function store(StoreOnlineOrderRequest $request)
     {
         \Log::info('🛒 OnlineOrderController: store() called');
-        
+
         $data = $request->validated();
-        
+
         // Get Customer using unified helper
         $customer = $this->getCurrentCustomer($request);
         $tableSession = $this->getActiveTableSession($request);
@@ -133,7 +133,7 @@ class OnlineOrderController extends Controller
                 }
             }
         }
-        
+
         // Telegram First Time User
         if (!$customer && $request->filled('telegram_id')) {
             $telegramId = $request->input('telegram_id');
@@ -143,7 +143,7 @@ class OnlineOrderController extends Controller
             );
 
             if (!$telegramUser->customer_id) {
-                 $newCustomer = Customer::create([
+                $newCustomer = Customer::create([
                     'user_id' => null,
                     'name' => $telegramUser->first_name ? ($telegramUser->first_name . ' ' . $telegramUser->last_name) : 'Telegram Guest',
                     'customer_code' => Customer::generateCustomerCode('TG'),
@@ -154,9 +154,9 @@ class OnlineOrderController extends Controller
                 $customer = $telegramUser->customer;
             }
         }
-        
+
         if (!$customer) {
-            abort(401, 'Unauthenticated. Please scan the QR code again.');
+            abort(401, __('messages.api.errors.scan_again'));
         }
 
         \Log::info('👤 Customer identified:', ['id' => $customer->id]);
@@ -164,14 +164,14 @@ class OnlineOrderController extends Controller
         // DELEGATE TO SERVICE
         try {
             $order = $this->orderPlacementService->placeOrder(
-                $data, 
-                $customer, 
+                $data,
+                $customer,
                 $tableSession,
                 $request->input('telegram_id')
             );
-            
+
             return new OrderResource($order->load(['items.menuItem', 'customerAddress', 'timeSlot']));
-            
+
         } catch (\Exception $e) {
             \Log::error('❌ Order Placement Failed:', ['error' => $e->getMessage()]);
             throw $e;

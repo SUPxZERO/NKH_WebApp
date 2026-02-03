@@ -2,12 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Sparkles } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface CartEmptyProps {
     onBrowseMenu?: () => void;
 }
 
 export function CartEmpty({ onBrowseMenu }: CartEmptyProps) {
+    const { t } = useTranslation();
     return (
         <motion.div
             className="flex flex-col items-center justify-center py-20 px-4 text-center"
@@ -37,10 +39,10 @@ export function CartEmpty({ onBrowseMenu }: CartEmptyProps) {
 
             {/* Text */}
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                Your cart is empty
+                {t('cart.empty_title')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
-                Looks like you haven't added anything to your cart yet. Browse our menu and discover delicious dishes!
+                {t('cart.browse_menu_desc')}
             </p>
 
             {/* CTA Button */}
@@ -48,13 +50,13 @@ export function CartEmpty({ onBrowseMenu }: CartEmptyProps) {
                 size="lg"
                 onClick={onBrowseMenu}
             >
-                Browse Menu
+                {t('cart.browse_menu_btn')}
             </Button>
 
             {/* Optional: Recent favorites or recommendations */}
             <div className="mt-12 w-full max-w-2xl">
                 <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-                    Popular right now
+                    {t('cart.popular_now')}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {['🍔', '🍕', '🍝', '🍰'].map((emoji, i) => (

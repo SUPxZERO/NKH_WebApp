@@ -9,6 +9,7 @@ import { Button } from '@/app/components/ui/Button';
 import { apiGet, apiPost } from '@/app/utils/api';
 import { cn } from '@/app/utils/cn';
 import { toastSuccess, toastError } from '@/app/utils/toast';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const SERVICE_TYPES = [
@@ -65,8 +66,9 @@ const StatCard = ({ title, value, icon: Icon, color, index }: any) => {
 };
 
 export default function OperatingHours() {
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
-    const [selectedLocation, setSelectedLocation] = useState<number>(1);
+    const [selectedLocation, setSelectedLocation] = useState<number | null>(null);
     const [selectedServiceType, setSelectedServiceType] = useState('dine-in');
     const [schedules, setSchedules] = useState<Record<number, OperatingHour>>({});
     const [hasChanges, setHasChanges] = useState(false);
@@ -81,10 +83,17 @@ export default function OperatingHours() {
     const { data: hoursData, isLoading } = useQuery({
         queryKey: ['operating-hours', selectedLocation],
         queryFn: () => apiGet(`/api/admin/operating-hours/location/${selectedLocation}`),
-        enabled: !!selectedLocation
+        enabled: selectedLocation !== null
     });
 
     const locations = locationsData?.data || [];
+
+    // Auto-select first location if none selected
+    useEffect(() => {
+        if (!selectedLocation && locations.length > 0) {
+            setSelectedLocation(locations[0].id);
+        }
+    }, [locations, selectedLocation]);
     const existingHours: Record<number, any> = hoursData?.data || {};
 
     // Initialize schedules when data loads
@@ -114,11 +123,11 @@ export default function OperatingHours() {
         mutationFn: (data: { location_id: number; service_type: string; hours: OperatingHour[] }) =>
             apiPost('/api/admin/operating-hours/bulk-update', data),
         onSuccess: () => {
-            toastSuccess('Operating hours saved');
+            toastSuccess(t('admin.operating_hours.messages.saved') as string);
             queryClient.invalidateQueries({ queryKey: ['operating-hours', selectedLocation] });
             setHasChanges(false);
         },
-        onError: () => toastError('Failed to save operating hours')
+        onError: () => toastError(t('admin.operating_hours.messages.save_failed') as string)
     });
 
     // Copy to all days mutation
@@ -126,10 +135,10 @@ export default function OperatingHours() {
         mutationFn: (data: { location_id: number; source_day: number; service_type: string }) =>
             apiPost('/api/admin/operating-hours/copy-to-all-days', data),
         onSuccess: () => {
-            toastSuccess('Hours copied to all days');
+            toastSuccess(t('admin.operating_hours.messages.copied') as string);
             queryClient.invalidateQueries({ queryKey: ['operating-hours', selectedLocation] });
         },
-        onError: () => toastError('Failed to copy hours')
+        onError: () => toastError(t('admin.operating_hours.messages.copy_failed') as string)
     });
 
     const updateSchedule = (day: number, field: 'opening_time' | 'closing_time', value: string) => {
@@ -165,6 +174,7 @@ export default function OperatingHours() {
     };
 
     const handleSave = () => {
+        if (selectedLocation === null) return;
         const hours = Object.values(schedules);
         saveMutation.mutate({
             location_id: selectedLocation,
@@ -174,11 +184,13 @@ export default function OperatingHours() {
     };
 
     const handleCopyToAll = (sourceDay: number) => {
+        if (selectedLocation === null) return;
         if (!schedules[sourceDay]) {
-            toastError('Please set hours for this day first');
+            toastError(t('admin.operating_hours.messages.set_first') as string);
             return;
         }
-        if (confirm(`Copy ${DAYS[sourceDay]}'s hours to all other days?`)) {
+        const dayName = t(`admin.operating_hours.days.${DAYS[sourceDay]}`) as string;
+        if (confirm(t('admin.operating_hours.messages.confirm_copy', { day: dayName }) as string)) {
             copyMutation.mutate({
                 location_id: selectedLocation,
                 source_day: sourceDay,
@@ -208,10 +220,10 @@ export default function OperatingHours() {
                                 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3"
                             >
                                 <Clock className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-purple-600 flex-shrink-0" />
-                                <span className="truncate">Operating Hours</span>
+                                <span className="truncate">{t('admin.operating_hours.title')}</span>
                             </motion.h1>
                             <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">
-                                Configure business hours for each location
+                                {t('admin.operating_hours.subtitle')}
                             </p>
                         </div>
                         {hasChanges && (
@@ -222,7 +234,7 @@ export default function OperatingHours() {
                                     className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 flex-shrink-0"
                                 >
                                     <Save className="w-4 h-4 sm:mr-2" />
-                                    <span className="hidden sm:inline">{saveMutation.isPending ? 'Saving...' : 'Save Changes'}</span>
+                                    <span className="hidden sm:inline">{saveMutation.isPending ? t('admin.operating_hours.saving') : t('admin.operating_hours.save')}</span>
                                 </Button>
                             </motion.div>
                         )}
@@ -231,21 +243,21 @@ export default function OperatingHours() {
                     {/* Stats Ribbon */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-6">
                         <StatCard
-                            title="Location"
+                            title={t('admin.operating_hours.stats.location')}
                             value={locations.find((l: any) => l.id === selectedLocation)?.name || '...'}
                             icon={MapPin}
                             color="purple"
                             index={0}
                         />
                         <StatCard
-                            title="Service"
-                            value={SERVICE_TYPES.find(s => s.value === selectedServiceType)?.label}
+                            title={t('admin.operating_hours.stats.service')}
+                            value={t(`admin.operating_hours.service_types.${selectedServiceType.replace('-', '_')}`)}
                             icon={selectedServiceType === 'dine-in' ? Coffee : selectedServiceType === 'pickup' ? ShoppingBag : Truck}
                             color="blue"
                             index={1}
                         />
                         <StatCard
-                            title="Open Days"
+                            title={t('admin.operating_hours.stats.open_days')}
                             value={`${activeDaysCount}/7`}
                             icon={Clock}
                             color="emerald"
@@ -262,14 +274,15 @@ export default function OperatingHours() {
                     >
                         <div className="flex flex-col gap-4 sm:gap-6">
                             <div className="w-full">
-                                <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 sm:mb-2 block">Location</label>
+                                <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 sm:mb-2 block">{t('admin.operating_hours.controls.location')}</label>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                                     <select
-                                        value={selectedLocation}
-                                        onChange={(e) => setSelectedLocation(Number(e.target.value))}
+                                        value={selectedLocation || ''}
+                                        onChange={(e) => setSelectedLocation(e.target.value ? Number(e.target.value) : null)}
                                         className="w-full pl-10 pr-4 py-2 sm:py-2.5 h-10 bg-background/50 border border-border rounded-lg sm:rounded-xl text-sm text-foreground focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
                                     >
+                                        <option value="" disabled>{t('admin.operating_hours.controls.select_location')}</option>
                                         {locations.map((location: any) => (
                                             <option key={location.id} value={location.id}>
                                                 {location.name}
@@ -280,7 +293,7 @@ export default function OperatingHours() {
                             </div>
 
                             <div className="w-full">
-                                <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 sm:mb-2 block">Service Type</label>
+                                <label className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 sm:mb-2 block">{t('admin.operating_hours.controls.service_type')}</label>
                                 <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                                     {SERVICE_TYPES.map((service) => {
                                         const Icon = service.icon;
@@ -297,7 +310,7 @@ export default function OperatingHours() {
                                                 )}
                                             >
                                                 <Icon className="w-4 h-4" />
-                                                <span className="hidden xs:inline sm:inline">{service.label}</span>
+                                                <span className="hidden xs:inline sm:inline">{t(`admin.operating_hours.service_types.${service.value.replace('-', '_')}`)}</span>
                                             </button>
                                         );
                                     })}
@@ -341,7 +354,7 @@ export default function OperatingHours() {
                                                             ? "bg-purple-500 text-white shadow-lg shadow-purple-500/30"
                                                             : "bg-secondary text-muted-foreground"
                                                     )}>
-                                                        <span className="font-bold text-sm sm:text-lg">{day.substring(0, 3)}</span>
+                                                        <span className="font-bold text-sm sm:text-lg">{(t(`admin.operating_hours.days.${day}`) as string).substring(0, 3)}</span>
                                                     </div>
                                                     <div className="min-w-0">
                                                         <input
@@ -354,10 +367,10 @@ export default function OperatingHours() {
                                                             "font-medium text-sm sm:text-lg block truncate",
                                                             isActive ? "text-foreground" : "text-muted-foreground"
                                                         )}>
-                                                            {day}
+                                                            {t(`admin.operating_hours.days.${day}`)}
                                                         </span>
                                                         <span className="text-[10px] sm:text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            {isActive ? 'Open' : 'Closed'}
+                                                            {isActive ? t('admin.operating_hours.schedule.open') : t('admin.operating_hours.schedule.closed')}
                                                         </span>
                                                     </div>
                                                 </label>
@@ -367,7 +380,7 @@ export default function OperatingHours() {
                                                     <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 flex-1">
                                                         <div className="flex items-center gap-1.5 sm:gap-3">
                                                             <div className="flex items-center gap-1 sm:gap-2 bg-background border border-border rounded-lg sm:rounded-xl px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-purple-500">
-                                                                <span className="text-[9px] sm:text-xs text-muted-foreground font-bold">OPEN</span>
+                                                                <span className="text-[9px] sm:text-xs text-muted-foreground font-bold">{t('admin.operating_hours.schedule.open_time')}</span>
                                                                 <input
                                                                     type="time"
                                                                     value={schedule.opening_time}
@@ -377,7 +390,7 @@ export default function OperatingHours() {
                                                             </div>
                                                             <div className="w-2 sm:w-4 h-0.5 bg-border rounded-full" />
                                                             <div className="flex items-center gap-1 sm:gap-2 bg-background border border-border rounded-lg sm:rounded-xl px-2 sm:px-3 py-1 sm:py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-purple-500">
-                                                                <span className="text-[9px] sm:text-xs text-muted-foreground font-bold">CLOSE</span>
+                                                                <span className="text-[9px] sm:text-xs text-muted-foreground font-bold">{t('admin.operating_hours.schedule.close_time')}</span>
                                                                 <input
                                                                     type="time"
                                                                     value={schedule.closing_time}
@@ -396,7 +409,7 @@ export default function OperatingHours() {
                                                             disabled={copyMutation.isPending}
                                                         >
                                                             <Copy className="w-3 h-3 sm:w-3.5 sm:h-3.5 sm:mr-1.5" />
-                                                            <span className="hidden sm:inline">Copy to All</span>
+                                                            <span className="hidden sm:inline">{t('admin.operating_hours.schedule.copy_all')}</span>
                                                         </Button>
                                                     </div>
                                                 )}

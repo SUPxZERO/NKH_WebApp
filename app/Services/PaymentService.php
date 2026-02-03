@@ -78,12 +78,20 @@ class PaymentService
             ->first();
 
         if ($existing) {
+            // Regenerate QR data for existing payment
+            $qrData = null;
+            if (in_array($methodCode, ['qr', 'aba_pay', 'wing']) && $existing->qr_reference) {
+                $khqrService = app(\App\Services\Payment\KhqrService::class);
+                $qrData = $khqrService->generateKhqr($existing, $order);
+            }
+
             return [
                 'success' => true,
                 'payment_id' => $existing->id,
                 'uuid' => $existing->uuid,
                 'status' => $existing->status,
-                'qr_string' => 'mock_qr_string_reused',
+                'qr_string' => $qrData['qr_string'] ?? null,
+                'md5_hash' => $qrData['md5_hash'] ?? null,
                 'qr_reference' => $existing->qr_reference,
                 'message' => 'Returning existing payment (idempotency)',
             ];
@@ -108,16 +116,29 @@ class PaymentService
             ]);
 
             // Generate QR reference (e.g. for KHQR)
-            $qrRef = 'KHQR-' . $payment->transaction_id;
+            $qrRef = 'NKH-' . strtoupper(Str::random(8));
             $payment->qr_reference = $qrRef;
             $invoice->payments()->save($payment);
+
+            // Generate real KHQR using KhqrService
+            $khqrService = app(\App\Services\Payment\KhqrService::class);
+            $qrData = $khqrService->generateKhqr($payment, $order);
+
+            // Store MD5 hash for transaction verification
+            $payment->update([
+                'metadata' => array_merge($payment->metadata ?? [], [
+                    'khqr_md5' => $qrData['md5_hash'],
+                    'bakong_account' => $qrData['bakong_account_id'],
+                ])
+            ]);
 
             return [
                 'success' => true,
                 'payment_id' => $payment->id,
                 'uuid' => $payment->uuid,
                 'status' => 'pending',
-                'qr_string' => 'mock_qr_string_for_' . $qrRef, // In prod, use QrCodeGenerator
+                'qr_string' => $qrData['qr_string'],
+                'md5_hash' => $qrData['md5_hash'],
                 'qr_reference' => $qrRef,
             ];
 

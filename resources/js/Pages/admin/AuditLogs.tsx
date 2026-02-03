@@ -13,37 +13,41 @@ import {
 } from '@/app/components/audit';
 import { apiGet } from '@/app/utils/api';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // Page Header Component
-const PageHeader: React.FC<{ onRefresh: () => void; isRefreshing: boolean }> = ({ onRefresh, isRefreshing }) => (
-  <motion.div
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-  >
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
-        <FileText className="w-6 h-6 text-white" />
+const PageHeader: React.FC<{ onRefresh: () => void; isRefreshing: boolean }> = ({ onRefresh, isRefreshing }) => {
+  const { t } = useLanguage();
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+    >
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
+          <FileText className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t('analytics.audit.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('analytics.audit.subtitle')}</p>
+        </div>
       </div>
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Audit Logs</h1>
-        <p className="text-sm text-muted-foreground">Track all system activity and changes</p>
-      </div>
-    </div>
 
-    <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        onClick={onRefresh}
-        disabled={isRefreshing}
-        className="gap-2"
-      >
-        <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
-        Refresh
-      </Button>
-    </div>
-  </motion.div>
-);
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          className="gap-2"
+        >
+          <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
+          {t('analytics.audit.refresh')}
+        </Button>
+      </div>
+    </motion.div>
+  );
+};
 
 // Pagination Component
 const Pagination: React.FC<{
@@ -52,49 +56,53 @@ const Pagination: React.FC<{
   perPage: number;
   onPageChange: (page: number) => void;
   onPerPageChange: (perPage: number) => void;
-}> = ({ page, lastPage, perPage, onPageChange, onPerPageChange }) => (
-  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">Show</span>
-      <select
-        value={perPage}
-        onChange={(e) => onPerPageChange(Number(e.target.value))}
-        className="h-9 px-3 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-      >
-        <option value={10}>10</option>
-        <option value={20}>20</option>
-        <option value={50}>50</option>
-        <option value={100}>100</option>
-      </select>
-      <span className="text-sm text-muted-foreground">per page</span>
-    </div>
+}> = ({ page, lastPage, perPage, onPageChange, onPerPageChange }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">{t('analytics.audit.pagination.show')}</span>
+        <select
+          value={perPage}
+          onChange={(e) => onPerPageChange(Number(e.target.value))}
+          className="h-9 px-3 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+        >
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </select>
+        <span className="text-sm text-muted-foreground">{t('analytics.audit.pagination.per_page')}</span>
+      </div>
 
-    <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={page === 1}
-        onClick={() => onPageChange(page - 1)}
-      >
-        Previous
-      </Button>
-      <span className="text-sm text-muted-foreground px-3">
-        Page {page} of {lastPage}
-      </span>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={page === lastPage}
-        onClick={() => onPageChange(page + 1)}
-      >
-        Next
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page === 1}
+          onClick={() => onPageChange(page - 1)}
+        >
+          {t('analytics.audit.pagination.previous')}
+        </Button>
+        <span className="text-sm text-muted-foreground px-3">
+          {t('analytics.audit.pagination.page_of', { page: String(page), lastPage: String(lastPage) })}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page === lastPage}
+          onClick={() => onPageChange(page + 1)}
+        >
+          {t('analytics.audit.pagination.next')}
+        </Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Export Actions Component
 const ExportActions: React.FC<{ filters: FilterState }> = ({ filters }) => {
+  const { t } = useLanguage();
   const buildExportUrl = (format: 'csv' | 'json') => {
     const params = new URLSearchParams();
     if (filters.action !== 'all') params.append('action', filters.action);
@@ -113,7 +121,7 @@ const ExportActions: React.FC<{ filters: FilterState }> = ({ filters }) => {
         className="gap-1.5"
       >
         <Download className="w-4 h-4" />
-        CSV
+        {t('analytics.audit.export_csv')}
       </Button>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/app/libs/apiClient';
 import { MenuItem } from '@/app/types/domain';
@@ -19,6 +20,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
     onClose,
     locationId
 }) => {
+    const { t } = useLanguage();
     const qc = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -57,7 +59,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
             return apiPost(`/menu-items/${id}?_method=PUT`, data);
         },
         onSuccess: () => {
-            toastSuccess('Featured status updated');
+            toastSuccess(t('admin.menu.featured_manager.status_updated'));
             qc.invalidateQueries({ queryKey: ['menu-items'] });
             qc.invalidateQueries({ queryKey: ['menu-items-all'] });
         },
@@ -70,7 +72,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
 
     const handleAdd = (id: number) => {
         if (featuredItems.length >= 4) {
-            toastError('Maximum 4 featured items allowed');
+            toastError(t('admin.menu.featured_manager.max_limit_error'));
             return;
         }
         toggleFeaturedMutation.mutate({
@@ -80,14 +82,14 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Manage Featured Items" className="max-w-4xl">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('admin.menu.featured_manager.title')} className="max-w-4xl">
             <div className="space-y-6">
                 {/* Current Featured Items */}
                 <div>
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-amber-500" />
-                            Featured Items ({featuredItems.length}/4)
+                            {t('admin.menu.featured_manager.current_featured')} ({featuredItems.length}/4)
                         </h3>
                     </div>
 
@@ -131,7 +133,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
                             >
                                 <div className="text-center text-muted-foreground text-xs">
                                     <Sparkles className="w-6 h-6 mx-auto mb-1 opacity-30" />
-                                    Empty Slot
+                                    {t('admin.menu.featured_manager.empty_slot')}
                                 </div>
                             </div>
                         ))}
@@ -141,14 +143,14 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
                 {/* Add Items Section */}
                 {featuredItems.length < 4 && (
                     <div>
-                        <h3 className="text-sm font-bold text-foreground mb-3">Add Item to Featured</h3>
+                        <h3 className="text-sm font-bold text-foreground mb-3">{t('admin.menu.featured_manager.add_item')}</h3>
 
                         {/* Search */}
                         <div className="relative mb-3">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                             <input
                                 type="text"
-                                placeholder="Search items..."
+                                placeholder={t('admin.menu.featured_manager.search_placeholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full h-10 pl-10 pr-3 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -159,7 +161,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
                         <div className="max-h-[300px] overflow-y-auto space-y-2 border border-border rounded-lg p-2">
                             {nonFeaturedItems.length === 0 ? (
                                 <div className="text-center py-8 text-muted-foreground text-sm">
-                                    {searchTerm ? 'No items found' : 'All active items are already featured'}
+                                    {searchTerm ? t('admin.menu.featured_manager.no_items') : t('admin.menu.featured_manager.all_featured')}
                                 </div>
                             ) : (
                                 nonFeaturedItems.slice(0, 10).map((item: MenuItem) => (
@@ -186,7 +188,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
                                             className="opacity-0 group-hover:opacity-100 transition-opacity"
                                             leftIcon={<Sparkles className="w-3 h-3" />}
                                         >
-                                            Add
+                                            {t('admin.menu.featured_manager.add_btn')}
                                         </Button>
                                     </div>
                                 ))
@@ -198,7 +200,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
                 {/* Actions */}
                 <div className="flex justify-end gap-3 pt-3 border-t border-border">
                     <Button variant="secondary" onClick={onClose}>
-                        Close
+                        {t('admin.inventory.adjustments.form.cancel')}
                     </Button>
                 </div>
             </div>

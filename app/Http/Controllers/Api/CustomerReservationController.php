@@ -40,7 +40,7 @@ class CustomerReservationController extends Controller
         }
 
         if (!$customer) {
-            abort(422, 'Customer profile not found. Please ensure you are logged in or access via Telegram.');
+            abort(422, __('messages.api.errors.customer_profile_not_found_long'));
         }
 
         return $customer;
@@ -62,10 +62,10 @@ class CustomerReservationController extends Controller
 
             $query->where(function ($q) use ($today, $time) {
                 $q->where('reservation_date', '>', $today)
-                  ->orWhere(function ($q2) use ($today, $time) {
-                      $q2->where('reservation_date', $today)
-                         ->where('reservation_time', '>=', $time);
-                  });
+                    ->orWhere(function ($q2) use ($today, $time) {
+                        $q2->where('reservation_date', $today)
+                            ->where('reservation_time', '>=', $time);
+                    });
             });
         }
 
@@ -166,8 +166,8 @@ class CustomerReservationController extends Controller
         ]);
 
         $locationId = (int) ($validated['location_id'] ?? $customer->preferred_location_id ?? 0);
-        if (! $locationId) {
-            abort(422, 'Location is required to check availability.');
+        if (!$locationId) {
+            abort(422, __('messages.api.errors.location_required_check'));
         }
 
         $guestCount = (int) $validated['guest_count'];
@@ -192,16 +192,16 @@ class CustomerReservationController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->exists();
 
-            if (! $hasConflict) {
+            if (!$hasConflict) {
                 $availableTable = $table;
                 break;
             }
         }
 
-        if (! $availableTable) {
+        if (!$availableTable) {
             return response()->json([
                 'available' => false,
-                'message' => 'No tables available for the selected time.',
+                'message' => __('messages.api.errors.no_tables_available'),
             ]);
         }
 
@@ -244,8 +244,8 @@ class CustomerReservationController extends Controller
             $locationId = (int) ($validated['location_id'] ?? $customer->preferred_location_id ?? 0);
         }
 
-        if (! $locationId) {
-            abort(422, 'Location is required to create a reservation.');
+        if (!$locationId) {
+            abort(422, __('messages.api.errors.location_required_create'));
         }
 
         $guestCount = (int) $validated['guest_count'];
@@ -259,7 +259,7 @@ class CustomerReservationController extends Controller
 
                 // Verify table capacity
                 if ($guestCount > (int) $selectedTable->capacity) {
-                    abort(422, 'Guest count exceeds table capacity.');
+                    abort(422, __('messages.api.errors.guest_limit'));
                 }
 
                 // Check if table is available at this time
@@ -272,7 +272,7 @@ class CustomerReservationController extends Controller
                     ->exists();
 
                 if ($hasConflict) {
-                    abort(409, 'This table is already reserved for the selected time.');
+                    abort(409, __('messages.api.errors.table_reserved'));
                 }
             } else {
                 // Find best-fit table at this location (original behavior)
@@ -294,18 +294,18 @@ class CustomerReservationController extends Controller
                         ->lockForUpdate()
                         ->exists();
 
-                    if (! $hasConflict) {
+                    if (!$hasConflict) {
                         $selectedTable = $table;
                         break;
                     }
                 }
 
-                if (! $selectedTable) {
-                    abort(409, 'No tables available for the selected time.');
+                if (!$selectedTable) {
+                    abort(409, __('messages.api.errors.no_tables_available'));
                 }
 
                 if ($guestCount > (int) $selectedTable->capacity) {
-                    abort(422, 'Guest count exceeds table capacity.');
+                    abort(422, __('messages.api.errors.guest_limit'));
                 }
             }
 
@@ -339,8 +339,13 @@ class CustomerReservationController extends Controller
                 $notificationService = app(NotificationService::class);
                 $reservedAt = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
                 $notificationService->sendSystemNotification(
-                    'Reservation Confirmed! 🍽️',
-                    "Your table for {$reservation->guest_count} is reserved on {$reservedAt->format('M d, Y')} at {$reservedAt->format('g:i A')}. Code: {$reservation->code}",
+                    __('messages.api.reservations.notifications.customer_confirmed.title'),
+                    __('messages.api.reservations.notifications.customer_confirmed.body', [
+                        'count' => $reservation->guest_count,
+                        'date' => $reservedAt->format('M d, Y'),
+                        'time' => $reservedAt->format('g:i A'),
+                        'code' => $reservation->code
+                    ]),
                     $customer->user,
                     '/customer/reservations'
                 );
@@ -357,17 +362,17 @@ class CustomerReservationController extends Controller
         $customer = $this->resolveCustomer($request);
 
         if ((int) $reservation->customer_id !== (int) $customer->id) {
-            abort(403, 'You can only cancel your own reservations.');
+            abort(403, __('messages.api.errors.cancel_own_only'));
         }
 
-        if (! $reservation->canCustomerCancel()) {
-            abort(422, 'You can only cancel before the reservation day.');
+        if (!$reservation->canCustomerCancel()) {
+            abort(422, __('messages.api.errors.cancel_time_limit'));
         }
 
         $reservation->status = 'cancelled';
         $reservation->save();
 
-        return response()->json(['message' => 'Reservation cancelled']);
+        return response()->json(['message' => __('messages.api.success.reservation_cancelled')]);
     }
 
     private function generateReservationNumber(int $locationId, Carbon $date): string

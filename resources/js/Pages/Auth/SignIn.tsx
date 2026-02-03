@@ -11,14 +11,16 @@ import { cn } from '@/app/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-const signInSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['customer', 'employee', 'admin']),
-  remember: z.boolean().optional(),
-});
+import { useTranslation } from '@/app/hooks/useTranslation';
 
-type SignInForm = z.infer<typeof signInSchema>;
+// We'll define the schema creator function inside the component or just use static schema with dynamic messages if possible.
+// Moving schema inside component to use translation hook for validation messages
+type SignInForm = {
+  email: string;
+  password: string;
+  role: 'customer' | 'employee' | 'admin';
+  remember?: boolean;
+};
 
 const roleConfig = {
   customer: {
@@ -51,11 +53,20 @@ const roleConfig = {
 };
 
 export default function SignIn() {
+
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
 
   const { props } = usePage<PageProps<{ csrf_token: string }>>();
   const csrfToken = props.csrf_token;
+
+  const signInSchema = z.object({
+    email: z.string().email(t('auth.validation.email_invalid') as string),
+    password: z.string().min(6, t('auth.validation.password_min') as string),
+    role: z.enum(['customer', 'employee', 'admin']),
+    remember: z.boolean().optional(),
+  });
 
   const {
     register,
@@ -79,7 +90,7 @@ export default function SignIn() {
     try {
       router.post(route('login'), { ...data, _token: csrfToken }, {
         onSuccess: () => {
-          toast.success('Welcome back!');
+          toast.success(t('auth.welcome_back_toast') as string);
 
           // Check for pending checkout redirect
           const pendingCheckout = localStorage.getItem('pendingCheckout');
@@ -91,7 +102,7 @@ export default function SignIn() {
             localStorage.removeItem('checkoutRedirectUrl');
 
             // Show helpful message
-            toast.success('Continuing to checkout...', { duration: 2000 });
+            toast.success(t('auth.continuing_checkout') as string, { duration: 2000 });
 
             // Redirect to checkout
             setTimeout(() => {
@@ -105,12 +116,12 @@ export default function SignIn() {
           // Otherwise, default Inertia redirect will happen
         },
         onError: (errors) => {
-          toast.error(errors.email || errors.password || 'Invalid credentials');
+          toast.error(errors.email || errors.password || t('auth.invalid_credentials') as string);
         },
         onFinish: () => setIsLoading(false),
       });
     } catch (error) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('auth.something_wrong') as string);
       setIsLoading(false);
     }
   };
@@ -168,7 +179,7 @@ export default function SignIn() {
             transition={{ delay: 0.3 }}
             className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2 sm:mb-3 tracking-tight"
           >
-            Welcome Back
+            {t('auth.welcome_back')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -176,7 +187,7 @@ export default function SignIn() {
             transition={{ delay: 0.4 }}
             className="text-gray-400 text-sm sm:text-base lg:text-lg px-4"
           >
-            Sign in to your <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">NKH Restaurant</span> account
+            {t('auth.sign_in_subtitle', { brand: '' })} <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">NKH Restaurant</span>
           </motion.p>
         </div>
 
@@ -195,7 +206,7 @@ export default function SignIn() {
               {/* Role Selection */}
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-3 sm:mb-4">
-                  Sign in as
+                  {t('auth.sign_in_as')}
                 </label>
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {Object.entries(roleConfig).map(([role, config]) => {
@@ -230,7 +241,7 @@ export default function SignIn() {
                             'text-[11px] sm:text-sm font-semibold transition-all',
                             isSelected ? 'text-white' : 'text-gray-400 group-hover:text-white'
                           )}>
-                            {config.label}
+                            {t(`auth.roles.${role}` as any)}
                           </div>
                         </div>
                       </motion.button>
@@ -245,7 +256,7 @@ export default function SignIn() {
                     exit={{ opacity: 0, y: 5 }}
                     className="text-[10px] sm:text-xs text-gray-500 mt-2 sm:mt-3 text-center"
                   >
-                    {currentRoleConfig.description}
+                    {t(`auth.roles.${selectedRole}_desc` as any)}
                   </motion.p>
                 </AnimatePresence>
               </div>
@@ -253,7 +264,7 @@ export default function SignIn() {
               {/* Email Input */}
               <div className="space-y-2">
                 <label className="block text-xs sm:text-sm font-medium text-gray-300">
-                  Email Address
+                  {t('auth.email_label')}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
@@ -262,7 +273,7 @@ export default function SignIn() {
                     <input
                       {...register('email')}
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={t('auth.email_placeholder') as string}
                       className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-base placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                     />
                   </div>
@@ -275,7 +286,7 @@ export default function SignIn() {
               {/* Password Input */}
               <div className="space-y-2">
                 <label className="block text-xs sm:text-sm font-medium text-gray-300">
-                  Password
+                  {t('auth.password_label')}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity" />
@@ -284,7 +295,7 @@ export default function SignIn() {
                     <input
                       {...register('password')}
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
+                      placeholder={t('auth.password_placeholder') as string}
                       className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm sm:text-base placeholder:text-gray-500 focus:outline-none focus:border-fuchsia-500/50 focus:bg-white/[0.05] transition-all"
                     />
                     <button
@@ -316,13 +327,13 @@ export default function SignIn() {
                       </svg>
                     </div>
                   </div>
-                  <span className="text-xs sm:text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Remember me</span>
+                  <span className="text-xs sm:text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{t('auth.remember_me')}</span>
                 </label>
                 <Link
                   href="/forgot-password"
                   className="text-xs sm:text-sm text-fuchsia-400 hover:text-fuchsia-300 transition-colors font-medium whitespace-nowrap"
                 >
-                  Forgot password?
+                  {t('auth.forgot_password')}
                 </Link>
               </div>
 
@@ -338,8 +349,8 @@ export default function SignIn() {
                 )}
               >
                 <span className="flex items-center justify-center gap-2">
-                  <span className="hidden sm:inline">Sign in as {currentRoleConfig.label}</span>
-                  <span className="sm:hidden">Sign in</span>
+                  <span className="hidden sm:inline">{t('auth.sign_in_as_role', { role: t(`auth.roles.${selectedRole}` as any) })}</span>
+                  <span className="sm:hidden">{t('auth.sign_in_btn')}</span>
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </span>
               </LoadingButton>
@@ -348,12 +359,12 @@ export default function SignIn() {
             {/* Register Link */}
             <div className="mt-6 sm:mt-8 text-center">
               <p className="text-gray-400 text-xs sm:text-sm">
-                Don't have an account?{' '}
+                {t('auth.dont_have_account')}{' '}
                 <Link
                   href="/register"
                   className="text-fuchsia-400 hover:text-fuchsia-300 font-semibold transition-colors"
                 >
-                  Create one here
+                  {t('auth.create_one')}
                 </Link>
               </p>
             </div>
@@ -367,7 +378,7 @@ export default function SignIn() {
           transition={{ delay: 0.6 }}
           className="mt-4 sm:mt-6 p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl"
         >
-          <p className="text-[10px] sm:text-xs text-gray-500 text-center mb-3 sm:mb-4 font-medium uppercase tracking-wider">Quick Demo Access</p>
+          <p className="text-[10px] sm:text-xs text-gray-500 text-center mb-3 sm:mb-4 font-medium uppercase tracking-wider">{t('auth.quick_demo')}</p>
           <div className="grid grid-cols-3 gap-2">
             {[
               { role: 'customer', email: 'demo@customer.com', color: 'emerald' },

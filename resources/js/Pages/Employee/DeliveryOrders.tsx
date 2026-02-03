@@ -20,6 +20,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { usePendingCollection, useCollectPayment } from '@/app/hooks/useOrderPayment';
 import { cn } from '@/app/utils/cn';
 import DriverMapView from './DriverMapView';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface CollectionModalProps {
     order: any;
@@ -28,6 +29,7 @@ interface CollectionModalProps {
 }
 
 function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
+    const { t } = useLanguage();
     const [amountReceived, setAmountReceived] = useState<string>('');
     const [notes, setNotes] = useState('');
     const collectMutation = useCollectPayment();
@@ -59,10 +61,10 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                 paymentMethod: 'cash',
                 notes: notes || undefined
             });
-            toastSuccess('Payment collected successfully');
+            toastSuccess(t('employee.delivery.payment_collected'));
             onSuccess();
         } catch (error: any) {
-            toastError(error?.message || 'Failed to collect payment');
+            toastError(error?.message || t('employee.common.error'));
         }
     };
 
@@ -84,7 +86,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center">
                     <Banknote className="w-12 h-12 mx-auto mb-3 text-white" />
-                    <h2 className="text-xl font-bold text-white">Collect Payment</h2>
+                    <h2 className="text-xl font-bold text-white">{t('employee.delivery.collect_payment')}</h2>
                     <p className="text-white/80">Order #{order.order_number}</p>
                 </div>
 
@@ -92,7 +94,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                 <div className="p-6 space-y-6">
                     {/* Amount Due */}
                     <div className="text-center">
-                        <p className="text-sm text-gray-400">Total Due</p>
+                        <p className="text-sm text-gray-400">{t('employee.delivery.total_due')}</p>
                         <p className="text-4xl font-bold text-white">
                             ${totalAmount.toFixed(2)}
                         </p>
@@ -119,7 +121,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                     {/* Cash Received Input */}
                     <div>
                         <label className="block text-sm text-gray-400 mb-2">
-                            Cash Received
+                            {t('employee.delivery.cash_received')}
                         </label>
                         <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
@@ -143,7 +145,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                         'p-4 rounded-xl text-center transition-all',
                         isValid ? 'bg-emerald-500/20' : 'bg-red-500/20'
                     )}>
-                        <p className="text-sm text-gray-400">Change to Give</p>
+                        <p className="text-sm text-gray-400">{t('employee.delivery.change')}</p>
                         <p className={cn(
                             'text-3xl font-bold',
                             isValid ? 'text-emerald-400' : 'text-red-400'
@@ -155,7 +157,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                     {/* Notes */}
                     <div>
                         <label className="block text-sm text-gray-400 mb-2">
-                            Notes (optional)
+                            {t('employee.delivery.notes')}
                         </label>
                         <input
                             type="text"
@@ -173,7 +175,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                             onClick={onClose}
                             className="flex-1"
                         >
-                            Cancel
+                            {t('employee.common.cancel')}
                         </Button>
                         <Button
                             onClick={handleCollect}
@@ -208,6 +210,7 @@ interface DriverModeProps {
 }
 
 function DriverMode({ onCollectPayment }: DriverModeProps) {
+    const { t } = useLanguage();
     const qc = useQueryClient();
     const [subTab, setSubTab] = useState<'my_deliveries' | 'available'>('my_deliveries');
     const [viewType, setViewType] = useState<'list' | 'map'>('list');
@@ -221,7 +224,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
     const claimMutation = useMutation({
         mutationFn: (orderId: number) => apiPost(`/employee/driver/orders/${orderId}/claim`, {}),
         onSuccess: () => {
-            toastSuccess('Order claimed!');
+            toastSuccess(t('employee.delivery.order_claimed'));
             qc.invalidateQueries({ queryKey: ['driver.orders'] });
         },
         onError: (err: any) => toastError(err?.response?.data?.message || 'Failed to claim')
@@ -230,10 +233,10 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
     const statusMutation = useMutation({
         mutationFn: (vars: { id: number, status: string }) => apiPut(`/employee/driver/orders/${vars.id}/status`, { status: vars.status }),
         onSuccess: () => {
-            toastSuccess('Status updated!');
+            toastSuccess(t('employee.delivery.status_updated'));
             qc.invalidateQueries({ queryKey: ['driver.orders'] });
         },
-        onError: (err: any) => toastError(err?.response?.data?.message || 'Failed to update status')
+        onError: (err: any) => toastError(err?.response?.data?.message || t('employee.common.error'))
     });
 
     const openMap = (address: string) => {
@@ -276,7 +279,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                             "text-gray-400 hover:text-white hover:bg-white/5"
                         )}
                     >
-                        ← Back to List
+                        ← {t('employee.delivery.back_to_list')}
                     </button>
                 </div>
 
@@ -298,7 +301,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                             subTab === 'my_deliveries' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
                         )}
                     >
-                        My Active Deliveries
+                        {t('employee.delivery.my_deliveries')}
                     </button>
                     <button
                         onClick={() => setSubTab('available')}
@@ -307,7 +310,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                             subTab === 'available' ? "bg-blue-600 text-white shadow" : "text-gray-400 hover:text-white"
                         )}
                     >
-                        Available to Claim
+                        {t('employee.delivery.available_claim')}
                     </button>
                 </div>
 
@@ -317,16 +320,16 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                     className="px-4 py-2 rounded-md text-sm font-medium bg-purple-600 hover:bg-purple-500 text-white transition-all flex items-center gap-2"
                 >
                     <MapPin className="w-4 h-4" />
-                    Map View
+                    {t('employee.delivery.map_view')}
                 </button>
             </div>
 
             {isLoading ? (
-                <div className="text-center py-10"><RefreshCw className="animate-spin inline-block" /> Loading...</div>
+                <div className="text-center py-10"><RefreshCw className="animate-spin inline-block" /> {t('employee.common.loading')}</div>
             ) : !orders || orders.length === 0 ? (
                 <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
                     <Truck className="w-12 h-12 mx-auto mb-3 text-gray-500" />
-                    <p className="text-gray-400">No orders found in this category.</p>
+                    <p className="text-gray-400">{t('employee.delivery.no_orders')}</p>
                 </div>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2">
@@ -377,7 +380,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                         className="w-full bg-blue-600 hover:bg-blue-500"
                                         disabled={claimMutation.isPending}
                                     >
-                                        Claim Order
+                                        {t('employee.delivery.claim_order')}
                                     </Button>
                                 ) : (
                                     <div className="flex gap-2">
@@ -386,7 +389,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                             onClick={() => order.delivery_address && openMap(order.delivery_address)}
                                             className="flex-1"
                                         >
-                                            Map
+                                            {t('employee.delivery.map')}
                                         </Button>
                                         {order.status === 'ready' || order.status === 'preparing' ? (
                                             <Button
@@ -394,7 +397,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                                 onClick={() => statusMutation.mutate({ id: order.id, status: 'out_for_delivery' })}
                                                 disabled={statusMutation.isPending}
                                             >
-                                                Start Delivery
+                                                {t('employee.delivery.start_delivery')}
                                             </Button>
                                         ) : order.status === 'out_for_delivery' ? (
                                             <Button
@@ -402,7 +405,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                                 onClick={() => handleComplete(order)}
                                                 disabled={statusMutation.isPending}
                                             >
-                                                Complete
+                                                {t('employee.delivery.complete')}
                                             </Button>
                                         ) : null}
                                     </div>
@@ -417,6 +420,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
 }
 
 export default function DeliveryOrders() {
+    const { t } = useLanguage();
     const qc = useQueryClient();
     const [viewMode, setViewMode] = useState<'collection' | 'driver'>('collection');
 
@@ -438,9 +442,9 @@ export default function DeliveryOrders() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Delivery & Pickup</h1>
+                        <h1 className="text-2xl font-bold text-white">{t('employee.delivery.title')}</h1>
                         <p className="text-sm text-gray-400">
-                            {viewMode === 'collection' ? 'Collect payments for orders' : 'Manage your delivery assignments'}
+                            {viewMode === 'collection' ? t('employee.delivery.subtitle_collection') : t('employee.delivery.subtitle_driver')}
                         </p>
                     </div>
 
@@ -453,7 +457,7 @@ export default function DeliveryOrders() {
                             )}
                         >
                             <Banknote className="w-4 h-4 inline-block mr-2" />
-                            Payments
+                            {t('employee.delivery.payments')}
                         </button>
                         <button
                             onClick={() => setViewMode('driver')}
@@ -463,7 +467,7 @@ export default function DeliveryOrders() {
                             )}
                         >
                             <Truck className="w-4 h-4 inline-block mr-2" />
-                            Driver Mode
+                            {t('employee.delivery.driver_mode')}
                         </button>
                     </div>
                 </div>
@@ -476,7 +480,7 @@ export default function DeliveryOrders() {
                         <div className="flex justify-end">
                             <Button variant="ghost" size="sm" onClick={() => refetch()}>
                                 <RefreshCw className="w-4 h-4 mr-2" />
-                                Refresh
+                                {t('employee.common.refresh')}
                             </Button>
                         </div>
 
@@ -488,8 +492,8 @@ export default function DeliveryOrders() {
                             <Card className="bg-white/5 border-dashed border-white/20">
                                 <CardContent className="py-12 text-center">
                                     <Truck className="w-12 h-12 mx-auto mb-4 text-emerald-400" />
-                                    <p className="text-lg font-medium text-white">No Pending Collections</p>
-                                    <p className="text-sm text-gray-400">All set! No orders waiting for payment.</p>
+                                    <p className="text-lg font-medium text-white">{t('employee.delivery.no_pending')}</p>
+                                    <p className="text-sm text-gray-400">{t('employee.delivery.all_set')}</p>
                                 </CardContent>
                             </Card>
                         ) : (
@@ -524,7 +528,7 @@ export default function DeliveryOrders() {
                                                         </div>
                                                         <div className="text-right">
                                                             <span className="px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 text-xs font-medium">
-                                                                Unpaid
+                                                                {t('employee.delivery.unpaid')}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -565,7 +569,7 @@ export default function DeliveryOrders() {
                                                             onClick={() => setSelectedOrder(order)}
                                                             className="bg-blue-600 hover:bg-blue-700"
                                                         >
-                                                            Collection
+                                                            {t('employee.delivery.collect')}
                                                         </Button>
                                                     </div>
                                                 </CardContent>

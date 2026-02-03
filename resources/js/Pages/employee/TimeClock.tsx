@@ -7,8 +7,10 @@ import { Card, CardContent } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Clock, LogIn, LogOut, AlertCircle } from 'lucide-react';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 export default function TimeClock() {
+    const { t } = useLanguage();
     const [elapsedTime, setElapsedTime] = useState(0);
     const qc = useQueryClient();
 
@@ -26,11 +28,11 @@ export default function TimeClock() {
                 notes: 'Clock in',
             }),
         onSuccess: () => {
-            toastSuccess('Clocked in successfully');
+            toastSuccess(t('employee.timeclock.messages.clocked_in'));
             qc.invalidateQueries({ queryKey: ['attendance.today'] });
         },
         onError: (error: any) => {
-            toastError(error.response?.data?.message || 'Failed to clock in');
+            toastError(error.response?.data?.message || t('employee.common.error'));
         },
     });
 
@@ -41,12 +43,12 @@ export default function TimeClock() {
                 notes: 'Clock out',
             }),
         onSuccess: () => {
-            toastSuccess('Clocked out successfully');
+            toastSuccess(t('employee.timeclock.messages.clocked_out'));
             qc.invalidateQueries({ queryKey: ['attendance.today'] });
             setElapsedTime(0);
         },
         onError: (error: any) => {
-            toastError(error.response?.data?.message || 'Failed to clock out');
+            toastError(error.response?.data?.message || t('employee.common.error'));
         },
     });
 
@@ -94,7 +96,7 @@ export default function TimeClock() {
     if (isLoading) {
         return (
             <EmployeeLayout>
-                <Head title="Time Clock" />
+                <Head title={t('employee.timeclock.title')} />
                 <div className="flex items-center justify-center min-h-screen">
                     <Clock className="w-8 h-8 animate-spin text-blue-600" />
                 </div>
@@ -114,7 +116,7 @@ export default function TimeClock() {
                     <CardContent className="pt-8 pb-6 text-center">
                         <Clock className={`w-16 h-16 mx-auto mb-4 ${isClockedIn ? 'text-green-600' : 'text-gray-400'}`} />
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            {isClockedIn ? 'Clocked In' : 'Clocked Out'}
+                            {isClockedIn ? t('employee.dashboard.shift.status.clocked_in') : t('employee.dashboard.shift.status.clocked_out')}
                         </h2>
                         <p className="text-4xl font-mono font-bold text-blue-600">
                             {formatTime(elapsedTime)}
@@ -131,7 +133,7 @@ export default function TimeClock() {
                             className="w-full py-8 text-2xl font-bold bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center justify-center gap-3"
                         >
                             <LogIn className="w-8 h-8" />
-                            {clockInMutation.isPending ? 'Clocking In...' : 'Clock In'}
+                            {clockInMutation.isPending ? `${t('employee.timeclock.clock_in')}...` : t('employee.timeclock.clock_in')}
                         </Button>
                     ) : (
                         <Button
@@ -140,7 +142,7 @@ export default function TimeClock() {
                             className="w-full py-8 text-2xl font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center justify-center gap-3"
                         >
                             <LogOut className="w-8 h-8" />
-                            {clockOutMutation.isPending ? 'Clocking Out...' : 'Clock Out'}
+                            {clockOutMutation.isPending ? `${t('employee.timeclock.clock_out')}...` : t('employee.timeclock.clock_out')}
                         </Button>
                     )}
                 </div>
@@ -149,7 +151,7 @@ export default function TimeClock() {
                 {statusData?.today_records && statusData.today_records.length > 0 && (
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="font-semibold text-gray-900 mb-4">Today's Records</h3>
+                            <h3 className="font-semibold text-gray-900 mb-4">{t('employee.timeclock.time_worked')}</h3>
                             <div className="space-y-3">
                                 {statusData.today_records.map((record: any, index: number) => (
                                     <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">

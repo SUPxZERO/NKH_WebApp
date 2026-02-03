@@ -24,13 +24,13 @@ class UserSettingsController extends Controller
         if ($request->user()) {
             return $request->user()->id;
         }
-        
+
         // For Telegram guests, use same pseudo-ID approach as NotificationPreferences
         $customer = $this->getCurrentCustomer($request);
         if ($customer) {
             return 900000000 + $customer->id;
         }
-        
+
         return null;
     }
 
@@ -40,14 +40,14 @@ class UserSettingsController extends Controller
     public function show(Request $request): JsonResponse
     {
         $ownerId = $this->getSettingsOwnerId($request);
-        
+
         if (!$ownerId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Authentication required',
+                'message' => __('messages.api.errors.authentication_required'),
             ], 401);
         }
-        
+
         // Get or create settings for user
         $settings = UserSetting::firstOrCreate(
             ['user_id' => $ownerId],
@@ -66,14 +66,14 @@ class UserSettingsController extends Controller
     public function update(Request $request): JsonResponse
     {
         $ownerId = $this->getSettingsOwnerId($request);
-        
+
         if (!$ownerId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Authentication required',
+                'message' => __('messages.api.errors.authentication_required'),
             ], 401);
         }
-        
+
         // Validate request
         $validated = $request->validate([
             'notifications' => 'sometimes|array',
@@ -101,7 +101,7 @@ class UserSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Settings updated successfully',
+            'message' => __('messages.api.success.settings_updated'),
             'data' => $settings->toFrontendFormat(),
         ]);
     }
@@ -144,14 +144,14 @@ class UserSettingsController extends Controller
     public function updateCategory(Request $request, string $category): JsonResponse
     {
         $ownerId = $this->getSettingsOwnerId($request);
-        
+
         if (!$ownerId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Authentication required',
+                'message' => __('messages.api.errors.authentication_required'),
             ], 401);
         }
-        
+
         // Get or create settings
         $settings = UserSetting::firstOrCreate(
             ['user_id' => $ownerId],
@@ -198,7 +198,7 @@ class UserSettingsController extends Controller
             default:
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid category',
+                    'message' => __('messages.api.errors.invalid_category'),
                 ], 400);
         }
 
@@ -218,17 +218,17 @@ class UserSettingsController extends Controller
         if (!$request->user() && $this->isTelegramGuest($request)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Password change is not available for Telegram guests',
-                'info' => 'Create a full account to set a password.'
+                'message' => __('messages.api.validation.password.telegram_guest'),
+                'info' => __('messages.api.validation.password.create_account_hint')
             ], 422);
         }
 
         $user = $request->user();
-        
+
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Authentication required',
+                'message' => __('messages.api.errors.authentication_required'),
             ], 401);
         }
 
@@ -241,9 +241,9 @@ class UserSettingsController extends Controller
         if (!Hash::check($validated['current_password'], $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Current password is incorrect',
+                'message' => __('messages.api.validation.password.incorrect'),
                 'errors' => [
-                    'current_password' => ['The current password is incorrect.'],
+                    'current_password' => [__('messages.api.validation.current_password')],
                 ],
             ], 422);
         }
@@ -254,7 +254,7 @@ class UserSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Password changed successfully',
+            'message' => __('messages.api.success.password_changed'),
         ]);
     }
 
@@ -275,7 +275,7 @@ class UserSettingsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Phone number updated successfully',
+                'message' => __('messages.api.success.phone_updated'),
                 'data' => [
                     'phone' => $user->phone,
                 ],
@@ -298,7 +298,7 @@ class UserSettingsController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Phone number updated successfully',
+                    'message' => __('messages.api.success.phone_updated'),
                     'data' => [
                         'phone' => $customer->phone,
                     ],

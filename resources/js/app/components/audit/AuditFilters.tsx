@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/app/utils/cn';
 import {
     Search, Filter, Calendar, User, Shield, X, ChevronDown,
     Zap, Trash2, Clock, AlertTriangle, SlidersHorizontal
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface FilterOption {
     value: string;
@@ -52,40 +53,6 @@ const defaultFilters: FilterState = {
     status: 'all'
 };
 
-// Quick filter presets
-const quickPresets = [
-    { id: 'today', label: 'Today', icon: Clock, filters: { dateRange: 'today' } },
-    { id: 'deletes', label: 'Deletes', icon: Trash2, filters: { action: 'deleted' } },
-    { id: 'risky', label: 'High Risk', icon: AlertTriangle, filters: { riskLevel: 'high' } },
-    { id: 'failed', label: 'Failed', icon: X, filters: { status: 'failed' } },
-];
-
-const datePresets = [
-    { value: 'all', label: 'All Time' },
-    { value: 'today', label: 'Today' },
-    { value: 'yesterday', label: 'Yesterday' },
-    { value: 'week', label: 'Last 7 Days' },
-    { value: 'month', label: 'Last 30 Days' },
-    { value: 'custom', label: 'Custom Range' }
-];
-
-const actionOptions = [
-    { value: 'all', label: 'All Actions' },
-    { value: 'created', label: 'Created' },
-    { value: 'updated', label: 'Updated' },
-    { value: 'deleted', label: 'Deleted' },
-    { value: 'login', label: 'Login' },
-    { value: 'logout', label: 'Logout' }
-];
-
-const riskOptions = [
-    { value: 'all', label: 'All Risk Levels' },
-    { value: 'low', label: 'Low Risk' },
-    { value: 'medium', label: 'Medium Risk' },
-    { value: 'high', label: 'High Risk' },
-    { value: 'critical', label: 'Critical' }
-];
-
 const SelectFilter: React.FC<{
     value: string;
     onChange: (value: string) => void;
@@ -124,6 +91,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
     availableFilters,
     className
 }) => {
+    const { t } = useLanguage();
     const [filters, setFilters] = useState<FilterState>(defaultFilters);
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [activePreset, setActivePreset] = useState<string | null>(null);
@@ -132,6 +100,39 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
     useEffect(() => {
         onFiltersChange(filters);
     }, [filters, onFiltersChange]);
+
+    const quickPresets = useMemo(() => [
+        { id: 'today', label: t('analytics.audit.filters.presets.today') as string, icon: Clock, filters: { dateRange: 'today' } },
+        { id: 'deletes', label: t('analytics.audit.filters.presets.deletes') as string, icon: Trash2, filters: { action: 'deleted' } },
+        { id: 'risky', label: t('analytics.audit.filters.presets.high_risk') as string, icon: AlertTriangle, filters: { riskLevel: 'high' } },
+        { id: 'failed', label: t('analytics.audit.filters.presets.failed') as string, icon: X, filters: { status: 'failed' } },
+    ], [t]);
+
+    const datePresets = useMemo(() => [
+        { value: 'all', label: t('analytics.audit.filters.date_options.all') as string },
+        { value: 'today', label: t('analytics.audit.filters.date_options.today') as string },
+        { value: 'yesterday', label: t('analytics.audit.filters.date_options.yesterday') as string },
+        { value: 'week', label: t('analytics.audit.filters.date_options.week') as string },
+        { value: 'month', label: t('analytics.audit.filters.date_options.month') as string },
+        { value: 'custom', label: t('analytics.audit.filters.date_options.custom') as string }
+    ], [t]);
+
+    const actionOptions = useMemo(() => [
+        { value: 'all', label: t('analytics.audit.filters.action_options.all') as string },
+        { value: 'created', label: t('analytics.audit.filters.action_options.created') as string },
+        { value: 'updated', label: t('analytics.audit.filters.action_options.updated') as string },
+        { value: 'deleted', label: t('analytics.audit.filters.action_options.deleted') as string },
+        { value: 'login', label: t('analytics.audit.filters.action_options.login') as string },
+        { value: 'logout', label: t('analytics.audit.filters.action_options.logout') as string }
+    ], [t]);
+
+    const riskOptions = useMemo(() => [
+        { value: 'all', label: t('analytics.audit.filters.risk_options.all') as string },
+        { value: 'low', label: t('analytics.audit.filters.risk_options.low') as string },
+        { value: 'medium', label: t('analytics.audit.filters.risk_options.medium') as string },
+        { value: 'high', label: t('analytics.audit.filters.risk_options.high') as string },
+        { value: 'critical', label: t('analytics.audit.filters.risk_options.critical') as string }
+    ], [t]);
 
     const updateFilter = (key: keyof FilterState, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -156,19 +157,26 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
 
     // Build user options from available filters
     const userOptions: FilterOption[] = [
-        { value: 'all', label: 'All Users' },
+        { value: 'all', label: t('analytics.audit.filters.dynamic_options.all_users') as string },
         ...(availableFilters?.users?.map(u => ({ value: String(u.id), label: u.name })) || [])
     ];
 
     const guardOptions: FilterOption[] = [
-        { value: 'all', label: 'All Guards' },
+        { value: 'all', label: t('analytics.audit.filters.dynamic_options.all_guards') as string },
         ...(availableFilters?.guards?.map(g => ({ value: g, label: g.charAt(0).toUpperCase() + g.slice(1) })) || [])
     ];
 
     const sourceOptions: FilterOption[] = [
-        { value: 'all', label: 'All Sources' },
+        { value: 'all', label: t('analytics.audit.filters.dynamic_options.all_sources') as string },
         ...(availableFilters?.sources?.map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) })) || [])
     ];
+
+    // Status options needs translation too
+    const statusOptions = useMemo(() => [
+        { value: 'all', label: t('analytics.audit.filters.status_options.all') as string },
+        { value: 'success', label: t('analytics.audit.filters.status_options.success') as string },
+        { value: 'failed', label: t('analytics.audit.filters.status_options.failed') as string }
+    ], [t]);
 
     return (
         <div className={cn('space-y-3', className)}>
@@ -179,7 +187,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                         type="text"
-                        placeholder="Search logs by IP, action, route..."
+                        placeholder={t('analytics.audit.filters.search') as string}
                         value={filters.search}
                         onChange={(e) => updateFilter('search', e.target.value)}
                         className={cn(
@@ -195,7 +203,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                     {quickPresets.map(preset => (
                         <button
                             key={preset.id}
-                            onClick={() => applyPreset(preset.id, preset.filters)}
+                            onClick={() => applyPreset(preset.id, preset.filters as any)}
                             className={cn(
                                 'flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium whitespace-nowrap',
                                 'border transition-all',
@@ -217,7 +225,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                     value={filters.action}
                     onChange={(v) => updateFilter('action', v)}
                     options={actionOptions}
-                    placeholder="Action"
+                    placeholder={t('analytics.audit.filters.labels.action') as string}
                     icon={Zap}
                     className="w-full sm:w-40"
                 />
@@ -225,7 +233,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                     value={filters.dateRange}
                     onChange={(v) => updateFilter('dateRange', v)}
                     options={datePresets}
-                    placeholder="Date"
+                    placeholder={t('analytics.audit.filters.labels.date') as string}
                     icon={Calendar}
                     className="w-full sm:w-40"
                 />
@@ -233,7 +241,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                     value={filters.riskLevel}
                     onChange={(v) => updateFilter('riskLevel', v)}
                     options={riskOptions}
-                    placeholder="Risk"
+                    placeholder={t('analytics.audit.filters.labels.risk') as string}
                     icon={AlertTriangle}
                     className="w-full sm:w-40"
                 />
@@ -248,7 +256,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                     )}
                 >
                     <SlidersHorizontal className="w-4 h-4" />
-                    <span className="hidden sm:inline">More</span>
+                    <span className="hidden sm:inline">{t('analytics.audit.filters.more')}</span>
                 </button>
 
                 {/* Clear Filters */}
@@ -258,7 +266,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                         className="flex items-center gap-1.5 px-3 h-10 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                     >
                         <X className="w-4 h-4" />
-                        Clear
+                        {t('analytics.audit.filters.clear')}
                     </button>
                 )}
             </div>
@@ -278,7 +286,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                                     value={filters.user_id}
                                     onChange={(v) => updateFilter('user_id', v)}
                                     options={userOptions}
-                                    placeholder="User"
+                                    placeholder={t('analytics.audit.filters.labels.user') as string}
                                     icon={User}
                                     className="w-full sm:w-44"
                                 />
@@ -286,7 +294,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                                     value={filters.guard}
                                     onChange={(v) => updateFilter('guard', v)}
                                     options={guardOptions}
-                                    placeholder="Guard"
+                                    placeholder={t('analytics.audit.filters.labels.guard') as string}
                                     icon={Shield}
                                     className="w-full sm:w-36"
                                 />
@@ -294,19 +302,15 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
                                     value={filters.source}
                                     onChange={(v) => updateFilter('source', v)}
                                     options={sourceOptions}
-                                    placeholder="Source"
+                                    placeholder={t('analytics.audit.filters.labels.source') as string}
                                     icon={Filter}
                                     className="w-full sm:w-36"
                                 />
                                 <SelectFilter
                                     value={filters.status}
                                     onChange={(v) => updateFilter('status', v)}
-                                    options={[
-                                        { value: 'all', label: 'All Status' },
-                                        { value: 'success', label: 'Success' },
-                                        { value: 'failed', label: 'Failed' }
-                                    ]}
-                                    placeholder="Status"
+                                    options={statusOptions}
+                                    placeholder={t('analytics.audit.filters.labels.status') as string}
                                     className="w-full sm:w-32"
                                 />
                             </div>

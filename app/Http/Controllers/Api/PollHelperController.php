@@ -24,13 +24,13 @@ class PollHelperController extends Controller
         $modules = explode(',', $request->query('modules', ''));
         $response = [];
         $user = $request->user();
-        
+
         // Scope to location if user has one (assuming employee/admin)
         $locationId = $user->employee->location_id ?? null; // Adjust based on actual User-Employee relation
-        
+
         // If user is a customer, logic might differ, but assuming this is mostly for staff/admin for now as per plan
         // detailed logic:
-        
+
         foreach ($modules as $module) {
             switch (trim($module)) {
                 case 'orders':
@@ -50,19 +50,19 @@ class PollHelperController extends Controller
                     $query = Order::query()->whereHas('orderStatus', function ($q) {
                         $q->whereIn('code', ['pending', 'received', 'preparing', 'ready']);
                     });
-                    
+
                     if ($locationId) {
                         $query->where('location_id', $locationId);
                     }
                     $lastUpdated = $query->max('updated_at');
                     $response['kitchen'] = $lastUpdated;
                     break;
-                    
+
                 case 'tables':
                     // Table status updates
                     $query = DiningTable::query();
                     if ($locationId) {
-                        $query->whereHas('floor', function($q) use ($locationId) {
+                        $query->whereHas('floor', function ($q) use ($locationId) {
                             $q->where('location_id', $locationId);
                         });
                     }
@@ -71,30 +71,41 @@ class PollHelperController extends Controller
                     break;
 
                 case 'admin-notifications':
-                   // Notification count for the authenticated user
-                   // Using the standard Laravel notification table or Custom?
-                   // Checking routes... NotificationController::unreadCount uses $user->unreadNotifications()->count() usually
-                   $count = $user->unreadNotifications()->count();
-                   // We return count + latest timestamp to be safe, or just count
-                   // For polling, if count changes or latest timestamp changes, we fetch.
-                   // Let's return a composite or just the latest created_at
-                   $lastNotif = $user->unreadNotifications()->latest()->first();
-                   $response['admin-notifications'] = [
-                       'count' => $count,
-                       'latest' => $lastNotif ? $lastNotif->created_at : null
-                   ];
-                   break;
-                
+                    // Notification count for the authenticated user
+                    // Using the standard Laravel notification table or Custom?
+                    // Checking routes... NotificationController::unreadCount uses $user->unreadNotifications()->count() usually
+                    $count = $user->unreadNotifications()->count();
+                    // We return count + latest timestamp to be safe, or just count
+                    // For polling, if count changes or latest timestamp changes, we fetch.
+                    // Let's return a composite or just the latest created_at
+                    $lastNotif = $user->unreadNotifications()->latest()->first();
+                    $response['admin-notifications'] = [
+                        'count' => $count,
+                        'latest' => $lastNotif ? $lastNotif->created_at : null
+                    ];
+                    break;
+
                 case 'customer-orders':
                     // For a specific customer (if logged in as customer)
                     if ($user->role === 'customer') {
-                         $lastUpdated = Order::where('customer_id', $user->customer->id ?? 0)->max('updated_at');
-                         $response['customer-orders'] = $lastUpdated;
+                        $lastUpdated = Order::where('customer_id', $user->customer->id ?? 0)->max('updated_at');
+                        $response['customer-orders'] = $lastUpdated;
                     }
+                    break;
+
+                case 'dashboard':
+                    // Check for any updates relevant to dashboard (orders or payments)
+                    $lastOrder = Order::max('updated_at');
+                    // Payment model might not use standard timestamps in all setups, but assuming standard
+                    // Use a simple query to get max created_at or updated_at
+                    $lastPayment = DB::table('payments')->max('created_at');
+
+                    // Return the more recent of the two
+                    $response['dashboard'] = max($lastOrder, $lastPayment);
                     break;
             }
         }
-        
+
         return response()->json([
             'data' => $response,
             'timestamp' => now()->toIso8601String() // Server time for reference

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -66,6 +67,7 @@ interface Recipe {
 }
 
 export default function Recipes() {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [menuItemFilter, setMenuItemFilter] = useState('all');
@@ -240,25 +242,25 @@ export default function Recipes() {
                                 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3"
                             >
                                 <ChefHat className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600 flex-shrink-0" />
-                                <span className="truncate">Recipes</span>
+                                <span className="truncate">{t('admin.recipes.title')}</span>
                             </motion.h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">Manage recipes and track costs</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">{t('admin.recipes.subtitle')}</p>
                         </div>
                         <Button
                             onClick={() => { closeModal(); setOpenCreate(true); }}
                             className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0"
                         >
-                            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Create Recipe</span>
+                            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('admin.recipes.create_recipe')}</span>
                         </Button>
                     </div>
 
                     {/* Stats Ribbon - Horizontal scroll on mobile */}
                     <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
                         <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-                            <StatCard title="Total" value={stats.total} icon={ChefHat} color="purple" index={0} />
-                            <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-                            <StatCard title="Avg Cost" value={`$${stats.avgCost.toFixed(2)}`} icon={DollarSign} color="amber" index={2} />
-                            <StatCard title="Avg Items" value={stats.avgIngredients.toFixed(1)} icon={FileText} color="blue" index={3} />
+                            <StatCard title={t('admin.recipes.stats.total')} value={stats.total} icon={ChefHat} color="purple" index={0} />
+                            <StatCard title={t('admin.recipes.stats.active')} value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+                            <StatCard title={t('admin.recipes.stats.avg_cost')} value={`$${stats.avgCost.toFixed(2)}`} icon={DollarSign} color="amber" index={2} />
+                            <StatCard title={t('admin.recipes.stats.avg_items')} value={stats.avgIngredients.toFixed(1)} icon={FileText} color="blue" index={3} />
                         </div>
                     </div>
 
@@ -277,13 +279,13 @@ export default function Recipes() {
                             </div>
                             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                                 className="bg-background/50 border border-border/50 rounded-lg sm:rounded-xl px-2 sm:px-4 py-2 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none transition-all">
-                                <option value="all">All</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="all">{t('admin.recipes.filters.all')}</option>
+                                <option value="active">{t('admin.recipes.filters.active')}</option>
+                                <option value="inactive">{t('admin.recipes.filters.inactive')}</option>
                             </select>
                             <select value={menuItemFilter} onChange={(e) => setMenuItemFilter(e.target.value)}
                                 className="hidden sm:block bg-background/50 border border-border/50 rounded-xl px-4 py-2 text-sm text-foreground focus:border-purple-500 outline-none transition-all">
-                                <option value="all">All Menu Items</option>
+                                <option value="all">{t('admin.recipes.filters.all_menu_items')}</option>
                                 {menuItems?.data?.map((item: MenuItem) => <option key={item.id} value={item.id}>{item.name}</option>)}
                             </select>
                         </div>
@@ -298,12 +300,12 @@ export default function Recipes() {
                     >
                         {/* Table Header - Desktop only */}
                         <div className="hidden lg:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-pink-500/5 to-purple-500/10">
-                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Recipe Name</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Menu Item</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Cost / Serving</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Time</div>
-                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.recipes.table.recipe_name')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.recipes.table.menu_item')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.recipes.table.cost_serving')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.recipes.table.time')}</div>
+                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.recipes.table.status')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.recipes.table.actions')}</div>
                         </div>
 
                         <div className="divide-y divide-border/30">
@@ -314,7 +316,7 @@ export default function Recipes() {
                                     <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
                                         <ChefHat className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-muted-foreground text-sm">No recipes found</p>
+                                    <p className="text-muted-foreground text-sm">{t('admin.recipes.table.empty_title')}</p>
                                 </div>
                             ) : recipeList.map((recipe: Recipe, idx: number) => {
                                 const recipeName = recipe.name || recipe.menu_item?.name || `Recipe #${recipe.id}`;
@@ -429,29 +431,29 @@ export default function Recipes() {
                 </div>
 
                 {/* Create/Edit Modal */}
-                <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRecipe ? 'Edit Recipe' : 'New Recipe'} size="xl">
+                <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRecipe ? t('admin.recipes.edit_recipe') : t('admin.recipes.create_recipe')} size="xl">
                     <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <Input label="Recipe Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Signature Burger Sauce" />
+                            <Input label={t('admin.recipes.form.recipe_name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Signature Burger Sauce" />
                             <div>
-                                <label className="block text-sm font-medium text-foreground mb-1">Linked Menu Item</label>
+                                <label className="block text-sm font-medium text-foreground mb-1">{t('admin.recipes.form.linked_menu_item')}</label>
                                 <select value={formData.menu_item_id} onChange={(e) => setFormData({ ...formData, menu_item_id: e.target.value })}
                                     className="w-full bg-background border border-border rounded-lg sm:rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-purple-500/20 outline-none transition-all h-10 sm:h-11">
-                                    <option value="">None (Internal)</option>
+                                    <option value="">{t('admin.recipes.form.none_internal')}</option>
                                     {menuItems?.data?.map((item: MenuItem) => <option key={item.id} value={item.id}>{item.name}</option>)}
                                 </select>
                             </div>
                         </div>
                         <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                            <Input label="Servings" type="number" min="1" value={formData.servings} onChange={(e) => setFormData({ ...formData, servings: e.target.value })} required />
-                            <Input label="Prep (min)" type="number" min="0" value={formData.prep_time_minutes} onChange={(e) => setFormData({ ...formData, prep_time_minutes: e.target.value })} />
-                            <Input label="Cook (min)" type="number" min="0" value={formData.cook_time_minutes} onChange={(e) => setFormData({ ...formData, cook_time_minutes: e.target.value })} />
+                            <Input label={t('admin.recipes.form.servings') as string} type="number" min="1" value={formData.servings} onChange={(e) => setFormData({ ...formData, servings: e.target.value })} required />
+                            <Input label={t('admin.recipes.form.prep_min') as string} type="number" min="0" value={formData.prep_time_minutes} onChange={(e) => setFormData({ ...formData, prep_time_minutes: e.target.value })} />
+                            <Input label={t('admin.recipes.form.cook_min') as string} type="number" min="0" value={formData.cook_time_minutes} onChange={(e) => setFormData({ ...formData, cook_time_minutes: e.target.value })} />
                         </div>
 
                         <div className="border border-border/50 rounded-lg sm:rounded-xl p-3 sm:p-4 bg-secondary/20">
                             <div className="flex justify-between items-center mb-2 sm:mb-3">
-                                <h4 className="font-semibold text-xs sm:text-sm uppercase tracking-wider text-muted-foreground"><ChefHat size={14} className="inline mr-1" /> Ingredients</h4>
-                                <Button type="button" size="sm" onClick={addIngredient} className="bg-purple-600 text-white h-8 px-2 sm:px-3 text-xs"><Plus className="w-3 h-3 sm:mr-1" /><span className="hidden sm:inline">Add</span></Button>
+                                <h4 className="font-semibold text-xs sm:text-sm uppercase tracking-wider text-muted-foreground"><ChefHat size={14} className="inline mr-1" /> {t('admin.recipes.form.ingredients')}</h4>
+                                <Button type="button" size="sm" onClick={addIngredient} className="bg-purple-600 text-white h-8 px-2 sm:px-3 text-xs"><Plus className="w-3 h-3 sm:mr-1" /><span className="hidden sm:inline">{t('admin.recipes.form.add')}</span></Button>
                             </div>
 
                             <div className="space-y-2 max-h-48 sm:max-h-60 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
@@ -459,43 +461,43 @@ export default function Recipes() {
                                     <div key={i} className="flex gap-2 items-center bg-background p-2 rounded-lg border border-border/50 shadow-sm">
                                         <select value={ing.ingredient_id} onChange={(e) => updateIngredient(i, 'ingredient_id', parseInt(e.target.value))}
                                             className="flex-1 bg-transparent border-none focus:ring-0 text-xs sm:text-sm font-medium min-w-0">
-                                            <option value={0}>Select...</option>
+                                            <option value={0}>{t('admin.recipes.form.select')}</option>
                                             {ingredients?.data?.map((ingItem: any) => <option key={ingItem.id} value={ingItem.id}>{ingItem.name}</option>)}
                                         </select>
-                                        <Input type="number" step="0.01" value={ing.quantity} onChange={(e) => updateIngredient(i, 'quantity', parseFloat(e.target.value))} className="w-16 sm:w-20 text-xs sm:text-sm bg-transparent border-none text-right" placeholder="Qty" />
+                                        <Input type="number" step="0.01" value={ing.quantity} onChange={(e) => updateIngredient(i, 'quantity', parseFloat(e.target.value))} className="w-16 sm:w-20 text-xs sm:text-sm bg-transparent border-none text-right" placeholder={t('admin.recipes.form.qty') as string} />
                                         <button type="button" onClick={() => removeIngredient(i)} className="p-1.5 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-500"><Trash2 size={14} /></button>
                                     </div>
                                 ))}
-                                {formData.ingredients.length === 0 && <p className="text-center text-muted-foreground text-xs sm:text-sm italic py-3 sm:py-4">No ingredients added yet.</p>}
+                                {formData.ingredients.length === 0 && <p className="text-center text-muted-foreground text-xs sm:text-sm italic py-3 sm:py-4">{t('admin.recipes.form.no_ingredients')}</p>}
                             </div>
 
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm pt-3 sm:pt-4 mt-2 border-t border-border/50">
-                                <span className="text-muted-foreground">Total Batch: <span className="text-foreground font-bold">${calculateTotalCost().toFixed(2)}</span></span>
-                                <span className="text-muted-foreground">Per Serving: <span className="text-emerald-500 font-bold">${(calculateTotalCost() / parseInt(formData.servings || '1')).toFixed(2)}</span></span>
+                                <span className="text-muted-foreground">{t('admin.recipes.form.total_batch')}: <span className="text-foreground font-bold">${calculateTotalCost().toFixed(2)}</span></span>
+                                <span className="text-muted-foreground">{t('admin.recipes.form.per_serving')}: <span className="text-emerald-500 font-bold">${(calculateTotalCost() / parseInt(formData.servings || '1')).toFixed(2)}</span></span>
                             </div>
                         </div>
 
                         <div className="flex gap-3 pt-3 sm:pt-4">
-                            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11">Cancel</Button>
-                            <Button type="submit" className="flex-1 h-10 sm:h-11 bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20">Save</Button>
+                            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11">{t('admin.recipes.form.cancel')}</Button>
+                            <Button type="submit" className="flex-1 h-10 sm:h-11 bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20">{t('admin.recipes.form.save')}</Button>
                         </div>
                     </form>
                 </Modal>
 
-                <Modal open={openCosting} onClose={() => setOpenCosting(false)} title="Cost Analysis" size="lg">
+                <Modal open={openCosting} onClose={() => setOpenCosting(false)} title={t('admin.recipes.costing.title')} size="lg">
                     {costingData && (
                         <div className="space-y-4 sm:space-y-6">
                             <div className="grid grid-cols-3 gap-2 sm:gap-4">
                                 <div className="bg-secondary/30 p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 text-center">
-                                    <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1">Total</div>
+                                    <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1">{t('admin.recipes.costing.total')}</div>
                                     <div className="text-lg sm:text-2xl font-bold text-foreground">${costingData.total_cost?.toFixed(2)}</div>
                                 </div>
                                 <div className="bg-secondary/30 p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 text-center">
-                                    <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1">Serving</div>
+                                    <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1">{t('admin.recipes.costing.serving')}</div>
                                     <div className="text-lg sm:text-2xl font-bold text-emerald-500">${costingData.cost_per_serving?.toFixed(2)}</div>
                                 </div>
                                 <div className="bg-secondary/30 p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 text-center">
-                                    <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1">Margin</div>
+                                    <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5 sm:mb-1">{t('admin.recipes.costing.margin')}</div>
                                     <div className="text-lg sm:text-2xl font-bold text-blue-500">
                                         {((editingRecipe?.menu_item?.price || 0) - (costingData.cost_per_serving || 0) > 0)
                                             ? `${(((editingRecipe?.menu_item?.price || 0) - costingData.cost_per_serving) / (editingRecipe?.menu_item?.price || 1) * 100).toFixed(0)}%`
@@ -505,7 +507,7 @@ export default function Recipes() {
                             </div>
 
                             <div className="bg-card border border-border rounded-xl overflow-hidden">
-                                <div className="text-sm font-semibold p-3 bg-muted/50 border-b border-border">Ingredient Breakdown</div>
+                                <div className="text-sm font-semibold p-3 bg-muted/50 border-b border-border">{t('admin.recipes.costing.breakdown')}</div>
                                 <div className="max-h-96 overflow-y-auto">
                                     {costingData.breakdown?.map((item: any, i: number) => (
                                         <div key={i} className="flex justify-between items-center p-3 border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors text-sm">
@@ -515,7 +517,7 @@ export default function Recipes() {
                                             </div>
                                             <div className="text-right">
                                                 <div className="font-bold text-foreground">${item.total_cost.toFixed(2)}</div>
-                                                <div className="text-xs text-muted-foreground">{item.percentage.toFixed(1)}% of total</div>
+                                                <div className="text-xs text-muted-foreground">{item.percentage.toFixed(1)}% {t('admin.recipes.costing.of_total')}</div>
                                             </div>
                                         </div>
                                     ))}
@@ -523,7 +525,7 @@ export default function Recipes() {
                             </div>
 
                             <div className="flex justify-end gap-3 pt-2">
-                                <Button onClick={() => setOpenCosting(false)} variant="secondary" className="w-full">Close Analysis</Button>
+                                <Button onClick={() => setOpenCosting(false)} variant="secondary" className="w-full">{t('admin.recipes.costing.close')}</Button>
                             </div>
                         </div>
                     )}

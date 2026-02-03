@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -79,16 +80,19 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Horizontal scroll on mobile
-const CategoryStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
-    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-      <StatCard title="Total" value={stats.total} icon={Folder} color="purple" index={0} />
-      <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-      <StatCard title="Sub-Cat" value={stats.sub} icon={Layers} color="blue" index={2} />
-      <StatCard title="Items" value={stats.items} icon={FolderOpen} color="amber" index={3} />
+const CategoryStatsRibbon = ({ stats }: { stats: any }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+      <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+        <StatCard title={t('admin.categories.stats.total')} value={stats.total} icon={Folder} color="purple" index={0} />
+        <StatCard title={t('admin.categories.stats.active')} value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+        <StatCard title={t('admin.categories.stats.sub')} value={stats.sub} icon={Layers} color="blue" index={2} />
+        <StatCard title={t('admin.categories.stats.items')} value={stats.items} icon={FolderOpen} color="amber" index={3} />
+      </div>
     </div>
-  </div>
-);
+  )
+};
 
 export default function Categories() {
   const [search, setSearch] = useState('');
@@ -98,6 +102,7 @@ export default function Categories() {
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [creatingUnder, setCreatingUnder] = useState<any>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const { t } = useTranslation();
 
   const qc = useQueryClient();
 
@@ -168,10 +173,10 @@ export default function Categories() {
 
   const handleDelete = (cat: any) => {
     if (cat.children && cat.children.length > 0) {
-      toastError('Cannot delete category with sub-categories');
+      toastError(t('admin.categories.actions.cannot_delete') as string);
       return;
     }
-    if (confirm(`Delete category "${cat.name}"?`)) deleteMutation.mutate(cat.id);
+    if (confirm(`${t('admin.categories.actions.confirm_delete')} "${cat.name}"?`)) deleteMutation.mutate(cat.id);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -234,7 +239,7 @@ export default function Categories() {
                 <div className="flex-1 min-w-0">
                   <span className="font-semibold text-foreground text-sm truncate block">{cat.name}</span>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-muted-foreground">{cat.menu_items?.length || 0} items</span>
+                    <span className="text-xs text-muted-foreground">{cat.menu_items?.length || 0} {t('admin.categories.table.items')}</span>
                     <span className={cn(
                       "w-1.5 h-1.5 rounded-full flex-shrink-0",
                       cat.is_active ? "bg-emerald-500" : "bg-red-500"
@@ -276,7 +281,7 @@ export default function Categories() {
               </div>
               <div className="col-span-3 text-sm text-muted-foreground font-mono">/{cat.slug}</div>
               <div className="col-span-2 text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">{cat.menu_items?.length || 0}</span> items
+                <span className="font-semibold text-foreground">{cat.menu_items?.length || 0}</span> {t('admin.categories.table.items')}
               </div>
               <div className="col-span-1">
                 <span className={cn(
@@ -286,11 +291,11 @@ export default function Categories() {
                     : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
                 )}>
                   <span className={cn("w-1.5 h-1.5 rounded-full", cat.is_active ? "bg-emerald-500" : "bg-red-500")} />
-                  {cat.is_active ? 'Active' : 'Inactive'}
+                  {cat.is_active ? t('admin.common.active') : t('admin.common.inactive')}
                 </span>
               </div>
               <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                <Button size="sm" variant="ghost" onClick={() => handleCreate(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500" title="Add Sub-category"><Plus size={12} /></Button>
+                <Button size="sm" variant="ghost" onClick={() => handleCreate(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500" title={t('admin.categories.actions.add_sub') as string}><Plus size={12} /></Button>
                 <Button size="sm" variant="ghost" onClick={() => handleEdit(cat)} className="h-7 w-7 p-0 hover:bg-fuchsia-500/20 hover:text-fuchsia-500"><Edit size={12} /></Button>
                 <Button size="sm" variant="ghost" onClick={() => handleDelete(cat)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-500"><Trash2 size={12} /></Button>
               </div>
@@ -320,12 +325,12 @@ export default function Categories() {
               animate={{ opacity: 1, x: 0 }}
               className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent truncate"
             >
-              Categories
+              {t('admin.categories.title')}
             </motion.h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Manage menu hierarchy</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">{t('admin.categories.subtitle')}</p>
           </div>
           <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10 flex-shrink-0">
-            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Category</span>
+            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('admin.categories.actions.add')}</span>
           </Button>
         </div>
 
@@ -340,14 +345,14 @@ export default function Categories() {
         >
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+            <Input placeholder={(t('admin.common.search') as string) || "Search..."} value={search} onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-10 sm:h-11 text-sm" variant="filled" />
           </div>
           <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
             {[
-              { key: 'all', label: 'All' },
-              { key: 'active', label: 'Active' },
-              { key: 'inactive', label: 'Inactive' }
+              { key: 'all', label: t('admin.common.all') || 'All' },
+              { key: 'active', label: t('admin.common.active') || 'Active' },
+              { key: 'inactive', label: t('admin.common.inactive') || 'Inactive' }
             ].map(({ key, label }) => (
               <button
                 key={key}
@@ -374,18 +379,18 @@ export default function Categories() {
         >
           {/* Table Header with Gradient - Hidden on mobile */}
           <div className="hidden md:grid grid-cols-12 gap-4 p-3 sm:p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
-            <div className="col-span-5 text-xs font-bold text-foreground uppercase tracking-wider">Category Name</div>
-            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Slug</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Items</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+            <div className="col-span-5 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.categories.table.name')}</div>
+            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.categories.table.slug')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.categories.table.items')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.categories.table.status')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.categories.table.actions')}</div>
           </div>
           <div className="divide-y divide-border/30">
             {isLoading ? (
               <div className="p-8 sm:p-12 text-center">
                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                   <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                  Loading...
+                  {t('admin.categories.empty.loading')}
                 </div>
               </div>
             ) : categories.length === 0 ? (
@@ -393,47 +398,47 @@ export default function Categories() {
                 <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                   <Folder className="w-7 h-7 sm:w-8 sm:h-8 text-fuchsia-500" />
                 </div>
-                <h3 className="text-foreground font-semibold">No categories found</h3>
-                <p className="text-muted-foreground text-sm mt-1">Create your first category</p>
+                <h3 className="text-foreground font-semibold">{t('admin.categories.empty.no_categories')}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{t('admin.categories.empty.create_first')}</p>
               </div>
             ) : renderTree(categories)}
           </div>
         </motion.div>
       </div>
 
-      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCategory ? 'Edit Category' : 'New Category'}>
+      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCategory ? t('admin.categories.actions.edit') : t('admin.categories.actions.add')}>
         <form onSubmit={handleSubmit} className="space-y-4">
           {creatingUnder && !editingCategory && (
             <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-300">
-              Adding sub-category to: <span className="font-bold text-blue-900 dark:text-white">{creatingUnder.name}</span>
+              {t('admin.categories.form.adding_to')}: <span className="font-bold text-blue-900 dark:text-white">{creatingUnder.name}</span>
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-            <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="Auto-generated" />
+            <Input label={t('admin.categories.form.name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+            <Input label={t('admin.categories.form.slug') as string} value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder={(t('admin.categories.form.auto_generated') as string) || "Auto-generated"} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.categories.form.description')}</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3}
               className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.categories.form.image')}</label>
             <ImageUploader onChange={(file) => setFormData({ ...formData, image: file })} />
           </div>
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                 className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20" />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.categories.form.active')}</span>
             </div>
             <div className="w-20 sm:w-24">
-              <Input label="Order" type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
+              <Input label={t('admin.categories.form.order') as string} type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
             </div>
           </div>
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11">Cancel</Button>
-            <Button type="submit" className="flex-1 h-10 sm:h-11 bg-purple-600 hover:bg-purple-700">Save</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11">{t('admin.categories.actions.cancel')}</Button>
+            <Button type="submit" className="flex-1 h-10 sm:h-11 bg-purple-600 hover:bg-purple-700">{t('admin.categories.actions.save')}</Button>
           </div>
         </form>
       </Modal>

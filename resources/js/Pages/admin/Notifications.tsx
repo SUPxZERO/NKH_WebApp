@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -16,48 +17,51 @@ import { cn } from '@/app/utils/cn';
 import SendNotificationPanel from '@/app/components/admin/SendNotificationPanel';
 
 // Stats Ribbon - Mobile optimized with horizontal scroll
-const NotificationStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
-    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-      <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">Total</p>
-            <p className="text-xl sm:text-2xl font-bold text-foreground mt-0.5 sm:mt-1">{stats.total}</p>
+const NotificationStatsRibbon = ({ stats }: { stats: any }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
+      <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">{t('admin.notifications.ribbon.total')}</p>
+              <p className="text-xl sm:text-2xl font-bold text-foreground mt-0.5 sm:mt-1">{stats.total}</p>
+            </div>
+            <Bell className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500 dark:text-purple-400 flex-shrink-0" />
           </div>
-          <Bell className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500 dark:text-purple-400 flex-shrink-0" />
         </div>
-      </div>
-      <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">Unread</p>
-            <p className="text-xl sm:text-2xl font-bold text-amber-500 dark:text-amber-400 mt-0.5 sm:mt-1">{stats.unread}</p>
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">{t('admin.notifications.ribbon.unread')}</p>
+              <p className="text-xl sm:text-2xl font-bold text-amber-500 dark:text-amber-400 mt-0.5 sm:mt-1">{stats.unread}</p>
+            </div>
+            <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-amber-500 dark:text-amber-400 flex-shrink-0" />
           </div>
-          <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-amber-500 dark:text-amber-400 flex-shrink-0" />
         </div>
-      </div>
-      <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">Alerts</p>
-            <p className="text-xl sm:text-2xl font-bold text-red-500 dark:text-red-400 mt-0.5 sm:mt-1">{stats.systemAlerts}</p>
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">{t('admin.notifications.ribbon.alerts')}</p>
+              <p className="text-xl sm:text-2xl font-bold text-red-500 dark:text-red-400 mt-0.5 sm:mt-1">{stats.systemAlerts}</p>
+            </div>
+            <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 dark:text-red-400 flex-shrink-0" />
           </div>
-          <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 dark:text-red-400 flex-shrink-0" />
         </div>
-      </div>
-      <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">Messages</p>
-            <p className="text-xl sm:text-2xl font-bold text-blue-500 dark:text-blue-400 mt-0.5 sm:mt-1">{stats.userMessages}</p>
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4 backdrop-blur-sm min-w-[100px] sm:min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-wider font-medium">{t('admin.notifications.ribbon.messages')}</p>
+              <p className="text-xl sm:text-2xl font-bold text-blue-500 dark:text-blue-400 mt-0.5 sm:mt-1">{stats.userMessages}</p>
+            </div>
+            <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400 flex-shrink-0" />
           </div>
-          <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400 flex-shrink-0" />
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface Notification {
   id: string; title: string; message: string; type: 'info' | 'success' | 'warning' | 'error' | 'system' | 'order' | 'promotion' | 'reward';
@@ -67,6 +71,7 @@ interface Notification {
 }
 
 export default function Notifications() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -111,19 +116,19 @@ export default function Notifications() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/admin/notifications', data),
-    onSuccess: () => { toastSuccess('Notification sent'); closeModal(); qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['notification-stats'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.notifications.messages.sent') as string); closeModal(); qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['notification-stats'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.notifications.messages.failed') as string)
   });
 
   const markAsReadMutation = useMutation({
     mutationFn: (id: string) => apiPut(`/api/admin/notifications/${id}/read`, {}),
-    onSuccess: () => { toastSuccess('Marked as read'); qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['notification-stats'] }); }
+    onSuccess: () => { toastSuccess(t('admin.notifications.messages.marked_read') as string); qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['notification-stats'] }); }
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiDelete(`/api/admin/notifications/${id}`),
-    onSuccess: () => { toastSuccess('Notification deleted'); qc.invalidateQueries({ queryKey: ['notifications'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.notifications.messages.deleted') as string); qc.invalidateQueries({ queryKey: ['notifications'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.notifications.messages.failed') as string)
   });
 
   const closeModal = () => {
@@ -181,9 +186,9 @@ export default function Notifications() {
           <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent tracking-tight truncate">
-                Notifications
+                {t('admin.notifications.title')}
               </h1>
-              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">System alerts and broadcasts</p>
+              <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">{t('admin.notifications.subtitle')}</p>
             </div>
           </div>
 
@@ -200,7 +205,7 @@ export default function Notifications() {
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search..."
+                placeholder={t('admin.notifications.search_placeholder') as string}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 sm:pl-10 h-10 sm:h-11 bg-background border-border text-foreground placeholder:text-muted-foreground text-sm"
@@ -214,7 +219,7 @@ export default function Notifications() {
             >
               <span className="flex items-center gap-2">
                 <Filter className="w-4 h-4" />
-                Filters
+                {t('admin.notifications.filters.toggle')}
                 {(typeFilter !== 'all' || statusFilter !== 'all' || targetFilter !== 'all') && (
                   <span className="w-2 h-2 rounded-full bg-purple-500" />
                 )}
@@ -229,26 +234,26 @@ export default function Notifications() {
             )}>
               <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
                 className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none">
-                <option value="all">All Types</option>
-                <option value="order">Order</option>
-                <option value="promotion">Promotion</option>
-                <option value="reward">Reward</option>
-                <option value="system">System</option>
+                <option value="all">{t('admin.notifications.filters.type.all')}</option>
+                <option value="order">{t('admin.notifications.filters.type.order')}</option>
+                <option value="promotion">{t('admin.notifications.filters.type.promotion')}</option>
+                <option value="reward">{t('admin.notifications.filters.type.reward')}</option>
+                <option value="system">{t('admin.notifications.filters.type.system')}</option>
               </select>
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                 className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none">
-                <option value="all">All Status</option>
-                <option value="read">Read</option>
-                <option value="unread">Unread</option>
+                <option value="all">{t('admin.notifications.filters.status.all')}</option>
+                <option value="read">{t('admin.notifications.filters.status.read')}</option>
+                <option value="unread">{t('admin.notifications.filters.status.unread')}</option>
               </select>
               <select value={targetFilter} onChange={(e) => setTargetFilter(e.target.value)}
                 className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none">
-                <option value="all">All Targets</option>
-                <option value="all_users">All Users</option>
-                <option value="all_customers">All Customers</option>
-                <option value="all_employees">All Employees</option>
-                <option value="by_role">By Role</option>
-                <option value="by_tier">By Tier</option>
+                <option value="all">{t('admin.notifications.filters.target.all')}</option>
+                <option value="all_users">{t('admin.notifications.filters.target.all_users')}</option>
+                <option value="all_customers">{t('admin.notifications.filters.target.all_customers')}</option>
+                <option value="all_employees">{t('admin.notifications.filters.target.all_employees')}</option>
+                <option value="by_role">{t('admin.notifications.filters.target.by_role')}</option>
+                <option value="by_tier">{t('admin.notifications.filters.target.by_tier')}</option>
               </select>
             </div>
           </div>
@@ -257,24 +262,24 @@ export default function Notifications() {
           <div className="bg-card border border-border rounded-xl overflow-hidden backdrop-blur-sm">
             {/* Table Header - Desktop only */}
             <div className="hidden lg:grid grid-cols-12 gap-4 p-4 border-b border-border bg-muted/50 text-xs font-semibold text-muted-foreground uppercase">
-              <div className="col-span-4">Title / Message</div>
-              <div className="col-span-2">Type</div>
-              <div className="col-span-2">Target</div>
-              <div className="col-span-2">Recipients</div>
-              <div className="col-span-1">Date</div>
-              <div className="col-span-1 text-right">Actions</div>
+              <div className="col-span-4">{t('admin.notifications.table.headers.title_message')}</div>
+              <div className="col-span-2">{t('admin.notifications.table.headers.type')}</div>
+              <div className="col-span-2">{t('admin.notifications.table.headers.target')}</div>
+              <div className="col-span-2">{t('admin.notifications.table.headers.recipients')}</div>
+              <div className="col-span-1">{t('admin.notifications.table.headers.date')}</div>
+              <div className="col-span-1 text-right">{t('admin.notifications.table.headers.actions')}</div>
             </div>
 
             <div className="divide-y divide-border">
               {isLoading ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                  Loading...
+                  {t('admin.notifications.table.empty.loading')}
                 </div>
               ) : notificationList.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <Bell className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                  No notifications found
+                  {t('admin.notifications.table.empty.no_data')}
                 </div>
               ) : notificationList.map((notification: Notification) => (
                 <motion.div
@@ -303,14 +308,14 @@ export default function Notifications() {
                             {notification.target_type.replace(/_/g, ' ').slice(0, 12)}
                           </span>
                         )}
-                        <span>{notification.recipient_count || 0} recipients</span>
+                        <span>{notification.recipient_count || 0} {t('admin.notifications.table.status.recipients')}</span>
                         <span className="hidden sm:inline">•</span>
-                        <span className="hidden sm:inline">{notification.read_count || 0} read</span>
+                        <span className="hidden sm:inline">{notification.read_count || 0} {t('admin.notifications.table.status.read')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] sm:text-xs">{formatDate(notification.created_at)}</span>
                         <button
-                          onClick={(e) => { e.stopPropagation(); confirm('Delete?') && deleteMutation.mutate(notification.id); }}
+                          onClick={(e) => { e.stopPropagation(); confirm(t('admin.categories.actions.confirm_delete') as string) && deleteMutation.mutate(notification.id); }}
                           className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500"
                         >
                           <Trash2 size={14} />
@@ -336,13 +341,13 @@ export default function Notifications() {
                           {notification.target_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </span>
                       ) : (
-                        <span className="text-xs text-muted-foreground italic">Legacy</span>
+                        <span className="text-xs text-muted-foreground italic">{t('admin.notifications.table.status.legacy')}</span>
                       )}
                     </div>
                     <div className="col-span-2">
-                      <div className="text-sm font-medium text-foreground">{notification.recipient_count || 0} recipients</div>
+                      <div className="text-sm font-medium text-foreground">{notification.recipient_count || 0} {t('admin.notifications.table.status.recipients')}</div>
                       <div className="text-xs text-muted-foreground">
-                        {notification.read_count || 0} read • {notification.unread_count || 0} unread
+                        {notification.read_count || 0} {t('admin.notifications.table.status.read')} • {notification.unread_count || 0} {t('admin.notifications.table.status.unread')}
                       </div>
                     </div>
                     <div className="col-span-1 text-sm text-muted-foreground">
@@ -350,7 +355,7 @@ export default function Notifications() {
                     </div>
                     <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setSelectedNotification(notification); setOpenView(true); }} className="h-8 w-8 p-0 border-border"><Eye size={14} /></Button>
-                      <Button size="sm" variant="danger" onClick={(e) => { e.stopPropagation(); confirm('Delete?') && deleteMutation.mutate(notification.id); }} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-600 dark:text-red-400"><Trash2 size={14} /></Button>
+                      <Button size="sm" variant="danger" onClick={(e) => { e.stopPropagation(); confirm(t('admin.categories.actions.confirm_delete') as string) && deleteMutation.mutate(notification.id); }} className="h-8 w-8 p-0 border-red-500/20 hover:bg-red-500/20 text-red-600 dark:text-red-400"><Trash2 size={14} /></Button>
                     </div>
                   </div>
                 </motion.div>
@@ -361,17 +366,17 @@ export default function Notifications() {
       </div>
 
       {/* Create Modal */}
-      <Modal open={openCreate} onClose={closeModal} title="Send Notification" size="lg">
+      <Modal open={openCreate} onClose={closeModal} title={t('admin.notifications.modal.send.title') as string} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="bg-background border-border" />
+          <Input label={t('admin.notifications.modal.send.form.title') as string} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required className="bg-background border-border" />
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Message</label>
+            <label className="block text-sm font-medium text-foreground mb-1">{t('admin.notifications.modal.send.form.message')}</label>
             <textarea value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required rows={4}
               className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground text-sm" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Type</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('admin.notifications.modal.send.form.type')}</label>
               <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm">
                 <option value="info">Info</option>
@@ -382,26 +387,26 @@ export default function Notifications() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Recipient</label>
+              <label className="block text-sm font-medium text-foreground mb-1">{t('admin.notifications.modal.send.form.recipient')}</label>
               <select value={formData.send_to_all ? 'all' : formData.user_id} onChange={(e) => {
                 if (e.target.value === 'all') setFormData({ ...formData, send_to_all: true, user_id: '' });
                 else setFormData({ ...formData, send_to_all: false, user_id: e.target.value });
               }}
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm">
-                <option value="all">All Users</option>
+                <option value="all">{t('admin.notifications.modal.send.form.all_users')}</option>
                 {users?.data?.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}
               </select>
             </div>
           </div>
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-11">Cancel</Button>
-            <Button type="submit" className="flex-1 h-11 bg-purple-600 hover:bg-purple-700">Send</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-11">{t('admin.notifications.modal.send.actions.cancel')}</Button>
+            <Button type="submit" className="flex-1 h-11 bg-purple-600 hover:bg-purple-700">{t('admin.notifications.modal.send.actions.send')}</Button>
           </div>
         </form>
       </Modal>
 
       {/* View Modal */}
-      <Modal open={openView} onClose={() => setOpenView(false)} title="Notification Details">
+      <Modal open={openView} onClose={() => setOpenView(false)} title={t('admin.notifications.modal.view.title') as string}>
         {selectedNotification && (
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-3">
@@ -413,29 +418,29 @@ export default function Notifications() {
             </div>
             <div className="grid grid-cols-2 gap-2 sm:gap-4">
               <div className="bg-background p-2.5 sm:p-3 rounded-lg border border-border">
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Target</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.notifications.modal.view.labels.target')}</div>
                 <div className="text-xs sm:text-sm font-medium text-foreground mt-0.5 sm:mt-1 truncate">
                   {selectedNotification.target_type ? selectedNotification.target_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}
                 </div>
               </div>
               <div className="bg-background p-2.5 sm:p-3 rounded-lg border border-border">
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Recipients</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.notifications.modal.view.labels.recipients')}</div>
                 <div className="text-xs sm:text-sm font-medium text-foreground mt-0.5 sm:mt-1">{selectedNotification.recipient_count || 0}</div>
               </div>
               <div className="bg-background p-2.5 sm:p-3 rounded-lg border border-border">
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Read</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.notifications.modal.view.labels.read')}</div>
                 <div className="text-xs sm:text-sm font-medium text-emerald-600 dark:text-emerald-400 mt-0.5 sm:mt-1">{selectedNotification.read_count || 0}</div>
               </div>
               <div className="bg-background p-2.5 sm:p-3 rounded-lg border border-border">
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Unread</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.notifications.modal.view.labels.unread')}</div>
                 <div className="text-xs sm:text-sm font-medium text-amber-600 dark:text-amber-400 mt-0.5 sm:mt-1">{selectedNotification.unread_count || 0}</div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row justify-between text-[10px] sm:text-xs text-muted-foreground pt-2 border-t border-border gap-1">
-              <span>By: {selectedNotification.created_by?.name || 'System'}</span>
+              <span>{t('admin.notifications.table.by')} {selectedNotification.created_by?.name || 'System'}</span>
               <span>{new Date(selectedNotification.created_at).toLocaleString()}</span>
             </div>
-            <Button onClick={() => setOpenView(false)} className="w-full h-11 mt-4">Close</Button>
+            <Button onClick={() => setOpenView(false)} className="w-full h-11 mt-4">{t('admin.notifications.modal.view.actions.close')}</Button>
           </div>
         )}
       </Modal>

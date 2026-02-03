@@ -1,0 +1,78 @@
+,
+"tables": {
+    "title": "តុ",
+    "subtitle": "គ្រប់គ្រងប្លង់ហាង",
+    "add": "បន្ថែមតុ",
+    "stats": {
+        "total": "តុសរុប",
+        "available": "ទំនេរ",
+        "occupied": "កំពុងប្រើ",
+        "reserved": "បានកក់"
+    },
+    "actions": {
+        "print_all": "បោះពុម្ពទាំងអស់",
+        "generate_all_qr": "បង្កើត QR ទាំងអស់",
+        "regenerate": "បង្កើតឡើងវិញ",
+        "copy_url": "ចម្លងតំណ",
+        "download": "ទាញយក",
+        "print": "បោះពុម្ព",
+        "generate_qr": "បង្កើត QR Code",
+        "generating": "កំពុងបង្កើត..."
+    },
+    "filters": {
+        "all_status": "គ្រប់ស្ថានភាព",
+        "all_floors": "គ្រប់ជាន់",
+        "search": "ស្វែងរក..."
+    },
+    "table": {
+        "code": "លេខតុ",
+        "floor": "ជាន់",
+        "capacity": "ចំនួនកៅអី",
+        "status": "ស្ថានភាព",
+        "actions": "សកម្មភាព",
+        "seats": "កៅអី",
+        "no_qr": "គ្មាន QR"
+    },
+    "modal": {
+        "new": "តុថ្មី",
+        "edit": "កែប្រែតុ",
+        "location": "ទីតាំង/សាខា",
+        "select_location": "ជ្រើសរើសទីតាំង",
+        "floor": "ជាន់",
+        "select_floor": "ជ្រើសរើសជាន់",
+        "code": "លេខតុ",
+        "capacity": "ចំនួនកៅអី",
+        "status": "ស្ថានភាព",
+        "qr_for": "QR Code - តុ :code",
+        "no_qr_yet": "មិនទាន់មាន QR Code ទេ",
+        "main_floor": "ជាន់ផ្ទាល់ដី"
+    },
+    "messages": {
+        "created": "តុត្រូវបានបង្កើត",
+        "create_failed": "បរាជ័យក្នុងការបង្កើត",
+        "updated": "តុត្រូវបានកែប្រែ",
+        "update_failed": "បរាជ័យក្នុងការកែប្រែ",
+        "deleted": "តុត្រូវបានលុប",
+        "delete_failed": "បរាជ័យក្នុងការលុប",
+        "qr_generated": "QR code ត្រូវបានបង្កើត",
+        "qr_failed": "បរាជ័យក្នុងការបង្កើត QR",
+        "bulk_qr_generated": "QR codes ត្រូវបានបង្កើតសម្រាប់តុចំនួន :count",
+        "bulk_qr_failed": "បរាជ័យក្នុងការបង្កើតជាក្រុម",
+        "all_qr_exists": "តុទាំងអស់មាន QR code រួចហើយ",
+        "confirm_delete": "លុបតុនេះ?",
+        "confirm_bulk_qr": "បង្កើត QR codes សម្រាប់តុចំនួន :count?",
+        "qr_downloaded": "QR code ត្រូវបានទាញយកជា JPG",
+        "qr_process_failed": "បរាជ័យក្នុងការដំណើរការរូបភាព QR",
+        "url_copied": "តំណភ្ជាប់ QR ត្រូវបានចម្លង"
+    },
+    "status": {
+        "available": "ទំនេរ",
+        "reserved": "បានកក់",
+        "occupied": "កំពុងប្រើ",
+        "unavailable": "មិនអាចប្រើបាន"
+    },
+    "empty": {
+        "no_tables": "រកមិនឃើញតុ",
+        "create_first": "បង្កើតតុដំបូងរបស់អ្នក"
+    }
+}

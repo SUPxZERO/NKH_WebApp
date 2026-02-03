@@ -31,21 +31,21 @@ class OrderStatusChanged extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         $message = (new MailMessage)
-            ->subject("Order {$this->order->order_number} {$this->status}")
-            ->greeting("Hello {$notifiable->name}");
+            ->subject(__('layout.emails.order_status.subject', ['order_number' => $this->order->order_number, 'status' => $this->status]))
+            ->greeting(__('layout.emails.order_status.greeting', ['name' => $notifiable->name]));
 
         if ($this->status === 'approved') {
-            $message->line("Your order #{$this->order->order_number} has been approved!")
-                   ->line('You will be notified once your order is ready.')
-                   ->action('View Order', url("/orders/{$this->order->id}"));
+            $message->line(__('layout.emails.order_status.approved_body', ['order_number' => $this->order->order_number]))
+                ->line(__('layout.emails.order_status.approved_next'))
+                ->action(__('layout.emails.order_status.view_order'), url("/orders/{$this->order->id}"));
         } else {
-            $message->line("Your order #{$this->order->order_number} has been rejected.")
-                   ->line("Reason: {$this->rejectionReason}")
-                   ->line('We apologize for any inconvenience caused.')
-                   ->action('Place New Order', url('/menu'));
+            $message->line(__('layout.emails.order_status.rejected_body', ['order_number' => $this->order->order_number]))
+                ->line(__('layout.emails.order_status.rejection_reason', ['reason' => $this->rejectionReason]))
+                ->line(__('layout.emails.order_status.apology'))
+                ->action(__('layout.emails.order_status.place_new_order'), url('/menu'));
         }
 
-        return $message->line('Thank you for choosing our service!');
+        return $message->line(__('layout.emails.order_status.closing'));
     }
 
     public function toArray($notifiable): array

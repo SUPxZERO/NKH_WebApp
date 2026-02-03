@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -41,6 +42,7 @@ import {
 const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899'];
 
 export default function FinancialDashboard() {
+    const { t } = useLanguage();
     const [startDate, setStartDate] = React.useState<Date | undefined>(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     );
@@ -94,7 +96,7 @@ export default function FinancialDashboard() {
 
     const stats = [
         {
-            label: 'Total Revenue',
+            label: t('finance.stats.total_revenue'),
             value: `$${Number(profitLoss?.total_revenue || 0).toLocaleString()}`,
             icon: DollarSign,
             color: 'text-green-600 dark:text-green-400',
@@ -102,7 +104,7 @@ export default function FinancialDashboard() {
             trend: profitLoss?.revenue_change
         },
         {
-            label: 'Total Expenses',
+            label: t('finance.stats.total_expenses'),
             value: `$${Number(profitLoss?.total_expenses || 0).toLocaleString()}`,
             icon: Receipt,
             color: 'text-red-600 dark:text-red-400',
@@ -110,7 +112,7 @@ export default function FinancialDashboard() {
             trend: profitLoss?.expenses_change
         },
         {
-            label: 'Net Profit',
+            label: t('finance.stats.net_profit'),
             value: `$${Number(profitLoss?.net_profit || 0).toLocaleString()}`,
             icon: profitLoss?.net_profit >= 0 ? TrendingUp : TrendingDown,
             color: profitLoss?.net_profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
@@ -118,7 +120,7 @@ export default function FinancialDashboard() {
             trend: profitLoss?.profit_margin
         },
         {
-            label: 'Profit Margin',
+            label: t('finance.stats.profit_margin'),
             value: `${Number(profitLoss?.profit_margin || 0).toFixed(1)}%`,
             icon: Percent,
             color: 'text-purple-600 dark:text-purple-400',
@@ -148,9 +150,9 @@ export default function FinancialDashboard() {
                             <div className="flex items-center justify-between gap-3">
                                 <div className="min-w-0">
                                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent truncate">
-                                        Financial Dashboard
+                                        {t('finance.title')}
                                     </h1>
-                                    <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Monitor revenue, expenses, and profitability</p>
+                                    <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('finance.subtitle')}</p>
                                 </div>
 
                                 <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
@@ -159,14 +161,14 @@ export default function FinancialDashboard() {
                                         className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                     >
                                         <FileText className="w-4 h-4 sm:mr-2" />
-                                        <span className="hidden sm:inline">PDF</span>
+                                        <span className="hidden sm:inline">{t('finance.pdf')}</span>
                                     </Button>
                                     <Button
                                         onClick={handleExportExcel}
                                         className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                     >
                                         <Download className="w-4 h-4 sm:mr-2" />
-                                        <span className="hidden sm:inline">CSV</span>
+                                        <span className="hidden sm:inline">{t('finance.csv')}</span>
                                     </Button>
                                 </div>
                             </div>
@@ -243,7 +245,7 @@ export default function FinancialDashboard() {
                             <CardContent className="p-3 sm:p-4 md:p-6">
                                 <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                     <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
-                                    <span className="truncate">Revenue vs Expenses</span>
+                                    <span className="truncate">{t('finance.charts.revenue_vs_expenses')}</span>
                                 </h3>
                                 {revenueExpenses?.data && revenueExpenses.data.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={250} className="sm:!h-[300px] md:!h-[350px]">
@@ -253,16 +255,16 @@ export default function FinancialDashboard() {
                                             <YAxis stroke="#9ca3af" fontSize={10} width={40} />
                                             <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', fontSize: '12px' }} />
                                             <Legend wrapperStyle={{ fontSize: '10px' }} />
-                                            <Area type="monotone" dataKey="revenue" fill="#10b98150" stroke="#10b981" name="Revenue" />
-                                            <Area type="monotone" dataKey="expenses" fill="#ef444450" stroke="#ef4444" name="Expenses" />
-                                            <Line type="monotone" dataKey="profit" stroke="#8b5cf6" strokeWidth={2} name="Profit" />
+                                            <Area type="monotone" dataKey="revenue" fill="#10b98150" stroke="#10b981" name={t('finance.charts.revenue')} />
+                                            <Area type="monotone" dataKey="expenses" fill="#ef444450" stroke="#ef4444" name={t('finance.charts.expenses')} />
+                                            <Line type="monotone" dataKey="profit" stroke="#8b5cf6" strokeWidth={2} name={t('finance.charts.profit')} />
                                         </ComposedChart>
                                     </ResponsiveContainer>
                                 ) : (
                                     <div className="h-[250px] sm:h-[300px] md:h-[350px] flex items-center justify-center text-muted-foreground">
                                         <div className="text-center">
                                             <BarChart3 className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                            <p className="text-xs sm:text-sm">No revenue vs expenses data</p>
+                                            <p className="text-xs sm:text-sm">{t('finance.empty.revenue_expenses')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -274,7 +276,7 @@ export default function FinancialDashboard() {
                             <CardContent className="p-3 sm:p-4 md:p-6">
                                 <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                     <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
-                                    Cost of Goods Sold
+                                    {t('finance.charts.cogs_breakdown')}
                                 </h3>
                                 {cogs?.breakdown && cogs.breakdown.length > 0 ? (
                                     <>
@@ -298,16 +300,16 @@ export default function FinancialDashboard() {
                                             </PieChart>
                                         </ResponsiveContainer>
                                         <div className="mt-3 sm:mt-4 text-center">
-                                            <p className="text-[10px] sm:text-sm text-muted-foreground">Total COGS</p>
+                                            <p className="text-[10px] sm:text-sm text-muted-foreground">{t('finance.stats.total_cogs')}</p>
                                             <p className="text-lg sm:text-xl md:text-2xl font-bold text-orange-600 dark:text-orange-400">${Number(cogs?.total || 0).toLocaleString()}</p>
-                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">{cogs?.percentage_of_revenue || 0}% of Revenue</p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">{cogs?.percentage_of_revenue || 0}% {t('finance.stats.of_revenue')}</p>
                                         </div>
                                     </>
                                 ) : (
                                     <div className="h-[200px] sm:h-[250px] md:h-[300px] flex items-center justify-center text-muted-foreground">
                                         <div className="text-center">
                                             <PieChartIcon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                            <p className="text-xs sm:text-sm">No COGS data</p>
+                                            <p className="text-xs sm:text-sm">{t('finance.empty.cogs')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -319,7 +321,7 @@ export default function FinancialDashboard() {
                             <CardContent className="p-3 sm:p-4 md:p-6">
                                 <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                     <Target className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
-                                    Margins by Category
+                                    {t('finance.charts.margins_by_category')}
                                 </h3>
                                 {margins?.by_category && margins.by_category.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={200} className="sm:!h-[250px] md:!h-[300px]">
@@ -342,7 +344,7 @@ export default function FinancialDashboard() {
                                     <div className="h-[200px] sm:h-[250px] md:h-[300px] flex items-center justify-center text-muted-foreground">
                                         <div className="text-center">
                                             <Target className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                            <p className="text-xs sm:text-sm">No margin data</p>
+                                            <p className="text-xs sm:text-sm">{t('finance.empty.margins')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -355,7 +357,7 @@ export default function FinancialDashboard() {
                         <CardContent className="p-3 sm:p-4 md:p-6">
                             <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                 <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
-                                Expense Breakdown
+                                {t('finance.charts.expense_breakdown')}
                             </h3>
                             {profitLoss?.expense_categories && profitLoss.expense_categories.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
@@ -369,7 +371,7 @@ export default function FinancialDashboard() {
                                             </div>
                                             <p className="text-base sm:text-lg md:text-2xl font-bold text-foreground">${Number(exp.amount).toLocaleString()}</p>
                                             <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                                                {exp.change >= 0 ? '↑' : '↓'} {Math.abs(exp.change).toFixed(1)}% from last period
+                                                {exp.change >= 0 ? '↑' : '↓'} {Math.abs(exp.change).toFixed(1)}% {t('finance.stats.from_last_period')}
                                             </p>
                                         </div>
                                     ))}
@@ -378,7 +380,7 @@ export default function FinancialDashboard() {
                                 <div className="h-[150px] sm:h-[180px] md:h-[200px] flex items-center justify-center text-muted-foreground">
                                     <div className="text-center">
                                         <CreditCard className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                        <p className="text-xs sm:text-sm">No expense breakdown</p>
+                                        <p className="text-xs sm:text-sm">{t('finance.empty.expenses')}</p>
                                     </div>
                                 </div>
                             )}

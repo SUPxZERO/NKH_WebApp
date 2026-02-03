@@ -5,6 +5,7 @@ import {
     FileText, Clock, Users, Activity, TrendingUp, AlertTriangle,
     CheckCircle, XCircle, Globe, Shield
 } from 'lucide-react';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface AuditStats {
     total_logs: number;
@@ -80,6 +81,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color, su
 );
 
 export const AuditStatsPanel: React.FC<AuditStatsPanelProps> = ({ stats, className }) => {
+    const { t } = useLanguage();
     const successRate = stats.success_count && stats.failed_count
         ? Math.round((stats.success_count / (stats.success_count + stats.failed_count)) * 100)
         : 100;
@@ -89,37 +91,37 @@ export const AuditStatsPanel: React.FC<AuditStatsPanelProps> = ({ stats, classNa
             {/* Primary Stats Row */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                 <StatCard
-                    title="Total Logs"
+                    title={t('analytics.audit.stats.total_logs') as string}
                     value={stats.total_logs}
                     icon={FileText}
                     color="text-purple-600 dark:text-purple-400"
                 />
                 <StatCard
-                    title="Today"
+                    title={t('analytics.audit.stats.today') as string}
                     value={stats.today_logs}
                     icon={Clock}
                     color="text-blue-600 dark:text-blue-400"
-                    subValue={stats.week_logs ? `${stats.week_logs} this week` : undefined}
+                    subValue={stats.week_logs ? `${stats.week_logs} ${t('analytics.audit.stats.suffixes.this_week')}` : undefined}
                 />
                 <StatCard
-                    title="Active Users"
+                    title={t('analytics.audit.stats.active_users') as string}
                     value={stats.unique_users}
                     icon={Users}
                     color="text-emerald-600 dark:text-emerald-400"
-                    subValue={stats.active_users_today ? `${stats.active_users_today} today` : undefined}
+                    subValue={stats.active_users_today ? `${stats.active_users_today} ${t('analytics.audit.stats.suffixes.today')}` : undefined}
                 />
                 <StatCard
-                    title="Top Action"
+                    title={t('analytics.audit.stats.top_action') as string}
                     value={stats.top_action || 'N/A'}
                     icon={Activity}
                     color="text-amber-600 dark:text-amber-400"
                 />
                 <StatCard
-                    title="Success Rate"
+                    title={t('analytics.audit.stats.success_rate') as string}
                     value={`${successRate}%`}
                     icon={successRate >= 95 ? CheckCircle : AlertTriangle}
                     color={successRate >= 95 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}
-                    subValue={stats.failed_count ? `${stats.failed_count} failed` : undefined}
+                    subValue={stats.failed_count ? `${stats.failed_count} ${t('analytics.audit.stats.suffixes.failed')}` : undefined}
                 />
             </div>
 
@@ -131,7 +133,7 @@ export const AuditStatsPanel: React.FC<AuditStatsPanelProps> = ({ stats, classNa
                         <div className="bg-card border border-border rounded-xl p-4">
                             <div className="flex items-center gap-2 mb-3">
                                 <Globe className="w-4 h-4 text-muted-foreground" />
-                                <h3 className="text-sm font-semibold text-foreground">By Source</h3>
+                                <h3 className="text-sm font-semibold text-foreground">{t('analytics.audit.stats.by_source')}</h3>
                             </div>
                             <div className="space-y-2">
                                 {Object.entries(stats.by_source).map(([source, count]) => {
@@ -159,7 +161,7 @@ export const AuditStatsPanel: React.FC<AuditStatsPanelProps> = ({ stats, classNa
                         <div className="bg-card border border-border rounded-xl p-4">
                             <div className="flex items-center gap-2 mb-3">
                                 <Shield className="w-4 h-4 text-muted-foreground" />
-                                <h3 className="text-sm font-semibold text-foreground">By Guard</h3>
+                                <h3 className="text-sm font-semibold text-foreground">{t('analytics.audit.stats.by_guard')}</h3>
                             </div>
                             <div className="space-y-2">
                                 {Object.entries(stats.by_guard).map(([guard, count]) => {
@@ -189,7 +191,7 @@ export const AuditStatsPanel: React.FC<AuditStatsPanelProps> = ({ stats, classNa
                 <div className="bg-card border border-border rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-3">
                         <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                        <h3 className="text-sm font-semibold text-foreground">Top Actions</h3>
+                        <h3 className="text-sm font-semibold text-foreground">{t('analytics.audit.stats.top_actions')}</h3>
                     </div>
                     <div className="flex items-end gap-2 h-24">
                         {Object.entries(stats.top_actions).slice(0, 5).map(([action, count], index) => {

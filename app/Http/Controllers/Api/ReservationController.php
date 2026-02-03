@@ -96,14 +96,14 @@ class ReservationController extends Controller
 
         $floor = $table->floor;
         if (!$floor) {
-            abort(422, 'Selected table is not assigned to a floor.');
+            abort(422, __('messages.api.errors.table_no_floor'));
         }
 
         $locationId = (int) $floor->location_id;
 
         $guestCount = (int) $validated['guest_count'];
         if ($guestCount > (int) $table->capacity) {
-            abort(422, 'Guest count exceeds table capacity.');
+            abort(422, __('messages.api.errors.guest_limit'));
         }
 
         $reservedAt = Carbon::parse($validated['reserved_for']);
@@ -117,7 +117,7 @@ class ReservationController extends Controller
             ->exists();
 
         if ($slotExists) {
-            abort(422, 'Selected table is already reserved for that time.');
+            abort(422, __('messages.api.errors.table_reserved'));
         }
 
         $duration = isset($validated['duration_minutes'])
@@ -179,12 +179,12 @@ class ReservationController extends Controller
                 : $reservation->table()->with('floor')->first();
 
             if (!$table) {
-                abort(422, 'Selected table could not be found.');
+                abort(422, __('messages.api.errors.table_unavailable'));
             }
 
             $floor = $table->floor;
             if (!$floor) {
-                abort(422, 'Selected table is not assigned to a floor.');
+                abort(422, __('messages.api.errors.table_no_floor'));
             }
 
             $locationId = (int) $floor->location_id;
@@ -216,7 +216,7 @@ class ReservationController extends Controller
                 : ($reservation->party_size ?? $reservation->guest_count ?? 1);
 
             if ($guestCount > (int) $table->capacity) {
-                abort(422, 'Guest count exceeds table capacity.');
+                abort(422, __('messages.api.errors.guest_limit'));
             }
 
             $slotExists = Reservation::where('location_id', $locationId)
@@ -227,7 +227,7 @@ class ReservationController extends Controller
                 ->exists();
 
             if ($slotExists) {
-                abort(422, 'Selected table is already reserved for that time.');
+                abort(422, __('messages.api.errors.table_reserved'));
             }
 
             $reservation->location_id = $locationId;
@@ -274,7 +274,7 @@ class ReservationController extends Controller
             $this->sendReservationStatusNotification($reservation, 'cancelled');
         }
 
-        return response()->json(['message' => 'Reservation cancelled']);
+        return response()->json(['message' => __('messages.api.success.reservation_cancelled')]);
     }
 
     /**
@@ -293,24 +293,24 @@ class ReservationController extends Controller
 
             $messages = [
                 'confirmed' => [
-                    'title' => 'Reservation Confirmed! ✅',
-                    'message' => "Your reservation on {$reservedAt->format('M d')} at {$reservedAt->format('g:i A')} has been confirmed!",
+                    'title' => __('messages.api.reservations.notifications.confirmed.title'),
+                    'message' => __('messages.api.reservations.notifications.confirmed.body', ['date' => $reservedAt->format('M d'), 'time' => $reservedAt->format('g:i A')]),
                 ],
                 'cancelled' => [
-                    'title' => 'Reservation Cancelled ❌',
-                    'message' => "Your reservation on {$reservedAt->format('M d')} at {$reservedAt->format('g:i A')} has been cancelled.",
+                    'title' => __('messages.api.reservations.notifications.cancelled.title'),
+                    'message' => __('messages.api.reservations.notifications.cancelled.body', ['date' => $reservedAt->format('M d'), 'time' => $reservedAt->format('g:i A')]),
                 ],
                 'seated' => [
-                    'title' => 'Welcome! 👋',
-                    'message' => "Enjoy your dining experience! Your table is ready.",
+                    'title' => __('messages.api.reservations.notifications.seated.title'),
+                    'message' => __('messages.api.reservations.notifications.seated.body'),
                 ],
                 'completed' => [
-                    'title' => 'Thanks for Dining! ⭐',
-                    'message' => "We hope you enjoyed your visit. See you again soon!",
+                    'title' => __('messages.api.reservations.notifications.completed.title'),
+                    'message' => __('messages.api.reservations.notifications.completed.body'),
                 ],
                 'no_show' => [
-                    'title' => 'Missed Reservation',
-                    'message' => "We missed you! Your reservation on {$reservedAt->format('M d')} was marked as no-show.",
+                    'title' => __('messages.api.reservations.notifications.no_show.title'),
+                    'message' => __('messages.api.reservations.notifications.no_show.body', ['date' => $reservedAt->format('M d')]),
                 ],
             ];
 

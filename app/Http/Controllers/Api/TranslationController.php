@@ -18,11 +18,13 @@ class TranslationController extends Controller
      */
     public function getCategoryTranslations(): JsonResponse
     {
-        $categories = Category::with(['translations' => function($query) {
-            $query->whereIn('locale', ['en', 'km']);
-        }])->get();
+        $categories = Category::with([
+            'translations' => function ($query) {
+                $query->whereIn('locale', ['en', 'km']);
+            }
+        ])->get();
 
-        $data = $categories->map(function($category) {
+        $data = $categories->map(function ($category) {
             $translations = $category->translations->groupBy('locale');
             return [
                 'id' => $category->id,
@@ -41,11 +43,14 @@ class TranslationController extends Controller
      */
     public function getMenuItemTranslations(): JsonResponse
     {
-        $menuItems = MenuItem::with(['translations' => function($query) {
-            $query->whereIn('locale', ['en', 'km']);
-        }, 'category.translations'])->get();
+        $menuItems = MenuItem::with([
+            'translations' => function ($query) {
+                $query->whereIn('locale', ['en', 'km']);
+            },
+            'category.translations'
+        ])->get();
 
-        $data = $menuItems->map(function($item) {
+        $data = $menuItems->map(function ($item) {
             $translations = $item->translations->groupBy('locale');
             return [
                 'id' => $item->id,
@@ -85,11 +90,11 @@ class TranslationController extends Controller
             );
 
             DB::commit();
-            return response()->json(['message' => 'Translation updated successfully']);
+            return response()->json(['message' => __('messages.api.utility.translation_updated')]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Failed to update translation: ' . $e->getMessage()], 500);
+            return response()->json(['message' => __('messages.api.utility.translation_update_failed', ['error' => $e->getMessage()])], 500);
         }
     }
 
@@ -118,11 +123,11 @@ class TranslationController extends Controller
             );
 
             DB::commit();
-            return response()->json(['message' => 'Translation updated successfully']);
+            return response()->json(['message' => __('messages.api.utility.translation_updated')]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Failed to update translation: ' . $e->getMessage()], 500);
+            return response()->json(['message' => __('messages.api.utility.translation_update_failed', ['error' => $e->getMessage()])], 500);
         }
     }
 
@@ -169,11 +174,11 @@ class TranslationController extends Controller
             }
 
             DB::commit();
-            return response()->json(['message' => 'Translations updated successfully']);
+            return response()->json(['message' => __('messages.api.utility.translations_bulk_updated')]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Failed to update translations: ' . $e->getMessage()], 500);
+            return response()->json(['message' => __('messages.api.utility.translations_bulk_failed', ['error' => $e->getMessage()])], 500);
         }
     }
 
@@ -182,11 +187,11 @@ class TranslationController extends Controller
      */
     public function getMissingTranslations(): JsonResponse
     {
-        $missingCategories = Category::whereDoesntHave('translations', function($query) {
+        $missingCategories = Category::whereDoesntHave('translations', function ($query) {
             $query->where('locale', 'km');
         })->count();
 
-        $missingMenuItems = MenuItem::whereDoesntHave('translations', function($query) {
+        $missingMenuItems = MenuItem::whereDoesntHave('translations', function ($query) {
             $query->where('locale', 'km');
         })->count();
 

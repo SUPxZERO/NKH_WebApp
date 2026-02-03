@@ -16,9 +16,13 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Order } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 // Enhanced Status badge with icons
 const StatusBadge = ({ status, size = 'default' }: { status: string; size?: 'default' | 'lg' }) => {
+  const { t } = useTranslation();
+  const getStatusLabel = (s: string) => t(`admin.orders.status.${s}`) || s;
+
   const configs: Record<string, { bg: string; text: string; icon: React.ReactNode; glow?: string }> = {
     pending: {
       bg: 'bg-amber-500/10 dark:bg-amber-500/20',
@@ -69,13 +73,16 @@ const StatusBadge = ({ status, size = 'default' }: { status: string; size?: 'def
       size === 'lg' ? 'px-3 py-1.5 text-sm' : 'px-2.5 py-1 text-xs'
     )}>
       {config.icon}
-      <span className="capitalize">{status}</span>
+      <span className="capitalize">{getStatusLabel(status)}</span>
     </span>
   );
 };
 
 // Order type badge
 const TypeBadge = ({ type }: { type: string }) => {
+  const { t } = useTranslation();
+  const getTypeLabel = (tType: string) => t(`admin.orders.filter.types.${tType.replace('-', '_')}`) || tType;
+
   const configs: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
     'dine-in': {
       bg: 'bg-violet-500/10 dark:bg-violet-500/20',
@@ -103,7 +110,7 @@ const TypeBadge = ({ type }: { type: string }) => {
       config.text
     )}>
       {config.icon}
-      <span className="capitalize">{type.replace('-', ' ')}</span>
+      <span className="capitalize">{getTypeLabel(type)}</span>
     </span>
   );
 };
@@ -212,6 +219,7 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   // State for rejection modal - REMOVED
   const [showFilters, setShowFilters] = useState(false);
+  const { t } = useTranslation();
 
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
@@ -314,13 +322,21 @@ export default function Orders() {
   };
 
   const getNextStatusLabel = (currentStatus: string): string => {
-    const labels: Record<string, string> = {
-      pending: 'Receive',
-      received: 'Start Prep',
-      preparing: 'Ready',
-      ready: 'Complete'
+    // const labels: Record<string, string> = {
+    //   pending: 'Receive',
+    //   received: 'Start Prep',
+    //   preparing: 'Ready',
+    //   ready: 'Complete'
+    // };
+    // return labels[currentStatus] || 'Update';
+    const mapping: Record<string, string> = {
+      pending: 'receive',
+      received: 'start_prep',
+      preparing: 'ready',
+      ready: 'complete'
     };
-    return labels[currentStatus] || 'Update';
+    const key = mapping[currentStatus] || 'update';
+    return t(`admin.orders.actions.${key}`) as string;
   };
 
   return (
@@ -334,12 +350,12 @@ export default function Orders() {
                 <ReceiptText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate">Orders</h1>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate">{t('admin.orders.title')}</h1>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{ordersData?.meta?.total || 0} orders</p>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{ordersData?.meta?.total || 0} {t('admin.common.items')}</p>
                   <div className="flex items-center gap-1">
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400">Live</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400">{t('admin.orders.live')}</span>
                   </div>
                 </div>
               </div>
@@ -360,7 +376,7 @@ export default function Orders() {
                   <Package className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-600 dark:text-fuchsia-400" />
                 </div>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">All</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('admin.orders.stats.all')}</p>
               </motion.div>
               <motion.div whileTap={{ scale: 0.98 }} onClick={() => setStatusFilter('pending')}
                 className={cn("relative p-3 sm:p-4 rounded-xl sm:rounded-2xl border cursor-pointer transition-all bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm min-w-[90px] sm:min-w-0",
@@ -369,7 +385,7 @@ export default function Orders() {
                   <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.pending}</p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Pending</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('admin.orders.stats.pending')}</p>
                 {stats.pending > 0 && <span className="absolute top-2 right-2 sm:top-3 sm:right-3 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 animate-pulse" />}
               </motion.div>
               <motion.div whileTap={{ scale: 0.98 }} onClick={() => setStatusFilter('preparing')}
@@ -379,7 +395,7 @@ export default function Orders() {
                   <ChefHat className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.preparing}</p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Preparing</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('admin.orders.stats.preparing')}</p>
                 {stats.preparing > 0 && <span className="absolute top-2 right-2 sm:top-3 sm:right-3 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-500 animate-pulse" />}
               </motion.div>
               <motion.div whileTap={{ scale: 0.98 }} onClick={() => setStatusFilter('ready')}
@@ -389,7 +405,7 @@ export default function Orders() {
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.ready}</p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Ready</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('admin.orders.stats.ready')}</p>
                 {stats.ready > 0 && <span className="absolute top-2 right-2 sm:top-3 sm:right-3 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />}
               </motion.div>
             </div>
@@ -402,7 +418,7 @@ export default function Orders() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by order number, customer name..."
+                  placeholder={(t('admin.orders.search_placeholder') as string) || "Search..."}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full h-12 pl-12 pr-4 bg-gray-50/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent transition-all"
@@ -419,17 +435,17 @@ export default function Orders() {
                   )}
                 >
                   <Filter className="w-4 h-4" />
-                  <span className="hidden sm:inline">Filters</span>
+                  <span className="hidden sm:inline">{t('admin.orders.filter.button')}</span>
                 </button>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
                   className="h-12 px-4 bg-gray-50/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 cursor-pointer"
                 >
-                  <option value="all">All Types</option>
-                  <option value="dine-in">Dine-In</option>
-                  <option value="pickup">Pickup</option>
-                  <option value="delivery">Delivery</option>
+                  <option value="all">{t('admin.orders.filter.types.all')}</option>
+                  <option value="dine-in">{t('admin.orders.filter.types.dine_in')}</option>
+                  <option value="pickup">{t('admin.orders.filter.types.pickup')}</option>
+                  <option value="delivery">{t('admin.orders.filter.types.delivery')}</option>
                 </select>
               </div>
             </div>
@@ -455,7 +471,7 @@ export default function Orders() {
                             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-fuchsia-300"
                         )}
                       >
-                        {s}
+                        {t(`admin.orders.status.${s}`) || s}
                       </button>
                     ))}
                   </div>
@@ -480,7 +496,7 @@ export default function Orders() {
                     </div>
                     <div>
                       <span className="font-bold text-lg">{selectedOrders.size}</span>
-                      <span className="ml-1 opacity-90">order{selectedOrders.size > 1 ? 's' : ''} selected</span>
+                      <span className="ml-1 opacity-90">{t('admin.common.items')} {t('admin.orders.actions.selected')}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -490,7 +506,7 @@ export default function Orders() {
                       onClick={() => setSelectedOrders(new Set())}
                       className="text-white hover:bg-white/20 h-10 px-4"
                     >
-                      <X className="w-4 h-4 mr-1" /> Clear
+                      <X className="w-4 h-4 mr-1" /> {t('admin.orders.actions.clear')}
                     </Button>
                   </div>
                 </div>
@@ -502,7 +518,7 @@ export default function Orders() {
           {isLoading ? (
             <div className="py-16 text-center">
               <div className="w-16 h-16 border-4 border-fuchsia-500/30 border-t-fuchsia-500 rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 font-medium">Loading orders...</p>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">{t('admin.orders.empty.loading')}</p>
             </div>
           ) : orderList.length === 0 ? (
             <motion.div
@@ -513,8 +529,8 @@ export default function Orders() {
               <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Package className="w-10 h-10 text-gray-400" />
               </div>
-              <p className="text-gray-900 dark:text-white font-semibold text-lg mb-1">No orders found</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or search query</p>
+              <p className="text-gray-900 dark:text-white font-semibold text-lg mb-1">{t('admin.orders.empty.no_orders')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin.orders.empty.try_adjusting')}</p>
             </motion.div>
           ) : (
             <div className="space-y-3">
@@ -528,7 +544,7 @@ export default function Orders() {
                     className="w-5 h-5 rounded-md border-2 border-gray-300 dark:border-gray-600 text-fuchsia-600 focus:ring-fuchsia-500 focus:ring-offset-0 cursor-pointer transition-all"
                   />
                   <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                    Select all ({orderList.length})
+                    {t('admin.orders.actions.select_all')} ({orderList.length})
                   </span>
                 </label>
                 <p className="text-xs text-gray-500 dark:text-gray-500">
@@ -578,7 +594,7 @@ export default function Orders() {
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center gap-1.5">
                             <User className="w-4 h-4" />
-                            {order.customer?.user?.name || 'Guest Customer'}
+                            {order.customer?.user?.name || t('admin.orders.card.guest')}
                           </span>
                           <span className="flex items-center gap-1.5">
                             <Timer className="w-4 h-4" />
@@ -587,7 +603,7 @@ export default function Orders() {
                           {order.items && order.items.length > 0 && (
                             <span className="flex items-center gap-1.5">
                               <UtensilsCrossed className="w-4 h-4" />
-                              {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                              {order.items.length} {t('admin.orders.card.items')}
                             </span>
                           )}
                         </div>
@@ -612,9 +628,9 @@ export default function Orders() {
                             : "bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400"
                         )}>
                           {order.payment_status === 'paid' ? (
-                            <><CreditCard className="w-3.5 h-3.5" /> Paid</>
+                            <><CreditCard className="w-3.5 h-3.5" /> {t('admin.orders.card.paid')}</>
                           ) : (
-                            <><Clock className="w-3.5 h-3.5" /> Unpaid</>
+                            <><Clock className="w-3.5 h-3.5" /> {t('admin.orders.card.unpaid')}</>
                           )}
                         </div>
                       </div>
@@ -754,13 +770,13 @@ export default function Orders() {
               <div className="p-6 overflow-y-auto flex-1">
                 {/* Customer Info */}
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 mb-4">
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Customer Details</h3>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{t('admin.orders.modal.customer_details')}</h3>
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
                       {(selectedOrder.customer?.user?.name || 'G')[0].toUpperCase()}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900 dark:text-white">{selectedOrder.customer?.user?.name || 'Guest Customer'}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{selectedOrder.customer?.user?.name || t('admin.orders.card.guest')}</p>
                       {selectedOrder.customer?.user?.email && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                           <Mail className="w-3.5 h-3.5" />
@@ -776,7 +792,7 @@ export default function Orders() {
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4">
                     <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
                       <DollarSign className="w-4 h-4" />
-                      <span className="text-xs font-medium uppercase">Total Amount</span>
+                      <span className="text-xs font-medium uppercase">{t('admin.orders.modal.total_amount')}</span>
                     </div>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">${getAmount(selectedOrder.total).toFixed(2)}</p>
                   </div>
@@ -793,7 +809,7 @@ export default function Orders() {
                         : "text-red-600 dark:text-red-400"
                     )}>
                       <CreditCard className="w-4 h-4" />
-                      <span className="text-xs font-medium uppercase">Payment</span>
+                      <span className="text-xs font-medium uppercase">{t('admin.orders.modal.payment')}</span>
                     </div>
                     <p className={cn(
                       "text-lg font-bold",

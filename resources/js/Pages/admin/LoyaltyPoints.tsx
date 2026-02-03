@@ -13,6 +13,7 @@ import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -79,16 +80,19 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Mobile optimized with horizontal scroll
-const LoyaltyStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
-    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-      <StatCard title="Earned" value={stats.earned.toLocaleString()} icon={TrendingUp} color="emerald" index={0} />
-      <StatCard title="Redeemed" value={stats.redeemed.toLocaleString()} icon={Gift} color="blue" index={1} />
-      <StatCard title="Customers" value={stats.activeCustomers} icon={Users} color="purple" index={2} />
-      <StatCard title="Txns" value={stats.transactions} icon={Star} color="amber" index={3} />
+const LoyaltyStatsRibbon = ({ stats }: { stats: any }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
+      <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+        <StatCard title={t('marketing.loyalty.stats.earned')} value={stats.earned.toLocaleString()} icon={TrendingUp} color="emerald" index={0} />
+        <StatCard title={t('marketing.loyalty.stats.redeemed')} value={stats.redeemed.toLocaleString()} icon={Gift} color="blue" index={1} />
+        <StatCard title={t('marketing.loyalty.stats.customers')} value={stats.activeCustomers} icon={Users} color="purple" index={2} />
+        <StatCard title={t('marketing.loyalty.stats.txns')} value={stats.transactions} icon={Star} color="amber" index={3} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface LoyaltyPoint {
   id: number; customer_id: number; customer?: { id: number; user?: { name: string } };
@@ -97,6 +101,7 @@ interface LoyaltyPoint {
 }
 
 export default function LoyaltyPoints() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -138,20 +143,20 @@ export default function LoyaltyPoints() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/admin/loyalty-points', data),
-    onSuccess: () => { toastSuccess('Transaction created'); closeModal(); qc.invalidateQueries({ queryKey: ['loyalty-points'] }); qc.invalidateQueries({ queryKey: ['loyalty-stats'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('marketing.loyalty.messages.created')); closeModal(); qc.invalidateQueries({ queryKey: ['loyalty-points'] }); qc.invalidateQueries({ queryKey: ['loyalty-stats'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('marketing.loyalty.messages.failed'))
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/loyalty-points/${id}`, data),
-    onSuccess: () => { toastSuccess('Transaction updated'); closeModal(); qc.invalidateQueries({ queryKey: ['loyalty-points'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('marketing.loyalty.messages.updated')); closeModal(); qc.invalidateQueries({ queryKey: ['loyalty-points'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('marketing.loyalty.messages.failed'))
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/loyalty-points/${id}`),
-    onSuccess: () => { toastSuccess('Transaction deleted'); qc.invalidateQueries({ queryKey: ['loyalty-points'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('marketing.loyalty.messages.deleted')); qc.invalidateQueries({ queryKey: ['loyalty-points'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('marketing.loyalty.messages.failed'))
   });
 
   const closeModal = () => {
@@ -220,13 +225,13 @@ export default function LoyaltyPoints() {
               animate={{ opacity: 1, x: 0 }}
               className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent truncate"
             >
-              Loyalty Points
+              {t('marketing.loyalty.title')}
             </motion.h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Customer rewards</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">{t('marketing.loyalty.subtitle')}</p>
           </div>
           <Button onClick={() => { closeModal(); setFormData({ ...formData, occurred_at: new Date().toISOString().slice(0, 16) }); setOpenCreate(true); }} className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0 bg-purple-600 hover:bg-purple-700">
             <Plus className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Transaction</span>
+            <span className="hidden sm:inline">{t('marketing.loyalty.add_button')}</span>
           </Button>
         </div>
 
@@ -242,15 +247,15 @@ export default function LoyaltyPoints() {
           <div className="flex gap-2 sm:gap-4">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+              <Input placeholder={t('marketing.loyalty.filters.search')} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 h-10 text-sm" variant="filled" />
             </div>
             <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
               {[
-                { key: 'all', label: 'All', mobile: 'All' },
-                { key: 'earn', label: 'Earned', mobile: '+' },
-                { key: 'redeem', label: 'Redeemed', mobile: '-' },
-                { key: 'adjust', label: 'Adjust', mobile: '±' }
+                { key: 'all', label: t('marketing.loyalty.filters.type.all'), mobile: t('marketing.loyalty.filters.type.all') },
+                { key: 'earn', label: t('marketing.loyalty.filters.type.earn'), mobile: '+' },
+                { key: 'redeem', label: t('marketing.loyalty.filters.type.redeem'), mobile: '-' },
+                { key: 'adjust', label: t('marketing.loyalty.filters.type.adjust'), mobile: '±' }
               ].map(({ key, label, mobile }) => (
                 <button
                   key={key}
@@ -279,19 +284,19 @@ export default function LoyaltyPoints() {
         >
           {/* Table Header with Gradient */}
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
-            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Customer</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Type</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Points</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Balance</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Date</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.loyalty.table.headers.customer')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.loyalty.table.headers.type')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.loyalty.table.headers.points')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.loyalty.table.headers.balance')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.loyalty.table.headers.date')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('marketing.loyalty.table.headers.actions')}</div>
           </div>
           <div className="divide-y divide-border/30">
             {isLoading ? (
               <div className="p-12 text-center">
                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                   <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  Loading...
+                  {t('marketing.loyalty.table.loading')}
                 </div>
               </div>
             ) : transactionList.length === 0 ? (
@@ -299,8 +304,8 @@ export default function LoyaltyPoints() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
                   <Star className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-foreground font-semibold">No transactions found</h3>
-                <p className="text-muted-foreground text-sm mt-1">Create first transaction</p>
+                <h3 className="text-foreground font-semibold">{t('marketing.loyalty.table.empty.title')}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{t('marketing.loyalty.table.empty.subtitle')}</p>
               </div>
             ) : transactionList.map((transaction: LoyaltyPoint, idx: number) => (
               <motion.div
@@ -334,7 +339,7 @@ export default function LoyaltyPoints() {
                 </div>
                 <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                   <Button size="sm" variant="ghost" onClick={() => handleEdit(transaction)} className="h-7 w-7 p-0 hover:bg-purple-500/20 hover:text-purple-600"><Edit size={14} /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => confirm('Delete?') && deleteMutation.mutate(transaction.id)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-600"><Trash2 size={14} /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => confirm(t('marketing.loyalty.messages.delete_confirm')) && deleteMutation.mutate(transaction.id)} className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-600"><Trash2 size={14} /></Button>
                 </div>
               </motion.div>
             ))}
@@ -346,12 +351,12 @@ export default function LoyaltyPoints() {
           {isLoading ? (
             <div className="p-6 text-center text-muted-foreground text-sm">
               <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              Loading...
+              {t('marketing.loyalty.table.loading')}
             </div>
           ) : transactionList.length === 0 ? (
             <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">
               <Star className="w-10 h-10 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
-              <p className="text-muted-foreground text-sm">No transactions found</p>
+              <p className="text-muted-foreground text-sm">{t('marketing.loyalty.table.empty.title')}</p>
             </div>
           ) : (
             transactionList.map((transaction: LoyaltyPoint, idx: number) => (
@@ -371,7 +376,7 @@ export default function LoyaltyPoints() {
                     <Button size="sm" variant="ghost" onClick={() => handleEdit(transaction)} className="h-8 w-8 p-0 hover:bg-purple-500/20 hover:text-purple-600">
                       <Edit size={14} />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => confirm('Delete?') && deleteMutation.mutate(transaction.id)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-600">
+                    <Button size="sm" variant="ghost" onClick={() => confirm(t('marketing.loyalty.messages.delete_confirm')) && deleteMutation.mutate(transaction.id)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-600">
                       <Trash2 size={14} />
                     </Button>
                   </div>
@@ -392,35 +397,35 @@ export default function LoyaltyPoints() {
         </div>
       </div>
 
-      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingTransaction ? 'Edit' : 'New Transaction'} size="lg">
+      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingTransaction ? t('marketing.loyalty.form.edit_title') : t('marketing.loyalty.form.create_title')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('marketing.loyalty.form.fields.customer')}</label>
               <select value={formData.customer_id} onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })} required
                 className="w-full h-10 bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all">
-                <option value="">Select</option>
+                <option value="">{t('marketing.loyalty.form.placeholders.search_customer')}</option>
                 {customers?.data?.map((c: any) => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('marketing.loyalty.form.fields.type')}</label>
               <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 className="w-full h-10 bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all">
-                <option value="earn">Earn</option>
-                <option value="redeem">Redeem</option>
-                <option value="adjust">Adjust</option>
+                <option value="earn">{t('marketing.loyalty.form.options.earn')}</option>
+                <option value="redeem">{t('marketing.loyalty.form.options.redeem')}</option>
+                <option value="adjust">{t('marketing.loyalty.form.options.adjust')}</option>
               </select>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Points" type="number" value={formData.points} onChange={(e) => setFormData({ ...formData, points: e.target.value })} required className="h-10 text-sm" placeholder={formData.type === 'adjust' ? 'e.g. 50 or -50' : 'e.g. 100'} />
-            <Input label="Date" type="datetime-local" value={formData.occurred_at} onChange={(e) => setFormData({ ...formData, occurred_at: e.target.value })} required className="h-10 text-sm" />
+            <Input label={t('marketing.loyalty.form.fields.points')} type="number" value={formData.points} onChange={(e) => setFormData({ ...formData, points: e.target.value })} required className="h-10 text-sm" placeholder={formData.type === 'adjust' ? t('marketing.loyalty.form.placeholders.points_adjust') : t('marketing.loyalty.form.placeholders.points_earn')} />
+            <Input label={t('marketing.loyalty.form.fields.date')} type="datetime-local" value={formData.occurred_at} onChange={(e) => setFormData({ ...formData, occurred_at: e.target.value })} required className="h-10 text-sm" />
           </div>
           <div className="hidden sm:block">
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('marketing.loyalty.form.fields.notes')}</label>
             <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2}
-              className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all" placeholder="Notes..." />
+              className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all" placeholder={t('marketing.loyalty.form.placeholders.notes')} />
           </div>
           <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
             <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>

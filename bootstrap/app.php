@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class, // Sprint P-Translation: Must run BEFORE Inertia
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\AuditMiddleware::class, // Audit request tracing
@@ -71,7 +72,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Unauthenticated.',
+                    'message' => __('messages.api.errors.unauthenticated'),
                 ], 401);
             }
         });
@@ -79,7 +80,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Auth\Access\AuthorizationException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Forbidden.',
+                    'message' => __('messages.api.errors.forbidden'),
                 ], 403);
             }
         });
@@ -87,7 +88,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Resource not found.',
+                    'message' => __('messages.api.errors.resource_not_found'),
                 ], 404);
             }
         });
@@ -96,7 +97,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson() || $request->is('api/*')) {
                 $status = $e->getStatusCode();
                 return response()->json([
-                    'message' => $e->getMessage() ?: 'HTTP error.',
+                    'message' => $e->getMessage() ?: __('messages.api.errors.http_error'),
                 ], $status);
             }
         });

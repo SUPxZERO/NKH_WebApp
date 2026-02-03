@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -84,6 +85,7 @@ const CustomerStatsRibbon = ({ stats }: { stats: any }) => (
 );
 
 export default function Customers() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedCustomers, setSelectedCustomers] = useState<Set<number>>(new Set());
@@ -121,19 +123,19 @@ export default function Customers() {
 
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/admin/customers', data),
-    onSuccess: () => { toastSuccess('Customer created'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/customers'] }); },
+    onSuccess: () => { toastSuccess(t('admin.people.customers.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/customers'] }); },
     onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`/admin/customers/${id}`, data),
-    onSuccess: () => { toastSuccess('Customer updated'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/customers'] }); },
+    onSuccess: () => { toastSuccess(t('admin.people.customers.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/customers'] }); },
     onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/admin/customers/${id}`),
-    onSuccess: () => { toastSuccess('Customer deactivated'); qc.invalidateQueries({ queryKey: ['admin/customers'] }); },
+    onSuccess: () => { toastSuccess(t('admin.people.customers.deactivated') as string); qc.invalidateQueries({ queryKey: ['admin/customers'] }); },
     onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
   });
 
@@ -167,7 +169,7 @@ export default function Customers() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Deactivate this customer?')) deleteMutation.mutate(id);
+    if (confirm(t('admin.people.customers.confirm_deactivate') as string)) deleteMutation.mutate(id);
   };
 
   const toggleSelectCustomer = (id: number) => {
@@ -194,12 +196,12 @@ export default function Customers() {
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight truncate">
               <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Customers
+                {t('admin.people.customers.title')}
               </span>
             </h1>
             <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm hidden sm:flex items-center gap-2">
               <Users className="w-3.5 h-3.5 text-fuchsia-500" />
-              Manage customers and loyalty
+              {t('admin.people.customers.subtitle')}
             </p>
           </div>
           <Button
@@ -208,12 +210,20 @@ export default function Customers() {
             className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0"
           >
             <Plus className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Customer</span>
+            <span className="hidden sm:inline">{t('admin.people.customers.add_customer')}</span>
           </Button>
         </motion.div>
 
         {/* Stats */}
-        <CustomerStatsRibbon stats={stats} />
+        <CustomerStatsRibbon stats={
+          {
+            ...stats,
+            totalLabel: t('admin.people.customers.stats.total'),
+            activeLabel: t('admin.people.customers.stats.active'),
+            vipLabel: t('admin.people.customers.stats.vip'),
+            pointsLabel: t('admin.people.customers.stats.points')
+          }
+        } />
 
         {/* Filters */}
         <motion.div
@@ -227,7 +237,7 @@ export default function Customers() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={t('common.search') as string}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full h-10 pl-9 pr-3 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -245,7 +255,7 @@ export default function Customers() {
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   )}
                 >
-                  {status === 'all' ? 'All' : status === 'active' ? 'On' : 'Off'}
+                  {status === 'all' ? t('admin.menu.stats.total') : status === 'active' ? t('admin.menu.stats.active') : t('admin.menu.stats.inactive')}
                 </button>
               ))}
             </div>
@@ -267,12 +277,12 @@ export default function Customers() {
                     <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-bold text-sm sm:text-lg">{selectedCustomers.size} selected</p>
+                    <p className="text-white font-bold text-sm sm:text-lg">{t('admin.people.customers.selected', { count: selectedCustomers.size })}</p>
                   </div>
                 </div>
                 <Button size="sm" onClick={() => setSelectedCustomers(new Set())} className="bg-white/20 text-white hover:bg-white/30 border-0 h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm">
                   <X className="w-3.5 h-3.5 sm:mr-1" />
-                  <span className="hidden sm:inline">Clear</span>
+                  <span className="hidden sm:inline">{t('admin.people.customers.clear')}</span>
                 </Button>
               </div>
             </motion.div>
@@ -296,11 +306,11 @@ export default function Customers() {
                 className="w-5 h-5 rounded-md border-2 border-border bg-card text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer transition-all"
               />
             </div>
-            <div className="col-span-3 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Customer</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Contact</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Location</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">Points</div>
-            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">Actions</div>
+            <div className="col-span-3 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.people.customers.table.customer')}</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.people.customers.table.contact')}</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.people.customers.table.location')}</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center">{t('admin.people.customers.table.points')}</div>
+            <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-end">{t('admin.people.customers.table.actions')}</div>
           </div>
 
           {/* Table Body */}
@@ -310,15 +320,15 @@ export default function Customers() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 mb-4">
                   <div className="w-8 h-8 border-3 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-muted-foreground font-medium">Loading...</p>
+                <p className="text-muted-foreground font-medium">{t('common.loading')}</p>
               </div>
             ) : customerList.length === 0 ? (
               <div className="p-16 text-center">
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-muted mb-4">
                   <Users className="w-10 h-10 text-muted-foreground" />
                 </div>
-                <h3 className="text-foreground font-bold text-lg mb-1">No customers found</h3>
-                <p className="text-muted-foreground text-sm">Try adjusting search</p>
+                <h3 className="text-foreground font-bold text-lg mb-1">{t('admin.people.customers.empty')}</h3>
+                <p className="text-muted-foreground text-sm">{t('admin.menu.try_adjusting')}</p>
               </div>
             ) : (
               customerList.map((customer, index) => (
@@ -354,7 +364,7 @@ export default function Customers() {
                           ? "bg-emerald-500/20 text-emerald-600 border-emerald-500/30"
                           : "bg-red-500/20 text-red-600 border-red-500/30"
                       )}>
-                        {customer.user?.is_active ? 'Active' : 'Inactive'}
+                        {customer.user?.is_active ? t('admin.menu.stats.active') : t('admin.menu.stats.inactive')}
                       </span>
                     </div>
                   </div>
@@ -385,7 +395,7 @@ export default function Customers() {
                         <span className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                           {(customer.points_balance || 0).toLocaleString()}
                         </span>
-                        <p className="text-xs text-muted-foreground">points</p>
+                        <p className="text-xs text-muted-foreground">{t('admin.people.customers.stats.points')}</p>
                       </div>
                     </div>
                   </div>
@@ -408,12 +418,12 @@ export default function Customers() {
           {isLoading ? (
             <div className="p-6 text-center text-muted-foreground text-sm">
               <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              Loading...
+              {t('common.loading')}
             </div>
           ) : customerList.length === 0 ? (
             <div className="p-8 text-center bg-card rounded-xl border border-border">
               <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground text-sm">No customers found</p>
+              <p className="text-muted-foreground text-sm">{t('admin.people.customers.empty')}</p>
             </div>
           ) : (
             customerList.map((customer, index) => (
@@ -449,7 +459,7 @@ export default function Customers() {
                     "px-2 py-0.5 rounded-full text-[10px] font-semibold",
                     customer.user?.is_active ? "bg-emerald-500/20 text-emerald-600" : "bg-red-500/20 text-red-600"
                   )}>
-                    {customer.user?.is_active ? 'Active' : 'Inactive'}
+                    {customer.user?.is_active ? t('admin.menu.stats.active') : t('admin.menu.stats.inactive')}
                   </span>
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-500/20 text-amber-600 flex items-center gap-1">
                     <Gift className="w-2.5 h-2.5" />
@@ -502,42 +512,42 @@ export default function Customers() {
       </div>
 
       {/* Create/Edit Modal - Mobile optimized */}
-      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCustomer ? 'Edit' : 'New Customer'} size="lg">
+      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingCustomer ? t('admin.people.customers.edit_customer') : t('admin.people.customers.new_customer')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-10 text-sm" />
+            <Input label={t('auth.full_name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-10 text-sm" />
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Gender</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('profile.gender')}</label>
               <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                 className="w-full h-10 bg-secondary/50 border border-border rounded-lg px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
-                <option value="">Select</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+                <option value="">{t('admin.nav.dashboard.select') || 'Select'}</option>
+                <option value="male">{t('profile.genders.male')}</option>
+                <option value="female">{t('profile.genders.female')}</option>
+                <option value="other">{t('profile.genders.other')}</option>
               </select>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required className="h-10 text-sm" />
-            <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-10 text-sm" />
+            <Input label={t('auth.email_label') as string} type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required className="h-10 text-sm" />
+            <Input label={t('auth.phone_label') as string} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-10 text-sm" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label={editingCustomer ? "Password" : "Password"} type="password" value={formData.password}
+            <Input label={editingCustomer ? t('auth.new_password_title') as string : t('auth.password_label') as string} type="password" value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })} required={!editingCustomer} className="h-10 text-sm" />
-            <Input label="Birth Date" type="date" value={formData.birth_date}
+            <Input label={t('profile.birth_date') as string} type="date" value={formData.birth_date}
               onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })} className="h-10 text-sm" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Points" type="number" value={formData.points_balance}
+            <Input label={t('admin.people.customers.table.points') as string} type="number" value={formData.points_balance}
               onChange={(e) => setFormData({ ...formData, points_balance: parseInt(e.target.value) || 0 })} className="h-10 text-sm" />
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Location</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('admin.people.customers.location_label')}</label>
               <select value={formData.preferred_location_id} onChange={(e) => setFormData({ ...formData, preferred_location_id: e.target.value })}
                 className="w-full h-10 bg-secondary/50 border border-border rounded-lg px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
-                <option value="">Select</option>
+                <option value="">{t('admin.nav.dashboard.select') || 'Select'}</option>
                 {(locations as any)?.data?.map((loc: Location) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
@@ -546,7 +556,7 @@ export default function Customers() {
           </div>
 
           <div className="hidden sm:block">
-            <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Notes</label>
+            <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('admin.people.customers.notes_label')}</label>
             <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2}
               className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
           </div>
@@ -555,13 +565,13 @@ export default function Customers() {
             <input type="checkbox" id="is_active" checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
               className="w-4 h-4 sm:w-5 sm:h-5 rounded border-2 border-border bg-card cursor-pointer" />
-            <label htmlFor="is_active" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">Active</label>
+            <label htmlFor="is_active" className="text-xs sm:text-sm font-medium text-foreground cursor-pointer">{t('admin.menu.stats.active')}</label>
           </div>
 
           <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('common.cancel')}</Button>
             <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 h-10 sm:h-11 text-sm">
-              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingCustomer ? 'Save' : 'Create')}
+              {createMutation.isPending || updateMutation.isPending ? t('profile.saving') : (editingCustomer ? t('common.save') : t('layout.actions.create'))}
             </Button>
           </div>
         </form>

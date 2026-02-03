@@ -59,26 +59,47 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role): JsonResponse
     {
+        // 1. Validate
         $request->validate([
             'name' => 'required|string|max:100|unique:roles,name,' . $role->id,
             'description' => 'nullable|string',
             'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id'
+            'permissions.*' => 'exists:permissions,id' // Accepts IDs
         ]);
 
         DB::beginTransaction();
         try {
-            $role->update([
-                'name' => $request->name,
-                'slug' => Str::slug($request->name),
-                'description' => $request->description
-            ]);
+            // 2. Handle System Role Protection (Name & Slug)
+            if ($role->is_system) {
+                // Prevent renaming system roles
+                // We compare strict equality to ensure absolute stability of system role keys
+                if ($request->name !== $role->name) {
+                    throw new \Exception("Cannot rename system role '{$role->name}'. Name must remain unchanged.");
+                }
 
+                // Only update description for system roles
+                $role->update([
+                    'description' => $request->description
+                ]);
+            } else {
+                // Normal roles: Update name, slug, description
+                $role->update([
+                    'name' => $request->name,
+                    'slug' => Str::slug($request->name),
+                    'description' => $request->description
+                ]);
+            }
+
+            // 3. Sync Permissions (Always allowed, even for system roles)
+            // Use 'sync' to strictly match the provided list (detaching others)
             if ($request->has('permissions')) {
+                // Ensure we pass an array of integers/IDs
                 $role->permissions()->sync($request->permissions);
             }
 
             DB::commit();
+
+            // 4. Return Fresh Data
             return response()->json([
                 'message' => 'Role updated successfully',
                 'data' => $role->load('permissions')
@@ -86,12 +107,18 @@ class RoleController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            // Log the error for debugging
+            \Log::error('Role Update Failed: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to update role: ' . $e->getMessage()], 500);
         }
     }
 
     public function destroy(Role $role): JsonResponse
     {
+        if ($role->is_system) {
+            return response()->json(['message' => 'Cannot delete system role'], 403);
+        }
+
         if ($role->users()->count() > 0) {
             return response()->json(['message' => 'Cannot delete role assigned to users'], 422);
         }
@@ -102,13 +129,13 @@ class RoleController extends Controller
 
     public function getAllPermissions(): JsonResponse
     {
-        $permissions = Permission::all()->groupBy(function($item) {
+        $permissions = Permission::all()->groupBy(function ($item) {
             // Group by resource name (e.g., "create-user" -> "user")
             // Assuming format "action-resource" or similar
             $parts = explode('-', $item->slug);
             return count($parts) > 1 ? end($parts) : 'general';
         });
-        
+
         return response()->json(['data' => $permissions]);
     }
 }

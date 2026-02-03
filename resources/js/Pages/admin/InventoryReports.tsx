@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import {
     Package,
@@ -41,6 +42,7 @@ import {
 const COLORS = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#06b6d4', '#a855f7'];
 
 export default function InventoryReports() {
+    const { t } = useLanguage();
     const [startDate, setStartDate] = React.useState<Date | undefined>(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     );
@@ -100,7 +102,7 @@ export default function InventoryReports() {
 
     const stats = [
         {
-            label: 'Total Inventory Value',
+            label: t('admin.inventory.reports.stats.total_value'),
             value: `$${Number(valuation?.total_value || 0).toLocaleString()}`,
             icon: DollarSign,
             color: 'text-green-600 dark:text-green-400',
@@ -108,14 +110,14 @@ export default function InventoryReports() {
             change: `${(valuation?.change_percent || 0).toFixed(1)}%`
         },
         {
-            label: 'Items in Stock',
+            label: t('admin.inventory.reports.stats.items_stock'),
             value: valuation?.items_count || 0,
             icon: Package,
             color: 'text-blue-600 dark:text-blue-400',
             bgColor: 'bg-blue-500/20'
         },
         {
-            label: 'Waste Value',
+            label: t('admin.inventory.reports.stats.waste_value'),
             value: `$${Number(wasteData?.total_waste_value || 0).toLocaleString()}`,
             icon: Trash2,
             color: 'text-red-600 dark:text-red-400',
@@ -123,7 +125,7 @@ export default function InventoryReports() {
             change: `-${wasteData?.waste_percent || 0}%`
         },
         {
-            label: 'Avg Turnover Rate',
+            label: t('admin.inventory.reports.stats.turnover_rate'),
             value: `${Number(turnover?.avg_turnover || 0).toFixed(1)}x`,
             icon: TrendingDown,
             color: 'text-purple-600 dark:text-purple-400',
@@ -150,9 +152,9 @@ export default function InventoryReports() {
                         <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent truncate">
-                                    Inventory Reports
+                                    {t('admin.inventory.reports.title')}
                                 </h1>
-                                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Usage, costs, and waste analytics</p>
+                                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.inventory.reports.subtitle')}</p>
                             </div>
 
                             <div className="flex gap-1 sm:gap-2 flex-shrink-0">
@@ -160,13 +162,13 @@ export default function InventoryReports() {
                                     onClick={handleExportPDF}
                                     className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                 >
-                                    <FileText className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">PDF</span>
+                                    <FileText className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('admin.inventory.reports.export_pdf')}</span>
                                 </Button>
                                 <Button
                                     onClick={handleExportExcel}
                                     className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                 >
-                                    <Download className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">CSV</span>
+                                    <Download className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('admin.inventory.reports.export_csv')}</span>
                                 </Button>
                             </div>
                         </div>
@@ -248,7 +250,7 @@ export default function InventoryReports() {
                         <CardContent className="p-3 sm:p-4 md:p-6">
                             <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                 <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
-                                Usage Trends
+                                {t('admin.inventory.reports.charts.usage_trends')}
                             </h3>
                             <ResponsiveContainer width="100%" height={200}>
                                 <AreaChart data={usageRates?.data || []}>
@@ -273,7 +275,7 @@ export default function InventoryReports() {
                         <CardContent className="p-3 sm:p-4 md:p-6">
                             <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                 <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
-                                Cost by Category
+                                {t('admin.inventory.reports.charts.cost_category')}
                             </h3>
                             <ResponsiveContainer width="100%" height={200}>
                                 <PieChart>
@@ -302,7 +304,7 @@ export default function InventoryReports() {
                         <CardContent className="p-3 sm:p-4 md:p-6">
                             <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                 <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
-                                Waste by Reason
+                                {t('admin.inventory.reports.charts.waste_reason')}
                             </h3>
                             <ResponsiveContainer width="100%" height={200}>
                                 <BarChart data={wasteData?.by_reason || []}>
@@ -321,7 +323,7 @@ export default function InventoryReports() {
                         <CardContent className="p-3 sm:p-4 md:p-6">
                             <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                 <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
-                                Top Cost Items
+                                {t('admin.inventory.reports.charts.top_cost')}
                             </h3>
                             <div className="space-y-2 sm:space-y-3">
                                 {(costAnalysis?.top_items || []).slice(0, 5).map((item: any, index: number) => (
@@ -351,7 +353,7 @@ export default function InventoryReports() {
                     <CardContent className="p-3 sm:p-4 md:p-6">
                         <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                             <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
-                            Turnover by Category
+                            {t('admin.inventory.reports.charts.turnover_category')}
                         </h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                             {(turnover?.by_category || []).map((cat: any) => (
@@ -367,7 +369,7 @@ export default function InventoryReports() {
                                         </Badge>
                                     </div>
                                     <p className="text-[10px] sm:text-xs text-muted-foreground">
-                                        {Number(cat.turnover_rate || 0) > 10 ? 'Excellent' : Number(cat.turnover_rate || 0) > 5 ? 'Good' : 'Needs Attention'}
+                                        {Number(cat.turnover_rate || 0) > 10 ? t('admin.inventory.reports.turnover_labels.excellent') : Number(cat.turnover_rate || 0) > 5 ? t('admin.inventory.reports.turnover_labels.good') : t('admin.inventory.reports.turnover_labels.attention')}
                                     </p>
                                 </div>
                             ))}

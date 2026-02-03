@@ -5,6 +5,7 @@ import { MenuItem } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
 import { useFoodDetailSafe } from '@/app/providers/FoodDetailProvider';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface MenuItemCardProps {
     item: MenuItem;
@@ -23,6 +24,7 @@ const dietaryIcons: Record<string, React.ReactNode> = {
 };
 
 export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', isFavorite = false, onToggleFavorite }: MenuItemCardProps) {
+    const { t } = useTranslation();
     const hasDiscount = item.original_price && item.original_price > item.price;
     const foodDetailContext = useFoodDetailSafe();
 
@@ -129,7 +131,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                             {item.prep_time && (
                                 <div className="flex items-center gap-1 text-sm text-gray-500">
                                     <Clock className="w-4 h-4" />
-                                    <span>{item.prep_time} min</span>
+                                    <span>{item.prep_time} {t('common.minutes_short')}</span>
                                 </div>
                             )}
                         </div>
@@ -150,7 +152,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                     leftIcon={<Plus className="w-4 h-4" />}
                     className="self-center flex-shrink-0"
                 >
-                    Add
+                    {t('common.add')}
                 </Button>
             </motion.div>
         );
@@ -184,7 +186,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                     {item.is_popular && (
                         <div className="px-2 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold flex items-center gap-1 shadow-lg">
                             <TrendingUp className="w-3 h-3" />
-                            <span className="hidden sm:inline">Popular</span>
+                            <span className="hidden sm:inline">{t('menu.badges.popular')}</span>
                         </div>
                     )}
                     {hasDiscount && (

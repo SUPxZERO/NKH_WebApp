@@ -5,15 +5,16 @@ import {
   LayoutDashboard, Users, ShoppingBag, Settings,
   BarChart3, Calendar, MapPin, FileText, Menu as MenuIcon,
   X, Bell, User, LogOut, ChefHat, Building, Grid3X3,
-  Tag, Star, Package, Shield, DollarSign, ClipboardList,
   AlertTriangle, Beaker, TrendingUp, ChevronRight, ChevronDown, Circle,
-  Sun, Moon, Search, Command
+  Sun, Moon, Search, Command, ClipboardList, Package
 } from 'lucide-react';
-import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
-import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
+import { LanguageSwitcher } from '@/app/components/common/LanguageSwitcher';
 import { GlobalSearch, useGlobalSearch, SearchTrigger } from '@/app/components/ui/GlobalSearch';
 import { cn } from '@/app/utils/cn';
 import { useThemeStore } from '@/app/store/theme';
+import { useAuth } from '@/app/providers/AuthProvider';
+import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
+import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 
 // --- 1. New Hierarchical Navigation Structure ---
 const navigationTree = [
@@ -21,99 +22,109 @@ const navigationTree = [
     name: 'Dashboard',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
-    type: 'link' // Single link
+    type: 'link',
+    permission: 'dashboard.view'
   },
   {
     name: 'Operations',
     icon: ClipboardList,
     type: 'group',
+    permission: 'orders.view', // Group permission - any child or group itself
     children: [
-      { name: 'Orders', href: '/admin/orders' },
-      { name: 'Reservations', href: '/admin/reservations' },
-      { name: 'Notifications', href: '/admin/notifications' },
+      { name: 'Orders', href: '/admin/orders', permission: 'orders.view' },
+      { name: 'Reservations', href: '/admin/reservations', permission: 'reservations.view' },
+      { name: 'Notifications', href: '/admin/notifications', permission: 'notifications.view' },
     ]
   },
   {
     name: 'Menu Management',
     icon: ChefHat,
     type: 'group',
+    permission: 'menu.view',
     children: [
-      { name: 'Categories', href: '/admin/categories' },
-      { name: 'Menu Items', href: '/admin/menu-items' },
-      { name: 'Recipes', href: '/admin/recipes' },
-      { name: 'Promotions', href: '/admin/promotions' },
+      { name: 'Categories', href: '/admin/categories', permission: 'categories.view' },
+      { name: 'Menu Items', href: '/admin/menu-items', permission: 'menu.view' },
+      { name: 'Recipes', href: '/admin/recipes', permission: 'recipes.view' },
+      { name: 'Promotions', href: '/admin/promotions', permission: 'promotions.view' },
     ]
   },
   {
     name: 'Inventory & Procurement',
     icon: Package,
     type: 'group',
+    permission: 'inventory.view',
     children: [
-      { name: 'Purchase Orders', href: '/admin/purchase-orders' },
-      { name: 'Inventory', href: '/admin/inventory' },
-      { name: 'Inventory Reports', href: '/admin/reports/inventory' },
-      { name: 'Ingredients', href: '/admin/ingredients' },
-      { name: 'Adjustments', href: '/admin/inventory-adjustments' },
-      { name: 'Stock Alerts', href: '/admin/stock-alerts' },
-      { name: 'Suppliers', href: '/admin/suppliers' },
-      { name: 'Units', href: '/admin/units' },
+      { name: 'Purchase Orders', href: '/admin/purchase-orders', permission: 'purchase-orders.view' },
+      { name: 'Inventory', href: '/admin/inventory', permission: 'inventory.view' },
+      { name: 'Inventory Reports', href: '/admin/reports/inventory', permission: 'reports.view' },
+      { name: 'Ingredients', href: '/admin/ingredients', permission: 'inventory.view' },
+      { name: 'Adjustments', href: '/admin/inventory-adjustments', permission: 'inventory.view' },
+      { name: 'Stock Alerts', href: '/admin/stock-alerts', permission: 'inventory.view' },
+      { name: 'Suppliers', href: '/admin/suppliers', permission: 'suppliers.view' },
+      { name: 'Units', href: '/admin/units', permission: 'inventory.view' },
     ]
   },
   {
     name: 'People Management',
     icon: Users,
     type: 'group',
+    permission: 'employees.view',
     children: [
-      { name: 'Employees', href: '/admin/employees' },
-      { name: 'Admins', href: '/admin/admins' },
-      { name: 'Customers', href: '/admin/customers' },
-      { name: 'Positions', href: '/admin/positions' },
-      { name: 'Loyalty Points', href: '/admin/loyalty-points' },
+      { name: 'Employees', href: '/admin/employees', permission: 'employees.view' },
+      { name: 'Admins', href: '/admin/admins', permission: 'users.view' },
+      { name: 'Customers', href: '/admin/customers', permission: 'customers.view' },
+      { name: 'Positions', href: '/admin/positions', permission: 'employees.view' },
+      { name: 'Loyalty Points', href: '/admin/loyalty-points', permission: 'loyalty.view' },
     ]
   },
   {
     name: 'Scheduling',
     icon: Calendar,
     type: 'group',
+    permission: 'shifts.view',
     children: [
-      { name: 'Shifts', href: '/admin/shifts' },
-      { name: 'Shift Approvals', href: '/admin/shift-approvals' },
-      { name: 'Time Off Requests', href: '/admin/time-off-requests' },
-      { name: 'Attendance Management', href: '/admin/attendance-management' },
-      { name: 'Payroll Management', href: '/admin/payroll-management' },
+      { name: 'Shifts', href: '/admin/shifts', permission: 'shifts.view' },
+      { name: 'Shift Approvals', href: '/admin/shift-approvals', permission: 'shifts.view' },
+      { name: 'Time Off Requests', href: '/admin/time-off-requests', permission: 'timeoff.view' },
+      { name: 'Attendance Management', href: '/admin/attendance-management', permission: 'attendance.view' },
+      { name: 'Payroll Management', href: '/admin/payroll-management', permission: 'payroll.view' },
     ]
   },
   {
     name: 'Restaurant Layout',
     icon: MapPin,
     type: 'group',
+    permission: 'locations.view',
     children: [
-      { name: 'Locations', href: '/admin/locations' },
-      { name: 'Floors', href: '/admin/floors' },
-      { name: 'Tables', href: '/admin/tables' },
+      { name: 'Locations', href: '/admin/locations', permission: 'locations.view' },
+      { name: 'Floors', href: '/admin/floors', permission: 'floors.manage' },
+      { name: 'Tables', href: '/admin/tables', permission: 'tables.manage' },
     ]
   },
   {
     name: 'Finance & Analytics',
     icon: TrendingUp,
     type: 'group',
+    permission: 'reports.view',
     children: [
-      { name: 'Sales Analytics', href: '/admin/sales-analytics' },
-      { name: 'Financial Dashboard', href: '/admin/financial-dashboard' },
-      { name: 'Expenses', href: '/admin/expenses' },
-      { name: 'Invoices', href: '/admin/invoices' },
+      { name: 'Sales Analytics', href: '/admin/sales-analytics', permission: 'reports.view' },
+      { name: 'Financial Dashboard', href: '/admin/financial-dashboard', permission: 'payments.view' },
+      { name: 'Expenses', href: '/admin/expenses', permission: 'expenses.view' },
+      { name: 'Invoices', href: '/admin/invoices', permission: 'invoices.view' },
     ]
   },
   {
     name: 'System',
     icon: Settings,
     type: 'group',
+    permission: 'settings.view',
     children: [
-      { name: 'Operating Hours', href: '/admin/operating-hours' },
-      { name: 'Roles & Permissions', href: '/admin/roles' },
-      { name: 'Translations', href: '/admin/translations' },
-      { name: 'Audit Logs', href: '/admin/audit-logs' },
-      { name: 'Settings', href: '/admin/settings' },
+      { name: 'Operating Hours', href: '/admin/operating-hours', permission: 'locations.manage' },
+      { name: 'Roles & Permissions', href: '/admin/roles', permission: 'roles.manage' },
+      { name: 'Translations', href: '/admin/translations', permission: 'translations.manage' },
+      { name: 'Audit Logs', href: '/admin/audit-logs', permission: 'audit.view' },
+      { name: 'Payment Methods', href: '/admin/payment-methods', permission: 'manage_payment_methods' },
+      { name: 'Settings', href: '/admin/settings', permission: 'settings.view' },
     ]
   },
 ];
@@ -315,12 +326,41 @@ import {
 } from '@/app/config/shortcuts.config';
 
 export default function AdminLayout({ children }: Props) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
+  const { user, hasPermission } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const { isDark, toggle: toggleTheme } = useThemeStore();
   const search = useGlobalSearch();
+
+  // --- Filter Navigation Tree ---
+  const filteredNav = useMemo(() => {
+    if (!user) return [];
+
+    return navigationTree.map(item => {
+      // If it's a link, check permission
+      if (item.type === 'link') {
+        const linkItem = item as any;
+        return hasPermission(linkItem.permission) ? item : null;
+      }
+
+      // If it's a group, filter its children
+      if (item.type === 'group') {
+        const groupItem = item as any;
+        const visibleChildren = groupItem.children?.filter((child: any) => hasPermission(child.permission)) || [];
+
+        // Only show group if it has visible children OR user has permission for the group itself
+        if (visibleChildren.length > 0 || hasPermission(groupItem.permission)) {
+          return {
+            ...groupItem,
+            children: visibleChildren
+          };
+        }
+      }
+      return null;
+    }).filter(Boolean) as any[];
+  }, [user, hasPermission]);
 
   // Enable admin keyboard shortcuts on all admin pages
   useRouteHotkeys('/admin', [
@@ -335,7 +375,7 @@ export default function AdminLayout({ children }: Props) {
   // Get current page title from URL
   const pageTitle = useMemo(() => {
     // Find the active item in navigation tree
-    for (const item of navigationTree) {
+    for (const item of filteredNav) { // Changed from navigationTree to filteredNav
       if (item.type === 'link' && item.href && isUrlMatchFn(item.href, url)) {
         return item.name;
       }
@@ -345,17 +385,17 @@ export default function AdminLayout({ children }: Props) {
       }
     }
     return 'Dashboard';
-  }, [url]);
+  }, [url, filteredNav]); // Added filteredNav to dependencies
 
   // Auto-expand groups based on active URL
   useEffect(() => {
-    const activeGroup = navigationTree.find(item =>
-      item.type === 'group' && item.children?.some(child => isUrlMatchFn(child.href, url))
+    const activeGroup = filteredNav.find(item => // Changed from navigationTree to filteredNav
+      item.type === 'group' && item.children?.some((child: any) => isUrlMatchFn(child.href, url))
     );
     if (activeGroup) {
       setExpandedGroups(prev => Array.from(new Set([...prev, activeGroup.name])));
     }
-  }, [url]);
+  }, [url, filteredNav]); // Added filteredNav to dependencies
 
   const toggleGroup = (name: string) => {
     setExpandedGroups(prev =>
@@ -388,13 +428,13 @@ export default function AdminLayout({ children }: Props) {
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
         initial={false}
-        animate={{ width: sidebarCollapsed ? 80 : 280 }}
+        animate={{ width: collapsed ? 80 : 280 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700/50 h-[72px] bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
           <AnimatePresence mode="wait">
-            {!sidebarCollapsed ? (
+            {!collapsed ? (
               <motion.div
                 className="flex items-center gap-3 overflow-hidden whitespace-nowrap"
                 initial={{ opacity: 0 }}
@@ -411,7 +451,7 @@ export default function AdminLayout({ children }: Props) {
                 </div>
                 <div>
                   <h1 className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-                    NKH Resto
+                    NKH Restaurant
                   </h1>
                   <p className="text-xs text-fuchsia-600 dark:text-fuchsia-400 font-semibold tracking-wide">Admin Portal</p>
                 </div>
@@ -435,7 +475,7 @@ export default function AdminLayout({ children }: Props) {
           </AnimatePresence>
 
           <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={() => setCollapsed(!collapsed)}
             className="hidden lg:flex w-8 h-8 items-center justify-center rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200"
           >
             <MenuIcon className="w-4 h-4" />
@@ -453,14 +493,14 @@ export default function AdminLayout({ children }: Props) {
         <div
           className={cn(
             "flex-1 overflow-y-auto overflow-x-visible py-4 space-y-1 custom-scrollbar",
-            sidebarCollapsed ? "px-2" : "px-3"
+            collapsed ? "px-2" : "px-3"
           )}
         >
-          {navigationTree.map((item, index) => (
+          {filteredNav.map((item: any) => (
             <SidebarItem
-              key={index}
+              key={item.name}
               item={item}
-              collapsed={sidebarCollapsed}
+              collapsed={collapsed}
               currentUrl={url}
               expandedGroups={expandedGroups}
               toggleGroup={toggleGroup}
@@ -472,14 +512,14 @@ export default function AdminLayout({ children }: Props) {
         <div className="p-4 border-t border-gray-100 dark:border-gray-700/50 bg-gradient-to-t from-gray-50/80 to-transparent dark:from-gray-900/30 dark:to-transparent">
           <div className={cn(
             'flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 hover:bg-white dark:hover:bg-gray-700/50 cursor-pointer group',
-            sidebarCollapsed && 'justify-center'
+            collapsed && 'justify-center'
           )}>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-800/20 flex items-center justify-center border-2 border-purple-200/50 dark:border-purple-700/30 shadow-sm flex-shrink-0 group-hover:shadow-md group-hover:border-purple-300 dark:group-hover:border-purple-600/50 transition-all">
               <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
 
             <AnimatePresence>
-              {!sidebarCollapsed && (
+              {!collapsed && (
                 <motion.div
                   className="flex-1 min-w-0"
                   initial={{ opacity: 0, width: 0 }}
@@ -523,6 +563,8 @@ export default function AdminLayout({ children }: Props) {
             <div className="flex items-center gap-2">
               {/* Search Button */}
               <SearchTrigger onClick={search.open} variant="admin" className="hidden md:flex" />
+
+              <LanguageSwitcher />
 
               {/* Theme Toggle */}
               <button

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
@@ -50,6 +51,7 @@ interface ShiftSwap {
 }
 
 export default function ManagerShiftApprovals() {
+    const { t } = useLanguage();
     const qc = useQueryClient();
     const [denyModalOpen, setDenyModalOpen] = useState(false);
     const [selectedSwapId, setSelectedSwapId] = useState<number | null>(null);
@@ -108,12 +110,12 @@ export default function ManagerShiftApprovals() {
         <AdminLayout>
             <Head title="Shift Swap Approvals" />
 
-            <div className="space-y-6">
+            <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 text-foreground overflow-x-hidden space-y-6">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Shift Swap Approvals</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('admin.hr.shifts.title')}</h1>
                         <p className="text-muted-foreground text-gray-400">
-                            Review and approve shift swap requests between employees.
+                            {t('admin.hr.shifts.subtitle')}
                         </p>
                     </div>
                 </div>
@@ -122,7 +124,7 @@ export default function ManagerShiftApprovals() {
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Clock className="w-5 h-5 text-yellow-500" />
-                            Pending Approvals
+                            {t('admin.hr.shifts.stats.pending')}
                             {pendingSwaps?.data && pendingSwaps.data.length > 0 && (
                                 <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                                     {pendingSwaps.data.length}
@@ -147,11 +149,11 @@ export default function ManagerShiftApprovals() {
                                                             ? 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300'
                                                             : 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
                                                     }>
-                                                        {swap.type === 'give_away' ? 'Give Away' : 'Trade'}
+                                                        {swap.type === 'give_away' ? t('admin.hr.shifts.types.give_away') : t('admin.hr.shifts.types.trade')}
                                                     </Badge>
                                                     <span className="text-sm text-gray-500 flex items-center gap-1">
                                                         <Clock className="w-3 h-3" />
-                                                        Requested {new Date(swap.created_at).toLocaleDateString()}
+                                                        {t('admin.hr.shifts.table.requested_on')} {new Date(swap.created_at).toLocaleDateString()}
                                                     </span>
                                                 </div>
                                             </div>
@@ -206,7 +208,7 @@ export default function ManagerShiftApprovals() {
 
                                             {swap.reason && (
                                                 <div className="bg-white dark:bg-gray-800 p-3 rounded text-sm text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
-                                                    <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">Reason:</span>
+                                                    <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">{t('admin.hr.shifts.table.reason')}:</span>
                                                     {swap.reason}
                                                 </div>
                                             )}
@@ -220,7 +222,7 @@ export default function ManagerShiftApprovals() {
                                                 disabled={approveMutation.isPending}
                                                 leftIcon={approveMutation.isPending ? undefined : <CheckCircle className="w-4 h-4" />}
                                             >
-                                                {approveMutation.isPending ? 'Approving...' : 'Approve'}
+                                                {approveMutation.isPending ? 'Approving...' : t('admin.hr.shifts.actions.approve')}
                                             </Button>
                                             <Button
                                                 variant="destructive"
@@ -229,7 +231,7 @@ export default function ManagerShiftApprovals() {
                                                 disabled={denyMutation.isPending}
                                                 leftIcon={<XCircle className="w-4 h-4" />}
                                             >
-                                                Deny
+                                                {t('admin.hr.shifts.actions.reject')}
                                             </Button>
                                         </div>
                                     </div>
@@ -251,7 +253,7 @@ export default function ManagerShiftApprovals() {
             <Modal
                 isOpen={denyModalOpen}
                 onClose={() => setDenyModalOpen(false)}
-                title="Deny Shift Swap Request"
+                title={t('admin.hr.shifts.actions.reject')}
             >
                 <form onSubmit={handleDenySubmit} className="space-y-4">
                     <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded text-sm flex items-start gap-2">
@@ -262,7 +264,7 @@ export default function ManagerShiftApprovals() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium mb-1">Reason for Denial (Optional)</label>
+                        <label className="block text-sm font-medium mb-1">{t('admin.hr.shifts.actions.rejection_reason')} (Optional)</label>
                         <Input
                             value={denialReason}
                             onChange={(e) => setDenialReason(e.target.value)}
@@ -277,14 +279,14 @@ export default function ManagerShiftApprovals() {
                             variant="ghost"
                             onClick={() => setDenyModalOpen(false)}
                         >
-                            Cancel
+                            {t('admin.inventory.adjustments.form.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             variant="destructive"
                             disabled={denyMutation.isPending}
                         >
-                            {denyMutation.isPending ? 'Denying...' : 'Confirm Denial'}
+                            {denyMutation.isPending ? 'Denying...' : t('admin.hr.shifts.actions.reject')}
                         </Button>
                     </div>
                 </form>

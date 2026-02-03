@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import { apiGet } from '@/app/utils/api';
 import { cn } from '@/app/utils/cn';
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 // Types
 interface DashboardSummary {
@@ -102,6 +103,7 @@ export default function Dashboard({
   initialTopItems
 }: DashboardProps) {
   useSmartPolling(['dashboard'], 30000);
+  const { t } = useTranslation();
 
   const isAdmin = useMemo(() =>
     dashboardSummary?.user?.roles?.some(r => ['super-admin', 'admin'].includes(r)) ?? false
@@ -158,7 +160,7 @@ export default function Dashboard({
                   transition={{ delay: 0.1 }}
                   className="text-lg sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 dark:from-white dark:via-fuchsia-200 dark:to-purple-200 bg-clip-text text-transparent"
                 >
-                  {dashboardSummary?.greeting || 'Welcome'}, {dashboardSummary?.user?.name?.split(' ')[0] || 'Admin'}!
+                  {dashboardSummary?.greeting || t('admin.dashboard.welcome')}, {dashboardSummary?.user?.name?.split(' ')[0] || 'Admin'}!
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, x: -20 }}
@@ -168,7 +170,7 @@ export default function Dashboard({
                 >
                   <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fuchsia-400" />
                   <span className="text-xs sm:text-base">
-                    {dashboardSummary?.today ? `${format(new Date(dashboardSummary.today), 'EEEE, MMMM d, yyyy')}` : 'Command Center'}
+                    {dashboardSummary?.today ? `${format(new Date(dashboardSummary.today), 'EEEE, MMMM d, yyyy')}` : t('admin.dashboard.command_center')}
                   </span>
                 </motion.p>
               </div>
@@ -189,7 +191,7 @@ export default function Dashboard({
                 )}
               >
                 <RefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
-                <span className="hidden sm:inline">Refresh</span>
+                <span className="hidden sm:inline">{t('admin.dashboard.refresh')}</span>
               </motion.button>
 
               <motion.div
@@ -202,7 +204,7 @@ export default function Dashboard({
                   transition={{ duration: 1, repeat: Infinity }}
                   className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"
                 />
-                <span className="text-sm font-bold text-emerald-400">LIVE</span>
+                <span className="text-sm font-bold text-emerald-400">{t('admin.dashboard.live')}</span>
               </motion.div>
             </div>
           </motion.div>
@@ -215,7 +217,7 @@ export default function Dashboard({
           {/* Bold Quick Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             <BoldStatCard
-              title="Today's Revenue"
+              title={t('admin.dashboard.stats.revenue') as string}
               value={formatCurrency(stats?.revenue?.today || 0)}
               icon={DollarSign}
               variant="revenue"
@@ -225,7 +227,7 @@ export default function Dashboard({
               } : undefined}
             />
             <BoldStatCard
-              title="Today's Orders"
+              title={t('admin.dashboard.stats.orders') as string}
               value={String(stats?.orders?.today || 0)}
               icon={ShoppingCart}
               variant="orders"
@@ -235,13 +237,13 @@ export default function Dashboard({
               } : undefined}
             />
             <BoldStatCard
-              title="Active Orders"
+              title={t('admin.dashboard.stats.active_orders') as string}
               value={String(stats?.orders?.active || 0)}
               icon={Package}
               variant="active"
             />
             <BoldStatCard
-              title="Avg Order Value"
+              title={t('admin.dashboard.stats.avg_order_value') as string}
               value={formatCurrency(initialKPIs?.avg_order_value || 0)}
               icon={TrendingUp}
               variant="average"
@@ -257,6 +259,8 @@ export default function Dashboard({
               revenueData={initialRevenue}
               orderStatusData={initialOrderStatus}
               topItemsData={initialTopItems}
+              teamStatus={dashboardSummary?.team_status}
+              pendingApprovals={dashboardSummary?.pending_approvals}
             />
           )}
 
@@ -291,13 +295,31 @@ function AdminDashboardContent({
   quickActions,
   revenueData,
   orderStatusData,
-  topItemsData
+  topItemsData,
+  teamStatus,
+  pendingApprovals
 }: any) {
   return (
     <>
-      {/* System Health - Bold Display */}
-      {systemHealth && (
-        <SystemHealthDisplay health={systemHealth} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* System Health */}
+        {systemHealth && (
+          <SystemHealthDisplay health={systemHealth} />
+        )}
+        {/* Team Status */}
+        {teamStatus && (
+          <TeamStatusBar
+            total={teamStatus?.total || 0}
+            byPosition={teamStatus?.by_position || {}}
+          />
+        )}
+      </div>
+
+      {/* Pending Approvals */}
+      {pendingApprovals && (
+        <div className="mb-6">
+          <ApprovalQueue approvals={pendingApprovals} />
+        </div>
       )}
 
       {/* Charts Grid */}
@@ -352,6 +374,7 @@ function ManagerDashboardContent({
 
 // ==================== Employee Dashboard Content ====================
 function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any) {
+  const { t } = useTranslation();
   return (
     <>
       {/* My Tasks */}
@@ -365,8 +388,8 @@ function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any)
             <ClipboardList className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-white text-lg">My Active Tasks</h3>
-            <p className="text-sm text-gray-400">Assigned orders</p>
+            <h3 className="font-bold text-white text-lg">{t('admin.dashboard.stats.active_tasks')}</h3>
+            <p className="text-sm text-gray-400">{t('admin.dashboard.stats.assigned_orders')}</p>
           </div>
         </div>
 
@@ -404,7 +427,7 @@ function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any)
         ) : (
           <div className="text-center py-12">
             <Package className="w-16 h-16 mx-auto text-gray-600 mb-4" />
-            <p className="text-gray-400 text-lg">No active tasks assigned</p>
+            <p className="text-gray-400 text-lg">{t('admin.dashboard.stats.no_tasks')}</p>
           </div>
         )}
 
@@ -422,7 +445,7 @@ function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any)
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/40">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-bold text-white text-lg">My Performance This Week</h3>
+            <h3 className="font-bold text-white text-lg">{t('admin.dashboard.stats.performance')}</h3>
           </div>
 
           <div className="flex items-center justify-center py-6">
@@ -434,7 +457,7 @@ function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any)
               >
                 {myPerformance.orders_this_week || 0}
               </motion.span>
-              <p className="text-gray-400 mt-2">Orders Completed</p>
+              <p className="text-gray-400 mt-2">{t('admin.dashboard.stats.orders_completed')}</p>
             </div>
           </div>
 

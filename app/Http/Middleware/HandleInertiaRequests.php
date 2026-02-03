@@ -30,17 +30,17 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        
+
         // Always fetch from roles() relationship for correct role assignment
         // The 'role' column (if it exists) may be stale or null
         $userRole = null;
         $permissions = [];
-        
+
         if ($user) {
             $roles = $user->roles()->with('permissions')->get();
             $userRole = $roles->first()?->slug;
             $permissions = $roles->pluck('permissions.*.slug')->flatten()->unique()->values()->all();
-            
+
             // Fallback to direct 'role' attribute only if no roles assigned via relationship
             if (!$userRole && isset($user->role)) {
                 $userRole = $user->role;
@@ -60,6 +60,12 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'csrf_token' => csrf_token(),
+            'locale' => app()->getLocale(),
+            'translations' => function () {
+                $locale = app()->getLocale();
+                $path = lang_path("{$locale}.json");
+                return file_exists($path) ? json_decode(file_get_contents($path), true) : [];
+            },
         ];
     }
 }

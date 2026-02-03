@@ -103,7 +103,7 @@ class CustomerDashboardController extends Controller
         }
 
         $orders = $this->orderService->getOrders($customer ?? new Customer(), $request, $tableSession);
-        return $this->success(OrderResource::collection($orders));
+        return OrderResource::collection($orders)->additional(['success' => true]);
     }
 
     /**

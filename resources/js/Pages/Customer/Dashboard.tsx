@@ -29,6 +29,7 @@ import { cn } from '@/app/utils/cn';
 import {
   BrandDivider,
 } from '@/Components/brand';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 // Interfaces
 interface FavoriteItem {
@@ -88,6 +89,7 @@ export default function Dashboard() {
   const { auth } = usePage<PageProps>().props;
   const queryClient = useQueryClient();
   const [showRewardsModal, setShowRewardsModal] = useState(false);
+  const { t } = useTranslation();
 
   // Data fetching
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
@@ -196,7 +198,7 @@ export default function Dashboard() {
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 mb-4"
                   >
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-xs font-semibold text-white uppercase tracking-wider">Member Dashboard</span>
+                    <span className="text-xs font-semibold text-white uppercase tracking-wider">{t('customer_pages.dashboard.member_badge')}</span>
                   </motion.div>
 
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4 font-display">
@@ -206,7 +208,7 @@ export default function Dashboard() {
                   </h1>
 
                   <p className="text-white/90 text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-lg">
-                    Ready to satisfy your cravings? Check your rewards and latest offers.
+                    {t('customer_pages.dashboard.subtitle')}
                   </p>
 
                   <div className="flex flex-wrap gap-3 sm:gap-4">
@@ -214,13 +216,13 @@ export default function Dashboard() {
                       onClick={() => router.visit('/menu')}
                       className="px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 bg-white text-fuchsia-600 rounded-xl font-bold shadow-lg shadow-black/20 hover:shadow-black/30 hover:scale-105 transition-all flex items-center gap-2 text-sm sm:text-base"
                     >
-                      <Utensils className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> Menu
+                      <Utensils className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> {t('customer_pages.dashboard.buttons.menu')}
                     </button>
                     <button
                       onClick={() => router.visit('/customer/orders')}
                       className="px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 bg-white/15 backdrop-blur-md border border-white/30 text-white rounded-xl font-bold hover:bg-white/25 transition-all flex items-center gap-2 text-sm sm:text-base"
                     >
-                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> Orders
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5" /> {t('customer_pages.dashboard.buttons.orders')}
                     </button>
                   </div>
                 </div>
@@ -237,8 +239,8 @@ export default function Dashboard() {
                   <div className="relative z-10">
                     <div className="flex justify-between items-start mb-4 sm:mb-5 md:mb-6">
                       <div>
-                        <h3 className="text-white/90 text-sm font-medium uppercase tracking-wider">Loyalty Balance</h3>
-                        <div className="text-3xl sm:text-4xl font-bold text-white mt-1">{profile?.loyalty_points || 0} <span className="text-lg text-white/70 font-normal">pts</span></div>
+                        <h3 className="text-white/90 text-sm font-medium uppercase tracking-wider">{t('customer_pages.dashboard.loyalty.balance')}</h3>
+                        <div className="text-3xl sm:text-4xl font-bold text-white mt-1">{profile?.loyalty_points || 0} <span className="text-lg text-white/70 font-normal">{t('customer_pages.dashboard.loyalty.pts')}</span></div>
                       </div>
                       <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-fuchsia-400 to-pink-400 flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/30">
                         <Star className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 fill-current" />
@@ -247,7 +249,7 @@ export default function Dashboard() {
 
                     <div className="space-y-2 mb-4 sm:mb-5 md:mb-6">
                       <div className="flex justify-between text-sm text-white/90">
-                        <span>Progress to next reward</span>
+                        <span>{t('customer_pages.dashboard.loyalty.progress')}</span>
                         <span>{Math.min(((profile?.loyalty_points || 0) % 100), 100)}%</span>
                       </div>
                       <div className="h-2.5 bg-white/20 rounded-full overflow-hidden">
@@ -262,7 +264,7 @@ export default function Dashboard() {
                       onClick={() => setShowRewardsModal(true)}
                       className="w-full py-3 rounded-xl bg-white text-fuchsia-600 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
                     >
-                      <Gift className="w-5 h-5" /> Redeem Rewards
+                      <Gift className="w-5 h-5" /> {t('customer_pages.dashboard.buttons.redeem_rewards')}
                     </button>
                   </div>
                 </motion.div>
@@ -277,18 +279,18 @@ export default function Dashboard() {
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 mb-4"
                   >
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-xs font-semibold text-white uppercase tracking-wider">Member Dashboard</span>
+                    <span className="text-xs font-semibold text-white uppercase tracking-wider">{t('customer_pages.dashboard.member_badge')}</span>
                   </motion.div>
 
                   <h1 className="text-4xl font-bold text-white mb-4 font-display">
-                    Welcome back, <br />
+                    {t('customer_pages.dashboard.welcome')} <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-200 to-pink-200">
                       {auth.user?.name || profile?.name || 'Guest'}!
                     </span>
                   </h1>
 
                   <p className="text-white/90 text-lg mb-8 max-w-lg">
-                    Ready to satisfy your cravings? Check your rewards and latest offers.
+                    {t('customer_pages.dashboard.subtitle')}
                   </p>
 
                   <div className="flex flex-wrap gap-4">
@@ -296,13 +298,13 @@ export default function Dashboard() {
                       onClick={() => router.visit('/menu')}
                       className="px-6 py-3 bg-white text-fuchsia-600 rounded-xl font-bold shadow-lg shadow-black/20 hover:shadow-black/30 hover:scale-105 transition-all flex items-center gap-2"
                     >
-                      <Utensils className="w-5 h-5" /> Browse Menu
+                      <Utensils className="w-5 h-5" /> {t('customer_pages.dashboard.buttons.browse_menu')}
                     </button>
                     <button
                       onClick={() => router.visit('/customer/orders')}
                       className="px-6 py-3 bg-white/15 backdrop-blur-md border border-white/30 text-white rounded-xl font-bold hover:bg-white/25 transition-all flex items-center gap-2"
                     >
-                      <Clock className="w-5 h-5" /> Recent Orders
+                      <Clock className="w-5 h-5" /> {t('customer_pages.dashboard.buttons.recent_orders')}
                     </button>
                   </div>
                 </div>
@@ -319,8 +321,8 @@ export default function Dashboard() {
                   <div className="relative z-10">
                     <div className="flex justify-between items-start mb-6">
                       <div>
-                        <h3 className="text-white/90 text-sm font-medium uppercase tracking-wider">Loyalty Balance</h3>
-                        <div className="text-4xl font-bold text-white mt-1">{profile?.loyalty_points || 0} <span className="text-lg text-white/70 font-normal">pts</span></div>
+                        <h3 className="text-white/90 text-sm font-medium uppercase tracking-wider">{t('customer_pages.dashboard.loyalty.balance')}</h3>
+                        <div className="text-4xl font-bold text-white mt-1">{profile?.loyalty_points || 0} <span className="text-lg text-white/70 font-normal">{t('customer_pages.dashboard.loyalty.pts')}</span></div>
                       </div>
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-400 to-pink-400 flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/30">
                         <Star className="w-6 h-6 fill-current" />
@@ -329,7 +331,7 @@ export default function Dashboard() {
 
                     <div className="space-y-2 mb-6">
                       <div className="flex justify-between text-sm text-white/90">
-                        <span>Progress to next reward</span>
+                        <span>{t('customer_pages.dashboard.loyalty.progress')}</span>
                         <span>{Math.min(((profile?.loyalty_points || 0) % 100), 100)}%</span>
                       </div>
                       <div className="h-2.5 bg-white/20 rounded-full overflow-hidden">
@@ -344,7 +346,7 @@ export default function Dashboard() {
                       onClick={() => setShowRewardsModal(true)}
                       className="w-full py-3 rounded-xl bg-white text-fuchsia-600 font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                     >
-                      <Gift className="w-5 h-5" /> Redeem Rewards
+                      <Gift className="w-5 h-5" /> {t('customer_pages.dashboard.buttons.redeem_rewards')}
                     </button>
                   </div>
                 </motion.div>
@@ -355,10 +357,10 @@ export default function Dashboard() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {[
-              { label: 'Total Orders', value: profile?.total_orders || 0, icon: ShoppingBag, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' },
-              { label: 'Total Spent', value: `$${Number(profile?.total_spent || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-200 dark:border-green-800/50' },
-              { label: 'Points Earned', value: `+${stats?.points_earned_this_month || 0}`, icon: Zap, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-200 dark:border-amber-800/50', sub: 'This Month', hideOnMobile: true },
-              { label: 'Available Rewards', value: stats?.available_rewards || 0, icon: Gift, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30', border: 'border-purple-200 dark:border-purple-800/50' }
+              { label: t('customer_pages.dashboard.stats.total_orders'), value: profile?.total_orders || 0, icon: ShoppingBag, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30', border: 'border-blue-200 dark:border-blue-800/50' },
+              { label: t('customer_pages.dashboard.stats.total_spent'), value: `$${Number(profile?.total_spent || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-200 dark:border-green-800/50' },
+              { label: t('customer_pages.dashboard.stats.points_earned'), value: `+${stats?.points_earned_this_month || 0}`, icon: Zap, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-200 dark:border-amber-800/50', sub: t('customer_pages.dashboard.stats.this_month'), hideOnMobile: true },
+              { label: t('customer_pages.dashboard.stats.available_rewards'), value: stats?.available_rewards || 0, icon: Gift, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/30', border: 'border-purple-200 dark:border-purple-800/50' }
             ].map((stat, idx) => (
               <motion.div
                 key={idx}
@@ -395,8 +397,8 @@ export default function Dashboard() {
                     <Award className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-sm sm:text-lg font-bold text-white">Loyalty Rewards Program</h3>
-                    <p className="text-[11px] sm:text-sm text-white/80">View your tier, earn points, and unlock rewards</p>
+                    <h3 className="text-sm sm:text-lg font-bold text-white">{t('customer_pages.dashboard.loyalty_cta.title')}</h3>
+                    <p className="text-[11px] sm:text-sm text-white/80">{t('customer_pages.dashboard.loyalty_cta.subtitle')}</p>
                   </div>
                 </div>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1 transition-transform" />
@@ -410,8 +412,8 @@ export default function Dashboard() {
             {/* Main Content - Recent Orders */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white font-display">Recent Activity</h2>
-                <button onClick={() => router.visit('/customer/orders')} className="text-sm font-medium text-fuchsia-600 hover:text-fuchsia-700 transition-colors">View All Orders</button>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white font-display">{t('customer_pages.dashboard.recent_activity')}</h2>
+                <button onClick={() => router.visit('/customer/orders')} className="text-sm font-medium text-fuchsia-600 hover:text-fuchsia-700 transition-colors">{t('customer_pages.dashboard.view_all_orders')}</button>
               </div>
 
               {ordersLoading ? (
@@ -431,8 +433,8 @@ export default function Dashboard() {
                           <ShoppingBag className="w-6 h-6" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-gray-900 dark:text-white">Order #{order.id}</h4>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(order.created_at).toLocaleDateString()} • {order.items?.length || 0} items</p>
+                          <h4 className="font-bold text-gray-900 dark:text-white">{t('customer_pages.dashboard.order_number')}{order.id}</h4>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(order.created_at).toLocaleDateString()} • {order.items?.length || 0} {t('customer_pages.dashboard.items')}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -450,12 +452,12 @@ export default function Dashboard() {
               ) : (
                 <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
                   <ShoppingBag className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400">No recent orders found.</p>
+                  <p className="text-gray-500 dark:text-gray-400">{t('customer_pages.dashboard.no_recent_orders')}</p>
                   <button
                     onClick={() => router.visit('/menu')}
                     className="mt-4 px-4 py-2 bg-fuchsia-600 text-white rounded-lg text-sm font-bold shadow-lg hover:bg-fuchsia-700 transition-colors"
                   >
-                    Order Now
+                    {t('customer_pages.dashboard.order_now')}
                   </button>
                 </div>
               )}
@@ -466,7 +468,7 @@ export default function Dashboard() {
               {/* Upcoming Reservations */}
               <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">Reservations</h3>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">{t('customer_pages.dashboard.reservations')}</h3>
                   <button onClick={() => router.visit('/customer/reservations')} className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"><ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400" /></button>
                 </div>
 
@@ -482,26 +484,26 @@ export default function Dashboard() {
                           </div>
                           <div>
                             <div className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">{new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                            <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{res.guest_count} Guests</div>
+                            <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{res.guest_count} {t('customer_pages.dashboard.guests')}</div>
                           </div>
                         </div>
                         {res.status === 'pending' && (
-                          <button onClick={() => handleCancelReservation(res.id)} className="text-[10px] sm:text-xs text-red-500 dark:text-red-400 hover:underline">Cancel</button>
+                          <button onClick={() => handleCancelReservation(res.id)} className="text-[10px] sm:text-xs text-red-500 dark:text-red-400 hover:underline">{t('customer_pages.dashboard.cancel')}</button>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-4 sm:py-6">
-                    <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-3">No upcoming reservations</p>
-                    <button onClick={() => router.visit('/customer/reservations')} className="text-[10px] sm:text-xs font-bold text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-wider hover:underline">Book a Table</button>
+                    <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-3">{t('customer_pages.dashboard.no_reservations')}</p>
+                    <button onClick={() => router.visit('/customer/reservations')} className="text-[10px] sm:text-xs font-bold text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-wider hover:underline">{t('customer_pages.dashboard.book_table')}</button>
                   </div>
                 )}
               </div>
 
               {/* Favorites */}
               <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 sm:p-5">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">Your Favorites</h3>
+                <h3 className="font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">{t('customer_pages.dashboard.favorites')}</h3>
                 {profile?.favorite_items && profile.favorite_items.length > 0 ? (
                   <div className="space-y-2 sm:space-y-3">
                     {profile.favorite_items.slice(0, 4).map(item => (
@@ -522,7 +524,7 @@ export default function Dashboard() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 text-center py-3 sm:py-4">Make some orders to see favorites!</p>
+                  <p className="text-[11px] sm:text-sm text-gray-500 dark:text-gray-400 text-center py-3 sm:py-4">{t('customer_pages.dashboard.no_favorites')}</p>
                 )}
               </div>
             </div>
@@ -549,11 +551,11 @@ export default function Dashboard() {
                 {/* Modal Header */}
                 <div className="p-6 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shrink-0">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold flex items-center gap-2"><Gift className="w-6 h-6" /> Rewards Marketplace</h2>
+                    <h2 className="text-2xl font-bold flex items-center gap-2"><Gift className="w-6 h-6" /> {t('customer_pages.dashboard.rewards_modal.title')}</h2>
                     <button onClick={() => setShowRewardsModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors"><XCircle className="w-6 h-6" /></button>
                   </div>
                   <div className="flex items-center justify-between bg-white/10 rounded-xl p-4 backdrop-blur-md">
-                    <span className="font-medium opacity-90">Your Balance</span>
+                    <span className="font-medium opacity-90">{t('customer_pages.dashboard.rewards_modal.balance')}</span>
                     <span className="text-2xl font-bold flex items-center gap-1">{profile?.loyalty_points || 0} <Star className="w-4 h-4 fill-current" /></span>
                   </div>
                 </div>
@@ -561,9 +563,9 @@ export default function Dashboard() {
                 {/* Modal Content */}
                 <div className="p-6 overflow-y-auto custom-scrollbar">
                   {rewardsLoading ? (
-                    <div className="text-center py-10 text-gray-500">Loading rewards...</div>
+                    <div className="text-center py-10 text-gray-500">{t('customer_pages.dashboard.rewards_modal.loading')}</div>
                   ) : REWARDS.length === 0 ? (
-                    <div className="text-center py-10 text-gray-500">No rewards available yet.</div>
+                    <div className="text-center py-10 text-gray-500">{t('customer_pages.dashboard.rewards_modal.no_rewards')}</div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {REWARDS.map(reward => {
@@ -584,7 +586,7 @@ export default function Dashboard() {
 
                             <div className="flex items-center justify-between mt-auto">
                               <span className={cn("text-sm font-bold", canRedeem ? "text-fuchsia-600" : "text-gray-400")}>
-                                {reward.points_required} Points
+                                {reward.points_required} {t('customer_pages.dashboard.rewards_modal.points')}
                               </span>
                               <button
                                 onClick={() => handleRedeemReward(reward)}
@@ -596,7 +598,7 @@ export default function Dashboard() {
                                     : "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700"
                                 )}
                               >
-                                Redeem
+                                {t('customer_pages.dashboard.rewards_modal.redeem')}
                               </button>
                             </div>
                           </div>

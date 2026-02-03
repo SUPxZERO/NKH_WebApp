@@ -36,6 +36,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SetLocale::class, // Sprint P-Translation
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             // Debug session/cookie info (local only)
@@ -46,10 +47,11 @@ class Kernel extends HttpKernel
 
         // API middleware is configured in bootstrap/app.php for Laravel 11
         'api' => [
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // Audit middleware - captures request context for API
+            // Audit middleware - captures request context for volume
             \App\Http\Middleware\AuditMiddleware::class,
+            \App\Http\Middleware\SetLocale::class, // Sprint P-Translation: Enable locale for API
         ],
     ];
 

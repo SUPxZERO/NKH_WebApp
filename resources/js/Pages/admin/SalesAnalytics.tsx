@@ -19,6 +19,7 @@ import { Card, CardContent } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { apiGet } from '@/app/utils/api';
 import DateRangePicker from '@/app/components/DateRangePicker';
+import { useLanguage } from '@/app/context/LanguageContext';
 import {
     LineChart,
     Line,
@@ -38,6 +39,7 @@ import {
 const COLORS = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
 
 export default function SalesAnalytics() {
+    const { t } = useLanguage();
     const [startDate, setStartDate] = React.useState<Date | undefined>(
         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     );
@@ -107,10 +109,10 @@ export default function SalesAnalytics() {
     };
 
     const stats = [
-        { label: 'Total Revenue', value: `$${Number(overview?.total_revenue || 0).toLocaleString()}`, icon: DollarSign, color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-500/20' },
-        { label: 'Total Orders', value: overview?.total_orders || 0, icon: ShoppingCart, color: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-500/20' },
-        { label: 'Avg Order Value', value: `$${Number(overview?.avg_order_value || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-purple-600 dark:text-purple-400', bgColor: 'bg-purple-500/20' },
-        { label: 'Customers', value: overview?.unique_customers || 0, icon: Users, color: 'text-pink-600 dark:text-pink-400', bgColor: 'bg-pink-500/20' }
+        { label: t('analytics.sales.stats.revenue'), value: `$${Number(overview?.total_revenue || 0).toLocaleString()}`, icon: DollarSign, color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-500/20' },
+        { label: t('analytics.sales.stats.orders'), value: overview?.total_orders || 0, icon: ShoppingCart, color: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-500/20' },
+        { label: t('analytics.sales.stats.avg_order'), value: `$${Number(overview?.avg_order_value || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-purple-600 dark:text-purple-400', bgColor: 'bg-purple-500/20' },
+        { label: t('analytics.sales.stats.customers'), value: overview?.unique_customers || 0, icon: Users, color: 'text-pink-600 dark:text-pink-400', bgColor: 'bg-pink-500/20' }
     ];
 
     return (
@@ -135,9 +137,9 @@ export default function SalesAnalytics() {
                             <div className="flex items-center justify-between gap-3">
                                 <div className="min-w-0">
                                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent truncate">
-                                        Sales Analytics
+                                        {t('analytics.sales.title')}
                                     </h1>
-                                    <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Track revenue, trends, and performance insights</p>
+                                    <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('analytics.sales.subtitle')}</p>
                                 </div>
 
                                 <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
@@ -146,14 +148,14 @@ export default function SalesAnalytics() {
                                         className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                     >
                                         <FileText className="w-4 h-4 sm:mr-2" />
-                                        <span className="hidden sm:inline">PDF</span>
+                                        <span className="hidden sm:inline">{t('analytics.sales.export_pdf')}</span>
                                     </Button>
                                     <Button
                                         onClick={handleExportExcel}
                                         className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                                     >
                                         <Download className="w-4 h-4 sm:mr-2" />
-                                        <span className="hidden sm:inline">CSV</span>
+                                        <span className="hidden sm:inline">{t('analytics.sales.export_csv')}</span>
                                     </Button>
                                 </div>
                             </div>
@@ -173,19 +175,19 @@ export default function SalesAnalytics() {
                                         onClick={() => setQuickDate(7)}
                                         className="px-2.5 sm:px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs rounded-lg bg-card hover:bg-accent border border-border text-foreground transition-colors"
                                     >
-                                        7D
+                                        {t('analytics.sales.presets.7d')}
                                     </button>
                                     <button
                                         onClick={() => setQuickDate(30)}
                                         className="px-2.5 sm:px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs rounded-lg bg-card hover:bg-accent border border-border text-foreground transition-colors"
                                     >
-                                        30D
+                                        {t('analytics.sales.presets.30d')}
                                     </button>
                                     <button
                                         onClick={() => setQuickDate(90)}
                                         className="px-2.5 sm:px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs rounded-lg bg-card hover:bg-accent border border-border text-foreground transition-colors"
                                     >
-                                        90D
+                                        {t('analytics.sales.presets.90d')}
                                     </button>
                                 </div>
                             </div>
@@ -196,7 +198,7 @@ export default function SalesAnalytics() {
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-6 mb-4 sm:mb-6 md:mb-8">
                         {stats.map((stat, index) => (
                             <motion.div
-                                key={stat.label}
+                                key={index}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
@@ -225,7 +227,7 @@ export default function SalesAnalytics() {
                             <CardContent className="p-3 sm:p-4 md:p-6">
                                 <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
-                                    Revenue Trends
+                                    {t('analytics.sales.charts.revenue_trends')}
                                 </h3>
                                 {trends?.data && trends.data.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={220} className="sm:!h-[260px] md:!h-[300px]">
@@ -243,7 +245,7 @@ export default function SalesAnalytics() {
                                     <div className="h-[220px] sm:h-[260px] md:h-[300px] flex items-center justify-center text-muted-foreground">
                                         <div className="text-center">
                                             <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                            <p className="text-xs sm:text-sm">No revenue data available</p>
+                                            <p className="text-xs sm:text-sm">{t('analytics.sales.empty.revenue')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -255,7 +257,7 @@ export default function SalesAnalytics() {
                             <CardContent className="p-3 sm:p-4 md:p-6">
                                 <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                     <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
-                                    Sales by Category
+                                    {t('analytics.sales.charts.by_category')}
                                 </h3>
                                 {categories?.data && categories.data.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={220} className="sm:!h-[260px] md:!h-[300px]">
@@ -281,7 +283,7 @@ export default function SalesAnalytics() {
                                     <div className="h-[220px] sm:h-[260px] md:h-[300px] flex items-center justify-center text-muted-foreground">
                                         <div className="text-center">
                                             <PieChartIcon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                            <p className="text-xs sm:text-sm">No category sales data</p>
+                                            <p className="text-xs sm:text-sm">{t('analytics.sales.empty.category')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -293,7 +295,7 @@ export default function SalesAnalytics() {
                             <CardContent className="p-3 sm:p-4 md:p-6">
                                 <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                     <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
-                                    Peak Hours
+                                    {t('analytics.sales.charts.peak_hours')}
                                 </h3>
                                 {peakHours?.data && peakHours.data.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={220} className="sm:!h-[260px] md:!h-[300px]">
@@ -309,7 +311,7 @@ export default function SalesAnalytics() {
                                     <div className="h-[220px] sm:h-[260px] md:h-[300px] flex items-center justify-center text-muted-foreground">
                                         <div className="text-center">
                                             <Clock className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                            <p className="text-xs sm:text-sm">No peak hours data</p>
+                                            <p className="text-xs sm:text-sm">{t('analytics.sales.empty.peak_hours')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -321,7 +323,7 @@ export default function SalesAnalytics() {
                             <CardContent className="p-3 sm:p-4 md:p-6">
                                 <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                                     <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
-                                    Top Selling Items
+                                    {t('analytics.sales.charts.top_items')}
                                 </h3>
                                 {topItems?.data && topItems.data.length > 0 ? (
                                     <div className="space-y-2 sm:space-y-3">
@@ -333,7 +335,7 @@ export default function SalesAnalytics() {
                                                     </div>
                                                     <div className="min-w-0">
                                                         <h4 className="text-foreground font-semibold text-xs sm:text-sm truncate">{item.name}</h4>
-                                                        <p className="text-[10px] sm:text-sm text-muted-foreground">{item.quantity_sold} sold</p>
+                                                        <p className="text-[10px] sm:text-sm text-muted-foreground">{item.quantity_sold} {t('analytics.sales.item_sold')}</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right flex-shrink-0">
@@ -346,7 +348,7 @@ export default function SalesAnalytics() {
                                     <div className="h-[220px] sm:h-[260px] md:h-[300px] flex items-center justify-center text-muted-foreground">
                                         <div className="text-center">
                                             <BarChart3 className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-20" />
-                                            <p className="text-xs sm:text-sm">No top selling items data</p>
+                                            <p className="text-xs sm:text-sm">{t('analytics.sales.empty.top_items')}</p>
                                         </div>
                                     </div>
                                 )}

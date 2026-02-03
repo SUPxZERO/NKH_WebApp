@@ -11,9 +11,11 @@ import { Modal } from '@/app/components/ui/Modal';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
+    const { t } = useLanguage();
     const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
         purple: {
             gradient: 'from-purple-500/20 to-fuchsia-500/10',
@@ -77,17 +79,22 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Mobile optimized with horizontal scroll
-const PositionStatsRibbon = ({ stats }: { stats: any }) => (
-    <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
-        <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-            <StatCard title="Total" value={stats.total} icon={Briefcase} color="purple" index={0} />
-            <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-            <StatCard title="Staff" value={stats.staff} icon={Users} color="blue" index={2} />
+// Stats Ribbon - Mobile optimized with horizontal scroll
+const PositionStatsRibbon = ({ stats }: { stats: any }) => {
+    const { t } = useLanguage();
+    return (
+        <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
+            <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+                <StatCard title={t('admin.hr.positions.stats.total')} value={stats.total} icon={Briefcase} color="purple" index={0} />
+                <StatCard title={t('admin.hr.positions.stats.active')} value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+                <StatCard title={t('admin.hr.positions.stats.staff')} value={stats.staff} icon={Users} color="blue" index={2} />
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 export default function Positions() {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [openCreate, setOpenCreate] = useState(false);
@@ -123,20 +130,20 @@ export default function Positions() {
     // Mutations
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/positions', data),
-        onSuccess: () => { toastSuccess('Position created'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.hr.positions.messages.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.hr.positions.messages.failed') as string)
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/positions/${id}`, data),
-        onSuccess: () => { toastSuccess('Position updated'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.hr.positions.messages.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.hr.positions.messages.failed') as string)
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/positions/${id}`),
-        onSuccess: () => { toastSuccess('Position deleted'); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.hr.positions.messages.deleted') as string); qc.invalidateQueries({ queryKey: ['admin/positions'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.hr.positions.messages.failed') as string)
     });
 
     const closeModal = () => {
@@ -153,7 +160,7 @@ export default function Positions() {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Delete this position?')) deleteMutation.mutate(id);
+        if (confirm(t('admin.hr.positions.messages.confirm_delete') as string)) deleteMutation.mutate(id);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -180,13 +187,14 @@ export default function Positions() {
                             animate={{ opacity: 1, x: 0 }}
                             className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent truncate"
                         >
-                            Positions
+
+                            {t('admin.hr.positions.title')}
                         </motion.h1>
-                        <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Manage job titles</p>
+                        <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">{t('admin.hr.positions.subtitle')}</p>
                     </div>
                     <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
                         <Plus className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">Add Position</span>
+                        <span className="hidden sm:inline">{t('admin.hr.positions.add')}</span>
                     </Button>
                 </div>
 
@@ -202,14 +210,14 @@ export default function Positions() {
                     <div className="flex gap-2 sm:gap-4">
                         <div className="relative flex-1 min-w-0">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                            <Input placeholder={t('layout.common.search') as string} value={search} onChange={(e) => setSearch(e.target.value)}
                                 className="pl-9 h-10 text-sm" variant="filled" />
                         </div>
                         <div className="flex gap-1.5 sm:gap-2">
                             {[
-                                { key: 'all', label: 'All', mobileLabel: 'All' },
-                                { key: 'active', label: 'Active', mobileLabel: 'On' },
-                                { key: 'inactive', label: 'Inactive', mobileLabel: 'Off' }
+                                { key: 'all', label: t('admin.hr.positions.filters.all'), mobileLabel: t('admin.hr.positions.filters.all') },
+                                { key: 'active', label: t('admin.hr.positions.filters.active'), mobileLabel: t('admin.hr.positions.filters.on') },
+                                { key: 'inactive', label: t('admin.hr.positions.filters.inactive'), mobileLabel: t('admin.hr.positions.filters.off') }
                             ].map(({ key, label, mobileLabel }) => (
                                 <button
                                     key={key}
@@ -238,18 +246,18 @@ export default function Positions() {
                 >
                     {/* Table Header with Gradient */}
                     <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
-                        <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">Title</div>
-                        <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">Description</div>
-                        <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Staff</div>
-                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+                        <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.positions.table.title')}</div>
+                        <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.positions.table.description')}</div>
+                        <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.positions.table.staff')}</div>
+                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.positions.table.status')}</div>
+                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.hr.positions.table.actions')}</div>
                     </div>
                     <div className="divide-y divide-border/30">
                         {isLoading ? (
                             <div className="p-12 text-center">
                                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                                     <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                                    Loading...
+                                    {t('layout.common.loading')}
                                 </div>
                             </div>
                         ) : positionList.length === 0 ? (
@@ -257,8 +265,8 @@ export default function Positions() {
                                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
                                     <Briefcase className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                                 </div>
-                                <h3 className="text-foreground font-semibold">No positions found</h3>
-                                <p className="text-muted-foreground text-sm mt-1">Create your first position</p>
+                                <h3 className="text-foreground font-semibold">{t('admin.hr.positions.messages.not_found')}</h3>
+                                <p className="text-muted-foreground text-sm mt-1">{t('admin.hr.positions.messages.create_first')}</p>
                             </div>
                         ) : positionList.map((pos: any, idx: number) => (
                             <motion.div
@@ -304,12 +312,12 @@ export default function Positions() {
                     {isLoading ? (
                         <div className="p-6 text-center text-muted-foreground text-sm">
                             <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                            Loading...
+                            {t('layout.common.loading')}
                         </div>
                     ) : positionList.length === 0 ? (
                         <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">
                             <Briefcase className="w-10 h-10 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
-                            <p className="text-muted-foreground text-sm">No positions found</p>
+                            <p className="text-muted-foreground text-sm">{t('admin.hr.positions.messages.not_found')}</p>
                         </div>
                     ) : (
                         positionList.map((pos: any, idx: number) => (
@@ -327,7 +335,7 @@ export default function Positions() {
                                         </div>
                                         <div className="min-w-0">
                                             <div className="font-semibold text-foreground text-sm truncate">{pos.title}</div>
-                                            <div className="text-[10px] text-muted-foreground truncate">{pos.description || 'No description'}</div>
+                                            <div className="text-[10px] text-muted-foreground truncate">{pos.description || t('admin.hr.positions.table.no_desc')}</div>
                                         </div>
                                     </div>
                                     <div className="flex gap-1 flex-shrink-0">
@@ -347,11 +355,11 @@ export default function Positions() {
                                             : "bg-red-500/20 text-red-600 dark:text-red-400"
                                     )}>
                                         <span className={cn("w-1.5 h-1.5 rounded-full", pos.is_active ? "bg-emerald-500" : "bg-red-500")} />
-                                        {pos.is_active ? 'Active' : 'Inactive'}
+                                        {pos.is_active ? t('admin.hr.positions.filters.active') : t('admin.hr.positions.filters.inactive')}
                                     </span>
                                     <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center gap-1">
                                         <Users size={10} />
-                                        {pos.employees_count || 0} staff
+                                        {pos.employees_count || 0} {t('admin.hr.positions.stats.staff')}
                                     </span>
                                 </div>
                             </motion.div>
@@ -360,24 +368,24 @@ export default function Positions() {
                 </div>
             </div>
 
-            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingPosition ? 'Edit Position' : 'New Position'}>
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingPosition ? t('admin.hr.positions.modal.edit_title') : t('admin.hr.positions.modal.create_title')}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input
-                        label="Title"
+                        label={t('admin.hr.positions.modal.title') as string}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
                         className="h-10 text-sm"
-                        placeholder="e.g. Head Chef"
+                        placeholder={t('admin.hr.positions.modal.placeholder.title') as string}
                     />
 
                     <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">Description</label>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">{t('admin.hr.positions.modal.description')}</label>
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={3}
-                            placeholder="Optional description of the role..."
+                            placeholder={t('admin.hr.positions.modal.placeholder.description') as string}
                             className="w-full bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none shadow-sm"
                         />
                     </div>
@@ -391,14 +399,14 @@ export default function Positions() {
                             className="rounded bg-background border-input text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
                         />
                         <label htmlFor="is_active" className="text-sm font-medium text-foreground cursor-pointer select-none">
-                            Active Status
+                            {t('admin.hr.positions.modal.active_status')}
                         </label>
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                        <Button type="button" variant="ghost" onClick={closeModal} className="flex-1">Cancel</Button>
+                        <Button type="button" variant="ghost" onClick={closeModal} className="flex-1">{t('admin.hr.positions.modal.cancel')}</Button>
                         <Button type="submit" variant="primary" className="flex-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-md">
-                            {editingPosition ? 'Update Position' : 'Create Position'}
+                            {editingPosition ? t('admin.hr.positions.modal.update') : t('admin.hr.positions.modal.create')}
                         </Button>
                     </div>
                 </form>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePage } from '@inertiajs/react';
@@ -42,6 +43,7 @@ interface Setting {
 
 export default function Settings() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { props } = usePage<{ auth: { user: any } }>();
   const user = props.auth?.user;
 
@@ -95,20 +97,20 @@ export default function Settings() {
   const updateProfileMutation = useMutation({
     mutationFn: (data: any) => apiPut('/api/user/profile', data),
     onSuccess: () => {
-      toastSuccess('Profile updated successfully');
+      toastSuccess(t('admin.settings.messages.profile_updated') as string);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
-    onError: () => toastError('Failed to update profile')
+    onError: () => toastError(t('admin.settings.messages.profile_update_failed') as string)
   });
 
   // Password Update Mutation
   const updatePasswordMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/user/change-password', data),
     onSuccess: () => {
-      toastSuccess('Password changed successfully');
+      toastSuccess(t('admin.settings.messages.password_changed') as string);
       setPasswordForm({ current_password: '', new_password: '', new_password_confirmation: '' });
     },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed to change password')
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.settings.messages.password_change_failed') as string)
   });
 
   // Settings Mutations
@@ -116,32 +118,32 @@ export default function Settings() {
     mutationFn: (data: { settings: { key: string; value: any }[]; location_id?: number | null }) =>
       apiPost('/api/admin/settings/bulk-update', data),
     onSuccess: () => {
-      toastSuccess('Settings saved');
+      toastSuccess(t('admin.settings.messages.settings_saved') as string);
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       setEditedValues({});
     },
-    onError: () => toastError('Failed to save settings')
+    onError: () => toastError(t('admin.settings.messages.settings_save_failed') as string)
   });
 
   const createMutation = useMutation({
     mutationFn: (data: { key: string; value: any; location_id?: number | null }) =>
       apiPost('/api/admin/settings', data),
     onSuccess: () => {
-      toastSuccess('Setting created');
+      toastSuccess(t('admin.settings.messages.setting_created') as string);
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       setShowAddModal(false);
       setNewSetting({ key: '', value: '' });
     },
-    onError: () => toastError('Failed to create setting')
+    onError: () => toastError(t('admin.settings.messages.setting_create_failed') as string)
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/settings/${id}`),
     onSuccess: () => {
-      toastSuccess('Setting deleted');
+      toastSuccess(t('admin.settings.messages.setting_deleted') as string);
       queryClient.invalidateQueries({ queryKey: ['settings'] });
     },
-    onError: () => toastError('Failed to delete setting')
+    onError: () => toastError(t('admin.settings.messages.setting_delete_failed') as string)
   });
 
   const handleValueChange = (key: string, value: any) => {
@@ -154,7 +156,7 @@ export default function Settings() {
   };
 
   const handleDelete = (setting: Setting) => {
-    if (confirm(`Delete setting "${setting.key}"?`)) {
+    if (confirm(`${t('admin.categories.actions.confirm_delete') as string} "${setting.key}"?`)) { // Reusing delete text or create new key if specific needed
       deleteMutation.mutate(setting.id);
     }
   };
@@ -169,7 +171,7 @@ export default function Settings() {
 
   const handleChangePassword = () => {
     if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
-      toastError('Passwords do not match');
+      toastError(t('admin.settings.messages.passwords_mismatch') as string);
       return;
     }
     updatePasswordMutation.mutate(passwordForm);
@@ -197,10 +199,12 @@ export default function Settings() {
     }
   };
 
+
+
   // Get current location
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
-      toastError("Geolocation is not supported by your browser");
+      toastError(t('admin.settings.messages.geolocation_error') as string);
       return;
     }
     setLoadingLocation(true);
@@ -211,7 +215,7 @@ export default function Settings() {
       },
       (error) => {
         console.error(error);
-        toastError("Unable to retrieve your location");
+        toastError(t('admin.settings.messages.location_error') as string);
         setLoadingLocation(false);
       },
       { enableHighAccuracy: true }
@@ -259,10 +263,10 @@ export default function Settings() {
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
                   <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent truncate">
-                    Settings
+                    {t('admin.settings.title')}
                   </span>
                 </h1>
-                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Manage your profile and system settings</p>
+                <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.settings.subtitle')}</p>
               </div>
             </div>
 
@@ -278,7 +282,7 @@ export default function Settings() {
                 )}
               >
                 <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline sm:inline">My </span>Profile
+                {t('admin.settings.tabs.profile')}
               </button>
               <button
                 onClick={() => setActiveSection('system')}
@@ -290,7 +294,7 @@ export default function Settings() {
                 )}
               >
                 <SettingsIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">System </span>Settings
+                {t('admin.settings.tabs.system')}
               </button>
             </div>
           </div>
@@ -303,7 +307,7 @@ export default function Settings() {
                 <div className="bg-card border border-border rounded-xl p-4 sm:p-6 backdrop-blur-sm">
                   <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                     <User className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
-                    Personal Information
+                    {t('admin.settings.profile.title')}
                   </h2>
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
@@ -317,7 +321,7 @@ export default function Settings() {
                       <h3 className="text-lg sm:text-xl font-semibold text-foreground">{profileForm.name}</h3>
                       <p className="text-sm sm:text-base text-muted-foreground">{profileForm.email}</p>
                       <span className="inline-block mt-0.5 sm:mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                        Administrator
+                        {t('layout.user_menu.roles.admin')}
                       </span>
                     </div>
                   </div>
@@ -326,7 +330,7 @@ export default function Settings() {
                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
                         <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-2" />
-                        Full Name
+                        {t('admin.settings.profile.form.full_name')}
                       </label>
                       <input
                         type="text"
@@ -338,7 +342,7 @@ export default function Settings() {
                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
                         <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-2" />
-                        Email
+                        {t('admin.settings.profile.form.email')}
                       </label>
                       <input
                         type="email"
@@ -350,7 +354,7 @@ export default function Settings() {
                     <div className="sm:col-span-2">
                       <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
                         <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-2" />
-                        Phone
+                        {t('admin.settings.profile.form.phone')}
                       </label>
                       <input
                         type="tel"
@@ -367,7 +371,7 @@ export default function Settings() {
                     className="mt-4 sm:mt-6 h-10 text-sm bg-purple-600 hover:bg-purple-700"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
+                    {updateProfileMutation.isPending ? t('admin.settings.profile.actions.saving') : t('admin.settings.profile.actions.save')}
                   </Button>
                 </div>
 
@@ -376,7 +380,7 @@ export default function Settings() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-0">
                     <h2 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
                       <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
-                      My Location
+                      {t('admin.settings.profile.location.title')}
                     </h2>
                     <button
                       onClick={handleLocateMe}
@@ -387,7 +391,7 @@ export default function Settings() {
                       ) : (
                         <Crosshair className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       )}
-                      Use My Location
+                      {t('admin.settings.profile.location.use_my_location')}
                     </button>
                   </div>
 
@@ -404,25 +408,25 @@ export default function Settings() {
                       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000]">
                         <div className="flex items-center gap-2 text-white bg-secondary px-3 py-1.5 rounded-lg">
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span className="text-xs sm:text-sm">Finding location...</span>
+                          <span className="text-xs sm:text-sm">{t('admin.settings.profile.location.finding_location')}</span>
                         </div>
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Address</label>
+                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.profile.location.address')}</label>
                     <textarea
                       value={profileForm.address}
                       onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                       rows={2}
                       className="w-full px-3 sm:px-4 py-2 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
-                      placeholder="Your address will appear here after selecting on map"
+                      placeholder={t('admin.settings.profile.location.address_placeholder') as string || "Your address will appear here after selecting on map"}
                     />
                   </div>
                   <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                    <span>Lat: {profileForm.latitude?.toFixed(6)}</span>
-                    <span>Lng: {profileForm.longitude?.toFixed(6)}</span>
+                    <span>{t('admin.settings.profile.location.lat')}: {profileForm.latitude?.toFixed(6)}</span>
+                    <span>{t('admin.settings.profile.location.lng')}: {profileForm.longitude?.toFixed(6)}</span>
                   </div>
                 </div>
               </div>
@@ -432,12 +436,12 @@ export default function Settings() {
                 <div className="bg-card border border-border rounded-xl p-4 sm:p-6 backdrop-blur-sm">
                   <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
                     <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
-                    Change Password
+                    {t('admin.settings.profile.security.title')}
                   </h2>
 
                   <div className="space-y-3 sm:space-y-4">
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Current Password</label>
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.profile.security.current')}</label>
                       <input
                         type="password"
                         value={passwordForm.current_password}
@@ -446,7 +450,7 @@ export default function Settings() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">New Password</label>
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.profile.security.new')}</label>
                       <input
                         type="password"
                         value={passwordForm.new_password}
@@ -455,7 +459,7 @@ export default function Settings() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Confirm Password</label>
+                      <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.profile.security.confirm')}</label>
                       <input
                         type="password"
                         value={passwordForm.new_password_confirmation}
@@ -471,27 +475,27 @@ export default function Settings() {
                     className="w-full mt-4 sm:mt-6 h-10 text-sm bg-purple-600 hover:bg-purple-700"
                   >
                     <Key className="w-4 h-4 mr-2" />
-                    {updatePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
+                    {updatePasswordMutation.isPending ? t('admin.settings.profile.security.changing') : t('admin.settings.profile.security.button')}
                   </Button>
                 </div>
 
                 {/* Quick Stats */}
                 <div className="bg-card border border-border rounded-xl p-4 sm:p-6 backdrop-blur-sm">
-                  <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Account Info</h2>
+                  <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">{t('admin.settings.profile.account.title')}</h2>
                   <div className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Role</span>
-                      <span className="text-foreground font-medium">Administrator</span>
+                      <span className="text-muted-foreground">{t('admin.settings.profile.account.role')}</span>
+                      <span className="text-foreground font-medium">{t('admin.settings.profile.account.role')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Member Since</span>
+                      <span className="text-muted-foreground">{t('admin.settings.profile.account.member_since')}</span>
                       <span className="text-foreground font-medium">
                         {new Date(user?.created_at).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Last Login</span>
-                      <span className="text-foreground font-medium">Today</span>
+                      <span className="text-muted-foreground">{t('admin.settings.profile.account.last_login')}</span>
+                      <span className="text-foreground font-medium">{t('admin.settings.profile.account.today')}</span>
                     </div>
                   </div>
                 </div>
@@ -507,13 +511,13 @@ export default function Settings() {
                       <Button onClick={handleSave} disabled={saveMutation.isPending}
                         className="w-full bg-emerald-600 hover:bg-emerald-700 h-9 sm:h-10 text-sm">
                         <Save className="w-4 h-4 mr-2" />
-                        {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
+                        {saveMutation.isPending ? t('admin.settings.system.actions.saving') : t('admin.settings.system.actions.save_changes')}
                       </Button>
                     </motion.div>
                   )}
                   <Button onClick={() => setShowAddModal(true)} variant="secondary"
                     className="flex-1 border-border hover:bg-secondary h-9 sm:h-10 text-sm">
-                    <Plus className="w-4 h-4 mr-2" /> Add Setting
+                    <Plus className="w-4 h-4 mr-2" /> {t('admin.settings.system.actions.add_setting')}
                   </Button>
                 </div>
               </div>
@@ -524,9 +528,9 @@ export default function Settings() {
                   <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
                   <select value={selectedLocation || ''} onChange={(e) => setSelectedLocation(e.target.value ? Number(e.target.value) : null)}
                     className="flex-1 px-3 sm:px-4 py-2 h-9 sm:h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500">
-                    <option value="">Global Settings</option>
+                    <option value="">{t('admin.settings.system.filter.global')}</option>
                     {locations.map((location: any) => (
-                      <option key={location.id} value={location.id}>{location.name} (Location-specific)</option>
+                      <option key={location.id} value={location.id}>{location.name} ({t('admin.settings.system.filter.location_specific')})</option>
                     ))}
                   </select>
                 </div>
@@ -561,8 +565,8 @@ export default function Settings() {
               ) : currentSettings.length === 0 ? (
                 <div className="bg-card border border-border rounded-xl p-8 sm:p-12 text-center backdrop-blur-sm">
                   <SettingsIcon className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                  <h3 className="text-foreground font-medium text-sm sm:text-base">No settings found</h3>
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">Click "Add Setting" to create one.</p>
+                  <h3 className="text-foreground font-medium text-sm sm:text-base">{t('admin.settings.system.empty.no_settings')}</h3>
+                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">{t('admin.settings.system.empty.click_add')}</p>
                 </div>
               ) : (
                 <div className="space-y-2 sm:space-y-3">
@@ -579,7 +583,7 @@ export default function Settings() {
                             <div className="flex items-center gap-2 flex-wrap">
                               <label className="font-medium text-sm text-foreground capitalize truncate">{setting.label}</label>
                               {isEdited && (
-                                <span className="text-[10px] sm:text-xs bg-purple-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full">Modified</span>
+                                <span className="text-[10px] sm:text-xs bg-purple-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full">{t('admin.settings.system.list.modified')}</span>
                               )}
                             </div>
                             <div className="text-[10px] sm:text-xs text-muted-foreground font-mono truncate">{setting.key}</div>
@@ -591,7 +595,7 @@ export default function Settings() {
                                 <input type="checkbox" checked={currentValue}
                                   onChange={(e) => handleValueChange(setting.key, e.target.checked)}
                                   className="w-4 h-4 sm:w-5 sm:h-5 rounded text-purple-600 focus:ring-purple-500 bg-background border-border" />
-                                <span className="text-xs sm:text-sm text-muted-foreground">{currentValue ? 'On' : 'Off'}</span>
+                                <span className="text-xs sm:text-sm text-muted-foreground">{currentValue ? t('admin.settings.system.list.on') : t('admin.settings.system.list.off')}</span>
                               </label>
                             ) : (
                               <input type="text"
@@ -620,33 +624,33 @@ export default function Settings() {
                     <motion.div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full"
                       initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} onClick={(e) => e.stopPropagation()}>
                       <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Add New Setting</h2>
+                        <h2 className="text-xl sm:text-2xl font-bold text-foreground">{t('admin.settings.system.modal.title')}</h2>
 
                         <div>
-                          <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Key *</label>
+                          <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.system.modal.key')} *</label>
                           <input type="text" value={newSetting.key}
                             onChange={(e) => setNewSetting({ ...newSetting, key: e.target.value })}
-                            placeholder="e.g., general.site_name"
+                            placeholder={t('admin.settings.system.modal.key_placeholder') as string || "e.g., general.site_name"}
                             className="w-full px-3 sm:px-4 py-2 h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
-                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Use format: category.setting_name</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('admin.settings.system.modal.key_hint')}</p>
                         </div>
 
                         <div>
-                          <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Value *</label>
+                          <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.system.modal.value')} *</label>
                           <input type="text" value={newSetting.value}
                             onChange={(e) => setNewSetting({ ...newSetting, value: e.target.value })}
-                            placeholder="Setting value"
+                            placeholder={(t('admin.settings.system.modal.value_placeholder') as string) || "Setting value"}
                             className="w-full px-3 sm:px-4 py-2 h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
                         </div>
 
                         <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
                           <Button variant="secondary" onClick={() => setShowAddModal(false)} className="flex-1 h-10 text-sm border-border">
-                            Cancel
+                            {t('admin.settings.system.actions.cancel')}
                           </Button>
                           <Button onClick={handleCreate}
                             disabled={!newSetting.key || !newSetting.value || createMutation.isPending}
                             className="flex-1 h-10 text-sm bg-purple-600 hover:bg-purple-700">
-                            {createMutation.isPending ? 'Creating...' : 'Create'}
+                            {createMutation.isPending ? t('admin.settings.system.actions.creating') : t('admin.settings.system.actions.create')}
                           </Button>
                         </div>
                       </div>

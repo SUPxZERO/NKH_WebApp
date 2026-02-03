@@ -5,6 +5,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export default function Authenticated({
     header,
@@ -12,6 +13,7 @@ export default function Authenticated({
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const { user } = useAuth();
     const { url } = usePage();
+    const { t } = useTranslation();
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -35,7 +37,7 @@ export default function Authenticated({
                                         </div>
                                     </div>
                                     <span className="hidden sm:block font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                                        NKH Restaurant
+                                        {t('layout.footer.brand_title')}
                                     </span>
                                 </Link>
                             </div>
@@ -45,7 +47,7 @@ export default function Authenticated({
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
                                 >
-                                    Dashboard
+                                    {t('layout.nav.admin.dashboard')}
                                 </NavLink>
                             </div>
                         </div>
@@ -81,14 +83,14 @@ export default function Authenticated({
                                         <Dropdown.Link
                                             href={route('profile.edit')}
                                         >
-                                            Profile
+                                            {t('layout.nav.admin.profile')}
                                         </Dropdown.Link>
                                         <Dropdown.Link
                                             href={route('logout')}
                                             method="post"
                                             as="button"
                                         >
-                                            Log Out
+                                            {t('layout.nav.admin.logout')}
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
@@ -149,7 +151,7 @@ export default function Authenticated({
                             href={route('dashboard')}
                             active={route().current('dashboard')}
                         >
-                            Dashboard
+                            {t('layout.nav.admin.dashboard')}
                         </ResponsiveNavLink>
                     </div>
 
@@ -165,14 +167,14 @@ export default function Authenticated({
 
                         <div className="mt-3 space-y-1">
                             <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
+                                {t('layout.nav.admin.profile')}
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 method="post"
                                 href={route('logout')}
                                 as="button"
                             >
-                                Log Out
+                                {t('layout.nav.admin.logout')}
                             </ResponsiveNavLink>
                         </div>
                     </div>

@@ -13,7 +13,7 @@ class CheckRole
         if (!Auth::check()) {
             // For API/XHR requests return JSON 401 instead of redirecting to login
             if ($request->expectsJson() || $request->is('api/*') || $request->ajax()) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
+                return response()->json(['message' => __('messages.api.errors.unauthenticated')], 401);
             }
 
             return redirect('login');
@@ -31,9 +31,9 @@ class CheckRole
 
         // For API/XHR requests return JSON 403 to avoid HTML error pages
         if ($request->expectsJson() || $request->is('api/*') || $request->ajax()) {
-            return response()->json(['message' => 'Forbidden.'], 403);
+            return response()->json(['message' => __('messages.api.errors.forbidden')], 403);
         }
 
-        return abort(403, 'Unauthorized action.');
+        return abort(403, __('messages.api.errors.unauthorized_action'));
     }
 }

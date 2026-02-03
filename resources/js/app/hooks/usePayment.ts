@@ -34,7 +34,7 @@ export interface PaymentInitResponse {
         image_base64: string;
     };
     instructions?: string;
-    order: {
+    order?: {
         id: number;
         order_number: string;
         total: number;

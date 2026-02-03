@@ -13,6 +13,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { Floor, Location } from '@/app/types/domain';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -79,16 +80,20 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Mobile optimized
-const FloorStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-    <StatCard title="Floors" value={stats.total} icon={Building} color="purple" index={0} />
-    <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-    <StatCard title="Tables" value={stats.tables} icon={Grid3X3} color="blue" index={2} />
-    <StatCard title="Capacity" value={stats.capacity} icon={Users} color="amber" index={3} />
-  </div>
-);
+const FloorStatsRibbon = ({ stats }: { stats: any }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+      <StatCard title={t('admin.floors.stats.floors')} value={stats.total} icon={Building} color="purple" index={0} />
+      <StatCard title={t('admin.floors.stats.active')} value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+      <StatCard title={t('admin.floors.stats.tables')} value={stats.tables} icon={Grid3X3} color="blue" index={2} />
+      <StatCard title={t('admin.floors.stats.capacity')} value={stats.capacity} icon={Users} color="amber" index={3} />
+    </div>
+  );
+};
 
 export default function Floors() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
@@ -132,20 +137,20 @@ export default function Floors() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/admin/floors', data),
-    onSuccess: () => { toastSuccess('Floor created'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/floors'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.floors.messages.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/floors'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.floors.messages.failed') as string)
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/floors/${id}`, data),
-    onSuccess: () => { toastSuccess('Floor updated'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/floors'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.floors.messages.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/floors'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.floors.messages.failed') as string)
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/floors/${id}`),
-    onSuccess: () => { toastSuccess('Floor deleted'); qc.invalidateQueries({ queryKey: ['admin/floors'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.floors.messages.deleted') as string); qc.invalidateQueries({ queryKey: ['admin/floors'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.floors.messages.failed') as string)
   });
 
   const closeModal = () => {
@@ -167,7 +172,7 @@ export default function Floors() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Delete this floor? All tables on this floor will also be deleted.')) deleteMutation.mutate(id);
+    if (confirm(t('admin.floors.messages.confirm_delete') as string)) deleteMutation.mutate(id);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -199,13 +204,13 @@ export default function Floors() {
               animate={{ opacity: 1, x: 0 }}
               className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-violet-500 to-purple-500 bg-clip-text text-transparent truncate"
             >
-              Floors
+              {t('admin.floors.title')}
             </motion.h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Manage restaurant layout</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.floors.subtitle')}</p>
           </div>
           <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
             <Plus className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Floor</span>
+            <span className="hidden sm:inline">{t('admin.floors.add')}</span>
           </Button>
         </div>
 
@@ -221,14 +226,14 @@ export default function Floors() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+              <Input placeholder={t('admin.floors.filters.search') as string} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="pl-10 h-10 text-sm" variant="filled" />
             </div>
             <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-3 sm:mx-0 px-3 sm:px-0">
               {[
-                { key: 'all', label: 'All' },
-                { key: 'active', label: 'Active' },
-                { key: 'inactive', label: 'Inactive' }
+                { key: 'all', label: t('admin.floors.filters.all') },
+                { key: 'active', label: t('admin.floors.filters.active') },
+                { key: 'inactive', label: t('admin.floors.filters.inactive') }
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -246,7 +251,7 @@ export default function Floors() {
             </div>
             <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}
               className="bg-secondary border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none transition-colors">
-              <option value="all">All Locations</option>
+              <option value="all">{t('admin.floors.filters.all_locations')}</option>
               {locations?.data?.map((l: Location) => (
                 <option key={l.id} value={l.id}>{l.name}</option>
               ))}
@@ -263,19 +268,19 @@ export default function Floors() {
         >
           {/* Table Header with Gradient */}
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-purple-500/10">
-            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name</div>
-            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Location</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Order</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Tables</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.floors.table.name')}</div>
+            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.floors.table.location')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.floors.table.order')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.floors.table.tables')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.floors.table.status')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.floors.table.actions')}</div>
           </div>
           <div className="divide-y divide-border/30">
             {isLoading ? (
               <div className="p-12 text-center">
                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                   <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  Loading floors...
+                  {t('admin.floors.table.loading')}
                 </div>
               </div>
             ) : floorList.length === 0 ? (
@@ -283,8 +288,8 @@ export default function Floors() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-violet-500/20 flex items-center justify-center">
                   <Building className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-foreground font-semibold">No floors found</h3>
-                <p className="text-muted-foreground text-sm mt-1">Create your first floor to get started</p>
+                <h3 className="text-foreground font-semibold">{t('admin.floors.empty.no_floors')}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{t('admin.floors.empty.create_first')}</p>
               </div>
             ) : floorList.map((floor: Floor, idx: number) => (
               <motion.div
@@ -306,7 +311,7 @@ export default function Floors() {
                 <div className="col-span-2 text-sm text-muted-foreground">{floor.display_order}</div>
                 <div className="col-span-2 text-sm text-muted-foreground flex items-center gap-2">
                   <Grid3X3 size={14} className="text-muted-foreground" />
-                  <span className="font-semibold text-foreground">{floor.tables?.length || 0}</span> tables
+                  <span className="font-semibold text-foreground">{floor.tables?.length || 0}</span> {(t('admin.floors.stats.tables') as string).toLowerCase()}
                 </div>
                 <div className="col-span-1">
                   <span className={cn(
@@ -316,7 +321,7 @@ export default function Floors() {
                       : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
                   )}>
                     <span className={cn("w-1.5 h-1.5 rounded-full", floor.is_active ? "bg-emerald-500" : "bg-red-500")} />
-                    {floor.is_active ? 'Active' : 'Inactive'}
+                    {floor.is_active ? t('admin.floors.table.active') : t('admin.floors.table.inactive')}
                   </span>
                 </div>
                 <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
@@ -338,7 +343,7 @@ export default function Floors() {
             <div className="p-8 text-center">
               <div className="inline-flex items-center gap-3 text-muted-foreground">
                 <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                Loading...
+                {t('admin.floors.table.loading_short')}
               </div>
             </div>
           ) : floorList.length === 0 ? (
@@ -346,8 +351,8 @@ export default function Floors() {
               <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500/20 to-violet-500/20 flex items-center justify-center">
                 <Building className="w-7 h-7 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="text-foreground font-semibold text-sm">No floors found</h3>
-              <p className="text-muted-foreground text-xs mt-1">Create your first floor</p>
+              <h3 className="text-foreground font-semibold text-sm">{t('admin.floors.empty.no_floors')}</h3>
+              <p className="text-muted-foreground text-xs mt-1">{t('admin.floors.empty.create_first')}</p>
             </div>
           ) : (
             floorList.map((floor: Floor) => (
@@ -377,7 +382,7 @@ export default function Floors() {
                       : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
                   )}>
                     <span className={cn("w-1.5 h-1.5 rounded-full", floor.is_active ? "bg-emerald-500" : "bg-red-500")} />
-                    {floor.is_active ? 'Active' : 'Off'}
+                    {floor.is_active ? t('admin.floors.table.active') : t('admin.floors.table.off')}
                   </span>
                 </div>
 
@@ -386,9 +391,9 @@ export default function Floors() {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Grid3X3 size={12} className="text-blue-500" />
-                      <span className="font-semibold text-foreground">{floor.tables?.length || 0}</span> tables
+                      <span className="font-semibold text-foreground">{floor.tables?.length || 0}</span> {(t('admin.floors.stats.tables') as string).toLowerCase()}
                     </span>
-                    <span className="hidden sm:inline">Order: {floor.display_order}</span>
+                    <span className="hidden sm:inline">{t('admin.floors.table.order')}: {floor.display_order}</span>
                   </div>
                   <div className="flex gap-1">
                     <Button size="sm" variant="ghost" onClick={() => handleEdit(floor)} className="h-8 w-8 p-0 hover:bg-purple-500/20 hover:text-purple-500">
@@ -405,36 +410,36 @@ export default function Floors() {
         </div>
       </div>
 
-      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingFloor ? 'Edit Floor' : 'New Floor'}>
+      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingFloor ? t('admin.floors.modal.edit') : t('admin.floors.modal.new')}>
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-1.5">Location</label>
+              <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-1.5">{t('admin.floors.modal.location')}</label>
               <select
                 value={formData.location_id}
                 onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                 required
                 className="w-full h-10 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none transition-colors"
               >
-                <option value="">Select Location</option>
+                <option value="">{t('admin.floors.modal.select_location')}</option>
                 {locations?.data?.map((l: Location) => (
                   <option key={l.id} value={l.id}>{l.name}</option>
                 ))}
               </select>
             </div>
-            <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-10 text-sm" />
+            <Input label={t('admin.floors.modal.name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-10 text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Display Order" type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: e.target.value })} className="h-10 text-sm" />
+            <Input label={t('admin.floors.modal.display_order') as string} type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: e.target.value })} className="h-10 text-sm" />
             <div className="flex items-center h-full pt-5 sm:pt-6">
               <label className="flex items-center gap-2 cursor-pointer text-foreground text-sm">
-                <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-background border-border w-4 h-4" /> Active
+                <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded bg-background border-border w-4 h-4" /> {t('admin.floors.modal.active')}
               </label>
             </div>
           </div>
           <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
-            <Button type="submit" variant="primary" className="flex-1 h-10 sm:h-11 text-sm">Save</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('admin.common.cancel') || 'Cancel'}</Button>
+            <Button type="submit" variant="primary" className="flex-1 h-10 sm:h-11 text-sm">{t('layout.actions.save')}</Button>
           </div>
         </form>
       </Modal>

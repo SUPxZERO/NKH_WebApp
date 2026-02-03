@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, useForm, router } from '@inertiajs/react'; // Add router import here
+import { Head, useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { Button } from '@/app/components/ui/Button';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // Types
 interface LookupItem {
@@ -40,14 +41,15 @@ interface PageProps {
 }
 
 export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentStatuses, loyaltyTiers }: PageProps) {
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'order_types' | 'order_statuses' | 'payment_statuses' | 'loyalty_tiers'>('order_types');
     const [editingItem, setEditingItem] = useState<LookupItem | null>(null);
 
     const tabs = [
-        { id: 'order_types', label: 'Order Types', icon: Truck, color: 'text-blue-500' },
-        { id: 'order_statuses', label: 'Order Statuses', icon: Grid, color: 'text-orange-500' },
-        { id: 'payment_statuses', label: 'Payment Statuses', icon: CreditCard, color: 'text-green-500' },
-        { id: 'loyalty_tiers', label: 'Loyalty Tiers', icon: Award, color: 'text-purple-500' },
+        { id: 'order_types', label: t('system.configuration.tabs.order_types'), icon: Truck, color: 'text-blue-500' },
+        { id: 'order_statuses', label: t('system.configuration.tabs.order_statuses'), icon: Grid, color: 'text-orange-500' },
+        { id: 'payment_statuses', label: t('system.configuration.tabs.payment_statuses'), icon: CreditCard, color: 'text-green-500' },
+        { id: 'loyalty_tiers', label: t('system.configuration.tabs.loyalty_tiers'), icon: Award, color: 'text-purple-500' },
     ];
 
     const getData = () => {
@@ -123,7 +125,7 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                     <div className="flex items-center justify-between p-4 border-b border-border bg-muted/50">
                         <h3 className="text-lg font-semibold flex items-center gap-2">
                             <Edit2 className="w-4 h-4" />
-                            Edit {item.name}
+                            {t('system.configuration.modal.edit_title').replace('{name}', item.name)}
                         </h3>
                         <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
                             <X className="w-5 h-5" />
@@ -133,7 +135,7 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                     <form onSubmit={handleSubmit} className="p-4 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2">
-                                <label className="block text-sm font-medium mb-1">Name</label>
+                                <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.name')}</label>
                                 <input
                                     type="text"
                                     value={data.name}
@@ -143,7 +145,7 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Icon (Lucide)</label>
+                                <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.icon')}</label>
                                 <input
                                     type="text"
                                     value={data.icon || ''}
@@ -153,7 +155,7 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Color (Hex)</label>
+                                <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.color')}</label>
                                 <div className="flex gap-2">
                                     <input
                                         type="color"
@@ -171,7 +173,7 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">Display Order</label>
+                                <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.display_order')}</label>
                                 <input
                                     type="number"
                                     value={data.display_order}
@@ -189,26 +191,26 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                                         onChange={e => setData('is_active', e.target.checked)}
                                     />
                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                    <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                                    <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">{t('system.configuration.modal.fields.active')}</span>
                                 </label>
                             </div>
 
                             {/* Specific Fields per Type */}
                             {activeTab === 'order_types' && (
                                 <div className="col-span-2 space-y-2 border-t border-border pt-4 mt-2">
-                                    <h4 className="font-medium text-sm text-muted-foreground">Capabilities</h4>
+                                    <h4 className="font-medium text-sm text-muted-foreground">{t('system.configuration.modal.fields.capabilities')}</h4>
                                     <div className="flex gap-4">
                                         <label className="flex items-center gap-2 text-sm">
                                             <input type="checkbox" checked={data.allows_delivery} onChange={e => setData('allows_delivery', e.target.checked)} className="rounded border-input text-blue-600" />
-                                            Allows Delivery
+                                            {t('system.configuration.modal.options.allows_delivery')}
                                         </label>
                                         <label className="flex items-center gap-2 text-sm">
                                             <input type="checkbox" checked={data.allows_pickup} onChange={e => setData('allows_pickup', e.target.checked)} className="rounded border-input text-blue-600" />
-                                            Allows Pickup
+                                            {t('system.configuration.modal.options.allows_pickup')}
                                         </label>
                                         <label className="flex items-center gap-2 text-sm">
                                             <input type="checkbox" checked={data.allows_table} onChange={e => setData('allows_table', e.target.checked)} className="rounded border-input text-blue-600" />
-                                            Allows Table
+                                            {t('system.configuration.modal.options.allows_table')}
                                         </label>
                                     </div>
                                 </div>
@@ -216,20 +218,20 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
 
                             {activeTab === 'order_statuses' && (
                                 <div className="col-span-2 space-y-2 border-t border-border pt-4 mt-2">
-                                    <h4 className="font-medium text-sm text-muted-foreground">Workflow</h4>
+                                    <h4 className="font-medium text-sm text-muted-foreground">{t('system.configuration.modal.fields.workflow')}</h4>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Workflow Position (1-10)</label>
+                                            <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.workflow_pos')}</label>
                                             <input type="number" value={data.workflow_position} onChange={e => setData('workflow_position', parseInt(e.target.value))} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
                                         </div>
                                         <div className="flex flex-col gap-2 pt-6">
                                             <label className="flex items-center gap-2 text-sm">
                                                 <input type="checkbox" checked={data.is_terminal} onChange={e => setData('is_terminal', e.target.checked)} className="rounded border-input text-blue-600" />
-                                                Terminal State (End)
+                                                {t('system.configuration.modal.options.is_terminal')}
                                             </label>
                                             <label className="flex items-center gap-2 text-sm">
                                                 <input type="checkbox" checked={data.show_to_customer} onChange={e => setData('show_to_customer', e.target.checked)} className="rounded border-input text-blue-600" />
-                                                Show to Customer
+                                                {t('system.configuration.modal.options.show_customer')}
                                             </label>
                                         </div>
                                     </div>
@@ -238,15 +240,15 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
 
                             {activeTab === 'payment_statuses' && (
                                 <div className="col-span-2 space-y-2 border-t border-border pt-4 mt-2">
-                                    <h4 className="font-medium text-sm text-muted-foreground">Attributes</h4>
+                                    <h4 className="font-medium text-sm text-muted-foreground">{t('system.configuration.modal.fields.attributes')}</h4>
                                     <div className="flex gap-4">
                                         <label className="flex items-center gap-2 text-sm">
                                             <input type="checkbox" checked={data.is_successful} onChange={e => setData('is_successful', e.target.checked)} className="rounded border-input text-green-600" />
-                                            Is Successful
+                                            {t('system.configuration.modal.options.is_successful')}
                                         </label>
                                         <label className="flex items-center gap-2 text-sm">
                                             <input type="checkbox" checked={data.is_terminal} onChange={e => setData('is_terminal', e.target.checked)} className="rounded border-input text-blue-600" />
-                                            Is Terminal
+                                            {t('system.configuration.modal.options.is_terminal')}
                                         </label>
                                     </div>
                                 </div>
@@ -254,22 +256,22 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
 
                             {activeTab === 'loyalty_tiers' && (
                                 <div className="col-span-2 space-y-2 border-t border-border pt-4 mt-2">
-                                    <h4 className="font-medium text-sm text-muted-foreground">Rules & Rewards</h4>
+                                    <h4 className="font-medium text-sm text-muted-foreground">{t('system.configuration.modal.fields.rules')}</h4>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Min Spent ($)</label>
+                                            <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.min_spent')}</label>
                                             <input type="number" step="0.01" value={data.min_spent} onChange={e => setData('min_spent', parseFloat(e.target.value))} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Max Spent ($)</label>
+                                            <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.max_spent')}</label>
                                             <input type="number" step="0.01" value={data.max_spent || ''} onChange={e => setData('max_spent', e.target.value ? parseFloat(e.target.value) : null)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Unlimited" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Discount %</label>
+                                            <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.discount_percent')}</label>
                                             <input type="number" step="0.1" value={data.discount_percent} onChange={e => setData('discount_percent', parseFloat(e.target.value))} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Points Multiplier</label>
+                                            <label className="block text-sm font-medium mb-1">{t('system.configuration.modal.fields.multiplier')}</label>
                                             <input type="number" step="0.1" value={data.points_multiplier} onChange={e => setData('points_multiplier', parseFloat(e.target.value))} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
                                         </div>
                                     </div>
@@ -278,9 +280,9 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                         </div>
 
                         <div className="flex justify-end gap-2 pt-4 border-t border-border">
-                            <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                            <Button type="button" variant="ghost" onClick={onClose}>{t('system.configuration.modal.buttons.cancel')}</Button>
                             <Button type="submit" disabled={processing} className="bg-blue-600 hover:bg-blue-700 text-white">
-                                <Save className="w-4 h-4 mr-2" /> Save Changes
+                                <Save className="w-4 h-4 mr-2" /> {t('system.configuration.modal.buttons.save')}
                             </Button>
                         </div>
                     </form>
@@ -291,7 +293,7 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
 
     return (
         <AdminLayout>
-            <Head title="System Configuration" />
+            <Head title={t('system.configuration.title')} />
             <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
 
                 {/* Header */}
@@ -299,9 +301,9 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                             <Settings className="w-8 h-8 text-purple-500" />
-                            System Configuration
+                            {t('system.configuration.title')}
                         </h1>
-                        <p className="text-muted-foreground mt-2">Manage dynamic lookup tables and system definitions.</p>
+                        <p className="text-muted-foreground mt-2">{t('system.configuration.subtitle')}</p>
                     </div>
                 </div>
 
@@ -338,12 +340,12 @@ export default function ConfigurationIndex({ orderTypes, orderStatuses, paymentS
                             <table className="w-full text-sm text-left">
                                 <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
                                     <tr>
-                                        <th className="px-6 py-4">Display Order</th>
-                                        <th className="px-6 py-4">Name / Code</th>
-                                        <th className="px-6 py-4">Visuals</th>
-                                        <th className="px-6 py-4">Status</th>
-                                        <th className="px-6 py-4">Attributes</th>
-                                        <th className="px-6 py-4 text-right">Actions</th>
+                                        <th className="px-6 py-4">{t('system.configuration.table.headers.display_order')}</th>
+                                        <th className="px-6 py-4">{t('system.configuration.table.headers.name_code')}</th>
+                                        <th className="px-6 py-4">{t('system.configuration.table.headers.visuals')}</th>
+                                        <th className="px-6 py-4">{t('system.configuration.table.headers.status')}</th>
+                                        <th className="px-6 py-4">{t('system.configuration.table.headers.attributes')}</th>
+                                        <th className="px-6 py-4 text-right">{t('system.configuration.table.headers.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">

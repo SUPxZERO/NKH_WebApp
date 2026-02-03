@@ -28,6 +28,7 @@ import { cn } from '@/app/utils/cn';
 import { useThemeStore } from '@/app/store/theme';
 import Avatar from '@/app/components/ui/Avatar';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 type UserRole = 'admin' | 'employee' | 'customer';
 
@@ -43,43 +44,46 @@ interface MenuItem {
 }
 
 // Menu configurations for different roles
-const menuConfigs: Record<UserRole, { items: MenuItem[]; bottomItems: MenuItem[] }> = {
-    customer: {
-        items: [
-            { label: 'My Profile', href: '/customer/profile', icon: User },
-            { label: 'Order History', href: '/customer/orders', icon: ShoppingBag },
-            { label: 'My Addresses', href: '/customer/profile', icon: MapPin },
-            { label: 'Loyalty Rewards', href: '/customer/loyalty', icon: Gift },
-        ],
-        bottomItems: [
-            { label: 'Settings', href: '/customer/settings', icon: Settings },
-            { label: 'Help & Support', href: '/customer/help', icon: HelpCircle },
-        ],
-    },
-    admin: {
-        items: [
-            { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-            { label: 'Manage Users', href: '/admin/customers', icon: Users },
-            { label: 'Analytics', href: '/admin/sales-analytics', icon: BarChart3 },
-            { label: 'Orders', href: '/admin/orders', icon: ClipboardList },
-        ],
-        bottomItems: [
-            { label: 'System Settings', href: '/admin/settings', icon: Settings },
-            { label: 'Audit Logs', href: '/admin/audit-logs', icon: Shield },
-        ],
-    },
-    employee: {
-        items: [
-            { label: 'My Profile', href: '/employee/settings', icon: User },
-            { label: 'My Schedule', href: '/employee/schedule', icon: Clock },
-            { label: 'Performance', href: '/employee/performance', icon: Star },
-            { label: 'Notifications', href: '/employee/notifications', icon: Bell },
-        ],
-        bottomItems: [
-            { label: 'Settings', href: '/employee/settings', icon: Settings },
-            { label: 'Help & Support', href: '/employee/support', icon: HelpCircle },
-        ],
-    },
+const getMenuConfig = (t: (key: string) => any) => {
+    const configs: Record<UserRole, { items: MenuItem[]; bottomItems: MenuItem[] }> = {
+        customer: {
+            items: [
+                { label: t('layout.ui.user_menu.items.profile'), href: '/customer/profile', icon: User },
+                { label: t('layout.ui.user_menu.items.orders'), href: '/customer/orders', icon: ShoppingBag },
+                { label: t('layout.ui.user_menu.items.addresses'), href: '/customer/profile', icon: MapPin },
+                { label: t('layout.ui.user_menu.items.loyalty'), href: '/customer/loyalty', icon: Gift },
+            ],
+            bottomItems: [
+                { label: t('layout.ui.user_menu.items.settings'), href: '/customer/settings', icon: Settings },
+                { label: t('layout.ui.user_menu.items.help'), href: '/customer/help', icon: HelpCircle },
+            ],
+        },
+        admin: {
+            items: [
+                { label: t('layout.ui.user_menu.items.dashboard'), href: '/admin/dashboard', icon: LayoutDashboard },
+                { label: t('layout.ui.user_menu.items.manage_users'), href: '/admin/customers', icon: Users },
+                { label: t('layout.ui.user_menu.items.analytics'), href: '/admin/sales-analytics', icon: BarChart3 },
+                { label: t('layout.ui.user_menu.items.manage_orders'), href: '/admin/orders', icon: ClipboardList },
+            ],
+            bottomItems: [
+                { label: t('layout.ui.user_menu.items.system_settings'), href: '/admin/settings', icon: Settings },
+                { label: t('layout.ui.user_menu.items.audit_logs'), href: '/admin/audit-logs', icon: Shield },
+            ],
+        },
+        employee: {
+            items: [
+                { label: t('layout.ui.user_menu.items.profile'), href: '/employee/settings', icon: User },
+                { label: t('layout.ui.user_menu.items.schedule'), href: '/employee/schedule', icon: Clock },
+                { label: t('layout.ui.user_menu.items.performance'), href: '/employee/performance', icon: Star },
+                { label: t('layout.ui.user_menu.items.notifications'), href: '/employee/notifications', icon: Bell },
+            ],
+            bottomItems: [
+                { label: t('layout.ui.user_menu.items.settings'), href: '/employee/settings', icon: Settings },
+                { label: t('layout.ui.user_menu.items.help'), href: '/employee/support', icon: HelpCircle },
+            ],
+        },
+    };
+    return configs;
 };
 
 // Role-based dashboard redirects
@@ -97,6 +101,7 @@ const profilePaths: Record<UserRole, string> = {
 };
 
 export default function UserProfileDropdown({ className, variant }: UserProfileDropdownProps) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const { isDark, toggle } = useThemeStore();
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -107,7 +112,8 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
     // Determine user role with safe fallback
     const userRole: UserRole = variant || (user?.role as UserRole) || 'customer';
     // Ensure config exists, fallback to customer if role is invalid
-    const config = menuConfigs[userRole] || menuConfigs['customer'];
+    const allConfigs = getMenuConfig(t);
+    const config = allConfigs[userRole] || allConfigs['customer'];
 
     // Get initials from name safely
     const getInitials = (name: string) => {
@@ -142,11 +148,11 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
     const getRoleLabel = () => {
         switch (userRole) {
             case 'admin':
-                return 'Administrator';
+                return t('common.ui.user_menu.roles.admin');
             case 'employee':
-                return 'Employee';
+                return t('common.ui.user_menu.roles.employee');
             default:
-                return 'Customer';
+                return t('common.ui.user_menu.roles.customer');
         }
     };
 
@@ -159,7 +165,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                     `bg-gradient-to-r ${getRoleGradient()}`
                 )}
             >
-                Sign In
+                {t('common.ui.user_menu.actions.sign_in')}
             </Link>
         );
     }
@@ -259,7 +265,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                         userRole === 'customer' && 'text-fuchsia-600 dark:text-fuchsia-400 hover:text-fuchsia-700'
                                     )}
                                 >
-                                    Manage Account
+                                    {t('common.ui.user_menu.actions.manage_account')}
                                     <ChevronRight className="w-4 h-4" />
                                 </Link>
                             </div>
@@ -322,7 +328,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                         )}
                                     </div>
                                     <span className="font-medium text-gray-700 dark:text-gray-300">
-                                        {isDark ? 'Light Mode' : 'Dark Mode'}
+                                        {isDark ? t('common.ui.user_menu.theme.light') : t('common.ui.user_menu.theme.dark')}
                                     </span>
                                     <div className={cn(
                                         'ml-auto w-11 h-6 rounded-full transition-colors relative',
@@ -370,7 +376,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                     className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 font-medium transition-colors"
                                 >
                                     <LogOut className="w-5 h-5" />
-                                    Sign Out
+                                    {t('common.ui.user_menu.actions.sign_out')}
                                 </button>
                             </div>
                         </motion.div>

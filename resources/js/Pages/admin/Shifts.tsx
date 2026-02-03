@@ -26,6 +26,7 @@ import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface ShiftUser {
     name: string;
@@ -126,6 +127,7 @@ const StatCard = ({ title, value, color, index = 0 }: { title: string; value: nu
 };
 
 export default function Shifts() {
+    const { t, locale } = useLanguage();
     // ... (state hooks)
     const [currentDate, setCurrentDate] = React.useState(new Date());
     const [view, setView] = React.useState<'week' | 'month'>('week');
@@ -205,41 +207,41 @@ export default function Shifts() {
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/shifts', data),
         onSuccess: () => {
-            toastSuccess('Shift created successfully!');
+            toastSuccess(t('admin.shifts.messages.created') as string);
             setOpenCreate(false);
             resetForm();
             qc.invalidateQueries({ queryKey: ['schedule'] });
             qc.invalidateQueries({ queryKey: ['shift-stats'] });
         },
-        onError: (error: any) => setError(error.response?.data?.message || 'Failed to create shift')
+        onError: (error: any) => setError(error.response?.data?.message || t('admin.shifts.messages.create_failed') as string)
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/shifts/${id}`, data),
         onSuccess: () => {
-            toastSuccess('Shift updated successfully!');
+            toastSuccess(t('admin.shifts.messages.updated') as string);
             setOpenEdit(false);
             resetForm();
             qc.invalidateQueries({ queryKey: ['schedule'] });
             qc.invalidateQueries({ queryKey: ['shift-stats'] });
         },
-        onError: (error: any) => setError(error.response?.data?.message || 'Failed to update shift')
+        onError: (error: any) => setError(error.response?.data?.message || t('admin.shifts.messages.update_failed') as string)
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/shifts/${id}`),
         onSuccess: () => {
-            toastSuccess('Shift deleted!');
+            toastSuccess(t('admin.shifts.messages.deleted') as string);
             qc.invalidateQueries({ queryKey: ['schedule'] });
             qc.invalidateQueries({ queryKey: ['shift-stats'] });
         },
-        onError: (error: any) => toastError(error.response?.data?.message || 'Failed to delete')
+        onError: (error: any) => toastError(error.response?.data?.message || t('admin.shifts.messages.delete_failed') as string)
     });
 
     const publishMutation = useMutation({
         mutationFn: (shiftIds: number[]) => apiPost('/api/admin/shifts/publish', { shift_ids: shiftIds }),
         onSuccess: () => {
-            toastSuccess('Shifts published!');
+            toastSuccess(t('admin.shifts.messages.published') as string);
             qc.invalidateQueries({ queryKey: ['schedule'] });
             qc.invalidateQueries({ queryKey: ['shift-stats'] });
         }
@@ -248,12 +250,12 @@ export default function Shifts() {
     const copyMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/shifts/copy', data),
         onSuccess: () => {
-            toastSuccess('Shifts copied successfully!');
+            toastSuccess(t('admin.shifts.messages.copied') as string);
             setOpenCopy(false);
             qc.invalidateQueries({ queryKey: ['schedule'] });
             qc.invalidateQueries({ queryKey: ['shift-stats'] });
         },
-        onError: (error: any) => toastError(error.response?.data?.message || 'Failed to copy shifts')
+        onError: (error: any) => toastError(error.response?.data?.message || t('admin.shifts.messages.copy_failed') as string)
     });
 
     const toggleStatusMutation = useMutation({
@@ -274,11 +276,11 @@ export default function Shifts() {
             });
         },
         onSuccess: () => {
-            toastSuccess('Status updated!');
+            toastSuccess(t('admin.shifts.messages.status_updated') as string);
             qc.invalidateQueries({ queryKey: ['schedule'] });
             qc.invalidateQueries({ queryKey: ['shift-stats'] });
         },
-        onError: (error: any) => toastError(error.response?.data?.message || 'Failed to update status')
+        onError: (error: any) => toastError(error.response?.data?.message || t('admin.shifts.messages.status_failed') as string)
     });
 
     const resetForm = () => {
@@ -350,11 +352,11 @@ export default function Shifts() {
     const publishDraftShifts = () => {
         const draftShifts = scheduleData?.shifts?.filter((s: Shift) => s.status === 'draft').map((s: Shift) => s.id) || [];
         if (draftShifts.length > 0) {
-            if (window.confirm(`Publish ${draftShifts.length} draft shifts?`)) {
+            if (window.confirm(t('admin.shifts.messages.confirm_publish', { count: draftShifts.length.toString() }) as string)) {
                 publishMutation.mutate(draftShifts);
             }
         } else {
-            toastError("No draft shifts to publish.");
+            toastError(t('admin.shifts.messages.no_drafts') as string);
         }
     };
 
@@ -365,7 +367,7 @@ export default function Shifts() {
         const targetStart = new Date(currentDate); // This week
 
         // Simple confirmation for now, could be a modal
-        if (window.confirm("Copy schedule from previous week to this week?")) {
+        if (window.confirm(t('admin.shifts.messages.confirm_copy') as string)) {
             copyMutation.mutate({
                 source_start_date: sourceStart.toISOString().split('T')[0],
                 target_start_date: targetStart.toISOString().split('T')[0]
@@ -471,36 +473,36 @@ export default function Shifts() {
                             <div className="flex items-center justify-between gap-3">
                                 <div className="min-w-0">
                                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent truncate">
-                                        {view === 'week' ? 'Weekly' : 'Monthly'} Schedule
+                                        {view === 'week' ? t('admin.shifts.title') : t('admin.shifts.title_monthly')}
                                     </h1>
                                     <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:flex items-center gap-2">
                                         <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                                        Manage team shifts
+                                        {t('admin.shifts.subtitle')}
                                     </p>
                                 </div>
                                 <Button onClick={() => { resetForm(); setOpenCreate(true); }} className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0 bg-primary hover:bg-primary/90">
                                     <Plus className="w-4 h-4 sm:mr-2" />
-                                    <span className="hidden sm:inline">Add Shift</span>
+                                    <span className="hidden sm:inline">{t('admin.shifts.add')}</span>
                                 </Button>
                             </div>
 
                             {/* Stats Row */}
                             <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-                                <StatCard title="Total" value={stats?.total_shifts || 0} color="purple" index={0} />
-                                <StatCard title="Published" value={stats?.published || 0} color="blue" index={1} />
-                                <StatCard title="Draft" value={stats?.draft || 0} color="amber" index={2} />
+                                <StatCard title={t('admin.shifts.stats.total') as string} value={stats?.total_shifts || 0} color="purple" index={0} />
+                                <StatCard title={t('admin.shifts.stats.published') as string} value={stats?.published || 0} color="blue" index={1} />
+                                <StatCard title={t('admin.shifts.stats.draft') as string} value={stats?.draft || 0} color="amber" index={2} />
                             </div>
 
                             {/* Action Buttons */}
                             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                                 <Button onClick={handleCopyWeek} variant="outline" size="sm" className="border-blue-500/20 hover:bg-blue-500/10 text-blue-500 h-9 px-2 sm:px-3 text-xs sm:text-sm flex-shrink-0">
                                     <Copy className="w-3.5 h-3.5 sm:mr-1.5" />
-                                    <span className="hidden sm:inline">Copy Week</span>
+                                    <span className="hidden sm:inline">{t('admin.shifts.actions.copy_week')}</span>
                                 </Button>
                                 <Button onClick={publishDraftShifts} variant="secondary" size="sm"
                                     className="border-green-500/20 hover:bg-green-500/10 text-green-600 h-9 px-2 sm:px-3 text-xs sm:text-sm flex-shrink-0">
                                     <CheckCircle className="w-3.5 h-3.5 sm:mr-1.5" />
-                                    <span className="hidden sm:inline">Publish</span>
+                                    <span className="hidden sm:inline">{t('admin.shifts.actions.publish')}</span>
                                 </Button>
                             </div>
                         </motion.div>
@@ -520,10 +522,10 @@ export default function Shifts() {
                             <div className="text-foreground font-semibold text-sm sm:text-base md:text-lg min-w-[140px] sm:min-w-[200px] text-center">
                                 {view === 'week'
                                     ? <span className="flex flex-col items-center leading-tight">
-                                        <span className="text-[10px] sm:text-xs text-muted-foreground">Week of</span>
-                                        <span className="text-xs sm:text-sm md:text-base">{new Date(range.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(range.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                        <span className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.shifts.actions.week_of')}</span>
+                                        <span className="text-xs sm:text-sm md:text-base">{new Date(range.start).toLocaleDateString(locale || 'en-US', { month: 'short', day: 'numeric' })} - {new Date(range.end).toLocaleDateString(locale || 'en-US', { month: 'short', day: 'numeric' })}</span>
                                     </span>
-                                    : <span className="text-sm sm:text-base">{new Date(currentDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>}
+                                    : <span className="text-sm sm:text-base">{new Date(currentDate).toLocaleDateString(locale || 'en-US', { month: 'long', year: 'numeric' })}</span>}
                             </div>
                             <button onClick={() => navigateDate('next')}
                                 className="p-1.5 sm:p-2 rounded-lg hover:bg-secondary/50 transition-colors text-foreground">
@@ -531,7 +533,7 @@ export default function Shifts() {
                             </button>
                             <Button size="sm" onClick={() => setCurrentDate(new Date())}
                                 variant="secondary" className="hidden sm:flex ml-2 h-8 text-xs">
-                                Today
+                                {t('admin.shifts.actions.today')}
                             </Button>
                         </div>
 
@@ -547,7 +549,7 @@ export default function Shifts() {
                                             : 'text-muted-foreground hover:text-foreground'
                                     )}
                                 >
-                                    {v}
+                                    {v === 'week' ? t('admin.shifts.actions.week') : t('admin.shifts.actions.month')}
                                 </button>
                             ))}
                         </div>
@@ -570,7 +572,7 @@ export default function Shifts() {
                                                 isToday ? "bg-primary/10" : "bg-secondary/20"
                                             )}>
                                                 <div className="text-xs sm:text-sm font-semibold text-muted-foreground">
-                                                    {day.date.toLocaleDateString('en-US', { weekday: 'short' })}
+                                                    {day.date.toLocaleDateString(locale || 'en-US', { weekday: 'short' })}
                                                 </div>
                                                 <div className={cn(
                                                     "text-lg sm:text-xl font-bold mt-0.5 sm:mt-1",
@@ -583,7 +585,7 @@ export default function Shifts() {
                                             <div className="flex-1 p-1.5 sm:p-2 space-y-2 sm:space-y-3 min-h-[120px] sm:min-h-[150px]">
                                                 {day.shifts.length === 0 ? (
                                                     <div className="h-full flex items-center justify-center text-[10px] sm:text-xs text-muted-foreground/50 italic py-4 sm:py-8">
-                                                        No shifts
+                                                        {t('admin.shifts.empty.default')}
                                                     </div>
                                                 ) : (
                                                     day.shifts.map((shift: Shift, idx: number) => (
@@ -604,10 +606,10 @@ export default function Shifts() {
 
                                                             <div className="pl-2">
                                                                 <div className="font-medium text-xs sm:text-sm text-foreground truncate">
-                                                                    {shift.employee?.user?.name || 'Unknown'}
+                                                                    {shift.employee?.user?.name || t('admin.employees.table.unknown')}
                                                                 </div>
                                                                 <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                                                                    {shift.position?.title || 'No Position'}
+                                                                    {shift.position?.title || t('admin.employees.table.no_position')}
                                                                 </div>
                                                                 <div className="text-[10px] sm:text-xs text-muted-foreground mt-1 flex items-center gap-1">
                                                                     <Clock className="w-3 h-3 text-blue-500" />
@@ -650,10 +652,10 @@ export default function Shifts() {
                                                         {day.date.getDate()}
                                                     </span>
                                                     <span className="text-sm text-muted-foreground">
-                                                        {day.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short' })}
+                                                        {day.date.toLocaleDateString(locale || 'en-US', { weekday: 'short', month: 'short' })}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs text-muted-foreground">{day.shifts.length} shifts</span>
+                                                <span className="text-xs text-muted-foreground">{day.shifts.length} {(t('admin.shifts.title') as string).toLowerCase().split(' ')[1]}</span>
                                             </div>
                                             <div className="p-2 space-y-2">
                                                 {day.shifts.map((shift: Shift) => (
@@ -671,7 +673,7 @@ export default function Shifts() {
                                                             )} />
                                                             <div className="min-w-0">
                                                                 <div className="font-medium text-sm text-foreground truncate">
-                                                                    {shift.employee?.user?.name || 'Unknown'}
+                                                                    {shift.employee?.user?.name || t('admin.employees.table.unknown')}
                                                                 </div>
                                                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                                                                     <Clock className="w-3 h-3" />
@@ -688,7 +690,7 @@ export default function Shifts() {
                                                             </div>
                                                         </div>
                                                         <Badge className={cn(getStatusColor(shift.status), "text-[10px]")}>
-                                                            {shift.status}
+                                                            {t(`admin.shifts.status.${shift.status}`)}
                                                         </Badge>
                                                     </div>
                                                 ))}
@@ -699,7 +701,7 @@ export default function Shifts() {
                                 {groupedShifts.every(d => d.shifts.length === 0) && (
                                     <div className="p-8 text-center bg-card/50 rounded-xl border border-border">
                                         <CalendarIcon className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                                        <p className="text-muted-foreground text-sm">No shifts this week</p>
+                                        <p className="text-muted-foreground text-sm">{t('admin.shifts.empty.week')}</p>
                                     </div>
                                 )}
                             </div>
@@ -715,7 +717,7 @@ export default function Shifts() {
                                 <div className="grid grid-cols-7 bg-secondary/30 border-b border-border">
                                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                                         <div key={day} className="p-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                            {day}
+                                            {t(`admin.common.days.${day.toLowerCase()}`) || day}
                                         </div>
                                     ))}
                                 </div>
@@ -773,7 +775,7 @@ export default function Shifts() {
                                                                         setExpandedDay({ date: cell.date!, shifts: cell.shifts });
                                                                     }}
                                                                 >
-                                                                    +{cell.shifts.length - 3} more
+                                                                    +{cell.shifts.length - 3} {t('admin.shifts.modal.more')}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -803,10 +805,10 @@ export default function Shifts() {
                                                         {day.date!.getDate()}
                                                     </span>
                                                     <span className="text-sm text-muted-foreground">
-                                                        {day.date!.toLocaleDateString('en-US', { weekday: 'short', month: 'short' })}
+                                                        {day.date!.toLocaleDateString(locale || 'en-US', { weekday: 'short', month: 'short' })}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs text-muted-foreground">{day.shifts.length} shifts</span>
+                                                <span className="text-xs text-muted-foreground">{day.shifts.length} {(t('admin.shifts.title') as string).toLowerCase().split(' ')[1]}</span>
                                             </div>
                                             <div className="p-2 space-y-2">
                                                 {day.shifts.map((shift: Shift) => (
@@ -824,7 +826,7 @@ export default function Shifts() {
                                                             )} />
                                                             <div className="min-w-0">
                                                                 <div className="font-medium text-sm text-foreground truncate">
-                                                                    {shift.employee?.user?.name || 'Unknown'}
+                                                                    {shift.employee?.user?.name || t('admin.employees.table.unknown')}
                                                                 </div>
                                                                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                                                                     <Clock className="w-3 h-3" />
@@ -841,7 +843,7 @@ export default function Shifts() {
                                                             </div>
                                                         </div>
                                                         <Badge className={cn(getStatusColor(shift.status), "text-[10px]")}>
-                                                            {shift.status}
+                                                            {t(`admin.shifts.status.${shift.status}`)}
                                                         </Badge>
                                                     </div>
                                                 ))}
@@ -852,7 +854,7 @@ export default function Shifts() {
                                 {monthDays.every(d => !d.date || d.shifts.length === 0) && (
                                     <div className="p-8 text-center bg-card/50 rounded-xl border border-border">
                                         <CalendarIcon className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                                        <p className="text-muted-foreground text-sm">No shifts this month</p>
+                                        <p className="text-muted-foreground text-sm">{t('admin.shifts.empty.month')}</p>
                                     </div>
                                 )}
                             </div>
@@ -863,7 +865,7 @@ export default function Shifts() {
                     <Modal
                         open={!!expandedDay}
                         onClose={() => setExpandedDay(null)}
-                        title={expandedDay ? `Shifts for ${expandedDay.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}` : 'Day Shifts'}
+                        title={expandedDay ? t('admin.shifts.modal.for_date', { date: expandedDay.date.toLocaleDateString(locale || 'en-US', { weekday: 'long', month: 'long', day: 'numeric' }) }) : t('admin.shifts.modal.day_shifts')}
                         size="md"
                     >
                         <div className="space-y-2 max-h-[60vh] overflow-y-auto">
@@ -886,10 +888,10 @@ export default function Shifts() {
                                         )} />
                                         <div className="min-w-0">
                                             <div className="font-medium text-sm text-foreground truncate">
-                                                {shift.employee?.user?.name || 'Unknown Employee'}
+                                                {shift.employee?.user?.name || t('admin.employees.table.unknown')}
                                             </div>
                                             <div className="text-xs text-muted-foreground truncate">
-                                                {shift.position?.title || 'No Position'}
+                                                {shift.position?.title || t('admin.employees.table.no_position')}
                                             </div>
                                             <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                                                 <Clock className="w-3 h-3" />
@@ -906,13 +908,13 @@ export default function Shifts() {
                                         </div>
                                     </div>
                                     <Badge className={cn(getStatusColor(shift.status), "text-[10px] flex-shrink-0")}>
-                                        {shift.status}
+                                        {t(`admin.shifts.status.${shift.status}`)}
                                     </Badge>
                                 </div>
                             ))}
                             {(!expandedDay?.shifts || expandedDay.shifts.length === 0) && (
                                 <div className="py-8 text-center text-muted-foreground text-sm">
-                                    No shifts for this day
+                                    {t('admin.shifts.empty.day')}
                                 </div>
                             )}
                         </div>
@@ -920,13 +922,13 @@ export default function Shifts() {
 
                     {/* Create/Edit Modal - Mobile optimized */}
                     <Modal open={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
-                        title={selectedShift ? 'Edit Shift' : 'New Shift'} size="lg">
+                        title={selectedShift ? t('admin.shifts.modal.edit') : t('admin.shifts.modal.new')} size="lg">
                         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                             {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2 sm:p-3 text-red-500 text-xs sm:text-sm">{error}</div>}
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">Employee <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.employee')} <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <select required value={formData.employee_id} onChange={(e) => {
                                             const empId = e.target.value;
@@ -939,7 +941,7 @@ export default function Shifts() {
                                             });
                                         }}
                                             className="w-full h-10 bg-background border border-input rounded-lg px-3 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none">
-                                            <option value="">Select</option>
+                                            <option value="">{t('admin.shifts.modal.select')}</option>
                                             {employees?.data?.map((emp: Employee) => (
                                                 <option key={emp.id} value={emp.id}>
                                                     {emp.user?.name || `Employee #${emp.id}`}
@@ -951,11 +953,11 @@ export default function Shifts() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">Location</label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.location')}</label>
                                     <div className="relative">
                                         <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                                             className="w-full h-10 bg-background border border-input rounded-lg px-3 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none">
-                                            <option value="">No location</option>
+                                            <option value="">{t('admin.shifts.modal.no_location')}</option>
                                             {locations?.data?.map((loc: Location) => (
                                                 <option key={loc.id} value={loc.id}>{loc.name}</option>
                                             ))}
@@ -965,10 +967,10 @@ export default function Shifts() {
                                 </div>
 
                                 <div className="space-y-1.5 hidden sm:block">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">Position</label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.position')}</label>
                                     <select value={formData.position_id} onChange={(e) => setFormData({ ...formData, position_id: e.target.value })}
                                         className="w-full h-10 bg-background border border-input rounded-lg px-3 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none">
-                                        <option value="">Use default</option>
+                                        <option value="">{t('admin.shifts.modal.use_default')}</option>
                                         {positions?.data?.map((pos: Position) => (
                                             <option key={pos.id} value={pos.id}>{pos.title}</option>
                                         ))}
@@ -976,19 +978,19 @@ export default function Shifts() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">Type <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.type')} <span className="text-red-500">*</span></label>
                                     <select required value={formData.shift_type} onChange={(e) => setFormData({ ...formData, shift_type: e.target.value })}
                                         className="w-full h-10 bg-background border border-input rounded-lg px-3 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none">
-                                        <option value="morning">Morning</option>
-                                        <option value="afternoon">Afternoon</option>
-                                        <option value="evening">Evening</option>
-                                        <option value="night">Night</option>
-                                        <option value="split">Split</option>
+                                        <option value="morning">{t('admin.shifts.types.morning')}</option>
+                                        <option value="afternoon">{t('admin.shifts.types.afternoon')}</option>
+                                        <option value="evening">{t('admin.shifts.types.evening')}</option>
+                                        <option value="night">{t('admin.shifts.types.night')}</option>
+                                        <option value="split">{t('admin.shifts.types.split')}</option>
                                     </select>
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">Start <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.start')} <span className="text-red-500">*</span></label>
                                     <Input type="datetime-local" required value={formData.start_time}
                                         onChange={(e) => {
                                             const newStart = e.target.value;
@@ -1008,26 +1010,26 @@ export default function Shifts() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">End <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.end')} <span className="text-red-500">*</span></label>
                                     <Input type="datetime-local" required value={formData.end_time}
                                         onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                                         className="h-10 text-sm rounded-lg" />
                                 </div>
 
                                 <div className="sm:col-span-2 space-y-1.5 hidden sm:block">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">Notes</label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.notes')}</label>
                                     <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                         className="w-full bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                                         rows={2}
-                                        placeholder="Notes..." />
+                                        placeholder={t('admin.shifts.modal.notes_placeholder') as string} />
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">Status <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs sm:text-sm font-semibold text-foreground">{t('admin.shifts.modal.status')} <span className="text-red-500">*</span></label>
                                     <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                                         className="w-full h-10 bg-background border border-input rounded-lg px-3 text-sm text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none">
-                                        <option value="draft">Draft</option>
-                                        <option value="published">Published</option>
+                                        <option value="draft">{t('admin.shifts.status.draft')}</option>
+                                        <option value="published">{t('admin.shifts.status.published')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -1035,11 +1037,11 @@ export default function Shifts() {
                             <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-border">
                                 <Button type="button" variant="ghost" onClick={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
                                     className="flex-1 h-10 sm:h-11 text-sm rounded-lg">
-                                    Cancel
+                                    {t('layout.common.cancel')}
                                 </Button>
                                 <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending}
                                     className="flex-1 h-10 sm:h-11 text-sm rounded-lg bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-700 hover:to-purple-700 text-white">
-                                    {selectedShift ? 'Save' : 'Create'}
+                                    {selectedShift ? t('layout.actions.save') : t('layout.actions.create')}
                                 </Button>
                             </div>
                         </form>

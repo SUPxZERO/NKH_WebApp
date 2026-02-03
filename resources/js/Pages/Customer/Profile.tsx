@@ -31,6 +31,7 @@ import { cn } from '@/app/utils/cn';
 import Map from '@/app/components/ui/Map';
 import ProfilePictureUpload from '@/app/components/ui/ProfilePictureUpload';
 import NotificationPreferencesSettings from '@/app/components/customer/NotificationPreferencesSettings';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface Address {
     id: number;
@@ -49,6 +50,7 @@ interface Address {
 
 export default function Profile() {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
     const [editMode, setEditMode] = useState(false);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -117,54 +119,54 @@ export default function Profile() {
     const updateProfileMutation = useMutation({
         mutationFn: (data: any) => apiPut('/api/customer/profile', data),
         onSuccess: () => {
-            toastSuccess('Profile updated successfully');
+            toastSuccess(t('profile.messages.update_success'));
             queryClient.invalidateQueries({ queryKey: ['customer', 'profile'] });
             setEditMode(false);
         },
-        onError: () => toastError('Failed to update profile')
+        onError: () => toastError(t('profile.messages.update_error'))
     });
 
     // Address mutations
     const createAddressMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/customer/addresses', data),
         onSuccess: () => {
-            toastSuccess('Address added successfully');
+            toastSuccess(t('profile.messages.address_added'));
             queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
             setShowAddressModal(false);
             resetAddressForm();
         },
-        onError: () => toastError('Failed to add address')
+        onError: () => toastError(t('profile.messages.address_add_error'))
     });
 
     const updateAddressMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: any }) =>
             apiPut(`/api/customer/addresses/${id}`, data),
         onSuccess: () => {
-            toastSuccess('Address updated successfully');
+            toastSuccess(t('profile.messages.address_updated'));
             queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
             setShowAddressModal(false);
             setEditingAddress(null);
             resetAddressForm();
         },
-        onError: () => toastError('Failed to update address')
+        onError: () => toastError(t('profile.messages.address_update_error'))
     });
 
     const deleteAddressMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/customer/addresses/${id}`),
         onSuccess: () => {
-            toastSuccess('Address deleted');
+            toastSuccess(t('profile.messages.address_deleted'));
             queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
         },
-        onError: () => toastError('Failed to delete address')
+        onError: () => toastError(t('profile.messages.address_delete_error'))
     });
 
     const setDefaultMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/api/customer/addresses/${id}/set-default`, {}),
         onSuccess: () => {
-            toastSuccess('Default address updated');
+            toastSuccess(t('profile.messages.default_updated'));
             queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
         },
-        onError: () => toastError('Failed to set default address')
+        onError: () => toastError(t('profile.messages.default_error'))
     });
 
     const handleSaveProfile = () => {
@@ -248,7 +250,7 @@ export default function Profile() {
     // Get current location
     const handleLocateMe = () => {
         if (!navigator.geolocation) {
-            toastError("Geolocation is not supported by your browser");
+            toastError(t('profile.messages.geo_not_supported'));
             return;
         }
         setLoadingLocation(true);
@@ -259,7 +261,7 @@ export default function Profile() {
             },
             (error) => {
                 console.error(error);
-                toastError("Unable to retrieve your location. Check browser permissions.");
+                toastError(t('profile.messages.geo_error'));
                 setLoadingLocation(false);
             },
             { enableHighAccuracy: true }
@@ -273,7 +275,7 @@ export default function Profile() {
         <RequireAuth roles={['customer']}>
             <CustomerLayout>
                 <Head>
-                    <title>My Profile - NKH Restaurant</title>
+                    <title>{t('profile.title')} - NKH Restaurant</title>
                 </Head>
                 <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
@@ -281,16 +283,16 @@ export default function Profile() {
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
                                 <User className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-                                My Profile
+                                {t('profile.title')}
                             </h1>
                             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
-                                Manage your personal information and preferences
+                                {t('profile.subtitle')}
                             </p>
                         </div>
                         {!editMode && !isProfileLoading && (
                             <Button onClick={() => setEditMode(true)} variant="outline" size="sm" className="self-start sm:self-auto">
                                 <Edit className="w-4 h-4 mr-2" />
-                                Edit Profile
+                                {t('profile.edit')}
                             </Button>
                         )}
                     </div>
@@ -319,7 +321,7 @@ export default function Profile() {
                         <Card>
                             <CardContent className="p-4 sm:p-6">
                                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                                    Personal Information
+                                    {t('profile.personal_info')}
                                 </h2>
 
                                 <div className="flex justify-center mb-4 sm:mb-6">
@@ -335,7 +337,7 @@ export default function Profile() {
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
                                             <User className="w-4 h-4 inline mr-2" />
-                                            Full Name
+                                            {t('profile.full_name')}
                                         </label>
                                         <input
                                             type="text"
@@ -349,7 +351,7 @@ export default function Profile() {
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
                                             <Mail className="w-4 h-4 inline mr-2" />
-                                            Email
+                                            {t('profile.email')}
                                         </label>
                                         <input
                                             type="email"
@@ -363,7 +365,7 @@ export default function Profile() {
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
                                             <Phone className="w-4 h-4 inline mr-2" />
-                                            Phone
+                                            {t('profile.phone')}
                                         </label>
                                         <input
                                             type="tel"
@@ -377,7 +379,7 @@ export default function Profile() {
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
                                             <Calendar className="w-4 h-4 inline mr-2" />
-                                            Birth Date
+                                            {t('profile.birth_date')}
                                         </label>
                                         <input
                                             type="date"
@@ -390,7 +392,7 @@ export default function Profile() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
-                                            Gender
+                                            {t('profile.gender')}
                                         </label>
                                         <select
                                             value={formData.gender}
@@ -398,16 +400,16 @@ export default function Profile() {
                                             disabled={!editMode}
                                             className="w-full px-4 py-2 border border-border rounded-lg bg-card text-foreground disabled:bg-secondary disabled:text-muted-foreground"
                                         >
-                                            <option value="">Prefer not to say</option>
-                                            <option value="male">Male</option>
-                                            <option value="female">Female</option>
-                                            <option value="other">Other</option>
+                                            <option value="">{t('profile.genders.na')}</option>
+                                            <option value="male">{t('profile.genders.male')}</option>
+                                            <option value="female">{t('profile.genders.female')}</option>
+                                            <option value="other">{t('profile.genders.other')}</option>
                                         </select>
                                     </div>
 
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
-                                            Preferred Language
+                                            {t('profile.language')}
                                         </label>
                                         <select
                                             value={formData.preferred_language}
@@ -431,7 +433,7 @@ export default function Profile() {
                                             className="w-5 h-5 rounded text-purple-600"
                                         />
                                         <span className="text-sm text-muted-foreground">
-                                            I want to receive promotional emails and offers
+                                            {t('profile.marketing_consent')}
                                         </span>
                                     </label>
                                 </div>
@@ -440,10 +442,10 @@ export default function Profile() {
                                     <div className="flex gap-3 mt-6">
                                         <Button onClick={handleSaveProfile} disabled={updateProfileMutation.isPending}>
                                             <Save className="w-4 h-4 mr-2" />
-                                            {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                            {updateProfileMutation.isPending ? t('profile.saving') : t('profile.save')}
                                         </Button>
                                         <Button variant="outline" onClick={() => setEditMode(false)}>
-                                            Cancel
+                                            {t('profile.cancel')}
                                         </Button>
                                     </div>
                                 )}
@@ -457,11 +459,11 @@ export default function Profile() {
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-4">
                                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 inline mr-2" />
-                                    My Addresses
+                                    {t('profile.addresses.title')}
                                 </h2>
                                 <Button onClick={handleAddAddress} variant="outline" size="sm" className="self-start sm:self-auto">
                                     <Plus className="w-4 h-4 mr-1 sm:mr-2" />
-                                    <span className="sm:inline">Add Address</span>
+                                    <span className="sm:inline">{t('profile.addresses.add')}</span>
                                 </Button>
                             </div>
 
@@ -480,7 +482,7 @@ export default function Profile() {
                                                     </h3>
                                                     {address.is_default && (
                                                         <span className="text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-600 px-2 py-1 rounded-full">
-                                                            Default
+                                                            {t('profile.addresses.default')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -493,7 +495,7 @@ export default function Profile() {
                                                 </p>
                                                 {address.delivery_instructions && (
                                                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                                        Instructions: {address.delivery_instructions}
+                                                        {t('profile.addresses.instructions')}: {address.delivery_instructions}
                                                     </p>
                                                 )}
                                             </div>
@@ -504,7 +506,7 @@ export default function Profile() {
                                                         size="sm"
                                                         variant="outline"
                                                         onClick={() => setDefaultMutation.mutate(address.id)}
-                                                        title="Set as Default"
+                                                        title={t('profile.addresses.set_default')}
                                                         className="p-1.5 sm:p-2"
                                                     >
                                                         <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -522,7 +524,7 @@ export default function Profile() {
                                                     size="sm"
                                                     variant="outline"
                                                     onClick={() => {
-                                                        if (confirm('Delete this address?')) {
+                                                        if (confirm(t('profile.addresses.delete_confirm'))) {
                                                             deleteAddressMutation.mutate(address.id);
                                                         }
                                                     }}
@@ -539,7 +541,7 @@ export default function Profile() {
                                     <div className="text-center py-6 sm:py-12">
                                         <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
                                         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                                            No addresses saved. Add one to make ordering easier!
+                                            {t('profile.addresses.no_addresses')}
                                         </p>
                                     </div>
                                 )}
@@ -573,7 +575,7 @@ export default function Profile() {
                                 >
                                     <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                                         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                                            {editingAddress ? 'Edit Address' : 'Add New Address'}
+                                            {editingAddress ? t('profile.addresses.edit') : t('profile.addresses.add')}
                                         </h2>
 
                                         {/* Map Section */}
@@ -581,7 +583,7 @@ export default function Profile() {
                                             <div className="flex justify-between items-center">
                                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     <MapPin className="w-4 h-4 inline mr-1" />
-                                                    Pin Your Location
+                                                    {t('profile.addresses.pin_location')}
                                                 </label>
                                                 <button
                                                     type="button"
@@ -593,7 +595,7 @@ export default function Profile() {
                                                     ) : (
                                                         <Crosshair className="w-4 h-4" />
                                                     )}
-                                                    Use My Location
+                                                    {t('profile.addresses.use_my_location')}
                                                 </button>
                                             </div>
                                             <div className="h-[160px] sm:h-[250px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 relative">
@@ -609,30 +611,30 @@ export default function Profile() {
                                                     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center">
                                                         <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-2 flex items-center gap-2">
                                                             <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
-                                                            <span className="text-sm">Finding address...</span>
+                                                            <span className="text-sm">{t('profile.addresses.finding')}</span>
                                                         </div>
                                                     </div>
                                                 )}
                                             </div>
                                             <p className="text-xs text-gray-500">
-                                                Drag the marker or click on the map to set your delivery location
+                                                {t('profile.addresses.drag_marker')}
                                             </p>
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                             <div className="sm:col-span-2">
-                                                <label className="block text-sm font-medium mb-1 text-foreground">Label *</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.label')} *</label>
                                                 <input
                                                     type="text"
                                                     value={addressForm.label}
                                                     onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })}
-                                                    placeholder="Home, Office, etc."
+                                                    placeholder={t('profile.addresses.label_placeholder')}
                                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-2">
-                                                <label className="block text-sm font-medium mb-1 text-foreground">Address Line 1 *</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.line1')} *</label>
                                                 <input
                                                     type="text"
                                                     value={addressForm.address_line_1}
@@ -642,7 +644,7 @@ export default function Profile() {
                                             </div>
 
                                             <div className="sm:col-span-2">
-                                                <label className="block text-sm font-medium mb-1 text-foreground">Address Line 2</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.line2')}</label>
                                                 <input
                                                     type="text"
                                                     value={addressForm.address_line_2}
@@ -652,7 +654,7 @@ export default function Profile() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium mb-1 text-foreground">City *</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.city')} *</label>
                                                 <input
                                                     type="text"
                                                     value={addressForm.city}
@@ -661,7 +663,7 @@ export default function Profile() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium mb-1 text-foreground">Province *</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.province')} *</label>
                                                 <input
                                                     type="text"
                                                     value={addressForm.province}
@@ -671,7 +673,7 @@ export default function Profile() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium mb-1 text-foreground">Postal Code</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.postal_code')}</label>
                                                 <input
                                                     type="text"
                                                     value={addressForm.postal_code}
@@ -680,7 +682,7 @@ export default function Profile() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium mb-1 text-foreground">Country</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.country')}</label>
                                                 <input
                                                     type="text"
                                                     value={addressForm.country}
@@ -690,12 +692,12 @@ export default function Profile() {
                                             </div>
 
                                             <div className="sm:col-span-2">
-                                                <label className="block text-sm font-medium mb-1 text-foreground">Delivery Instructions</label>
+                                                <label className="block text-sm font-medium mb-1 text-foreground">{t('profile.addresses.delivery_instructions')}</label>
                                                 <textarea
                                                     value={addressForm.delivery_instructions}
                                                     onChange={(e) => setAddressForm({ ...addressForm, delivery_instructions: e.target.value })}
                                                     rows={2}
-                                                    placeholder="e.g., Ring the doorbell, leave at gate..."
+                                                    placeholder={t('profile.addresses.delivery_instructions_placeholder')}
                                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                                 />
                                             </div>
@@ -708,19 +710,19 @@ export default function Profile() {
                                                 onChange={(e) => setAddressForm({ ...addressForm, is_default: e.target.checked })}
                                                 className="w-5 h-5 rounded text-purple-600"
                                             />
-                                            <span className="text-sm text-muted-foreground">Set as default address</span>
+                                            <span className="text-sm text-muted-foreground">{t('profile.addresses.set_default')}</span>
                                         </label>
 
                                         <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
                                             <Button variant="outline" onClick={() => setShowAddressModal(false)} className="flex-1">
-                                                Cancel
+                                                {t('profile.cancel')}
                                             </Button>
                                             <Button
                                                 onClick={handleSaveAddress}
                                                 className="flex-1"
                                                 disabled={createAddressMutation.isPending || updateAddressMutation.isPending}
                                             >
-                                                {(createAddressMutation.isPending || updateAddressMutation.isPending) ? 'Saving...' : (editingAddress ? 'Update' : 'Add')} Address
+                                                {(createAddressMutation.isPending || updateAddressMutation.isPending) ? t('profile.saving') : (editingAddress ? t('profile.addresses.update') : t('profile.addresses.add_btn'))} {t('profile.addresses.address_suffix')}
                                             </Button>
                                         </div>
                                     </div>

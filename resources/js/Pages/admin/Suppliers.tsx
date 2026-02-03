@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -16,6 +17,7 @@ import { Location } from '@/app/types/domain';
 
 // StatCard Component with vibrant gradients
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
+    const { t } = useLanguage();
     const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
         purple: {
             gradient: 'from-fuchsia-500/20 to-purple-500/10',
@@ -79,16 +81,20 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon
-const SupplierStatsRibbon = ({ stats }: { stats: any }) => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Suppliers" value={stats.total} icon={Truck} color="purple" index={0} />
-        <StatCard title="Active" value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-        <StatCard title="Food & Produce" value={stats.food} icon={Package} color="blue" index={2} />
-        <StatCard title="Beverages" value={stats.beverage} icon={FileText} color="amber" index={3} />
-    </div>
-);
+const SupplierStatsRibbon = ({ stats }: { stats: any }) => {
+    const { t } = useLanguage();
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <StatCard title={t('admin.suppliers.stats.total')} value={stats.total} icon={Truck} color="purple" index={0} />
+            <StatCard title={t('admin.suppliers.stats.active')} value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+            <StatCard title={t('admin.suppliers.stats.food')} value={stats.food} icon={Package} color="blue" index={2} />
+            <StatCard title={t('admin.suppliers.stats.beverages')} value={stats.beverage} icon={FileText} color="amber" index={3} />
+        </div>
+    );
+};
 
 export default function Suppliers() {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
@@ -137,35 +143,35 @@ export default function Suppliers() {
     }), [supplierList, suppliers, statsData]);
 
     const supplierTypes = {
-        food_produce: 'Food & Produce',
-        beverages: 'Beverages',
-        meat_seafood: 'Meat & Seafood',
-        dairy: 'Dairy Products',
-        equipment: 'Equipment',
-        supplies: 'Supplies & Packaging',
-        cleaning: 'Cleaning Products',
-        utilities: 'Utilities',
-        services: 'Services',
-        other: 'Other'
+        food_produce: t('admin.suppliers.types.food_produce'),
+        beverages: t('admin.suppliers.types.beverages'),
+        meat_seafood: t('admin.suppliers.types.meat_seafood'),
+        dairy: t('admin.suppliers.types.dairy'),
+        equipment: t('admin.suppliers.types.equipment'),
+        supplies: t('admin.suppliers.types.supplies'),
+        cleaning: t('admin.suppliers.types.cleaning'),
+        utilities: t('admin.suppliers.types.utilities'),
+        services: t('admin.suppliers.types.services'),
+        other: t('admin.suppliers.types.other')
     };
 
     // Mutations
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/suppliers', data),
-        onSuccess: () => { toastSuccess('Supplier created'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.suppliers.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.suppliers.failed') as string)
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/suppliers/${id}`, data),
-        onSuccess: () => { toastSuccess('Supplier updated'); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.suppliers.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.suppliers.failed') as string)
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/suppliers/${id}`),
-        onSuccess: () => { toastSuccess('Supplier deleted'); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.suppliers.deleted') as string); qc.invalidateQueries({ queryKey: ['suppliers'] }); qc.invalidateQueries({ queryKey: ['supplier-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.suppliers.failed') as string)
     });
 
     const closeModal = () => {
@@ -200,7 +206,7 @@ export default function Suppliers() {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Delete this supplier?')) deleteMutation.mutate(id);
+        if (confirm(t('admin.suppliers.delete_confirm'))) deleteMutation.mutate(id);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -231,12 +237,12 @@ export default function Suppliers() {
                             animate={{ opacity: 1, x: 0 }}
                             className="text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent"
                         >
-                            Suppliers
+                            {t('admin.suppliers.title')}
                         </motion.h1>
-                        <p className="text-muted-foreground mt-1">Manage vendor relationships</p>
+                        <p className="text-muted-foreground mt-1">{t('admin.suppliers.subtitle')}</p>
                     </div>
                     <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary">
-                        <Plus className="w-4 h-4 mr-2" /> Add Supplier
+                        <Plus className="w-4 h-4 mr-2" /> {t('admin.suppliers.add_supplier')}
                     </Button>
                 </div>
 
@@ -252,14 +258,14 @@ export default function Suppliers() {
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="relative flex-1 min-w-[200px]">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input placeholder="Search suppliers..." value={search} onChange={(e) => setSearch(e.target.value)}
+                            <Input placeholder={t('admin.suppliers.filters.search')} value={search} onChange={(e) => setSearch(e.target.value)}
                                 className="pl-10" variant="filled" />
                         </div>
                         <div className="flex gap-2 flex-wrap">
                             {[
-                                { key: 'all', label: 'All Status' },
-                                { key: 'active', label: 'Active' },
-                                { key: 'inactive', label: 'Inactive' }
+                                { key: 'all', label: t('admin.suppliers.filters.all_status') },
+                                { key: 'active', label: t('admin.suppliers.filters.active') },
+                                { key: 'inactive', label: t('admin.suppliers.filters.inactive') }
                             ].map(({ key, label }) => (
                                 <button
                                     key={key}
@@ -277,7 +283,7 @@ export default function Suppliers() {
                         </div>
                         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
                             className="bg-secondary border border-border rounded-xl px-4 py-2.5 text-foreground text-sm focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all">
-                            <option value="all">All Types</option>
+                            <option value="all">{t('admin.suppliers.filters.all_types')}</option>
                             {Object.entries(supplierTypes).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
                             ))}
@@ -294,18 +300,18 @@ export default function Suppliers() {
                 >
                     {/* Table Header with Gradient */}
                     <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
-                        <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name / Code</div>
-                        <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Contact</div>
-                        <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Type</div>
-                        <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+                        <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.suppliers.table.name_code')}</div>
+                        <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.suppliers.table.contact')}</div>
+                        <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.suppliers.table.type')}</div>
+                        <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.suppliers.table.status')}</div>
+                        <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.suppliers.table.actions')}</div>
                     </div>
                     <div className="divide-y divide-border/30">
                         {isLoading ? (
                             <div className="p-12 text-center">
                                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                                     <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                                    Loading suppliers...
+                                    {t('admin.suppliers.table.loading')}
                                 </div>
                             </div>
                         ) : supplierList.length === 0 ? (
@@ -313,8 +319,8 @@ export default function Suppliers() {
                                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                                     <Truck className="w-8 h-8 text-fuchsia-500" />
                                 </div>
-                                <h3 className="text-foreground font-semibold">No suppliers found</h3>
-                                <p className="text-muted-foreground text-sm mt-1">Add your first supplier to get started</p>
+                                <h3 className="text-foreground font-semibold">{t('admin.suppliers.table.empty_title')}</h3>
+                                <p className="text-muted-foreground text-sm mt-1">{t('admin.suppliers.table.empty_desc')}</p>
                             </div>
                         ) : supplierList.map((supplier: any, idx: number) => (
                             <motion.div
@@ -338,7 +344,7 @@ export default function Suppliers() {
                                 </div>
                                 <div className="col-span-3">
                                     <span className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold border border-blue-500/30">
-                                        {supplierTypes[supplier.type as keyof typeof supplierTypes] || supplier.type || 'Unknown'}
+                                        {supplierTypes[supplier.type as keyof typeof supplierTypes] || supplier.type || t('admin.suppliers.types.unknown')}
                                     </span>
                                 </div>
                                 <div className="col-span-2">
@@ -352,7 +358,7 @@ export default function Suppliers() {
                                             "w-1.5 h-1.5 rounded-full",
                                             supplier.is_active ? "bg-emerald-500" : "bg-red-500"
                                         )} />
-                                        {supplier.is_active ? 'Active' : 'Inactive'}
+                                        {supplier.is_active ? t('admin.suppliers.filters.active') : t('admin.suppliers.filters.inactive')}
                                     </span>
                                 </div>
                                 <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
@@ -373,8 +379,8 @@ export default function Suppliers() {
                     {suppliers?.meta && (
                         <div className="flex items-center justify-between p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
                             <div className="text-sm text-muted-foreground">
-                                Showing <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> to{' '}
-                                <span className="font-semibold text-foreground">{Math.min(page * perPage, suppliers.meta.total)}</span> of{' '}
+                                {t('admin.suppliers.table.showing')} <span className="font-semibold text-foreground">{((page - 1) * perPage) + 1}</span> {t('admin.suppliers.table.to')}{' '}
+                                <span className="font-semibold text-foreground">{Math.min(page * perPage, suppliers.meta.total)}</span> {t('admin.suppliers.table.of')}{' '}
                                 <span className="font-semibold text-fuchsia-500">{suppliers.meta.total}</span>
                             </div>
                             <div className="flex gap-2">
@@ -416,15 +422,15 @@ export default function Suppliers() {
                 </motion.div>
             </div>
 
-            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingSupplier ? 'Edit Supplier' : 'New Supplier'} size="lg">
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingSupplier ? t('admin.suppliers.edit_supplier') : t('admin.suppliers.new_supplier')} size="lg">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                        <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required />
-                        <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                        <Input label={t('admin.suppliers.form.code')} value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required />
+                        <Input label={t('admin.suppliers.form.name')} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.suppliers.form.type')}</label>
                             <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                                 className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
                                 {Object.entries(supplierTypes).map(([key, label]) => (
@@ -433,10 +439,10 @@ export default function Suppliers() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.suppliers.form.location')}</label>
                             <select value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value })}
                                 className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-gray-900 dark:text-white">
-                                <option value="">No specific location</option>
+                                <option value="">{t('admin.suppliers.form.no_location')}</option>
                                 {locations?.data?.map((l: Location) => (
                                     <option key={l.id} value={l.id}>{l.name}</option>
                                 ))}
@@ -444,24 +450,24 @@ export default function Suppliers() {
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                        <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                        <Input label={t('admin.suppliers.form.phone')} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                        <Input label={t('admin.suppliers.form.email')} type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <Input label="Contact Name" value={formData.contact_name} onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })} />
-                        <Input label="Contact Phone" value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })} />
+                        <Input label={t('admin.suppliers.form.contact_name')} value={formData.contact_name} onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })} />
+                        <Input label={t('admin.suppliers.form.contact_phone')} value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })} />
                     </div>
-                    <Input label="Address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+                    <Input label={t('admin.suppliers.form.address')} value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
 
                     <div className="flex items-center gap-2 pt-2">
                         <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                             className="rounded bg-white dark:bg-slate-950 border-gray-300 dark:border-white/20" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.suppliers.form.active')}</span>
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">Cancel</Button>
-                        <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">Save</Button>
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1">{t('admin.suppliers.form.cancel')}</Button>
+                        <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">{t('admin.suppliers.form.save')}</Button>
                     </div>
                 </form>
             </Modal>

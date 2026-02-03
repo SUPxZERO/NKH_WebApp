@@ -10,14 +10,89 @@ class ExpenseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Use dates from last week to now
+        $locationId = \App\Models\Location::first()?->id ?? 1;
+        $userId = \App\Models\User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['admin', 'super-admin', 'manager']);
+        })->first()?->id ?? \App\Models\User::first()?->id ?? 1;
+
+        $categories = \App\Models\ExpenseCategory::all();
+        if ($categories->isEmpty()) {
+            $this->call(ExpenseCategorySeeder::class);
+            $categories = \App\Models\ExpenseCategory::all();
+        }
+
+        $foodCat = $categories->where('name', 'Food Supplies')->first()?->id ?? $categories->first()?->id;
+        $utilCat = $categories->where('name', 'Utilities')->first()?->id ?? $categories->first()?->id;
+        $maintCat = $categories->where('name', 'Maintenance')->first()?->id ?? $categories->first()?->id;
+        $salaryCat = $categories->where('name', 'Staff Salaries')->first()?->id ?? $categories->first()?->id;
+
         $baseDate = Carbon::now();
-        
+
         $expenses = [
             [
-                'location_id' => 1,
-                'expense_category_id' => 1,
-                'created_by' => 1,
+                'location_id' => $locationId,
+                'expense_category_id' => $foodCat,
+                'created_by' => $userId,
+                'expense_date' => $baseDate->copy()->subDays(28)->format('Y-m-d'),
+                'amount' => 450.25,
+                'currency' => 'USD',
+                'vendor_name' => 'Wholesale Food Mart',
+                'reference' => 'INV-FEB-001',
+                'description' => 'Bulk dry goods and rice replenishment',
+                'status' => 'paid',
+            ],
+            [
+                'location_id' => $locationId,
+                'expense_category_id' => $utilCat,
+                'created_by' => $userId,
+                'expense_date' => $baseDate->copy()->subDays(25)->format('Y-m-d'),
+                'amount' => 85.00,
+                'currency' => 'USD',
+                'vendor_name' => 'City Internet Pro',
+                'reference' => 'NET-2026-01',
+                'description' => 'Monthly fiber optic internet service',
+                'status' => 'paid',
+            ],
+            [
+                'location_id' => $locationId,
+                'expense_category_id' => $maintCat,
+                'created_by' => $userId,
+                'expense_date' => $baseDate->copy()->subDays(20)->format('Y-m-d'),
+                'amount' => 120.00,
+                'currency' => 'USD',
+                'vendor_name' => 'CoolAir AC Services',
+                'reference' => 'SERV-9921',
+                'description' => 'Quarterly AC maintenance for dining area',
+                'status' => 'approved',
+            ],
+            [
+                'location_id' => $locationId,
+                'expense_category_id' => $foodCat,
+                'created_by' => $userId,
+                'expense_date' => $baseDate->copy()->subDays(15)->format('Y-m-d'),
+                'amount' => 310.50,
+                'currency' => 'USD',
+                'vendor_name' => 'Fresh Catch Seafood',
+                'reference' => 'INV-SEA-442',
+                'description' => 'Premium seafood delivery',
+                'status' => 'paid',
+            ],
+            [
+                'location_id' => $locationId,
+                'expense_category_id' => $salaryCat,
+                'created_by' => $userId,
+                'expense_date' => $baseDate->copy()->subDays(10)->format('Y-m-d'),
+                'amount' => 1250.00,
+                'currency' => 'USD',
+                'vendor_name' => 'Staff Payroll',
+                'reference' => 'PAY-JAN-MID',
+                'description' => 'Mid-month advance payments for kitchen staff',
+                'status' => 'paid',
+            ],
+            [
+                'location_id' => $locationId,
+                'expense_category_id' => $foodCat,
+                'created_by' => $userId,
                 'expense_date' => $baseDate->copy()->subDays(5)->format('Y-m-d'),
                 'amount' => 150.75,
                 'currency' => 'USD',
@@ -27,9 +102,9 @@ class ExpenseSeeder extends Seeder
                 'status' => 'approved',
             ],
             [
-                'location_id' => 1,
-                'expense_category_id' => 2,
-                'created_by' => 1,
+                'location_id' => $locationId,
+                'expense_category_id' => $utilCat,
+                'created_by' => $userId,
                 'expense_date' => $baseDate->copy()->subDays(3)->format('Y-m-d'),
                 'amount' => 320.00,
                 'currency' => 'USD',
@@ -39,9 +114,9 @@ class ExpenseSeeder extends Seeder
                 'status' => 'approved',
             ],
             [
-                'location_id' => 1,
-                'expense_category_id' => 3,
-                'created_by' => 1,
+                'location_id' => $locationId,
+                'expense_category_id' => $maintCat,
+                'created_by' => $userId,
                 'expense_date' => $baseDate->copy()->subDays(1)->format('Y-m-d'),
                 'amount' => 89.50,
                 'currency' => 'USD',
@@ -51,46 +126,22 @@ class ExpenseSeeder extends Seeder
                 'status' => 'approved',
             ],
             [
-                'location_id' => 2,
-                'expense_category_id' => 1,
-                'created_by' => 1,
-                'expense_date' => $baseDate->copy()->subDays(6)->format('Y-m-d'),
-                'amount' => 245.00,
+                'location_id' => $locationId,
+                'expense_category_id' => $foodCat,
+                'created_by' => $userId,
+                'expense_date' => $baseDate->copy()->format('Y-m-d'),
+                'amount' => 75.20,
                 'currency' => 'USD',
-                'vendor_name' => 'Phnom Penh Produce Co.',
-                'reference' => 'INV-1002',
-                'description' => 'Fresh vegetables and fruits',
-                'status' => 'approved',
-            ],
-            [
-                'location_id' => 1,
-                'expense_category_id' => 2,
-                'created_by' => 1,
-                'expense_date' => $baseDate->copy()->subDays(4)->format('Y-m-d'),
-                'amount' => 180.00,
-                'currency' => 'USD',
-                'vendor_name' => 'Phnom Penh Water',
-                'reference' => 'BILL-2002',
-                'description' => 'Monthly water bill',
-                'status' => 'approved',
-            ],
-            [
-                'location_id' => 2,
-                'expense_category_id' => 3,
-                'created_by' => 1,
-                'expense_date' => $baseDate->copy()->subDays(2)->format('Y-m-d'),
-                'amount' => 125.00,
-                'currency' => 'USD',
-                'vendor_name' => 'Kitchen Equipment Co.',
-                'reference' => 'MT-413',
-                'description' => 'Kitchen equipment maintenance',
+                'vendor_name' => 'Local Bakery',
+                'reference' => 'BAKE-554',
+                'description' => 'Daily bread and pastry supply',
                 'status' => 'approved',
             ],
         ];
 
         foreach ($expenses as $exp) {
             Expense::updateOrCreate(
-                ['reference' => $exp['reference']], // Unique key
+                ['reference' => $exp['reference']],
                 $exp
             );
         }

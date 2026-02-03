@@ -21,8 +21,8 @@ class UnitController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('display_name', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('display_name', 'like', "%{$search}%");
             });
         }
 
@@ -81,7 +81,7 @@ class UnitController extends Controller
         $unit = Unit::create($validated);
 
         return response()->json([
-            'message' => 'Unit created successfully',
+            'message' => __('messages.api.utility.unit_created'),
             'data' => $unit
         ], 201);
     }
@@ -124,7 +124,7 @@ class UnitController extends Controller
         $unit->update($validated);
 
         return response()->json([
-            'message' => 'Unit updated successfully',
+            'message' => __('messages.api.utility.unit_updated'),
             'data' => $unit
         ]);
     }
@@ -141,14 +141,14 @@ class UnitController extends Controller
 
         if ($inUseCheck) {
             return response()->json([
-                'message' => 'Cannot delete unit that is in use by ingredients'
+                'message' => __('messages.api.utility.unit_in_use')
             ], 422);
         }
 
         $unit->delete();
 
         return response()->json([
-            'message' => 'Unit deleted successfully'
+            'message' => __('messages.api.utility.unit_deleted')
         ]);
     }
 

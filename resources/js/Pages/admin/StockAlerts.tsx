@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -24,6 +25,7 @@ import { cn } from '@/app/utils/cn';
 
 // Enhanced StatCard - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) => {
+    const { t } = useLanguage();
     const colorStyles: Record<string, any> = {
         red: { gradient: 'from-red-500/20 to-rose-500/10', iconBg: 'bg-gradient-to-br from-red-500 to-rose-600', text: 'text-red-600 dark:text-red-400', border: 'border-red-500/30', shadow: 'shadow-red-500/20' },
         orange: { gradient: 'from-orange-500/20 to-amber-500/10', iconBg: 'bg-gradient-to-br from-orange-500 to-amber-600', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-500/30', shadow: 'shadow-orange-500/20' },
@@ -91,6 +93,7 @@ interface Alert {
 }
 
 export default function StockAlerts() {
+    const { t } = useLanguage();
     const [typeFilter, setTypeFilter] = React.useState('all');
     const [severityFilter, setSeverityFilter] = React.useState('all');
     const [showAcknowledged, setShowAcknowledged] = React.useState(false);
@@ -146,29 +149,29 @@ export default function StockAlerts() {
     const acknowledgeMutation = useMutation({
         mutationFn: (alertId: number) => apiPost(`/api/admin/stock-alerts/${alertId}/acknowledge`, {}),
         onSuccess: () => {
-            toastSuccess('Alert acknowledged');
+            toastSuccess(t('admin.inventory.alerts.reorder.acknowledged') as string);
             qc.invalidateQueries({ queryKey: ['stock-alerts'] });
         },
-        onError: () => toastError('Failed to acknowledge alert')
+        onError: () => toastError(t('admin.inventory.alerts.reorder.acknowledge_failed') as string)
     });
 
     const createPOMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/purchase-orders', data),
         onSuccess: () => {
-            toastSuccess('Purchase Order created successfully');
+            toastSuccess(t('admin.inventory.alerts.reorder.po_created') as string);
             setOpenReorder(false);
             setReorderQuantity('');
         },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to create PO')
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.inventory.alerts.reorder.po_failed') as string)
     });
 
     const updateSettingsMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/settings', { ...data, _method: 'PUT' }),
         onSuccess: () => {
-            toastSuccess('Settings updated');
+            toastSuccess(t('admin.inventory.alerts.reorder.settings_updated') as string);
             qc.invalidateQueries({ queryKey: ['settings'] });
         },
-        onError: () => toastError('Failed to update settings')
+        onError: () => toastError(t('admin.inventory.alerts.reorder.settings_failed') as string)
     });
 
     const handleToggleSetting = (key: string, currentValue: boolean) => {
@@ -184,7 +187,7 @@ export default function StockAlerts() {
         if (!selectedIngredient || !reorderQuantity) return;
 
         if (!selectedIngredient.supplier_id) {
-            toastError('Ingredient has no supplier assigned');
+            toastError(t('admin.inventory.alerts.reorder.supplier_missing') as string);
             return;
         }
 
@@ -222,10 +225,10 @@ export default function StockAlerts() {
 
     const getAlertTypeLabel = (type: string) => {
         const labels: Record<string, string> = {
-            critical_stock: 'Critical Stock',
-            low_stock: 'Low Stock',
-            expiring_soon: 'Expiring Soon',
-            overstock: 'Overstock'
+            critical_stock: t('admin.inventory.alerts.types.critical_stock') as string,
+            low_stock: t('admin.inventory.alerts.types.low_stock') as string,
+            expiring_soon: t('admin.inventory.alerts.types.expiring_soon') as string,
+            overstock: t('admin.inventory.alerts.types.overstock') as string
         };
         return labels[type] || type;
     };
@@ -249,18 +252,18 @@ export default function StockAlerts() {
                         <ShieldAlert className="w-6 h-6 sm:w-8 sm:h-8 text-red-600 flex-shrink-0" />
                         <div className="min-w-0">
                             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 via-orange-600 to-red-600 bg-clip-text text-transparent truncate">
-                                Stock Alerts
+                                {t('admin.inventory.alerts.title')}
                             </h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Monitor critical inventory levels</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.inventory.alerts.subtitle')}</p>
                         </div>
                     </motion.div>
 
                     {/* Stats Ribbon - Horizontal scroll on mobile */}
                     <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
                         <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-                            <StatCard title="Active" value={stats?.active_alerts || 0} icon={AlertTriangle} color="red" index={0} />
-                            <StatCard title="Critical" value={stats?.critical || 0} icon={AlertCircle} color="orange" index={1} subtext="Immediate action" />
-                            <StatCard title="Expiring" value={stats?.expiring || 0} icon={Clock} color="yellow" index={2} subtext="Within 7 days" />
+                            <StatCard title={t('admin.inventory.alerts.stats.active')} value={stats?.active_alerts || 0} icon={AlertTriangle} color="red" index={0} />
+                            <StatCard title={t('admin.inventory.alerts.stats.critical')} value={stats?.critical || 0} icon={AlertCircle} color="orange" index={1} subtext={t('admin.inventory.alerts.stats.immediate_action')} />
+                            <StatCard title={t('admin.inventory.alerts.stats.expiring')} value={stats?.expiring || 0} icon={Clock} color="yellow" index={2} subtext={t('admin.inventory.alerts.stats.within_7_days')} />
                         </div>
                     </div>
 
@@ -273,25 +276,25 @@ export default function StockAlerts() {
                     >
                         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
                             className="bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-red-500 outline-none transition-all flex-1 sm:flex-none">
-                            <option value="all">Type</option>
-                            <option value="critical_stock">Critical</option>
-                            <option value="low_stock">Low</option>
-                            <option value="expiring_soon">Expiring</option>
-                            <option value="overstock">Over</option>
+                            <option value="all">{t('admin.inventory.alerts.filters.type')}</option>
+                            <option value="critical_stock">{t('admin.inventory.alerts.types.critical_stock')}</option>
+                            <option value="low_stock">{t('admin.inventory.alerts.types.low_stock')}</option>
+                            <option value="expiring_soon">{t('admin.inventory.alerts.types.expiring_soon')}</option>
+                            <option value="overstock">{t('admin.inventory.alerts.types.overstock')}</option>
                         </select>
 
                         <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}
                             className="bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-red-500 outline-none transition-all flex-1 sm:flex-none">
-                            <option value="all">Severity</option>
-                            <option value="high">High</option>
-                            <option value="medium">Medium</option>
-                            <option value="low">Low</option>
+                            <option value="all">{t('admin.inventory.alerts.filters.severity')}</option>
+                            <option value="high">{t('admin.inventory.alerts.severity.high')}</option>
+                            <option value="medium">{t('admin.inventory.alerts.severity.medium')}</option>
+                            <option value="low">{t('admin.inventory.alerts.severity.low')}</option>
                         </select>
 
                         <label className="hidden sm:flex items-center gap-2 bg-background/50 border border-border/50 rounded-lg px-4 py-2 h-10 cursor-pointer hover:bg-secondary/50 transition-colors">
                             <input type="checkbox" checked={showAcknowledged} onChange={(e) => setShowAcknowledged(e.target.checked)}
                                 className="rounded border-gray-300 text-red-600 focus:ring-red-500" />
-                            <span className="text-sm font-medium text-foreground">Acknowledged</span>
+                            <span className="text-sm font-medium text-foreground">{t('admin.inventory.alerts.filters.acknowledged')}</span>
                         </label>
                     </motion.div>
 
@@ -311,11 +314,11 @@ export default function StockAlerts() {
                                 </h2>
 
                                 {isLoading ? (
-                                    <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">Loading...</div>
+                                    <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">{t('admin.common.loading')}</div>
                                 ) : (Array.isArray(alerts) ? alerts : (alerts?.data || []))?.length === 0 ? (
                                     <div className="text-center py-8 sm:py-12 text-muted-foreground text-sm bg-secondary/20 rounded-xl border border-border/50 border-dashed">
                                         <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 opacity-50" />
-                                        No active alerts
+                                        {t('admin.inventory.alerts.no_active')}
                                     </div>
                                 ) : (
                                     <div className="space-y-2 sm:space-y-3">
@@ -352,7 +355,7 @@ export default function StockAlerts() {
                                                                 onClick={() => acknowledgeMutation.mutate(alert.id)}
                                                                 className="hover:bg-green-500/10 hover:text-green-600 h-8 sm:h-9 px-2 sm:px-3 text-xs flex-shrink-0">
                                                                 <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                                                                <span className="hidden sm:inline ml-1">Done</span>
+                                                                <span className="hidden sm:inline ml-1">{t('admin.inventory.alerts.actions.done')}</span>
                                                             </Button>
                                                         )}
                                                     </div>
@@ -388,7 +391,7 @@ export default function StockAlerts() {
 
                                 <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-3 sm:mb-4 md:mb-5 flex items-center gap-2 relative z-10">
                                     <Package className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-                                    Reorder
+                                    {t('admin.inventory.alerts.reorder.title')}
                                 </h2>
 
                                 {lowStock?.length === 0 ? (
@@ -396,7 +399,7 @@ export default function StockAlerts() {
                                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500/10 flex items-center justify-center mb-2 sm:mb-3">
                                             <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                                         </div>
-                                        <p>All stock healthy</p>
+                                        <p>{t('admin.inventory.alerts.reorder.all_healthy')}</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-2 sm:space-y-3 md:space-y-4">
@@ -405,7 +408,7 @@ export default function StockAlerts() {
                                                 <div className="flex justify-between items-start mb-2 sm:mb-3 gap-2">
                                                     <div className="min-w-0">
                                                         <h4 className="text-sm sm:text-base font-bold text-white mb-0.5 truncate">{ingredient.name}</h4>
-                                                        <p className="text-[10px] sm:text-xs text-zinc-400 truncate">{ingredient.supplier?.name || 'No Supplier'}</p>
+                                                        <p className="text-[10px] sm:text-xs text-zinc-400 truncate">{ingredient.supplier?.name || t('admin.inventory.alerts.reorder.no_supplier')}</p>
                                                     </div>
                                                     <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[8px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0">
                                                         {Number(ingredient.current_stock || 0).toFixed(1)}
@@ -415,7 +418,7 @@ export default function StockAlerts() {
                                                     onClick={() => { setSelectedIngredient(ingredient); setOpenReorder(true); }}
                                                     className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white rounded-full h-8 sm:h-9 md:h-10 text-xs sm:text-sm shadow-lg"
                                                 >
-                                                    <span className="font-semibold">Create PO</span>
+                                                    <span className="font-semibold">{t('admin.inventory.alerts.actions.create_po')}</span>
                                                     <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
                                                 </Button>
                                             </div>
@@ -433,29 +436,29 @@ export default function StockAlerts() {
                             >
                                 <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-3 sm:mb-4 md:mb-5 flex items-center gap-2">
                                     <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
-                                    Settings
+                                    {t('admin.inventory.alerts.settings.title')}
                                 </h2>
                                 <div className="space-y-3 sm:space-y-4 md:space-y-5">
                                     <div className="flex justify-between items-center text-xs sm:text-sm">
-                                        <span className="text-zinc-400 font-medium">Email Alert</span>
+                                        <span className="text-zinc-400 font-medium">{t('admin.inventory.alerts.settings.email_alerts')}</span>
                                         <span className={cn(
                                             "border rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold",
                                             settingsData?.stock_notifications_email
                                                 ? "bg-green-500/10 text-green-500 border-green-500/20"
                                                 : "bg-zinc-800 text-zinc-500 border-white/5"
                                         )}>
-                                            {settingsData?.stock_notifications_email ? 'On' : 'Off'}
+                                            {settingsData?.stock_notifications_email ? t('admin.inventory.alerts.settings.on') : t('admin.inventory.alerts.settings.off')}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center text-xs sm:text-sm">
-                                        <span className="text-zinc-400 font-medium">Auto-Reorder</span>
+                                        <span className="text-zinc-400 font-medium">{t('admin.inventory.alerts.settings.auto_reorder')}</span>
                                         <span className={cn(
                                             "border rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold",
                                             settingsData?.stock_auto_reorder
                                                 ? "bg-purple-500/10 text-purple-500 border-purple-500/20"
                                                 : "bg-zinc-800 text-zinc-500 border-white/5"
                                         )}>
-                                            {settingsData?.stock_auto_reorder ? 'On' : 'Off'}
+                                            {settingsData?.stock_auto_reorder ? t('admin.inventory.alerts.settings.on') : t('admin.inventory.alerts.settings.off')}
                                         </span>
                                     </div>
                                     <Button
@@ -463,7 +466,7 @@ export default function StockAlerts() {
                                         onClick={() => setOpenSettings(true)}
                                         className="w-full mt-1 sm:mt-2 h-9 sm:h-10 md:h-11 rounded-lg sm:rounded-xl border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 font-medium text-xs sm:text-sm"
                                     >
-                                        Manage Settings
+                                        {t('admin.inventory.alerts.actions.manage_settings')}
                                     </Button>
                                 </div>
                             </motion.div>
@@ -474,11 +477,11 @@ export default function StockAlerts() {
 
             {/* Create PO Modal */}
             <Modal open={openReorder} onClose={() => { setOpenReorder(false); setSelectedIngredient(null); setReorderQuantity(''); }}
-                title="Create PO" size="md">
+                title={t('admin.inventory.alerts.reorder.modal_title')} size="md">
                 {selectedIngredient && (
                     <div className="space-y-4 sm:space-y-6">
                         <div className="bg-secondary/30 p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl border border-border/50">
-                            <h3 className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1 sm:mb-2">Item</h3>
+                            <h3 className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1 sm:mb-2">{t('admin.inventory.alerts.reorder.item_label')}</h3>
                             <div className="flex justify-between items-center mb-1 gap-2">
                                 <p className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">{selectedIngredient.name}</p>
                                 <Badge variant="outline" className="bg-background text-[10px] sm:text-xs flex-shrink-0">{selectedIngredient.code}</Badge>
@@ -488,7 +491,7 @@ export default function StockAlerts() {
 
                         <div>
                             <label className="block text-xs sm:text-sm font-medium text-foreground mb-2 sm:mb-3">
-                                Quantity <span className="text-destructive">*</span>
+                                {t('admin.inventory.alerts.reorder.quantity')} <span className="text-destructive">*</span>
                             </label>
                             <div className="relative">
                                 <Input type="number" step="0.01" required value={reorderQuantity}
@@ -503,27 +506,27 @@ export default function StockAlerts() {
                             {/* Location Selector */}
                             <div className="mt-3">
                                 <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
-                                    Destination Location
+                                    {t('admin.inventory.alerts.reorder.destination')}
                                 </label>
                                 <select
                                     className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm"
                                     value={locationId}
                                     onChange={(e) => setLocationId(e.target.value)}
                                 >
-                                    <option value="">Select Location (Default: {locations?.data?.[0]?.name || 'Main'})</option>
+                                    <option value="">{t('admin.inventory.alerts.reorder.select_location', { default: locations?.data?.[0]?.name || 'Main' })}</option>
                                     {locations?.data?.map((loc: any) => (
                                         <option key={loc.id} value={loc.id}>{loc.name}</option>
                                     ))}
                                 </select>
-                                <p className="text-[10px] text-muted-foreground mt-1">If unspecified, defaults to {locations?.data?.[0]?.name || 'Main Kitchen'}</p>
+                                <p className="text-[10px] text-muted-foreground mt-1">{t('admin.inventory.alerts.reorder.unspecified_location', { default: locations?.data?.[0]?.name || 'Main Kitchen' })}</p>
                             </div>
 
                             <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3 text-[10px] sm:text-xs">
                                 <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-blue-500/10 text-blue-500 font-medium">
-                                    Now: {selectedIngredient.current_stock}
+                                    {t('admin.inventory.alerts.reorder.now')}: {selectedIngredient.current_stock}
                                 </span>
                                 <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-purple-500/10 text-purple-500 font-medium">
-                                    Max: {selectedIngredient.max_stock_level}
+                                    {t('admin.inventory.alerts.reorder.max')}: {selectedIngredient.max_stock_level}
                                 </span>
                             </div>
                         </div>
@@ -531,18 +534,18 @@ export default function StockAlerts() {
                         <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
                             <Button variant="ghost" onClick={() => { setOpenReorder(false); setReorderQuantity(''); }}
                                 className="flex-1 h-10 sm:h-11 md:h-12 rounded-lg sm:rounded-xl text-sm">
-                                Cancel
+                                {t('admin.inventory.alerts.actions.cancel')}
                             </Button>
                             <Button onClick={handleCreatePO} disabled={createPOMutation.isPending}
                                 className="flex-[2] h-10 sm:h-11 md:h-12 rounded-lg sm:rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-xl font-bold text-xs sm:text-sm">
                                 {createPOMutation.isPending ? (
                                     <span className="flex items-center gap-2">
                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        <span className="hidden sm:inline">Processing...</span>
+                                        <span className="hidden sm:inline">{t('admin.inventory.alerts.actions.processing')}</span>
                                     </span>
                                 ) : (
                                     <span className="flex items-center gap-1 sm:gap-2">
-                                        Confirm <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        {t('admin.inventory.alerts.actions.confirm')} <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </span>
                                 )}
                             </Button>
@@ -551,11 +554,11 @@ export default function StockAlerts() {
                 )}
             </Modal>
             {/* Settings Modal */}
-            <Modal open={openSettings} onClose={() => setOpenSettings(false)} title="Settings" size="md">
+            <Modal open={openSettings} onClose={() => setOpenSettings(false)} title={t('admin.inventory.alerts.settings.title')} size="md">
                 <div className="space-y-4 sm:space-y-6">
                     <div className="bg-secondary/30 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50">
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                            Configure stock notifications and automated actions.
+                            {t('admin.inventory.alerts.settings.subtitle')}
                         </p>
                     </div>
 
@@ -567,8 +570,8 @@ export default function StockAlerts() {
                                     <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="font-semibold text-foreground text-sm sm:text-base">Email Alerts</p>
-                                    <p className="text-[10px] sm:text-xs text-muted-foreground">Critical stock alerts</p>
+                                    <p className="font-semibold text-foreground text-sm sm:text-base">{t('admin.inventory.alerts.settings.email_alerts')}</p>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.inventory.alerts.settings.email_desc')}</p>
                                 </div>
                             </div>
                             <div
@@ -592,8 +595,8 @@ export default function StockAlerts() {
                                     <Package className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="font-semibold text-foreground text-sm sm:text-base">Auto-Reorder</p>
-                                    <p className="text-[10px] sm:text-xs text-muted-foreground">Auto draft POs</p>
+                                    <p className="font-semibold text-foreground text-sm sm:text-base">{t('admin.inventory.alerts.settings.auto_reorder')}</p>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">{t('admin.inventory.alerts.settings.auto_reorder_desc')}</p>
                                 </div>
                             </div>
                             <div
@@ -613,7 +616,7 @@ export default function StockAlerts() {
 
                     <div className="flex justify-end pt-1 sm:pt-2">
                         <Button onClick={() => setOpenSettings(false)} className="h-9 sm:h-10 text-sm">
-                            Close
+                            {t('admin.inventory.alerts.actions.close')}
                         </Button>
                     </div>
                 </div>

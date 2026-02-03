@@ -1,7 +1,8 @@
 import React from 'react';
 import { usePagination } from '../hooks/useApi';
+import { useLanguage } from '@/app/context/LanguageContext';
 
-export const DataTable = ({ 
+export const DataTable = ({
     apiFunction,
     columns,
     defaultParams = {},
@@ -10,6 +11,7 @@ export const DataTable = ({
     filters,
     searchable = true
 }) => {
+    const { t } = useLanguage();
     const {
         data,
         meta,
@@ -38,7 +40,7 @@ export const DataTable = ({
     if (error) {
         return (
             <div className="p-4 text-red-500">
-                Error: {error}
+                {t('components.datatable.error')} {error}
             </div>
         );
     }
@@ -50,7 +52,7 @@ export const DataTable = ({
                 {searchable && (
                     <input
                         type="text"
-                        placeholder="Search..."
+                        placeholder={t('components.datatable.search')}
                         className="px-3 py-2 border rounded-lg"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -112,13 +114,13 @@ export const DataTable = ({
                         {loading ? (
                             <tr>
                                 <td colSpan={columns.length} className="px-6 py-4 text-center">
-                                    Loading...
+                                    {t('components.datatable.loading')}
                                 </td>
                             </tr>
                         ) : data.length === 0 ? (
                             <tr>
                                 <td colSpan={columns.length} className="px-6 py-4 text-center">
-                                    No records found
+                                    {t('components.datatable.no_records')}
                                 </td>
                             </tr>
                         ) : (
@@ -145,7 +147,7 @@ export const DataTable = ({
                 <div className="px-4 py-3 border-t flex items-center justify-between">
                     <div className="flex-1 flex justify-between items-center">
                         <div>
-                            Showing {meta.current_page} of {meta.last_page} pages
+                            {t('components.datatable.showing')} {meta.current_page} {t('components.datatable.of')} {meta.last_page} {t('components.datatable.pages')}
                         </div>
                         <div className="flex gap-2">
                             <button
@@ -153,14 +155,14 @@ export const DataTable = ({
                                 disabled={meta.current_page === 1}
                                 className="px-4 py-2 border rounded-lg disabled:opacity-50"
                             >
-                                Previous
+                                {t('components.datatable.previous')}
                             </button>
                             <button
                                 onClick={() => setPage(meta.current_page + 1)}
                                 disabled={meta.current_page === meta.last_page}
                                 className="px-4 py-2 border rounded-lg disabled:opacity-50"
                             >
-                                Next
+                                {t('components.datatable.next')}
                             </button>
                         </div>
                     </div>

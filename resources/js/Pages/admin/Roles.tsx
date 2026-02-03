@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -10,10 +11,13 @@ import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
+
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // Enhanced StatCard Component - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
+    const { t } = useLanguage();
     const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string; shadow: string }> = {
         purple: {
             gradient: 'from-fuchsia-500/20 to-purple-500/10',
@@ -77,16 +81,20 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Roles Ribbon - Mobile optimized
-const RoleStatsRibbon = ({ stats }: { stats: any }) => (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-        <StatCard title="Roles" value={stats.total} icon={Shield} color="purple" index={0} />
-        <StatCard title="Users" value={stats.users} icon={Users} color="emerald" index={1} />
-        <StatCard title="Perms" value={stats.permissions} icon={Lock} color="blue" index={2} />
-        <StatCard title="Avg/Role" value={stats.avgPerms} icon={CheckCircle} color="amber" index={3} />
-    </div>
-);
+const RoleStatsRibbon = ({ stats }: { stats: any }) => {
+    const { t } = useLanguage();
+    return (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+            <StatCard title={t('admin.hr.roles.stats.roles')} value={stats.total} icon={Shield} color="purple" index={0} />
+            <StatCard title={t('admin.hr.roles.stats.users')} value={stats.users} icon={Users} color="emerald" index={1} />
+            <StatCard title={t('admin.hr.roles.stats.perms')} value={stats.permissions} icon={Lock} color="blue" index={2} />
+            <StatCard title={t('admin.hr.roles.stats.avg_role')} value={stats.avgPerms} icon={CheckCircle} color="amber" index={3} />
+        </div>
+    );
+};
 
 export default function Roles() {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [openCreate, setOpenCreate] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
@@ -132,20 +140,26 @@ export default function Roles() {
     // Mutations
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/roles', data),
-        onSuccess: () => { toastSuccess('Role created'); closeModal(); qc.invalidateQueries({ queryKey: ['roles'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.hr.roles.messages.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['roles'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.hr.roles.messages.failed') as string)
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/roles/${id}`, data),
-        onSuccess: () => { toastSuccess('Role updated'); closeModal(); qc.invalidateQueries({ queryKey: ['roles'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => {
+            toastSuccess(t('admin.hr.roles.messages.updated') as string);
+            closeModal();
+            qc.invalidateQueries({ queryKey: ['roles'] });
+            // Force Inertia to refresh shared auth data (permissions)
+            router.reload({ only: ['auth'] });
+        },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.hr.roles.messages.failed') as string)
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/roles/${id}`),
-        onSuccess: () => { toastSuccess('Role deleted'); qc.invalidateQueries({ queryKey: ['roles'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.hr.roles.messages.deleted') as string); qc.invalidateQueries({ queryKey: ['roles'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.hr.roles.messages.failed') as string)
     });
 
     const closeModal = () => {
@@ -166,17 +180,22 @@ export default function Roles() {
                 permissions: fullRole.permissions?.map((p: any) => p.id) || []
             });
             setOpenEdit(true);
+            setOpenEdit(true);
         } catch (e) {
-            toastError('Failed to load role details');
+            toastError(t('admin.hr.roles.messages.load_failed') as string);
         }
     };
 
     const handleDelete = (role: any) => {
-        if (role.users_count > 0) {
-            toastError(`Cannot delete role assigned to ${role.users_count} users`);
+        if (role.is_system) {
+            toastError(t('admin.hr.roles.messages.system_delete_error') as string);
             return;
         }
-        if (confirm(`Delete role "${role.name}"?`)) deleteMutation.mutate(role.id);
+        if (role.users_count > 0) {
+            toastError(t('admin.hr.roles.messages.assigned_delete_error', { count: role.users_count.toString() }) as string);
+            return;
+        }
+        if (confirm(t('admin.hr.roles.messages.confirm_delete', { name: role.name }) as string)) deleteMutation.mutate(role.id);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -212,14 +231,15 @@ export default function Roles() {
                                 animate={{ opacity: 1, x: 0 }}
                                 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent truncate"
                             >
-                                <span className="hidden sm:inline">Roles & Permissions</span>
-                                <span className="sm:hidden">Roles</span>
+
+                                <span className="hidden sm:inline">{t('admin.hr.roles.title')}</span>
+                                <span className="sm:hidden">{t('admin.hr.roles.stats.roles')}</span>
                             </motion.h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Manage user access control and security</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.hr.roles.subtitle')}</p>
                         </div>
                         <Button onClick={() => { closeModal(); setOpenCreate(true); }} className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-lg shadow-purple-500/20 flex-shrink-0">
                             <Plus className="w-4 h-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Create Role</span>
+                            <span className="hidden sm:inline">{t('admin.hr.roles.add')}</span>
                         </Button>
                     </div>
 
@@ -234,7 +254,7 @@ export default function Roles() {
                     >
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                            <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                            <Input placeholder={t('layout.common.search') as string} value={search} onChange={(e) => setSearch(e.target.value)}
                                 className="pl-10 h-10 text-sm bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
                         </div>
                     </motion.div>
@@ -247,25 +267,25 @@ export default function Roles() {
                         className="hidden md:block bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
                         <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
-                            <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">Role Name</div>
-                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Slug</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Users</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Permissions</div>
-                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+                            <div className="col-span-4 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.roles.table.role_name')}</div>
+                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.roles.table.slug')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.roles.table.users')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.roles.table.permissions')}</div>
+                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.hr.roles.table.actions')}</div>
                         </div>
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
                                 <div className="p-12 text-center text-muted-foreground">
                                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-2"></div>
-                                    <p>Loading...</p>
+                                    <p>{t('layout.common.loading')}</p>
                                 </div>
                             ) : roles.length === 0 ? (
                                 <div className="p-12 text-center">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
                                         <Shield className="w-8 h-8 text-purple-500" />
                                     </div>
-                                    <h3 className="text-foreground font-semibold">No roles found</h3>
-                                    <p className="text-muted-foreground text-sm mt-1">Create a new role to get started</p>
+                                    <h3 className="text-foreground font-semibold">{t('admin.hr.roles.messages.not_found')}</h3>
+                                    <p className="text-muted-foreground text-sm mt-1">{t('admin.hr.roles.messages.create_first')}</p>
                                 </div>
                             ) : roles.map((role: any, idx: number) => (
                                 <motion.div
@@ -278,7 +298,7 @@ export default function Roles() {
                                     <div className="col-span-4">
                                         <div className="font-semibold text-foreground flex items-center gap-2">
                                             {role.name}
-                                            {role.id === 1 && <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs border border-amber-500/20">System</span>}
+                                            {role.is_system && <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs border border-amber-500/20 flex items-center gap-1"><Lock size={10} /> {t('admin.hr.roles.table.system')}</span>}
                                         </div>
                                         <div className="text-xs text-muted-foreground truncate max-w-[90%]">{role.description}</div>
                                     </div>
@@ -294,16 +314,18 @@ export default function Roles() {
                                                 </div>
                                             )}
                                         </div>
-                                        {role.users_count === 0 && <span className="text-muted-foreground text-xs">No users</span>}
+                                        {role.users_count === 0 && <span className="text-muted-foreground text-xs">{t('admin.hr.roles.table.no_users')}</span>}
                                     </div>
                                     <div className="col-span-2 text-sm text-foreground flex items-center gap-2">
                                         <Lock size={14} className="text-purple-500" />
                                         <span className="font-medium">{role.permissions_count}</span>
-                                        <span className="text-muted-foreground text-xs">access points</span>
+                                        <span className="text-muted-foreground text-xs">{t('admin.hr.roles.table.access_points')}</span>
                                     </div>
                                     <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                                         <Button size="sm" variant="ghost" onClick={() => handleEdit(role)} className="h-8 w-8 p-0 hover:bg-purple-500/10 hover:text-purple-600"><Edit size={14} /></Button>
-                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(role)} className="h-8 w-8 p-0 hover:bg-red-500/10 hover:text-red-600"><Trash2 size={14} /></Button>
+                                        {!role.is_system && (
+                                            <Button size="sm" variant="ghost" onClick={() => handleDelete(role)} className="h-8 w-8 p-0 hover:bg-red-500/10 hover:text-red-600"><Trash2 size={14} /></Button>
+                                        )}
                                     </div>
                                 </motion.div>
                             ))}
@@ -316,7 +338,7 @@ export default function Roles() {
                             <div className="bg-card/50 rounded-xl p-8 text-center border border-border/50 backdrop-blur-sm">
                                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                                     <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                                    <span className="text-sm">Loading...</span>
+                                    <span className="text-sm">{t('layout.common.loading')}</span>
                                 </div>
                             </div>
                         ) : roles.length === 0 ? (
@@ -324,8 +346,8 @@ export default function Roles() {
                                 <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
                                     <Shield className="w-7 h-7 text-purple-500" />
                                 </div>
-                                <h3 className="text-foreground font-semibold text-sm">No roles found</h3>
-                                <p className="text-muted-foreground text-xs mt-1">Create a new role to get started</p>
+                                <h3 className="text-foreground font-semibold text-sm">{t('admin.hr.roles.messages.not_found')}</h3>
+                                <p className="text-muted-foreground text-xs mt-1">{t('admin.hr.roles.messages.create_first')}</p>
                             </div>
                         ) : roles.map((role: any, idx: number) => (
                             <motion.div
@@ -344,7 +366,7 @@ export default function Roles() {
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-1.5">
                                                 <h3 className="font-semibold text-sm text-foreground truncate">{role.name}</h3>
-                                                {role.id === 1 && <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] border border-amber-500/20 flex-shrink-0">Sys</span>}
+                                                {role.is_system && <Lock size={12} className="text-amber-500" />}
                                             </div>
                                             <p className="text-[10px] text-muted-foreground truncate">{role.description || role.slug}</p>
                                         </div>
@@ -353,9 +375,11 @@ export default function Roles() {
                                         <Button size="sm" variant="ghost" onClick={() => handleEdit(role)} className="h-8 w-8 p-0 hover:bg-purple-500/20 hover:text-purple-600">
                                             <Edit size={14} />
                                         </Button>
-                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(role)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-600">
-                                            <Trash2 size={14} />
-                                        </Button>
+                                        {!role.is_system && (
+                                            <Button size="sm" variant="ghost" onClick={() => handleDelete(role)} className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-600">
+                                                <Trash2 size={14} />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
 
@@ -370,7 +394,7 @@ export default function Roles() {
                                         <div className="flex items-center gap-1.5">
                                             <Lock size={12} className="text-purple-500" />
                                             <span className="text-xs font-medium text-foreground">{role.permissions_count}</span>
-                                            <span className="text-[10px] text-muted-foreground">perms</span>
+                                            <span className="text-[10px] text-muted-foreground">{t('admin.hr.roles.stats.perms')}</span>
                                         </div>
                                     </div>
                                     <span className="font-mono text-[10px] text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">{role.slug}</span>
@@ -379,24 +403,37 @@ export default function Roles() {
                         ))}
                     </div>
                 </div>
-            </div>
+            </div >
 
-            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRole ? 'Edit Role' : 'New Role'} size="lg">
+            <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRole ? t('admin.hr.roles.modal.edit_title') : t('admin.hr.roles.modal.create_title')} size="lg">
                 <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                     <div>
-                        <Input label="Role Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Restaurant Manager" className="h-10 text-sm" />
+                        <Input
+                            label={t('admin.hr.roles.modal.role_name') as string}
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            required
+                            placeholder={t('admin.hr.roles.modal.placeholder.name') as string}
+                            className="h-10 text-sm"
+                            disabled={editingRole?.is_system}
+                        />
+                        {editingRole?.is_system && (
+                            <p className="text-[10px] text-amber-500 mt-1 flex items-center gap-1">
+                                <Lock size={10} /> {t('admin.hr.roles.modal.system_lock')}
+                            </p>
+                        )}
                     </div>
                     <div>
-                        <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Description</label>
+                        <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.hr.roles.modal.description')}</label>
                         <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
                             className="w-full bg-background border border-border rounded-lg sm:rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-purple-500 outline-none resize-none"
-                            placeholder="Describe what this role can do..." />
+                            placeholder={t('admin.hr.roles.modal.placeholder.description') as string} />
                     </div>
 
                     <div className="border-t border-border pt-3 sm:pt-4">
                         <label className="block text-xs sm:text-sm font-medium text-foreground mb-2 sm:mb-3 flex items-center justify-between">
-                            <span>Permissions</span>
-                            <span className="text-[10px] sm:text-xs text-muted-foreground">{formData.permissions.length} selected</span>
+                            <span>{t('admin.hr.roles.modal.permissions')}</span>
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">{formData.permissions.length} {t('admin.hr.roles.modal.selected')}</span>
                         </label>
                         <div className="h-60 sm:h-80 overflow-y-auto pr-2 space-y-3 sm:space-y-5">
                             {Object.entries(permissions).map(([group, perms]: [string, any]) => (
@@ -436,13 +473,13 @@ export default function Roles() {
                     </div>
 
                     <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-border">
-                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
+                        <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('layout.common.cancel')}</Button>
                         <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white shadow-lg shadow-purple-500/20">
-                            {editingRole ? 'Update' : 'Create'}
+                            {editingRole ? t('layout.actions.update') : t('layout.actions.create')}
                         </Button>
                     </div>
                 </form>
             </Modal>
-        </AdminLayout>
+        </AdminLayout >
     );
 }

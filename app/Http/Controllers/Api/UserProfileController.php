@@ -20,14 +20,14 @@ class UserProfileController extends Controller
     public function update(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // For Telegram guests without User record, delegate to customer/telegram update
         if (!$user && $this->isTelegramGuest($request)) {
             return $this->updateTelegramGuestProfile($request);
         }
 
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return response()->json(['message' => __('messages.api.errors.unauthenticated')], 401);
         }
 
         $validated = $request->validate([
@@ -42,7 +42,7 @@ class UserProfileController extends Controller
         $user->update($validated);
 
         return response()->json([
-            'message' => 'Profile updated successfully',
+            'message' => __('messages.api.success.profile_updated'),
             'data' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -66,7 +66,7 @@ class UserProfileController extends Controller
         $telegramUser = $this->getTelegramUser($request);
 
         if (!$customer && !$telegramUser) {
-            return response()->json(['message' => 'Profile not found'], 404);
+            return response()->json(['message' => __('messages.api.errors.profile_not_found')], 404);
         }
 
         $validated = $request->validate([
@@ -91,17 +91,20 @@ class UserProfileController extends Controller
         // Update Customer if available
         if ($customer) {
             $customerUpdate = [];
-            if (isset($validated['name'])) $customerUpdate['name'] = $validated['name'];
-            if (isset($validated['email'])) $customerUpdate['email'] = $validated['email'];
-            if (isset($validated['phone'])) $customerUpdate['phone'] = $validated['phone'];
-            
+            if (isset($validated['name']))
+                $customerUpdate['name'] = $validated['name'];
+            if (isset($validated['email']))
+                $customerUpdate['email'] = $validated['email'];
+            if (isset($validated['phone']))
+                $customerUpdate['phone'] = $validated['phone'];
+
             if (!empty($customerUpdate)) {
                 $customer->update($customerUpdate);
             }
         }
 
         return response()->json([
-            'message' => 'Profile updated successfully',
+            'message' => __('messages.api.success.profile_updated'),
             'data' => [
                 'id' => $customer?->id ?? 0,
                 'name' => $customer?->name ?? $telegramUser?->display_name,
@@ -126,13 +129,13 @@ class UserProfileController extends Controller
         $user = $request->user();
         $customer = null;
         $telegramUser = null;
-        
+
         // If no direct user, try to get via Telegram session
         if (!$user && $this->isTelegramGuest($request)) {
             // Using logic from trait manually to avoid "undefined method" risk if trait isn't updating
             $customer = $this->getCurrentCustomer($request);
             // $telegramUser = $this->getTelegramUser($request); // Not needed for avatar
-            
+
             // Check if customer has a linked User account
             if ($customer && $customer->user) {
                 $user = $customer->user;
@@ -142,18 +145,18 @@ class UserProfileController extends Controller
         // Check if file was received at all
         if (!$request->hasFile('avatar')) {
             return response()->json([
-                'message' => 'No file received',
-                'errors' => ['avatar' => ['No file was uploaded. Please try again.']],
+                'message' => __('messages.api.validation.upload.no_file'),
+                'errors' => ['avatar' => [__('messages.api.validation.upload.no_file')]],
             ], 422);
         }
 
         $file = $request->file('avatar');
-        
+
         // Check for upload errors
         if (!$file->isValid()) {
             return response()->json([
-                'message' => 'File upload failed',
-                'errors' => ['avatar' => ['File upload error: ' . $file->getErrorMessage()]],
+                'message' => __('messages.api.validation.upload.failed_prefix') . $file->getErrorMessage(),
+                'errors' => ['avatar' => [__('messages.api.validation.upload.failed_prefix') . $file->getErrorMessage()]],
             ], 422);
         }
 
@@ -164,8 +167,8 @@ class UserProfileController extends Controller
         // Must have either User or Customer to store avatar
         if (!$user && !$customer) {
             return response()->json([
-                'message' => 'Authentication required',
-                'errors' => ['auth' => ['You must be logged in to upload a profile picture.']],
+                'message' => __('messages.api.errors.authentication_required'),
+                'errors' => ['auth' => [__('messages.api.validation.upload.auth_required')]],
             ], 401);
         }
 
@@ -202,7 +205,7 @@ class UserProfileController extends Controller
         }
 
         return response()->json([
-            'message' => 'Profile picture updated successfully',
+            'message' => __('messages.api.success.avatar_updated'),
             'avatar_url' => Storage::url($path),
             'image_path' => $path,
             'image_path_url' => Storage::url($path),
@@ -217,8 +220,8 @@ class UserProfileController extends Controller
         // Telegram guests cannot change password (no User record)
         if (!$request->user() && $this->isTelegramGuest($request)) {
             return response()->json([
-                'message' => 'Password change is not available for Telegram guests',
-                'info' => 'Create a full account to set a password.'
+                'message' => __('messages.api.validation.password.telegram_guest'),
+                'info' => __('messages.api.validation.password.create_account_hint')
             ], 422);
         }
 
@@ -230,13 +233,13 @@ class UserProfileController extends Controller
         $user = $request->user();
 
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return response()->json(['message' => __('messages.api.errors.unauthenticated')], 401);
         }
 
         // Verify current password
         if (!Hash::check($validated['current_password'], $user->password)) {
             return response()->json([
-                'message' => 'Current password is incorrect'
+                'message' => __('messages.api.validation.password.incorrect')
             ], 422);
         }
 
@@ -246,7 +249,7 @@ class UserProfileController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Password changed successfully'
+            'message' => __('messages.api.success.password_changed')
         ]);
     }
 
@@ -271,7 +274,7 @@ class UserProfileController extends Controller
 
         // Must have either User or Customer to delete avatar
         if (!$user && !$customer) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return response()->json(['message' => __('messages.api.errors.unauthenticated')], 401);
         }
 
         // If we have a User, delete from User model
@@ -302,7 +305,7 @@ class UserProfileController extends Controller
         }
 
         return response()->json([
-            'message' => 'Avatar deleted successfully'
+            'message' => __('messages.api.success.avatar_deleted')
         ]);
     }
 
@@ -347,6 +350,6 @@ class UserProfileController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Unauthenticated'], 401);
+        return response()->json(['message' => __('messages.api.errors.unauthenticated')], 401);
     }
 }

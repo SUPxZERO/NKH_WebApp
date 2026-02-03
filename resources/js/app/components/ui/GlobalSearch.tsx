@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { apiGet } from '@/app/utils/api';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 // Search result types
 interface SearchResult {
@@ -96,6 +97,7 @@ interface GlobalSearchProps {
 }
 
 export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -167,19 +169,19 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
     const groups: SearchGroup[] = [];
 
     if (filteredNavigation.length > 0) {
-      groups.push({ name: 'Pages', results: filteredNavigation });
+      groups.push({ name: t('common.ui.search.groups.pages') as string, results: filteredNavigation });
     }
 
     if (menuResults && menuResults.length > 0) {
-      groups.push({ name: 'Menu Items', results: menuResults });
+      groups.push({ name: t('common.ui.search.groups.menu_items') as string, results: menuResults });
     }
 
     if (orderResults && orderResults.length > 0) {
-      groups.push({ name: 'Orders', results: orderResults });
+      groups.push({ name: t('common.ui.search.groups.orders') as string, results: orderResults });
     }
 
     return groups;
-  }, [filteredNavigation, menuResults, orderResults]);
+  }, [filteredNavigation, menuResults, orderResults, t]);
 
   // Flatten results for keyboard navigation
   const flatResults = useMemo(() => {
@@ -305,10 +307,10 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={
                     variant === 'admin'
-                      ? "Search pages, menu items, orders..."
+                      ? t('common.ui.search.placeholder.admin') as string
                       : variant === 'employee'
-                      ? "Search pages..."
-                      : "Search menu, pages..."
+                        ? t('common.ui.search.placeholder.employee') as string
+                        : t('common.ui.search.placeholder.customer') as string
                   }
                   className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder:text-gray-400 outline-none text-lg"
                 />
@@ -323,8 +325,8 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
                 {searchGroups.length === 0 && query.length > 0 ? (
                   <div className="px-4 py-12 text-center">
                     <Search className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-500 dark:text-gray-400">No results found for "{query}"</p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Try a different search term</p>
+                    <p className="text-gray-500 dark:text-gray-400">{t('common.ui.search.empty.title', { query })}</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('common.ui.search.empty.subtitle')}</p>
                   </div>
                 ) : (
                   <div className="py-2">
@@ -405,16 +407,16 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
                     <span className="flex items-center gap-1">
                       <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">↑</kbd>
                       <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">↓</kbd>
-                      <span className="ml-1">Navigate</span>
+                      <span className="ml-1">{t('common.ui.search.footer.navigate')}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">↵</kbd>
-                      <span className="ml-1">Select</span>
+                      <span className="ml-1">{t('common.ui.search.footer.select')}</span>
                     </span>
                   </div>
                   <span className="flex items-center gap-1">
                     <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">ESC</kbd>
-                    <span className="ml-1">Close</span>
+                    <span className="ml-1">{t('common.ui.search.footer.close')}</span>
                   </span>
                 </div>
               </div>
@@ -456,6 +458,7 @@ interface SearchTriggerProps {
 }
 
 export function SearchTrigger({ onClick, variant = 'admin', className }: SearchTriggerProps) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
@@ -468,7 +471,7 @@ export function SearchTrigger({ onClick, variant = 'admin', className }: SearchT
       )}
     >
       <Search className="w-4 h-4" />
-      <span className="hidden lg:inline">Search...</span>
+      <span className="hidden lg:inline">{t('common.ui.search.placeholder.default')}</span>
       <kbd className={cn(
         "hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs rounded",
         variant === 'customer'

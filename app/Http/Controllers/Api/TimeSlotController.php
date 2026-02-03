@@ -53,8 +53,8 @@ class TimeSlotController extends Controller
                     'max_orders' => $slot->max_orders,
                     'current_orders' => $slot->current_orders,
                     'available' => $slot->current_orders < $slot->max_orders,
-                    'availability_percentage' => $slot->max_orders > 0 
-                        ? round((($slot->max_orders - $slot->current_orders) / $slot->max_orders) * 100) 
+                    'availability_percentage' => $slot->max_orders > 0
+                        ? round((($slot->max_orders - $slot->current_orders) / $slot->max_orders) * 100)
                         : 0,
                 ];
             });
@@ -89,7 +89,7 @@ class TimeSlotController extends Controller
             $output = Artisan::output();
 
             return response()->json([
-                'message' => 'Time slots regenerated successfully',
+                'message' => __('messages.api.utility.timeslots_regenerated'),
                 'days' => $days,
                 'cleared' => $clearExisting ? $deleted ?? 0 : 0,
                 'output' => trim($output),
@@ -97,7 +97,7 @@ class TimeSlotController extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to regenerate time slots',
+                'message' => __('messages.api.utility.timeslots_regenerate_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -112,13 +112,13 @@ class TimeSlotController extends Controller
             $deleted = OrderTimeSlot::where('slot_date', '<', today())->delete();
 
             return response()->json([
-                'message' => 'Old time slots cleaned up successfully',
+                'message' => __('messages.api.utility.timeslots_cleanup'),
                 'deleted' => $deleted,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to cleanup time slots',
+                'message' => __('messages.api.utility.timeslots_cleanup_failed'),
                 'error' => $e->getMessage(),
             ], 500);
         }

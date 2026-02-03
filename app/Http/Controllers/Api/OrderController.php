@@ -47,21 +47,21 @@ class OrderController extends Controller
 
         // Ensure request is authenticated before accessing user()->id
         if (!$request->user()) {
-            abort(401, 'Unauthenticated.');
+            abort(401, __('messages.api.errors.unauthenticated'));
         }
 
         $employee = Employee::where('user_id', $request->user()->id)->firstOrFail();
         $employee = Employee::where('user_id', $request->user()->id)->firstOrFail();
-        
+
         // FIX Issue #14: Race Condition - Lock the table row to prevent double booking
         // Must happen inside the transaction, so we move table retrieval inside
-        
+
         $order = DB::transaction(function () use ($employee, $data) {
             // Lock table for update to prevent concurrent bookings
             $table = DiningTable::where('id', $data['table_id'])->lockForUpdate()->find($data['table_id']);
-            
+
             if (!$table) {
-                abort(404, 'Table not found.');
+                abort(404, __('messages.api.errors.table_not_found'));
             }
 
             app(TableStatusService::class)->occupyForStaff($table, $employee->user_id);
@@ -73,7 +73,6 @@ class OrderController extends Controller
                 'employee_id' => $employee->id,
                 'order_number' => $this->generateOrderNumber($employee->location_id, 'DIN'),
                 'order_type' => 'dine-in',
-                'order_type' => 'dine-in',
                 // 'status' => $isEmployeeOrder ? 'received' : 'pending', // REMOVED
                 'status' => $isEmployeeOrder ? 'received' : 'pending',
                 'payment_status' => 'unpaid',
@@ -81,7 +80,7 @@ class OrderController extends Controller
                 'ordered_at' => now(),
                 'special_instructions' => $data['notes'] ?? null,
             ]);
-            
+
             // Set status using helper
             $order->setStatus($isEmployeeOrder ? 'received' : 'pending');
             $order->save();
@@ -97,7 +96,7 @@ class OrderController extends Controller
     {
         // FIX Issue #13: IDOR Prevention - Ensure user has permission to view this order
         $this->authorize('view', $order);
-        
+
         // PHASE 2: Comprehensive eager loading for order details
         return new OrderResource($order->load([
             'items.menuItem.category',
@@ -118,7 +117,7 @@ class OrderController extends Controller
     public function addItem(StoreOrderItemRequest $request, Order $order): OrderItemResource
     {
         if ($order->status !== 'received') {
-            abort(409, 'Order is not pending.');
+            abort(409, __('messages.api.errors.order_not_pending'));
         }
 
         $data = $request->validated();
@@ -159,7 +158,7 @@ class OrderController extends Controller
     public function updateItem(UpdateOrderItemRequest $request, OrderItem $orderItem): OrderItemResource
     {
         if ($orderItem->order->status !== 'received') {
-            abort(409, 'Order is not pending.');
+            abort(409, __('messages.api.errors.order_not_pending'));
         }
         $data = $request->validated();
 
@@ -180,7 +179,7 @@ class OrderController extends Controller
     public function removeItem(OrderItem $orderItem): JsonResponse
     {
         if ($orderItem->order->status !== 'received') {
-            abort(409, 'Order is not pending.');
+            abort(409, __('messages.api.errors.order_not_pending'));
         }
         DB::transaction(function () use ($orderItem) {
             $order = $orderItem->order;
@@ -188,7 +187,7 @@ class OrderController extends Controller
             $this->recalculateTotals($order->fresh(['items']));
         });
 
-        return response()->json(['message' => 'Order item removed.']);
+        return response()->json(['message' => __('messages.api.success.order_item_removed')]);
     }
 
     // POST /api/orders/{order}/invoice (role:admin,manager,waiter)
@@ -198,7 +197,7 @@ class OrderController extends Controller
 
         DB::transaction(function () use ($order, $data, $request, $paymentService) {
             if ($order->status !== 'received') {
-                abort(409, 'Order is not pending.');
+                abort(409, __('messages.api.errors.order_not_pending'));
             }
 
             $order->loadMissing('items');
@@ -224,7 +223,8 @@ class OrderController extends Controller
         for ($i = 0; $i < 5; $i++) {
             $number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), Str::upper(Str::random(5)));
             $exists = Order::where('location_id', $locationId)->where('order_number', $number)->exists();
-            if (!$exists) return $number;
+            if (!$exists)
+                return $number;
         }
         return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
     }
@@ -243,14 +243,14 @@ class OrderController extends Controller
             'location',                  // Location info
             'promotion',                 // Applied promotion
         ]);
-        
-        
-        
+
+
+
         // Filter by location
         if ($request->has('location_id')) {
             $query->where('location_id', $request->location_id);
         }
-        
+
         // Filter by status (ignore 'all')
         if ($request->filled('status')) {
             $status = (string) $request->string('status');
@@ -261,7 +261,7 @@ class OrderController extends Controller
                 });
             }
         }
-        
+
         // Filter by order type (frontend sends ?type=)
         if ($request->filled('type')) {
             $type = $request->type;
@@ -269,18 +269,18 @@ class OrderController extends Controller
                 $q->where('code', $type);
             });
         }
-        
+
         // Search by order number or customer name/email
         if ($request->filled('search')) {
             $s = $request->string('search');
             $query->where(function ($q) use ($s) {
                 $q->where('order_number', 'like', "%{$s}%")
-                  ->orWhereHas('customer.user', function ($uq) use ($s) {
-                      $uq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%");
-                  });
+                    ->orWhereHas('customer.user', function ($uq) use ($s) {
+                        $uq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%");
+                    });
             });
         }
-        
+
         // Filter by date range
         if ($request->has('start_date')) {
             $query->whereDate('ordered_at', '>=', $request->start_date);
@@ -288,17 +288,17 @@ class OrderController extends Controller
         if ($request->has('end_date')) {
             $query->whereDate('ordered_at', '<=', $request->end_date);
         }
-        
+
         // ✅ Add diagnostic logging
         \Log::info('📊 Admin Orders Query', [
             'filters' => $request->only(['status', 'type', 'location_id', 'search', 'start_date', 'end_date']),
             'sql' => $query->toSql(),
             'bindings' => $query->getBindings()
         ]);
-        
+
         $orders = $query->orderBy('ordered_at', 'desc')
-                       ->paginate($request->get('per_page', 15));
-        
+            ->paginate($request->get('per_page', 15));
+
         // ✅ Log result count for debugging
         \Log::info('✅ Admin Orders Result', [
             'total' => $orders->total(),
@@ -313,10 +313,10 @@ class OrderController extends Controller
         if ($request->filled('location_id')) {
             $statsQuery->where('location_id', $request->location_id);
         }
-        
+
         // Helper to get count by status code
-        $getCountByStatus = function($code) use ($statsQuery) {
-            return (clone $statsQuery)->whereHas('orderStatus', function($q) use ($code) {
+        $getCountByStatus = function ($code) use ($statsQuery) {
+            return (clone $statsQuery)->whereHas('orderStatus', function ($q) use ($code) {
                 $q->where('code', $code);
             })->count();
         };
@@ -336,22 +336,22 @@ class OrderController extends Controller
     public function submitToKitchen(Order $order): OrderResource
     {
         if ($order->status !== 'received') {
-            abort(409, 'Order is not in received status.');
+            abort(409, __('messages.api.errors.order_not_received'));
         }
-        
+
         if ($order->items->isEmpty()) {
-            abort(422, 'Cannot submit order with no items.');
+            abort(422, __('messages.api.errors.no_items'));
         }
-        
+
         // NOTE: status is guarded - must use direct assignment
         // $order->status = 'preparing'; 
         $order->setStatus('preparing');
         $order->kitchen_submitted_at = now();
         $order->save();
-        
+
         // Update all order items to preparing status
         $order->items()->update(['status' => 'preparing']);
-        
+
         return new OrderResource($order->fresh(['items.menuItem', 'table']));
     }
 
@@ -396,7 +396,7 @@ class OrderController extends Controller
                 'completed' => 'completed',
                 'cancelled' => 'cancelled',
             ];
-            
+
             if (isset($statusMap[$newStatus])) {
                 $notificationService = app(NotificationService::class);
                 $notificationService->sendOrderNotification($order, $statusMap[$newStatus]);
@@ -416,11 +416,11 @@ class OrderController extends Controller
 
         // Prevent deleting completed or paid orders (Data Integrity)
         if ($order->status === 'completed' || $order->payment_status === 'paid') {
-            return response()->json(['message' => 'Cannot delete a completed or paid order.'], 409);
+            return response()->json(['message' => __('messages.api.errors.delete_completed_order')], 409);
         }
 
         $order->delete();
-        return response()->json(['message' => 'Order deleted successfully.']);
+        return response()->json(['message' => __('messages.api.success.order_deleted')]);
     }
 
     // PATCH /api/admin/orders/{order}/payment-status
@@ -434,16 +434,16 @@ class OrderController extends Controller
 
         if ($newStatus === 'paid') {
             if ($order->isPaid()) {
-                abort(409, 'Order is already paid.');
+                abort(409, __('messages.api.errors.already_paid'));
             }
-            
+
             $paymentService->markAsPaid($order, $request->user()->id);
 
         } elseif ($newStatus === 'unpaid') {
             if ($order->isUnpaid()) {
-                abort(409, 'Order is already unpaid.');
+                abort(409, __('messages.api.errors.already_unpaid'));
             }
-            
+
             $paymentService->markAsUnpaid($order, $request->user()->id);
         }
 

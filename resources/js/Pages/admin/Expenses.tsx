@@ -13,6 +13,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { Expense, ExpenseCategory } from '@/app/types/domain';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -72,21 +73,27 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Mobile optimized
-const ExpenseStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-    <StatCard title="Total" value={`$${stats.total.toFixed(0)}`} icon={DollarSign} color="purple" index={0} />
-    <StatCard title="Paid" value={`$${stats.paid.toFixed(0)}`} icon={CheckCircle} color="emerald" index={1} />
-    <StatCard title="Pending" value={`$${stats.pending.toFixed(0)}`} icon={Clock} color="amber" index={2} />
-  </div>
-);
+const ExpenseStatsRibbon = ({ stats }: { stats: any }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+      <StatCard title={t('finance.expenses.stats.total')} value={`$${stats.total.toFixed(0)}`} icon={DollarSign} color="purple" index={0} />
+      <StatCard title={t('finance.expenses.stats.paid')} value={`$${stats.paid.toFixed(0)}`} icon={CheckCircle} color="emerald" index={1} />
+      <StatCard title={t('finance.expenses.stats.pending')} value={`$${stats.pending.toFixed(0)}`} icon={Clock} color="amber" index={2} />
+    </div>
+  );
+};
 
 export default function Expenses() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [openManageCategories, setOpenManageCategories] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const qc = useQueryClient();
@@ -122,31 +129,58 @@ export default function Expenses() {
     queryFn: () => apiGet('/api/admin/expense-categories')
   });
 
-  const expenseList = useMemo(() => expenses?.data || [], [expenses]);
+  const expenseList = useMemo(() => {
+    if (!expenses) return [];
+    if (Array.isArray(expenses)) return expenses;
+    if (Array.isArray(expenses.data)) return expenses.data;
+    return [];
+  }, [expenses]);
 
-  const stats = useMemo(() => ({
-    total: expenseList.reduce((sum: number, e: Expense) => sum + parseFloat(e.amount.toString()), 0),
-    paid: expenseList.filter((e: Expense) => e.status === 'paid').reduce((sum: number, e: Expense) => sum + parseFloat(e.amount.toString()), 0),
-    pending: expenseList.filter((e: Expense) => e.status === 'approved').reduce((sum: number, e: Expense) => sum + parseFloat(e.amount.toString()), 0)
-  }), [expenseList]);
+  const stats = useMemo(() => {
+    if (!expenseList.length) return { total: 0, paid: 0, pending: 0 };
+    return {
+      total: expenseList.reduce((sum: number, e: Expense) => sum + (parseFloat(e.amount?.toString()) || 0), 0),
+      paid: expenseList.filter((e: Expense) => e.status === 'paid').reduce((sum: number, e: Expense) => sum + (parseFloat(e.amount?.toString()) || 0), 0),
+      pending: expenseList.filter((e: Expense) => e.status === 'approved').reduce((sum: number, e: Expense) => sum + (parseFloat(e.amount?.toString()) || 0), 0)
+    };
+  }, [expenseList]);
 
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/admin/expenses', data),
-    onSuccess: () => { toastSuccess('Expense created'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/expenses'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('finance.expenses.toasts.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/expenses'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('finance.expenses.toasts.failed') as string)
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/expenses/${id}`, data),
-    onSuccess: () => { toastSuccess('Expense updated'); closeModal(); qc.invalidateQueries({ queryKey: ['admin/expenses'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('finance.expenses.toasts.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/expenses'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('finance.expenses.toasts.failed') as string)
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/expenses/${id}`),
-    onSuccess: () => { toastSuccess('Expense deleted'); qc.invalidateQueries({ queryKey: ['admin/expenses'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('finance.expenses.toasts.deleted') as string); qc.invalidateQueries({ queryKey: ['admin/expenses'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('finance.expenses.toasts.failed') as string)
+  });
+
+  const createCategoryMutation = useMutation({
+    mutationFn: (data: any) => apiPost('/api/admin/expense-categories', data),
+    onSuccess: () => {
+      toastSuccess(t('finance.expenses.toasts.category_created') as string);
+      setNewCatName('');
+      qc.invalidateQueries({ queryKey: ['expense-categories'] });
+    },
+    onError: (err: any) => toastError(err.response?.data?.message || t('finance.expenses.toasts.failed') as string)
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: number) => apiDelete(`/api/admin/expense-categories/${id}`),
+    onSuccess: () => {
+      toastSuccess(t('finance.expenses.toasts.category_deleted') as string);
+      qc.invalidateQueries({ queryKey: ['expense-categories'] });
+    },
+    onError: (err: any) => toastError(err.response?.data?.message || t('finance.expenses.toasts.failed') as string)
   });
 
   const closeModal = () => {
@@ -174,7 +208,7 @@ export default function Expenses() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Delete this expense?')) deleteMutation.mutate(id);
+    if (confirm(t('finance.expenses.modal.confirm_delete') as string)) deleteMutation.mutate(id);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -215,14 +249,20 @@ export default function Expenses() {
               animate={{ opacity: 1, x: 0 }}
               className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent truncate"
             >
-              Expenses
+              {t('finance.expenses.title')}
             </motion.h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">Track business spending</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('finance.expenses.subtitle')}</p>
           </div>
-          <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
-            <Plus className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Expense</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setOpenManageCategories(true)} variant="secondary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
+              <FileText className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t('finance.expenses.categories')}</span>
+            </Button>
+            <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
+              <Plus className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t('finance.expenses.add_expense')}</span>
+            </Button>
+          </div>
         </div>
 
         <ExpenseStatsRibbon stats={stats} />
@@ -237,31 +277,31 @@ export default function Expenses() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+              <Input placeholder={t('finance.expenses.filters.search') as string} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="pl-10 h-10 text-sm" variant="filled" />
             </div>
             <div className="flex gap-2 sm:gap-3">
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                 className="flex-1 sm:flex-none bg-secondary border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none">
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="approved">Approved</option>
-                <option value="paid">Paid</option>
-                <option value="voided">Voided</option>
+                <option value="all">{t('finance.expenses.filters.all_status')}</option>
+                <option value="draft">{t('finance.expenses.status.draft')}</option>
+                <option value="approved">{t('finance.expenses.status.approved')}</option>
+                <option value="paid">{t('finance.expenses.status.paid')}</option>
+                <option value="voided">{t('finance.expenses.status.voided')}</option>
               </select>
               <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
                 className="flex-1 sm:flex-none bg-secondary border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none hidden sm:block">
-                <option value="all">All Categories</option>
+                <option value="all">{t('finance.expenses.filters.all_categories')}</option>
                 {categories?.data?.map((c: ExpenseCategory) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
               <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
                 className="flex-1 sm:flex-none bg-secondary border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-purple-500 outline-none">
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="week">Week</option>
-                <option value="month">Month</option>
+                <option value="all">{t('finance.expenses.filters.all_time')}</option>
+                <option value="today">{t('dashboard.period.today')}</option>
+                <option value="week">{t('dashboard.period.this_week')}</option>
+                <option value="month">{t('dashboard.period.this_month')}</option>
               </select>
             </div>
           </div>
@@ -276,19 +316,19 @@ export default function Expenses() {
         >
           {/* Table Header with Gradient */}
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 via-fuchsia-500/5 to-purple-500/10">
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Date</div>
-            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Category / Vendor</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Amount</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Reference</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('finance.expenses.table.date')}</div>
+            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('finance.expenses.table.category_vendor')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('finance.expenses.table.amount')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('finance.expenses.table.reference')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('finance.expenses.table.status')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('finance.expenses.table.actions')}</div>
           </div>
           <div className="divide-y divide-border/30">
             {isLoading ? (
               <div className="p-12 text-center">
                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                   <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  Loading expenses...
+                  {t('finance.expenses.table.loading')}
                 </div>
               </div>
             ) : expenseList.length === 0 ? (
@@ -296,8 +336,8 @@ export default function Expenses() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
                   <DollarSign className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-foreground font-semibold">No expenses found</h3>
-                <p className="text-muted-foreground text-sm mt-1">Create your first expense to get started</p>
+                <h3 className="text-foreground font-semibold">{t('finance.expenses.table.empty')}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{t('finance.expenses.table.create_trigger')}</p>
               </div>
             ) : expenseList.map((expense: Expense) => (
               <motion.div key={expense.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -306,7 +346,7 @@ export default function Expenses() {
                   {new Date(expense.expense_date).toLocaleDateString()}
                 </div>
                 <div className="col-span-3">
-                  <div className="font-medium text-foreground">{expense.expense_category?.name}</div>
+                  <div className="font-medium text-foreground">{expense.expense_category?.name || t('finance.expenses.uncategorized')}</div>
                   <div className="text-xs text-muted-foreground">{expense.vendor_name || '-'}</div>
                 </div>
                 <div className="col-span-2 font-bold text-foreground">
@@ -315,7 +355,7 @@ export default function Expenses() {
                 <div className="col-span-2 text-sm text-muted-foreground font-mono">{expense.reference || '-'}</div>
                 <div className="col-span-2">
                   <span className={cn("px-2 py-1 rounded-md text-xs font-medium border", getStatusColor(expense.status))}>
-                    {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
+                    {t(`finance.expenses.status.${expense.status || 'draft'}`)}
                   </span>
                 </div>
                 <div className="col-span-1 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -333,7 +373,7 @@ export default function Expenses() {
             <div className="bg-card/50 rounded-xl p-8 text-center border border-border/50 backdrop-blur-sm">
               <div className="inline-flex items-center gap-3 text-muted-foreground">
                 <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm">Loading...</span>
+                <span className="text-sm">{t('finance.expenses.table.loading')}</span>
               </div>
             </div>
           ) : expenseList.length === 0 ? (
@@ -341,8 +381,8 @@ export default function Expenses() {
               <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center">
                 <DollarSign className="w-7 h-7 text-purple-600 dark:text-purple-400" />
               </div>
-              <h3 className="text-foreground font-semibold text-sm">No expenses found</h3>
-              <p className="text-muted-foreground text-xs mt-1">Create your first expense</p>
+              <h3 className="text-foreground font-semibold text-sm">{t('finance.expenses.table.empty')}</h3>
+              <p className="text-muted-foreground text-xs mt-1">{t('finance.expenses.table.create_trigger')}</p>
             </div>
           ) : expenseList.map((expense: Expense) => (
             <motion.div
@@ -358,14 +398,14 @@ export default function Expenses() {
                     <DollarSign className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-sm text-foreground truncate">{expense.expense_category?.name || 'Uncategorized'}</h3>
+                    <h3 className="font-semibold text-sm text-foreground truncate">{expense.expense_category?.name || t('finance.expenses.uncategorized')}</h3>
                     <p className="text-[10px] text-muted-foreground truncate">
                       {new Date(expense.expense_date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0", getStatusColor(expense.status))}>
-                  {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
+                  {t(`finance.expenses.status.${expense.status || 'draft'}`)}
                 </span>
               </div>
 
@@ -391,48 +431,98 @@ export default function Expenses() {
         </div>
       </div>
 
-      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingExpense ? 'Edit Expense' : 'New Expense'} size="lg">
+      <Modal open={openCreate || openEdit} onClose={closeModal} title={editingExpense ? t('finance.expenses.modal.edit_title') : t('finance.expenses.modal.new_title')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">Category</label>
+              <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+                <label className="block text-xs sm:text-sm font-medium text-foreground">{t('finance.expenses.modal.category_label')}</label>
+                <button type="button" onClick={() => setOpenManageCategories(true)} className="text-[10px] text-purple-500 hover:text-purple-600 font-medium flex items-center gap-1">
+                  <Plus size={10} /> {t('finance.expenses.categories_modal.add_new')}
+                </button>
+              </div>
               <select value={formData.expense_category_id} onChange={(e) => setFormData({ ...formData, expense_category_id: e.target.value })}
                 required className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none">
-                <option value="">Select Category</option>
+                <option value="">{t('finance.expenses.modal.select_category')}</option>
                 {categories?.data?.map((c: ExpenseCategory) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
-            <Input label="Date" type="date" value={formData.expense_date} onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })} required className="h-10 text-sm" />
+            <Input label={t('finance.expenses.modal.date_label') as string} type="date" value={formData.expense_date} onChange={(e) => setFormData({ ...formData, expense_date: e.target.value })} required className="h-10 text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Amount" type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required className="h-10 text-sm" />
+            <Input label={t('finance.expenses.modal.amount_label') as string} type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required className="h-10 text-sm" />
             <div>
-              <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">Status</label>
+              <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">{t('finance.expenses.modal.status_label')}</label>
               <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                 className="w-full h-10 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none">
-                <option value="draft">Draft</option>
-                <option value="approved">Approved</option>
-                <option value="paid">Paid</option>
-                <option value="voided">Voided</option>
+                <option value="draft">{t('finance.expenses.status.draft')}</option>
+                <option value="approved">{t('finance.expenses.status.approved')}</option>
+                <option value="paid">{t('finance.expenses.status.paid')}</option>
+                <option value="voided">{t('finance.expenses.status.voided')}</option>
               </select>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Input label="Vendor" value={formData.vendor_name} onChange={(e) => setFormData({ ...formData, vendor_name: e.target.value })} className="h-10 text-sm" />
-            <Input label="Reference" value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} className="h-10 text-sm" />
+            <Input label={t('finance.expenses.modal.vendor_label') as string} value={formData.vendor_name} onChange={(e) => setFormData({ ...formData, vendor_name: e.target.value })} className="h-10 text-sm" />
+            <Input label={t('finance.expenses.modal.reference_label') as string} value={formData.reference} onChange={(e) => setFormData({ ...formData, reference: e.target.value })} className="h-10 text-sm" />
           </div>
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">Description</label>
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-1.5">{t('finance.expenses.modal.description_label')}</label>
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
               className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none resize-none" />
           </div>
           <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
-            <Button type="submit" variant="primary" className="flex-1 h-10 sm:h-11 text-sm">Save</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('finance.expenses.modal.cancel')}</Button>
+            <Button type="submit" variant="primary" className="flex-1 h-10 sm:h-11 text-sm">{t('finance.expenses.modal.save')}</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Categories Management Modal */}
+      <Modal open={openManageCategories} onClose={() => setOpenManageCategories(false)} title={t('finance.expenses.categories_modal.title')} size="md">
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder={t('finance.expenses.categories_modal.placeholder') as string}
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              onClick={() => {
+                if (newCatName.trim()) createCategoryMutation.mutate({ name: newCatName.trim() });
+              }}
+              disabled={createCategoryMutation.isPending || !newCatName.trim()}
+              variant="primary"
+            >
+              {t('finance.expenses.categories_modal.add_btn')}
+            </Button>
+          </div>
+
+          <div className="max-h-[300px] overflow-y-auto rounded-lg border border-border">
+            <div className="divide-y divide-border">
+              {categories?.data?.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">{t('finance.expenses.categories_modal.empty')}</div>
+              ) : categories?.data?.map((c: ExpenseCategory) => (
+                <div key={c.id} className="flex items-center justify-between p-3 hover:bg-secondary/50">
+                  <span className="text-sm font-medium">{c.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (confirm(t('finance.expenses.categories_modal.confirm_delete') as string)) deleteCategoryMutation.mutate(c.id);
+                    }}
+                    className="h-8 w-8 p-0 text-red-500 hover:bg-red-500/10"
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </Modal>
     </AdminLayout>
   );

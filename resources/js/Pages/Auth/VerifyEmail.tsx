@@ -1,14 +1,15 @@
-
 import React, { useState } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react'; // Link import removed as unused
 import { Mail, CheckCircle, LogOut, ArrowRight, Send } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Logo } from '@/Components/brand';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export default function VerifyEmail() {
   const { props } = usePage();
+  const { t } = useTranslation();
   const [isResending, setIsResending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -20,15 +21,15 @@ export default function VerifyEmail() {
       router.post('/email/verification-notification', {}, {
         onSuccess: () => {
           setEmailSent(true);
-          toast.success('Verification email sent!');
+          toast.success(t('auth.verification_sent') as string);
         },
         onError: () => {
-          toast.error('Failed to send verification email. Please try again.');
+          toast.error(t('auth.verify_email_failed') as string);
         },
         onFinish: () => setIsResending(false),
       });
     } catch (error) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('auth.something_wrong') as string);
       setIsResending(false);
     }
   };
@@ -63,7 +64,7 @@ export default function VerifyEmail() {
             transition={{ delay: 0.3 }}
             className="text-4xl font-black text-white mb-3 tracking-tight font-display"
           >
-            Verify Email
+            {t('auth.verify_email_title')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -71,7 +72,7 @@ export default function VerifyEmail() {
             transition={{ delay: 0.4 }}
             className="text-gray-400 text-lg"
           >
-            We've sent a verification link to your email
+            {t('auth.verify_email_subtitle')}
           </motion.p>
         </div>
 
@@ -104,14 +105,8 @@ export default function VerifyEmail() {
               </motion.div>
 
               <div>
-                <h3 className="text-2xl font-bold text-white mb-3">Check Your Inbox</h3>
-                <p className="text-gray-400 leading-relaxed">
-                  We've sent a verification link to{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">
-                    {user?.email}
-                  </span>
-                  . Click the link to verify your account.
-                </p>
+                <h3 className="text-2xl font-bold text-white mb-3">{t('auth.check_inbox_title')}</h3>
+                <p className="text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: t('auth.check_inbox_desc', { email: user?.email }) }} />
               </div>
 
               {emailSent && (
@@ -122,7 +117,7 @@ export default function VerifyEmail() {
                 >
                   <div className="flex items-center justify-center gap-2 text-emerald-400">
                     <CheckCircle className="w-5 h-5" />
-                    <span className="font-semibold">Verification email sent!</span>
+                    <span className="font-semibold">{t('auth.verification_sent')}</span>
                   </div>
                 </motion.div>
               )}
@@ -146,12 +141,12 @@ export default function VerifyEmail() {
                     {isResending ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Sending...
+                        {t('auth.resending')}
                       </>
                     ) : (
                       <>
                         <Send className="w-5 h-5" />
-                        Resend Verification Email
+                        {t('auth.resend_verification')}
                       </>
                     )}
                   </span>
@@ -165,7 +160,7 @@ export default function VerifyEmail() {
                     whileTap={{ scale: 0.98 }}
                     className="h-12 rounded-xl font-medium text-white bg-white/[0.05] border border-white/10 hover:bg-white/[0.1] transition-all flex items-center justify-center gap-2"
                   >
-                    Continue
+                    {t('auth.continue')}
                     <ArrowRight className="w-4 h-4" />
                   </motion.button>
 
@@ -177,7 +172,7 @@ export default function VerifyEmail() {
                     className="h-12 rounded-xl font-medium text-gray-400 hover:text-white bg-transparent border border-white/5 hover:border-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <LogOut className="w-4 h-4" />
-                    Sign Out
+                    {t('auth.sign_out')}
                   </motion.button>
                 </div>
               </div>
@@ -193,10 +188,10 @@ export default function VerifyEmail() {
         >
           <div className="text-center space-y-1">
             <p className="text-xs text-gray-500">
-              💡 Didn't receive the email? Check your spam folder or try resending.
+              💡 {t('auth.didnt_receive_email')}
             </p>
             <p className="text-xs text-gray-500">
-              Need help? Contact{' '}
+              {t('auth.need_help')} {' '}
               <a
                 href="mailto:support@nkhrestaurant.com"
                 className="text-fuchsia-400 hover:text-fuchsia-300 transition-colors"

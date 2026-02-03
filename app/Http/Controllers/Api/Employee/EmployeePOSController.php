@@ -20,17 +20,19 @@ class EmployeePOSController extends Controller
     /**
      * Get tables grouped by floor for the employee's location.
      */
-    public function getTables(Request $request) 
+    public function getTables(Request $request)
     {
         $user = $request->user();
         $employee = Employee::where('user_id', $user->id)->first();
-        $locationId = $employee ? $employee->location_id : 1; 
+        $locationId = $employee ? $employee->location_id : 1;
 
         $floors = Floor::where('location_id', $locationId)
             ->where('is_active', true)
-            ->with(['tables' => function($q) {
-                $q->orderBy('code');
-            }])
+            ->with([
+                'tables' => function ($q) {
+                    $q->orderBy('code');
+                }
+            ])
             ->orderBy('display_order')
             ->get();
 
@@ -55,7 +57,7 @@ class EmployeePOSController extends Controller
 
         $user = $request->user();
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return response()->json(['message' => __('messages.api.errors.unauthenticated')], 401);
         }
 
         // Find associated employee record
@@ -66,7 +68,7 @@ class EmployeePOSController extends Controller
             // The Order model has 'employee_id'. If nullable, fine. If not, we need one.
             // Let's assume nullable or we use the user's relation if available.
         }
-        
+
         $locationId = $employee ? $employee->location_id : 1; // Default or fail
 
         return DB::transaction(function () use ($validated, $user, $employee, $locationId) {
@@ -74,7 +76,7 @@ class EmployeePOSController extends Controller
             if (!empty($validated['table_id'])) {
                 $table = DiningTable::lockForUpdate()->find($validated['table_id']);
                 if (!$table) {
-                    abort(404, 'Table not found.');
+                    abort(404, __('messages.api.errors.table_not_found'));
                 }
 
                 app(TableStatusService::class)->occupyForStaff($table, $user->id);
@@ -105,10 +107,11 @@ class EmployeePOSController extends Controller
 
             foreach ($validated['items'] as $itemData) {
                 $menuItem = $menuItems->get($itemData['menu_item_id']);
-                if (!$menuItem) continue;
+                if (!$menuItem)
+                    continue;
 
                 $lineTotal = $menuItem->price * $itemData['quantity'];
-                
+
                 $itemsToInsert[] = [
                     'order_id' => $order->id,
                     'menu_item_id' => $menuItem->id,

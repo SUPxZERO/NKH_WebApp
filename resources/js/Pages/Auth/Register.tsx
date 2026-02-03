@@ -9,20 +9,18 @@ import { cn } from '@/app/utils/cn';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-// Customer registration schema - only customers can register publicly
-const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  phone: z.string().min(10, 'Please enter a valid phone number'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  password_confirmation: z.string(),
-  terms: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
-}).refine(data => data.password === data.password_confirmation, {
-  message: "Passwords don't match",
-  path: ['password_confirmation'],
-});
+import { useTranslation } from '@/app/hooks/useTranslation';
 
-type RegisterForm = z.infer<typeof registerSchema>;
+
+
+type RegisterForm = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  password_confirmation: string;
+  terms: boolean;
+};
 
 // Premium Input Component
 // Premium Input Component
@@ -78,6 +76,20 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
+
+  // Customer registration schema - only customers can register publicly
+  const registerSchema = z.object({
+    name: z.string().min(2, t('auth.validation.name_min') as string),
+    email: z.string().email(t('auth.validation.email_invalid') as string),
+    phone: z.string().min(10, t('auth.validation.phone_min') as string),
+    password: z.string().min(8, t('auth.validation.password_min_8') as string),
+    password_confirmation: z.string(),
+    terms: z.boolean().refine(val => val === true, t('auth.validation.terms_required') as string),
+  }).refine(data => data.password === data.password_confirmation, {
+    message: t('auth.validation.password_mismatch') as string,
+    path: ['password_confirmation'],
+  });
 
   const { props } = usePage<PageProps<{ csrf_token: string }>>();
   const csrfToken = props.csrf_token;
@@ -108,7 +120,7 @@ export default function Register() {
         _token: csrfToken
       }, {
         onSuccess: () => {
-          toast.success('Welcome to NKH Restaurant!');
+          toast.success(t('auth.welcome_register_toast') as string);
 
           // Check for pending checkout redirect
           const pendingCheckout = localStorage.getItem('pendingCheckout');
@@ -120,7 +132,7 @@ export default function Register() {
             localStorage.removeItem('checkoutRedirectUrl');
 
             // Show helpful message
-            toast.success('Continuing to checkout...', { duration: 2000 });
+            toast.success(t('auth.continuing_checkout') as string, { duration: 2000 });
 
             // Redirect to checkout
             setTimeout(() => {
@@ -135,12 +147,12 @@ export default function Register() {
         },
         onError: (errors) => {
           const firstError = Object.values(errors)[0] as string;
-          toast.error(firstError || 'Registration failed. Please try again.');
+          toast.error(firstError || t('auth.register_failed') as string);
         },
         onFinish: () => setIsLoading(false),
       });
     } catch (error) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('auth.something_wrong') as string);
       setIsLoading(false);
     }
   };
@@ -199,7 +211,7 @@ export default function Register() {
             transition={{ delay: 0.3 }}
             className="text-3xl font-black text-white mb-2 tracking-tight"
           >
-            Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">NKH Restaurant</span>
+            {t('auth.join_title', { brand: '' })} <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">NKH Restaurant</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -207,7 +219,7 @@ export default function Register() {
             transition={{ delay: 0.4 }}
             className="text-gray-400"
           >
-            Create your account to start ordering
+            {t('auth.join_subtitle')}
           </motion.p>
         </div>
 
@@ -226,8 +238,8 @@ export default function Register() {
               {/* Full Name */}
               <InputField
                 icon={User}
-                label="Full Name"
-                placeholder="Enter your full name"
+                label={t('auth.full_name')}
+                placeholder={t('auth.full_name_placeholder')}
                 error={errors.name?.message}
                 {...register('name')}
               />
@@ -235,9 +247,9 @@ export default function Register() {
               {/* Email */}
               <InputField
                 icon={Mail}
-                label="Email Address"
+                label={t('auth.email_label')}
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('auth.email_placeholder')}
                 error={errors.email?.message}
                 {...register('email')}
               />
@@ -245,9 +257,9 @@ export default function Register() {
               {/* Phone */}
               <InputField
                 icon={Phone}
-                label="Phone Number"
+                label={t('auth.phone_label')}
                 type="tel"
-                placeholder="Enter your phone number"
+                placeholder={t('auth.phone_placeholder')}
                 error={errors.phone?.message}
                 {...register('phone')}
               />
@@ -255,8 +267,8 @@ export default function Register() {
               {/* Password */}
               <InputField
                 icon={Lock}
-                label="Password"
-                placeholder="Create a strong password"
+                label={t('auth.password_label')}
+                placeholder={t('auth.password_create_placeholder')}
                 showToggle
                 toggleValue={showPassword}
                 onToggle={() => setShowPassword(!showPassword)}
@@ -267,8 +279,8 @@ export default function Register() {
               {/* Confirm Password */}
               <InputField
                 icon={Lock}
-                label="Confirm Password"
-                placeholder="Confirm your password"
+                label={t('auth.password_confirm_label')}
+                placeholder={t('auth.password_confirm_placeholder')}
                 showToggle
                 toggleValue={showConfirmPassword}
                 onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -297,10 +309,10 @@ export default function Register() {
                   </div>
                 </div>
                 <span className="text-sm text-gray-400 leading-relaxed">
-                  I agree to the{' '}
-                  <Link href="/terms" className="text-fuchsia-400 hover:text-fuchsia-300 underline">Terms of Service</Link>
-                  {' '}and{' '}
-                  <Link href="/privacy" className="text-fuchsia-400 hover:text-fuchsia-300 underline">Privacy Policy</Link>
+                  {t('auth.terms_agree')}{' '}
+                  <Link href="/terms" className="text-fuchsia-400 hover:text-fuchsia-300 underline">{t('auth.terms_service')}</Link>
+                  {' '} {t('common.and_symbol')} {' '}
+                  <Link href="/privacy" className="text-fuchsia-400 hover:text-fuchsia-300 underline">{t('auth.privacy_policy')}</Link>
                 </span>
               </label>
               {errors.terms && (
@@ -325,11 +337,11 @@ export default function Register() {
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Creating Account...
+                      {t('auth.creating_account')}
                     </>
                   ) : (
                     <>
-                      Create Account
+                      {t('auth.create_account')}
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -340,12 +352,12 @@ export default function Register() {
             {/* Sign In Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-400 text-sm">
-                Already have an account?{' '}
+                {t('auth.already_have_account')}{' '}
                 <Link
                   href="/login"
                   className="text-fuchsia-400 hover:text-fuchsia-300 font-semibold transition-colors"
                 >
-                  Sign in here
+                  {t('auth.sign_in_here')}
                 </Link>
               </p>
             </div>
@@ -361,7 +373,7 @@ export default function Register() {
         >
           <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-2">
             <ShieldCheck className="w-4 h-4 text-fuchsia-500" />
-            Your information is secure and encrypted
+            {t('auth.secure_info')}
           </p>
         </motion.div>
       </motion.div>

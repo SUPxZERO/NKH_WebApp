@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -51,6 +52,7 @@ const formatTimeAgo = (dateString: string) => {
 
 export default function Reservations() {
   useReservationUpdates();
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -125,20 +127,20 @@ export default function Reservations() {
 
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/admin/reservations', data),
-    onSuccess: () => { toastSuccess('Created'); setOpenCreate(false); resetForm(); qc.invalidateQueries({ queryKey: ['admin/reservations'] }); },
-    onError: (err: any) => setError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.reservations.messages.created') as string); setOpenCreate(false); resetForm(); qc.invalidateQueries({ queryKey: ['admin/reservations'] }); },
+    onError: (err: any) => setError(err.response?.data?.message || t('admin.reservations.messages.failed') as string)
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/reservations/${id}`, data),
-    onSuccess: () => { toastSuccess('Updated'); setOpenEdit(false); setOpenView(false); setUpdatingId(null); resetForm(); qc.invalidateQueries({ queryKey: ['admin/reservations'] }); },
-    onError: (err: any) => { setError(err.response?.data?.message); setUpdatingId(null); toastError(err.response?.data?.message || 'Failed'); }
+    onSuccess: () => { toastSuccess(t('admin.reservations.messages.updated') as string); setOpenEdit(false); setOpenView(false); setUpdatingId(null); resetForm(); qc.invalidateQueries({ queryKey: ['admin/reservations'] }); },
+    onError: (err: any) => { setError(err.response?.data?.message); setUpdatingId(null); toastError(err.response?.data?.message || t('admin.reservations.messages.failed') as string); }
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/reservations/${id}`),
-    onSuccess: () => { toastSuccess('Cancelled'); qc.invalidateQueries({ queryKey: ['admin/reservations'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.reservations.messages.cancelled') as string); qc.invalidateQueries({ queryKey: ['admin/reservations'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.reservations.messages.failed') as string)
   });
 
   const handleQuickStatus = (id: number, status: string, e?: React.MouseEvent) => {
@@ -188,9 +190,9 @@ export default function Reservations() {
 
   const getNextAction = (status: string): { label: string; next: string; color: string } | null => {
     const actions: Record<string, { label: string; next: string; color: string }> = {
-      pending: { label: 'Confirm', next: 'confirmed', color: 'bg-fuchsia-500 hover:bg-fuchsia-600' },
-      confirmed: { label: 'Seat', next: 'seated', color: 'bg-emerald-500 hover:bg-emerald-600' },
-      seated: { label: 'Complete', next: 'completed', color: 'bg-gray-600 hover:bg-gray-700' }
+      pending: { label: t('admin.reservations.actions.confirm') as string, next: 'confirmed', color: 'bg-fuchsia-500 hover:bg-fuchsia-600' },
+      confirmed: { label: t('admin.reservations.actions.seat') as string, next: 'seated', color: 'bg-emerald-500 hover:bg-emerald-600' },
+      seated: { label: t('admin.reservations.actions.complete') as string, next: 'completed', color: 'bg-gray-600 hover:bg-gray-700' }
     };
     return actions[status] || null;
   };
@@ -206,12 +208,12 @@ export default function Reservations() {
                 <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate">Reservations</h1>
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate">{t('admin.reservations.title')}</h1>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{reservations?.meta?.total || 0} bookings</p>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{reservations?.meta?.total || 0} {t('admin.reservations.subtitle')}</p>
                   <div className="flex items-center gap-1">
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400">Live</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400">{t('admin.reservations.live')}</span>
                   </div>
                 </div>
               </div>
@@ -222,7 +224,7 @@ export default function Reservations() {
                 <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
               </motion.button>
               <Button onClick={() => { resetForm(); setOpenCreate(true); }} className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white shadow-lg text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10">
-                <Plus className="w-4 h-4 sm:mr-1" /><span className="hidden sm:inline">New</span>
+                <Plus className="w-4 h-4 sm:mr-1" /><span className="hidden sm:inline">{t('admin.reservations.actions.new')}</span>
               </Button>
             </div>
           </div>
@@ -231,14 +233,14 @@ export default function Reservations() {
           <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
             <div className="flex sm:grid sm:grid-cols-5 gap-2.5 sm:gap-3 min-w-max sm:min-w-0 px-1">
               {[
-                { label: 'Total', value: stats.total, color: 'fuchsia', icon: CalendarDays, filter: 'all' },
-                { label: 'Pending', value: stats.pending, color: 'blue', icon: Clock, filter: 'pending' },
-                { label: 'Confirmed', value: stats.confirmed, color: 'purple', icon: CheckCircle, filter: 'confirmed' },
-                { label: 'Seated', value: stats.seated, color: 'emerald', icon: Utensils, filter: 'seated' },
-                { label: 'Late', value: stats.late, color: 'amber', icon: AlertCircle, filter: '' }
-              ].map(({ label, value, color, icon: Icon, filter }) => (
+                { label: t('admin.reservations.stats.total'), value: stats.total, color: 'fuchsia', icon: CalendarDays, filter: 'all' },
+                { label: t('admin.reservations.stats.pending'), value: stats.pending, color: 'blue', icon: Clock, filter: 'pending' },
+                { label: t('admin.reservations.stats.confirmed'), value: stats.confirmed, color: 'purple', icon: CheckCircle, filter: 'confirmed' },
+                { label: t('admin.reservations.stats.seated'), value: stats.seated, color: 'emerald', icon: Utensils, filter: 'seated' },
+                { label: t('admin.reservations.stats.late'), value: stats.late, color: 'amber', icon: AlertCircle, filter: '' }
+              ].map(({ label, value, color, icon: Icon, filter }, idx) => (
                 <motion.button
-                  key={label}
+                  key={filter || `stat-${idx}`}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => filter && setStatusFilter(statusFilter === filter ? 'all' : filter)}
                   disabled={!filter}
@@ -264,7 +266,7 @@ export default function Reservations() {
           <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-gray-200/50 dark:border-gray-700/50 p-3 sm:p-4 mb-4 sm:mb-6 shadow-sm">
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input type="text" placeholder="Search reservations..." value={search} onChange={(e) => setSearch(e.target.value)}
+              <input type="text" placeholder={(t('admin.common.search') as string) || "Search..."} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="w-full h-11 pl-11 pr-4 bg-gray-50/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 touch-manipulation" />
             </div>
             <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
@@ -282,7 +284,7 @@ export default function Reservations() {
           {isLoading ? (
             <div className="py-16 text-center">
               <div className="w-16 h-16 border-4 border-fuchsia-500/30 border-t-fuchsia-500 rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 font-medium">Loading reservations...</p>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">{t('admin.reservations.empty.loading')}</p>
             </div>
           ) : reservationList.length === 0 ? (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -290,8 +292,8 @@ export default function Reservations() {
               <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CalendarDays className="w-10 h-10 text-gray-400" />
               </div>
-              <p className="text-gray-900 dark:text-white font-semibold text-lg mb-1">No reservations found</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or create a new reservation</p>
+              <p className="text-gray-900 dark:text-white font-semibold text-lg mb-1">{t('admin.reservations.empty.no_reservations')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin.reservations.empty.try_adjusting')}</p>
             </motion.div>
           ) : (
             <div className="space-y-3">
@@ -305,7 +307,7 @@ export default function Reservations() {
                     onClick={() => { setSelectedReservation(res); setOpenView(true); }}>
                     {late && (
                       <div className="absolute inset-x-0 top-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium py-1.5 px-3 rounded-t-xl flex items-center gap-1.5 justify-center">
-                        <AlertCircle className="w-3.5 h-3.5" /> Late - {formatTimeAgo(res.reserved_for)}
+                        <AlertCircle className="w-3.5 h-3.5" /> {t('admin.reservations.stats.late')} - {formatTimeAgo(res.reserved_for)}
                       </div>
                     )}
                     <div className={cn("flex items-start gap-4", late && "mt-6")}>
@@ -328,7 +330,7 @@ export default function Reservations() {
                           <StatusBadge status={res.status} />
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{res.guest_count} guests</span>
+                          <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{res.guest_count} {t('admin.reservations.view.guests')}</span>
                           <span className="flex items-center gap-1.5"><Armchair className="w-4 h-4" />Table {res.table?.code || 'N/A'}</span>
                         </div>
                         <div className="hidden md:flex items-center gap-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -396,20 +398,20 @@ export default function Reservations() {
               <div className="p-5 overflow-y-auto flex-1">
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Calendar className="w-4 h-4" /><span className="text-xs font-medium uppercase">Date & Time</span></div>
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Calendar className="w-4 h-4" /><span className="text-xs font-medium uppercase">{t('admin.reservations.form.date_time')}</span></div>
                     <p className="font-bold text-gray-900 dark:text-white">{selectedReservation.reserved_for ? new Date(selectedReservation.reserved_for).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) : 'N/A'}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-300">{selectedReservation.reserved_for ? new Date(selectedReservation.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Users className="w-4 h-4" /><span className="text-xs font-medium uppercase">Party Size</span></div>
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Users className="w-4 h-4" /><span className="text-xs font-medium uppercase">{t('admin.reservations.view.party_size')}</span></div>
                     <p className="font-bold text-2xl text-gray-900 dark:text-white">{selectedReservation.guest_count}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">guests</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{t('admin.reservations.view.guests')}</p>
                   </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Armchair className="w-4 h-4" /><span className="text-xs font-medium uppercase">Table Assignment</span></div>
+                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Armchair className="w-4 h-4" /><span className="text-xs font-medium uppercase">{t('admin.reservations.view.table_assignment')}</span></div>
                   <p className="font-bold text-gray-900 dark:text-white">Table {selectedReservation.table?.code || 'N/A'}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{selectedReservation.duration_minutes} minutes duration</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{selectedReservation.duration_minutes} {t('admin.reservations.view.duration')}</p>
                 </div>
                 {selectedReservation.notes && (
                   <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
@@ -426,8 +428,8 @@ export default function Reservations() {
                       <Sparkles className="w-5 h-5 mr-2" />{getNextAction(selectedReservation.status)!.label}
                     </Button>
                   )}
-                  <Button variant="outline" onClick={() => { setOpenView(false); handleEdit(selectedReservation); }} className="flex-1 h-12"><Edit className="w-5 h-5 mr-2" />Edit</Button>
-                  <Button variant="destructive" onClick={() => { if (confirm('Cancel this reservation?')) { deleteMutation.mutate(selectedReservation.id); setOpenView(false); } }} className="h-12 px-4"><Trash2 className="w-5 h-5" /></Button>
+                  <Button variant="outline" onClick={() => { setOpenView(false); handleEdit(selectedReservation); }} className="flex-1 h-12"><Edit className="w-5 h-5 mr-2" />{t('admin.reservations.actions.edit')}</Button>
+                  <Button variant="destructive" onClick={() => { if (confirm(t('admin.reservations.messages.confirm_cancel') as string)) { deleteMutation.mutate(selectedReservation.id); setOpenView(false); } }} className="h-12 px-4"><Trash2 className="w-5 h-5" /></Button>
                 </div>
               </div>
             </motion.div>
@@ -436,56 +438,56 @@ export default function Reservations() {
       </AnimatePresence>
 
       {/* Create/Edit Modal */}
-      <Modal open={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }} title={editingReservation ? 'Edit Reservation' : 'New Reservation'} size="lg">
+      <Modal open={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }} title={editingReservation ? t('admin.reservations.actions.edit') : t('admin.reservations.actions.new')} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm p-3 rounded-lg">{error}</div>}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer *</label>
+            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.customer')} *</label>
               <select required value={formData.customer_id} onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation">
                 <option value="">Select</option>{customers?.data?.map((c: Customer) => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
               </select>
             </div>
-            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Guests *</label>
+            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.guests')} *</label>
               <input type="number" required value={formData.guest_count} onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation" />
             </div>
           </div>
-          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date & Time *</label>
+          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.date_time')} *</label>
             <input type="datetime-local" required value={formData.reserved_for} onChange={(e) => setFormData({ ...formData, reserved_for: e.target.value })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location *</label>
+            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.location')} *</label>
               <select required value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value, floor_id: '', table_id: '' })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation">
                 <option value="">Select</option>{locations?.data?.map((loc: any) => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
               </select>
             </div>
-            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Floor *</label>
+            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.floor')} *</label>
               <select required value={formData.floor_id} onChange={(e) => setFormData({ ...formData, floor_id: e.target.value, table_id: '' })} disabled={!formData.location_id} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:opacity-50 touch-manipulation">
                 <option value="">Select</option>{floors?.data?.map((f: any) => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
             </div>
           </div>
-          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Table *</label>
+          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.table')} *</label>
             <select required value={formData.table_id} onChange={(e) => setFormData({ ...formData, table_id: e.target.value })} disabled={!formData.floor_id} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:opacity-50 touch-manipulation">
               <option value="">Select</option>{tables?.data?.map((t: DiningTable) => <option key={t.id} value={t.id}>Table {t.code} ({t.capacity} seats)</option>)}
             </select>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration (min)</label>
+            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.duration')}</label>
               <input type="number" value={formData.duration_minutes} onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation" />
             </div>
-            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+            <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.status')}</label>
               <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation">
                 <option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="seated">Seated</option><option value="cancelled">Cancelled</option><option value="completed">Completed</option><option value="no_show">No Show</option>
               </select>
             </div>
           </div>
-          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
-            <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none touch-manipulation" placeholder="Allergies, special requests..." />
+          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.notes')}</label>
+            <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none touch-manipulation" placeholder={t('admin.reservations.form.notes_placeholder') as string || "Allergies, special requests..."} />
           </div>
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1 h-12">Cancel</Button>
+            <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); setOpenEdit(false); }} className="flex-1 h-12">{t('admin.reservations.actions.cancel')}</Button>
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 h-12 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
-              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingReservation ? 'Save Changes' : 'Create Reservation')}
+              {createMutation.isPending || updateMutation.isPending ? t('admin.reservations.actions.saving') : (editingReservation ? t('admin.reservations.actions.save_changes') : t('admin.reservations.actions.create'))}
             </Button>
           </div>
         </form>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -78,6 +79,7 @@ interface Ingredient {
 }
 
 export default function Ingredients() {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [supplierFilter, setSupplierFilter] = useState('all');
@@ -121,8 +123,15 @@ export default function Ingredients() {
     }), [statsData]);
 
     const categories = {
-        protein: 'Protein', vegetable: 'Vegetables', fruit: 'Fruits', dairy: 'Dairy',
-        grain: 'Grains', spice: 'Spices', oil: 'Oils', beverage: 'Beverages', other: 'Other'
+        protein: t('admin.ingredients.categories.protein'),
+        vegetable: t('admin.ingredients.categories.vegetable'),
+        fruit: t('admin.ingredients.categories.fruit'),
+        dairy: t('admin.ingredients.categories.dairy'),
+        grain: t('admin.ingredients.categories.grain'),
+        spice: t('admin.ingredients.categories.spice'),
+        oil: t('admin.ingredients.categories.oil'),
+        beverage: t('admin.ingredients.categories.beverage'),
+        other: t('admin.ingredients.categories.other')
     };
 
     // Mutations
@@ -245,24 +254,24 @@ export default function Ingredients() {
                                 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 bg-clip-text text-transparent flex items-center gap-2 sm:gap-3"
                             >
                                 <Leaf className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600 flex-shrink-0" />
-                                <span className="truncate">Ingredients</span>
+                                <span className="truncate">{t('admin.ingredients.title')}</span>
                             </motion.h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">Manage inventory items and stock</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-2 hidden sm:block">{t('admin.ingredients.subtitle')}</p>
                         </div>
                         <Button
                             onClick={() => { closeModal(); setOpenCreate(true); }}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
                         >
-                            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Ingredient</span>
+                            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('admin.ingredients.add_ingredient')}</span>
                         </Button>
                     </div>
 
                     {/* Stats Ribbon - Horizontal scroll on mobile */}
                     <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
                         <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-                            <StatCard title="Total Items" value={stats.total} icon={Package} color="purple" index={0} />
-                            <StatCard title="Low Stock" value={stats.lowStock} icon={AlertTriangle} color="amber" index={1} subtext="Below reorder point" />
-                            <StatCard title="Inventory Value" value={`$${stats.totalValue.toLocaleString()}`} icon={DollarSign} color="emerald" index={2} />
+                            <StatCard title={t('admin.ingredients.stats.total_items')} value={stats.total} icon={Package} color="purple" index={0} />
+                            <StatCard title={t('admin.ingredients.stats.low_stock')} value={stats.lowStock} icon={AlertTriangle} color="amber" index={1} subtext={t('admin.ingredients.stats.below_reorder')} />
+                            <StatCard title={t('admin.ingredients.stats.inventory_value')} value={`$${stats.totalValue.toLocaleString()}`} icon={DollarSign} color="emerald" index={2} />
                         </div>
                     </div>
 
@@ -276,19 +285,19 @@ export default function Ingredients() {
                         <div className="flex gap-2 sm:gap-4">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                <Input placeholder={t('admin.common.search')} value={search} onChange={(e) => setSearch(e.target.value)}
                                     className="pl-9 sm:pl-10 h-10 text-sm bg-background/50 border-border/50 focus:border-emerald-500 text-foreground" />
                             </div>
                             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
                                 className="bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-emerald-500 outline-none transition-all">
-                                <option value="all">Category</option>
+                                <option value="all">{t('admin.ingredients.table.category')}</option>
                                 {Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                             </select>
                             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                                 className="hidden sm:block bg-background/50 border border-border/50 rounded-lg px-2 sm:px-4 py-2 h-10 text-xs sm:text-sm text-foreground focus:border-emerald-500 outline-none transition-all">
-                                <option value="all">Status</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="all">{t('admin.common.filters.status') || ''}</option>
+                                <option value="active">{t('admin.common.filters.active') || ''}</option>
+                                <option value="inactive">{t('admin.common.filters.inactive') || ''}</option>
                             </select>
                         </div>
                     </motion.div>
@@ -302,12 +311,12 @@ export default function Ingredients() {
                     >
                         {/* Table Header - Desktop only */}
                         <div className="hidden lg:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-emerald-500/10 via-green-500/5 to-emerald-500/10">
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Code</div>
-                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Name</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Category</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Stock / Cost</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Supplier</div>
-                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.ingredients.table.code')}</div>
+                            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.ingredients.table.name')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.ingredients.table.category')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.ingredients.table.stock_cost')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.ingredients.table.supplier')}</div>
+                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.ingredients.table.actions')}</div>
                         </div>
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
@@ -317,7 +326,7 @@ export default function Ingredients() {
                                     <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
                                         <Package className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-muted-foreground text-sm">No ingredients found</p>
+                                    <p className="text-muted-foreground text-sm">{t('admin.ingredients.table.empty_title')}</p>
                                 </div>
                             ) : ingredientList.map((ingredient: Ingredient, idx: number) => {
                                 const CatIcon = getCategoryIcon(ingredient.category);
@@ -351,7 +360,7 @@ export default function Ingredients() {
                                             </div>
                                             {isLowStock(ingredient) && (
                                                 <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs font-bold">
-                                                    <AlertTriangle size={10} /> Low Stock
+                                                    <AlertTriangle size={10} /> {t('admin.ingredients.stats.low_stock')}
                                                 </div>
                                             )}
                                         </div>
@@ -363,7 +372,7 @@ export default function Ingredients() {
                                                 <div className="font-medium text-foreground">{ingredient.name}</div>
                                                 {isLowStock(ingredient) && (
                                                     <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs mt-1 font-bold animate-pulse">
-                                                        <AlertTriangle size={10} /> Low Stock
+                                                        <AlertTriangle size={10} /> {t('admin.ingredients.stats.low_stock')}
                                                     </div>
                                                 )}
                                             </div>
@@ -390,40 +399,40 @@ export default function Ingredients() {
                     </motion.div>
                 </div>
 
-                <Modal open={openCreate || openEdit} onClose={closeModal} title={editingIngredient ? 'Edit Ingredient' : 'New Ingredient'} size="lg">
+                <Modal open={openCreate || openEdit} onClose={closeModal} title={editingIngredient ? t('admin.ingredients.edit_ingredient') : t('admin.ingredients.add_ingredient')} size="lg">
                     <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <Input label="Item Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. TOM-001" className="h-10 text-sm" />
-                            <Input label="Item Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Tomato Ripe" className="h-10 text-sm" />
+                            <Input label={t('admin.ingredients.form.item_code') as string} value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. TOM-001" className="h-10 text-sm" />
+                            <Input label={t('admin.ingredients.form.item_name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Tomato Ripe" className="h-10 text-sm" />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Category</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.ingredients.form.category')}</label>
                                 <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
                                     {Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Unit</label>
+                                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.ingredients.form.unit')}</label>
                                 <select value={formData.unit_id} onChange={(e) => setFormData({ ...formData, unit_id: e.target.value })} required
                                     className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
-                                    <option value="">Select</option>
+                                    <option value="">{t('admin.common.select')}</option>
                                     {units?.data?.map((u: any) => <option key={u.id} value={u.id}>{u.name}</option>)}
                                 </select>
                             </div>
                         </div>
 
                         <div className="bg-secondary/30 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50">
-                            <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-muted-foreground">Inventory</h4>
+                            <h4 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-muted-foreground">{t('admin.ingredients.form.inventory')}</h4>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
-                                <Input label="Cost ($)" type="number" step="0.01" value={formData.cost_per_unit} onChange={(e) => setFormData({ ...formData, cost_per_unit: e.target.value })} required placeholder="0.00" className="h-10 text-sm" />
-                                <Input label="Reorder Pt" type="number" step="0.01" value={formData.reorder_point} onChange={(e) => setFormData({ ...formData, reorder_point: e.target.value })} placeholder="Min" className="h-10 text-sm" />
+                                <Input label={t('admin.ingredients.form.cost') as string} type="number" step="0.01" value={formData.cost_per_unit} onChange={(e) => setFormData({ ...formData, cost_per_unit: e.target.value })} required placeholder="0.00" className="h-10 text-sm" />
+                                <Input label={t('admin.ingredients.form.reorder_pt') as string} type="number" step="0.01" value={formData.reorder_point} onChange={(e) => setFormData({ ...formData, reorder_point: e.target.value })} placeholder="Min" className="h-10 text-sm" />
                                 <div className="col-span-2 sm:col-span-1">
-                                    <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">Supplier</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.ingredients.form.supplier')}</label>
                                     <select value={formData.supplier_id} onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
                                         className="w-full bg-background border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all">
-                                        <option value="">None</option>
+                                        <option value="">{t('admin.ingredients.form.none')}</option>
                                         {suppliers?.data?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
                                 </div>
@@ -431,9 +440,9 @@ export default function Ingredients() {
                         </div>
 
                         <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
-                            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-9 sm:h-10 text-sm">Cancel</Button>
+                            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-9 sm:h-10 text-sm">{t('admin.ingredients.form.cancel')}</Button>
                             <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white h-9 sm:h-10 text-sm">
-                                {editingIngredient ? 'Save' : 'Create'}
+                                {editingIngredient ? t('admin.ingredients.form.save') : t('admin.ingredients.form.create')}
                             </Button>
                         </div>
                     </form>

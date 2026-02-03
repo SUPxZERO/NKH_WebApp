@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Truck, ShoppingBag } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface ModeSelectorProps {
     mode: 'delivery' | 'pickup';
@@ -9,6 +10,7 @@ interface ModeSelectorProps {
 }
 
 export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
+    const { t } = useTranslation();
     return (
         <div className="flex gap-2 p-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl">
             {/* Delivery Option */}
@@ -22,7 +24,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
                 )}
             >
                 <Truck className="w-4 h-4" />
-                <span className="hidden sm:inline">Delivery</span>
+                <span className="hidden sm:inline">{t('cart.delivery')}</span>
             </button>
 
             {/* Pickup Option */}
@@ -36,7 +38,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
                 )}
             >
                 <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline">Pickup</span>
+                <span className="hidden sm:inline">{t('cart.pickup')}</span>
             </button>
         </div>
     );

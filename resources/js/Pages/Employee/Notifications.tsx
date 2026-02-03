@@ -7,6 +7,7 @@ import { apiGet, apiPut } from '@/app/utils/api';
 import { cn } from '@/app/utils/cn';
 import { toastSuccess } from '@/app/utils/toast';
 import { Card, CardContent } from '@/app/components/ui/Card';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface Notification {
     id: string;
@@ -19,6 +20,7 @@ interface Notification {
 }
 
 export default function Notifications() {
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
 
     // Fetch Notifications
@@ -38,7 +40,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['employeeNotifications'] });
-            toastSuccess('Marked as read');
+            toastSuccess(t('employee.notifications.mark_read'));
         },
     });
 
@@ -50,7 +52,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['employeeNotifications'] });
-            toastSuccess('All marked as read');
+            toastSuccess(t('employee.notifications.clear'));
         },
     });
 
@@ -83,22 +85,22 @@ export default function Notifications() {
                         <div>
                             <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
                                 <Bell className="w-8 h-8 text-fuchsia-500" />
-                                Notifications
+                                {t('employee.notifications.title')}
                             </h1>
-                            <p className="text-slate-500 dark:text-slate-400 mt-1">Stay updated with alerts and messages</p>
+                            <p className="text-slate-500 dark:text-slate-400 mt-1">{t('employee.notifications.all')}</p>
                         </div>
                         <button
                             className="text-sm text-fuchsia-600 dark:text-fuchsia-400 hover:underline font-medium disabled:opacity-50"
                             onClick={() => markAllAsReadMutation.mutate()}
                             disabled={markAllAsReadMutation.isPending}
                         >
-                            {markAllAsReadMutation.isPending ? 'Marking...' : 'Mark all as read'}
+                            {markAllAsReadMutation.isPending ? t('employee.common.loading') : t('employee.notifications.clear')}
                         </button>
                     </div>
 
                     <div className="space-y-4">
                         {isLoading ? (
-                            <div className="text-center py-12 text-slate-500">Loading notifications...</div>
+                            <div className="text-center py-12 text-slate-500">{t('employee.common.loading')}</div>
                         ) : notificationsData?.length === 0 ? (
                             <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
@@ -147,7 +149,7 @@ export default function Notifications() {
                                                         onClick={() => markAsReadMutation.mutate(notification.id)}
                                                         className="text-xs font-medium text-fuchsia-600 dark:text-fuchsia-400 hover:text-fuchsia-500"
                                                     >
-                                                        Mark as read
+                                                        {t('employee.notifications.mark_read')}
                                                     </button>
                                                 </div>
                                             )}

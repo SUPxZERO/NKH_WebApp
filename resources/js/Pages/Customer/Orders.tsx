@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface OrderItem {
     id: number;
@@ -67,7 +68,7 @@ interface Order {
 }
 
 interface OrdersResponse {
-    status: string;
+    success: boolean;
     data: Order[];
     meta: {
         current_page: number;
@@ -77,49 +78,50 @@ interface OrdersResponse {
         from: number;
         to: number;
     };
+    message?: string;
 }
 
 type FilterStatus = 'all' | 'pending' | 'completed' | 'cancelled';
 
 const statusConfig = {
     pending: {
-        label: 'Pending',
+        label: 'customer_pages.orders.status.pending',
         color: 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30',
         icon: Clock,
         iconColor: 'text-amber-500'
     },
     received: {
-        label: 'Received',
+        label: 'customer_pages.orders.status.received',
         color: 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30',
         icon: CheckCircle,
         iconColor: 'text-blue-500'
     },
     preparing: {
-        label: 'Preparing',
+        label: 'customer_pages.orders.status.preparing',
         color: 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30',
         icon: Clock,
         iconColor: 'text-orange-500'
     },
     ready: {
-        label: 'Ready',
+        label: 'customer_pages.orders.status.ready',
         color: 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
         icon: CheckCircle,
         iconColor: 'text-emerald-500'
     },
     completed: {
-        label: 'Completed',
+        label: 'customer_pages.orders.status.completed',
         color: 'bg-gradient-to-r from-green-500/20 to-teal-500/20 text-green-600 dark:text-green-400 border border-green-500/30',
         icon: CheckCircle,
         iconColor: 'text-green-500'
     },
     cancelled: {
-        label: 'Cancelled',
+        label: 'customer_pages.orders.status.cancelled',
         color: 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30',
         icon: XCircle,
         iconColor: 'text-red-500'
     },
     delivered: {
-        label: 'Delivered',
+        label: 'customer_pages.orders.status.delivered',
         color: 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/30',
         icon: Package,
         iconColor: 'text-teal-500'
@@ -128,15 +130,15 @@ const statusConfig = {
 
 const approvalConfig = {
     pending: {
-        label: 'Awaiting Approval',
+        label: 'customer_pages.orders.approval.pending',
         color: 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
     },
     approved: {
-        label: 'Approved',
+        label: 'customer_pages.orders.approval.approved',
         color: 'bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
     },
     rejected: {
-        label: 'Rejected',
+        label: 'customer_pages.orders.approval.rejected',
         color: 'bg-gradient-to-r from-red-500/10 to-rose-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
     },
 };
@@ -152,6 +154,7 @@ export default function Orders() {
     const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+    const { t } = useTranslation();
 
     // Poll for order updates every 3 seconds
     // useSmartPolling(['orders'], 3000);
@@ -244,15 +247,15 @@ export default function Orders() {
                 )}>
                     <div className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold', statusInfo.color)}>
                         <StatusIcon className="w-3 h-3" />
-                        <span className="hidden sm:inline">{statusInfo.label}</span>
-                        <span className="sm:hidden">{statusInfo.label.slice(0, 4)}</span>
+                        <span className="hidden sm:inline">{t(statusInfo.label)}</span>
+                        <span className="sm:hidden">{t(statusInfo.label).slice(0, 4)}</span>
                     </div>
                     {order.approval_status && approvalInfo && (
                         <div className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium', approvalInfo.color)}>
                             {order.approval_status === 'pending' && <Clock className="w-2.5 h-2.5" />}
                             {order.approval_status === 'approved' && <CheckCircle className="w-2.5 h-2.5" />}
                             {order.approval_status === 'rejected' && <XCircle className="w-2.5 h-2.5" />}
-                            <span className="hidden sm:inline">{approvalInfo.label}</span>
+                            <span className="hidden sm:inline">{t(approvalInfo.label)}</span>
                         </div>
                     )}
                 </div>
@@ -288,7 +291,7 @@ export default function Orders() {
                                 : "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30"
                         )}>
                             <DollarSign className="w-3 h-3" />
-                            <span className="hidden sm:inline">{order.is_paid ? 'Paid' : 'Pending'}</span>
+                            <span className="hidden sm:inline">{order.is_paid ? t('customer_pages.orders.payment.paid') : t('customer_pages.orders.payment.pending')}</span>
                         </div>
                     </div>
 
@@ -301,7 +304,7 @@ export default function Orders() {
                         )}>
                             {order.order_type === 'pickup' && <ShoppingBag className="w-3.5 h-3.5" />}
                             {order.order_type === 'delivery' && <Truck className="w-3.5 h-3.5" />}
-                            <span className="capitalize">{order.order_type}</span>
+                            <span className="capitalize">{t(`customer_pages.orders.types.${order.order_type}`)}</span>
                         </div>
                         <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
                             <Store className="w-3.5 h-3.5" />
@@ -328,7 +331,7 @@ export default function Orders() {
                         <div className="flex-1 min-w-0">
                             <p className="font-semibold text-foreground flex items-center gap-1.5 text-sm">
                                 <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                                {order.items_count} {order.items_count === 1 ? 'item' : 'items'}
+                                {order.items_count} {t('customer_pages.dashboard.items')}
                             </p>
                             <p className="text-xs text-muted-foreground mt-0.5 truncate">
                                 {order.items.slice(0, 2).map(item => item.name).join(', ')}
@@ -338,7 +341,7 @@ export default function Orders() {
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide hidden sm:block">Total</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide hidden sm:block">{t('customer_pages.orders.order_card.total')}</p>
                             <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
                                 ${order.total_amount.toFixed(2)}
                             </p>
@@ -354,14 +357,14 @@ export default function Orders() {
                             onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
                             rightIcon={<ChevronDown className={cn('w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300', isExpanded && 'rotate-180')} />}
                         >
-                            {isExpanded ? 'Hide' : 'Details'}
+                            {isExpanded ? t('customer_pages.orders.actions.hide') : t('customer_pages.orders.actions.details')}
                         </Button>
                         <Button
                             variant="outline"
                             size="sm"
                             className="h-9 sm:h-11 px-3"
                             onClick={() => window.location.href = `/customer/orders/${order.id}`}
-                            title="Open Full Page"
+                            title={t('customer_pages.orders.actions.details')}
                         >
                             <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
@@ -371,7 +374,7 @@ export default function Orders() {
                                 size="sm"
                                 className="h-9 sm:h-11 px-3"
                                 onClick={() => setConfirmReorderId(order.id)}
-                                title="Reorder"
+                                title={t('customer_pages.orders.actions.reorder')}
                             >
                                 <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </Button>
@@ -385,7 +388,7 @@ export default function Orders() {
                                 disabled={cancellingOrderId === order.id}
                             >
                                 <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                <span className="hidden sm:inline">{cancellingOrderId === order.id ? 'Cancelling...' : 'Cancel'}</span>
+                                <span className="hidden sm:inline">{cancellingOrderId === order.id ? t('customer_pages.orders.actions.cancelling') : t('customer_pages.orders.actions.cancel')}</span>
                             </Button>
                         )}
                     </div>
@@ -405,7 +408,7 @@ export default function Orders() {
                                 <div>
                                     <h4 className="font-bold text-foreground mb-3 flex items-center gap-2 text-sm sm:text-base">
                                         <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                                        Order Items
+                                        {t('customer_pages.orders.order_card.order_items')}
                                     </h4>
                                     <div className="space-y-2">
                                         {order.items.map((item) => (
@@ -445,7 +448,7 @@ export default function Orders() {
                                     <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-emerald-500/10 to-green-500/5 border border-emerald-500/20">
                                         <h4 className="font-bold text-emerald-600 dark:text-emerald-400 mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2 text-sm">
                                             <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-                                            Delivery Address
+                                            {t('customer_pages.orders.order_card.delivery_address')}
                                         </h4>
                                         <p className="text-foreground text-sm">
                                             {order.delivery_address.address_line_1}
@@ -462,35 +465,35 @@ export default function Orders() {
                                 <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-card border border-border">
                                     <h4 className="font-bold text-foreground mb-3 flex items-center gap-1.5 sm:gap-2 text-sm">
                                         <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                                        Price Breakdown
+                                        {t('customer_pages.orders.order_card.price_breakdown')}
                                     </h4>
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Subtotal</span>
+                                            <span className="text-muted-foreground">{t('customer_pages.orders.order_card.subtotal')}</span>
                                             <span className="text-foreground font-medium">${order.subtotal.toFixed(2)}</span>
                                         </div>
                                         {order.delivery_fee > 0 && (
                                             <div className="flex justify-between">
                                                 <span className="text-muted-foreground flex items-center gap-1">
-                                                    <Truck className="w-3.5 h-3.5" /> Delivery
+                                                    <Truck className="w-3.5 h-3.5" /> {t('customer_pages.orders.order_card.delivery')}
                                                 </span>
                                                 <span className="text-foreground font-medium">${order.delivery_fee.toFixed(2)}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Tax</span>
+                                            <span className="text-muted-foreground">{t('customer_pages.orders.order_card.tax')}</span>
                                             <span className="text-foreground font-medium">${order.tax_amount.toFixed(2)}</span>
                                         </div>
                                         {order.discount_amount > 0 && (
                                             <div className="flex justify-between">
-                                                <span className="text-emerald-600 dark:text-emerald-400">Discount</span>
+                                                <span className="text-emerald-600 dark:text-emerald-400">{t('customer_pages.orders.order_card.discount')}</span>
                                                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                                                     -${order.discount_amount.toFixed(2)}
                                                 </span>
                                             </div>
                                         )}
                                         <div className="flex justify-between pt-2 border-t border-border">
-                                            <span className="text-foreground font-bold">Total</span>
+                                            <span className="text-foreground font-bold">{t('customer_pages.orders.order_card.total')}</span>
                                             <span className="font-bold bg-gradient-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
                                                 ${order.total_amount.toFixed(2)}
                                             </span>
@@ -523,11 +526,11 @@ export default function Orders() {
                         <div>
                             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
                                 <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                    My Orders
+                                    {t('customer_pages.orders.title')}
                                 </span>
                             </h1>
                             <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                                Track your order history
+                                {t('customer_pages.orders.subtitle')}
                             </p>
                         </div>
                         {data && (
@@ -557,7 +560,7 @@ export default function Orders() {
                             )}
                         >
                             <Filter className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">All</span>
+                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.all')}</span>
                         </button>
                         <button
                             onClick={() => setFilterStatus('pending')}
@@ -569,8 +572,8 @@ export default function Orders() {
                             )}
                         >
                             <Clock className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Active</span>
-                            <span className="sm:hidden">Active</span>
+                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.active')}</span>
+                            <span className="sm:hidden">{t('customer_pages.orders.filters.active')}</span>
                         </button>
                         <button
                             onClick={() => setFilterStatus('completed')}
@@ -582,8 +585,8 @@ export default function Orders() {
                             )}
                         >
                             <CheckCircle className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Completed</span>
-                            <span className="sm:hidden">Done</span>
+                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.completed')}</span>
+                            <span className="sm:hidden">{t('customer_pages.orders.filters.completed')}</span>
                         </button>
                         <button
                             onClick={() => setFilterStatus('cancelled')}
@@ -595,8 +598,8 @@ export default function Orders() {
                             )}
                         >
                             <XCircle className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Cancelled</span>
-                            <span className="sm:hidden">Cancel</span>
+                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.cancelled')}</span>
+                            <span className="sm:hidden">{t('customer_pages.orders.filters.cancelled')}</span>
                         </button>
                     </motion.div>
 
@@ -608,7 +611,7 @@ export default function Orders() {
                                     <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             </div>
-                            <p className="mt-4 text-sm text-muted-foreground font-medium">Loading orders...</p>
+                            <p className="mt-4 text-sm text-muted-foreground font-medium">{t('customer_pages.orders.loading')}</p>
                         </div>
                     )}
 
@@ -622,11 +625,11 @@ export default function Orders() {
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-3">
                                 <AlertTriangle className="w-6 h-6 text-red-500" />
                             </div>
-                            <h3 className="text-base font-bold text-foreground mb-1">Failed to load orders</h3>
-                            <p className="text-sm text-muted-foreground mb-3">Please try again later.</p>
+                            <h3 className="text-base font-bold text-foreground mb-1">{t('customer_pages.orders.error.title')}</h3>
+                            <p className="text-sm text-muted-foreground mb-3">{t('customer_pages.orders.error.message')}</p>
                             <Button variant="destructive" size="sm" onClick={() => window.location.reload()}>
                                 <RefreshCcw className="w-3.5 h-3.5 mr-1.5" />
-                                Try Again
+                                {t('customer_pages.orders.actions.try_again')}
                             </Button>
                         </motion.div>
                     )}
@@ -646,12 +649,12 @@ export default function Orders() {
                             </h3>
                             <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
                                 {filterStatus === 'all'
-                                    ? "Ready to order? Browse our menu!"
-                                    : `No ${filterStatus} orders. Try changing the filter.`}
+                                    ? t('customer_pages.orders.empty.cta_browse')
+                                    : t('customer_pages.orders.empty.no_filtered', { status: filterStatus }) + ' ' + t('customer_pages.orders.empty.cta_filter')}
                             </p>
                             <Button variant="primary" onClick={() => window.location.href = '/menu'}>
                                 <ShoppingBag className="w-4 h-4 mr-2" />
-                                Browse Menu
+                                {t('customer_pages.orders.empty.browse_menu')}
                             </Button>
                         </motion.div>
                     )}
@@ -685,7 +688,7 @@ export default function Orders() {
                             className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 bg-card border border-border rounded-xl shadow-sm"
                         >
                             <div className="text-xs text-muted-foreground hidden sm:block">
-                                Showing <span className="font-semibold text-foreground">{data.meta.from}</span> to <span className="font-semibold text-foreground">{data.meta.to}</span> of <span className="font-semibold text-foreground">{data.meta.total}</span> orders
+                                {t('customer_pages.orders.pagination.showing')} <span className="font-semibold text-foreground">{data.meta.from}</span> {t('customer_pages.orders.pagination.to')} <span className="font-semibold text-foreground">{data.meta.to}</span> {t('customer_pages.orders.pagination.of')} <span className="font-semibold text-foreground">{data.meta.total}</span> {t('customer_pages.orders.pagination.orders')}
                             </div>
                             <div className="flex items-center gap-1">
                                 <Button
@@ -696,7 +699,7 @@ export default function Orders() {
                                     className="h-9 px-3"
                                 >
                                     <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-                                    <span className="hidden sm:inline">Prev</span>
+                                    <span className="hidden sm:inline">{t('customer_pages.orders.pagination.prev')}</span>
                                 </Button>
                                 <div className="flex items-center gap-1">
                                     {Array.from({ length: Math.min(5, data.meta.last_page) }, (_, i) => {
@@ -733,7 +736,7 @@ export default function Orders() {
                                     onClick={() => setCurrentPage(p => p + 1)}
                                     className="h-9 px-3"
                                 >
-                                    <span className="hidden sm:inline">Next</span>
+                                    <span className="hidden sm:inline">{t('customer_pages.orders.pagination.next')}</span>
                                     <ChevronRight className="w-3.5 h-3.5 ml-1" />
                                 </Button>
                             </div>
@@ -767,7 +770,7 @@ export default function Orders() {
                                         </div>
                                         <div>
                                             <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                                                Cancel Order?
+                                                {t('customer_pages.orders.cancel_modal.title')}
                                             </h3>
                                             <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                                                 <Hash className="w-3 h-3" />
@@ -780,18 +783,18 @@ export default function Orders() {
                                 {/* Modal Body */}
                                 <div className="p-4 sm:p-6">
                                     <p className="text-sm text-muted-foreground mb-4">
-                                        Are you sure you want to cancel? This action <span className="text-red-500 font-semibold">cannot be undone</span>.
+                                        {t('customer_pages.orders.cancel_modal.warning')}
                                     </p>
 
                                     {/* Order Summary */}
                                     <div className="p-3 rounded-lg bg-secondary/50 border border-border mb-4">
                                         <div className="flex items-center justify-between mb-1.5">
-                                            <span className="text-xs text-muted-foreground">Order Total</span>
+                                            <span className="text-xs text-muted-foreground">{t('customer_pages.orders.cancel_modal.order_total')}</span>
                                             <span className="text-base font-bold text-foreground">${orderToCancel.total_amount.toFixed(2)}</span>
                                         </div>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs text-muted-foreground">Items</span>
-                                            <span className="text-xs font-medium text-foreground">{orderToCancel.items_count} items</span>
+                                            <span className="text-xs text-muted-foreground">{t('customer_pages.orders.cancel_modal.items')}</span>
+                                            <span className="text-xs font-medium text-foreground">{orderToCancel.items_count} {t('customer_pages.dashboard.items')}</span>
                                         </div>
                                     </div>
 
@@ -802,7 +805,7 @@ export default function Orders() {
                                             onClick={() => setShowCancelModal(false)}
                                             disabled={cancelOrderMutation.isPending}
                                         >
-                                            Keep
+                                            {t('customer_pages.orders.cancel_modal.keep')}
                                         </Button>
                                         <Button
                                             variant="destructive"
@@ -818,7 +821,7 @@ export default function Orders() {
                                             ) : (
                                                 <>
                                                     <XCircle className="w-4 h-4 mr-1.5" />
-                                                    Cancel Order
+                                                    {t('customer_pages.orders.cancel_modal.confirm')}
                                                 </>
                                             )}
                                         </Button>
@@ -862,7 +865,7 @@ export default function Orders() {
                                         </div>
                                         <div>
                                             <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                                                Reorder Items?
+                                                {t('customer_pages.orders.reorder_modal.title')}
                                             </h3>
                                             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                                                 Add all items from this order to your cart
@@ -874,7 +877,7 @@ export default function Orders() {
                                 {/* Modal Body */}
                                 <div className="p-4 sm:p-6">
                                     <p className="text-sm text-muted-foreground mb-6">
-                                        This will add all items from Order #{data?.data.find(o => o.id === confirmReorderId)?.order_number} to your current cart.
+                                        {t('customer_pages.orders.reorder_modal.message')}
                                     </p>
 
                                     <div className="flex gap-2">
@@ -884,7 +887,7 @@ export default function Orders() {
                                             onClick={() => setConfirmReorderId(null)}
                                             disabled={isReordering}
                                         >
-                                            Cancel
+                                            {t('customer_pages.orders.reorder_modal.cancel')}
                                         </Button>
                                         <Button
                                             variant="primary"
@@ -915,7 +918,7 @@ export default function Orders() {
                                             ) : (
                                                 <>
                                                     <ShoppingBag className="w-4 h-4 mr-1.5" />
-                                                    Add to Cart
+                                                    {t('customer_pages.orders.reorder_modal.confirm')}
                                                 </>
                                             )}
                                         </Button>

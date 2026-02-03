@@ -25,16 +25,10 @@ import {
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
 
+import { useTranslation } from '@/app/hooks/useTranslation';
+
 type SortOption = 'popular' | 'price-low' | 'price-high' | 'name' | 'newest';
 type LayoutOption = 'grid' | 'list';
-
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: 'popular', label: 'Most Popular' },
-  { value: 'price-low', label: 'Price: Low to High' },
-  { value: 'price-high', label: 'Price: High to Low' },
-  { value: 'name', label: 'Name (A-Z)' },
-  { value: 'newest', label: 'Newest First' }
-];
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -62,6 +56,15 @@ const itemVariants: Variants = {
 const ITEMS_PER_PAGE = 15;
 
 export default function Menu() {
+  const { t } = useTranslation();
+
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: 'popular', label: t('menu.sort.popular') as string },
+    { value: 'price-low', label: t('menu.sort.price_low') as string },
+    { value: 'price-high', label: t('menu.sort.price_high') as string },
+    { value: 'name', label: t('menu.sort.name') as string },
+    { value: 'newest', label: t('menu.sort.newest') as string }
+  ];
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('popular');
@@ -161,7 +164,7 @@ export default function Menu() {
       quantity: 1,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(`${item.name} added to cart`);
+    toastSuccess(t('menu.added_to_cart_msg', { name: item.name }) as string || `${item.name} added to cart`);
   };
 
   const clearAllFilters = () => {
@@ -194,7 +197,7 @@ export default function Menu() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search menu items..."
+                  placeholder={t('menu.search_placeholder') as string}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-12 py-3 rounded-xl bg-gray-800/80 border border-gray-600/50 text-base text-white placeholder:text-gray-400 focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20 transition-all"
@@ -227,7 +230,7 @@ export default function Menu() {
               {/* Item Count */}
               {!isLoading && (
                 <p className="text-base text-gray-400">
-                  <span className="font-semibold text-white">{totalItems}</span> items
+                  <span className="font-semibold text-white">{totalItems}</span> {t('menu.items_count')}
                   {selectedCategory && ` • ${categories?.find((c) => c.id === selectedCategory)?.name}`}
                 </p>
               )}
@@ -242,7 +245,7 @@ export default function Menu() {
                       ? 'bg-fuchsia-600 text-white shadow-lg'
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   )}
-                  title="Grid View"
+                  title={t('menu.grid_view') as string}
                 >
                   <Grid3x3 className="w-5 h-5" />
                 </button>
@@ -254,7 +257,7 @@ export default function Menu() {
                       ? 'bg-fuchsia-600 text-white shadow-lg'
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   )}
-                  title="List View"
+                  title={t('menu.list_view') as string}
                 >
                   <List className="w-5 h-5" />
                 </button>
@@ -268,7 +271,7 @@ export default function Menu() {
                   leftIcon={<ShoppingBag className="w-5 h-5" />}
                   onClick={() => window.location.href = '/cart'}
                 >
-                  Cart ({cart.items.length})
+                  {t('menu.cart')} ({cart.items.length})
                 </Button>
               )}
             </div>
@@ -292,7 +295,7 @@ export default function Menu() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search menu..."
+                  placeholder={t('menu.search_placeholder') as string}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 border-0 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:ring-2 focus:ring-fuchsia-500 transition-all"
@@ -348,11 +351,11 @@ export default function Menu() {
             <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
               {hasItems ? (
                 <>
-                  <span className="font-semibold text-gray-900 dark:text-white">{totalItems}</span> items
+                  <span className="font-semibold text-gray-900 dark:text-white">{totalItems}</span> {t('menu.items_count')}
                   {selectedCategory && ` • ${categories?.find((c) => c.id === selectedCategory)?.name}`}
                 </>
               ) : (
-                'No items found'
+                t('menu.no_items_found')
               )}
             </p>
 
@@ -367,7 +370,7 @@ export default function Menu() {
                       ? 'bg-white dark:bg-gray-700 text-fuchsia-600 dark:text-fuchsia-400 shadow-sm'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                   )}
-                  title="Grid View"
+                  title={t('menu.grid_view') as string}
                 >
                   <Grid3x3 className="w-4 h-4" />
                 </button>
@@ -379,7 +382,7 @@ export default function Menu() {
                       ? 'bg-white dark:bg-gray-700 text-fuchsia-600 dark:text-fuchsia-400 shadow-sm'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                   )}
-                  title="List View"
+                  title={t('menu.list_view') as string}
                 >
                   <List className="w-4 h-4" />
                 </button>
@@ -402,7 +405,7 @@ export default function Menu() {
               onClick={() => window.location.href = '/cart'}
               className="w-full shadow-xl"
             >
-              View Cart ({cart.items.length} items)
+              {t('menu.view_cart')} ({cart.items.length} {t('menu.items_count')})
             </Button>
           </motion.div>
         )}
@@ -446,17 +449,17 @@ export default function Menu() {
                 <Search className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                No items found
+                {t('menu.no_items_found')}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Try a different search or category
+                {t('menu.try_different_search')}
               </p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={clearAllFilters}
               >
-                Clear filters
+                {t('menu.clear_filters')}
               </Button>
             </motion.div>
           )}
@@ -483,7 +486,7 @@ export default function Menu() {
                 )}
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Prev</span>
+                <span className="hidden sm:inline">{t('menu.pagination.prev')}</span>
               </button>
 
               {/* Mobile: Simple Page Indicator */}
@@ -533,14 +536,14 @@ export default function Menu() {
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 )}
               >
-                <span className="hidden sm:inline">Next</span>
+                <span className="hidden sm:inline">{t('menu.pagination.next')}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
             {/* Page Info */}
             <p className="hidden sm:block text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Page {currentPage} of {totalPages} • {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} items
+              {t('menu.pagination.page_info', { current: String(currentPage), total: String(totalPages), start: String(startIndex + 1), end: String(Math.min(endIndex, totalItems)), items: String(totalItems) })}
             </p>
           </motion.div>
         )}
@@ -574,7 +577,7 @@ export default function Menu() {
 
               {/* Header */}
               <div className="flex items-center justify-between px-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Filters & Sort</h2>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('menu.filter')} & {t('menu.sort_by')}</h2>
                 <button
                   onClick={() => setShowMobileFilters(false)}
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -588,7 +591,7 @@ export default function Menu() {
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <ArrowUpDown className="w-4 h-4" />
-                    Sort By
+                    {t('menu.sort_by')}
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
                     {sortOptions.map((option) => (
@@ -614,7 +617,7 @@ export default function Menu() {
                 {/* Active Filters */}
                 {(selectedCategory || searchQuery) && (
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Active Filters</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('menu.active_filters')}</h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedCategory && (
                         <button
@@ -647,7 +650,7 @@ export default function Menu() {
                     }}
                     className="w-full px-4 py-3 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                   >
-                    Clear all filters
+                    {t('menu.clear_filters')}
                   </button>
                 </div>
               </div>

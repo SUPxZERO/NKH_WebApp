@@ -11,6 +11,7 @@ import Modal from '@/app/components/ui/Modal';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import MyRequestsTab from './components/MyRequestsTab';
+import { useLanguage } from '@/app/context/LanguageContext';
 import {
     Calendar as CalendarIcon,
     Clock,
@@ -78,6 +79,7 @@ interface ShiftSwap {
 }
 
 export default function Schedule() {
+    const { t } = useLanguage();
     const [showTimeOffModal, setShowTimeOffModal] = useState(false);
     const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
     const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
@@ -132,13 +134,13 @@ export default function Schedule() {
     const timeOffMutation = useMutation({
         mutationFn: (data: typeof timeOffData) => apiPost('/employee/time-off-requests', data),
         onSuccess: () => {
-            toastSuccess('Time off request submitted successfully!');
+            toastSuccess(t('employee.schedule.request_submitted'));
             setShowTimeOffModal(false);
             setTimeOffData({ start_date: '', end_date: '', reason: '' });
             qc.invalidateQueries({ queryKey: ['employee.time-off-requests'] });
         },
         onError: (error: any) => {
-            toastError(error.response?.data?.message || 'Failed to submit request');
+            toastError(error.response?.data?.message || t('employee.common.error'));
         },
     });
 
@@ -279,17 +281,17 @@ export default function Schedule() {
     const claimMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/employee/shift-swaps/${id}`, { _method: 'PUT', action: 'claim' }),
         onSuccess: () => {
-            toastSuccess('Shift claimed successfully! Awaiting manager approval.');
+            toastSuccess(t('employee.schedule.shift_claimed'));
             qc.invalidateQueries({ queryKey: ['shift-swaps.available'] });
             qc.invalidateQueries({ queryKey: ['employee.shifts'] }); // Update my shifts if needed (though pending approval)
         },
         onError: (err: any) => {
-            toastError(err?.response?.data?.message || 'Failed to claim shift');
+            toastError(err?.response?.data?.message || t('employee.common.error'));
         }
     });
 
     const handleClaimShift = (id: number) => {
-        if (confirm('Are you sure you want to claim this shift?')) {
+        if (confirm(t('employee.schedule.confirm_claim'))) {
             claimMutation.mutate(id);
         }
     };
@@ -298,17 +300,17 @@ export default function Schedule() {
     const cancelMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/employee/shift-swaps/${id}`, { _method: 'PUT', action: 'cancel' }),
         onSuccess: () => {
-            toastSuccess('Request cancelled successfully.');
+            toastSuccess(t('employee.schedule.request_cancelled'));
             qc.invalidateQueries({ queryKey: ['shift-swaps.my_requests'] });
             qc.invalidateQueries({ queryKey: ['shift-swaps.available'] });
         },
         onError: (err: any) => {
-            toastError(err?.response?.data?.message || 'Failed to cancel request');
+            toastError(err?.response?.data?.message || t('employee.common.error'));
         }
     });
 
     const handleCancelRequest = (id: number) => {
-        if (confirm('Are you sure you want to cancel this swap request?')) {
+        if (confirm(t('employee.schedule.confirm_cancel'))) {
             cancelMutation.mutate(id);
         }
     };
@@ -322,13 +324,13 @@ export default function Schedule() {
     const swapMutation = useMutation({
         mutationFn: (data: { shift_id: number, type: string, reason: string }) => apiPost('/employee/shift-swaps', data),
         onSuccess: () => {
-            toastSuccess('Shift swap request created!');
+            toastSuccess(t('employee.schedule.swap_created'));
             setSwapModalOpen(false);
             setSelectedShift(null);
             setSwapReason('');
         },
         onError: (err: any) => {
-            toastError(err?.response?.data?.message || 'Failed to request swap');
+            toastError(err?.response?.data?.message || t('employee.common.error'));
         }
     });
 
@@ -357,7 +359,7 @@ export default function Schedule() {
     return (
         <EmployeeLayout>
             <Head>
-                <title>My Schedule - NKH Restaurant</title>
+                <title>{t('employee.schedule.title')} - NKH Restaurant</title>
             </Head>
 
             <div className="space-y-6">
@@ -365,10 +367,10 @@ export default function Schedule() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            {activeTab === 'schedule' ? 'My Schedule' : activeTab === 'marketplace' ? 'Shift Marketplace' : 'My Requests'}
+                            {activeTab === 'schedule' ? t('employee.schedule.my_schedule') : activeTab === 'marketplace' ? t('employee.schedule.marketplace') : t('employee.schedule.my_requests')}
                         </h1>
                         <p className="text-gray-400 mt-1">
-                            {activeTab === 'schedule' ? 'View your shifts and manage time off' : activeTab === 'marketplace' ? 'Pick up extra shifts from colleagues' : 'Track your shift swap requests'}
+                            {activeTab === 'schedule' ? t('employee.schedule.view_shifts') : activeTab === 'marketplace' ? t('employee.schedule.pickup_shifts') : t('employee.schedule.track_requests')}
                         </p>
                     </div>
                     <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 self-start md:self-auto">
@@ -379,7 +381,7 @@ export default function Schedule() {
                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            My Schedule
+                            {t('employee.schedule.my_schedule')}
                         </button>
                         <button
                             onClick={() => setActiveTab('marketplace')}
@@ -388,7 +390,7 @@ export default function Schedule() {
                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            Marketplace
+                            {t('employee.schedule.marketplace')}
                         </button>
                         <button
                             onClick={() => setActiveTab('my_requests')}
@@ -397,7 +399,7 @@ export default function Schedule() {
                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            My Requests
+                            {t('employee.schedule.my_requests')}
                         </button>
                     </div>
                     {activeTab === 'schedule' && (
@@ -406,7 +408,7 @@ export default function Schedule() {
                             className="bg-gradient-to-r from-purple-500 to-pink-500"
                             leftIcon={<Plus className="w-4 h-4" />}
                         >
-                            Request Time Off
+                            {t('employee.schedule.request_time_off')}
                         </Button>
                     )}
                 </div>
@@ -423,7 +425,7 @@ export default function Schedule() {
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <div className="text-sm text-gray-400 mb-1">Next Shift</div>
+                                                <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.next_shift')}</div>
                                                 <div className="text-3xl font-bold text-white mb-2">
                                                     {new Date(nextShift.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                                                 </div>
@@ -451,7 +453,7 @@ export default function Schedule() {
                             <Card className="bg-white/5 border-white/10">
                                 <CardContent className="p-6 text-center">
                                     <Coffee className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                                    <p className="text-gray-400">No upcoming shifts scheduled</p>
+                                    <p className="text-gray-400">{t('employee.schedule.no_shifts')}</p>
                                 </CardContent>
                             </Card>
                         )}
@@ -460,27 +462,27 @@ export default function Schedule() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <Card className="bg-white/5 border-white/10">
                                 <CardContent className="p-6">
-                                    <div className="text-sm text-gray-400 mb-1">This Week's Hours</div>
+                                    <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.week_hours')}</div>
                                     <div className="text-4xl font-bold text-white">{weekHours.toFixed(1)}</div>
-                                    <div className="text-sm text-gray-400 mt-1">hours scheduled</div>
+                                    <div className="text-sm text-gray-400 mt-1">{t('employee.schedule.hours_scheduled')}</div>
                                 </CardContent>
                             </Card>
 
                             <Card className="bg-white/5 border-white/10">
                                 <CardContent className="p-6">
-                                    <div className="text-sm text-gray-400 mb-1">Total Shifts</div>
+                                    <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.total_shifts')}</div>
                                     <div className="text-4xl font-bold text-white">{shifts?.data?.length || 0}</div>
-                                    <div className="text-sm text-gray-400 mt-1">upcoming shifts</div>
+                                    <div className="text-sm text-gray-400 mt-1">{t('employee.schedule.upcoming_shiftstext')}</div>
                                 </CardContent>
                             </Card>
 
                             <Card className="bg-white/5 border-white/10">
                                 <CardContent className="p-6">
-                                    <div className="text-sm text-gray-400 mb-1">Pending Requests</div>
+                                    <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.pending_requests')}</div>
                                     <div className="text-4xl font-bold text-white">
                                         {timeOfRequests?.data?.filter((r) => r.status === 'pending').length || 0}
                                     </div>
-                                    <div className="text-sm text-gray-400 mt-1">awaiting approval</div>
+                                    <div className="text-sm text-gray-400 mt-1">{t('employee.schedule.awaiting_approval')}</div>
                                 </CardContent>
                             </Card>
                         </div>
@@ -489,13 +491,13 @@ export default function Schedule() {
                         <Card className="bg-white/5 border-white/10">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold">{viewMode === 'week' ? 'Weekly Schedule' : 'Monthly Schedule'}</h2>
+                                    <h2 className="text-xl font-semibold">{viewMode === 'week' ? t('employee.schedule.weekly') : t('employee.schedule.monthly')}</h2>
                                     <div className="flex gap-2">
                                         <Button size="sm" variant={viewMode === 'week' ? 'primary' : 'ghost'} onClick={() => setViewMode('week')}>
-                                            Week
+                                            {t('employee.schedule.week')}
                                         </Button>
                                         <Button size="sm" variant={viewMode === 'month' ? 'primary' : 'ghost'} onClick={() => setViewMode('month')}>
-                                            Month
+                                            {t('employee.schedule.month')}
                                         </Button>
                                     </div>
                                 </div>
@@ -543,7 +545,7 @@ export default function Schedule() {
 
                                                             <div className="flex-1">
                                                                 {dayShifts.length === 0 ? (
-                                                                    <div className="text-gray-500 text-sm">No shifts</div>
+                                                                    <div className="text-gray-500 text-sm">{t('employee.schedule.no_shifts_day')}</div>
                                                                 ) : (
                                                                     <div className="space-y-2">
                                                                         {dayShifts.map((shift) => (
@@ -620,7 +622,7 @@ export default function Schedule() {
                         {timeOfRequests?.data && timeOfRequests.data.length > 0 && (
                             <Card className="bg-white/5 border-white/10">
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold">Time Off Requests</h2>
+                                    <h2 className="text-xl font-semibold">{t('employee.schedule.time_off_requests')}</h2>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-3">
@@ -657,8 +659,8 @@ export default function Schedule() {
                     <div className="grid gap-4">
                         <Card className="bg-white/5 border-white/10">
                             <CardHeader>
-                                <h3 className="text-lg font-semibold">Available Shifts</h3>
-                                <p className="text-sm text-gray-400">Available shifts you can claim.</p>
+                                <h3 className="text-lg font-semibold">{t('employee.schedule.available_shifts')}</h3>
+                                <p className="text-sm text-gray-400">{t('employee.schedule.shifts_claim')}</p>
                             </CardHeader>
                             <CardContent>
                                 {marketplaceLoading ? (
@@ -699,7 +701,7 @@ export default function Schedule() {
                                                     className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500"
                                                     disabled={claimMutation.isPending}
                                                 >
-                                                    {claimMutation.isPending ? 'Claiming...' : 'Claim Shift'}
+                                                    {claimMutation.isPending ? t('employee.common.loading') : t('employee.schedule.claim_shift')}
                                                 </Button>
                                             </div>
                                         ))}
@@ -707,7 +709,7 @@ export default function Schedule() {
                                 ) : (
                                     <div className="text-center py-10 text-gray-400">
                                         <div className="text-4xl mb-2">🤷‍♂️</div>
-                                        <p>No shifts available to claim right now.</p>
+                                        <p>{t('employee.schedule.no_available_shifts')}</p>
                                     </div>
                                 )}
                             </CardContent>
@@ -727,13 +729,13 @@ export default function Schedule() {
             <Modal
                 isOpen={showTimeOffModal}
                 onClose={() => setShowTimeOffModal(false)}
-                title="Request Time Off"
+                title={t('employee.schedule.request_time_off')}
                 className="max-w-md"
             >
                 <form onSubmit={handleTimeOffSubmit} className="space-y-4">
                     <Input
                         type="date"
-                        label="Start Date"
+                        label={t('employee.schedule.start_date')}
                         value={timeOffData.start_date}
                         onChange={(e) => setTimeOffData({ ...timeOffData, start_date: e.target.value })}
                         required
@@ -742,7 +744,7 @@ export default function Schedule() {
 
                     <Input
                         type="date"
-                        label="End Date"
+                        label={t('employee.schedule.end_date')}
                         value={timeOffData.end_date}
                         onChange={(e) => setTimeOffData({ ...timeOffData, end_date: e.target.value })}
                         required
@@ -750,7 +752,7 @@ export default function Schedule() {
                     />
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Reason (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">{t('employee.schedule.reason')}</label>
                         <textarea
                             value={timeOffData.reason}
                             onChange={(e) => setTimeOffData({ ...timeOffData, reason: e.target.value })}
@@ -767,14 +769,14 @@ export default function Schedule() {
                             onClick={() => setShowTimeOffModal(false)}
                             className="flex-1 border-white/20 hover:bg-white/10"
                         >
-                            Cancel
+                            {t('employee.common.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             disabled={timeOffMutation.isPending}
                             className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500"
                         >
-                            {timeOffMutation.isPending ? 'Submitting...' : 'Submit Request'}
+                            {timeOffMutation.isPending ? t('employee.common.loading') : t('employee.common.submit')}
                         </Button>
                     </div>
                 </form>
@@ -785,7 +787,7 @@ export default function Schedule() {
                 <Modal
                     isOpen={!!selectedShift}
                     onClose={() => setSelectedShift(null)}
-                    title="Shift Details"
+                    title={t('employee.schedule.shift_details')}
                     className="max-w-md"
                 >
                     <div className="space-y-4">

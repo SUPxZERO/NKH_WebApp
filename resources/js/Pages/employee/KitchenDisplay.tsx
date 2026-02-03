@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import EmployeeLayout from '@/app/layouts/EmployeeLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPut } from '@/app/libs/apiClient';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { toastSuccess } from '@/app/utils/toast';
@@ -56,6 +57,7 @@ interface KitchenOrder {
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 
 export default function KitchenDisplay() {
+    const { t } = useLanguage();
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
     useOrderUpdates();
@@ -75,7 +77,7 @@ export default function KitchenDisplay() {
         mutationFn: ({ id, status }: { id: number; status: string }) =>
             apiPut(`/kitchen/orders/${id}/status`, { status }),
         onSuccess: () => {
-            toastSuccess('Order status updated');
+            toastSuccess(t('employee.common.success'));
             qc.invalidateQueries({ queryKey: ['kitchen.orders'] });
         },
     });
@@ -163,11 +165,11 @@ export default function KitchenDisplay() {
             switch (order.status) {
                 case 'pending':
                 case 'received':
-                    return { label: 'START PREP', action: () => handleStartPrep(order.id) };
+                    return { label: t('employee.kitchen.start_prep'), action: () => handleStartPrep(order.id) };
                 case 'preparing':
-                    return { label: 'MARK READY', action: () => handleMarkReady(order.id) };
+                    return { label: t('employee.kitchen.mark_ready'), action: () => handleMarkReady(order.id) };
                 case 'ready':
-                    return { label: 'DELIVERED', action: () => handleMarkCompleted(order.id) };
+                    return { label: t('employee.kitchen.delivered'), action: () => handleMarkCompleted(order.id) };
                 default:
                     return null;
             }
@@ -234,7 +236,7 @@ export default function KitchenDisplay() {
                             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                                 <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
                                     <User className="w-5 h-5" />
-                                    Customer Information
+                                    {t('employee.kitchen.customer_info')}
                                 </h3>
                                 <div className="space-y-1 text-sm">
                                     {order.customer_name && (
@@ -264,7 +266,7 @@ export default function KitchenDisplay() {
                             <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
                                 <h3 className="font-bold text-yellow-800 dark:text-yellow-300 mb-2 flex items-center gap-2">
                                     <FileText className="w-5 h-5" />
-                                    Order Notes
+                                    {t('employee.kitchen.order_notes')}
                                 </h3>
                                 <p className="text-yellow-700 dark:text-yellow-200">{order.notes}</p>
                             </div>
@@ -274,7 +276,7 @@ export default function KitchenDisplay() {
                         <div>
                             <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                                 <ChefHat className="w-5 h-5" />
-                                Order Items ({order.items.length})
+                                {t('employee.kitchen.order_items')} ({order.items.length})
                             </h3>
                             <div className="space-y-3">
                                 {order.items.map((item, index) => (
@@ -301,7 +303,7 @@ export default function KitchenDisplay() {
                                             </div>
                                             {item.notes && (
                                                 <div className="mt-2 p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm text-orange-700 dark:text-orange-300">
-                                                    <strong>Special Request:</strong> {item.notes}
+                                                    <strong>{t('employee.kitchen.special_request')}:</strong> {item.notes}
                                                 </div>
                                             )}
                                             {item.unit_price && (
@@ -449,7 +451,7 @@ export default function KitchenDisplay() {
     return (
         <EmployeeLayout>
             <Head>
-                <title>Kitchen Display - NKH Restaurant</title>
+                <title>{t('employee.kitchen.title')} - NKH Restaurant</title>
             </Head>
 
             <div className="space-y-4">
@@ -457,7 +459,7 @@ export default function KitchenDisplay() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <ChefHat className="w-8 h-8 text-fuchsia-600" />
-                        <h1 className="text-3xl font-bold">Kitchen Display System</h1>
+                        <h1 className="text-3xl font-bold">{t('employee.kitchen.system')}</h1>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button
@@ -466,10 +468,10 @@ export default function KitchenDisplay() {
                             onClick={() => setSoundEnabled(!soundEnabled)}
                             leftIcon={<Bell className="w-4 h-4" />}
                         >
-                            {soundEnabled ? 'Sound On' : 'Sound Off'}
+                            {soundEnabled ? t('employee.kitchen.sound_on') : t('employee.kitchen.sound_off')}
                         </Button>
                         <div className="text-lg">
-                            <span className="text-gray-500">Total: </span>
+                            <span className="text-gray-500">{t('employee.kitchen.total')}: </span>
                             <span className="font-bold">{orders?.data?.length || 0}</span>
                         </div>
                     </div>
@@ -483,7 +485,7 @@ export default function KitchenDisplay() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <AlertCircle className="w-6 h-6" />
-                                    <h2 className="text-xl font-bold">NEW</h2>
+                                    <h2 className="text-xl font-bold">{t('employee.kitchen.new')}</h2>
                                 </div>
                                 <div className="text-3xl font-bold">{groupedOrders.pending.length}</div>
                             </div>
@@ -498,7 +500,7 @@ export default function KitchenDisplay() {
                                         className="text-center py-12 text-gray-500"
                                     >
                                         <Package className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                        <p>No new orders</p>
+                                        <p>{t('employee.kitchen.no_new_orders')}</p>
                                     </motion.div>
                                 ) : (
                                     groupedOrders.pending.map((order) => (
@@ -506,7 +508,7 @@ export default function KitchenDisplay() {
                                             key={order.id}
                                             order={order}
                                             showAction
-                                            actionLabel="START PREP"
+                                            actionLabel={t('employee.kitchen.start_prep')}
                                             onAction={handleStartPrep}
                                             statusColor="border-red-500"
                                         />
@@ -522,7 +524,7 @@ export default function KitchenDisplay() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Flame className="w-6 h-6" />
-                                    <h2 className="text-xl font-bold">PREPARING</h2>
+                                    <h2 className="text-xl font-bold">{t('employee.kitchen.preparing')}</h2>
                                 </div>
                                 <div className="text-3xl font-bold">{groupedOrders.preparing.length}</div>
                             </div>
@@ -537,7 +539,7 @@ export default function KitchenDisplay() {
                                         className="text-center py-12 text-gray-500"
                                     >
                                         <ChefHat className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                        <p>No orders cooking</p>
+                                        <p>{t('employee.kitchen.no_cooking')}</p>
                                     </motion.div>
                                 ) : (
                                     groupedOrders.preparing.map((order) => (
@@ -545,7 +547,7 @@ export default function KitchenDisplay() {
                                             key={order.id}
                                             order={order}
                                             showAction
-                                            actionLabel="MARK READY"
+                                            actionLabel={t('employee.kitchen.mark_ready')}
                                             onAction={handleMarkReady}
                                             statusColor="border-yellow-500"
                                         />
@@ -561,7 +563,7 @@ export default function KitchenDisplay() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <CheckCircle className="w-6 h-6" />
-                                    <h2 className="text-xl font-bold">READY</h2>
+                                    <h2 className="text-xl font-bold">{t('employee.kitchen.ready')}</h2>
                                 </div>
                                 <div className="text-3xl font-bold">{groupedOrders.ready.length}</div>
                             </div>
@@ -576,7 +578,7 @@ export default function KitchenDisplay() {
                                         className="text-center py-12 text-gray-500"
                                     >
                                         <Clock className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                        <p>No orders ready</p>
+                                        <p>{t('employee.kitchen.no_ready')}</p>
                                     </motion.div>
                                 ) : (
                                     groupedOrders.ready.map((order) => (
@@ -584,7 +586,7 @@ export default function KitchenDisplay() {
                                             key={order.id}
                                             order={order}
                                             showAction
-                                            actionLabel="DELIVERED"
+                                            actionLabel={t('employee.kitchen.delivered')}
                                             onAction={handleMarkCompleted}
                                             statusColor="border-green-500"
                                         />

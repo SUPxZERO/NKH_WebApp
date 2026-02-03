@@ -9,32 +9,34 @@ class Expense extends Model
 {
     use HasFactory;
 
-    public const STATUS_PENDING = 'pending';
+    public const STATUS_DRAFT = 'draft';
     public const STATUS_APPROVED = 'approved';
-    public const STATUS_REJECTED = 'rejected';
-    
-    
-    /**
-     * SECURITY: Protect expense amounts and approval status
-     */
-    protected $guarded = [
-        'id',
-        'amount',               // ⚠️ CRITICAL: Expense amount
-        'status',               // ⚠️ Workflow (\u0026 approval)
-        'created_at',
-        'updated_at',
-    ];
+    public const STATUS_PAID = 'paid';
+    public const STATUS_VOIDED = 'voided';
 
-    
-    public function scopeApproved($query)
-    {
-        return $query->where('status', self::STATUS_APPROVED);
-    }
+    protected $fillable = [
+        'location_id',
+        'expense_category_id',
+        'created_by',
+        'expense_date',
+        'amount',
+        'currency',
+        'vendor_name',
+        'reference',
+        'description',
+        'status',
+        'attachment_path',
+    ];
 
     protected $casts = [
         'expense_date' => 'date',
         'amount' => 'decimal:2',
     ];
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
+    }
 
     public function location()
     {

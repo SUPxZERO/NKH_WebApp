@@ -168,6 +168,7 @@ Route::prefix('payments')->group(function () {
         ->middleware('payment.rate:simulate');
     Route::post('/{payment}/simulate-failure', [\App\Http\Controllers\Api\PaymentController::class, 'simulateFailure'])
         ->middleware('payment.rate:simulate');
+    Route::post('/{payment}/verify-bakong', [\App\Http\Controllers\Api\PaymentController::class, 'verifyBakongTransaction']);
 });
 
 // Receipt Routes (Sprint P8)

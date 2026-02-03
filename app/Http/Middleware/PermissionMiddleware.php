@@ -39,19 +39,7 @@ class PermissionMiddleware
             $permissions = array_map('trim', explode(',', $permissions[0]));
         }
 
-        // Super-admin bypass - has all permissions
-        // SECURITY: Log super-admin actions for audit trail
-        if ($user->hasRole('super-admin')) {
-            \Log::info('Super-admin permission bypass', [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'bypassed_permissions' => $permissions,
-                'path' => $request->path(),
-                'method' => $request->method(),
-                'ip' => $request->ip(),
-            ]);
-            return $next($request);
-        }
+
 
         // Check if user has ANY of the required permissions
         foreach ($permissions as $permission) {

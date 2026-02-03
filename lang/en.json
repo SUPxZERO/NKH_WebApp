@@ -1,0 +1,3088 @@
+{
+    "meta": {
+        "home_title": "NKH Restaurant - Fresh Food Delivered Fast"
+    },
+    "menu": {
+        "categories_label": "Explore Categories",
+        "add_to_cart": "Add to Cart",
+        "featured": "Featured Dishes",
+        "view_full": "View Full Menu",
+        "search_placeholder": "Search menu items...",
+        "items_count": "Items",
+        "filter": "Filter",
+        "clear_filters": "Clear All",
+        "active_filters": "Active Filters",
+        "sort_by": "Sort By",
+        "no_items_found": "No items found",
+        "try_different_search": "Try a different search term or category",
+        "view_cart": "View Cart",
+        "cart": "Cart",
+        "grid_view": "Grid View",
+        "list_view": "List View",
+        "categories": {
+            "main_course": "Main Course",
+            "add_to_cart": "Add to Cart"
+        },
+        "badges": {
+            "featured": "Featured",
+            "hot_item": "Hot Item",
+            "popular": "Popular"
+        },
+        "sort": {
+            "popular": "Most Popular",
+            "price_low": "Price: Low to High",
+            "price_high": "Price: High to Low",
+            "name": "Name (A-Z)",
+            "newest": "Newest"
+        },
+        "pagination": {
+            "prev": "Prev",
+            "next": "Next",
+            "page_info": "Page :current of :total • :start-:end of :items items"
+        },
+        "added_to_cart_msg": "Added :name to cart",
+        "featured_manager": {
+            "title": "Manage Featured Items",
+            "current_featured": "Featured Items",
+            "empty_slot": "Empty Slot",
+            "add_item": "Add Item to Featured",
+            "search_placeholder": "Search items...",
+            "no_items": "No items found",
+            "all_featured": "All active items are already featured",
+            "add_btn": "Add",
+            "remove_tooltip": "Remove from featured",
+            "max_limit_error": "Maximum 4 featured items allowed",
+            "status_updated": "Featured status updated"
+        }
+    },
+    "layout": {
+        "nav": {
+            "home": "Home",
+            "menu": "Menu",
+            "about": "About Us",
+            "contact": "Contact",
+            "dashboard": "Dashboard",
+            "cart": "Cart",
+            "orders": "Orders",
+            "book_table": "Book Table",
+            "login": "Login",
+            "profile": "Profile",
+            "logout": "Logout",
+            "view_account": "View account details",
+            "mobile_menu_title": "Menu",
+            "admin": {
+                "dashboard": "Dashboard",
+                "hr": {
+                    "employees": {
+                        "title": "Employees",
+                        "subtitle": "Manage staff",
+                        "add": "Add Employee",
+                        "stats": {
+                            "total": "Total",
+                            "active": "Active",
+                            "leave": "Leave",
+                            "inactive": "Inactive"
+                        },
+                        "filters": {
+                            "all": "All",
+                            "active": "Active",
+                            "leave": "Leave",
+                            "off": "Off"
+                        },
+                        "table": {
+                            "employee": "Employee",
+                            "position": "Position",
+                            "contact": "Contact",
+                            "hire_date": "Hire Date",
+                            "status": "Status",
+                            "actions": "Actions",
+                            "no_position": "No Position",
+                            "unknown": "Unknown"
+                        },
+                        "modal": {
+                            "create_title": "New Employee",
+                            "edit_title": "Edit Employee",
+                            "name": "Name",
+                            "email": "Email",
+                            "phone": "Phone",
+                            "password": "Password",
+                            "new_password": "New Password",
+                            "code": "Code",
+                            "auto_generated": "Auto-generated",
+                            "hire_date": "Hire Date",
+                            "type": "Type",
+                            "salary": "Salary",
+                            "status": "Status",
+                            "position": "Position",
+                            "location": "Location",
+                            "address": "Address",
+                            "search_address": "Search address...",
+                            "select": "Select",
+                            "types": {
+                                "monthly": "Monthly",
+                                "hourly": "Hourly"
+                            },
+                            "statuses": {
+                                "active": "Active",
+                                "inactive": "Inactive",
+                                "on_leave": "On Leave",
+                                "terminated": "Terminated"
+                            }
+                        },
+                        "messages": {
+                            "created": "Employee created successfully",
+                            "updated": "Employee updated successfully",
+                            "deleted": "Employee deactivated",
+                            "confirm_delete": "Deactivate this employee?",
+                            "failed": "Operation failed",
+                            "not_found": "No employees found",
+                            "adjust_filters": "Try adjusting filters"
+                        }
+                    }
+                },
+                "profile": "Profile",
+                "logout": "Log Out",
+                "settings": "Settings"
+            },
+            "search": {
+                "placeholder": {
+                    "admin": "Search pages, menu items, orders...",
+                    "employee": "Search pages...",
+                    "customer": "Search menu, pages...",
+                    "default": "Search..."
+                },
+                "groups": {
+                    "pages": "Pages",
+                    "menu_items": "Menu Items",
+                    "orders": "Orders"
+                },
+                "footer": {
+                    "navigate": "Navigate",
+                    "select": "Select",
+                    "close": "Close"
+                },
+                "empty": {
+                    "title": "No results found for \":query\"",
+                    "subtitle": "Try a different search term"
+                }
+            }
+        },
+        "ui": {
+            "user_menu": {
+                "roles": {
+                    "admin": "Administrator",
+                    "employee": "Employee",
+                    "customer": "Customer"
+                },
+                "actions": {
+                    "sign_in": "Sign In",
+                    "sign_out": "Sign Out",
+                    "manage_account": "Manage Account"
+                },
+                "check_availability": "Check Availability",
+                "in_stock": "In Stock",
+                "out_of_stock": "Out of Stock",
+                "theme": {
+                    "light": "Light Mode",
+                    "dark": "Dark Mode"
+                },
+                "items": {
+                    "profile": "My Profile",
+                    "orders": "Order History",
+                    "addresses": "My Addresses",
+                    "loyalty": "Loyalty Rewards",
+                    "settings": "Settings",
+                    "help": "Help & Support",
+                    "dashboard": "Dashboard",
+                    "manage_users": "Manage Users",
+                    "unauthenticated": "Unauthenticated.",
+                    "forbidden": "Forbidden.",
+                    "unauthorized_action": "Unauthorized action.",
+                    "resource_not_found": "Resource not found.",
+                    "http_error": "HTTP error.",
+                    "table_not_found": "Table not found",
+                    "schedule": "My Schedule",
+                    "performance": "Performance",
+                    "notifications": "Notifications",
+                    "manage_orders": "Orders",
+                    "system_settings": "System Settings",
+                    "audit_logs": "Audit Logs",
+                    "analytics": "Sales Analytics"
+                }
+            },
+            "notifications": {
+                "title": "Notifications",
+                "new": ":count new",
+                "mark_all_read": "Mark all as read",
+                "empty": "No notifications yet",
+                "view_all": "View All Notifications"
+            }
+        },
+        "footer": {
+            "quick_links": "Quick Links",
+            "contact_us": "Contact Us",
+            "opening_hours": "Opening Hours",
+            "days": {
+                "mon_thu": "Mon - Thu",
+                "fri_sat": "Fri - Sat",
+                "sun": "Sunday"
+            },
+            "rights_reserved": "© :year NKH Restaurant. All rights reserved.",
+            "back_to_top": "Back to top",
+            "brand_title": "NKH Restaurant",
+            "brand_subtitle": "Culinary Excellence",
+            "subtitle": "Delicious & Fresh",
+            "description": "Serving delicious, fresh meals with love and passion since 2020.",
+            "address": "123 Food Street, City",
+            "phone": "+1 (555) 123-4567",
+            "email": "hello@nkhrestaurant.com",
+            "hours": {
+                "mon_thu": "11AM - 10PM",
+                "fri_sat": "11AM - 11PM",
+                "sun": "12PM - 9PM"
+            }
+        },
+        "table": "Table"
+    },
+    "hero": {
+        "title": "Taste the Extraordinary.",
+        "subtitle": "Experience culinary perfection delivered to your door. Fresh ingredients, masterful recipes, and passion in every bite.",
+        "cta_order": "Order Now",
+        "cta_menu": "Browse Menu"
+    },
+    "cart": {
+        "title": "Your Cart",
+        "meta_title": "Cart - NKH Restaurant",
+        "meta_desc": "Review your cart and proceed to checkout",
+        "clear": "Clear",
+        "clear_confirm_title": "Clear Cart?",
+        "clear_confirm_desc": "Remove all items from your cart?",
+        "continue_shopping": "Continue Shopping",
+        "empty_title": "Your cart is empty",
+        "empty_desc": "Looks like you haven't added anything yet.",
+        "items": "Items",
+        "subtotal": "Subtotal",
+        "delivery": "Delivery",
+        "tax": "Tax",
+        "total": "Total",
+        "checkout": "Checkout",
+        "item_removed": "Item removed from cart",
+        "cart_cleared": "Cart cleared",
+        "select_location": "Please select a restaurant location",
+        "login_required": "Please sign in to complete your order",
+        "show_details": "Show details",
+        "order_summary": "Order Summary",
+        "promo_code": "Promo Code",
+        "enter_code": "Enter code",
+        "apply": "Apply",
+        "applied": "applied",
+        "delivery_fee": "Delivery Fee",
+        "estimated_delivery": "Estimated delivery",
+        "proceed_to_checkout": "Proceed to Checkout",
+        "popular_now": "Popular right now",
+        "browse_menu_desc": "Looks like you haven't added anything to your cart yet. Browse our menu and discover delicious dishes!",
+        "browse_menu_btn": "Browse Menu",
+        "select_location_title": "Select Location",
+        "selected": "Selected",
+        "open": "Open",
+        "now": "Now",
+        "please_select_location": "Please select a location",
+        "failed_load_locations": "Failed to load locations",
+        "no_locations": "No locations available",
+        "pickup": "Pickup"
+    },
+    "auth": {
+        "welcome_back": "Welcome Back",
+        "sign_in_subtitle": "Sign in to your :brand account",
+        "sign_in_as": "Sign in as",
+        "sign_in_btn": "Sign in",
+        "sign_in_as_role": "Sign in as :role",
+        "email_label": "Email Address",
+        "email_placeholder": "Enter your email",
+        "password_label": "Password",
+        "password_placeholder": "Enter your password",
+        "password_confirm_label": "Confirm Password",
+        "password_confirm_placeholder": "Confirm your password",
+        "password_create_placeholder": "Create a strong password",
+        "remember_me": "Remember me",
+        "forgot_password": "Forgot password?",
+        "dont_have_account": "Don't have an account?",
+        "create_one": "Create one here",
+        "quick_demo": "Quick Demo Access",
+        "welcome_back_toast": "Welcome back!",
+        "invalid_credentials": "Invalid credentials",
+        "something_wrong": "Something went wrong. Please try again.",
+        "roles": {
+            "customer": "Customer",
+            "customer_desc": "Order food & track deliveries",
+            "employee": "Employee",
+            "employee_desc": "POS & order management",
+            "admin": "Admin",
+            "admin_desc": "Full system control"
+        },
+        "join_title": "Join :brand",
+        "join_subtitle": "Create your account to start ordering",
+        "full_name": "Full Name",
+        "full_name_placeholder": "Enter your full name",
+        "phone_label": "Phone Number",
+        "phone_placeholder": "Enter your phone number",
+        "terms_agree": "I agree to the",
+        "terms_service": "Terms of Service",
+        "privacy_policy": "Privacy Policy",
+        "create_account": "Create Account",
+        "creating_account": "Creating Account...",
+        "already_have_account": "Already have an account?",
+        "sign_in_here": "Sign in here",
+        "secure_info": "Your information is secure and encrypted",
+        "welcome_register_toast": "Welcome to NKH Restaurant!",
+        "register_failed": "Registration failed. Please try again.",
+        "validation": {
+            "email_invalid": "Please enter a valid email address",
+            "password_min": "Password must be at least 6 characters",
+            "password_min_8": "Password must be at least 8 characters",
+            "name_min": "Name must be at least 2 characters",
+            "phone_min": "Please enter a valid phone number",
+            "password_mismatch": "Passwords don't match",
+            "terms_required": "You must accept the terms and conditions"
+        },
+        "forgot_password_title": "Reset Password",
+        "check_email": "Check your email for reset instructions",
+        "enter_email_reset": "Enter your email to receive a reset link",
+        "send_reset_link": "Send Reset Link",
+        "sending": "Sending...",
+        "back_to_sign_in": "Back to Sign In",
+        "email_sent_title": "Email Sent!",
+        "email_sent_desc": "We've sent a password reset link to <span class=\"text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold\">:email</span>. Check your inbox and follow the instructions.",
+        "resend_email": "Resend Email",
+        "resending": "Resending...",
+        "reset_link_sent": "Password reset link sent to your email!",
+        "reset_link_failed": "Failed to send reset link. Please try again.",
+        "new_password_title": "New Password",
+        "new_password_subtitle": "Create a strong new password for your account",
+        "resetting_for": "Resetting password for",
+        "update_password": "Update Password",
+        "updating_password": "Updating Password...",
+        "password_reset_success": "Password reset successfully! Please sign in with your new password.",
+        "password_reset_failed": "Failed to reset password. Please try again.",
+        "verify_email_title": "Verify Email",
+        "verify_email_subtitle": "We've sent a verification link to your email",
+        "check_inbox_title": "Check Your Inbox",
+        "check_inbox_desc": "We've sent a verification link to <span class=\"text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold\">:email</span>. Click the link to verify your account.",
+        "verification_sent": "Verification email sent!",
+        "resend_verification": "Resend Verification Email",
+        "continue": "Continue",
+        "sign_out": "Sign Out",
+        "didnt_receive_email": "Didn't receive the email? Check your spam folder or contact",
+        "need_help": "Need help? Contact",
+        "verify_email_failed": "Failed to send verification email. Please try again.",
+        "security_tips": "Security Tips",
+        "very_weak": "Very Weak",
+        "weak": "Weak",
+        "fair": "Fair",
+        "good": "Good",
+        "strong": "Strong",
+        "password_strength": "password",
+        "tip_length": "Use 8+ characters with mixed case",
+        "tip_chars": "Include numbers and special characters"
+    },
+    "features": {
+        "fast_delivery": "Lightning Fast",
+        "fast_delivery_desc": "Average delivery time under 30 minutes",
+        "fresh_ingredients": "Fresh Ingredients",
+        "fresh_ingredients_desc": "Locally sourced, premium quality",
+        "made_with_love": "Made with Love",
+        "made_with_love_desc": "Passion in every single dish"
+    },
+    "home": {
+        "rating_badge": "Rated :rating/5 by :count+ Customers",
+        "stats": {
+            "avg_delivery": "Avg. Delivery",
+            "happy_customers": "Happy Customers",
+            "rating": "Rating"
+        },
+        "our_menu": "Our Menu",
+        "explore_categories": "Explore Categories",
+        "featured_dishes": "Featured Dishes",
+        "view_full_menu": "View Full Menu",
+        "cta": {
+            "title": "Ready to taste something :highlight?",
+            "subtitle": "Join thousands of happy customers and experience the best food delivery service in town.",
+            "highlight": "amazing"
+        },
+        "delicious_choices": "Delicious Choices"
+    },
+    "common": {
+        "loading": "Loading...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "search": "Search...",
+        "view": "View",
+        "create": "Create",
+        "add": "Add",
+        "update": "Update",
+        "actions": "Actions",
+        "status": "Status",
+        "date": "Date",
+        "all": "All",
+        "apply": "Apply",
+        "reset": "Reset",
+        "item": "item",
+        "items": "items",
+        "minutes_short": "mins",
+        "and_symbol": "&"
+    },
+    "admin": {
+        "common": {
+            "title": "NKH Restaurant",
+            "portal": "Admin Portal",
+            "open_dashboard": "Open Dashboard",
+            "online": "Online",
+            "back": "Back",
+            "days": {
+                "sun": "Sun",
+                "mon": "Mon",
+                "tue": "Tue",
+                "wed": "Wed",
+                "thu": "Thu",
+                "fri": "Fri",
+                "na": "N/A"
+            }
+        },
+        "expenses": {
+            "title": "Expenses",
+            "subtitle": "Track business spending",
+            "add_expense": "Add Expense",
+            "categories": "Categories",
+            "stats": {
+                "total": "Total",
+                "paid": "Paid",
+                "pending": "Pending"
+            },
+            "filters": {
+                "search": "Search...",
+                "all_status": "All Status",
+                "all_categories": "All Categories",
+                "all_time": "All Time"
+            },
+            "table": {
+                "date": "Date",
+                "category_vendor": "Category / Vendor",
+                "amount": "Amount",
+                "reference": "Reference",
+                "status": "Status",
+                "actions": "Actions",
+                "loading": "Loading expenses...",
+                "empty": "No expenses found",
+                "create_trigger": "Create your first expense to get started"
+            },
+            "modal": {
+                "new_title": "New Expense",
+                "edit_title": "Edit Expense",
+                "category_label": "Category",
+                "select_category": "Select Category",
+                "date_label": "Date",
+                "amount_label": "Amount",
+                "status_label": "Status",
+                "vendor_label": "Vendor",
+                "reference_label": "Reference",
+                "description_label": "Description",
+                "save": "Save",
+                "cancel": "Cancel",
+                "confirm_delete": "Delete this expense?"
+            },
+            "categories_modal": {
+                "title": "Manage Categories",
+                "add_new": "Add New",
+                "placeholder": "New Category Name...",
+                "add_btn": "Add",
+                "empty": "No categories yet",
+                "confirm_delete": "Delete category?"
+            },
+            "status": {
+                "draft": "Draft",
+                "approved": "Approved",
+                "paid": "Paid",
+                "voided": "Voided"
+            },
+            "uncategorized": "Uncategorized",
+            "toasts": {
+                "created": "Expense created",
+                "updated": "Expense updated",
+                "deleted": "Expense deleted",
+                "category_created": "Category created",
+                "category_deleted": "Category deleted",
+                "failed": "Failed"
+            }
+        },
+        "emails": {
+            "order_status": {
+                "subject": "Order :order_number :status",
+                "greeting": "Hello :name",
+                "approved_body": "Your order #:order_number has been approved!",
+                "approved_next": "You will be notified once your order is ready.",
+                "view_order": "View Order",
+                "rejected_body": "Your order #:order_number has been rejected.",
+                "rejection_reason": "Reason: :reason",
+                "apology": "We apologize for any inconvenience caused.",
+                "place_new_order": "Place New Order",
+                "closing": "Thank you for choosing our service!"
+            },
+            "receipt": {
+                "title": "Payment Receipt",
+                "payment_status": "Payment :status",
+                "hi": "Hi :name,",
+                "hello": "Hello,",
+                "thank_you": "Thank you for your order! Here's your receipt.",
+                "order_number": "Order #",
+                "subtotal": "Subtotal",
+                "tax": "Tax",
+                "discount": "Discount",
+                "total_paid": "Total Paid",
+                "payment_details": "Payment Details",
+                "receipt_number": "Receipt Number:",
+                "transaction_id": "Transaction ID:",
+                "amount": "Amount:",
+                "pdf_copy": "A PDF copy of your receipt is attached to this email for your records.",
+                "tel": "Tel:",
+                "automated_message": "This is an automated email. Please do not reply directly to this message."
+            }
+        },
+        "hr": {
+            "employees": {
+                "title": "Employees",
+                "subtitle": "Manage staff",
+                "add": "Add Employee",
+                "stats": {
+                    "total": "Total",
+                    "active": "Active",
+                    "leave": "Leave",
+                    "inactive": "Inactive"
+                },
+                "filters": {
+                    "all": "All",
+                    "active": "Active",
+                    "leave": "Leave",
+                    "off": "Off"
+                },
+                "table": {
+                    "employee": "Employee",
+                    "position": "Position",
+                    "contact": "Contact",
+                    "hire_date": "Hire Date",
+                    "status": "Status",
+                    "actions": "Actions",
+                    "no_position": "No Position",
+                    "unknown": "Unknown"
+                },
+                "modal": {
+                    "create_title": "New Employee",
+                    "edit_title": "Edit Employee",
+                    "name": "Name",
+                    "email": "Email",
+                    "phone": "Phone",
+                    "password": "Password",
+                    "new_password": "New Password",
+                    "code": "Code",
+                    "auto_generated": "Auto-generated",
+                    "hire_date": "Hire Date",
+                    "type": "Type",
+                    "salary": "Salary",
+                    "status": "Status",
+                    "position": "Position",
+                    "location": "Location",
+                    "address": "Address",
+                    "search_address": "Search address...",
+                    "select": "Select",
+                    "types": {
+                        "monthly": "Monthly",
+                        "hourly": "Hourly"
+                    },
+                    "statuses": {
+                        "active": "Active",
+                        "inactive": "Inactive",
+                        "on_leave": "On Leave",
+                        "terminated": "Terminated"
+                    }
+                },
+                "messages": {
+                    "created": "Employee created successfully",
+                    "updated": "Employee updated successfully",
+                    "deleted": "Employee deactivated",
+                    "confirm_delete": "Deactivate this employee?",
+                    "failed": "Operation failed",
+                    "not_found": "No employees found",
+                    "adjust_filters": "Try adjusting filters"
+                }
+            },
+            "positions": {
+                "title": "Positions",
+                "subtitle": "Manage job titles",
+                "add": "Add Position",
+                "stats": {
+                    "total": "Total",
+                    "active": "Active",
+                    "staff": "Staff"
+                },
+                "filters": {
+                    "all": "All",
+                    "active": "Active",
+                    "inactive": "Inactive",
+                    "on": "On",
+                    "off": "Off"
+                },
+                "table": {
+                    "title": "Title",
+                    "description": "Description",
+                    "staff": "Staff",
+                    "status": "Status",
+                    "actions": "Actions",
+                    "no_desc": "No description"
+                },
+                "modal": {
+                    "create_title": "New Position",
+                    "edit_title": "Edit Position",
+                    "title": "Title",
+                    "description": "Description",
+                    "active_status": "Active Status",
+                    "cancel": "Cancel",
+                    "create": "Create Position",
+                    "update": "Update Position",
+                    "placeholder": {
+                        "title": "e.g. Head Chef",
+                        "description": "Optional description..."
+                    }
+                },
+                "messages": {
+                    "created": "Position created",
+                    "updated": "Position updated",
+                    "deleted": "Position deleted",
+                    "failed": "Failed",
+                    "confirm_delete": "Delete this position?",
+                    "not_found": "No positions found",
+                    "create_first": "Create your first position"
+                }
+            },
+            "roles": {
+                "title": "Roles & Permissions",
+                "subtitle": "Manage user access control and security",
+                "add": "Create Role",
+                "stats": {
+                    "roles": "Roles",
+                    "users": "Users",
+                    "perms": "Perms",
+                    "avg_role": "Avg/Role"
+                },
+                "table": {
+                    "role_name": "Role Name",
+                    "slug": "Slug",
+                    "users": "Users",
+                    "permissions": "Permissions",
+                    "actions": "Actions",
+                    "access_points": "access points",
+                    "no_users": "No users",
+                    "system": "System"
+                },
+                "modal": {
+                    "create_title": "New Role",
+                    "edit_title": "Edit Role",
+                    "role_name": "Role Name",
+                    "description": "Description",
+                    "permissions": "Permissions",
+                    "selected": "selected",
+                    "system_lock": "System role names cannot be changed",
+                    "placeholder": {
+                        "name": "e.g. Restaurant Manager",
+                        "description": "Describe what this role can do..."
+                    }
+                },
+                "messages": {
+                    "created": "Role created",
+                    "updated": "Role updated",
+                    "deleted": "Role deleted",
+                    "failed": "Failed",
+                    "system_delete_error": "Cannot delete system roles",
+                    "assigned_delete_error": "Cannot delete role assigned to :count users",
+                    "confirm_delete": "Delete role ':name'?",
+                    "not_found": "No roles found",
+                    "create_first": "Create a new role to get started",
+                    "load_failed": "Failed to load role details"
+                }
+            },
+            "shifts": {
+                "title": "Weekly Schedule",
+                "title_monthly": "Monthly Schedule",
+                "subtitle": "Manage team shifts",
+                "add": "Add Shift",
+                "stats": {
+                    "total": "Total",
+                    "published": "Published",
+                    "draft": "Draft"
+                },
+                "actions": {
+                    "copy_week": "Copy Week",
+                    "publish": "Publish",
+                    "today": "Today",
+                    "week": "Week",
+                    "month": "Month",
+                    "week_of": "Week of"
+                },
+                "messages": {
+                    "created": "Shift created successfully!",
+                    "create_failed": "Failed to create shift",
+                    "updated": "Shift updated successfully!",
+                    "update_failed": "Failed to update shift",
+                    "deleted": "Shift deleted!",
+                    "delete_failed": "Failed to delete",
+                    "published": "Shifts published!",
+                    "copied": "Shifts copied successfully!",
+                    "copy_failed": "Failed to copy shifts",
+                    "status_updated": "Status updated!",
+                    "status_failed": "Failed to update status",
+                    "no_drafts": "No draft shifts to publish.",
+                    "confirm_publish": "Publish {{count}} draft shifts?",
+                    "confirm_copy": "Copy schedule from previous week to this week?"
+                },
+                "empty": {
+                    "week": "No shifts this week",
+                    "month": "No shifts this month",
+                    "day": "No shifts for this day",
+                    "default": "No shifts"
+                },
+                "modal": {
+                    "new": "New Shift",
+                    "edit": "Edit Shift",
+                    "day_shifts": "Day Shifts",
+                    "for_date": "Shifts for {{date}}",
+                    "employee": "Employee",
+                    "location": "Location",
+                    "position": "Position",
+                    "type": "Type",
+                    "start": "Start",
+                    "end": "End",
+                    "notes": "Notes",
+                    "status": "Status",
+                    "select": "Select",
+                    "no_location": "No location",
+                    "use_default": "Use default",
+                    "placeholder_notes": "Notes..."
+                },
+                "types": {
+                    "morning": "Morning",
+                    "afternoon": "Afternoon",
+                    "evening": "Evening",
+                    "night": "Night",
+                    "split": "Split"
+                },
+                "status": {
+                    "draft": "Draft",
+                    "published": "Published",
+                    "scheduled": "Scheduled",
+                    "in_progress": "In Progress",
+                    "completed": "Completed",
+                    "cancelled": "Cancelled"
+                }
+            }
+        },
+        "tables": {
+            "title": "Tables",
+            "subtitle": "Manage restaurant floor plan",
+            "add": "Add Table",
+            "stats": {
+                "total": "Tables",
+                "available": "Available",
+                "occupied": "Occupied",
+                "reserved": "Reserved"
+            },
+            "actions": {
+                "print_all": "Print All",
+                "generate_all_qr": "Generate All QR",
+                "regenerate": "Regenerate",
+                "copy_url": "Copy URL",
+                "download": "Download",
+                "print": "Print",
+                "generate_qr": "Generate QR Code",
+                "generating": "Generating..."
+            },
+            "filters": {
+                "all_status": "All Status",
+                "all_floors": "All Floors",
+                "search": "Search..."
+            },
+            "table": {
+                "code": "Code",
+                "floor": "Floor",
+                "capacity": "Capacity",
+                "status": "Status",
+                "actions": "Actions",
+                "seats": "seats",
+                "no_qr": "No QR"
+            },
+            "modal": {
+                "new": "New Table",
+                "edit": "Edit Table",
+                "location": "Location",
+                "select_location": "Select Location",
+                "floor": "Floor",
+                "select_floor": "Select Floor",
+                "code": "Table Code",
+                "capacity": "Capacity",
+                "status": "Status",
+                "qr_for": "QR Code - Table :code",
+                "no_qr_yet": "No QR code yet",
+                "main_floor": "Main Floor"
+            },
+            "messages": {
+                "created": "Table created",
+                "create_failed": "Failed to create",
+                "updated": "Table updated",
+                "update_failed": "Failed to update",
+                "deleted": "Table deleted",
+                "delete_failed": "Failed to delete",
+                "qr_generated": "QR code generated",
+                "qr_failed": "Failed to generate QR",
+                "bulk_qr_generated": "QR codes generated for :count tables",
+                "bulk_qr_failed": "Failed to bulk generate",
+                "all_qr_exists": "All tables already have QR codes",
+                "confirm_delete": "Delete this table?",
+                "confirm_bulk_qr": "Generate QR codes for :count tables?",
+                "qr_downloaded": "QR code downloaded as JPG",
+                "qr_process_failed": "Failed to process QR image",
+                "url_copied": "QR URL copied to clipboard"
+            },
+            "status": {
+                "available": "Available",
+                "reserved": "Reserved",
+                "occupied": "Occupied",
+                "unavailable": "Unavailable"
+            },
+            "empty": {
+                "no_tables": "No tables found",
+                "create_first": "Create your first table"
+            }
+        },
+        "floors": {
+            "title": "Floor Management",
+            "subtitle": "Manage restaurant floors and layout",
+            "add": "Add Floor",
+            "stats": {
+                "floors": "Total Floors",
+                "active": "Active Floors",
+                "tables": "Total Tables",
+                "capacity": "Total Capacity"
+            },
+            "filters": {
+                "search": "Search floors...",
+                "all": "All Status",
+                "active": "Active",
+                "inactive": "Inactive",
+                "all_locations": "All Locations"
+            },
+            "table": {
+                "name": "Floor Name",
+                "location": "Location",
+                "order": "Display Order",
+                "tables": "Tables",
+                "status": "Status",
+                "actions": "Actions",
+                "active": "Active",
+                "inactive": "Inactive",
+                "off": "Off",
+                "loading": "Loading floors...",
+                "loading_short": "Loading..."
+            },
+            "empty": {
+                "no_floors": "No floors found",
+                "create_first": "Create your first floor to get started"
+            },
+            "messages": {
+                "created": "Floor created successfully",
+                "updated": "Floor updated successfully",
+                "deleted": "Floor deleted successfully",
+                "failed": "Operation failed",
+                "confirm_delete": "Are you sure you want to delete this floor?"
+            },
+            "modal": {
+                "new": "New Floor",
+                "edit": "Edit Floor",
+                "location": "Location",
+                "select_location": "Select Location",
+                "name": "Floor Name",
+                "display_order": "Display Order",
+                "active": "Active"
+            }
+        },
+        "locations": {
+            "title": "Location Management",
+            "subtitle": "Manage restaurant branches and details",
+            "add": "Add Location",
+            "stats": {
+                "locations": "Total Locations",
+                "active": "Active",
+                "online": "Online Ordering",
+                "delivery": "Delivery Available"
+            },
+            "filters": {
+                "search": "Search locations...",
+                "all": "All Status",
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "table": {
+                "location": "Location Details",
+                "contact": "Contact Info",
+                "services": "Services",
+                "status": "Status",
+                "actions": "Actions",
+                "active": "Active",
+                "inactive": "Inactive",
+                "online": "Online Ordering",
+                "pickup": "Pickup Available",
+                "delivery": "Delivery Available",
+                "loading": "Loading locations..."
+            },
+            "empty": {
+                "no_locations": "No locations found",
+                "add_first": "Add your first location to get started"
+            },
+            "messages": {
+                "created": "Location created successfully",
+                "updated": "Location updated successfully",
+                "deleted": "Location deleted successfully",
+                "failed": "Operation failed",
+                "confirm_delete": "Are you sure you want to delete this location? This will affect all associated floors and tables."
+            },
+            "modal": {
+                "new": "New Location",
+                "edit": "Edit Location",
+                "pin_location": "Pin Location on Map",
+                "code": "Location Code",
+                "name": "Location Name",
+                "phone": "Phone Number",
+                "city": "City/Province",
+                "address": "Address Line 1",
+                "postal": "Postal Code",
+                "services_status": "Services & Status",
+                "online": "Accept Online Orders",
+                "pickup": "Accept Pickup",
+                "delivery": "Accept Delivery",
+                "active": "Location Active",
+                "hours": {
+                    "title": "Operating Hours",
+                    "add": "Add Hours",
+                    "dine": "Dine-In",
+                    "pick": "Pickup",
+                    "deliv": "Delivery"
+                }
+            }
+        },
+        "operating_hours": {
+            "title": "Operating Hours",
+            "subtitle": "Manage your business hours for each location and service type",
+            "save": "Save Changes",
+            "saving": "Saving...",
+            "stats": {
+                "location": "Location",
+                "service": "Service Type",
+                "open_days": "Open Days"
+            },
+            "controls": {
+                "location": "Location",
+                "select_location": "Select Location...",
+                "service_type": "Service Type"
+            },
+            "service_types": {
+                "dine_in": "Dine-In",
+                "pickup": "Pickup",
+                "delivery": "Delivery"
+            },
+            "days": {
+                "Sunday": "Sunday",
+                "Monday": "Monday",
+                "Tuesday": "Tuesday",
+                "Wednesday": "Wednesday",
+                "Thursday": "Thursday",
+                "Friday": "Friday",
+                "Saturday": "Saturday"
+            },
+            "schedule": {
+                "open": "OPEN",
+                "closed": "CLOSED",
+                "open_time": "OPEN",
+                "close_time": "CLOSE",
+                "copy_all": "Copy to All"
+            },
+            "messages": {
+                "saved": "Operating hours saved successfully",
+                "save_failed": "Failed to save operating hours",
+                "copied": "Schedule copied to all days",
+                "copy_failed": "Failed to copy schedule",
+                "set_first": "Please set hours for this day first",
+                "confirm_copy": "Are you sure you want to copy {day}'s schedule to all other days?"
+            }
+        },
+        "inventory": {
+            "title": "Inventory",
+            "subtitle": "Stock tracking and management",
+            "actions": {
+                "transfer": "Transfer",
+                "wastage": "Wastage"
+            },
+            "stats": {
+                "value": "Total Value",
+                "low": "Low Stock",
+                "expiring": "Expiring",
+                "items": "Total Items"
+            },
+            "filters": {
+                "search": "Search items...",
+                "location": "Location"
+            },
+            "table": {
+                "item": "Item Name",
+                "location": "Location",
+                "stock": "Stock Level",
+                "batch": "Batch Info",
+                "expiry": "Expiry",
+                "history": "History",
+                "value": "value"
+            },
+            "empty": "No inventory items found",
+            "modal": {
+                "transfer_title": "Transfer Stock",
+                "wastage_title": "Record Wastage",
+                "history_title": "History: {item}",
+                "from": "From",
+                "to": "To",
+                "ingredient": "Ingredient",
+                "quantity": "Quantity",
+                "notes": "Notes",
+                "location": "Location",
+                "reason": "Reason",
+                "cancel": "Cancel",
+                "record": "Record",
+                "transfer": "Transfer"
+            },
+            "reasons": {
+                "expired": "Expired",
+                "damaged": "Damaged",
+                "spilled": "Spilled",
+                "other": "Other"
+            }
+        },
+        "nav": {
+            "dashboard": "Dashboard",
+            "operations": {
+                "title": "Operations",
+                "orders": "Orders",
+                "reservations": "Reservations",
+                "notifications": "Notifications"
+            },
+            "menu": {
+                "title": "Menu Management",
+                "categories": "Categories",
+                "items": "Menu Items",
+                "recipes": "Recipes",
+                "promotions": "Promotions"
+            },
+            "inventory": {
+                "title": "Inventory & Procurement",
+                "purchase_orders": "Purchase Orders",
+                "inventory": "Inventory",
+                "reports": "Inventory Reports",
+                "ingredients": "Ingredients",
+                "adjustments": "Adjustments",
+                "alerts": "Stock Alerts",
+                "suppliers": "Suppliers",
+                "units": "Units"
+            },
+            "people": {
+                "title": "People Management",
+                "employees": "Employees",
+                "admins": "Admins",
+                "customers": "Customers",
+                "positions": "Positions",
+                "loyalty": "Loyalty Points"
+            },
+            "scheduling": {
+                "title": "Scheduling",
+                "shifts": "Shifts",
+                "approvals": "Shift Approvals",
+                "time_off": "Time Off Requests",
+                "attendance": "Attendance Management",
+                "payroll": "Payroll Management"
+            },
+            "layout": {
+                "title": "Restaurant Layout",
+                "locations": "Locations",
+                "floors": "Floors",
+                "tables": "Tables"
+            },
+            "finance": {
+                "title": "Finance & Analytics",
+                "analytics": "Sales Analytics",
+                "dashboard": "Financial Dashboard",
+                "expenses": "Expenses",
+                "invoices": "Invoices"
+            },
+            "system": {
+                "title": "System",
+                "operating_hours": "Operating Hours",
+                "roles": "Roles & Permissions",
+                "translations": "Translations",
+                "audit_logs": "Audit Logs",
+                "settings": "Settings"
+            }
+        },
+        "dashboard": {
+            "welcome": "Welcome",
+            "command_center": "Command Center",
+            "refresh": "Refresh",
+            "live": "LIVE",
+            "stats": {
+                "revenue": "Today's Revenue",
+                "orders": "Today's Orders",
+                "active_orders": "Active Orders",
+                "avg_order_value": "Avg Order Value",
+                "active_tasks": "My Active Tasks",
+                "assigned_orders": "Assigned orders",
+                "performance": "My Performance This Week",
+                "orders_completed": "Orders Completed",
+                "no_tasks": "No active tasks assigned"
+            }
+        },
+        "orders": {
+            "title": "Orders",
+            "live": "Live",
+            "stats": {
+                "all": "All",
+                "pending": "Pending",
+                "preparing": "Preparing",
+                "ready": "Ready"
+            },
+            "search_placeholder": "Search by order number, customer name...",
+            "filter": {
+                "button": "Filters",
+                "types": {
+                    "all": "All Types",
+                    "dine_in": "Dine-In",
+                    "pickup": "Pickup",
+                    "delivery": "Delivery"
+                }
+            },
+            "status": {
+                "pending": "Pending",
+                "received": "Received",
+                "preparing": "Preparing",
+                "ready": "Ready",
+                "completed": "Completed",
+                "cancelled": "Cancelled",
+                "delete_completed_order": "Cannot delete a completed or paid order.",
+                "scan_again": "Unauthenticated. Please scan the QR code again.",
+                "customer_profile_not_found_long": "Customer profile not found. Please ensure you are logged in or access via Telegram.",
+                "location_required_check": "Location is required to check availability.",
+                "location_required_create": "Location is required to create a reservation."
+            },
+            "reservations": {
+                "notifications": {
+                    "confirmed": {
+                        "title": "Reservation Confirmed! ✅",
+                        "body": "Your reservation on :date at :time has been confirmed!"
+                    },
+                    "cancelled": {
+                        "title": "Reservation Cancelled ❌",
+                        "body": "Your reservation on :date at :time has been cancelled."
+                    },
+                    "seated": {
+                        "title": "Welcome! 👋",
+                        "body": "Enjoy your dining experience! Your table is ready."
+                    },
+                    "completed": {
+                        "title": "Thanks for Dining! ⭐",
+                        "body": "We hope you enjoyed your visit. See you again soon!"
+                    },
+                    "no_show": {
+                        "title": "Missed Reservation",
+                        "body": "We missed you! Your reservation on :date was marked as no-show."
+                    },
+                    "customer_confirmed": {
+                        "title": "Reservation Confirmed! 🍽️",
+                        "body": "Your table for :count is reserved on :date at :time. Code: :code"
+                    }
+                }
+            },
+            "actions": {
+                "select_all": "Select all",
+                "clear": "Clear",
+                "receive": "Receive",
+                "start_prep": "Start Prep",
+                "ready": "Ready",
+                "complete": "Complete",
+                "update": "Update",
+                "scan_again": "Unauthenticated. Please scan the QR code again.",
+                "customer_profile_not_found_long": "Customer profile not found. Please ensure you are logged in or access via Telegram.",
+                "location_required_check": "Location is required to check availability.",
+                "location_required_create": "Location is required to create a reservation.",
+                "profile_not_found": "Profile not found",
+                "authentication_required": "Authentication required",
+                "invalid_category": "Invalid category"
+            },
+            "success": {
+                "order_created": "Order created successfully",
+                "order_updated": "Order updated successfully",
+                "order_cancelled": "Order cancelled successfully",
+                "order_deleted": "Order deleted successfully",
+                "order_item_removed": "Order item removed.",
+                "payment_processed": "Payment processed successfully",
+                "reservation_cancelled": "Reservation cancelled",
+                "profile_updated": "Profile updated successfully",
+                "avatar_updated": "Profile picture updated successfully",
+                "password_changed": "Password changed successfully",
+                "avatar_deleted": "Avatar deleted successfully",
+                "settings_updated": "Settings updated successfully",
+                "phone_updated": "Phone number updated successfully"
+            },
+            "validation": {
+                "current_password": "The current password is incorrect.",
+                "upload": {
+                    "no_file": "No file was uploaded. Please try again.",
+                    "failed_prefix": "File upload error: ",
+                    "auth_required": "You must be logged in to upload a profile picture."
+                },
+                "password": {
+                    "telegram_guest": "Password change is not available for Telegram guests",
+                    "create_account_hint": "Create a full account to set a password.",
+                    "incorrect": "Current password is incorrect"
+                }
+            },
+            "card": {
+                "guest": "Guest Customer",
+                "items": "item(s)",
+                "total": "Total",
+                "status": "Status",
+                "date": "Date",
+                "actions": "Actions",
+                "paid": "Paid",
+                "unpaid": "Unpaid"
+            },
+            "utility": {
+                "translation_updated": "Translation updated successfully",
+                "translations_bulk_updated": "Translations updated successfully",
+                "translation_update_failed": "Failed to update translation: :error",
+                "translations_bulk_failed": "Failed to update translations: :error",
+                "unit_created": "Unit created successfully",
+                "unit_updated": "Unit updated successfully",
+                "unit_deleted": "Unit deleted successfully",
+                "unit_in_use": "Cannot delete unit that is in use by ingredients",
+                "timeslots_regenerated": "Time slots regenerated successfully",
+                "timeslots_regenerate_failed": "Failed to regenerate time slots",
+                "timeslots_cleanup": "Old time slots cleaned up successfully",
+                "timeslots_cleanup_failed": "Failed to cleanup time slots"
+            },
+            "modal": {
+                "customer_details": "Customer Details",
+                "total_amount": "Total Amount",
+                "payment": "Payment"
+            },
+            "empty": {
+                "loading": "Loading orders...",
+                "no_orders": "No orders found",
+                "try_adjusting": "Try adjusting your filters or search query"
+            }
+        },
+        "menu": {
+            "title": "Menu Items",
+            "subtitle": "Manage your restaurant's menu",
+            "stats": {
+                "total": "Total",
+                "active": "Active",
+                "inactive": "Inactive",
+                "featured": "Featured"
+            },
+            "actions": {
+                "manage_featured": "Manage Featured",
+                "add_item": "Add Item",
+                "enable": "Enable",
+                "disable": "Disable",
+                "preview": "Preview",
+                "edit": "Edit",
+                "delete": "Delete",
+                "confirm_delete": "Delete this menu item?"
+            },
+            "search_placeholder": "Search...",
+            "table": {
+                "item": "Item",
+                "category": "Category",
+                "price": "Price",
+                "highlights": "Highlights",
+                "status": "Status",
+                "actions": "Actions"
+            },
+            "empty": {
+                "loading": "Loading...",
+                "no_items": "No items found",
+                "try_adjusting": "Try adjusting filters or add an item"
+            }
+        },
+        "people": {
+            "admins": {
+                "title": "Admins",
+                "subtitle": "Manage system administrators",
+                "add_admin": "Add Admin",
+                "edit_admin": "Edit Admin",
+                "new_admin": "New Admin",
+                "empty": "No admins found",
+                "confirm_deactivate": "Are you sure you want to deactivate this admin?",
+                "created": "Admin created successfully",
+                "updated": "Admin updated successfully",
+                "deactivated": "Admin deactivated",
+                "create_failed": "Failed to create admin",
+                "update_failed": "Failed to update admin",
+                "deactivate_failed": "Failed to deactivate admin",
+                "table": {
+                    "admin": "Admin",
+                    "contact": "Contact",
+                    "role": "Role",
+                    "status": "Status",
+                    "actions": "Actions"
+                },
+                "stats": {
+                    "total": "Total",
+                    "active": "Active",
+                    "inactive": "Inactive"
+                },
+                "roles": {
+                    "admin": "Admin",
+                    "manager": "Manager",
+                    "super_admin": "Super Admin"
+                }
+            },
+            "customers": {
+                "title": "Customers",
+                "subtitle": "Manage customers and loyalty",
+                "add_customer": "Add Customer",
+                "edit_customer": "Edit Customer",
+                "new_customer": "New Customer",
+                "stats": {
+                    "total": "Total",
+                    "active": "Active",
+                    "vip": "VIP",
+                    "points": "Points"
+                },
+                "table": {
+                    "customer": "Customer",
+                    "contact": "Contact",
+                    "location": "Location",
+                    "points": "Points",
+                    "actions": "Actions"
+                },
+                "empty": "No customers found",
+                "confirm_deactivate": "Deactivate this customer?",
+                "created": "Customer created",
+                "updated": "Customer updated",
+                "deactivated": "Customer deactivated",
+                "selected": ":count selected",
+                "clear": "Clear",
+                "location_label": "Location",
+                "notes_label": "Notes"
+            },
+            "nav": {
+                "dashboard": {
+                    "select": "Select"
+                }
+            },
+            "settings": {
+                "title": "Settings",
+                "subtitle": "Manage system settings",
+                "tabs": {
+                    "profile": "Profile",
+                    "system": "System"
+                },
+                "profile": {
+                    "title": "Profile Settings",
+                    "form": {
+                        "full_name": "Full Name",
+                        "email": "Email",
+                        "phone": "Phone"
+                    },
+                    "location": {
+                        "title": "Location",
+                        "use_my_location": "Use My Location",
+                        "finding_location": "Finding location...",
+                        "address": "Address",
+                        "lat": "Latitude",
+                        "lng": "Longitude"
+                    },
+                    "security": {
+                        "title": "Security",
+                        "current": "Current Password",
+                        "new": "New Password",
+                        "confirm": "Confirm Password",
+                        "button": "Change Password",
+                        "changing": "Changing..."
+                    },
+                    "account": {
+                        "title": "Account Info",
+                        "role": "Role",
+                        "member_since": "Member Since",
+                        "last_login": "Last Login",
+                        "today": "Today"
+                    },
+                    "actions": {
+                        "save": "Save Changes",
+                        "saving": "Saving..."
+                    }
+                },
+                "system": {
+                    "actions": {
+                        "save_changes": "Save Changes",
+                        "saving": "Saving...",
+                        "add_setting": "Add Setting",
+                        "create": "Create",
+                        "creating": "Creating...",
+                        "cancel": "Cancel"
+                    },
+                    "filter": {
+                        "global": "Global Settings",
+                        "location_specific": "Location Specific"
+                    },
+                    "empty": {
+                        "no_settings": "No settings found",
+                        "click_add": "Click 'Add Setting' to create one"
+                    },
+                    "list": {
+                        "modified": "Modified",
+                        "on": "On",
+                        "off": "Off"
+                    },
+                    "modal": {
+                        "title": "New Setting",
+                        "key": "Key",
+                        "key_hint": "Key must be unique",
+                        "value": "Value",
+                        "value_placeholder": "Setting value"
+                    }
+                },
+                "messages": {
+                    "profile_updated": "Profile updated successfully",
+                    "password_changed": "Password changed successfully",
+                    "settings_saved": "Settings saved successfully",
+                    "setting_created": "Setting created successfully",
+                    "setting_deleted": "Setting deleted successfully",
+                    "profile_update_failed": "Failed to update profile",
+                    "password_change_failed": "Failed to change password",
+                    "settings_save_failed": "Failed to save settings",
+                    "setting_create_failed": "Failed to create setting",
+                    "setting_delete_failed": "Failed to delete setting",
+                    "passwords_mismatch": "New passwords do not match",
+                    "geolocation_error": "Geolocation is not supported by your browser",
+                    "location_error": "Unable to retrieve your location"
+                }
+            },
+            "notifications": {
+                "title": "Notifications",
+                "subtitle": "System alerts and broadcasts",
+                "ribbon": {
+                    "total": "Total",
+                    "unread": "Unread",
+                    "alerts": "Alerts",
+                    "messages": "Messages"
+                },
+                "search_placeholder": "Search...",
+                "filters": {
+                    "toggle": "Filters",
+                    "type": {
+                        "all": "All Types",
+                        "order": "Order",
+                        "promotion": "Promotion",
+                        "reward": "Reward",
+                        "system": "System"
+                    },
+                    "status": {
+                        "all": "All Status",
+                        "read": "Read",
+                        "unread": "Unread"
+                    },
+                    "target": {
+                        "all": "All Targets",
+                        "all_users": "All Users",
+                        "all_customers": "All Customers",
+                        "all_employees": "All Employees",
+                        "by_role": "By Role",
+                        "by_tier": "By Tier"
+                    }
+                },
+                "table": {
+                    "headers": {
+                        "title_message": "Title / Message",
+                        "type": "Type",
+                        "target": "Target",
+                        "recipients": "Recipients",
+                        "date": "Date",
+                        "actions": "Actions"
+                    },
+                    "empty": {
+                        "loading": "Loading...",
+                        "no_data": "No notifications found"
+                    },
+                    "status": {
+                        "recipients": "recipients",
+                        "read": "read",
+                        "unread": "unread",
+                        "legacy": "Legacy"
+                    },
+                    "by": "By"
+                },
+                "modal": {
+                    "send": {
+                        "title": "Send Notification",
+                        "form": {
+                            "title": "Title",
+                            "message": "Message",
+                            "type": "Type",
+                            "recipient": "Recipient",
+                            "all_users": "All Users"
+                        },
+                        "actions": {
+                            "send": "Send",
+                            "cancel": "Cancel"
+                        }
+                    },
+                    "view": {
+                        "title": "Notification Details",
+                        "labels": {
+                            "target": "Target",
+                            "recipients": "Recipients",
+                            "read": "Read",
+                            "unread": "Unread"
+                        },
+                        "actions": {
+                            "close": "Close"
+                        }
+                    }
+                },
+                "messages": {
+                    "sent": "Notification sent",
+                    "marked_read": "Marked as read",
+                    "deleted": "Notification deleted",
+                    "failed": "Failed"
+                },
+                "categories": {
+                    "actions": {
+                        "confirm_delete": "Are you sure you want to delete"
+                    }
+                }
+            }
+        },
+        "profile": {
+            "title": "My Profile",
+            "subtitle": "Manage your personal information and preferences",
+            "edit": "Edit Profile",
+            "personal_info": "Personal Information",
+            "full_name": "Full Name",
+            "email": "Email",
+            "phone": "Phone",
+            "birth_date": "Birth Date",
+            "gender": "Gender",
+            "genders": {
+                "na": "Prefer not to say",
+                "male": "Male",
+                "female": "Female",
+                "other": "Other"
+            },
+            "language": "Preferred Language",
+            "marketing_consent": "I want to receive promotional emails and offers",
+            "save": "Save Changes",
+            "saving": "Saving...",
+            "cancel": "Cancel",
+            "addresses": {
+                "title": "My Addresses",
+                "add": "Add Address",
+                "edit": "Edit Address",
+                "delete_confirm": "Delete this address?",
+                "default": "Default",
+                "set_default": "Set as Default",
+                "instructions": "Instructions",
+                "no_addresses": "No addresses saved. Add one to make ordering easier!",
+                "label": "Label",
+                "label_placeholder": "Home, Office, etc.",
+                "line1": "Address Line 1",
+                "line2": "Address Line 2",
+                "city": "City",
+                "province": "Province",
+                "postal_code": "Postal Code",
+                "country": "Country",
+                "delivery_instructions": "Delivery Instructions",
+                "delivery_instructions_placeholder": "e.g., Ring the doorbell, leave at gate...",
+                "pin_location": "Pin Your Location",
+                "use_my_location": "Use My Location",
+                "finding": "Finding address...",
+                "drag_marker": "Drag the marker or click on the map to set your delivery location",
+                "update": "Update",
+                "add_btn": "Add",
+                "address_suffix": "Address"
+            },
+            "messages": {
+                "update_success": "Profile updated successfully",
+                "update_error": "Failed to update profile",
+                "address_added": "Address added successfully",
+                "address_add_error": "Failed to add address",
+                "address_updated": "Address updated successfully",
+                "address_update_error": "Failed to update address",
+                "address_deleted": "Address deleted",
+                "address_delete_error": "Failed to delete address",
+                "default_updated": "Default address updated",
+                "default_error": "Failed to set default address",
+                "geo_not_supported": "Geolocation is not supported by your browser",
+                "geo_error": "Unable to retrieve your location. Check browser permissions."
+            }
+        },
+        "alerts": {
+            "title": "Stock Alerts",
+            "subtitle": "Monitor critical inventory levels",
+            "active": "Active Alerts",
+            "no_active": "No active alerts",
+            "stats": {
+                "active": "Active",
+                "critical": "Critical",
+                "expiring": "Expiring",
+                "immediate_action": "Immediate action",
+                "within_7_days": "Within 7 days"
+            },
+            "filters": {
+                "type": "Type",
+                "severity": "Severity",
+                "acknowledged": "Acknowledged"
+            },
+            "severity": {
+                "high": "High",
+                "medium": "Medium",
+                "low": "Low"
+            },
+            "types": {
+                "critical_stock": "Critical Stock",
+                "low_stock": "Low Stock",
+                "expiring_soon": "Expiring Soon",
+                "overstock": "Overstock"
+            },
+            "actions": {
+                "done": "Done",
+                "create_po": "Create PO",
+                "manage_settings": "Manage Settings",
+                "close": "Close",
+                "cancel": "Cancel",
+                "confirm": "Confirm",
+                "processing": "Processing..."
+            },
+            "settings": {
+                "title": "Settings",
+                "subtitle": "Configure stock notifications and automated actions.",
+                "email_alerts": "Email Alerts",
+                "email_desc": "Critical stock alerts",
+                "auto_reorder": "Auto-Reorder",
+                "auto_reorder_desc": "Auto draft POs",
+                "on": "On",
+                "off": "Off"
+            },
+            "reorder": {
+                "title": "Reorder",
+                "all_healthy": "All stock healthy",
+                "modal_title": "Create PO",
+                "item_label": "Item",
+                "quantity": "Quantity",
+                "destination": "Destination Location",
+                "select_location": "Select Location (Default: {default})",
+                "unspecified_location": "If unspecified, defaults to {default}",
+                "now": "Now",
+                "max": "Max",
+                "no_supplier": "No Supplier",
+                "supplier_missing": "Ingredient has no supplier assigned",
+                "po_created": "Purchase Order created successfully",
+                "po_failed": "Failed to create PO",
+                "acknowledged": "Alert acknowledged",
+                "acknowledge_failed": "Failed to acknowledge alert",
+                "settings_updated": "Settings updated",
+                "settings_failed": "Failed to update settings"
+            }
+        },
+        "suppliers": {
+            "title": "Suppliers",
+            "subtitle": "Manage vendor relationships",
+            "add_supplier": "Add Supplier",
+            "edit_supplier": "Edit Supplier",
+            "new_supplier": "New Supplier",
+            "delete_confirm": "Delete this supplier?",
+            "created": "Supplier created",
+            "updated": "Supplier updated",
+            "deleted": "Supplier deleted",
+            "failed": "Failed",
+            "stats": {
+                "total": "Total Suppliers",
+                "active": "Active",
+                "food": "Food & Produce",
+                "beverages": "Beverages"
+            },
+            "filters": {
+                "search": "Search suppliers...",
+                "all_status": "All Status",
+                "active": "Active",
+                "inactive": "Inactive",
+                "all_types": "All Types"
+            },
+            "types": {
+                "food_produce": "Food & Produce",
+                "beverages": "Beverages",
+                "meat_seafood": "Meat & Seafood",
+                "dairy": "Dairy Products",
+                "equipment": "Equipment",
+                "supplies": "Supplies & Packaging",
+                "cleaning": "Cleaning Products",
+                "utilities": "Utilities",
+                "services": "Services",
+                "other": "Other",
+                "unknown": "Unknown"
+            },
+            "table": {
+                "name_code": "Name / Code",
+                "contact": "Contact",
+                "type": "Type",
+                "status": "Status",
+                "actions": "Actions",
+                "empty_title": "No suppliers found",
+                "empty_desc": "Add your first supplier to get started",
+                "loading": "Loading suppliers...",
+                "showing": "Showing",
+                "to": "to",
+                "of": "of"
+            },
+            "form": {
+                "code": "Code",
+                "name": "Name",
+                "type": "Type",
+                "location": "Location",
+                "no_location": "No specific location",
+                "phone": "Phone",
+                "email": "Email",
+                "contact_name": "Contact Name",
+                "contact_phone": "Contact Phone",
+                "address": "Address",
+                "payment_terms": "Payment Terms",
+                "notes": "Notes",
+                "tax_id": "Tax ID",
+                "active": "Active",
+                "cancel": "Cancel",
+                "save": "Save"
+            },
+            "ingredients": {
+                "title": "Ingredients",
+                "subtitle": "Manage inventory items and stock",
+                "add_ingredient": "Add Ingredient",
+                "edit_ingredient": "Edit Ingredient",
+                "categories": {
+                    "protein": "Protein",
+                    "vegetable": "Vegetables",
+                    "fruit": "Fruits",
+                    "dairy": "Dairy",
+                    "grain": "Grains",
+                    "spice": "Spices",
+                    "oil": "Oils",
+                    "beverage": "Beverages",
+                    "other": "Other"
+                },
+                "stats": {
+                    "total_items": "Total Items",
+                    "low_stock": "Low Stock",
+                    "inventory_value": "Inventory Value",
+                    "below_reorder": "Below reorder point"
+                },
+                "table": {
+                    "code": "Code",
+                    "name": "Name",
+                    "category": "Category",
+                    "stock_cost": "Stock / Cost",
+                    "supplier": "Supplier",
+                    "actions": "Actions",
+                    "empty_title": "No ingredients found"
+                },
+                "form": {
+                    "item_code": "Item Code",
+                    "item_name": "Item Name",
+                    "category": "Category",
+                    "unit": "Unit",
+                    "inventory": "Inventory",
+                    "cost": "Cost ($)",
+                    "reorder_pt": "Reorder Pt",
+                    "supplier": "Supplier",
+                    "none": "None",
+                    "cancel": "Cancel",
+                    "save": "Save",
+                    "create": "Create"
+                }
+            }
+        },
+        "purchase_orders": {
+            "title": "Purchase Orders",
+            "subtitle": "Manage supplier orders",
+            "create_po": "Create PO",
+            "edit_po": "Edit PO",
+            "po_details": "Purchase Order Details",
+            "stats": {
+                "pending": "Pending",
+                "awaiting": "Awaiting",
+                "month": "Month",
+                "value": "Value",
+                "total": "Total"
+            },
+            "filters": {
+                "search": "Search...",
+                "status": "Status",
+                "all_suppliers": "All Suppliers"
+            },
+            "status": {
+                "draft": "Draft",
+                "pending": "Pending",
+                "approved": "Approved",
+                "ordered": "Ordered",
+                "partially_received": "Partial",
+                "received": "Received",
+                "cancelled": "Cancelled"
+            },
+            "table": {
+                "po_number": "PO Number",
+                "supplier": "Supplier",
+                "location": "Location",
+                "date": "Date",
+                "status": "Status",
+                "total": "Total",
+                "actions": "Actions",
+                "loading": "Loading...",
+                "empty_title": "No purchase orders found",
+                "empty_desc": "Create a new purchase order to get started"
+            },
+            "form": {
+                "supplier": "Supplier",
+                "select_supplier": "Select Supplier",
+                "location": "Location",
+                "select_location": "Select Location",
+                "items": "Items",
+                "add_item": "Add",
+                "ingredient": "Ingredient",
+                "qty": "Qty",
+                "price": "Price",
+                "no_items": "No items added",
+                "cancel": "Cancel",
+                "save": "Save",
+                "notes": "Notes",
+                "expected_delivery": "Expected Delivery"
+            },
+            "receive_modal": {
+                "title": "Receive Items",
+                "description": "Confirm quantities received for PO",
+                "ordered": "Ordered",
+                "prev_received": "Prev. Received",
+                "receive_now": "Receive Now",
+                "destination": "Destination Location (Optional)",
+                "default_location": "Use Default / PO Location",
+                "processing": "Processing...",
+                "confirm": "Confirm Receipt"
+            },
+            "messages": {
+                "created": "Purchase order created",
+                "updated": "Purchase order updated",
+                "approved": "Purchase order approved",
+                "submitted": "Purchase order submitted",
+                "marked_ordered": "Marked as ordered",
+                "items_received": "Items received",
+                "cancelled": "Purchase order cancelled",
+                "deleted": "Purchase order deleted",
+                "failed": "Failed",
+                "select_supplier": "Select a supplier",
+                "add_item": "Add at least one item",
+                "delete_confirm": "Delete?"
+            }
+        },
+        "recipes": {
+            "title": "Recipes",
+            "subtitle": "Manage recipes and track costs",
+            "create_recipe": "Create Recipe",
+            "edit_recipe": "Edit Recipe",
+            "stats": {
+                "total": "Total",
+                "active": "Active",
+                "avg_cost": "Avg Cost",
+                "avg_items": "Avg Items"
+            },
+            "filters": {
+                "all": "All",
+                "active": "Active",
+                "inactive": "Inactive",
+                "all_menu_items": "All Menu Items"
+            },
+            "table": {
+                "recipe_name": "Recipe Name",
+                "menu_item": "Menu Item",
+                "cost_serving": "Cost / Serving",
+                "time": "Time",
+                "status": "Status",
+                "actions": "Actions",
+                "empty_title": "No recipes found",
+                "ingredients": "ingredients",
+                "servings": "servings",
+                "items": "items",
+                "min": "min",
+                "profit": "profit",
+                "batch": "Batch"
+            },
+            "form": {
+                "recipe_name": "Recipe Name",
+                "linked_menu_item": "Linked Menu Item",
+                "none_internal": "None (Internal)",
+                "servings": "Servings",
+                "prep_min": "Prep (min)",
+                "cook_min": "Cook (min)",
+                "ingredients": "Ingredients",
+                "add": "Add",
+                "select": "Select...",
+                "qty": "Qty",
+                "no_ingredients": "No ingredients added yet.",
+                "total_batch": "Total Batch",
+                "per_serving": "Per Serving",
+                "cancel": "Cancel",
+                "save": "Save"
+            },
+            "costing": {
+                "title": "Cost Analysis",
+                "total": "Total",
+                "serving": "Serving",
+                "margin": "Margin",
+                "breakdown": "Ingredient Breakdown",
+                "of_total": "of total",
+                "close": "Close Analysis"
+            },
+            "messages": {
+                "created": "Recipe created",
+                "updated": "Recipe updated",
+                "deleted": "Recipe deleted",
+                "duplicated": "Recipe duplicated",
+                "status_updated": "Status updated",
+                "failed": "Failed",
+                "add_ingredient": "Add at least one ingredient",
+                "delete_confirm": "Delete recipe?",
+                "costing_failed": "Failed to load costing data"
+            }
+        },
+        "ingredients": {
+            "title": "Ingredients",
+            "subtitle": "Manage raw materials and stock items",
+            "add_ingredient": "Add Ingredient",
+            "edit_ingredient": "Edit Ingredient",
+            "categories": {
+                "protein": "Protein",
+                "vegetable": "Vegetable",
+                "fruit": "Fruit",
+                "dairy": "Dairy",
+                "grain": "Grain",
+                "spice": "Spice",
+                "oil": "Oil",
+                "beverage": "Beverage",
+                "other": "Other"
+            },
+            "stats": {
+                "total_items": "Total Items",
+                "low_stock": "Low Stock",
+                "inventory_value": "Inventory Value",
+                "below_reorder": "Below Reorder Point"
+            },
+            "table": {
+                "code": "Code",
+                "name": "Name",
+                "category": "Category",
+                "stock_cost": "Stock / Cost",
+                "supplier": "Supplier",
+                "actions": "Actions",
+                "empty_title": "No ingredients found"
+            },
+            "form": {
+                "item_code": "Item Code",
+                "item_name": "Item Name",
+                "category": "Category",
+                "unit": "Unit",
+                "inventory": "Inventory",
+                "cost": "Cost ($)",
+                "reorder_pt": "Reorder Pt",
+                "supplier": "Supplier",
+                "none": "None",
+                "cancel": "Cancel",
+                "save": "Save",
+                "create": "Create"
+            },
+            "messages": {
+                "created": "Ingredient created successfully",
+                "updated": "Ingredient updated successfully",
+                "deleted": "Ingredient deleted successfully",
+                "failed": "Operation failed",
+                "delete_confirm": "Are you sure you want to delete this ingredient?",
+                "status_updated": "Status updated"
+            }
+        },
+        "units": {
+            "title": "Units",
+            "subtitle": "Manage measurement units",
+            "add_unit": "Add Unit",
+            "edit_unit": "Edit Unit",
+            "new_unit": "New Unit",
+            "stats": {
+                "total": "Total",
+                "base": "Base",
+                "derived": "Derived",
+                "primary_standards": "Primary standards",
+                "from_base": "From base units"
+            },
+            "filters": {
+                "type": "Type",
+                "weight": "Weight",
+                "volume": "Volume",
+                "qty": "Qty",
+                "pack": "Pack",
+                "all_units": "All Units",
+                "base_only": "Base Only",
+                "derived_only": "Derived Only"
+            },
+            "table": {
+                "name_code": "Name / Code",
+                "type": "Type",
+                "base_unit": "Base Unit",
+                "factor": "Factor",
+                "usage": "Usage",
+                "actions": "Actions",
+                "empty_title": "No units found matching your filters",
+                "empty_mobile": "No units found",
+                "base": "BASE",
+                "general": "General",
+                "produce": "Produce",
+                "packaging": "Packaging",
+                "quantity": "Quantity"
+            },
+            "form": {
+                "code": "Code",
+                "name": "Name",
+                "display": "Display",
+                "is_base_unit": "Is Base Unit?",
+                "conversion": "Conversion",
+                "base_unit": "Base Unit",
+                "select": "Select",
+                "factor": "Factor",
+                "usage": "Usage",
+                "cancel": "Cancel",
+                "save": "Save",
+                "create": "Create"
+            },
+            "usage_types": {
+                "weig": "Weig",
+                "volu": "Volu",
+                "quan": "Quan",
+                "pack": "Pack",
+                "prod": "Prod"
+            },
+            "messages": {
+                "created": "Unit created",
+                "updated": "Unit updated",
+                "deleted": "Unit deleted",
+                "failed": "Failed",
+                "delete_confirm": "Delete this unit?"
+            }
+        },
+        "finance": {
+            "title": "Financial Dashboard",
+            "subtitle": "Monitor revenue, expenses, and profitability",
+            "pdf": "PDF",
+            "csv": "CSV",
+            "stats": {
+                "total_revenue": "Total Revenue",
+                "total_expenses": "Total Expenses",
+                "net_profit": "Net Profit",
+                "profit_margin": "Profit Margin",
+                "total_cogs": "Total COGS",
+                "of_revenue": "of Revenue",
+                "from_last_period": "from last period"
+            },
+            "charts": {
+                "revenue_vs_expenses": "Revenue vs Expenses",
+                "cogs_breakdown": "Cost of Goods Sold",
+                "margins_by_category": "Margins by Category",
+                "expense_breakdown": "Expense Breakdown",
+                "revenue": "Revenue",
+                "expenses": "Expenses",
+                "profit": "Profit"
+            },
+            "empty": {
+                "revenue_expenses": "No revenue vs expenses data",
+                "cogs": "No COGS data",
+                "margins": "No margin data",
+                "expenses": "No expense breakdown"
+            }
+        },
+        "payments": {
+            "title": "Payment Dashboard",
+            "subtitle": "Monitor and manage all payment transactions",
+            "refresh": "Refresh",
+            "search_placeholder": "Search by reference, transaction ID...",
+            "stats": {
+                "total_payments": "Total Payments",
+                "success_rate": "Success Rate",
+                "pending": "Pending",
+                "failed": "failed",
+                "completed": "completed",
+                "avg": "Avg:",
+                "awaiting": "Awaiting confirmation"
+            },
+            "status": {
+                "all": "All Status",
+                "completed": "Completed",
+                "pending": "Pending",
+                "failed": "Failed",
+                "processing": "Processing",
+                "cancelled": "Cancelled"
+            },
+            "table": {
+                "recent": "Recent Payments",
+                "reference": "Reference",
+                "order": "Order",
+                "amount": "Amount",
+                "method": "Method",
+                "status": "Status",
+                "date": "Date",
+                "actions": "Actions",
+                "processed": "Processed",
+                "guest": "Guest",
+                "empty": "No payments found"
+            },
+            "modal": {
+                "title": "Payment Details",
+                "transaction_id": "Transaction ID",
+                "qr_reference": "QR Reference",
+                "created": "Created",
+                "failure_reason": "Failure Reason",
+                "view_details": "View Details"
+            }
+        },
+        "invoices": {
+            "title": "Invoices",
+            "subtitle": "Manage customer billing, payments, and history",
+            "export_csv": "Export CSV",
+            "stats": {
+                "revenue": "Revenue",
+                "outstanding": "Outstanding",
+                "paid": "Paid",
+                "unpaid": "Unpaid"
+            },
+            "filters": {
+                "search": "Search...",
+                "all_status": "All Status",
+                "all_time": "All Time"
+            },
+            "table": {
+                "invoice_no": "Invoice #",
+                "customer": "Customer",
+                "amount": "Amount",
+                "issued_date": "Issued Date",
+                "status": "Status",
+                "actions": "Actions",
+                "loading": "Loading...",
+                "empty": "No invoices found",
+                "paid_amount": "Paid"
+            },
+            "status": {
+                "paid": "Paid",
+                "unpaid": "Unpaid",
+                "partial": "Partial"
+            },
+            "modal": {
+                "title": "Invoice Details",
+                "invoice_number": "Invoice Number",
+                "order_reference": "Order Reference",
+                "date_issued": "Date Issued",
+                "financials": "Financials",
+                "subtotal": "Subtotal",
+                "tax": "Tax",
+                "total": "Total",
+                "download_pdf": "Download PDF",
+                "close": "Close"
+            },
+            "na": "N/A"
+        }
+    },
+    "analytics": {
+        "title": "Analytics",
+        "sales": {
+            "title": "Sales Analytics",
+            "subtitle": "Track revenue, trends, and performance insights",
+            "export_pdf": "PDF",
+            "export_csv": "CSV",
+            "stats": {
+                "revenue": "Total Revenue",
+                "orders": "Total Orders",
+                "avg_order": "Avg Order Value",
+                "customers": "Customers"
+            },
+            "charts": {
+                "revenue_trends": "Revenue Trends",
+                "by_category": "Sales by Category",
+                "peak_hours": "Peak Hours",
+                "top_items": "Top Selling Items"
+            },
+            "empty": {
+                "revenue": "No revenue data available",
+                "category": "No category sales data",
+                "peak_hours": "No peak hours data",
+                "top_items": "No top selling items data"
+            },
+            "item_sold": "sold",
+            "presets": {
+                "7d": "7D",
+                "30d": "30D",
+                "90d": "90D"
+            }
+        },
+        "audit": {
+            "title": "Audit Logs",
+            "subtitle": "Track all system activity and changes",
+            "refresh": "Refresh",
+            "export_csv": "CSV",
+            "pagination": {
+                "show": "Show",
+                "per_page": "per page",
+                "previous": "Previous",
+                "next": "Next",
+                "page_of": "Page {page} of {lastPage}"
+            },
+            "filters": {
+                "search": "Search logs by IP, action, route...",
+                "more": "More",
+                "clear": "Clear",
+                "labels": {
+                    "action": "Action",
+                    "date": "Date",
+                    "risk": "Risk",
+                    "user": "User",
+                    "guard": "Guard",
+                    "source": "Source",
+                    "status": "Status"
+                },
+                "presets": {
+                    "today": "Today",
+                    "deletes": "Deletes",
+                    "high_risk": "High Risk",
+                    "failed": "Failed"
+                },
+                "date_options": {
+                    "all": "All Time",
+                    "today": "Today",
+                    "yesterday": "Yesterday",
+                    "week": "Last 7 Days",
+                    "month": "Last 30 Days",
+                    "custom": "Custom Range"
+                },
+                "action_options": {
+                    "all": "All Actions",
+                    "created": "Created",
+                    "updated": "Updated",
+                    "deleted": "Deleted",
+                    "login": "Login",
+                    "logout": "Logout"
+                },
+                "risk_options": {
+                    "all": "All Risk Levels",
+                    "low": "Low Risk",
+                    "medium": "Medium Risk",
+                    "high": "High Risk",
+                    "critical": "Critical"
+                },
+                "status_options": {
+                    "all": "All Status",
+                    "success": "Success",
+                    "failed": "Failed"
+                },
+                "dynamic_options": {
+                    "all_users": "All Users",
+                    "all_guards": "All Guards",
+                    "all_sources": "All Sources"
+                }
+            },
+            "stats": {
+                "total_logs": "Total Logs",
+                "today": "Today",
+                "active_users": "Active Users",
+                "top_action": "Top Action",
+                "success_rate": "Success Rate",
+                "by_source": "By Source",
+                "by_guard": "By Guard",
+                "top_actions": "Top Actions",
+                "suffixes": {
+                    "this_week": "this week",
+                    "today": "today",
+                    "failed": "failed"
+                }
+            }
+        },
+        "marketing": {
+            "title": "Marketing",
+            "promotions": {
+                "title": "Promotions",
+                "subtitle": "Manage campaigns",
+                "create_button": "Create Promotion",
+                "stats": {
+                    "total": "Total",
+                    "active": "Active",
+                    "usage": "Usage",
+                    "savings": "Savings"
+                },
+                "filters": {
+                    "search": "Search...",
+                    "status": {
+                        "all": "All",
+                        "active": "Active",
+                        "inactive": "Inactive"
+                    },
+                    "type": {
+                        "all": "All Types",
+                        "percentage": "%",
+                        "fixed_amount": "$",
+                        "buy_x_get_y": "BOGO"
+                    }
+                },
+                "table": {
+                    "headers": {
+                        "name_code": "Name / Code",
+                        "type": "Type",
+                        "discount": "Discount",
+                        "usage": "Usage",
+                        "valid_until": "Valid Until",
+                        "actions": "Actions"
+                    },
+                    "empty": {
+                        "title": "No promotions found",
+                        "subtitle": "Create your first promotion"
+                    },
+                    "loading": "Loading..."
+                },
+                "form": {
+                    "create_title": "Create Promotion",
+                    "edit_title": "Edit Promotion",
+                    "fields": {
+                        "name": "Name",
+                        "description": "Description",
+                        "code": "Code",
+                        "type": "Type",
+                        "discount_value": "Discount Value",
+                        "min_order": "Min Order Amount",
+                        "max_discount": "Max Discount",
+                        "usage_limit": "Usage Limit",
+                        "start_date": "Start Date",
+                        "end_date": "End Date",
+                        "applicable_to": "Applicable To",
+                        "terms": "Terms & Conditions",
+                        "buy_qty": "Buy Quantity",
+                        "get_qty": "Get Quantity"
+                    },
+                    "placeholders": {
+                        "name": "Summer Sale",
+                        "code": "SUMMER2024",
+                        "discount": "0"
+                    },
+                    "options": {
+                        "percentage": "Percentage",
+                        "fixed_amount": "Fixed Amount",
+                        "buy_x_get_y": "Buy X Get Y",
+                        "all_items": "All Items",
+                        "categories": "Specific Categories",
+                        "items": "Specific Items"
+                    }
+                },
+                "messages": {
+                    "created": "Promotion created successfully",
+                    "updated": "Promotion updated successfully",
+                    "deleted": "Promotion deleted successfully",
+                    "delete_confirm": "Are you sure you want to delete this promotion?",
+                    "failed": "Operation failed"
+                }
+            },
+            "loyalty": {
+                "title": "Loyalty Points",
+                "subtitle": "Customer rewards",
+                "add_button": "Add Transaction",
+                "stats": {
+                    "earned": "Earned",
+                    "redeemed": "Redeemed",
+                    "customers": "Customers",
+                    "txns": "Txns"
+                },
+                "filters": {
+                    "search": "Search...",
+                    "type": {
+                        "all": "All",
+                        "earn": "Earned",
+                        "redeem": "Redeemed",
+                        "adjust": "Adjust"
+                    }
+                },
+                "table": {
+                    "headers": {
+                        "customer": "Customer",
+                        "type": "Type",
+                        "points": "Points",
+                        "balance": "Balance",
+                        "date": "Date",
+                        "actions": "Actions"
+                    },
+                    "empty": {
+                        "title": "No transactions found",
+                        "subtitle": "Create first transaction"
+                    },
+                    "loading": "Loading..."
+                },
+                "form": {
+                    "create_title": "New Transaction",
+                    "edit_title": "Edit Transaction",
+                    "fields": {
+                        "customer": "Customer",
+                        "type": "Type",
+                        "points": "Points",
+                        "date": "Date",
+                        "notes": "Notes"
+                    },
+                    "placeholders": {
+                        "search_customer": "Select Customer",
+                        "points_earn": "e.g. 100",
+                        "points_adjust": "e.g. 50 or -50",
+                        "notes": "Notes..."
+                    },
+                    "options": {
+                        "earn": "Earn",
+                        "redeem": "Redeem",
+                        "adjust": "Adjust"
+                    }
+                },
+                "messages": {
+                    "created": "Transaction created successfully",
+                    "updated": "Transaction updated successfully",
+                    "deleted": "Transaction deleted successfully",
+                    "delete_confirm": "Are you sure you want to delete this transaction?",
+                    "failed": "Operation failed"
+                }
+            }
+        },
+        "system": {
+            "configuration": {
+                "title": "System Configuration",
+                "subtitle": "Manage dynamic lookup tables and system definitions",
+                "tabs": {
+                    "order_types": "Order Types",
+                    "order_statuses": "Order Statuses",
+                    "payment_statuses": "Payment Statuses",
+                    "loyalty_tiers": "Loyalty Tiers"
+                },
+                "table": {
+                    "headers": {
+                        "display_order": "Display Order",
+                        "name_code": "Name / Code",
+                        "visuals": "Visuals",
+                        "status": "Status",
+                        "attributes": "Attributes",
+                        "actions": "Actions"
+                    }
+                },
+                "modal": {
+                    "edit_title": "Edit {name}",
+                    "fields": {
+                        "name": "Name",
+                        "icon": "Icon (Lucide)",
+                        "color": "Color (Hex)",
+                        "display_order": "Display Order",
+                        "active": "Active",
+                        "capabilities": "Capabilities",
+                        "workflow": "Workflow",
+                        "attributes": "Attributes",
+                        "rules": "Rules & Rewards",
+                        "min_spent": "Min Spent ($)",
+                        "max_spent": "Max Spent ($)",
+                        "discount_percent": "Discount %",
+                        "multiplier": "Points Multiplier",
+                        "workflow_pos": "Workflow Position (1-10)"
+                    },
+                    "options": {
+                        "allows_delivery": "Allows Delivery",
+                        "allows_pickup": "Allows Pickup",
+                        "allows_table": "Allows Table",
+                        "is_terminal": "Terminal State",
+                        "show_customer": "Show to Customer",
+                        "is_successful": "Is Successful"
+                    },
+                    "buttons": {
+                        "cancel": "Cancel",
+                        "save": "Save Changes"
+                    }
+                }
+            },
+            "translations": {
+                "title": "Translations",
+                "subtitle": "Manage multi-language content",
+                "save_button": "Save Changes",
+                "saving": "Saving...",
+                "stats": {
+                    "keys": "Keys",
+                    "missing_cat": "Missing Cat",
+                    "missing_items": "Missing Items",
+                    "progress": "Progress"
+                },
+                "filters": {
+                    "search": "Search...",
+                    "categories": "Categories",
+                    "menu_items": "Menu Items"
+                },
+                "table": {
+                    "headers": {
+                        "id": "ID",
+                        "english": "English (Default)",
+                        "khmer": "Khmer (Translation)"
+                    },
+                    "empty": "No translations found",
+                    "loading": "Loading..."
+                },
+                "placeholders": {
+                    "en_name": "English Name",
+                    "en_desc": "English Description",
+                    "km_name": "Khmer Name",
+                    "km_desc": "Khmer Description"
+                },
+                "messages": {
+                    "saved": "Translations saved successfully",
+                    "failed": "Failed to save translations"
+                }
+            }
+        }
+    },
+    "employee": {
+        "dashboard": {
+            "title": "Dashboard",
+            "welcome": "Welcome back",
+            "shift": {
+                "current": "Current Shift",
+                "clock_in": "Clock In",
+                "clock_out": "Clock Out",
+                "break": "Take Break",
+                "end_break": "End Break",
+                "status": {
+                    "clocked_in": "Clocked In",
+                    "on_break": "On Break",
+                    "clocked_out": "Clocked Out"
+                }
+            },
+            "stats": {
+                "today_sales": "Today's Sales",
+                "orders": "Orders",
+                "hours": "Hours",
+                "tips": "Tips"
+            },
+            "quick_actions": "Quick Actions",
+            "recent_orders": "Recent Orders"
+        },
+        "pos": {
+            "title": "Point of Sale",
+            "cart": "Cart",
+            "total": "Total",
+            "subtotal": "Subtotal",
+            "tax": "Tax",
+            "discount": "Discount",
+            "add_item": "Add Item",
+            "remove_item": "Remove",
+            "clear_cart": "Clear Cart",
+            "checkout": "Checkout",
+            "payment": {
+                "title": "Payment",
+                "method": "Payment Method",
+                "cash": "Cash",
+                "card": "Card",
+                "received": "Amount Received",
+                "change": "Change",
+                "complete": "Complete Payment"
+            },
+            "order_type": {
+                "dine_in": "Dine In",
+                "takeout": "Takeout",
+                "delivery": "Delivery"
+            },
+            "table": "Table",
+            "customer": "Customer",
+            "notes": "Order Notes",
+            "messages": {
+                "order_placed": "Order placed successfully",
+                "payment_complete": "Payment completed",
+                "error": "An error occurred"
+            }
+        },
+        "kitchen": {
+            "title": "Kitchen Display",
+            "queue": "Order Queue",
+            "in_progress": "In Progress",
+            "ready": "Ready",
+            "completed": "Completed",
+            "status": {
+                "new": "New",
+                "preparing": "Preparing",
+                "ready": "Ready",
+                "served": "Served"
+            },
+            "actions": {
+                "start": "Start Prep",
+                "ready": "Mark Ready",
+                "complete": "Complete"
+            },
+            "order_time": "Order Time",
+            "prep_time": "Prep Time",
+            "table": "Table",
+            "items": "Items"
+        },
+        "delivery": {
+            "title": "Delivery Orders",
+            "available": "Available",
+            "assigned": "Assigned to Me",
+            "delivering": "Delivering",
+            "completed": "Completed",
+            "actions": {
+                "accept": "Accept",
+                "pickup": "Picked Up",
+                "deliver": "Delivered",
+                "cancel": "Cancel"
+            },
+            "map": {
+                "title": "Route Map",
+                "navigate": "Navigate",
+                "distance": "Distance",
+                "eta": "ETA"
+            },
+            "customer": {
+                "name": "Customer",
+                "phone": "Phone",
+                "address": "Address",
+                "notes": "Delivery Notes"
+            }
+        },
+        "schedule": {
+            "title": "Schedule",
+            "my_shifts": "My Shifts",
+            "week": "Week",
+            "month": "Month",
+            "shift": {
+                "start": "Start",
+                "end": "End",
+                "duration": "Duration",
+                "position": "Position"
+            },
+            "time_off": {
+                "title": "Time Off Requests",
+                "request": "Request Time Off",
+                "pending": "Pending",
+                "approved": "Approved",
+                "denied": "Denied"
+            },
+            "swap": {
+                "title": "Shift Swap",
+                "request": "Request Swap",
+                "offers": "Swap Offers"
+            }
+        },
+        "performance": {
+            "title": "Performance",
+            "overview": "Overview",
+            "metrics": {
+                "sales": "Sales",
+                "orders": "Orders",
+                "avg_order": "Avg Order",
+                "rating": "Rating",
+                "speed": "Speed",
+                "accuracy": "Accuracy"
+            },
+            "goals": {
+                "title": "Goals",
+                "progress": "Progress",
+                "achieved": "Achieved"
+            },
+            "badges": {
+                "title": "Badges",
+                "earned": "Earned"
+            }
+        },
+        "timeclock": {
+            "title": "Time Clock",
+            "clock_in": "Clock In",
+            "clock_out": "Clock Out",
+            "break_start": "Start Break",
+            "break_end": "End Break",
+            "current_status": "Current Status",
+            "time_worked": "Time Worked Today",
+            "messages": {
+                "clocked_in": "Clocked in successfully",
+                "clocked_out": "Clocked out successfully",
+                "break_started": "Break started",
+                "break_ended": "Break ended"
+            }
+        },
+        "settings": {
+            "title": "Settings",
+            "profile": "Profile",
+            "preferences": "Preferences",
+            "language": "Language",
+            "notifications": "Notifications",
+            "privacy": "Privacy",
+            "save": "Save Changes"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "all": "All",
+            "unread": "Unread",
+            "mark_read": "Mark as Read",
+            "clear": "Clear All"
+        },
+        "feedback": {
+            "title": "Feedback",
+            "submit": "Submit Feedback",
+            "type": {
+                "suggestion": "Suggestion",
+                "issue": "Issue",
+                "praise": "Praise"
+            },
+            "message": "Your Message",
+            "messages": {
+                "submitted": "Feedback submitted successfully",
+                "thank_you": "Thank you for your feedback"
+            }
+        },
+        "help": {
+            "title": "Help & Support",
+            "faq": "FAQ",
+            "contact": "Contact Support",
+            "guides": "Guides",
+            "search": "Search help..."
+        },
+        "cash": {
+            "title": "Cash Payments",
+            "register": "Register",
+            "open": "Open Register",
+            "close": "Close Register",
+            "count": "Cash Count",
+            "expected": "Expected",
+            "actual": "Actual",
+            "difference": "Difference"
+        },
+        "common": {
+            "loading": "Loading...",
+            "error": "Error",
+            "success": "Success",
+            "confirm": "Confirm",
+            "cancel": "Cancel",
+            "save": "Save",
+            "back": "Back",
+            "next": "Next"
+        }
+    },
+    "inventory": {
+        "adjustments": {
+            "title": "Adjustments",
+            "subtitle": "Stock corrections and audit trail",
+            "create_btn": "New Adjustment",
+            "stats": {
+                "pending": "Pending",
+                "approved": "Approved",
+                "month": "This Month"
+            },
+            "table": {
+                "before": "Before",
+                "after": "After",
+                "reason": "Reason",
+                "date": "Date",
+                "adjusted_by": "Adjusted By",
+                "change": "Change",
+                "details": "Details",
+                "approval_notes": "Approval Notes"
+            },
+            "form": {
+                "title": "New Adjustment",
+                "ingredient": "Ingredient",
+                "location": "Location",
+                "qty_before": "Qty Before",
+                "qty_after": "Qty After",
+                "reason": "Reason",
+                "notes": "Notes",
+                "cancel": "Cancel",
+                "create": "Create"
+            },
+            "reasons": {
+                "damaged": "Damaged",
+                "expired": "Expired",
+                "theft": "Theft",
+                "count_error": "Count Error",
+                "spillage": "Spillage",
+                "returned": "Returned to Supplier",
+                "correction": "Correction",
+                "other": "Other"
+            },
+            "actions": {
+                "approve": "Approve",
+                "reject": "Reject",
+                "approve_title": "Approve Adjustment",
+                "reject_title": "Reject Adjustment",
+                "confirm_approve": "Approve adjustment for",
+                "confirm_reject": "Reject adjustment for",
+                "rejection_reason": "Rejection Reason"
+            }
+        },
+        "reports": {
+            "title": "Inventory Reports",
+            "subtitle": "Usage, costs, and waste analytics",
+            "export_pdf": "PDF",
+            "export_csv": "CSV",
+            "stats": {
+                "total_value": "Total Inventory Value",
+                "items_stock": "Items in Stock",
+                "waste_value": "Waste Value",
+                "turnover_rate": "Avg Turnover Rate"
+            },
+            "charts": {
+                "usage_trends": "Usage Trends",
+                "cost_category": "Cost by Category",
+                "waste_reason": "Waste by Reason",
+                "top_cost": "Top Cost Items",
+                "turnover_category": "Turnover by Category"
+            },
+            "turnover_labels": {
+                "excellent": "Excellent",
+                "good": "Good",
+                "attention": "Needs Attention"
+            }
+        }
+    },
+    "hr": {
+        "time_off": {
+            "title": "Time Off Requests",
+            "subtitle": "Manage employee leave applications",
+            "stats": {
+                "pending": "Pending Requests",
+                "approved": "Approved",
+                "rejected": "Rejected",
+                "month": "This Month's Leave"
+            },
+            "table": {
+                "employee": "Employee",
+                "type": "Type",
+                "days": "Days",
+                "dates": "Dates",
+                "reason": "Reason",
+                "status": "Status",
+                "requested_on": "Requested On",
+                "actions": "Actions"
+            },
+            "types": {
+                "vacation": "Vacation",
+                "sick": "Sick Leave",
+                "personal": "Personal",
+                "other": "Other"
+            },
+            "actions": {
+                "approve": "Approve",
+                "reject": "Reject",
+                "approve_confirm": "Approve time off for",
+                "reject_confirm": "Reject time off for",
+                "rejection_reason": "Reason for rejection"
+            }
+        },
+        "shifts": {
+            "title": "Shift Approvals",
+            "subtitle": "Approve or reject shift swaps",
+            "stats": {
+                "pending": "Pending Swaps",
+                "approved": "Approved Swaps",
+                "rejected": "Rejected Swaps"
+            },
+            "table": {
+                "requester": "Requester",
+                "target_shift": "Target Shift",
+                "type": "Type",
+                "reason": "Reason",
+                "status": "Status",
+                "requested_on": "Requested On"
+            },
+            "types": {
+                "give_away": "Give Away",
+                "trade": "Trade"
+            },
+            "actions": {
+                "approve": "Approve Swap",
+                "reject": "Reject Swap",
+                "approve_confirm": "Approve shift swap for",
+                "reject_confirm": "Reject shift swap for",
+                "deny_warning": "Denying this request will notify both employees and return the shift to the original owner.",
+                "rejection_reason": "Reason for Denial"
+            }
+        }
+    },
+    "customer_pages": {
+        "dashboard": {
+            "title": "Dashboard",
+            "member_badge": "Member Dashboard",
+            "welcome": "Welcome back,",
+            "subtitle": "Ready to satisfy your cravings? Check your rewards and latest offers.",
+            "buttons": {
+                "menu": "Menu",
+                "browse_menu": "Browse Menu",
+                "orders": "Orders",
+                "recent_orders": "Recent Orders",
+                "redeem_rewards": "Redeem Rewards"
+            },
+            "loyalty": {
+                "balance": "Loyalty Balance",
+                "pts": "pts",
+                "progress": "Progress to next reward"
+            },
+            "stats": {
+                "total_orders": "Total Orders",
+                "total_spent": "Total Spent",
+                "points_earned": "Points Earned",
+                "available_rewards": "Available Rewards",
+                "this_month": "This Month"
+            },
+            "loyalty_cta": {
+                "title": "Loyalty Rewards Program",
+                "subtitle": "View your tier, earn points, and unlock rewards"
+            },
+            "recent_activity": "Recent Activity",
+            "view_all_orders": "View All Orders",
+            "order_number": "Order #",
+            "items": "items",
+            "no_recent_orders": "No recent orders found.",
+            "order_now": "Order Now",
+            "reservations": "Reservations",
+            "no_reservations": "No upcoming reservations",
+            "book_table": "Book a Table",
+            "guests": "Guests",
+            "cancel": "Cancel",
+            "favorites": "Your Favorites",
+            "no_favorites": "Make some orders to see favorites!",
+            "rewards_modal": {
+                "title": "Rewards Marketplace",
+                "balance": "Your Balance",
+                "loading": "Loading rewards...",
+                "no_rewards": "No rewards available yet.",
+                "points": "Points",
+                "redeem": "Redeem",
+                "not_enough_points": "You don't have enough points for this reward!",
+                "confirm_redeem": "Redeem {title} for {points} points?",
+                "success": "Redemption successful!",
+                "code": "Code"
+            }
+        },
+        "orders": {
+            "title": "My Orders",
+            "subtitle": "Track your order history",
+            "status": {
+                "pending": "Pending",
+                "received": "Received",
+                "preparing": "Preparing",
+                "ready": "Ready",
+                "completed": "Completed",
+                "cancelled": "Cancelled",
+                "delivered": "Delivered"
+            },
+            "approval": {
+                "pending": "Awaiting Approval",
+                "approved": "Approved",
+                "rejected": "Rejected"
+            },
+            "payment": {
+                "paid": "Paid",
+                "pending": "Pending"
+            },
+            "types": {
+                "pickup": "Pickup",
+                "delivery": "Delivery"
+            },
+            "filters": {
+                "all": "All",
+                "active": "Active",
+                "completed": "Completed",
+                "cancelled": "Cancelled"
+            },
+            "order_card": {
+                "order_items": "Order Items",
+                "delivery_address": "Delivery Address",
+                "price_breakdown": "Price Breakdown",
+                "subtotal": "Subtotal",
+                "delivery": "Delivery",
+                "tax": "Tax",
+                "discount": "Discount",
+                "total": "Total"
+            },
+            "actions": {
+                "details": "Details",
+                "hide": "Hide",
+                "reorder": "Reorder",
+                "cancel": "Cancel",
+                "cancelling": "Cancelling...",
+                "try_again": "Try Again"
+            },
+            "empty": {
+                "no_orders": "No orders yet",
+                "no_filtered": "No {status} orders",
+                "cta_browse": "Ready to order? Browse our menu!",
+                "cta_filter": "Try changing the filter.",
+                "browse_menu": "Browse Menu"
+            },
+            "loading": "Loading orders...",
+            "error": {
+                "title": "Failed to load orders",
+                "message": "Please try again later."
+            },
+            "pagination": {
+                "showing": "Showing",
+                "to": "to",
+                "of": "of",
+                "orders": "orders",
+                "prev": "Prev",
+                "next": "Next"
+            },
+            "cancel_modal": {
+                "title": "Cancel Order?",
+                "warning": "Are you sure you want to cancel? This action cannot be undone.",
+                "order_total": "Order Total",
+                "items": "Items",
+                "confirm": "Yes, Cancel Order",
+                "keep": "Keep Order"
+            },
+            "reorder_modal": {
+                "title": "Reorder Items?",
+                "message": "Add all items from this order to your cart?",
+                "confirm": "Yes, Reorder",
+                "cancel": "Cancel"
+            }
+        }
+    },
+    "components": {
+        "datatable": {
+            "search": "Search...",
+            "loading": "Loading...",
+            "no_records": "No records found",
+            "error": "Error:",
+            "showing": "Showing",
+            "of": "of",
+            "pages": "pages",
+            "previous": "Previous",
+            "next": "Next"
+        },
+        "date_picker": {
+            "start_date": "Start Date",
+            "end_date": "End Date",
+            "to": "to"
+        }
+    }
+}

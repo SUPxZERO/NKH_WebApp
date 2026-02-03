@@ -90,7 +90,7 @@ class EnsureCustomerAccess
         // 8. Otherwise, redirect to login
         // If it's an API request (expects JSON), return 401
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
+            return response()->json(['message' => __('messages.api.errors.unauthenticated')], 401);
         }
 
         return redirect()->route('login');

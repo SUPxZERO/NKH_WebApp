@@ -13,6 +13,7 @@ import { Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toastSuccess, toastError, toastInfo } from '@/app/utils/toast';
 
 import { apiGet } from '@/app/utils/api';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -36,6 +37,7 @@ const itemVariants: Variants = {
 
 export default function Cart() {
   const cart = useCartStore();
+  const { t } = useTranslation();
   const [showClearConfirm, setShowClearConfirm] = React.useState(false);
 
   const { auth } = usePage().props as { auth?: { user?: any } };
@@ -64,7 +66,7 @@ export default function Cart() {
   const handleUpdateQuantity = (menuItemId: number, quantity: number) => {
     if (quantity < 1) {
       cart.removeItem(menuItemId);
-      toastSuccess('Item removed from cart');
+      toastSuccess(t('cart.item_removed') as string);
     } else {
       cart.updateQty(menuItemId, quantity);
     }
@@ -72,23 +74,23 @@ export default function Cart() {
 
   const handleRemoveItem = (menuItemId: number) => {
     cart.removeItem(menuItemId);
-    toastSuccess('Item removed from cart');
+    toastSuccess(t('cart.item_removed') as string);
   };
 
   const handleClearCart = () => {
     cart.clear();
     setShowClearConfirm(false);
-    toastSuccess('Cart cleared');
+    toastSuccess(t('cart.cart_cleared') as string);
   };
 
   const handleCheckout = () => {
     if (cart.items.length === 0) {
-      toastError('Your cart is empty');
+      toastError(t('cart.empty_title') as string);
       return;
     }
 
     if (!cart.location_id) {
-      toastError('Please select a restaurant location');
+      toastError(t('cart.select_location') as string);
       return;
     }
 
@@ -98,7 +100,7 @@ export default function Cart() {
     if (!isAuthenticated && !isTelegram) {
       localStorage.setItem('pendingCheckout', 'true');
       localStorage.setItem('checkoutRedirectUrl', '/checkout');
-      toastInfo('Please sign in to complete your order');
+      toastInfo(t('cart.login_required') as string);
       // Sprint 3: Use router.visit for smooth navigation
       router.visit('/login?redirect=/checkout', {
         preserveScroll: false
@@ -117,8 +119,8 @@ export default function Cart() {
   return (
     <CustomerLayout>
       <Head>
-        <title>Cart - NKH Restaurant</title>
-        <meta name="description" content="Review your cart and proceed to checkout" />
+        <title>{t('cart.meta_title') as string}</title>
+        <meta name="description" content={t('cart.meta_desc') as string} />
       </Head>
 
       <motion.div
@@ -141,11 +143,11 @@ export default function Cart() {
             </button>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                Your Cart
+                {t('cart.title')}
               </h1>
               {!isEmpty && (
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  {cart.items.length} {cart.items.length === 1 ? 'item' : 'items'}
+                  {cart.items.length} {cart.items.length === 1 ? t('common.item') : t('common.items')}
                 </p>
               )}
             </div>
@@ -156,7 +158,7 @@ export default function Cart() {
               onClick={() => setShowClearConfirm(true)}
               className="text-xs text-red-500 hover:text-red-600 p-2"
             >
-              Clear
+              {t('cart.clear')}
             </button>
           )}
         </motion.div>
@@ -180,10 +182,10 @@ export default function Cart() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                  Clear Cart?
+                  {t('cart.clear_confirm_title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Remove all items from your cart?
+                  {t('cart.clear_confirm_desc')}
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -191,14 +193,14 @@ export default function Cart() {
                     className="flex-1"
                     onClick={() => setShowClearConfirm(false)}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     variant="danger"
                     className="flex-1"
                     onClick={handleClearCart}
                   >
-                    Clear
+                    {t('cart.clear')}
                   </Button>
                 </div>
               </motion.div>
@@ -273,7 +275,7 @@ export default function Cart() {
                 onClick={() => router.visit('/menu')}
                 leftIcon={<ShoppingBag className="w-4 h-4" />}
               >
-                Continue Shopping
+                {t('cart.continue_shopping')}
               </Button>
             </motion.div>
           </div>
@@ -294,30 +296,30 @@ export default function Cart() {
           <details className="group">
             <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">{cart.items.length} items</span>
+                <span className="text-sm text-gray-500">{cart.items.length} {t('common.items')}</span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
                   ${cart.total.toFixed(2)}
                 </span>
               </div>
               <span className="text-xs text-gray-400 group-open:rotate-180 transition-transform">
-                Show details
+                {t('cart.show_details')}
               </span>
             </summary>
 
             {/* Expanded Details */}
             <div className="px-4 pb-4 space-y-2 border-t border-gray-100 dark:border-gray-800">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Subtotal</span>
+                <span className="text-gray-500">{t('cart.subtotal')}</span>
                 <span>${cart.subtotal.toFixed(2)}</span>
               </div>
               {cart.mode === 'delivery' && cart.deliveryFee > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Delivery</span>
+                  <span className="text-gray-500">{t('cart.delivery')}</span>
                   <span>${cart.deliveryFee.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Tax</span>
+                <span className="text-gray-500">{t('cart.tax')}</span>
                 <span>${cart.tax.toFixed(2)}</span>
               </div>
             </div>
@@ -330,7 +332,7 @@ export default function Cart() {
               disabled={!cart.location_id}
               className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white font-bold rounded-xl shadow-lg active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Checkout • ${cart.total.toFixed(2)}
+              {t('cart.checkout')} • ${cart.total.toFixed(2)}
             </button>
           </div>
         </motion.div>

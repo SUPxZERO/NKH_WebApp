@@ -104,7 +104,7 @@ class User extends Authenticatable
         if ($this->attributes['avatar_url'] ?? null) {
             return $this->attributes['avatar_url'];
         }
-        
+
         $path = $this->image_path ?: $this->avatar;
         if (!$path) {
             return null;

@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
 import Avatar from '@/app/components/ui/Avatar';
 import AddressPicker, { AddressData } from '@/app/components/customer/AddressPicker';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -78,18 +79,22 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 };
 
 // Stats Ribbon - Mobile optimized horizontal scroll
-const EmployeeStatsRibbon = ({ stats }: { stats: any }) => (
-  <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
-    <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-      <StatCard title="Total" value={stats.total} icon={Users} color="purple" index={0} />
-      <StatCard title="Active" value={stats.active} icon={UserCheck} color="emerald" index={1} />
-      <StatCard title="Leave" value={stats.onLeave} icon={Clock} color="amber" index={2} />
-      <StatCard title="Inactive" value={stats.inactive} icon={UserX} color="slate" index={3} />
+const EmployeeStatsRibbon = ({ stats }: { stats: any }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
+      <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
+        <StatCard title={t('admin.hr.employees.stats.total')} value={stats.total} icon={Users} color="purple" index={0} />
+        <StatCard title={t('admin.hr.employees.stats.active')} value={stats.active} icon={UserCheck} color="emerald" index={1} />
+        <StatCard title={t('admin.hr.employees.stats.leave')} value={stats.onLeave} icon={Clock} color="amber" index={2} />
+        <StatCard title={t('admin.hr.employees.stats.inactive')} value={stats.inactive} icon={UserX} color="slate" index={3} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function Employees() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [openCreate, setOpenCreate] = useState(false);
@@ -144,20 +149,20 @@ export default function Employees() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/admin/employees', data),
-    onSuccess: () => { toastSuccess('Employee created'); setOpenCreate(false); resetForm(); qc.invalidateQueries({ queryKey: ['admin/employees'] }); },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.hr.employees.messages.created') as string); setOpenCreate(false); resetForm(); qc.invalidateQueries({ queryKey: ['admin/employees'] }); },
+    onError: (error: any) => toastError(error.response?.data?.message || t('admin.hr.employees.messages.failed') as string)
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`/admin/employees/${id}`, data),
-    onSuccess: () => { toastSuccess('Employee updated'); setOpenEdit(false); resetForm(); qc.invalidateQueries({ queryKey: ['admin/employees'] }); },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.hr.employees.messages.updated') as string); setOpenEdit(false); resetForm(); qc.invalidateQueries({ queryKey: ['admin/employees'] }); },
+    onError: (error: any) => toastError(error.response?.data?.message || t('admin.hr.employees.messages.failed') as string)
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/admin/employees/${id}`),
-    onSuccess: () => { toastSuccess('Employee deactivated'); qc.invalidateQueries({ queryKey: ['admin/employees'] }); },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
+    onSuccess: () => { toastSuccess(t('admin.hr.employees.messages.deleted') as string); qc.invalidateQueries({ queryKey: ['admin/employees'] }); },
+    onError: (error: any) => toastError(error.response?.data?.message || t('admin.hr.employees.messages.failed') as string)
   });
 
   const resetForm = () => {
@@ -195,7 +200,7 @@ export default function Employees() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Deactivate this employee?')) deleteMutation.mutate(id);
+    if (confirm(t('admin.hr.employees.messages.confirm_delete') as string)) deleteMutation.mutate(id);
   };
 
   const handleAddressChange = (data: AddressData | null) => {
@@ -236,13 +241,13 @@ export default function Employees() {
               animate={{ opacity: 1, x: 0 }}
               className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent truncate"
             >
-              Employees
+              {t('admin.hr.employees.title')}
             </motion.h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">Manage staff</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 hidden sm:block">{t('admin.hr.employees.subtitle')}</p>
           </div>
           <Button onClick={() => { resetForm(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0">
             <Plus className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Employee</span>
+            <span className="hidden sm:inline">{t('admin.hr.employees.add')}</span>
           </Button>
         </div>
 
@@ -259,15 +264,15 @@ export default function Employees() {
           <div className="flex gap-2 sm:gap-4">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+              <Input placeholder={t('layout.ui.search.placeholder.default') as string} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 h-10 text-sm" variant="filled" />
             </div>
             <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
               {[
-                { key: 'all', label: 'All', color: 'fuchsia' },
-                { key: 'active', label: 'Active', color: 'emerald' },
-                { key: 'on_leave', label: 'Leave', color: 'amber' },
-                { key: 'inactive', label: 'Off', color: 'slate' }
+                { key: 'all', label: t('admin.hr.employees.filters.all'), color: 'fuchsia' },
+                { key: 'active', label: t('admin.hr.employees.filters.active'), color: 'emerald' },
+                { key: 'on_leave', label: t('admin.hr.employees.filters.leave'), color: 'amber' },
+                { key: 'inactive', label: t('admin.hr.employees.filters.off'), color: 'slate' }
               ].map(({ key, label, color }) => (
                 <button key={key} onClick={() => setStatusFilter(key)}
                   className={cn(
@@ -295,12 +300,12 @@ export default function Employees() {
         >
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
-            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">Employee</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Position</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Contact</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">Hire Date</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">Status</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider text-right">Actions</div>
+            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.employees.table.employee')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.employees.table.position')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.employees.table.contact')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.employees.table.hire_date')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.hr.employees.table.status')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.hr.employees.table.actions')}</div>
           </div>
 
           <div className="divide-y divide-border/30">
@@ -316,8 +321,8 @@ export default function Employees() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                   <Users className="w-8 h-8 text-fuchsia-500" />
                 </div>
-                <h3 className="text-foreground font-semibold">No employees found</h3>
-                <p className="text-muted-foreground text-sm mt-1">Try adjusting filters</p>
+                <h3 className="text-foreground font-semibold">{t('admin.hr.employees.messages.not_found')}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{t('admin.hr.employees.messages.adjust_filters')}</p>
               </div>
             ) : (
               employeeList.map((employee, idx) => (
@@ -336,13 +341,13 @@ export default function Employees() {
                       )}
                     </div>
                     <div>
-                      <div className="font-semibold text-foreground">{employee.user?.name || 'Unknown'}</div>
+                      <div className="font-semibold text-foreground">{employee.user?.name || t('admin.hr.employees.table.unknown')}</div>
                       <div className="text-xs text-muted-foreground font-mono">{employee.employee_code}</div>
                     </div>
                   </div>
                   <div className="col-span-2">
                     <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 text-sm font-medium">
-                      {employee.position?.title || 'No Position'}
+                      {employee.position?.title || t('admin.hr.employees.table.no_position')}
                     </span>
                   </div>
                   <div className="col-span-2">
@@ -406,7 +411,7 @@ export default function Employees() {
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                 <Users className="w-6 h-6 text-fuchsia-500" />
               </div>
-              <p className="text-muted-foreground text-sm">No employees found</p>
+              <p className="text-muted-foreground text-sm">{t('admin.hr.employees.messages.not_found')}</p>
             </div>
           ) : (
             employeeList.map((employee, idx) => (
@@ -426,7 +431,7 @@ export default function Employees() {
                       )}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-semibold text-foreground text-sm truncate">{employee.user?.name || 'Unknown'}</div>
+                      <div className="font-semibold text-foreground text-sm truncate">{employee.user?.name || t('admin.hr.employees.table.unknown')}</div>
                       <div className="text-[10px] text-muted-foreground font-mono">{employee.employee_code}</div>
                     </div>
                   </div>
@@ -443,7 +448,7 @@ export default function Employees() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-medium">
-                    {employee.position?.title || 'No Position'}
+                    {employee.position?.title || t('admin.hr.employees.table.no_position')}
                   </span>
                   <span className={cn(
                     "px-2 py-0.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1",
@@ -516,12 +521,12 @@ export default function Employees() {
 
       {/* Create/Edit Modal - Mobile optimized */}
       <Modal isOpen={openCreate || openEdit} onClose={() => { setOpenCreate(false); setOpenEdit(false); resetForm(); }}
-        title={editingEmployee ? 'Edit' : 'New Employee'} className="max-w-2xl">
+        title={editingEmployee ? t('admin.hr.employees.modal.edit_title') : t('admin.hr.employees.modal.create_title')} className="max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Name & Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input
-              label="Name"
+              label={t('admin.hr.employees.modal.name') as string}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
@@ -530,7 +535,7 @@ export default function Employees() {
               className="h-10 text-sm"
             />
             <Input
-              label="Email"
+              label={t('admin.hr.employees.modal.email') as string}
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -544,7 +549,7 @@ export default function Employees() {
           {/* Phone & Password */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input
-              label="Phone"
+              label={t('admin.hr.employees.modal.phone') as string}
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               leftIcon={<Phone className="w-4 h-4" />}
@@ -552,7 +557,7 @@ export default function Employees() {
               className="h-10 text-sm"
             />
             <Input
-              label={editingEmployee ? "New Password" : "Password"}
+              label={editingEmployee ? t('admin.hr.employees.modal.new_password') as string : t('admin.hr.employees.modal.password') as string}
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -565,9 +570,9 @@ export default function Employees() {
           {/* Employee Code & Hire Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input
-              label="Code"
+              label={t('admin.hr.employees.modal.code') as string}
               value={formData.employee_code}
-              placeholder={editingEmployee ? '' : 'Auto-generated'}
+              placeholder={editingEmployee ? '' : t('admin.hr.employees.modal.auto_generated') as string}
               onChange={() => { }} // Read-only
               disabled
               leftIcon={<BadgeIcon className="w-4 h-4" />}
@@ -575,7 +580,7 @@ export default function Employees() {
               className="h-10 text-sm opacity-70 cursor-not-allowed"
             />
             <Input
-              label="Hire Date"
+              label={t('admin.hr.employees.modal.hire_date') as string}
               type="date"
               value={formData.hire_date}
               onChange={(e) => setFormData({ ...formData, hire_date: e.target.value })}
@@ -588,18 +593,18 @@ export default function Employees() {
           {/* Salary Type, Salary, Status */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Type</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('admin.hr.employees.modal.type')}</label>
               <select
                 value={formData.salary_type}
                 onChange={(e) => setFormData({ ...formData, salary_type: e.target.value as any })}
                 className="w-full bg-secondary border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:border-fuchsia-500 transition-all"
               >
-                <option value="monthly">Monthly</option>
-                <option value="hourly">Hourly</option>
+                <option value="monthly">{t('admin.hr.employees.modal.types.monthly')}</option>
+                <option value="hourly">{t('admin.hr.employees.modal.types.hourly')}</option>
               </select>
             </div>
             <Input
-              label="Salary"
+              label={t('admin.hr.employees.modal.salary') as string}
               type="number"
               step="0.01"
               value={formData.salary}
@@ -609,16 +614,16 @@ export default function Employees() {
               className="h-10 text-sm"
             />
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Status</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('admin.hr.employees.modal.status')}</label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                 className="w-full bg-secondary border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:border-fuchsia-500 transition-all"
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="on_leave">On Leave</option>
-                <option value="terminated">Terminated</option>
+                <option value="active">{t('admin.hr.employees.modal.statuses.active')}</option>
+                <option value="inactive">{t('admin.hr.employees.modal.statuses.inactive')}</option>
+                <option value="on_leave">{t('admin.hr.employees.modal.statuses.on_leave')}</option>
+                <option value="terminated">{t('admin.hr.employees.modal.statuses.terminated')}</option>
               </select>
             </div>
           </div>
@@ -626,13 +631,13 @@ export default function Employees() {
           {/* Position & Location */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">Position</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('admin.hr.employees.modal.position')}</label>
               <select
                 value={formData.position_id}
                 onChange={(e) => setFormData({ ...formData, position_id: e.target.value })}
                 className="w-full bg-secondary border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:border-fuchsia-500 transition-all"
               >
-                <option value="">Select</option>
+                <option value="">{t('admin.hr.employees.modal.select')}</option>
                 {(positions as any)?.data?.map((pos: Position) => (
                   <option key={pos.id} value={pos.id}>{pos.title}</option>
                 ))}
@@ -640,7 +645,7 @@ export default function Employees() {
             </div>
             <div>
               <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">
-                Location <span className="text-destructive">*</span>
+                {t('admin.hr.employees.modal.location')} <span className="text-destructive">*</span>
               </label>
               <select
                 value={formData.location_id}
@@ -648,7 +653,7 @@ export default function Employees() {
                 required
                 className="w-full bg-secondary border border-border rounded-lg px-3 py-2 h-10 text-sm text-foreground focus:border-fuchsia-500 transition-all"
               >
-                <option value="">Select</option>
+                <option value="">{t('admin.hr.employees.modal.select')}</option>
                 {(locations as any)?.data?.map((loc: Location) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
@@ -660,12 +665,12 @@ export default function Employees() {
           <div className="hidden sm:block">
             <AddressPicker
               key={editingEmployee ? `edit-${editingEmployee.id}` : 'create'}
-              label="Address"
+              label={t('admin.hr.employees.modal.address') as string}
               initialAddress={formData.address}
               initialLat={formData.latitude || undefined}
               initialLng={formData.longitude || undefined}
               onChange={handleAddressChange}
-              placeholder="Search address..."
+              placeholder={t('admin.hr.employees.modal.search_address') as string}
             />
           </div>
 
@@ -677,7 +682,7 @@ export default function Employees() {
               onClick={() => { setOpenCreate(false); setOpenEdit(false); }}
               className="flex-1 h-10 sm:h-11 text-sm"
             >
-              Cancel
+              {t('layout.actions.cancel')}
             </Button>
             <Button
               type="submit"
@@ -691,7 +696,7 @@ export default function Employees() {
                   <span className="hidden sm:inline">Saving...</span>
                 </span>
               ) : (
-                editingEmployee ? 'Save' : 'Create'
+                editingEmployee ? t('layout.actions.save') : t('layout.actions.create')
               )}
             </Button>
           </div>

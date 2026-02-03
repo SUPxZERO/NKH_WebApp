@@ -5,8 +5,10 @@ import { apiGet } from '@/app/utils/api';
 import { Button } from '@/app/components/ui/Button';
 import { Printer, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 import { DiningTable, Floor } from '@/app/types/domain';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 export default function QrPrintView() {
+    const { t } = useLanguage();
     const { data: grouped, isLoading, refetch } = useQuery<{ [key: string]: DiningTable[] }>({
         queryKey: ['admin/tables/grouped', 'all'],
         queryFn: () => apiGet('/api/admin/tables/grouped?status=all'),
@@ -29,7 +31,7 @@ export default function QrPrintView() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen">
                 <Loader2 className="w-12 h-12 animate-spin text-fuchsia-600 mb-4" />
-                <p className="text-gray-500">Loading tables...</p>
+                <p className="text-gray-500">{t('admin.common.loading')}</p>
             </div>
         );
     }
@@ -39,23 +41,23 @@ export default function QrPrintView() {
 
     return (
         <div className="min-h-screen bg-white">
-            <Head title="Print QR Codes" />
+            <Head title={t('admin.tables.print.page_title') as string} />
 
             {/* No-Print Header */}
             <div className="print:hidden sticky top-0 z-50 bg-white border-b border-gray-200 p-4 shadow-sm">
                 <div className="max-w-screen-xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" onClick={handleBack} leftIcon={<ArrowLeft className="w-4 h-4" />}>
-                            Back
+                            {t('admin.common.back')}
                         </Button>
-                        <h1 className="text-xl font-bold">Print QR Codes</h1>
+                        <h1 className="text-xl font-bold">{t('admin.tables.print.page_title')}</h1>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button variant="outline" onClick={() => refetch()} leftIcon={<RefreshCw className="w-4 h-4" />}>
-                            Refresh
+                            {t('admin.tables.actions.regenerate')}
                         </Button>
                         <Button onClick={handlePrint} leftIcon={<Printer className="w-4 h-4" />}>
-                            Print All
+                            {t('admin.tables.actions.print_all')}
                         </Button>
                     </div>
                 </div>
@@ -65,7 +67,7 @@ export default function QrPrintView() {
             <div className="p-8 print:p-0">
                 {!hasTables ? (
                     <div className="text-center py-12 text-gray-500">
-                        No tables found.
+                        {t('admin.tables.empty.no_tables')}
                     </div>
                 ) : (
                     Object.entries(grouped || {}).map(([floorName, tables]) => (
@@ -77,7 +79,7 @@ export default function QrPrintView() {
                                         key={table.id}
                                         className="flex flex-col items-center justify-center p-6 border-2 border-gray-900 rounded-xl break-inside-avoid text-center bg-white print:border-black print:p-4"
                                     >
-                                        <div className="mb-2 text-lg font-bold uppercase tracking-wider">Table</div>
+                                        <div className="mb-2 text-lg font-bold uppercase tracking-wider">{t('admin.tables.print.table_prefix')}</div>
                                         <div className="mb-4 text-5xl font-black">{table.code}</div>
 
                                         <div className="w-40 h-40 mb-4 bg-gray-100 flex items-center justify-center overflow-hidden">
@@ -90,7 +92,7 @@ export default function QrPrintView() {
                                         </div>
 
                                         <div className="text-xs text-gray-500 font-medium print:text-black">
-                                            Scan to Order
+                                            {t('admin.tables.print.scan_to_order')}
                                         </div>
                                         <div className="text-[10px] text-gray-400 mt-1 print:hidden">
                                             ID: {table.id}
