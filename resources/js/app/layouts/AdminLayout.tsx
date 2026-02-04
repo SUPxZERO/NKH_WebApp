@@ -15,116 +15,117 @@ import { useThemeStore } from '@/app/store/theme';
 import { useAuth } from '@/app/providers/AuthProvider';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 // --- 1. New Hierarchical Navigation Structure ---
 const navigationTree = [
   {
-    name: 'Dashboard',
+    name: 'layout.admin.nav.dashboard',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     type: 'link',
     permission: 'dashboard.view'
   },
   {
-    name: 'Operations',
+    name: 'layout.admin.nav.operations',
     icon: ClipboardList,
     type: 'group',
     permission: 'orders.view', // Group permission - any child or group itself
     children: [
-      { name: 'Orders', href: '/admin/orders', permission: 'orders.view' },
-      { name: 'Reservations', href: '/admin/reservations', permission: 'reservations.view' },
-      { name: 'Notifications', href: '/admin/notifications', permission: 'notifications.view' },
+      { name: 'layout.admin.nav.orders', href: '/admin/orders', permission: 'orders.view' },
+      { name: 'layout.admin.nav.reservations', href: '/admin/reservations', permission: 'reservations.view' },
+      { name: 'layout.admin.nav.notifications', href: '/admin/notifications', permission: 'notifications.view' },
     ]
   },
   {
-    name: 'Menu Management',
+    name: 'layout.admin.nav.menu_management',
     icon: ChefHat,
     type: 'group',
     permission: 'menu.view',
     children: [
-      { name: 'Categories', href: '/admin/categories', permission: 'categories.view' },
-      { name: 'Menu Items', href: '/admin/menu-items', permission: 'menu.view' },
-      { name: 'Recipes', href: '/admin/recipes', permission: 'recipes.view' },
-      { name: 'Promotions', href: '/admin/promotions', permission: 'promotions.view' },
+      { name: 'layout.admin.nav.categories', href: '/admin/categories', permission: 'categories.view' },
+      { name: 'layout.admin.nav.menu_items', href: '/admin/menu-items', permission: 'menu.view' },
+      { name: 'layout.admin.nav.recipes', href: '/admin/recipes', permission: 'recipes.view' },
+      { name: 'layout.admin.nav.promotions', href: '/admin/promotions', permission: 'promotions.view' },
     ]
   },
   {
-    name: 'Inventory & Procurement',
+    name: 'layout.admin.nav.inventory_procurement',
     icon: Package,
     type: 'group',
     permission: 'inventory.view',
     children: [
-      { name: 'Purchase Orders', href: '/admin/purchase-orders', permission: 'purchase-orders.view' },
-      { name: 'Inventory', href: '/admin/inventory', permission: 'inventory.view' },
-      { name: 'Inventory Reports', href: '/admin/reports/inventory', permission: 'reports.view' },
-      { name: 'Ingredients', href: '/admin/ingredients', permission: 'inventory.view' },
-      { name: 'Adjustments', href: '/admin/inventory-adjustments', permission: 'inventory.view' },
-      { name: 'Stock Alerts', href: '/admin/stock-alerts', permission: 'inventory.view' },
-      { name: 'Suppliers', href: '/admin/suppliers', permission: 'suppliers.view' },
-      { name: 'Units', href: '/admin/units', permission: 'inventory.view' },
+      { name: 'layout.admin.nav.purchase_orders', href: '/admin/purchase-orders', permission: 'purchase-orders.view' },
+      { name: 'layout.admin.nav.inventory', href: '/admin/inventory', permission: 'inventory.view' },
+      { name: 'layout.admin.nav.inventory_reports', href: '/admin/reports/inventory', permission: 'reports.view' },
+      { name: 'layout.admin.nav.ingredients', href: '/admin/ingredients', permission: 'inventory.view' },
+      { name: 'layout.admin.nav.adjustments', href: '/admin/inventory-adjustments', permission: 'inventory.view' },
+      { name: 'layout.admin.nav.stock_alerts', href: '/admin/stock-alerts', permission: 'inventory.view' },
+      { name: 'layout.admin.nav.suppliers', href: '/admin/suppliers', permission: 'suppliers.view' },
+      { name: 'layout.admin.nav.units', href: '/admin/units', permission: 'inventory.view' },
     ]
   },
   {
-    name: 'People Management',
+    name: 'layout.admin.nav.people_management',
     icon: Users,
     type: 'group',
     permission: 'employees.view',
     children: [
-      { name: 'Employees', href: '/admin/employees', permission: 'employees.view' },
-      { name: 'Admins', href: '/admin/admins', permission: 'users.view' },
-      { name: 'Customers', href: '/admin/customers', permission: 'customers.view' },
-      { name: 'Positions', href: '/admin/positions', permission: 'employees.view' },
-      { name: 'Loyalty Points', href: '/admin/loyalty-points', permission: 'loyalty.view' },
+      { name: 'layout.admin.nav.employees', href: '/admin/employees', permission: 'employees.view' },
+      { name: 'layout.admin.nav.admins', href: '/admin/admins', permission: 'users.view' },
+      { name: 'layout.admin.nav.customers', href: '/admin/customers', permission: 'customers.view' },
+      { name: 'layout.admin.nav.positions', href: '/admin/positions', permission: 'employees.view' },
+      { name: 'layout.admin.nav.loyalty_points', href: '/admin/loyalty-points', permission: 'loyalty.view' },
     ]
   },
   {
-    name: 'Scheduling',
+    name: 'layout.admin.nav.scheduling',
     icon: Calendar,
     type: 'group',
     permission: 'shifts.view',
     children: [
-      { name: 'Shifts', href: '/admin/shifts', permission: 'shifts.view' },
-      { name: 'Shift Approvals', href: '/admin/shift-approvals', permission: 'shifts.view' },
-      { name: 'Time Off Requests', href: '/admin/time-off-requests', permission: 'timeoff.view' },
-      { name: 'Attendance Management', href: '/admin/attendance-management', permission: 'attendance.view' },
-      { name: 'Payroll Management', href: '/admin/payroll-management', permission: 'payroll.view' },
+      { name: 'layout.admin.nav.shifts', href: '/admin/shifts', permission: 'shifts.view' },
+      { name: 'layout.admin.nav.shift_approvals', href: '/admin/shift-approvals', permission: 'shifts.view' },
+      { name: 'layout.admin.nav.time_off_requests', href: '/admin/time-off-requests', permission: 'timeoff.view' },
+      { name: 'layout.admin.nav.attendance_management', href: '/admin/attendance-management', permission: 'attendance.view' },
+      { name: 'layout.admin.nav.payroll_management', href: '/admin/payroll-management', permission: 'payroll.view' },
     ]
   },
   {
-    name: 'Restaurant Layout',
+    name: 'layout.admin.nav.restaurant_layout',
     icon: MapPin,
     type: 'group',
     permission: 'locations.view',
     children: [
-      { name: 'Locations', href: '/admin/locations', permission: 'locations.view' },
-      { name: 'Floors', href: '/admin/floors', permission: 'floors.manage' },
-      { name: 'Tables', href: '/admin/tables', permission: 'tables.manage' },
+      { name: 'layout.admin.nav.locations', href: '/admin/locations', permission: 'locations.view' },
+      { name: 'layout.admin.nav.floors', href: '/admin/floors', permission: 'floors.manage' },
+      { name: 'layout.admin.nav.tables', href: '/admin/tables', permission: 'tables.manage' },
     ]
   },
   {
-    name: 'Finance & Analytics',
+    name: 'layout.admin.nav.finance_analytics',
     icon: TrendingUp,
     type: 'group',
     permission: 'reports.view',
     children: [
-      { name: 'Sales Analytics', href: '/admin/sales-analytics', permission: 'reports.view' },
-      { name: 'Financial Dashboard', href: '/admin/financial-dashboard', permission: 'payments.view' },
-      { name: 'Expenses', href: '/admin/expenses', permission: 'expenses.view' },
-      { name: 'Invoices', href: '/admin/invoices', permission: 'invoices.view' },
+      { name: 'layout.admin.nav.sales_analytics', href: '/admin/sales-analytics', permission: 'reports.view' },
+      { name: 'layout.admin.nav.financial_dashboard', href: '/admin/financial-dashboard', permission: 'payments.view' },
+      { name: 'layout.admin.nav.expenses', href: '/admin/expenses', permission: 'expenses.view' },
+      { name: 'layout.admin.nav.invoices', href: '/admin/invoices', permission: 'invoices.view' },
     ]
   },
   {
-    name: 'System',
+    name: 'layout.admin.nav.system',
     icon: Settings,
     type: 'group',
     permission: 'settings.view',
     children: [
-      { name: 'Operating Hours', href: '/admin/operating-hours', permission: 'locations.manage' },
-      { name: 'Roles & Permissions', href: '/admin/roles', permission: 'roles.manage' },
-      { name: 'Translations', href: '/admin/translations', permission: 'translations.manage' },
-      { name: 'Audit Logs', href: '/admin/audit-logs', permission: 'audit.view' },
-      { name: 'Payment Methods', href: '/admin/payment-methods', permission: 'manage_payment_methods' },
-      { name: 'Settings', href: '/admin/settings', permission: 'settings.view' },
+      { name: 'layout.admin.nav.operating_hours', href: '/admin/operating-hours', permission: 'locations.manage' },
+      { name: 'layout.admin.nav.roles_permissions', href: '/admin/roles', permission: 'roles.manage' },
+      { name: 'layout.admin.nav.translations', href: '/admin/translations', permission: 'translations.manage' },
+      { name: 'layout.admin.nav.audit_logs', href: '/admin/audit-logs', permission: 'audit.view' },
+      { name: 'layout.admin.nav.payment_methods', href: '/admin/payment-methods', permission: 'manage_payment_methods' },
+      { name: 'layout.admin.nav.settings', href: '/admin/settings', permission: 'settings.view' },
     ]
   },
 ];
@@ -134,7 +135,7 @@ const handleLogout = () => {
 };
 
 // --- 2. Sub-Component: Sidebar Item (Recursive) ---
-const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup }: any) => {
+const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup, t }: any) => {
   const Icon = item.icon;
 
   // Helper function to check if URL matches (handles query params and trailing slashes)
@@ -175,7 +176,7 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 p-2 min-w-[200px] overflow-hidden">
             {/* Header */}
             <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 mb-1">
-              <span className="font-semibold text-gray-900 dark:text-white">{item.name}</span>
+              <span className="font-semibold text-gray-900 dark:text-white">{t(item.name)}</span>
             </div>
 
             {/* Children Links */}
@@ -194,14 +195,14 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
                           : "text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
                       )}
                     >
-                      {child.name}
+                      {t(child.name)}
                     </Link>
                   )
                 })}
               </div>
             ) : (
               <Link href={item.href} className="block px-3 py-2 text-sm text-gray-600 hover:text-purple-600">
-                Open Dashboard
+                {t('layout.admin.open_dashboard')}
               </Link>
             )}
           </div>
@@ -225,7 +226,7 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
           whileTap={{ scale: 0.98 }}
         >
           <Icon className="w-5 h-5 flex-shrink-0" />
-          <span className="font-medium text-sm">{item.name}</span>
+          <span className="font-medium text-sm">{t(item.name)}</span>
         </motion.div>
       </Link>
     );
@@ -245,7 +246,7 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
       >
         <div className="flex items-center gap-3">
           <Icon className={cn("w-5 h-5 transition-colors", isGroupActive ? "text-purple-600 dark:text-purple-400" : "text-gray-500")} />
-          <span className={cn("font-medium text-sm", isGroupActive && "font-semibold")}>{item.name}</span>
+          <span className={cn("font-medium text-sm", isGroupActive && "font-semibold")}>{t(item.name)}</span>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -293,7 +294,7 @@ const SidebarItem = ({ item, collapsed, currentUrl, expandedGroups, toggleGroup 
                         isChildActive ? "bg-purple-600 border-purple-600" : "border-gray-300 dark:border-gray-600"
                       )} />
 
-                      <span>{child.name}</span>
+                      <span>{t(child.name)}</span>
                     </motion.div>
                   </Link>
                 );
@@ -333,6 +334,8 @@ export default function AdminLayout({ children }: Props) {
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const { isDark, toggle: toggleTheme } = useThemeStore();
   const search = useGlobalSearch();
+  const { t, locale } = useLanguage();
+  const dateLocale = locale === 'km' ? 'km-KH' : 'en-US';
 
   // --- Filter Navigation Tree ---
   const filteredNav = useMemo(() => {
@@ -377,15 +380,15 @@ export default function AdminLayout({ children }: Props) {
     // Find the active item in navigation tree
     for (const item of filteredNav) { // Changed from navigationTree to filteredNav
       if (item.type === 'link' && item.href && isUrlMatchFn(item.href, url)) {
-        return item.name;
+        return t(item.name);
       }
       if (item.type === 'group' && item.children) {
         const child = item.children.find((c: any) => c.href && isUrlMatchFn(c.href, url));
-        if (child) return child.name;
+        if (child) return t(child.name);
       }
     }
-    return 'Dashboard';
-  }, [url, filteredNav]); // Added filteredNav to dependencies
+    return t('layout.admin.nav.dashboard');
+  }, [url, filteredNav, t]); // Added filteredNav to dependencies
 
   // Auto-expand groups based on active URL
   useEffect(() => {
@@ -451,9 +454,9 @@ export default function AdminLayout({ children }: Props) {
                 </div>
                 <div>
                   <h1 className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-                    NKH Restaurant
+                    {t('layout.footer.brand_title')}
                   </h1>
-                  <p className="text-xs text-fuchsia-600 dark:text-fuchsia-400 font-semibold tracking-wide">Admin Portal</p>
+                  <p className="text-xs text-fuchsia-600 dark:text-fuchsia-400 font-semibold tracking-wide">{t('layout.admin.portal')}</p>
                 </div>
               </motion.div>
             ) : (
@@ -504,6 +507,7 @@ export default function AdminLayout({ children }: Props) {
               currentUrl={url}
               expandedGroups={expandedGroups}
               toggleGroup={toggleGroup}
+              t={t}
             />
           ))}
         </div>
@@ -527,11 +531,11 @@ export default function AdminLayout({ children }: Props) {
                   exit={{ opacity: 0, width: 0 }}
                 >
                   <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
-                    Admin User
+                    {t('layout.admin.user_name')}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    Online
+                    {t('layout.admin.status_online')}
                   </p>
                 </motion.div>
               )}
@@ -555,7 +559,7 @@ export default function AdminLayout({ children }: Props) {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">{pageTitle}</h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  {new Date().toLocaleDateString(dateLocale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
               </div>
             </div>
@@ -570,7 +574,7 @@ export default function AdminLayout({ children }: Props) {
               <button
                 onClick={toggleTheme}
                 className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all duration-200"
-                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={isDark ? t('layout.admin.theme.light') : t('layout.admin.theme.dark')}
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>

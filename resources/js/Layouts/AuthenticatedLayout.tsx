@@ -31,7 +31,7 @@ export default function Authenticated({
                                         <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 p-1.5">
                                             <img
                                                 src="/Nkhlogo.png"
-                                                alt="NKH Restaurant"
+                                                alt={t('layout.footer.brand_title')}
                                                 className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(217,70,239,0.4)]"
                                             />
                                         </div>

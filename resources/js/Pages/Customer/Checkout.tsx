@@ -234,7 +234,7 @@ export default function Checkout() {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('checkout.title')}</h1>
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {t('checkout.items_summary', { count: cart.items.length, unit: cart.items.length === 1 ? 'item' : 'items', total: `$${cart.total.toFixed(2)}` })}
+              {t('checkout.items_summary', { count: cart.items.length, unit: cart.items.length === 1 ? t('common.item') : t('common.items'), total: `$${cart.total.toFixed(2)}` })}
             </p>
           </div>
         </motion.div>
@@ -257,10 +257,10 @@ export default function Checkout() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {cart.tableCode || 'TB-??'}
+                        {cart.tableCode || t('checkout.table_fallback')}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {cart.floorName || 'Main Floor'}
+                        {cart.floorName || t('checkout.floor_fallback')}
                       </div>
                     </div>
                     <div className="text-right text-xs text-gray-500 max-w-[50%]">
@@ -549,13 +549,13 @@ export default function Checkout() {
         < details className="group" open={showSummary} onToggle={(e) => setShowSummary((e.target as HTMLDetailsElement).open)}>
           <summary className="flex items-center justify-between p-3 sm:p-4 cursor-pointer list-none bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">{cart.items.length} items</span>
+              <span className="text-xs text-gray-500">{cart.items.length} {t('common.items')}</span>
               <span className="text-base font-bold text-gray-900 dark:text-white">
                 ${cart.total.toFixed(2)}
               </span>
             </div>
             <span className="text-xs text-gray-400 group-open:rotate-180 transition-transform flex items-center gap-1">
-              Details
+              {t('checkout.details')}
               {showSummary ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </span>
           </summary>

@@ -134,6 +134,8 @@ export function RestaurantLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { url } = usePage();
   const { t } = useLanguage();
+  const roleLabel = t(`layout.restaurant.roles.${role}`);
+  const portalLabel = t('layout.restaurant.portal', { role: roleLabel });
 
   const navigation = navigationConfig[role];
   const themeClass = roleThemes[role];
@@ -258,16 +260,16 @@ export function RestaurantLayout({
                     <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20">
                       <img
                         src="/Nkhlogo.png"
-                        alt="NKH"
+                        alt={t('layout.footer.brand_title')}
                         className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
                       />
                     </div>
                     <div>
                       <h1 className="font-display text-xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                        NKH Restaurant
+                        {t('layout.footer.brand_title')}
                       </h1>
                       <p className="text-sm text-fuchsia-500 capitalize">
-                        {role} Portal
+                        {portalLabel}
                       </p>
                     </div>
                   </motion.div>
@@ -281,7 +283,7 @@ export function RestaurantLayout({
                   >
                     <img
                       src="/Nkhlogo.png"
-                      alt="NKH"
+                      alt={t('layout.footer.brand_title')}
                       className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
                     />
                   </motion.div>
@@ -357,10 +359,10 @@ export function RestaurantLayout({
                       transition={{ duration: 0.2 }}
                     >
                       <p className="font-medium text-neutral-900 dark:text-neutral-100 truncate">
-                        John Doe
+                        {t('layout.restaurant.user_name')}
                       </p>
                       <p className="text-sm text-neutral-500 truncate">
-                        {role}@nkh.com
+                        {t('layout.restaurant.user_email', { role: roleLabel })}
                       </p>
                     </motion.div>
                   )}

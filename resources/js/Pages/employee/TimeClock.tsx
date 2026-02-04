@@ -25,7 +25,7 @@ export default function TimeClock() {
             apiPost('/api/attendance/clock-in', {
                 employee_id: (statusData as any)?.employee_id,
                 location_id: (statusData as any)?.location_id,
-                notes: 'Clock in',
+                notes: t('employee.timeclock.notes.clock_in'),
             }),
         onSuccess: () => {
             toastSuccess(t('employee.timeclock.messages.clocked_in'));
@@ -40,7 +40,7 @@ export default function TimeClock() {
         mutationFn: () =>
             apiPost('/api/attendance/clock-out', {
                 attendance_id: (statusData as any)?.current_attendance?.id,
-                notes: 'Clock out',
+                notes: t('employee.timeclock.notes.clock_out'),
             }),
         onSuccess: () => {
             toastSuccess(t('employee.timeclock.messages.clocked_out'));
@@ -108,7 +108,7 @@ export default function TimeClock() {
 
     return (
         <EmployeeLayout>
-            <Head title="Time Clock" />
+            <Head title={t('employee.timeclock.title')} />
 
             <div className="max-w-md mx-auto space-y-6 py-8">
                 {/* Status Card */}
@@ -157,10 +157,10 @@ export default function TimeClock() {
                                     <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                                         <div>
                                             <p className="text-sm font-medium text-gray-900">
-                                                {record.clock_in_at.split(' ')[1]} - {record.clock_out_at?.split(' ')[1] || 'Ongoing'}
+                                                {record.clock_in_at.split(' ')[1]} - {record.clock_out_at?.split(' ')[1] || t('employee.timeclock.ongoing')}
                                             </p>
                                             <p className="text-xs text-gray-600">
-                                                {record.total_hours ? `${record.total_hours} hours` : 'Clocking...'}
+                                                {record.total_hours ? t('employee.timeclock.total_hours', { hours: record.total_hours }) : t('employee.timeclock.clocking')}
                                             </p>
                                         </div>
                                     </div>
@@ -176,8 +176,8 @@ export default function TimeClock() {
                         <div className="flex gap-3">
                             <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                             <div className="text-sm text-blue-800">
-                                <p className="font-medium">Time Clock Instructions</p>
-                                <p className="mt-1 text-xs">Click "Clock In" when you arrive at work and "Clock Out" when you leave. Your attendance will be automatically recorded.</p>
+                                <p className="font-medium">{t('employee.timeclock.instructions.title')}</p>
+                                <p className="mt-1 text-xs">{t('employee.timeclock.instructions.body')}</p>
                             </div>
                         </div>
                     </CardContent>

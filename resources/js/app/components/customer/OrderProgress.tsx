@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { ShoppingBag, ShoppingCart, MapPin, CreditCard, Check } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
+import { useTranslation } from '@/app/hooks/useTranslation';
+
 type Step = 'menu' | 'cart' | 'checkout' | 'payment';
 
 interface OrderProgressProps {
@@ -10,14 +12,16 @@ interface OrderProgressProps {
     className?: string;
 }
 
-const steps = [
-    { id: 'menu', label: 'Menu', icon: ShoppingBag },
-    { id: 'cart', label: 'Cart', icon: ShoppingCart },
-    { id: 'checkout', label: 'Checkout', icon: MapPin },
-    { id: 'payment', label: 'Payment', icon: CreditCard },
-] as const;
-
 export function OrderProgress({ currentStep, className }: OrderProgressProps) {
+    const { t } = useTranslation();
+
+    const steps = [
+        { id: 'menu', label: t('layout.nav.mobile_menu_title'), icon: ShoppingBag },
+        { id: 'cart', label: t('layout.nav.cart'), icon: ShoppingCart },
+        { id: 'checkout', label: t('cart.checkout'), icon: MapPin },
+        { id: 'payment', label: t('checkout.payment_title'), icon: CreditCard },
+    ] as const;
+
     const currentIndex = steps.findIndex(s => s.id === currentStep);
 
     return (

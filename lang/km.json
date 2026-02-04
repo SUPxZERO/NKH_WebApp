@@ -1,10 +1,16 @@
 {
     "meta": {
-        "home_title": "NKH Restaurant - អាហារស្រស់ ដឹកជូនរហ័ស"
+        "home_title": "NKH Restaurant - អាហារស្រស់ ដឹកជូនរហ័ស",
+        "app_title": "ភោជនីយដ្ឋាន NKH"
     },
     "menu": {
         "categories_label": "ស្វែងរកតាមប្រភេទ",
         "add_to_cart": "ដាក់ចូលកន្ត្រក",
+        "added_to_cart": "បានដាក់ :name ចូលកន្ត្រក!",
+        "favorite_error": "បរាជ័យក្នុងការអាប់ដេតចំណូលចិត្ត",
+        "page_title": "ម៉ឺនុយ - ភោជនីយដ្ឋាន NKH | ជម្រើសម្ហូបឆ្ងាញ់",
+        "page_desc": "ស្វែងរកមុខម្ហូបរបស់យើងទាំងមូល តម្រៀបតាមប្រភេទ ស្វែងរកមុខម្ហូបដែលអ្នកចូលចិត្ត និងបញ្ជាទិញអនឡាញសម្រាប់ដឹកជញ្ជូន ឬទៅយកផ្ទាល់។",
+        "search_filter": "ស្វែងរក: \":query\"",
         "featured": "មុខម្ហូបពិសេស",
         "view_full": "មើលម៉ឺនុយពេញ",
         "search_placeholder": "ស្វែងរកមុខម្ហូប...",
@@ -207,6 +213,9 @@
             "profile": "ប្រវត្តិរូប",
             "logout": "ចាកចេញ",
             "view_account": "មើលព័ត៌មានគណនី",
+            "user_fallback": "អ្នកប្រើ",
+            "search_title": "ស្វែងរក",
+            "profile_title": "ប្រវត្តិរូប",
             "mobile_menu_title": "ម៉ឺនុយ",
             "admin": {
                 "dashboard": "ផ្ទាំងគ្រប់គ្រង",
@@ -239,6 +248,123 @@
                 "sun": "១២ថ្ងៃត្រង់ - ៩យប់"
             }
         },
+        "employee": {
+            "portal_title": "ផ្ទាំងបុគ្គលិក",
+            "more": "ផ្សេងៗ",
+            "sign_out": "ចេញពីគណនី",
+            "search_title": "ស្វែងរក (Ctrl+K)",
+            "on_duty": "កំពុងបម្រើការងារ",
+            "footer": "© :year ភោជនីយដ្ឋាន NKH។ ផ្ទាំងបុគ្គលិក v2.0",
+            "greeting": {
+                "morning": "សួស្តីព្រឹក",
+                "afternoon": "សួស្តីរសៀល",
+                "evening": "សួស្តីល្ងាច"
+            },
+            "nav": {
+                "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+                "pos": "POS",
+                "kitchen": "ផ្ទះបាយ",
+                "delivery": "ដឹកជញ្ជូន",
+                "schedule": "កាលវិភាគ",
+                "performance": "ការអនុវត្ត",
+                "support": "ជំនួយ",
+                "feedback": "មតិកែលម្អ"
+            }
+        },
+        "admin": {
+            "portal": "ផ្ទាំងអ្នកគ្រប់គ្រង",
+            "user_name": "អ្នកគ្រប់គ្រង",
+            "status_online": "កំពុងអនឡាញ",
+            "open_dashboard": "បើកផ្ទាំងគ្រប់គ្រង",
+            "theme": {
+                "light": "ប្តូរទៅរបៀបពន្លឺ",
+                "dark": "ប្តូរទៅរបៀបងងឹត"
+            },
+            "nav": {
+                "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+                "operations": "ប្រតិបត្តិការ",
+                "orders": "ការកុម្ម៉ង់",
+                "reservations": "ការកក់តុ",
+                "notifications": "ការជូនដំណឹង",
+                "menu_management": "គ្រប់គ្រងម៉ឺនុយ",
+                "categories": "ប្រភេទ",
+                "menu_items": "មុខម្ហូប",
+                "recipes": "រូបមន្ត",
+                "promotions": "ប្រូម៉ូសិន",
+                "inventory_procurement": "ស្តុក និងការផ្គត់ផ្គង់",
+                "purchase_orders": "បញ្ជាទិញទំនិញ",
+                "inventory": "ស្តុក",
+                "inventory_reports": "របាយការណ៍ស្តុក",
+                "ingredients": "គ្រឿងផ្សំ",
+                "adjustments": "ការកែតម្រូវ",
+                "stock_alerts": "ការជូនដំណឹងស្តុក",
+                "suppliers": "អ្នកផ្គត់ផ្គង់",
+                "units": "ឯកតា",
+                "people_management": "គ្រប់គ្រងមនុស្ស",
+                "employees": "បុគ្គលិក",
+                "admins": "អ្នកគ្រប់គ្រង",
+                "customers": "អតិថិជន",
+                "positions": "តួនាទី",
+                "loyalty_points": "ពិន្ទុស្មោះត្រង់",
+                "scheduling": "កាលវិភាគ",
+                "shifts": "វេន",
+                "shift_approvals": "អនុម័តវេន",
+                "time_off_requests": "សំណើសុំឈប់សម្រាក",
+                "attendance_management": "គ្រប់គ្រងវត្តមាន",
+                "payroll_management": "គ្រប់គ្រងប្រាក់ឈ្នួល",
+                "restaurant_layout": "ប្លង់ភោជនីយដ្ឋាន",
+                "locations": "ទីតាំង",
+                "floors": "ជាន់",
+                "tables": "តុ",
+                "finance_analytics": "ហិរញ្ញវត្ថុ និងវិភាគ",
+                "sales_analytics": "វិភាគលក់",
+                "financial_dashboard": "ផ្ទាំងហិរញ្ញវត្ថុ",
+                "expenses": "ចំណាយ",
+                "invoices": "វិក័យប័ត្រ",
+                "system": "ប្រព័ន្ធ",
+                "operating_hours": "ម៉ោងធ្វើការ",
+                "roles_permissions": "តួនាទី និងសិទ្ធិ",
+                "translations": "ការបកប្រែ",
+                "audit_logs": "កំណត់ហេតុសវនកម្ម",
+                "payment_methods": "វិធីបង់ប្រាក់",
+                "settings": "ការកំណត់"
+            }
+        },
+        "restaurant": {
+            "portal": ":role ផ្ទាំង",
+            "user_name": "អ្នកប្រើប្រាស់",
+            "user_email": ":role@nkh.com",
+            "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+            "menu_management": "គ្រប់គ្រងម៉ឺនុយ",
+            "orders": "ការកុម្ម៉ង់",
+            "staff": "បុគ្គលិក",
+            "locations": "ទីតាំង",
+            "payments": "ការទូទាត់",
+            "scheduling": "កាលវិភាគ",
+            "reviews": "មតិយោបល់",
+            "settings": "ការកំណត់",
+            "kitchen": "ផ្ទះបាយ",
+            "menu": "ម៉ឺនុយ",
+            "schedule": "កាលវិភាគ",
+            "tables": "តុ",
+            "my_orders": "ការកុម្ម៉ង់របស់ខ្ញុំ",
+            "favorites": "ចំណូលចិត្ត",
+            "rewards": "រង្វាន់",
+            "roles": {
+                "admin": "អ្នកគ្រប់គ្រង",
+                "manager": "អ្នកគ្រប់គ្រង",
+                "chef": "មេចុងភៅ",
+                "waiter": "អ្នកបម្រើ",
+                "customer": "អតិថិជន"
+            }
+        },
+        "table_brand": "NKH.",
+        "table_label": "តុ :code",
+        "table_nav": {
+            "menu": "ម៉ឺនុយ",
+            "orders": "ការកុម្ម៉ង់",
+            "tray": "ថាស"
+        },
         "table": "តុ"
     },
     "hero": {
@@ -248,6 +374,10 @@
         "cta_menu": "មើលម៉ឺនុយ"
     },
     "cart": {
+        "sign_in_modal_title": "ចូលគណនីដើម្បីបន្ត",
+        "add_items_btn": "បន្ថែមទំនិញដើម្បីបន្ត",
+        "go_to_cart_btn": "ទៅកាន់កន្ត្រក",
+        "sign_in_required_msg": "អ្នកត្រូវចូលគណនីដើម្បីបញ្ចប់ការកម្មង់",
         "title": "កន្ត្រករបស់អ្នក",
         "meta_title": "កន្ត្រក - NKH Restaurant",
         "meta_desc": "ពិនិត្យមើលកន្ត្រករបស់អ្នក និងបន្តទៅគិតប្រាក់",
@@ -423,125 +553,749 @@
                 "thu": "ព្រហស្បតិ៍",
                 "fri": "សុក្រ",
                 "na": "មិនមាន"
+            },
+            "time": {
+                "just_now": "ឥឡូវនេះ",
+                "minutes_ago": ":count នាទីមុន",
+                "hours_ago": ":count ម៉ោងមុន",
+                "days_ago": ":count ថ្ងៃមុន"
+            },
+            "pagination": {
+                "page_of_total": "ទំព័រ :current នៃ :total",
+                "previous": "មុន",
+                "next": "បន្ទាប់",
+                "showing_of_total": "បង្ហាញ :count នៃ :total"
             }
         },
-    "dashboard": {
-      "welcome": "ស្វាគមន៍",
-      "command_center": "មជ្ឈមណ្ឌលបញ្ជា",
-      "refresh": "ធ្វើឱ្យស្រស់",
-      "live": "ផ្សាយបន្តផ្ទាល់",
-      "stats": {
-        "revenue": "ចំណូលថ្ងៃនេះ",
-        "orders": "ការបញ្ជាទិញថ្ងៃនេះ",
-        "active_orders": "ការបញ្ជាទិញសកម្ម",
-        "avg_order_value": "តម្លៃបញ្ជាទិញមធ្យម",
-        "active_tasks": "ភារកិច្ចសកម្មរបស់ខ្ញុំ",
-        "assigned_orders": "ការបញ្ជាទិញដែលបានកំណត់",
-        "performance": "សមត្ថភាពរបស់ខ្ញុំសប្តាហ៍នេះ",
-        "orders_completed": "ការបញ្ជាទិញបានបញ្ចប់",
-        "no_tasks": "មិនមានភារកិច្ចសកម្មបានកំណត់"
-      }
-    },
-    "emails": {
-      "order_status": {
-        "subject": "ការបញ្ជាទិញ :order_number :status",
-        "greeting": "សួស្តី :name",
-        "approved_body": "ការបញ្ជាទិញ #:order_number របស់អ្នកបានអនុម័ត!",
-        "approved_next": "អ្នកនឹងទទួលបានការជូនដំណឹងនៅពេលការបញ្ជាទិញរបស់អ្នករួចរាល់។",
-        "view_order": "មើលការបញ្ជាទិញ",
-        "rejected_body": "ការបញ្ជាទិញ #:order_number របស់អ្នកត្រូវបានបដិសេធ។",
-        "rejection_reason": "មូលហេតុ៖ :reason",
-        "apology": "យើងសូមអភ័យទោសចំពោះការរអាក់រអួលដែលបានកើតឡើង។",
-        "place_new_order": "បញ្ជាទិញថ្មី",
-        "closing": "សូមអរគុណដែលបានជ្រើសរើសសេវាកម្មរបស់យើង!"
-      },
-      "receipt": {
-        "title": "បង្កាន់ដៃទូទាត់",
-        "payment_status": "ការទូទាត់ :status",
-        "hi": "សួស្តី :name,",
-        "hello": "សួស្តី,",
-        "thank_you": "សូមអរគុណសម្រាប់ការបញ្ជាទិញរបស់អ្នក! នេះជាបង្កាន់ដៃរបស់អ្នក។",
-        "order_number": "លេខបញ្ជាទិញ #",
-        "subtotal": "សរុបរង",
-        "tax": "ពន្ធ",
-        "discount": "បញ្ចុះតម្លៃ",
-        "total_paid": "សរុបទូទាត់",
-        "payment_details": "ព័ត៌មានលម្អិតការទូទាត់",
-        "receipt_number": "លេខបង្កាន់ដៃ:",
-        "transaction_id": "លេខសម្គាល់ប្រតិបត្តិការ:",
-        "amount": "ចំនួនប្រាក់:",
-        "pdf_copy": "ច្បាប់ PDF នៃបង្កាន់ដៃរបស់អ្នកត្រូវបានភ្ជាប់ជាមួយអ៊ីមែលនេះសម្រាប់ការកត់ត្រារបស់អ្នក។",
-        "tel": "ទូរស័ព្ទ:",
-        "automated_message": "នេះជាអ៊ីមែលស្វ័យប្រវត្តិ។ សូមកុំឆ្លើយតបដោយផ្ទាល់ទៅសារនេះ។"
-      }
-    },
-    "expenses": {
-      "title": "ចំណាយ",
-      "subtitle": "តាមដានការចំណាយអាជីវកម្ម",
-      "add_expense": "បន្ថែមចំណាយ",
-      "categories": "ប្រភេទ",
-      "stats": {
-        "total": "សរុប",
-        "paid": "បានបង់",
-        "pending": "កំពុងរង់ចាំ"
-      },
-      "filters": {
-        "search": "ស្វែងរក...",
-        "all_status": "ស្ថានភាពទាំងអស់",
-        "all_categories": "ប្រភេទទាំងអស់",
-        "all_time": "គ្រប់រយៈពេល"
-      },
-      "table": {
-        "date": "កាលបរិច្ឆេទ",
-        "category_vendor": "ប្រភេទ / អ្នកផ្គត់ផ្គង់",
-        "amount": "ចំនួនប្រាក់",
-        "reference": "យោង",
-        "status": "ស្ថានភាព",
-        "actions": "សកម្មភាព",
-        "loading": "កំពុងផ្ទុកចំណាយ...",
-        "empty": "រកមិនឃើញចំណាយទេ",
-        "create_trigger": "បង្កើតចំណាយដំបូងរបស់អ្នកដើម្បីចាប់ផ្តើម"
-      },
-      "modal": {
-        "new_title": "ចំណាយថ្មី",
-        "edit_title": "កែប្រែចំណាយ",
-        "category_label": "ប្រភេទ",
-        "select_category": "ជ្រើសរើសប្រភេទ",
-        "date_label": "កាលបរិច្ឆេទ",
-        "amount_label": "ចំនួនប្រាក់",
-        "status_label": "ស្ថានភាព",
-        "vendor_label": "អ្នកផ្គត់ផ្គង់",
-        "reference_label": "យោង",
-        "description_label": "ការពិពណ៌នា",
-        "save": "រក្សាទុក",
-        "cancel": "បោះបង់",
-        "confirm_delete": "លុបចំណាយនេះ?"
-      },
-      "categories_modal": {
-        "title": "គ្រប់គ្រងប្រភេទ",
-        "add_new": "បន្ថែមថ្មី",
-        "placeholder": "ឈ្មោះប្រភេទថ្មី...",
-        "add_btn": "បន្ថែម",
-        "empty": "មិនទាន់មានប្រភេទ",
-        "confirm_delete": "លុបប្រភេទ?"
-      },
-      "status": {
-        "draft": "ព្រាង",
-        "approved": "បានអនុម័ត",
-        "paid": "បានបង់",
-        "voided": "បានលុបចោល"
-      },
-      "uncategorized": "មិនមានប្រភេទ",
-      "toasts": {
-        "created": "បានបង្កើតចំណាយ",
-        "updated": "បានកែប្រែចំណាយ",
-        "deleted": "បានលុបចំណាយ",
-        "category_created": "បានបង្កើតប្រភេទ",
-        "category_deleted": "បានលុបប្រភេទ",
-        "failed": "បរាជ័យ"
-      }
-    },
-    "alerts": {
+        "dashboard": {
+            "welcome": "ស្វាគមន៍",
+            "command_center": "មជ្ឈមណ្ឌលបញ្ជា",
+            "refresh": "ធ្វើឱ្យស្រស់",
+            "live": "ផ្សាយបន្តផ្ទាល់",
+            "stats": {
+                "revenue": "ចំណូលថ្ងៃនេះ",
+                "orders": "ការបញ្ជាទិញថ្ងៃនេះ",
+                "active_orders": "ការបញ្ជាទិញសកម្ម",
+                "avg_order_value": "តម្លៃបញ្ជាទិញមធ្យម",
+                "active_tasks": "ភារកិច្ចសកម្មរបស់ខ្ញុំ",
+                "assigned_orders": "ការបញ្ជាទិញដែលបានកំណត់",
+                "performance": "សមត្ថភាពរបស់ខ្ញុំសប្តាហ៍នេះ",
+                "orders_completed": "ការបញ្ជាទិញបានបញ្ចប់",
+                "no_tasks": "មិនមានភារកិច្ចសកម្មបានកំណត់"
+            },
+            "approvals": {
+                "title": "ការអនុម័តដែលរង់ចាំ",
+                "subtitle": "ធាតុដែលត្រូវការចំណាត់ការរបស់អ្នក",
+                "pending_count": ":count កំពុងរង់ចាំ",
+                "orders": "ការអនុម័តការបញ្ជាទិញ",
+                "time_off": "សំណើសុំឈប់សម្រាក",
+                "inventory": "ការកែតម្រូវឃ្លាំង",
+                "awaiting": ":count រង់ចាំការត្រួតពិនិត្យ",
+                "clear": "សម្អាត"
+            },
+            "team_status": {
+                "title": "ក្រុមដែលកំពុងបំពេញការងារ",
+                "subtitle": "វេនថ្ងៃនេះ",
+                "staff_members": "បុគ្គលិក",
+                "no_shifts": "មិនមានវេនគ្រោងទុកសម្រាប់ថ្ងៃនេះទេ",
+                "view_schedule": "មើលកាលវិភាគពេញលេញ"
+            },
+            "health": {
+                "api": "API Gateway",
+                "database": "មូលដ្ឋានទិន្នន័យ",
+                "queue": "ជួរការងារ",
+                "uptime": "ពេលដំណើរការ",
+                "connection": "ការតភ្ជាប់",
+                "pending": "កំពុងរង់ចាំ",
+                "healthy": "ល្អ",
+                "active": "សកម្ម",
+                "warning": "ព្រមាន",
+                "degraded": "ធ្លាក់ចុះ",
+                "error": "កំហុស"
+            },
+            "order_status": {
+                "title": "ស្ថានភាពការបញ្ជាទិញ",
+                "subtitle": "ការបែងចែកពេលវេលាជាក់ស្តែង",
+                "total_orders": "ការបញ្ជាទិញសរុប",
+                "no_orders": "មិនមានការបញ្ជាទិញថ្ងៃនេះទេ",
+                "pending": "កំពុងរង់ចាំ",
+                "confirmed": "បានបញ្ជាក់",
+                "preparing": "កំពុងរៀបចំ",
+                "ready": "រួចរាល់",
+                "served": "បានបម្រើ",
+                "completed": "បានបញ្ចប់",
+                "cancelled": "បានលុបចោល",
+                "delivered": "បានដឹកជញ្ជូន",
+                "unknown": "មិនស្គាល់"
+            },
+            "revenue_chart": {
+                "title": "ទិដ្ឋភាពទូទៅនៃចំណូល",
+                "total_revenue": "ចំណូលសរុប",
+                "daily_avg": "មធ្យមប្រចាំថ្ងៃ",
+                "weekly_avg": "មធ្យមប្រចាំសប្តាហ៍",
+                "monthly_avg": "មធ្យមប្រចាំខែ",
+                "days": "ថ្ងៃ",
+                "weeks": "សប្តាហ៍",
+                "months": "ខែ",
+                "ranges": {
+                    "daily": "ប្រចាំថ្ងៃ",
+                    "weekly": "ប្រចាំសប្តាហ៍",
+                    "monthly": "ប្រចាំខែ"
+                },
+                "descriptions": {
+                    "daily": "7 ថ្ងៃចុងក្រោយ",
+                    "weekly": "4 សប្តាហ៍ចុងក្រោយ",
+                    "monthly": "6 ខែចុងក្រោយ"
+                },
+                "error_title": "កំហុសក្នុងការផ្ទុកទិន្នន័យចំណូល",
+                "retry": "ព្យាយាមម្តងទៀត"
+            },
+            "top_items": {
+                "title": "លក់ដាច់បំផុត",
+                "subtitle": "មុខម្ហូបពេញនិយម",
+                "sold": ":count បានលក់"
+            },
+            "quick_actions": {
+                "title": "សកម្មភាពរហ័ស",
+                "subtitle": "កិច្ចការដែលធ្វើញឹកញាប់",
+                "actions": {
+                    "new_order": "ការបញ្ជាទិញថ្មី",
+                    "add_menu_item": "បន្ថែមមុខម្ហូប",
+                    "staff_schedule": "កាលវិភាគបុគ្គលិក",
+                    "settings": "ការកំណត់"
+                },
+                "access": "ចូលប្រើរហ័ស"
+            }
+        },
+        "emails": {
+            "order_status": {
+                "subject": "ការបញ្ជាទិញ :order_number :status",
+                "greeting": "សួស្តី :name",
+                "approved_body": "ការបញ្ជាទិញ #:order_number របស់អ្នកបានអនុម័ត!",
+                "approved_next": "អ្នកនឹងទទួលបានការជូនដំណឹងនៅពេលការបញ្ជាទិញរបស់អ្នករួចរាល់។",
+                "view_order": "មើលការបញ្ជាទិញ",
+                "rejected_body": "ការបញ្ជាទិញ #:order_number របស់អ្នកត្រូវបានបដិសេធ។",
+                "rejection_reason": "មូលហេតុ៖ :reason",
+                "apology": "យើងសូមអភ័យទោសចំពោះការរអាក់រអួលដែលបានកើតឡើង។",
+                "place_new_order": "បញ្ជាទិញថ្មី",
+                "closing": "សូមអរគុណដែលបានជ្រើសរើសសេវាកម្មរបស់យើង!"
+            },
+            "receipt": {
+                "title": "បង្កាន់ដៃទូទាត់",
+                "payment_status": "ការទូទាត់ :status",
+                "hi": "សួស្តី :name,",
+                "hello": "សួស្តី,",
+                "thank_you": "សូមអរគុណសម្រាប់ការបញ្ជាទិញរបស់អ្នក! នេះជាបង្កាន់ដៃរបស់អ្នក។",
+                "order_number": "លេខបញ្ជាទិញ #",
+                "subtotal": "សរុបរង",
+                "tax": "ពន្ធ",
+                "discount": "បញ្ចុះតម្លៃ",
+                "total_paid": "សរុបទូទាត់",
+                "payment_details": "ព័ត៌មានលម្អិតការទូទាត់",
+                "receipt_number": "លេខបង្កាន់ដៃ:",
+                "transaction_id": "លេខសម្គាល់ប្រតិបត្តិការ:",
+                "amount": "ចំនួនប្រាក់:",
+                "pdf_copy": "ច្បាប់ PDF នៃបង្កាន់ដៃរបស់អ្នកត្រូវបានភ្ជាប់ជាមួយអ៊ីមែលនេះសម្រាប់ការកត់ត្រារបស់អ្នក។",
+                "tel": "ទូរស័ព្ទ:",
+                "automated_message": "នេះជាអ៊ីមែលស្វ័យប្រវត្តិ។ សូមកុំឆ្លើយតបដោយផ្ទាល់ទៅសារនេះ។"
+            }
+        },
+        "expenses": {
+            "title": "ចំណាយ",
+            "subtitle": "តាមដានការចំណាយអាជីវកម្ម",
+            "add_expense": "បន្ថែមចំណាយ",
+            "categories": "ប្រភេទ",
+            "stats": {
+                "total": "សរុប",
+                "paid": "បានបង់",
+                "pending": "កំពុងរង់ចាំ"
+            },
+            "filters": {
+                "search": "ស្វែងរក...",
+                "all_status": "ស្ថានភាពទាំងអស់",
+                "all_categories": "ប្រភេទទាំងអស់",
+                "all_time": "គ្រប់រយៈពេល"
+            },
+            "table": {
+                "date": "កាលបរិច្ឆេទ",
+                "category_vendor": "ប្រភេទ / អ្នកផ្គត់ផ្គង់",
+                "amount": "ចំនួនប្រាក់",
+                "reference": "យោង",
+                "status": "ស្ថានភាព",
+                "actions": "សកម្មភាព",
+                "loading": "កំពុងផ្ទុកចំណាយ...",
+                "empty": "រកមិនឃើញចំណាយទេ",
+                "create_trigger": "បង្កើតចំណាយដំបូងរបស់អ្នកដើម្បីចាប់ផ្តើម"
+            },
+            "modal": {
+                "new_title": "ចំណាយថ្មី",
+                "edit_title": "កែប្រែចំណាយ",
+                "category_label": "ប្រភេទ",
+                "select_category": "ជ្រើសរើសប្រភេទ",
+                "date_label": "កាលបរិច្ឆេទ",
+                "amount_label": "ចំនួនប្រាក់",
+                "status_label": "ស្ថានភាព",
+                "vendor_label": "អ្នកផ្គត់ផ្គង់",
+                "reference_label": "យោង",
+                "description_label": "ការពិពណ៌នា",
+                "save": "រក្សាទុក",
+                "cancel": "បោះបង់",
+                "confirm_delete": "លុបចំណាយនេះ?"
+            },
+            "categories_modal": {
+                "title": "គ្រប់គ្រងប្រភេទ",
+                "add_new": "បន្ថែមថ្មី",
+                "placeholder": "ឈ្មោះប្រភេទថ្មី...",
+                "add_btn": "បន្ថែម",
+                "empty": "មិនទាន់មានប្រភេទ",
+                "confirm_delete": "លុបប្រភេទ?"
+            },
+            "status": {
+                "draft": "ព្រាង",
+                "approved": "បានអនុម័ត",
+                "paid": "បានបង់",
+                "voided": "បានលុបចោល"
+            },
+            "uncategorized": "មិនមានប្រភេទ",
+            "toasts": {
+                "created": "បានបង្កើតចំណាយ",
+                "updated": "បានកែប្រែចំណាយ",
+                "deleted": "បានលុបចំណាយ",
+                "category_created": "បានបង្កើតប្រភេទ",
+                "category_deleted": "បានលុបប្រភេទ",
+                "failed": "បរាជ័យ"
+            }
+        },
+        "finance": {
+            "title": "ផ្ទាំងហិរញ្ញវត្ថុ",
+            "subtitle": "តាមដានចំណូល ចំណាយ និងផលចំណេញ",
+            "pdf": "PDF",
+            "csv": "CSV",
+            "stats": {
+                "total_revenue": "ចំណូលសរុប",
+                "total_expenses": "ចំណាយសរុប",
+                "net_profit": "ប្រាក់ចំណេញសុទ្ធ",
+                "profit_margin": "សមាមាត្រប្រាក់ចំណេញ",
+                "total_cogs": "COGS សរុប",
+                "of_revenue": "នៃចំណូល",
+                "from_last_period": "ពីរយៈពេលមុន"
+            },
+            "charts": {
+                "revenue_vs_expenses": "ចំណូលទល់នឹងចំណាយ",
+                "cogs_breakdown": "ថ្លៃដើមទំនិញ",
+                "margins_by_category": "សមាមាត្រតាមប្រភេទ",
+                "expense_breakdown": "បំបែកចំណាយ",
+                "revenue": "ចំណូល",
+                "expenses": "ចំណាយ",
+                "profit": "ប្រាក់ចំណេញ"
+            },
+            "empty": {
+                "revenue_expenses": "មិនមានទិន្នន័យចំណូលទល់នឹងចំណាយ",
+                "cogs": "មិនមានទិន្នន័យ COGS",
+                "margins": "មិនមានទិន្នន័យសមាមាត្រ",
+                "expenses": "មិនមានទិន្នន័យបំបែកចំណាយ"
+            }
+        },
+        "floors": {
+            "title": "ការគ្រប់គ្រងជាន់",
+            "subtitle": "គ្រប់គ្រងជាន់ និងប្លង់ភោជនីយដ្ឋាន",
+            "add": "បន្ថែមជាន់",
+            "stats": {
+                "floors": "ចំនួនជាន់សរុប",
+                "active": "ជាន់សកម្ម",
+                "tables": "ចំនួនតុសរុប",
+                "capacity": "សមត្ថភាពសរុប"
+            },
+            "filters": {
+                "search": "ស្វែងរកជាន់...",
+                "all": "ស្ថានភាពទាំងអស់",
+                "active": "សកម្ម",
+                "inactive": "អសកម្ម",
+                "all_locations": "ទីតាំងទាំងអស់"
+            },
+            "table": {
+                "name": "ឈ្មោះជាន់",
+                "location": "ទីតាំង",
+                "order": "លំដាប់បង្ហាញ",
+                "tables": "តុ",
+                "status": "ស្ថានភាព",
+                "actions": "សកម្មភាព",
+                "active": "សកម្ម",
+                "inactive": "អសកម្ម",
+                "off": "បិទ",
+                "loading": "កំពុងផ្ទុកជាន់...",
+                "loading_short": "កំពុងផ្ទុក..."
+            },
+            "empty": {
+                "no_floors": "រកមិនឃើញជាន់ទេ",
+                "create_first": "បង្កើតជាន់ដំបូងរបស់អ្នកដើម្បីចាប់ផ្តើម"
+            },
+            "messages": {
+                "created": "បានបង្កើតជាន់ដោយជោគជ័យ",
+                "updated": "បានកែប្រែជាន់ដោយជោគជ័យ",
+                "deleted": "បានលុបជាន់ដោយជោគជ័យ",
+                "failed": "ប្រតិបត្តិការបរាជ័យ",
+                "confirm_delete": "តើអ្នកប្រាកដថាចង់លុបជាន់នេះទេ?"
+            },
+            "modal": {
+                "new": "ជាន់ថ្មី",
+                "edit": "កែប្រែជាន់",
+                "location": "ទីតាំង",
+                "select_location": "ជ្រើសរើសទីតាំង",
+                "name": "ឈ្មោះជាន់",
+                "display_order": "លំដាប់បង្ហាញ",
+                "active": "សកម្ម"
+            }
+        },
+        "hr": {
+            "employees": {
+                "title": "បុគ្គលិក",
+                "subtitle": "គ្រប់គ្រងបុគ្គលិក",
+                "add": "បន្ថែមបុគ្គលិក",
+                "stats": {
+                    "total": "សរុប",
+                    "active": "សកម្ម",
+                    "leave": "ឈប់សម្រាក",
+                    "inactive": "អសកម្ម"
+                },
+                "filters": {
+                    "all": "ទាំងអស់",
+                    "active": "សកម្ម",
+                    "leave": "ឈប់សម្រាក",
+                    "off": "បិទ"
+                },
+                "table": {
+                    "employee": "បុគ្គលិក",
+                    "position": "តួនាទី",
+                    "contact": "ទំនាក់ទំនង",
+                    "hire_date": "កាលបរិច្ឆេទជួល",
+                    "status": "ស្ថានភាព",
+                    "actions": "សកម្មភាព",
+                    "no_position": "គ្មានតួនាទី",
+                    "unknown": "មិនស្គាល់"
+                },
+                "modal": {
+                    "create_title": "បុគ្គលិកថ្មី",
+                    "edit_title": "កែប្រែបុគ្គលិក",
+                    "name": "ឈ្មោះ",
+                    "email": "អ៊ីមែល",
+                    "phone": "ទូរស័ព្ទ",
+                    "password": "ពាក្យសម្ងាត់",
+                    "new_password": "ពាក្យសម្ងាត់ថ្មី",
+                    "code": "កូដ",
+                    "auto_generated": "បង្កើតស្វ័យប្រវត្តិ",
+                    "hire_date": "កាលបរិច្ឆេទជួល",
+                    "type": "ប្រភេទ",
+                    "salary": "ប្រាក់ខែ",
+                    "status": "ស្ថានភាព",
+                    "position": "តួនាទី",
+                    "location": "ទីតាំង",
+                    "address": "អាសយដ្ឋាន",
+                    "search_address": "ស្វែងរកអាសយដ្ឋាន...",
+                    "select": "ជ្រើសរើស",
+                    "types": {
+                        "monthly": "ប្រចាំខែ",
+                        "hourly": "តាមម៉ោង"
+                    },
+                    "statuses": {
+                        "active": "សកម្ម",
+                        "inactive": "អសកម្ម",
+                        "on_leave": "កំពុងឈប់សម្រាក",
+                        "terminated": "បញ្ចប់ការងារ"
+                    }
+                },
+                "messages": {
+                    "created": "បានបង្កើតបុគ្គលិកដោយជោគជ័យ",
+                    "updated": "បានកែប្រែបុគ្គលិកដោយជោគជ័យ",
+                    "deleted": "បានបិទបុគ្គលិក",
+                    "confirm_delete": "បិទបុគ្គលិកនេះ?",
+                    "failed": "ប្រតិបត្តិការបរាជ័យ",
+                    "not_found": "រកមិនឃើញបុគ្គលិកទេ",
+                    "adjust_filters": "សូមសាកល្បងកែតម្រូវតម្រង"
+                }
+            },
+            "positions": {
+                "title": "តួនាទី",
+                "subtitle": "គ្រប់គ្រងចំណងជើងការងារ",
+                "add": "បន្ថែមតួនាទី",
+                "stats": {
+                    "total": "សរុប",
+                    "active": "សកម្ម",
+                    "staff": "បុគ្គលិក"
+                },
+                "filters": {
+                    "all": "ទាំងអស់",
+                    "active": "សកម្ម",
+                    "inactive": "អសកម្ម",
+                    "on": "បើក",
+                    "off": "បិទ"
+                },
+                "table": {
+                    "title": "ចំណងជើង",
+                    "description": "ការពិពណ៌នា",
+                    "staff": "បុគ្គលិក",
+                    "status": "ស្ថានភាព",
+                    "actions": "សកម្មភាព",
+                    "no_desc": "គ្មានការពិពណ៌នា"
+                },
+                "modal": {
+                    "create_title": "តួនាទីថ្មី",
+                    "edit_title": "កែប្រែតួនាទី",
+                    "title": "ចំណងជើង",
+                    "description": "ការពិពណ៌នា",
+                    "active_status": "ស្ថានភាពសកម្ម",
+                    "cancel": "បោះបង់",
+                    "create": "បង្កើតតួនាទី",
+                    "update": "កែប្រែតួនាទី",
+                    "placeholder": {
+                        "title": "ឧ. មេចុងភៅ",
+                        "description": "ការពិពណ៌នាជម្រើស..."
+                    }
+                },
+                "messages": {
+                    "created": "បានបង្កើតតួនាទី",
+                    "updated": "បានកែប្រែតួនាទី",
+                    "deleted": "បានលុបតួនាទី",
+                    "failed": "បរាជ័យ",
+                    "confirm_delete": "លុបតួនាទីនេះ?",
+                    "not_found": "រកមិនឃើញតួនាទីទេ",
+                    "create_first": "បង្កើតតួនាទីដំបូងរបស់អ្នក"
+                }
+            },
+            "roles": {
+                "title": "តួនាទី និងសិទ្ធិ",
+                "subtitle": "គ្រប់គ្រងការចូលប្រើ និងសុវត្ថិភាព",
+                "add": "បង្កើតតួនាទី",
+                "stats": {
+                    "roles": "តួនាទី",
+                    "users": "អ្នកប្រើប្រាស់",
+                    "perms": "សិទ្ធិ",
+                    "avg_role": "មធ្យម/តួនាទី"
+                },
+                "table": {
+                    "role_name": "ឈ្មោះតួនាទី",
+                    "slug": "Slug",
+                    "users": "អ្នកប្រើប្រាស់",
+                    "permissions": "សិទ្ធិ",
+                    "actions": "សកម្មភាព",
+                    "access_points": "ចំណុចចូលប្រើ",
+                    "no_users": "គ្មានអ្នកប្រើប្រាស់",
+                    "system": "ប្រព័ន្ធ"
+                },
+                "modal": {
+                    "create_title": "តួនាទីថ្មី",
+                    "edit_title": "កែប្រែតួនាទី",
+                    "role_name": "ឈ្មោះតួនាទី",
+                    "description": "ការពិពណ៌នា",
+                    "permissions": "សិទ្ធិ",
+                    "selected": "បានជ្រើសរើស",
+                    "system_lock": "ឈ្មោះតួនាទីប្រព័ន្ធមិនអាចផ្លាស់ប្តូរ",
+                    "placeholder": {
+                        "name": "ឧ. អ្នកគ្រប់គ្រងភោជនីយដ្ឋាន",
+                        "description": "ពិពណ៌នាអំពីសិទ្ធិដែលតួនាទីនេះអាចធ្វើបាន..."
+                    }
+                },
+                "messages": {
+                    "created": "បានបង្កើតតួនាទី",
+                    "updated": "បានកែប្រែតួនាទី",
+                    "deleted": "បានលុបតួនាទី",
+                    "failed": "បរាជ័យ",
+                    "system_delete_error": "មិនអាចលុបតួនាទីប្រព័ន្ធបានទេ",
+                    "assigned_delete_error": "មិនអាចលុបតួនាទីដែលបានកំណត់ឱ្យអ្នកប្រើ :count នាក់បានទេ",
+                    "confirm_delete": "លុបតួនាទី ':name'?",
+                    "not_found": "រកមិនឃើញតួនាទីទេ",
+                    "create_first": "បង្កើតតួនាទីថ្មីដើម្បីចាប់ផ្តើម",
+                    "load_failed": "បរាជ័យក្នុងការផ្ទុកព័ត៌មានតួនាទី"
+                }
+            },
+            "shifts": {
+                "title": "កាលវិភាគប្រចាំសប្តាហ៍",
+                "title_monthly": "កាលវិភាគប្រចាំខែ",
+                "subtitle": "គ្រប់គ្រងវេនក្រុម",
+                "add": "បន្ថែមវេន",
+                "stats": {
+                    "total": "សរុប",
+                    "published": "បានផ្សព្វផ្សាយ",
+                    "draft": "ព្រាង"
+                },
+                "actions": {
+                    "copy_week": "ចម្លងសប្តាហ៍",
+                    "publish": "ផ្សព្វផ្សាយ",
+                    "today": "ថ្ងៃនេះ",
+                    "week": "សប្តាហ៍",
+                    "month": "ខែ",
+                    "week_of": "សប្តាហ៍នៃ"
+                },
+                "messages": {
+                    "created": "បានបង្កើតវេនដោយជោគជ័យ!",
+                    "create_failed": "បរាជ័យក្នុងការបង្កើតវេន",
+                    "updated": "បានកែប្រែវេនដោយជោគជ័យ!",
+                    "update_failed": "បរាជ័យក្នុងការកែប្រែវេន",
+                    "deleted": "បានលុបវេន!",
+                    "delete_failed": "បរាជ័យក្នុងការលុប",
+                    "published": "បានផ្សព្វផ្សាយវេន!",
+                    "copied": "បានចម្លងវេនដោយជោគជ័យ!",
+                    "copy_failed": "បរាជ័យក្នុងការចម្លងវេន",
+                    "status_updated": "បានកែប្រែស្ថានភាព!",
+                    "status_failed": "បរាជ័យក្នុងការកែប្រែស្ថានភាព",
+                    "no_drafts": "គ្មានវេនព្រាងសម្រាប់ផ្សព្វផ្សាយ។",
+                    "confirm_publish": "ផ្សព្វផ្សាយវេនព្រាង {{count}}?",
+                    "confirm_copy": "ចម្លងកាលវិភាគពីសប្តាហ៍មុនទៅសប្តាហ៍នេះ?"
+                },
+                "empty": {
+                    "week": "គ្មានវេនក្នុងសប្តាហ៍នេះ",
+                    "month": "គ្មានវេនក្នុងខែនេះ",
+                    "day": "គ្មានវេនសម្រាប់ថ្ងៃនេះ",
+                    "default": "គ្មានវេន"
+                },
+                "modal": {
+                    "new": "វេនថ្មី",
+                    "edit": "កែប្រែវេន",
+                    "day_shifts": "វេនប្រចាំថ្ងៃ",
+                    "for_date": "វេនសម្រាប់ {{date}}",
+                    "employee": "បុគ្គលិក",
+                    "location": "ទីតាំង",
+                    "position": "តួនាទី",
+                    "type": "ប្រភេទ",
+                    "start": "ចាប់ផ្តើម",
+                    "end": "បញ្ចប់",
+                    "notes": "កំណត់សម្គាល់",
+                    "status": "ស្ថានភាព",
+                    "select": "ជ្រើសរើស",
+                    "no_location": "គ្មានទីតាំង",
+                    "use_default": "ប្រើលំនាំដើម",
+                    "placeholder_notes": "កំណត់សម្គាល់..."
+                },
+                "types": {
+                    "morning": "ព្រឹក",
+                    "afternoon": "រសៀល",
+                    "evening": "ល្ងាច",
+                    "night": "យប់",
+                    "split": "បែងចែក"
+                },
+                "status": {
+                    "draft": "ព្រាង",
+                    "published": "បានផ្សព្វផ្សាយ",
+                    "scheduled": "កំណត់ពេល",
+                    "in_progress": "កំពុងដំណើរការ",
+                    "completed": "បានបញ្ចប់",
+                    "cancelled": "បានបោះបង់"
+                }
+            }
+        },
+        "ingredients": {
+            "title": "គ្រឿងផ្សំ",
+            "subtitle": "គ្រប់គ្រងវត្ថុធាតុដើម និងស្តុក",
+            "add_ingredient": "បន្ថែមគ្រឿងផ្សំ",
+            "edit_ingredient": "កែប្រែគ្រឿងផ្សំ",
+            "categories": {
+                "protein": "ប្រូតេអ៊ីន",
+                "vegetable": "បន្លែ",
+                "fruit": "ផ្លែឈើ",
+                "dairy": "ផលិតផលទឹកដោះគោ",
+                "grain": "គ្រាប់ធញ្ញជាតិ",
+                "spice": "គ្រឿងទេស",
+                "oil": "ប្រេង",
+                "beverage": "ភេសជ្ជៈ",
+                "other": "ផ្សេងៗ"
+            },
+            "stats": {
+                "total_items": "ចំនួនមុខសរុប",
+                "low_stock": "ស្តុកទាប",
+                "inventory_value": "តម្លៃស្តុក",
+                "below_reorder": "ក្រោមចំណុចបញ្ជាទិញឡើងវិញ"
+            },
+            "table": {
+                "code": "កូដ",
+                "name": "ឈ្មោះ",
+                "category": "ប្រភេទ",
+                "stock_cost": "ស្តុក / តម្លៃ",
+                "supplier": "អ្នកផ្គត់ផ្គង់",
+                "actions": "សកម្មភាព",
+                "empty_title": "រកមិនឃើញគ្រឿងផ្សំទេ"
+            },
+            "form": {
+                "item_code": "កូដទំនិញ",
+                "item_name": "ឈ្មោះទំនិញ",
+                "category": "ប្រភេទ",
+                "unit": "ឯកតា",
+                "inventory": "ស្តុក",
+                "cost": "តម្លៃ ($)",
+                "reorder_pt": "ចំណុចបញ្ជាទិញឡើងវិញ",
+                "supplier": "អ្នកផ្គត់ផ្គង់",
+                "none": "គ្មាន",
+                "cancel": "បោះបង់",
+                "save": "រក្សាទុក",
+                "create": "បង្កើត"
+            },
+            "messages": {
+                "created": "បានបង្កើតគ្រឿងផ្សំដោយជោគជ័យ",
+                "updated": "បានកែប្រែគ្រឿងផ្សំដោយជោគជ័យ",
+                "deleted": "បានលុបគ្រឿងផ្សំដោយជោគជ័យ",
+                "failed": "ប្រតិបត្តិការបរាជ័យ",
+                "delete_confirm": "តើអ្នកប្រាកដថាចង់លុបគ្រឿងផ្សំនេះទេ?",
+                "status_updated": "បានកែប្រែស្ថានភាព"
+            }
+        },
+        "inventory": {
+            "title": "ស្តុក",
+            "subtitle": "តាមដាន និងគ្រប់គ្រងស្តុក",
+            "actions": {
+                "transfer": "ផ្ទេរ",
+                "wastage": "ខូចខាត"
+            },
+            "stats": {
+                "value": "តម្លៃសរុប",
+                "low": "ស្តុកទាប",
+                "expiring": "ជិតផុតកំណត់",
+                "items": "ចំនួនមុខសរុប"
+            },
+            "filters": {
+                "search": "ស្វែងរកទំនិញ...",
+                "location": "ទីតាំង"
+            },
+            "table": {
+                "item": "ឈ្មោះទំនិញ",
+                "location": "ទីតាំង",
+                "stock": "កម្រិតស្តុក",
+                "batch": "ព័ត៌មានបាច់",
+                "expiry": "ផុតកំណត់",
+                "history": "ប្រវត្តិ",
+                "value": "តម្លៃ"
+            },
+            "empty": "រកមិនឃើញទំនិញក្នុងស្តុកទេ",
+            "modal": {
+                "transfer_title": "ផ្ទេរស្តុក",
+                "wastage_title": "កត់ត្រាខូចខាត",
+                "history_title": "ប្រវត្តិ: {item}",
+                "from": "ពី",
+                "to": "ទៅ",
+                "ingredient": "គ្រឿងផ្សំ",
+                "quantity": "បរិមាណ",
+                "notes": "កំណត់សម្គាល់",
+                "location": "ទីតាំង",
+                "reason": "មូលហេតុ",
+                "cancel": "បោះបង់",
+                "record": "កត់ត្រា",
+                "transfer": "ផ្ទេរ"
+            },
+            "reasons": {
+                "expired": "ផុតកំណត់",
+                "damaged": "ខូចខាត",
+                "spilled": "ធ្លាយចេញ",
+                "other": "ផ្សេងៗ"
+            }
+        },
+        "invoices": {
+            "title": "វិក្កយបត្រ",
+            "subtitle": "គ្រប់គ្រងវិក្កយបត្រ ការទូទាត់ និងប្រវត្តិ",
+            "export_csv": "នាំចេញ CSV",
+            "stats": {
+                "revenue": "ចំណូល",
+                "outstanding": "នៅសល់",
+                "paid": "បានបង់",
+                "unpaid": "មិនបានបង់"
+            },
+            "filters": {
+                "search": "ស្វែងរក...",
+                "all_status": "ស្ថានភាពទាំងអស់",
+                "all_time": "គ្រប់រយៈពេល"
+            },
+            "table": {
+                "invoice_no": "លេខវិក្កយបត្រ #",
+                "customer": "អតិថិជន",
+                "amount": "ចំនួនប្រាក់",
+                "issued_date": "កាលបរិច្ឆេទចេញ",
+                "status": "ស្ថានភាព",
+                "actions": "សកម្មភាព",
+                "loading": "កំពុងផ្ទុក...",
+                "empty": "រកមិនឃើញវិក្កយបត្រទេ",
+                "paid_amount": "បានបង់"
+            },
+            "status": {
+                "paid": "បានបង់",
+                "unpaid": "មិនបានបង់",
+                "partial": "បង់ផ្នែកខ្លះ"
+            },
+            "modal": {
+                "title": "ព័ត៌មានលម្អិតវិក្កយបត្រ",
+                "invoice_number": "លេខវិក្កយបត្រ",
+                "order_reference": "យោងការបញ្ជាទិញ",
+                "date_issued": "កាលបរិច្ឆេទចេញ",
+                "financials": "ព័ត៌មានហិរញ្ញវត្ថុ",
+                "subtotal": "សរុបរង",
+                "tax": "ពន្ធ",
+                "total": "សរុប",
+                "download_pdf": "ទាញយក PDF",
+                "close": "បិទ"
+            },
+            "na": "មិនមាន"
+        },
+        "locations": {
+            "title": "ការគ្រប់គ្រងទីតាំង",
+            "subtitle": "គ្រប់គ្រងសាខាភោជនីយដ្ឋាន និងព័ត៌មានលម្អិត",
+            "add": "បន្ថែមទីតាំង",
+            "stats": {
+                "locations": "ចំនួនទីតាំងសរុប",
+                "active": "សកម្ម",
+                "online": "ការបញ្ជាទិញអនឡាញ",
+                "delivery": "មានសេវាដឹកជញ្ជូន"
+            },
+            "filters": {
+                "search": "ស្វែងរកទីតាំង...",
+                "all": "ស្ថានភាពទាំងអស់",
+                "active": "សកម្ម",
+                "inactive": "អសកម្ម"
+            },
+            "table": {
+                "location": "ព័ត៌មានទីតាំង",
+                "contact": "ព័ត៌មានទំនាក់ទំនង",
+                "services": "សេវាកម្ម",
+                "status": "ស្ថានភាព",
+                "actions": "សកម្មភាព",
+                "active": "សកម្ម",
+                "inactive": "អសកម្ម",
+                "online": "ការបញ្ជាទិញអនឡាញ",
+                "pickup": "មានសេវាទៅយក",
+                "delivery": "មានសេវាដឹកជញ្ជូន",
+                "loading": "កំពុងផ្ទុកទីតាំង..."
+            },
+            "empty": {
+                "no_locations": "រកមិនឃើញទីតាំងទេ",
+                "add_first": "បន្ថែមទីតាំងដំបូងរបស់អ្នកដើម្បីចាប់ផ្តើម"
+            },
+            "messages": {
+                "created": "បានបង្កើតទីតាំងដោយជោគជ័យ",
+                "updated": "បានកែប្រែទីតាំងដោយជោគជ័យ",
+                "deleted": "បានលុបទីតាំងដោយជោគជ័យ",
+                "failed": "ប្រតិបត្តិការបរាជ័យ",
+                "confirm_delete": "តើអ្នកប្រាកដថាចង់លុបទីតាំងនេះទេ? វានឹងប៉ះពាល់ដល់ជាន់ និងតុដែលពាក់ព័ន្ធទាំងអស់។"
+            },
+            "modal": {
+                "new": "ទីតាំងថ្មី",
+                "edit": "កែប្រែទីតាំង",
+                "pin_location": "បិទទីតាំងលើផែនទី",
+                "code": "កូដទីតាំង",
+                "name": "ឈ្មោះទីតាំង",
+                "phone": "លេខទូរស័ព្ទ",
+                "city": "ទីក្រុង/ខេត្ត",
+                "address": "អាសយដ្ឋាន បន្ទាត់ 1",
+                "postal": "លេខប្រៃសណីយ៍",
+                "services_status": "សេវាកម្ម និងស្ថានភាព",
+                "online": "ទទួលការបញ្ជាទិញអនឡាញ",
+                "pickup": "ទទួលការទៅយក",
+                "delivery": "ទទួលការដឹកជញ្ជូន",
+                "active": "ទីតាំងសកម្ម",
+                "hours": {
+                    "title": "ម៉ោងប្រតិបត្តិការ",
+                    "add": "បន្ថែមម៉ោង",
+                    "dine": "ទទួលទាននៅហាង",
+                    "pick": "ទៅយក",
+                    "deliv": "ដឹកជញ្ជូន"
+                }
+            }
+        },
+        "alerts": {
             "title": "ការជូនដំណឹងស្តុក",
             "subtitle": "តាមដានកម្រិតស្តុកសំខាន់",
             "active": "ការជូនដំណឹងសកម្ម",
@@ -786,7 +1540,138 @@
         "search": "ស្វែងរក...",
         "actions": "សកម្មភាព",
         "add": "បន្ថែម",
-        "status": "ស្ថានភាព"
+        "status": "ស្ថានភាព",
+        "filters": {
+            "today": "ថ្ងៃនេះ",
+            "tomorrow": "ថ្ងៃស្អែក",
+            "week": "សប្តាហ៍",
+            "all": "ទាំងអស់",
+            "days": "ថ្ងៃ"
+        }
+    },
+    "reservations": {
+        "title": "ការកក់តុ",
+        "subtitle": "ការកក់ថ្ងៃនេះ",
+        "live": "បន្តផ្ទាល់",
+        "stats": {
+            "total": "សរុប",
+            "pending": "រង់ចាំ",
+            "confirmed": "បានបញ្ជាក់",
+            "seated": "បានចូលតុ",
+            "late": "យឺត"
+        },
+        "status": {
+            "pending": "រង់ចាំ",
+            "confirmed": "បានបញ្ជាក់",
+            "seated": "បានចូលតុ",
+            "cancelled": "បានលុបចោល",
+            "completed": "បានបញ្ចប់",
+            "no_show": "មិនបានមក"
+        },
+        "actions": {
+            "new": "ការកក់ថ្មី",
+            "edit": "កែប្រែ",
+            "cancel": "លុបចោល",
+            "confirm": "បញ្ជាក់",
+            "seat": "រៀបចំតុ",
+            "complete": "បញ្ចប់",
+            "save_changes": "រក្សាទុក",
+            "create": "បង្កើតការកក់",
+            "saving": "កំពុងរក្សាទុក..."
+        },
+        "form": {
+            "customer": "អតិថិជន",
+            "guests": "ចំនួនភ្ញៀវ",
+            "date_time": "កាលបរិច្ឆេទ & ម៉ោង",
+            "location": "ទីតាំង",
+            "floor": "ជាន់",
+            "table": "តុ",
+            "status": "ស្ថានភាព",
+            "duration": "រយៈពេល (នាទី)",
+            "notes": "កំណត់ចំណាំ",
+            "notes_placeholder": "អាឡែហ្ស៊ី, សំណើពិសេស..."
+        },
+        "view": {
+            "guests": "ភ្ញៀវ",
+            "party_size": "ទំហំក្រុម",
+            "table_assignment": "ការកំណត់តុ",
+            "duration": "រយៈពេល"
+        },
+        "messages": {
+            "created": "បានបង្កើតការកក់ជោគជ័យ",
+            "updated": "បានកែប្រែការកក់ជោគជ័យ",
+            "cancelled": "បានលុបការកក់ជោគជ័យ",
+            "failed": "ប្រតិបត្តិការបរាជ័យ",
+            "confirm_cancel": "តើអ្នកប្រាកដថាចង់លុបការកក់នេះទេ?"
+        },
+        "empty": {
+            "loading": "កំពុងផ្ទុកការកក់...",
+            "no_reservations": "មិនមានការកក់ទេ",
+            "try_adjusting": "សាកល្បងកែតម្រូវតម្រង"
+        }
+    },
+    "checkout": {
+        "page_title": "ការទូទាត់ - NKH ភោជនីយដ្ឋាន",
+        "title": "ការទូទាត់",
+        "items_summary": ":count :unit • :total",
+        "dine_in_title": "ការកម្មង់ក្នុងហាង",
+        "table_linked": "ភ្ជាប់ជាមួយតុ",
+        "table_fallback": "TB-??",
+        "floor_fallback": "ជាន់មេ",
+        "when_title": "ពេលណា",
+        "select_location_first": "ជ្រើសរើសទីតាំងដើម្បីមើលពេលវេលាដែលមាន",
+        "order_now": "កម្មង់ឥឡូវនេះ",
+        "fastest_delivery": "ដឹកជញ្ជូនលឿនបំផុត",
+        "ready_in_mins": "រួចរាល់ក្នុង ~ ២០-៣០ នាទី",
+        "schedule_later": "កំណត់ពេលក្រោយ",
+        "pick_time": "ជ្រើសរើសម៉ោង",
+        "restaurant_closed": "ហាងបិទ",
+        "no_times_available": "មិនមានពេលវេលាសម្រាប់ :mode",
+        "pickup_at": "ទៅយកនៅម៉ោង :time",
+        "delivery_at": "ដឹកជញ្ជូននៅម៉ោង :time",
+        "payment_title": "វិធីសាស្ត្រទូទាត់",
+        "order_summary": "សង្ខេបការកម្មង់",
+        "subtotal": "សរុបរង",
+        "delivery": "ថ្លៃដឹកជញ្ជូន",
+        "tax": "ពន្ធ",
+        "total": "សរុប",
+        "placing_order": "កំពុងដាក់ការកម្មង់...",
+        "pay_now": "ទូទាត់ឥឡូវនេះ",
+        "place_order": "ដាក់ការកម្មង់",
+        "empty_cart": "កន្ត្រកទំនិញរបស់អ្នកទទេ",
+        "select_location": "សូមជ្រើសរើសទីតាំង",
+        "select_time": "សូមជ្រើសរើសពេលវេលា",
+        "select_address": "សូមជ្រើសរើសអាសយដ្ឋានដឹកជញ្ជូន",
+        "order_placed_pay": "ការកម្មង់ត្រូវបានដាក់! កំពុងបញ្ជូនទៅការទូទាត់...",
+        "order_placed_success": "ការកម្មង់ត្រូវបានដាក់ដោយជោគជ័យ!",
+        "failed_place": "បរាជ័យក្នុងការដាក់ការកម្មង់",
+        "form_restored": "ព័ត៌មានលម្អិតត្រូវបានស្តារឡើងវិញ",
+        "details": "លម្អិត"
+    },
+    "payment": {
+        "page_title": "ការទូទាត់ - NKH ភោជនីយដ្ឋាន",
+        "no_order": "មិនបានជ្រើសរើសការកម្មង់",
+        "place_order_first": "សូមធ្វើការកម្មង់ជាមុនសិន",
+        "browse_menu": "មើលម៉ឺនុយ",
+        "choose_payment": "ជ្រើសរើសការទូទាត់",
+        "complete_payment": "បញ្ចប់ការទូទាត់",
+        "order_number": "ការកម្មង់ #:number",
+        "processing": "កំពុងដំណើរការ...",
+        "continue": "បន្ត",
+        "total_amount": "ទឹកប្រាក់សរុប",
+        "change_method": "ផ្លាស់ប្តូរវិធីទូទាត់",
+        "dev_mode": "Dev Mode",
+        "simulate_success": "សាកល្បងជោគជ័យ",
+        "simulate_failure": "សាកល្បងបរាជ័យ",
+        "messages": {
+            "success": "ការទូទាត់ជោគជ័យ! កំពុងបញ្ជូន...",
+            "failed": "ការទូទាត់បរាជ័យ: :reason",
+            "cancelled": "ការទូទាត់ត្រូវបានបោះបង់",
+            "init_failed": "បរាជ័យក្នុងការចាប់ផ្តើមការទូទាត់",
+            "retry_failed": "បរាជ័យក្នុងការព្យាយាមទូទាត់ឡើងវិញ",
+            "simulation_failed": "ការសាកល្បងបរាជ័យ",
+            "qr_expired": "QR កូដទូទាត់បានផុតកំណត់"
+        }
     },
     "nav": {
         "dashboard": "ផ្ទាំងគ្រប់គ្រង",
@@ -1361,238 +2246,66 @@
         }
     },
     "hr": {
-        "employees": {
-            "title": "បុគ្គលិក",
-            "subtitle": "គ្រប់គ្រងបុគ្គលិក",
-            "add": "បន្ថែមបុគ្គលិក",
+        "time_off": {
+            "title": "សំណើច្បាប់ឈប់សម្រាក",
+            "subtitle": "គ្រប់គ្រងសំណើរសុំច្បាប់",
             "stats": {
-                "total": "សរុប",
-                "active": "សកម្ម",
-                "leave": "សម្រាក",
-                "inactive": "អសកម្ម"
-            },
-            "filters": {
-                "all": "ទាំងអស់",
-                "active": "សកម្ម",
-                "leave": "សម្រាក",
-                "off": "បិទ"
+                "pending": "រង់ចាំសម្រេច",
+                "approved": "បានអនុម័ត",
+                "rejected": "បានបដិសេធ",
+                "month": "ច្បាប់លាខែនេះ"
             },
             "table": {
                 "employee": "បុគ្គលិក",
-                "position": "តួនាទី",
-                "contact": "ទំនាក់ទំនង",
-                "hire_date": "ថ្ងៃចូលធ្វើការ",
-                "status": "ស្ថានភាព",
-                "actions": "សកម្មភាព",
-                "no_position": "គ្មានតួនាទី",
-                "unknown": "មិនស្គាល់"
-            },
-            "modal": {
-                "create_title": "បុគ្គលិកថ្មី",
-                "edit_title": "កែប្រែបុគ្គលិក",
-                "name": "ឈ្មោះ",
-                "email": "អ៊ីមែល",
-                "phone": "លេខទូរស័ព្ទ",
-                "password": "ពាក្យសម្ងាត់",
-                "new_password": "ពាក្យសម្ងាត់ថ្មី",
-                "code": "កូដ",
-                "auto_generated": "បង្កើតស្វ័យប្រវត្តិ",
-                "hire_date": "ថ្ងៃចូលធ្វើការ",
                 "type": "ប្រភេទ",
-                "salary": "ប្រាក់ខែ",
+                "days": "ចំនួនថ្ងៃ",
+                "dates": "កាលបរិច្ឆេទ",
+                "reason": "មូលហេតុ",
                 "status": "ស្ថានភាព",
-                "position": "តួនាទី",
-                "location": "សាខា",
-                "address": "អាសយដ្ឋាន",
-                "search_address": "ស្វែងរកអាសយដ្ឋាន...",
-                "select": "ជ្រើសរើស",
-                "types": {
-                    "monthly": "ប្រចាំខែ",
-                    "hourly": "ប្រចាំម៉ោង"
-                },
-                "statuses": {
-                    "active": "សកម្ម",
-                    "inactive": "អសកម្ម",
-                    "on_leave": "សម្រាក",
-                    "terminated": "បញ្ឈប់"
-                }
+                "requested_on": "ស្នើសុំនៅ",
+                "actions": "សកម្មភាព"
             },
-            "messages": {
-                "created": "បុគ្គលិកត្រូវបានបង្កើតដោយជោគជ័យ",
-                "updated": "បុគ្គលិកត្រូវបានកែប្រែដោយជោគជ័យ",
-                "deleted": "បុគ្គលិកត្រូវបានបិទដំណើរការ",
-                "confirm_delete": "តើអ្នកច្បាស់ទេថាចង់បិទដំណើរការបុគ្គលិកនេះ?",
-                "failed": "ប្រតិបត្តិការបរាជ័យ",
-                "not_found": "រកមិនឃើញបុគ្គលិក",
-                "adjust_filters": "សាកល្បងកែប្រែតម្រង"
-            }
-        },
-        "positions": {
-            "title": "តួនាទី",
-            "subtitle": "គ្រប់គ្រងឈ្មោះការងារ",
-            "add": "បន្ថែមតួនាទី",
-            "stats": {
-                "total": "សរុប",
-                "active": "សកម្ម",
-                "staff": "បុគ្គលិក"
+            "types": {
+                "vacation": "សម្រាកប្រចាំឆ្នាំ",
+                "sick": "ច្បាប់ឈឺ",
+                "personal": "ផ្ទាល់ខ្លួន",
+                "other": "ផ្សេងៗ"
             },
-            "filters": {
-                "all": "ទាំងអស់",
-                "active": "សកម្ម",
-                "inactive": "អសកម្ម",
-                "on": "បើក",
-                "off": "បិទ"
-            },
-            "table": {
-                "title": "ចំណងជើង",
-                "description": "ការពិពណ៌នា",
-                "staff": "បុគ្គលិក",
-                "status": "ស្ថានភាព",
-                "actions": "សកម្មភាព",
-                "no_desc": "គ្មានការពិពណ៌នា"
-            },
-            "modal": {
-                "create_title": "តួនាទីថ្មី",
-                "edit_title": "កែប្រែតួនាទី",
-                "title": "ចំណងជើង",
-                "description": "ការពិពណ៌នា",
-                "active_status": "ស្ថានភាពសកម្ម",
-                "cancel": "បោះបង់",
-                "create": "បង្កើតតួនាទី",
-                "update": "កែប្រែតួនាទី",
-                "placeholder": {
-                    "title": "ឧទាហរណ៍៖ មេចុងភៅ",
-                    "description": "ការពិពណ៌នាបន្ថែម..."
-                }
-            },
-            "messages": {
-                "created": "តួនាទីត្រូវបានបង្កើត",
-                "updated": "តួនាទីត្រូវបានកែប្រែ",
-                "deleted": "តួនាទីត្រូវបានលុប",
-                "failed": "បរាជ័យ",
-                "confirm_delete": "លុបតួនាទីនេះ?",
-                "not_found": "រកមិនឃើញតួនាទី",
-                "create_first": "បង្កើតតួនាទីដំបូងរបស់អ្នក"
-            }
-        },
-        "roles": {
-            "title": "តួនាទី & សិទ្ធិ",
-            "subtitle": "គ្រប់គ្រងសិទ្ធិអ្នកប្រើប្រាស់",
-            "add": "បង្កើតតួនាទី",
-            "stats": {
-                "roles": "តួនាទី",
-                "users": "អ្នកប្រើប្រាស់",
-                "perms": "សិទ្ធិ",
-                "avg_role": "មធ្យម/តួនាទី"
-            },
-            "table": {
-                "role_name": "ឈ្មោះតួនាទី",
-                "slug": "Slug",
-                "users": "អ្នកប្រើប្រាស់",
-                "permissions": "សិទ្ធិ",
-                "actions": "សកម្មភាព",
-                "access_points": "ចំណុចចូលប្រើ",
-                "no_users": "គ្មានអ្នកប្រើប្រាស់",
-                "system": "ប្រព័ន្ធ"
-            },
-            "modal": {
-                "create_title": "តួនាទីថ្មី",
-                "edit_title": "កែប្រែតួនាទី",
-                "role_name": "ឈ្មោះតួនាទី",
-                "description": "ការពិពណ៌នា",
-                "permissions": "សិទ្ធិ",
-                "selected": "បានជ្រើសរើស",
-                "system_lock": "ឈ្មោះតួនាទីប្រព័ន្ធមិនអាចផ្លាស់ប្តូរបានទេ",
-                "placeholder": {
-                    "name": "ឧទាហរណ៍៖ អ្នកគ្រប់គ្រងហាង",
-                    "description": "ពិពណ៌នាអំពីអ្វីដែលតួនាទីនេះអាចធ្វើបាន..."
-                }
-            },
-            "messages": {
-                "created": "តួនាទីត្រូវបានបង្កើត",
-                "updated": "តួនាទីត្រូវបានកែប្រែ",
-                "deleted": "តួនាទីត្រូវបានលុប",
-                "failed": "បរាជ័យ",
-                "system_delete_error": "មិនអាចលុបតួនាទីប្រព័ន្ធបានទេ",
-                "assigned_delete_error": "មិនអាចលុបតួនាទីដែលកំពុងប្រើដោយអ្នកប្រើប្រាស់ :count នាក់",
-                "confirm_delete": "លុបតួនាទី ':name'?",
-                "not_found": "រកមិនឃើញតួនាទី",
-                "create_first": "បង្កើតតួនាទីថ្មីដើម្បីចាប់ផ្តើម",
-                "load_failed": "បរាជ័យក្នុងការផ្ទុកព័ត៌មានតួនាទី"
+            "actions": {
+                "approve": "អនុម័ត",
+                "reject": "បដិសេធ",
+                "approve_confirm": "អនុម័តច្បាប់សម្រាប់",
+                "reject_confirm": "បដិសេធច្បាប់សម្រាប់",
+                "rejection_reason": "មូលហេតុបដិសេធ"
             }
         },
         "shifts": {
-            "title": "កាលវិភាគប្រចាំសប្តាហ៍",
-            "title_monthly": "កាលវិភាគប្រចាំខែ",
-            "subtitle": "គ្រប់គ្រងវេនការងារបុគ្គលិក",
-            "add": "បន្ថែមវេន",
+            "title": "ការអនុម័តប្តូរវេន",
+            "subtitle": "អនុម័តឬបដិសេធការប្តូរវេន",
             "stats": {
-                "total": "សរុប",
-                "published": "បានផ្សាយ",
-                "draft": "ព្រាង"
+                "pending": "សំណើប្តូររង់ចាំ",
+                "approved": "បានអនុម័ត",
+                "rejected": "បានបដិសេធ"
             },
-            "actions": {
-                "copy_week": "ចម្លងសប្តាហ៍",
-                "publish": "ផ្សាយ",
-                "today": "ថ្ងៃនេះ",
-                "week": "សប្តាហ៍",
-                "month": "ខែ",
-                "week_of": "សប្តាហ៍នៃ"
-            },
-            "messages": {
-                "created": "វេនការងារត្រូវបានបង្កើត!",
-                "create_failed": "បរាជ័យក្នុងការបង្កើតវេន",
-                "updated": "វេនការងារត្រូវបានកែប្រែ!",
-                "update_failed": "បរាជ័យក្នុងការកែប្រែវេន",
-                "deleted": "វេនការងារត្រូវបានលុប!",
-                "delete_failed": "បរាជ័យក្នុងការលុប",
-                "published": "វេនការងារត្រូវបានផ្សាយ!",
-                "copied": "វេនការងារត្រូវបានចម្លង!",
-                "copy_failed": "បរាជ័យក្នុងការចម្លងវេន",
-                "status_updated": "ស្ថានភាពត្រូវបានកែប្រែ!",
-                "status_failed": "បរាជ័យក្នុងការកែប្រែស្ថានភាព",
-                "no_drafts": "គ្មានវេនការងារព្រាងដើម្បីផ្សាយ",
-                "confirm_publish": "ផ្សាយវេនការងារព្រាងចំនួន {{count}}?",
-                "confirm_copy": "ចម្លងកាលវិភាគពីសប្តាហ៍មុនមកសប្តាហ៍នេះ?"
-            },
-            "empty": {
-                "week": "គ្មានវេនការងារសម្រាប់សប្តាហ៍នេះ",
-                "month": "គ្មានវេនការងារសម្រាប់ខែនេះ",
-                "day": "គ្មានវេនការងារសម្រាប់ថ្ងៃនេះ",
-                "default": "គ្មានវេនការងារ"
-            },
-            "modal": {
-                "new": "វេនការងារថ្មី",
-                "edit": "កែប្រែវេនការងារ",
-                "day_shifts": "វេនការងារប្រចាំថ្ងៃ",
-                "for_date": "វេនការងារសម្រាប់ {{date}}",
-                "employee": "បុគ្គលិក",
-                "location": "ទីតាំង",
-                "position": "តួនាទី",
+            "table": {
+                "requester": "អ្នកស្នើសុំ",
+                "target_shift": "វេនគោលដៅ",
                 "type": "ប្រភេទ",
-                "start": "ចាប់ផ្តើម",
-                "end": "បញ្ចប់",
-                "notes": "កំណត់សម្គាល់",
+                "reason": "មូលហេតុ",
                 "status": "ស្ថានភាព",
-                "select": "ជ្រើសរើស",
-                "no_location": "គ្មានទីតាំង",
-                "use_default": "ប្រើលំនាំដើម",
-                "placeholder_notes": "កំណត់សម្គាល់..."
+                "requested_on": "ស្នើសុំនៅ"
             },
             "types": {
-                "morning": "ព្រឹក",
-                "afternoon": "រសៀល",
-                "evening": "ល្ងាច",
-                "night": "យប់",
-                "split": "វេនកាត់"
+                "give_away": "ប្រគល់វេន",
+                "trade": "ប្តូរវេន"
             },
-            "status": {
-                "draft": "ព្រាង",
-                "published": "បានផ្សាយ",
-                "scheduled": "បានគ្រោងទុក",
-                "in_progress": "កំពុងដំណើរការ",
-                "completed": "បានបញ្ចប់",
-                "cancelled": "បានបោះបង់"
+            "actions": {
+                "approve": "អនុម័តការប្តូរ",
+                "reject": "បដិសេធការប្តូរ",
+                "approve_confirm": "អនុម័តការប្តូរវេនសម្រាប់",
+                "reject_confirm": "បដិសេធការប្តូរវេនសម្រាប់",
+                "deny_warning": "ការបដិសេធសំណើនេះនឹងជូនដំណឹងដល់បុគ្គលិកទាំងពីរ ហើយវេននឹងត្រឡប់ទៅម្ចាស់ដើមវិញ។",
+                "rejection_reason": "មូលហេតុនៃការបដិសេធ"
             }
         }
     },
@@ -1979,953 +2692,6 @@
         }
     },
     "inventory": {
-        "title": "ស្តុកទំនិញ",
-        "subtitle": "ការតាមដាននិងគ្រប់គ្រងស្តុក",
-        "actions": {
-            "transfer": "ផ្ទេរ",
-            "wastage": "កាកសំណល់"
-        },
-        "stats": {
-            "value": "តម្លៃសរុប",
-            "low": "ស្តុកតិច",
-            "expiring": "ជិតផុតកំណត់",
-            "items": "មុខទំនិញសរុប"
-        },
-        "filters": {
-            "search": "ស្វែងរក...",
-            "location": "ទីតាំង"
-        },
-        "table": {
-            "item": "ឈ្មោះទំនិញ",
-            "location": "ទីតាំង",
-            "stock": "ចំនួនក្នុងស្តុក",
-            "batch": "ព័ត៌មានបាច់",
-            "expiry": "ផុតកំណត់",
-            "history": "ប្រវត្តិ",
-            "value": "តម្លៃ"
-        },
-        "empty": "មិនមានទិន្នន័យស្តុកទេ",
-        "modal": {
-            "transfer_title": "ផ្ទេរស្តុក",
-            "wastage_title": "កត់ត្រាកាកសំណល់",
-            "history_title": "ប្រវត្តិ: {item}",
-            "from": "ពី",
-            "to": "ទៅ",
-            "ingredient": "គ្រឿងផ្សំ",
-            "quantity": "ចំនួន",
-            "notes": "កំណត់សម្គាល់",
-            "location": "ទីតាំង"
-        },
-        "common": {
-            "loading": "កំពុងផ្ទុក...",
-            "save": "រក្សាទុក",
-            "cancel": "បោះបង់",
-            "edit": "កែប្រែ",
-            "delete": "លុប",
-            "search": "ស្វែងរក...",
-            "item": "មុខ",
-            "items": "មុខ",
-            "minutes_short": "នាទី",
-            "and_symbol": "&"
-        },
-        "recipes": {
-            "title": "រូបមន្ត",
-            "subtitle": "គ្រប់គ្រងរូបមន្តនិងតាមដានថ្លៃដើម",
-            "create_recipe": "បង្កើតរូបមន្ត",
-            "edit_recipe": "កែប្រែរូបមន្ត",
-            "stats": {
-                "total": "សរុប",
-                "active": "សកម្ម",
-                "avg_cost": "ថ្លៃដើមជាមធ្យម",
-                "avg_items": "មុខជាមធ្យម"
-            },
-            "filters": {
-                "all": "ទាំងអស់",
-                "active": "សកម្ម",
-                "inactive": "អសកម្ម",
-                "all_menu_items": "ម៉ឺនុយទាំងអស់"
-            },
-            "table": {
-                "recipe_name": "ឈ្មោះរូបមន្ត",
-                "menu_item": "មុខម៉ឺនុយ",
-                "cost_serving": "ថ្លៃដើម / ចំណែក",
-                "time": "រយៈពេល",
-                "status": "ស្ថានភាព",
-                "actions": "សកម្មភាព",
-                "empty_title": "មិនមានរូបមន្តទេ",
-                "ingredients": "គ្រឿងផ្សំ",
-                "servings": "ចំណែក",
-                "items": "មុខ",
-                "min": "នាទី",
-                "profit": "ប្រាក់ចំណេញ",
-                "batch": "បាច់"
-            },
-            "form": {
-                "recipe_name": "ឈ្មោះរូបមន្ត",
-                "linked_menu_item": "មុខម៉ឺនុយភ្ជាប់",
-                "none_internal": "គ្មាន (ផ្ទៃក្នុង)",
-                "servings": "ចំណែក",
-                "prep_min": "រៀបចំ (នាទី)",
-                "cook_min": "ចម្អិន (នាទី)",
-                "ingredients": "គ្រឿងផ្សំ",
-                "add": "បន្ថែម",
-                "select": "ជ្រើសរើស...",
-                "qty": "ចំនួន",
-                "no_ingredients": "មិនមានគ្រឿងផ្សំទេ។",
-                "total_batch": "បាច់សរុប",
-                "per_serving": "ក្នុងមួយចំណែក",
-                "cancel": "បោះបង់",
-                "save": "រក្សាទុក"
-            },
-            "costing": {
-                "title": "ការវិភាគថ្លៃដើម",
-                "total": "សរុប",
-                "serving": "ចំណែក",
-                "margin": "ប្រាក់ចំណេញ",
-                "breakdown": "បំបែកគ្រឿងផ្សំ",
-                "of_total": "នៃសរុប",
-                "close": "បិទការវិភាគ"
-            },
-            "messages": {
-                "created": "បានបង្កើតរូបមន្ត",
-                "updated": "បានកែប្រែរូបមន្ត",
-                "deleted": "បានលុបរូបមន្ត",
-                "duplicated": "បានចម្លងរូបមន្ត",
-                "status_updated": "បានធ្វើបច្ចុប្បន្នភាពស្ថានភាព",
-                "failed": "បានបរាជ័យ",
-                "add_ingredient": "បន្ថែមគ្រឿងផ្សំយ៉ាងហោចណាស់មួយ",
-                "delete_confirm": "លុបរូបមន្ត?",
-                "costing_failed": "បរាជ័យក្នុងការផ្ទុកទិន្នន័យថ្លៃដើម"
-            }
-        },
-        "units": {
-            "title": "ឯកតា",
-            "subtitle": "គ្រប់គ្រងឯកតារង្វាស់",
-            "add_unit": "បន្ថែមឯកតា",
-            "edit_unit": "កែប្រែឯកតា",
-            "new_unit": "ឯកតាថ្មី",
-            "stats": {
-                "total": "សរុប",
-                "base": "មូលដ្ឋាន",
-                "derived": "បញ្ជាក់",
-                "primary_standards": "ស្តង់ដារដំបូង",
-                "from_base": "ពីឯកតាមូលដ្ឋាន"
-            },
-            "filters": {
-                "type": "ប្រភេទ",
-                "weight": "ទម្ងន់",
-                "volume": "បរិមាណ",
-                "qty": "ចំនួន",
-                "pack": "កញ្ចប់",
-                "all_units": "ឯកតាទាំងអស់",
-                "base_only": "មូលដ្ឋានតែប៉ុណ្ណោះ",
-                "derived_only": "បញ្ជាក់តែប៉ុណ្ណោះ"
-            },
-            "table": {
-                "name_code": "ឈ្មោះ / កូដ",
-                "type": "ប្រភេទ",
-                "base_unit": "ឯកតាមូលដ្ឋាន",
-                "factor": "កត្តា",
-                "usage": "ការប្រើប្រាស់",
-                "actions": "សកម្មភាព",
-                "empty_title": "រកមិនឃើញឯកតាដែលត្រូវនឹងតម្រង",
-                "empty_mobile": "រកមិនឃើញឯកតាទេ",
-                "base": "មូលដ្ឋាន",
-                "general": "ទូទៅ",
-                "produce": "ផលិតផល",
-                "packaging": "កញ្ចប់",
-                "quantity": "ចំនួន"
-            },
-            "form": {
-                "code": "កូដ",
-                "name": "ឈ្មោះ",
-                "display": "បង្ហាញ",
-                "is_base_unit": "ជាឯកតាមូលដ្ឋាន?",
-                "conversion": "ការបំប្លែង",
-                "base_unit": "ឯកតាមូលដ្ឋាន",
-                "select": "ជ្រើសរើស",
-                "factor": "កត្តា",
-                "usage": "ការប្រើប្រាស់",
-                "cancel": "បោះបង់",
-                "save": "រក្សាទុក",
-                "create": "បង្កើត"
-            },
-            "usage_types": {
-                "weig": "ទម្ង",
-                "volu": "បរិម",
-                "quan": "ចំនួ",
-                "pack": "កញ្ច",
-                "prod": "ផលិត"
-            },
-            "messages": {
-                "created": "បានបង្កើតឯកតា",
-                "updated": "បានកែប្រែឯកតា",
-                "deleted": "បានលុបឯកតា",
-                "failed": "បានបរាជ័យ",
-                "delete_confirm": "លុបឯកតានេះ?"
-            }
-        },
-        "finance": {
-            "title": "ផ្ទាំងគ្រប់គ្រងហិរញ្ញវត្ថុ",
-            "subtitle": "តាមដានចំណូល ចំណាយ និងប្រាក់ចំណេញ",
-            "pdf": "PDF",
-            "csv": "CSV",
-            "stats": {
-                "total_revenue": "ចំណូលសរុប",
-                "total_expenses": "ចំណាយសរុប",
-                "net_profit": "ប្រាក់ចំណេញសុទ្ធ",
-                "profit_margin": "អត្រាប្រាក់ចំណេញ",
-                "total_cogs": "ថ្លៃដើមទំនិញសរុប",
-                "of_revenue": "នៃចំណូល",
-                "from_last_period": "ធៀបនឹងកាលបរិច្ឆេទមុន"
-            },
-            "charts": {
-                "revenue_vs_expenses": "ចំណូល ធៀបនឹង ចំណាយ",
-                "cogs_breakdown": "ថ្លៃដើមទំនិញលក់ចេញ",
-                "margins_by_category": "ប្រាក់ចំណេញតាមប្រភេទ",
-                "expense_breakdown": "បំណែងចែកចំណាយ",
-                "revenue": "ចំណូល",
-                "expenses": "ចំណាយ",
-                "profit": "ប្រាក់ចំណេញ"
-            },
-            "empty": {
-                "revenue_expenses": "គ្មានទិន្នន័យចំណូល/ចំណាយ",
-                "cogs": "គ្មានទិន្នន័យថ្លៃដើម",
-                "margins": "គ្មានទិន្នន័យប្រាក់ចំណេញ",
-                "expenses": "គ្មានទិន្នន័យចំណាយ"
-            },
-            "payments": {
-                "title": "ផ្ទាំងគ្រប់គ្រងការទូទាត់",
-                "subtitle": "ត្រួតពិនិត្យនិងគ្រប់គ្រងរាល់ប្រតិបត្តិការទូទាត់",
-                "refresh": "ធ្វើឱ្យស្រស់",
-                "search_placeholder": "ស្វែងរកតាមរយៈលេខយោង, លេខប្រតិបត្តិការ...",
-                "stats": {
-                    "total_payments": "ការទូទាត់សរុប",
-                    "success_rate": "អត្រាជោគជ័យ",
-                    "pending": "កំពុងរង់ចាំ",
-                    "failed": "បរាជ័យ",
-                    "completed": "បានបញ្ចប់",
-                    "avg": "មធ្យម:",
-                    "awaiting": "កំពុងរង់ចាំការបញ្ជាក់"
-                },
-                "status": {
-                    "all": "ស្ថានភាពទាំងអស់",
-                    "completed": "បានបញ្ចប់",
-                    "pending": "កំពុងរង់ចាំ",
-                    "failed": "បរាជ័យ",
-                    "processing": "កំពុងដំណើរការ",
-                    "cancelled": "បានបោះបង់"
-                },
-                "table": {
-                    "recent": "ការទូទាត់ថ្មីៗ",
-                    "reference": "លេខយោង",
-                    "order": "ការកុម្ម៉ង់",
-                    "amount": "ចំនួនប្រាក់",
-                    "method": "វិធីសាស្ត្រ",
-                    "status": "ស្ថានភាព",
-                    "date": "កាលបរិច្ឆេទ",
-                    "actions": "សកម្មភាព",
-                    "processed": "បានដំណើរការ",
-                    "guest": "ភ្ញៀវ",
-                    "empty": "រកមិនឃើញការទូទាត់"
-                },
-                "modal": {
-                    "title": "ព័ត៌មានលម្អិតការទូទាត់",
-                    "transaction_id": "លេខសម្គាល់ប្រតិបត្តិការ",
-                    "qr_reference": "លេខយោង QR",
-                    "created": "បានបង្កើត",
-                    "failure_reason": "មូលហេតុបរាជ័យ",
-                    "view_details": "មើលព័ត៌មានលម្អិត"
-                }
-            },
-            "invoices": {
-                "title": "វិក្កយបត្រ",
-                "subtitle": "គ្រប់គ្រងការចេញវិក្កយបត្រ និងប្រវត្តិ",
-                "export_csv": "នាំចេញ CSV",
-                "stats": {
-                    "revenue": "ចំណូល",
-                    "outstanding": "មិនទាន់ទូទាត់",
-                    "paid": "បានទូទាត់",
-                    "unpaid": "មិនទាន់ទូទាត់"
-                },
-                "filters": {
-                    "search": "ស្វែងរក...",
-                    "all_status": "ស្ថានភាពទាំងអស់",
-                    "all_time": "គ្រប់ពេល"
-                },
-                "table": {
-                    "invoice_no": "វិក្កយបត្រ #",
-                    "customer": "អតិថិជន",
-                    "amount": "ចំនួនប្រាក់",
-                    "issued_date": "កាលបរិច្ឆេទចេញ",
-                    "status": "ស្ថានភាព",
-                    "actions": "សកម្មភាព",
-                    "loading": "កំពុងផ្ទុក...",
-                    "empty": "រកមិនឃើញវិក្កយបត្រ",
-                    "paid_amount": "បានទូទាត់"
-                },
-                "status": {
-                    "paid": "បានទូទាត់",
-                    "unpaid": "មិនទាន់ទូទាត់",
-                    "partial": "មួយផ្នែក"
-                },
-                "modal": {
-                    "title": "ព័ត៌មានលម្អិតវិក្កយបត្រ",
-                    "invoice_number": "លេខវិក្កយបត្រ",
-                    "order_reference": "លេខយោងកុម្ម៉ង់",
-                    "date_issued": "កាលបរិច្ឆេទចេញ",
-                    "financials": "ហិរញ្ញវត្ថុ",
-                    "subtotal": "សរុបរង",
-                    "tax": "ពន្ធ",
-                    "total": "សរុប",
-                    "download_pdf": "ទាញយក PDF",
-                    "close": "បិទ"
-                },
-                "na": "គ្មាន"
-            },
-            "expenses": {
-                "title": "ចំណាយ",
-                "subtitle": "តាមដានការចំណាយអាជីវកម្ម",
-                "add_expense": "បន្ថែមការចំណាយ",
-                "categories": "ប្រភេទ",
-                "stats": {
-                    "total": "សរុប",
-                    "paid": "បានទូទាត់",
-                    "pending": "កំពុងរង់ចាំ"
-                },
-                "filters": {
-                    "search": "ស្វែងរក...",
-                    "all_status": "ស្ថានភាពទាំងអស់",
-                    "all_categories": "ប្រភេទទាំងអស់",
-                    "all_time": "គ្រប់ពេល"
-                },
-                "table": {
-                    "date": "កាលបរិច្ឆេទ",
-                    "category_vendor": "ប្រភេទ / អ្នកផ្គត់ផ្គង់",
-                    "amount": "ចំនួនប្រាក់",
-                    "reference": "លេខយោង",
-                    "status": "ស្ថានភាព",
-                    "actions": "សកម្មភាព",
-                    "loading": "កំពុងផ្ទុកការចំណាយ...",
-                    "empty": "រកមិនឃើញការចំណាយ",
-                    "create_trigger": "បង្កើតការចំណាយដំបូងរបស់អ្នក"
-                },
-                "modal": {
-                    "new_title": "ការចំណាយថ្មី",
-                    "edit_title": "កែប្រែការចំណាយ",
-                    "category_label": "ប្រភេទ",
-                    "select_category": "ជ្រើសរើសប្រភេទ",
-                    "date_label": "កាលបរិច្ឆេទ",
-                    "amount_label": "ចំនួនប្រាក់",
-                    "status_label": "ស្ថានភាព",
-                    "vendor_label": "អ្នកផ្គត់ផ្គង់",
-                    "reference_label": "លេខយោង",
-                    "description_label": "ការពិពណ៌នា",
-                    "save": "រក្សាទុក",
-                    "cancel": "បោះបង់",
-                    "confirm_delete": "លុបការចំណាយនេះ?"
-                },
-                "categories_modal": {
-                    "title": "គ្រប់គ្រងប្រភេទ",
-                    "add_new": "បន្ថែមថ្មី",
-                    "placeholder": "ឈ្មោះប្រភេទថ្មី...",
-                    "add_btn": "បន្ថែម",
-                    "empty": "មិនទាន់មានប្រភេទ",
-                    "confirm_delete": "លុបប្រភេទ?"
-                },
-                "status": {
-                    "draft": "ព្រាង",
-                    "approved": "បានអនុម័ត",
-                    "paid": "បានទូទាត់",
-                    "voided": "បានមោឃៈ"
-                },
-                "uncategorized": "គ្មានប្រភេទ",
-                "toasts": {
-                    "created": "ការចំណាយត្រូវបានបង្កើត",
-                    "updated": "ការចំណាយត្រូវបានធ្វើបច្ចុប្បន្នភាព",
-                    "deleted": "ការចំណាយត្រូវបានលុប",
-                    "category_created": "ប្រភេទត្រូវបានបង្កើត",
-                    "category_deleted": "ប្រភេទត្រូវបានលុប",
-                    "failed": "បរាជ័យ"
-                }
-            }
-        },
-        "analytics": {
-            "title": "ការវិភាគ",
-            "sales": {
-                "title": "ការវិភាគការលក់",
-                "subtitle": "តាមដានចំណូល និន្នាការ និងប្រសិទ្ធភាព",
-                "export_pdf": "PDF",
-                "export_csv": "CSV",
-                "stats": {
-                    "revenue": "ចំណូលសរុប",
-                    "orders": "ការកុម្ម៉ង់សរុប",
-                    "avg_order": "តម្លៃកុម្ម៉ង់មធ្យម",
-                    "customers": "អតិថិជន"
-                },
-                "charts": {
-                    "revenue_trends": "និន្នាការចំណូល",
-                    "by_category": "ការលក់តាមប្រភេទ",
-                    "peak_hours": "ម៉ោងមមាញឹក",
-                    "top_items": "ទំនិញលក់ដាច់បំផុត"
-                },
-                "empty": {
-                    "revenue": "មិនមានទិន្នន័យចំណូល",
-                    "category": "មិនមានទិន្នន័យការលក់តាមប្រភេទ",
-                    "peak_hours": "មិនមានទិន្នន័យម៉ោងមមាញឹក",
-                    "top_items": "មិនមានទិន្នន័យទំនិញលក់ដាច់"
-                },
-                "item_sold": "បានលក់",
-                "presets": {
-                    "7d": "7ថ្ងៃ",
-                    "30d": "30ថ្ងៃ",
-                    "90d": "90ថ្ងៃ"
-                }
-            },
-            "audit": {
-                "title": "កំណត់ហេតុប្រព័ន្ធ",
-                "subtitle": "តាមដានសកម្មភាព និងការផ្លាស់ប្តូរប្រព័ន្ធទាំងអស់",
-                "refresh": "ផ្ទុកឡើងវិញ",
-                "export_csv": "CSV",
-                "pagination": {
-                    "show": "បង្ហាញ",
-                    "per_page": "ក្នុងមួយទំព័រ",
-                    "previous": "មុន",
-                    "next": "បន្ទាប់",
-                    "page_of": "ទំព័រ {page} នៃ {lastPage}"
-                },
-                "filters": {
-                    "search": "ស្វែងរកកំណត់ហេតុ...",
-                    "more": "បន្ថែម",
-                    "clear": "សម្អាត",
-                    "labels": {
-                        "action": "សកម្មភាព",
-                        "date": "កាលបរិច្ឆេទ",
-                        "risk": "ហានីភ័យ",
-                        "user": "អ្នកប្រើប្រាស់",
-                        "guard": "Guard",
-                        "source": "ប្រភព",
-                        "status": "ស្ថានភាព"
-                    },
-                    "presets": {
-                        "today": "ថ្ងៃនេះ",
-                        "deletes": "បានលុប",
-                        "high_risk": "ហានីភ័យខ្ពស់",
-                        "failed": "បរាជ័យ"
-                    },
-                    "date_options": {
-                        "all": "គ្រប់ពេល",
-                        "today": "ថ្ងៃនេះ",
-                        "yesterday": "ម្សិលមិញ",
-                        "week": "7ថ្ងៃចុងក្រោយ",
-                        "month": "30ថ្ងៃចុងក្រោយ",
-                        "custom": "ផ្ទាល់ខ្លួន"
-                    },
-                    "action_options": {
-                        "all": "សកម្មភាពទាំងអស់",
-                        "created": "បានបង្កើត",
-                        "updated": "បានធ្វើបច្ចុប្បន្នភាព",
-                        "deleted": "បានលុប",
-                        "login": "ចូលប្រព័ន្ធ",
-                        "logout": "ចាកចេញ"
-                    },
-                    "risk_options": {
-                        "all": "ហានីភ័យទាំងអស់",
-                        "low": "ទាប",
-                        "medium": "មធ្យម",
-                        "high": "ខ្ពស់",
-                        "critical": "ធ្ងន់ធ្ងរ"
-                    },
-                    "status_options": {
-                        "all": "ស្ថានភាពទាំងអស់",
-                        "success": "ជោគជ័យ",
-                        "failed": "បរាជ័យ"
-                    },
-                    "dynamic_options": {
-                        "all_users": "អ្នកប្រើប្រាស់ទាំងអស់",
-                        "all_guards": "Guard ទាំងអស់",
-                        "all_sources": "ប្រភពទាំងអស់"
-                    }
-                },
-                "stats": {
-                    "total_logs": "កំណត់ហេតុសរុប",
-                    "today": "ថ្ងៃនេះ",
-                    "active_users": "អ្នកប្រើប្រាស់សកម្ម",
-                    "top_action": "សកម្មភាពពេញនិយម",
-                    "success_rate": "អត្រាជោគជ័យ",
-                    "by_source": "តាមប្រភព",
-                    "by_guard": "តាម Guard",
-                    "top_actions": "សកម្មភាពពេញនិយម",
-                    "suffixes": {
-                        "this_week": "ក្នុងសប្តាហ៍នេះ",
-                        "today": "ថ្ងៃនេះ",
-                        "failed": "បានបរាជ័យ"
-                    }
-                }
-            }
-        },
-        "marketing": {
-            "title": "ការផ្សព្វផ្សាយ",
-            "promotions": {
-                "title": "ការផ្សព្វផ្សាយ",
-                "subtitle": "គ្រប់គ្រងយុទ្ធនាការ",
-                "create_button": "បង្កើតការផ្សព្វផ្សាយ",
-                "stats": {
-                    "total": "សរុប",
-                    "active": "សកម្ម",
-                    "usage": "ការប្រើប្រាស់",
-                    "savings": "ការសន្សំ"
-                },
-                "filters": {
-                    "search": "ស្វែងរក...",
-                    "status": {
-                        "all": "ទាំងអស់",
-                        "active": "សកម្ម",
-                        "inactive": "អសកម្ម"
-                    },
-                    "type": {
-                        "all": "ប្រភេទទាំងអស់",
-                        "percentage": "%",
-                        "fixed_amount": "$",
-                        "buy_x_get_y": "ទិញថែម"
-                    }
-                },
-                "table": {
-                    "headers": {
-                        "name_code": "ឈ្មោះ / លេខកូដ",
-                        "type": "ប្រភេទ",
-                        "discount": "បញ្ចុះតម្លៃ",
-                        "usage": "ការប្រើប្រាស់",
-                        "valid_until": "សុពលភាពដល់",
-                        "actions": "សកម្មភាព"
-                    },
-                    "empty": {
-                        "title": "មិនមានការផ្សព្វផ្សាយទេ",
-                        "subtitle": "បង្កើតការផ្សព្វផ្សាយដំបូងរបស់អ្នក"
-                    },
-                    "loading": "កំពុងផ្ទុក..."
-                },
-                "form": {
-                    "create_title": "បង្កើតការផ្សព្វផ្សាយ",
-                    "edit_title": "កែប្រែការផ្សព្វផ្សាយ",
-                    "fields": {
-                        "name": "ឈ្មោះ",
-                        "description": "ការពិពណ៌នា",
-                        "code": "លេខកូដ",
-                        "type": "ប្រភេទ",
-                        "discount_value": "តម្លៃបញ្ចុះ",
-                        "min_order": "កុម្ម៉ង់អប្បបរមា",
-                        "max_discount": "បញ្ចុះតម្លៃអតិបរមា",
-                        "usage_limit": "កំណត់ការប្រើប្រាស់",
-                        "start_date": "ថ្ងៃចាប់ផ្តើម",
-                        "end_date": "ថ្ងៃបញ្ចប់",
-                        "applicable_to": "អាចប្រើជាមួយ",
-                        "terms": "លក្ខន្តិកៈ",
-                        "buy_qty": "ចំនួនទិញ",
-                        "get_qty": "ចំនួនថែម"
-                    },
-                    "placeholders": {
-                        "name": "បញ្ចុះតម្លៃរដូវក្តៅ",
-                        "code": "SUMMER2024",
-                        "discount": "0"
-                    },
-                    "options": {
-                        "percentage": "ភាគរយ",
-                        "fixed_amount": "ទឹកប្រាក់ថេរ",
-                        "buy_x_get_y": "ទិញ X ថែម Y",
-                        "all_items": "ទំនិញទាំងអស់",
-                        "categories": "ប្រភេទជាក់លាក់",
-                        "items": "ទំនិញជាក់លាក់"
-                    }
-                },
-                "messages": {
-                    "created": "បង្កើតការផ្សព្វផ្សាយជោគជ័យ",
-                    "updated": "ធ្វើបច្ចុប្បន្នភាពការផ្សព្វផ្សាយជោគជ័យ",
-                    "deleted": "លុបការផ្សព្វផ្សាយជោគជ័យ",
-                    "delete_confirm": "តើអ្នកប្រាកដថាចង់លុបការផ្សព្វផ្សាយនេះទេ?",
-                    "failed": "ប្រតិបត្តិការបរាជ័យ"
-                }
-            },
-            "loyalty": {
-                "title": "ពិន្ទុភាពស្មោះត្រង់",
-                "subtitle": "រង្វាន់អតិថិជន",
-                "add_button": "បន្ថែមប្រតិបត្តិការ",
-                "stats": {
-                    "earned": "ទទួលបាន",
-                    "redeemed": "បានប្តូរ",
-                    "customers": "អតិថិជន",
-                    "txns": "ប្រតិបត្តិការ"
-                },
-                "filters": {
-                    "search": "ស្វែងរក...",
-                    "type": {
-                        "all": "ទាំងអស់",
-                        "earn": "ទទួលបាន",
-                        "redeem": "បានប្តូរ",
-                        "adjust": "កែតម្រូវ"
-                    }
-                },
-                "table": {
-                    "headers": {
-                        "customer": "អតិថិជន",
-                        "type": "ប្រភេទ",
-                        "points": "ពិន្ទុ",
-                        "balance": "សមតុល្យ",
-                        "date": "កាលបរិច្ឆេទ",
-                        "actions": "សកម្មភាព"
-                    },
-                    "empty": {
-                        "title": "មិនមានប្រតិបត្តិការទេ",
-                        "subtitle": "បង្កើតប្រតិបត្តិការដំបូង"
-                    },
-                    "loading": "កំពុងផ្ទុក..."
-                },
-                "form": {
-                    "create_title": "ប្រតិបត្តិការថ្មី",
-                    "edit_title": "កែប្រែប្រតិបត្តិការ",
-                    "fields": {
-                        "customer": "អតិថិជន",
-                        "type": "ប្រភេទ",
-                        "points": "ពិន្ទុ",
-                        "date": "កាលបរិច្ឆេទ",
-                        "notes": "កំណត់សម្គាល់"
-                    },
-                    "placeholders": {
-                        "search_customer": "ជ្រើសរើសអតិថិជន",
-                        "points_earn": "ឧ. 100",
-                        "points_adjust": "ឧ. 50 ឬ -50",
-                        "notes": "កំណត់សម្គាល់..."
-                    },
-                    "options": {
-                        "earn": "ទទួលបាន",
-                        "redeem": "ប្តូរ",
-                        "adjust": "កែតម្រូវ"
-                    }
-                },
-                "messages": {
-                    "created": "បង្កើតប្រតិបត្តិការជោគជ័យ",
-                    "updated": "ធ្វើបច្ចុប្បន្នភាពប្រតិបត្តិការជោគជ័យ",
-                    "deleted": "លុបប្រតិបត្តិការជោគជ័យ",
-                    "delete_confirm": "តើអ្នកប្រាកដថាចង់លុបប្រតិបត្តិការនេះទេ?",
-                    "failed": "ប្រតិបត្តិការបរាជ័យ"
-                }
-            }
-        },
-        "system": {
-            "configuration": {
-                "title": "ការកំណត់ប្រព័ន្ធ",
-                "subtitle": "គ្រប់គ្រងតារាងទិន្នន័យនិងនិយមន័យប្រព័ន្ធ",
-                "tabs": {
-                    "order_types": "ប្រភេទការកុម្ម៉ង់",
-                    "order_statuses": "ស្ថានភាពការកុម្ម៉ង់",
-                    "payment_statuses": "ស្ថានភាពការទូទាត់",
-                    "loyalty_tiers": "កម្រិតសមាជិក"
-                },
-                "table": {
-                    "headers": {
-                        "display_order": "លំដាប់",
-                        "name_code": "ឈ្មោះ / កូដ",
-                        "visuals": "រូបភាព/ពណ៌",
-                        "status": "ស្ថានភាព",
-                        "attributes": "លក្ខណៈសម្បត្តិ",
-                        "actions": "សកម្មភាព"
-                    }
-                },
-                "modal": {
-                    "edit_title": "កែប្រែ {name}",
-                    "fields": {
-                        "name": "ឈ្មោះ",
-                        "icon": "រូបតំណាង (Lucide)",
-                        "color": "ពណ៌ (Hex)",
-                        "display_order": "លំដាប់បង្ហាញ",
-                        "active": "សកម្ម",
-                        "capabilities": "សមត្ថភាព",
-                        "workflow": "លំហូរការងារ",
-                        "attributes": "លក្ខណៈសម្បត្តិ",
-                        "rules": "ច្បាប់ & រង្វាន់",
-                        "min_spent": "ចំណាយអប្បបរមា ($)",
-                        "max_spent": "ចំណាយអតិបរមា ($)",
-                        "discount_percent": "បញ្ចុះតម្លៃ %",
-                        "multiplier": "គុណពិន្ទុ",
-                        "workflow_pos": "ទីតាំងលំហូរ (1-10)"
-                    },
-                    "options": {
-                        "allows_delivery": "អនុញ្ញាតដឹកជញ្ជូន",
-                        "allows_pickup": "អនុញ្ញាតមកយកផ្ទាល់",
-                        "allows_table": "អនុញ្ញាតញ៉ាំនៅហាង",
-                        "is_terminal": "ស្ថានភាពបញ្ចប់",
-                        "show_customer": "បង្ហាញដល់អតិថិជន",
-                        "is_successful": "ជោគជ័យ"
-                    },
-                    "buttons": {
-                        "cancel": "បោះបង់",
-                        "save": "រក្សាទុក"
-                    }
-                }
-            },
-            "translations": {
-                "title": "ការបកប្រែ",
-                "subtitle": "គ្រប់គ្រងមាតិកាពហុភាសា",
-                "save_button": "រក្សាទុកការផ្លាស់ប្តូរ",
-                "saving": "កំពុងរក្សាទុក...",
-                "stats": {
-                    "keys": "ពាក្យគន្លឹះ",
-                    "missing_cat": "ខ្វះប្រភេទ",
-                    "missing_items": "ខ្វះទំនិញ",
-                    "progress": "វឌ្ឍនភាព"
-                },
-                "filters": {
-                    "search": "ស្វែងរក...",
-                    "categories": "ប្រភេទ",
-                    "menu_items": "ទំនិញ"
-                },
-                "table": {
-                    "headers": {
-                        "id": "ល.រ",
-                        "english": "អង់គ្លេស (លំនាំដើម)",
-                        "khmer": "ខ្មែរ (បកប្រែ)"
-                    },
-                    "empty": "មិនមានការបកប្រែទេ",
-                    "loading": "កំពុងផ្ទុក..."
-                },
-                "placeholders": {
-                    "en_name": "ឈ្មោះជាភាសាអង់គ្លេស",
-                    "en_desc": "ការពិពណ៌នាជាភាសាអង់គ្លេស",
-                    "km_name": "ឈ្មោះជាភាសាខ្មែរ",
-                    "km_desc": "ការពិពណ៌នាជាភាសាខ្មែរ"
-                },
-                "messages": {
-                    "saved": "រក្សាទុកការបកប្រែជោគជ័យ",
-                    "failed": "បរាជ័យក្នុងការរក្សាទុកការបកប្រែ"
-                }
-            }
-        }
-    },
-    "employee": {
-        "dashboard": {
-            "title": "ផ្ទាំងគ្រប់គ្រង",
-            "welcome": "ស្វាគមន៍ការវិលត្រឡប់",
-            "shift": {
-                "current": "វេនបច្ចុប្បន្ន",
-                "clock_in": "ចូលបម្រើការងារ",
-                "clock_out": "ចេញពីការងារ",
-                "break": "សម្រាក",
-                "end_break": "បញ្ចប់ការសម្រាក",
-                "status": {
-                    "clocked_in": "កំពុងបម្រើការងារ",
-                    "on_break": "កំពុងសម្រាក",
-                    "clocked_out": "បានចេញពីការងារ"
-                }
-            },
-            "stats": {
-                "today_sales": "ការលក់ថ្ងៃនេះ",
-                "orders": "ការបញ្ជាទិញ",
-                "hours": "ម៉ោង",
-                "tips": "ប្រាក់ឧបត្ថម្ភ"
-            },
-            "quick_actions": "សកម្មភាពរហ័ស",
-            "recent_orders": "ការបញ្ជាទិញថ្មីៗ"
-        },
-        "pos": {
-            "title": "ចំណុចលក់",
-            "cart": "កន្ត្រក",
-            "total": "សរុប",
-            "subtotal": "សរុបរង",
-            "tax": "ពន្ធ",
-            "discount": "បញ្ចុះតម្លៃ",
-            "add_item": "បន្ថែមទំនិញ",
-            "remove_item": "យកចេញ",
-            "clear_cart": "សម្អាតកន្ត្រក",
-            "checkout": "បញ្ចប់ការទិញ",
-            "payment": {
-                "title": "ការបង់ប្រាក់",
-                "method": "វិធីសាស្ត្របង់ប្រាក់",
-                "cash": "សាច់ប្រាក់",
-                "card": "កាត",
-                "received": "ចំនួនបានទទួល",
-                "change": "ប្រាក់អាប់",
-                "complete": "បញ្ចប់ការបង់ប្រាក់"
-            },
-            "order_type": {
-                "dine_in": "ញ៉ាំនៅទីនេះ",
-                "takeout": "យកទៅ",
-                "delivery": "ដឹកជញ្ជូន"
-            },
-            "table": "តុ",
-            "customer": "អតិថិជន",
-            "notes": "កំណត់ចំណាំការបញ្ជាទិញ",
-            "messages": {
-                "order_placed": "បានធ្វើការបញ្ជាទិញដោយជោគជ័យ",
-                "payment_complete": "បង់ប្រាក់រួចរាល់",
-                "error": "មានកំហុសកើតឡើង"
-            }
-        },
-        "kitchen": {
-            "title": "ផ្ទាំងបង្ហាញផ្ទះបាយ",
-            "queue": "ជួរកង់",
-            "in_progress": "កំពុងដំណើរការ",
-            "ready": "រួចរាល់",
-            "completed": "បានបញ្ចប់",
-            "status": {
-                "new": "ថ្មី",
-                "preparing": "កំពុងរៀបចំ",
-                "ready": "រួចរាល់",
-                "served": "បានបម្រើ"
-            },
-            "actions": {
-                "start": "ចាប់ផ្តើមរៀបចំ",
-                "ready": "សម្គាល់ជារួចរាល់",
-                "complete": "បញ្ចប់"
-            },
-            "order_time": "ពេលវេលាបញ្ជាទិញ",
-            "prep_time": "ពេលវេលារៀបចំ",
-            "table": "តុ",
-            "items": "ទំនិញ"
-        },
-        "delivery": {
-            "title": "ការដឹកជញ្ជូន",
-            "available": "មានផ្តល់ជូន",
-            "assigned": "បានចាត់តាំងឱ្យខ្ញុំ",
-            "delivering": "កំពុងដឹកជញ្ជូន",
-            "completed": "បានបញ្ចប់",
-            "actions": {
-                "accept": "ទទួលយក",
-                "pickup": "បានយកទំនិញ",
-                "deliver": "បានដឹកជញ្ជូន",
-                "cancel": "បោះបង់"
-            },
-            "map": {
-                "title": "ផែនទីផ្លូវ",
-                "navigate": "រកផ្លូវ",
-                "distance": "ចម្ងាយ",
-                "eta": "ពេលវេលាដល់ប៉ាន់ស្មាន"
-            },
-            "customer": {
-                "name": "អតិថិជន",
-                "phone": "ទូរសព្ទ",
-                "address": "អាសយដ្ឋាន",
-                "notes": "កំណត់ចំណាំដឹកជញ្ជូន"
-            }
-        },
-        "schedule": {
-            "title": "កាលវិភាគ",
-            "my_shifts": "វេនរបស់ខ្ញុំ",
-            "week": "សប្តាហ៍",
-            "month": "ខែ",
-            "shift": {
-                "start": "ចាប់ផ្តើម",
-                "end": "បញ្ចប់",
-                "duration": "រយៈពេល",
-                "position": "មុខតំណែង"
-            },
-            "time_off": {
-                "title": "សំណើច្បាប់",
-                "request": "ស្នើសុំច្បាប់",
-                "pending": "កំពុងរង់ចាំ",
-                "approved": "បានអនុម័ត",
-                "denied": "បានបដិសេធ"
-            },
-            "swap": {
-                "title": "ប្តូរវេន",
-                "request": "ស្នើសុំប្តូរវេន",
-                "offers": "ការផ្តល់ជូនប្តូរវេន"
-            }
-        },
-        "performance": {
-            "title": "ការអនុវត្ត",
-            "overview": "ទិដ្ឋភាពទូទៅ",
-            "metrics": {
-                "sales": "ការលក់",
-                "orders": "ការបញ្ជាទិញ",
-                "avg_order": "ការបញ្ជាទិញមធ្យម",
-                "rating": "ការវាយតម្លៃ",
-                "speed": "ល្បឿន",
-                "accuracy": "ភាពត្រឹមត្រូវ"
-            },
-            "goals": {
-                "title": "គោលដៅ",
-                "progress": "វឌ្ឍនភាព",
-                "achieved": "បានសម្រេច"
-            },
-            "badges": {
-                "title": "ផ្លាកសញ្ញា",
-                "earned": "បានទទួល"
-            }
-        },
-        "timeclock": {
-            "title": "នាឡិកាពេលវេលា",
-            "clock_in": "ចូលបម្រើការងារ",
-            "clock_out": "ចេញពីការងារ",
-            "break_start": "ចាប់ផ្តើមសម្រាក",
-            "break_end": "បញ្ចប់ការសម្រាក",
-            "current_status": "ស្ថានភាពបច្ចុប្បន្ន",
-            "time_worked": "ពេលវេលាធ្វើការថ្ងៃនេះ",
-            "messages": {
-                "clocked_in": "ចូលបម្រើការងារដោយជោគជ័យ",
-                "clocked_out": "ចេញពីការងារដោយជោគជ័យ",
-                "break_started": "បានចាប់ផ្តើមសម្រាក",
-                "break_ended": "បានបញ្ចប់ការសម្រាក"
-            }
-        },
-        "settings": {
-            "title": "ការកំណត់",
-            "profile": "ប្រវត្តិរូប",
-            "preferences": "ចំណង់ចំណូលចិត្ត",
-            "language": "ភាសា",
-            "notifications": "ការជូនដំណឹង",
-            "privacy": "ឯកជនភាព",
-            "save": "រក្សាទុកការផ្លាស់ប្តូរ"
-        },
-        "notifications": {
-            "title": "ការជូនដំណឹង",
-            "all": "ទាំងអស់",
-            "unread": "មិនទាន់អាន",
-            "mark_read": "សម្គាល់ជាបានអាន",
-            "clear": "សម្អាតទាំងអស់"
-        },
-        "feedback": {
-            "title": "មតិកែលម្អ",
-            "submit": "ដាក់ស្នើមតិកែលម្អ",
-            "type": {
-                "suggestion": "យោបល់",
-                "issue": "បញ្ហា",
-                "praise": "ការសរសើរ"
-            },
-            "message": "សារររបស់អ្នក",
-            "messages": {
-                "submitted": "បានដាក់ស្នើមតិកែលម្អដោយជោគជ័យ",
-                "thank_you": "សូមអរគុណចំពោះមតិកែលម្អរបស់អ្នក"
-            }
-        },
-        "help": {
-            "title": "ជំនួយ និងការគាំទ្រ",
-            "faq": "សំណួរចម្លើយញឹកញាប់",
-            "contact": "ទាក់ទងការគាំទ្រ",
-            "guides": "មគ្គុទ្ទេសក៍",
-            "search": "ស្វែងរកជំនួយ..."
-        },
-        "cash": {
-            "title": "ការបង់ប្រាក់សាច់ប្រាក់",
-            "register": "ប្រអប់ថវិកា",
-            "open": "បើកប្រអប់ថវិកា",
-            "close": "បិទប្រអប់ថវិកា",
-            "count": "រាប់ប្រាក់",
-            "expected": "បានរំពឹងទុក",
-            "actual": "ពិតប្រាកដ",
-            "difference": "ភាពខុសគ្នា"
-        },
-        "common": {
-            "loading": "កំពុងផ្ទុក...",
-            "error": "កំហុស",
-            "success": "ជោគជ័យ",
-            "confirm": "បញ្ជាក់",
-            "cancel": "បោះបង់",
-            "save": "រក្សាទុក",
-            "back": "ត្រឡប់ក្រោយ",
-            "next": "បន្ទាប់"
-        }
-    },
-    "inventory": {
         "adjustments": {
             "title": "ការកែតម្រូវ",
             "subtitle": "ការកែតម្រូវស្តុកនិងប្រវត្តិ",
@@ -3001,67 +2767,739 @@
             }
         }
     },
-    "hr": {
-        "time_off": {
-            "title": "សំណើច្បាប់ឈប់សម្រាក",
-            "subtitle": "គ្រប់គ្រងសំណើរសុំច្បាប់",
+    "employee": {
+        "dashboard": {
+            "title": "ផ្ទាំងគ្រប់គ្រង",
+            "welcome": "ស្វាគមន៍ការវិលត្រឡប់",
+            "shift": {
+                "current": "វេនបច្ចុប្បន្ន",
+                "clock_in": "ចូលបម្រើការងារ",
+                "clock_out": "ចេញពីការងារ",
+                "break": "សម្រាក",
+                "end_break": "បញ្ចប់ការសម្រាក",
+                "status": {
+                    "clocked_in": "កំពុងបម្រើការងារ",
+                    "on_break": "កំពុងសម្រាក",
+                    "clocked_out": "បានចេញពីការងារ"
+                },
+                "next": "វេនបន្ទាប់",
+                "swap": "ប្តូរវេន",
+                "none_upcoming": "មិនមានវេនខាងមុខ",
+                "none_this_week": "មិនមានវេនបន្ថែមក្នុងសប្តាហ៍នេះ"
+            },
             "stats": {
-                "pending": "រង់ចាំសម្រេច",
-                "approved": "បានអនុម័ត",
-                "rejected": "បានបដិសេធ",
-                "month": "ច្បាប់លាខែនេះ"
+                "today_sales": "ការលក់ថ្ងៃនេះ",
+                "orders": "ការបញ្ជាទិញ",
+                "hours": "ម៉ោង",
+                "tips": "ប្រាក់ឧបត្ថម្ភ"
             },
-            "table": {
-                "employee": "បុគ្គលិក",
-                "type": "ប្រភេទ",
-                "days": "ចំនួនថ្ងៃ",
-                "dates": "កាលបរិច្ឆេទ",
-                "reason": "មូលហេតុ",
-                "status": "ស្ថានភាព",
-                "requested_on": "ស្នើសុំនៅ",
-                "actions": "សកម្មភាព"
+            "quick_actions": "សកម្មភាពរហ័ស",
+            "recent_orders": "ការបញ្ជាទិញថ្មីៗ",
+            "greeting": {
+                "morning": "អរុណសួស្តី",
+                "afternoon": "សួស្តីពេលថ្ងៃ",
+                "evening": "សួស្តីពេលល្ងាច"
             },
-            "types": {
-                "vacation": "សម្រាកប្រចាំឆ្នាំ",
-                "sick": "ច្បាប់ឈឺ",
-                "personal": "ផ្ទាល់ខ្លួន",
-                "other": "ផ្សេងៗ"
+            "position_fallback": "បុគ្គលិក",
+            "hours": "ម៉ោង",
+            "earnings": "ប្រាក់ចំណូល",
+            "leave": "ថ្ងៃឈប់សម្រាក",
+            "orders": "ការបញ្ជាទិញ",
+            "upcoming": "វេនខាងមុខ",
+            "time_off": {
+                "label": "សុំឈប់សម្រាក",
+                "submitted": "បានដាក់សំណើសុំឈប់សម្រាកដោយជោគជ័យ",
+                "title": "ស្នើសុំឈប់សម្រាក",
+                "request_type": "ប្រភេទសំណើ",
+                "start_date": "កាលបរិច្ឆេទចាប់ផ្តើម",
+                "end_date": "កាលបរិច្ឆេទបញ្ចប់",
+                "reason_optional": "មូលហេតុ (ស្រេចចិត្ត)",
+                "reason_placeholder": "ពិពណ៌នាខ្លីៗ...",
+                "types": {
+                    "vacation": "ឈប់សម្រាក",
+                    "sick": "ឈឺ",
+                    "sick_leave": "ឈប់ព្យាបាល",
+                    "personal": "ផ្ទាល់ខ្លួន"
+                }
             },
-            "actions": {
-                "approve": "អនុម័ត",
-                "reject": "បដិសេធ",
-                "approve_confirm": "អនុម័តច្បាប់សម្រាប់",
-                "reject_confirm": "បដិសេធច្បាប់សម្រាប់",
-                "rejection_reason": "មូលហេតុបដិសេធ"
+            "time_off_balance": "សមតុល្យថ្ងៃឈប់សម្រាក",
+            "announcements": {
+                "title": "សេចក្តីជូនដំណឹងថ្មីៗ",
+                "empty": "មិនមានសេចក្តីជូនដំណឹងថ្មី"
             }
         },
-        "shifts": {
-            "title": "ការអនុម័តប្តូរវេន",
-            "subtitle": "អនុម័តឬបដិសេធការប្តូរវេន",
-            "stats": {
-                "pending": "សំណើប្តូររង់ចាំ",
-                "approved": "បានអនុម័ត",
-                "rejected": "បានបដិសេធ"
+        "pos": {
+            "title": "ចំណុចលក់",
+            "cart": "កន្ត្រក",
+            "total": "សរុប",
+            "subtotal": "សរុបរង",
+            "tax": "ពន្ធ",
+            "discount": "បញ្ចុះតម្លៃ",
+            "add_item": "បន្ថែមទំនិញ",
+            "remove_item": "យកចេញ",
+            "clear_cart": "សម្អាតកន្ត្រក",
+            "checkout": "បញ្ចប់ការទិញ",
+            "payment": {
+                "title": "ការបង់ប្រាក់",
+                "method": "វិធីសាស្ត្របង់ប្រាក់",
+                "cash": "សាច់ប្រាក់",
+                "card": "កាត",
+                "received": "ចំនួនបានទទួល",
+                "change": "ប្រាក់អាប់",
+                "complete": "បញ្ចប់ការបង់ប្រាក់"
             },
-            "table": {
-                "requester": "អ្នកស្នើសុំ",
-                "target_shift": "វេនគោលដៅ",
-                "type": "ប្រភេទ",
-                "reason": "មូលហេតុ",
-                "status": "ស្ថានភាព",
-                "requested_on": "ស្នើសុំនៅ"
+            "order_type": {
+                "dine_in": "ញ៉ាំនៅទីនេះ",
+                "takeout": "យកទៅ",
+                "pickup": "ទៅយកផ្ទាល់",
+                "delivery": "ដឹកជញ្ជូន"
             },
-            "types": {
-                "give_away": "ប្រគល់វេន",
-                "trade": "ប្តូរវេន"
+            "table": "តុ",
+            "customer": "អតិថិជន",
+            "notes": "កំណត់ចំណាំការបញ្ជាទិញ",
+            "messages": {
+                "order_placed": "បានធ្វើការបញ្ជាទិញដោយជោគជ័យ",
+                "payment_complete": "បង់ប្រាក់រួចរាល់",
+                "error": "មានកំហុសកើតឡើង"
             },
+            "start": "ចាប់ផ្តើម POS",
+            "added": "បានបន្ថែមទៅកន្ត្រក",
+            "order_held": "បានទុកការបញ្ជាទិញជាបណ្តោះអាសន្ន",
+            "replace_cart_confirm": "ជំនួសកន្ត្រកបច្ចុប្បន្នជាមួយការបញ្ជាទិញដែលបានទុកនេះ?",
+            "held_restored": "បានស្តារការបញ្ជាទិញដែលបានទុក",
+            "table_occupied": "តុ :code កំពុង :status",
+            "table_updated": "បានធ្វើបច្ចុប្បន្នភាពស្ថានភាពតុ",
+            "new_order": "ការបញ្ជាទិញថ្មី",
+            "active": "ការបញ្ជាទិញកំពុងដំណើរការ",
+            "grid": "បណ្ដុំក្រឡា",
+            "list": "បញ្ជី",
+            "numpad": "បន្ទះលេខ",
+            "active_orders": "ការបញ្ជាទិញកំពុងដំណើរការ",
+            "no_active_orders": "មិនមានការបញ្ជាទិញកំពុងដំណើរការទេ",
+            "create_new_order": "បង្កើតការបញ្ជាទិញថ្មីដើម្បីចាប់ផ្តើម",
+            "pay": "បង់ប្រាក់",
+            "favorites": "ពេញនិយម",
+            "held": "បានទុកជាបណ្តោះអាសន្ន",
+            "walk_in": "ដើរចូល",
+            "restore": "ស្តារ",
+            "table_customer": "តុ និងអតិថិជន",
+            "no_floors": "មិនមានជាន់ទេ",
+            "available": "ទំនេរ",
+            "reserved": "បានកក់",
+            "occupied": "កំពុងប្រើ",
+            "unavailable": "មិនអាចប្រើបាន",
+            "quantity": "ចំនួន",
+            "current_order": "ការបញ្ជាទិញបច្ចុប្បន្ន",
+            "items": "មុខទំនិញ",
+            "no_items": "មិនទាន់មានទំនិញក្នុងកន្ត្រកទេ",
+            "clear": "សម្អាត",
+            "hold": "ទុក",
+            "charge": "គិតលុយ",
+            "menu": "ម៉ឺនុយ",
+            "selected": "បានជ្រើស",
+            "status": "ស្ថានភាព",
+            "add_selected": "បន្ថែម :name",
+            "payment_status": {
+                "paid": "បានបង់",
+                "partial": "បានបង់ខ្លះ",
+                "pending": "រង់ចាំ",
+                "failed": "បរាជ័យ"
+            },
+            "table_status": {
+                "available": "ទំនេរ",
+                "occupied": "កំពុងប្រើ",
+                "reserved": "បានកក់",
+                "unavailable": "មិនអាចប្រើបាន"
+            }
+        },
+        "kitchen": {
+            "title": "ផ្ទាំងបង្ហាញផ្ទះបាយ",
+            "system": "ផ្ទាំងបង្ហាញផ្ទះបាយ",
+            "queue": "ជួរកង់",
+            "in_progress": "កំពុងដំណើរការ",
+            "ready": "រួចរាល់",
+            "completed": "បានបញ្ចប់",
+            "new": "ការបញ្ជាទិញថ្មី",
+            "preparing": "កំពុងរៀបចំ",
+            "sound_on": "បើកសម្លេង",
+            "sound_off": "បិទសម្លេង",
+            "total": "សរុប",
+            "no_new_orders": "មិនមានការបញ្ជាទិញថ្មីទេ",
+            "no_cooking": "មិនមានការបញ្ជាទិញកំពុងរៀបចំទេ",
+            "no_ready": "មិនមានការបញ្ជាទិញរួចរាល់ទេ",
+            "customer_info": "ព័ត៌មានអតិថិជន",
+            "order_notes": "កំណត់ចំណាំការបញ្ជាទិញ",
+            "order_items": "មុខទំនិញក្នុងការបញ្ជាទិញ",
+            "special_request": "សំណើពិសេស",
+            "total_amount": "សរុប",
+            "updating": "កំពុងធ្វើបច្ចុប្បន្នភាព...",
+            "urgent": "បន្ទាន់",
+            "note": "កំណត់ចំណាំ",
+            "more_items": "+ :count មុខទំនិញបន្ថែម (ចុចដើម្បីមើលទាំងអស់)",
+            "order_number": "ការបញ្ជាទិញ #:number",
+            "table_number": "តុ :number",
+            "age_minutes": ":minutes នាទី",
+            "unit_price_each": "$:price ក្នុងមួយមុខ",
+            "item_total": "សរុប: $:total",
+            "order_type": {
+                "dine_in": "ញ៉ាំនៅទីនេះ",
+                "pickup": "ទៅយកផ្ទាល់",
+                "delivery": "ដឹកជញ្ជូន"
+            },
+            "status_labels": {
+                "new": "ថ្មី",
+                "preparing": "កំពុងរៀបចំ",
+                "ready": "រួចរាល់",
+                "default": ":status"
+            },
+            "item_status": {
+                "served": "បានបម្រើ",
+                "preparing": "កំពុងរៀបចំ",
+                "pending": "រង់ចាំ"
+            },
+            "status": {
+                "new": "ថ្មី",
+                "preparing": "កំពុងរៀបចំ",
+                "ready": "រួចរាល់",
+                "served": "បានបម្រើ"
+            },
+            "delivered": "បានបម្រើ",
             "actions": {
-                "approve": "អនុម័តការប្តូរ",
-                "reject": "បដិសេធការប្តូរ",
-                "approve_confirm": "អនុម័តការប្តូរវេនសម្រាប់",
-                "reject_confirm": "បដិសេធការប្តូរវេនសម្រាប់",
-                "deny_warning": "ការបដិសេធសំណើនេះនឹងជូនដំណឹងដល់បុគ្គលិកទាំងពីរ ហើយវេននឹងត្រឡប់ទៅម្ចាស់ដើមវិញ។",
-                "rejection_reason": "មូលហេតុនៃការបដិសេធ"
+                "start": "ចាប់ផ្តើមរៀបចំ",
+                "ready": "សម្គាល់ជារួចរាល់",
+                "complete": "បញ្ចប់"
+            },
+            "order_time": "ពេលវេលាបញ្ជាទិញ",
+            "prep_time": "ពេលវេលារៀបចំ",
+            "table": "តុ",
+            "items": "ទំនិញ"
+        },
+        "delivery": {
+            "title": "ការដឹកជញ្ជូន",
+            "available": "មានផ្តល់ជូន",
+            "assigned": "បានចាត់តាំងឱ្យខ្ញុំ",
+            "delivering": "កំពុងដឹកជញ្ជូន",
+            "completed": "បានបញ្ចប់",
+            "actions": {
+                "accept": "ទទួលយក",
+                "pickup": "បានយកទំនិញ",
+                "deliver": "បានដឹកជញ្ជូន",
+                "cancel": "បោះបង់"
+            },
+            "map": {
+                "title": "ផែនទីផ្លូវ",
+                "navigate": "រកផ្លូវ",
+                "distance": "ចម្ងាយ",
+                "eta": "ពេលវេលាដល់ប៉ាន់ស្មាន"
+            },
+            "customer": {
+                "name": "អតិថិជន",
+                "phone": "ទូរសព្ទ",
+                "address": "អាសយដ្ឋាន",
+                "notes": "កំណត់ចំណាំដឹកជញ្ជូន"
+            },
+            "order_number": "បញ្ជាទិញ #:number",
+            "amount_placeholder": "0.00",
+            "notes_placeholder": "ឧ. ប្រាក់សោះត្រូវ, ទុកមុខទ្វារ...",
+            "claim_failed": "បរាជ័យក្នុងការទាមទារ",
+            "confirm_claim": "ទទួលយកការដឹកជញ្ជូននេះ?",
+            "confirm_complete": "បញ្ចប់ការដឹកជញ្ជូននេះ?",
+            "no_address": "មិនមានអាសយដ្ឋាន",
+            "no_phone": "មិនមានលេខទូរស័ព្ទ",
+            "page_title": "ការបញ្ជាទិញដឹកជញ្ជូន និងយកទៅ",
+            "placed_at": "បានបញ្ជាទិញ :time",
+            "payment_status": {
+                "paid": "បានបង់",
+                "unpaid": "មិនទាន់បង់"
+            },
+            "order_type": {
+                "delivery": "ដឹកជញ្ជូន",
+                "pickup": "យកទៅ",
+                "takeaway": "យកទៅ"
+            },
+            "status": {
+                "out_for_delivery": "កំពុងដឹកជញ្ជូន",
+                "delivered": "បានដឹកជញ្ជូន",
+                "ready": "រួចរាល់",
+                "preparing": "កំពុងរៀបចំ"
+            }
+        },
+        "schedule": {
+            "title": "កាលវិភាគ",
+            "my_shifts": "វេនរបស់ខ្ញុំ",
+            "week": "សប្តាហ៍",
+            "month": "ខែ",
+            "shift": {
+                "start": "ចាប់ផ្តើម",
+                "end": "បញ្ចប់",
+                "duration": "រយៈពេល",
+                "position": "មុខតំណែង"
+            },
+            "time_off": {
+                "title": "សំណើច្បាប់",
+                "request": "ស្នើសុំច្បាប់",
+                "pending": "កំពុងរង់ចាំ",
+                "approved": "បានអនុម័ត",
+                "denied": "បានបដិសេធ"
+            },
+            "swap": {
+                "title": "ប្តូរវេន",
+                "request": "ស្នើសុំប្តូរវេន",
+                "offers": "ការផ្តល់ជូនប្តូរវេន"
+            },
+            "week_of": "សប្តាហ៍ទី :date",
+            "reason_placeholder": "ឈប់សម្រាក, ពេទ្យ, ល។",
+            "unknown_location": "ទីតាំងមិនស្គាល់",
+            "unknown": "មិនស្គាល់",
+            "offered_by": "ផ្តល់ដោយ :name",
+            "request_swap": "ស្នើប្តូរវេន",
+            "swap_title": "ស្នើប្តូរវេន",
+            "swap_requesting": "កំពុងស្នើប្តូរ/លះវេននៅថ្ងៃ៖",
+            "swap_type": "ប្រភេទ",
+            "swap_give_away": "ផ្តល់ឲ្យ (លះវេន)",
+            "swap_trade": "ស្នើប្តូរ",
+            "swap_reason_optional": "មូលហេតុ (ស្រេចចិត្ត)",
+            "swap_reason_placeholder": "ហេតុអ្វីត្រូវប្តូរ?",
+            "confirm_request": "បញ្ជាក់សំណើ",
+            "status": {
+                "approved": "បានអនុម័ត",
+                "denied": "បានបដិសេធ",
+                "pending": "កំពុងរង់ចាំ"
+            },
+            "details": {
+                "date": "កាលបរិច្ឆេទ",
+                "time": "ម៉ោង",
+                "position": "តួនាទី",
+                "location": "ទីតាំង",
+                "notes": "កំណត់ចំណាំ"
+            },
+            "days": {
+                "sun": "អាទិត្យ",
+                "mon": "ចន្ទ",
+                "tue": "អង្គារ",
+                "wed": "ពុធ",
+                "thu": "ព្រហស្បតិ៍",
+                "fri": "សុក្រ",
+                "sat": "សៅរ៍"
+            }
+        },
+        "performance": {
+            "title": "ការអនុវត្ត",
+            "overview": "ទិដ្ឋភាពទូទៅ",
+            "metrics": {
+                "sales": "ការលក់",
+                "orders": "ការបញ្ជាទិញ",
+                "avg_order": "ការបញ្ជាទិញមធ្យម",
+                "rating": "ការវាយតម្លៃ",
+                "speed": "ល្បឿន",
+                "accuracy": "ភាពត្រឹមត្រូវ"
+            },
+            "goals": {
+                "title": "គោលដៅ",
+                "progress": "វឌ្ឍនភាព",
+                "achieved": "បានសម្រេច"
+            },
+            "badges": {
+                "title": "ផ្លាកសញ្ញា",
+                "earned": "បានទទួល"
+            },
+            "labels": {
+                "hours": "ម៉ោង",
+                "earnings": "ប្រាក់ចំណូល",
+                "base_wage": "ប្រាក់ខែគោល",
+                "tips": "ប្រាក់រង្វាន់",
+                "estimated": "ប៉ាន់ស្មាន",
+                "rating": "ការវាយតម្លៃ",
+                "na": "មិនមាន",
+                "customer_feedback": "មតិអតិថិជន",
+                "top_percentile": "កំពូល :percentile%"
+            },
+            "period": {
+                "day": "ថ្ងៃ",
+                "week": "សប្ដាហ៍",
+                "month": "ខែ",
+                "year": "ឆ្នាំ"
+            },
+            "activity": "សកម្មភាព",
+            "no_activity": "មិនមានទិន្នន័យសកម្មភាពសម្រាប់រយៈពេលនេះ"
+        },
+        "timeclock": {
+            "title": "នាឡិកាពេលវេលា",
+            "clock_in": "ចូលបម្រើការងារ",
+            "clock_out": "ចេញពីការងារ",
+            "break_start": "ចាប់ផ្តើមសម្រាក",
+            "break_end": "បញ្ចប់ការសម្រាក",
+            "current_status": "ស្ថានភាពបច្ចុប្បន្ន",
+            "time_worked": "ពេលវេលាធ្វើការថ្ងៃនេះ",
+            "messages": {
+                "clocked_in": "ចូលបម្រើការងារដោយជោគជ័យ",
+                "clocked_out": "ចេញពីការងារដោយជោគជ័យ",
+                "break_started": "បានចាប់ផ្តើមសម្រាក",
+                "break_ended": "បានបញ្ចប់ការសម្រាក"
+            },
+            "notes": {
+                "clock_in": "ចូលវេន",
+                "clock_out": "ចេញវេន"
+            },
+            "ongoing": "កំពុងដំណើរការ",
+            "total_hours": ":hours ម៉ោង",
+            "clocking": "កំពុងកត់ម៉ោង...",
+            "instructions": {
+                "title": "សេចក្តីណែនាំម៉ោងវេន",
+                "body": "ចុច \"ចូលវេន\" នៅពេលមកដល់ការងារ និង \"ចេញវេន\" នៅពេលចាកចេញ។ ការចូលវេនរបស់អ្នកនឹងត្រូវបានកត់ត្រាស្វ័យប្រវត្តិ។"
+            }
+        },
+        "settings": {
+            "title": "ការកំណត់",
+            "profile": {
+                "title": "ព័ត៌មានផ្ទាល់ខ្លួន",
+                "employee_badge": "បុគ្គលិក",
+                "full_name": "ឈ្មោះពេញ",
+                "email": "អ៊ីមែល",
+                "phone": "លេខទូរស័ព្ទ",
+                "phone_placeholder": "+855 12 345 6789"
+            },
+            "preferences": "ចំណង់ចំណូលចិត្ត",
+            "language": {
+                "title": "ភាសា",
+                "description": "ជ្រើសរើសភាសាដែលចូលចិត្ត",
+                "changed": "បានប្តូរភាសាទៅជា :name"
+            },
+            "notifications": "ការជូនដំណឹង",
+            "privacy": "ឯកជនភាព",
+            "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+            "sections": {
+                "profile": {
+                    "title": "ប្រវត្តិ",
+                    "description": "គ្រប់គ្រងព័ត៌មានផ្ទាល់ខ្លួន"
+                },
+                "work": {
+                    "title": "ចំណូលចិត្តការងារ",
+                    "description": "កំណត់ស្ថានីយការងារ និងវេនដែលចូលចិត្ត"
+                },
+                "notifications": {
+                    "title": "ការជូនដំណឹង",
+                    "description": "គ្រប់គ្រងការកំណត់ការជូនដំណឹង"
+                },
+                "security": {
+                    "title": "សុវត្ថិភាព",
+                    "description": "ការកំណត់ពាក្យសម្ងាត់ និងសុវត្ថិភាព"
+                },
+                "appearance": {
+                    "title": "រូបរាង",
+                    "description": "កំណត់រូបរាងកម្មវិធី"
+                },
+                "language": {
+                    "title": "ភាសា",
+                    "description": "ជ្រើសរើសភាសាដែលចូលចិត្ត"
+                }
+            },
+            "emergency": {
+                "title": "ទំនាក់ទំនងបន្ទាន់",
+                "name": "ឈ្មោះទំនាក់ទំនង",
+                "phone": "លេខទូរស័ព្ទ",
+                "relationship": "ទំនាក់ទំនង",
+                "select": "ជ្រើសរើស...",
+                "name_placeholder": "John Doe",
+                "phone_placeholder": "+855 12 345 6789",
+                "relationship_options": {
+                    "spouse": "ប្តី/ប្រពន្ធ",
+                    "parent": "ឪពុកម្តាយ",
+                    "sibling": "បងប្អូន",
+                    "friend": "មិត្តភក្តិ",
+                    "other": "ផ្សេងៗ"
+                }
+            },
+            "work": {
+                "title": "ស្ថានីយការងារដែលចូលចិត្ត",
+                "description": "ជ្រើសស្ថានីយដែលអ្នកចូលចិត្តធ្វើការ"
+            },
+            "shifts": {
+                "title": "វេនដែលចូលចិត្ត",
+                "description": "ជ្រើសម៉ោងធ្វើការដែលចូលចិត្ត",
+                "morning": {
+                    "label": "ពេលព្រឹក",
+                    "time": "6AM - 2PM"
+                },
+                "afternoon": {
+                    "label": "ពេលរសៀល",
+                    "time": "2PM - 10PM"
+                },
+                "evening": {
+                    "label": "ពេលល្ងាច",
+                    "time": "6PM - 2AM"
+                }
+            },
+            "days": {
+                "title": "ថ្ងៃដែលអាចធ្វើការ",
+                "description": "ជ្រើសថ្ងៃដែលអ្នកអាចធ្វើការ",
+                "mon": "ចន្ទ",
+                "tue": "អង្គារ",
+                "wed": "ពុធ",
+                "thu": "ព្រហស្បតិ៍",
+                "fri": "សុក្រ",
+                "sat": "សៅរ៍",
+                "sun": "អាទិត្យ"
+            },
+            "max_hours": {
+                "title": "ម៉ោងអតិបរមាក្នុងមួយសប្ដាហ៍",
+                "description": "កំណត់ម៉ោងធ្វើការអតិបរមាដែលចូលចិត្ត",
+                "unit": "ម៉ោង"
+            },
+            "workstations": {
+                "pos": "POS / កាស៊ីយ៉ែរ",
+                "kitchen": "ផ្ទះបាយ",
+                "delivery": "ដឹកជញ្ជូន",
+                "service": "បម្រើតុ"
+            },
+            "appearance": {
+                "title": "រូបរាង",
+                "description": "ជ្រើសរើសរូបរាងកម្មវិធី",
+                "options": {
+                    "light": "ភ្លឺ",
+                    "light_desc": "ភ្លឺ និងស្អាត",
+                    "dark": "ងងឹត",
+                    "dark_desc": "ស្រួលភ្នែក",
+                    "system": "ប្រព័ន្ធ",
+                    "system_desc": "តាមការកំណត់ឧបករណ៍"
+                }
+            },
+            "emergency_saved": "បានរក្សាទុកទំនាក់ទំនងបន្ទាន់",
+            "emergency_failed": "រក្សាទុកទំនាក់ទំនងបន្ទាន់បរាជ័យ"
+        },
+        "notifications": {
+            "title": "ការជូនដំណឹង",
+            "all": "ទាំងអស់",
+            "unread": "មិនទាន់អាន",
+            "mark_read": "សម្គាល់ជាបានអាន",
+            "clear": "សម្អាតទាំងអស់",
+            "empty_title": "បានទាន់ហើយ!",
+            "empty_message": "អ្នកមិនមានការជូនដំណឹងថ្មីទេ។"
+        },
+        "feedback": {
+            "title": "មតិកែលម្អ",
+            "submit": "ដាក់ស្នើមតិកែលម្អ",
+            "type": {
+                "suggestion": "យោបល់",
+                "issue": "បញ្ហា",
+                "praise": "ការសរសើរ",
+                "general": "ទូទៅ",
+                "shift_rating": "វាយតម្លៃវេន"
+            },
+            "message": "សារររបស់អ្នក",
+            "messages": {
+                "submitted": "បានដាក់ស្នើមតិកែលម្អដោយជោគជ័យ",
+                "thank_you": "សូមអរគុណចំពោះមតិកែលម្អរបស់អ្នក"
+            },
+            "anonymous": "របៀបអនាមិក",
+            "public_mode": "របៀបបង្ហាញឈ្មោះ",
+            "identity_hidden": "អត្តសញ្ញាណរបស់អ្នកនឹងត្រូវលាក់",
+            "name_attached": "ឈ្មោះរបស់អ្នកនឹងត្រូវបង្ហាញ",
+            "rate_prompt": "សូមវាយតម្លៃ",
+            "footer": "មតិយោបល់របស់អ្នកជួយបង្កើតកន្លែងធ្វើការល្អសម្រាប់គ្រប់គ្នា។",
+            "rating": {
+                "none": "",
+                "very_poor": "អន់ខ្លាំង",
+                "poor": "អន់",
+                "average": "មធ្យម",
+                "good": "ល្អ",
+                "excellent": "ល្អបំផុត"
+            },
+            "placeholders": {
+                "suggestion": "ខ្ញុំគិតថាអាចកែលម្អ...",
+                "complaint": "ខ្ញុំមានកង្វល់អំពី...",
+                "general": "ចែករំលែកព័ត៌មានរបស់អ្នក..."
+            }
+        },
+        "help": {
+            "title": "ជំនួយ និងការគាំទ្រ",
+            "faq": "សំណួរចម្លើយញឹកញាប់",
+            "contact": "ទាក់ទងការគាំទ្រ",
+            "guides": "មគ្គុទ្ទេសក៍",
+            "search": "ស្វែងរកជំនួយ...",
+            "tabs": {
+                "my_tickets": "សំបុត្ររបស់ខ្ញុំ",
+                "new_ticket": "សំបុត្រថ្មី"
+            },
+            "faq_title": "សំណួរញឹកញាប់",
+            "track_requests": "តាមដានសំណើរបស់អ្នក",
+            "no_tickets": "អ្នកមិនទាន់ដាក់សំបុត្រទេ។",
+            "priority_label": ":priority អាទិភាព",
+            "one_response": "មានចម្លើយ ១",
+            "new_ticket_title": "ដាក់សំបុត្រជំនួយ",
+            "form": {
+                "category": "ប្រភេទ",
+                "priority": "អាទិភាព",
+                "subject": "ប្រធានបទ",
+                "description": "ពិពណ៌នា",
+                "subject_placeholder": "សង្ខេបបញ្ហាឲ្យខ្លី",
+                "description_placeholder": "សូមផ្តល់ព័ត៌មានលម្អិត...",
+                "category_options": {
+                    "it_support": "បញ្ហា IT / បច្ចេកទេស",
+                    "hr": "HR / ប្រាក់ឈ្នួល",
+                    "maintenance": "ថែទាំអគារ",
+                    "operations": "ប្រតិបត្តិការទូទៅ",
+                    "other": "ផ្សេងៗ"
+                },
+                "priority_options": {
+                    "low": "ទាប - សំណួរទូទៅ",
+                    "medium": "មធ្យម - ត្រូវការការយកចិត្តទុកដាក់",
+                    "high": "ខ្ពស់ - ប៉ះពាល់ការងារ",
+                    "critical": "បន្ទាន់ - ជាបញ្ហាសង្គ្រោះ"
+                }
+            },
+            "faqs": {
+                "swap": {
+                    "question": "តើខ្ញុំប្តូរវេនដូចម្តេច?",
+                    "answer": "ទៅកាន់ទំព័រ Schedule ជ្រើសវេនរបស់អ្នក ហើយចុច \"Request Swap\"។ អ្នកគ្រប់គ្រងត្រូវអនុម័ត។"
+                },
+                "pos": {
+                    "question": "POS កក គួរធ្វើអ្វី?",
+                    "answer": "សាក refresh (F5)។ បើមិនបាន សាកបិទបើកថេប្លេត។ បញ្ហាបន្ទាន់ សូមដាក់សំបុត្រជំនួយ \"Critical\"។"
+                },
+                "time_off": {
+                    "question": "តើស្នើសុំឈប់សម្រាកដូចម្តេច?",
+                    "answer": "ទៅកាន់ Schedule > Time Off Requests ហើយដាក់សំណើថ្មីជាមួយកាលបរិច្ឆេទ និងមូលហេតុ។"
+                },
+                "pay": {
+                    "question": "ខ្ញុំមើលប្រាក់ឈ្នួលឯណា?",
+                    "answer": "ព័ត៌មានប្រាក់ឈ្នួលមាននៅ User Profile > Payroll (បើបើកសម្រាប់តួនាទី) ឬទាក់ទង HR ដោយផ្ទាល់។"
+                }
+            }
+        },
+        "notification_preferences": {
+            "title": "ចំណូលចិត្តសេចក្តីជូនដំណឹង",
+            "subtitle": "ជ្រើសរើសសេចក្តីជូនដំណឹងដែលអ្នកចង់ទទួល",
+            "groups": {
+                "in_app": {
+                    "title": "សេចក្តីជូនដំណឹងក្នុងកម្មវិធី",
+                    "description": "សេចក្តីជូនដំណឹងដែលបង្ហាញនៅក្នុងកម្មវិធី"
+                },
+                "external": {
+                    "title": "សេចក្តីជូនដំណឹងក្រៅកម្មវិធី",
+                    "description": "សេចក្តីជូនដំណឹងដែលផ្ញើក្រៅកម្មវិធី"
+                }
+            },
+            "items": {
+                "order_alerts": {
+                    "label": "ការជូនដំណឹងអំពីការបញ្ជាទិញ",
+                    "desc": "ទទួលដំណឹងអំពីការបញ្ជាទិញថ្មី និងការផ្លាស់ប្តូរស្ថានភាព"
+                },
+                "shift_reminders": {
+                    "label": "រំលឹកវេនធ្វើការ",
+                    "desc": "ទទួលការរំលឹកមុនពេលវេនធ្វើការចាប់ផ្តើម"
+                },
+                "announcements": {
+                    "label": "សេចក្តីប្រកាសប្រព័ន្ធ",
+                    "desc": "ព័ត៌មានសំខាន់ៗពីការគ្រប់គ្រង"
+                },
+                "email": {
+                    "label": "ការជូនដំណឹងតាមអ៊ីមែល",
+                    "desc": "ទទួលព័ត៌មានសំខាន់ៗតាមអ៊ីមែល"
+                },
+                "push": {
+                    "label": "ការជូនដំណឹងតាមស្មាតហ្វូន",
+                    "desc": "ទទួលសារ​ជូនដំណឹង​នៅលើទូរសព្ទរបស់អ្នក"
+                }
+            },
+            "note": {
+                "title": "សំខាន់",
+                "body": "សេចក្តីជូនដំណឹងសំខាន់ៗអំពីវេន និងការបញ្ជាទិញ នឹងត្រូវផ្ញើជានិច្ច ទោះបីអ្នកបានកំណត់ចំណូលចិត្តយ៉ាងណាក៏ដោយ ដើម្បីធានាថាអ្នកមិនខកខានព័ត៌មានការងារសំខាន់ៗ។"
+            },
+            "messages": {
+                "updated": "បានអាប់ដេតចំណូលចិត្តរួចរាល់",
+                "update_failed": "មិនអាចអាប់ដេតចំណូលចិត្តបានទេ"
+            }
+        },
+        "cash": {
+            "title": "ការបង់ប្រាក់សាច់ប្រាក់",
+            "register": "ប្រអប់ថវិកា",
+            "open": "បើកប្រអប់ថវិកា",
+            "close": "បិទប្រអប់ថវិកា",
+            "count": "រាប់ប្រាក់",
+            "expected": "បានរំពឹងទុក",
+            "actual": "ពិតប្រាកដ",
+            "difference": "ភាពខុសគ្នា",
+            "stats": {
+                "pending": "រង់ចាំ",
+                "confirmed_today": "បានបញ្ជាក់ថ្ងៃនេះ",
+                "total_collected": "សរុបដែលបានប្រមូល",
+                "change_given": "ប្រាក់អាប់ដែលបានឱ្យ"
+            },
+            "queue": {
+                "title": "ការទូទាត់សាច់ប្រាក់កំពុងរង់ចាំ",
+                "waiting_one": ":count ការទូទាត់កំពុងរង់ចាំ",
+                "waiting_other": ":count ការទូទាត់កំពុងរង់ចាំ",
+                "empty_title": "រួចរាល់ទាំងអស់!",
+                "empty_subtitle": "មិនមានការទូទាត់សាច់ប្រាក់កំពុងរង់ចាំទេ",
+                "reason_placeholder": "មូលហេតុ...",
+                "reason_required": "សូមផ្តល់មូលហេតុ",
+                "rejected": "បានបដិសេធការទូទាត់",
+                "reject_failed": "បរាជ័យក្នុងការបដិសេធ",
+                "items_one": ":count មុខទំនិញ",
+                "items_other": ":count មុខទំនិញ"
+            },
+            "modal": {
+                "title": "បញ្ជាក់ការទូទាត់សាច់ប្រាក់",
+                "order_number": "ការបញ្ជាទិញ #:number",
+                "amount_due": "ប្រាក់ត្រូវបង់",
+                "cash_received": "ប្រាក់ទទួលបាន",
+                "cash_received_placeholder": "0.00",
+                "change_due": "ប្រាក់អាប់ត្រូវឱ្យ",
+                "insufficient": "ប្រាក់មិនគ្រប់",
+                "notes_label": "កំណត់ចំណាំ (ជាជម្រើស)",
+                "notes_placeholder": "បន្ថែមកំណត់ចំណាំ...",
+                "confirm_success": "បានបញ្ជាក់ការទូទាត់!",
+                "confirm_failed": "បរាជ័យក្នុងការបញ្ជាក់ការទូទាត់"
+            }
+        },
+        "common": {
+            "loading": "កំពុងផ្ទុក...",
+            "error": "កំហុស",
+            "success": "ជោគជ័យ",
+            "confirm": "បញ្ជាក់",
+            "cancel": "បោះបង់",
+            "save": "រក្សាទុក",
+            "back": "ត្រឡប់ក្រោយ",
+            "next": "បន្ទាប់",
+            "view_all": "មើលទាំងអស់",
+            "close": "បិទ",
+            "submitting": "កំពុងដាក់ស្នើ...",
+            "refresh": "ផ្ទុកឡើងវិញ"
+        },
+        "security": {
+            "title": "ប្តូរពាក្យសម្ងាត់",
+            "subtitle": "ធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់ដើម្បីរក្សាប្រព័ន្ធឲ្យមានសុវត្ថិភាព",
+            "current_password": "ពាក្យសម្ងាត់បច្ចុប្បន្ន",
+            "new_password": "ពាក្យសម្ងាត់ថ្មី",
+            "confirm_password": "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី",
+            "current_password_placeholder": "បញ្ចូលពាក្យសម្ងាត់បច្ចុប្បន្ន",
+            "new_password_placeholder": "បញ្ចូលពាក្យសម្ងាត់ថ្មី",
+            "confirm_password_placeholder": "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី",
+            "strength": {
+                "label": "កម្លាំង",
+                "very_weak": "ខ្សោយខ្លាំង",
+                "weak": "ខ្សោយ",
+                "fair": "មធ្យម",
+                "good": "ល្អ",
+                "strong": "ខ្លាំង"
+            },
+            "change": "ប្តូរពាក្យសម្ងាត់",
+            "changing": "កំពុងប្តូរពាក្យសម្ងាត់...",
+            "messages": {
+                "changed": "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ",
+                "change_failed": "បរាជ័យក្នុងការប្តូរពាក្យសម្ងាត់",
+                "mismatch": "ពាក្យសម្ងាត់មិនដូចគ្នា",
+                "min_length": "ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច 8 អក្សរ"
+            },
+            "tips": {
+                "title": "គន្លឹះសុវត្ថិភាព",
+                "items": {
+                    "length": "ប្រើយ៉ាងតិច 8 អក្សរ និងលាយអក្សរ លេខ និងសញ្ញា",
+                    "personal_info": "កុំប្រើព័ត៌មានផ្ទាល់ខ្លួន ដូចជា ឈ្មោះ ឬ ថ្ងៃកំណើត",
+                    "unique": "ប្រើពាក្យសម្ងាត់មិនស្ទួន និងមិនប្រើកន្លែងផ្សេង",
+                    "change_regularly": "ប្តូរពាក្យសម្ងាត់ជាប្រចាំ ដើម្បីសុវត្ថិភាព"
+                }
             }
         }
     },
@@ -3219,6 +3657,1175 @@
                 "message": "បន្ថែមមុខទំនិញទាំងអស់ពីការបញ្ជាទិញនេះទៅកន្ត្រក?",
                 "confirm": "បាទ បញ្ជាទិញម្តងទៀត",
                 "cancel": "បោះបង់"
+            },
+            "details": {
+                "back": "ត្រឡប់ក្រោយ",
+                "order_number": "ការបញ្ជាទិញ #:number",
+                "placed_on": "បានបញ្ជាទិញនៅ :date",
+                "pay_now": "បង់ឥឡូវ",
+                "order_not_found": "រកមិនឃើញការបញ្ជាទិញ",
+                "order_not_found_desc": "ការបញ្ជាទិញដែលអ្នកកំពុងស្វែងរកមិនមានទេ ឬអ្នកមិនមានសិទ្ធិមើលវា។",
+                "back_to_orders": "ត្រឡប់ទៅការបញ្ជាទិញ",
+                "status_messages": {
+                    "completed": "រីករាយនឹងអាហាររបស់អ្នក!",
+                    "default": "យើងកំពុងដំណើរការការបញ្ជាទិញរបស់អ្នក"
+                },
+                "estimated_arrival": "ពេលវេលាដឹកជញ្ជូនប៉ាន់ស្មាន",
+                "estimated_pickup": "ពេលវេលាយកប៉ាន់ស្មាន",
+                "order_items": "មុខទំនិញក្នុងការបញ្ជាទិញ",
+                "note": "កំណត់ចំណាំ",
+                "billed_to": "វិក្កយបត្រ",
+                "subtotal": "សរុបរង",
+                "delivery_fee": "ថ្លៃដឹកជញ្ជូន",
+                "tax": "ពន្ធ",
+                "discount": "បញ្ចុះតម្លៃ",
+                "total": "សរុប",
+                "payment_status": "ស្ថានភាពការបង់ប្រាក់",
+                "paid": "បានបង់",
+                "unpaid": "មិនទាន់បង់",
+                "delivery_address": "អាសយដ្ឋានដឹកជញ្ជូន",
+                "pickup_location": "ទីតាំងយក",
+                "local_store": "ហាងក្នុងតំបន់",
+                "address_not_available": "អាសយដ្ឋានមិនមានទេ",
+                "instructions": "ការណែនាំ"
+            }
+        },
+        "reservations": {
+            "title": "ការកក់តុរបស់ខ្ញុំ",
+            "title_short": "ការកក់តុ",
+            "subtitle": "កក់តុ និងគ្រប់គ្រងការកក់របស់អ្នក",
+            "new_reservation": "កក់តុថ្មី",
+            "book": "កក់",
+            "upcoming": "នាពេលខាងមុខ",
+            "past": "មុន",
+            "loading": "កំពុងផ្ទុក...",
+            "no_upcoming": "មិនមានការកក់តុនាពេលខាងមុខទេ",
+            "make_reservation": "កក់តុ",
+            "book_table": "កក់តុ",
+            "status": {
+                "confirmed": "បានបញ្ជាក់",
+                "pending": "រង់ចាំ",
+                "completed": "បានបញ្ចប់",
+                "cancelled": "បានបោះបង់",
+                "no_show": "មិនបានមកដល់"
+            },
+            "card": {
+                "code": "លេខកូដ",
+                "guests": "ភ្ញៀវ",
+                "guest": "ភ្ញៀវ",
+                "table": "តុ"
+            },
+            "modal": {
+                "title": "កក់តុ",
+                "basic_info": "ព័ត៌មានគោល",
+                "select_spot": "ជ្រើសរើសកន្លែង",
+                "summary": "សេចក្តីសង្ខេប",
+                "location": "ទីតាំង",
+                "date": "កាលបរិច្ឆេទ",
+                "time": "ម៉ោង",
+                "guests": "ភ្ញៀវ",
+                "floor": "ជាន់",
+                "table": "តុ",
+                "special_requests": "សំណើពិសេស",
+                "notes_placeholder": "អាល្លែរហ្សី ឱកាស...",
+                "select": "ជ្រើសរើស",
+                "select_location": "ជ្រើសរើសទីតាំងជាមុនសិន",
+                "select_floor": "ជ្រើសរើសជាន់ជាមុនសិន",
+                "no_floors": "មិនមានជាន់ទេ",
+                "no_tables": "មិនមានតុទេ",
+                "seats": "កៅអី",
+                "confirm": "បញ្ជាក់",
+                "cancel": "បោះបង់",
+                "fill_required": "បំពេញព័ត៌មានចាំបាច់"
+            },
+            "actions": {
+                "cancel": "បោះបង់",
+                "cancel_confirm": "តើអ្នកប្រាកដថាចង់បោះបង់ការកក់នេះមែនទេ?"
+            },
+            "messages": {
+                "reserved_success": "កក់តុបានជោគជ័យ!",
+                "cancelled": "ការកក់ត្រូវបានបោះបង់",
+                "fill_required": "សូមបំពេញព័ត៌មានចាំបាច់ទាំងអស់",
+                "failed_create": "បរាជ័យក្នុងការកក់តុ",
+                "failed_cancel": "បរាជ័យក្នុងការបោះបង់ការកក់"
+            }
+        },
+        "loyalty": {
+            "title": "កម្មវិធីភក្តីភាព",
+            "subtitle": "តាមដានរង្វាន់របស់អ្នក និងទទួលបានអត្ថប្រយោជន៍ពិសេស",
+            "member": "សមាជិក :tier",
+            "current_tier": "ថ្នាក់បច្ចុប្បន្ន",
+            "points_available": "ពិន្ទុមាន",
+            "in_value": "= $:amount តម្លៃ",
+            "lifetime_spend": "ចំណាយសរុប",
+            "orders_count": ":count ការបញ្ជាទិញ",
+            "progress_to": "ការឈានទៅកាន់ :tier",
+            "more_to_unlock": "ចំណាយទៀត $:amount ដើម្បីដោះសោ :tier!",
+            "spend_threshold": "ចំណាយ $:amount+",
+            "points_history": "ប្រវត្តិពិន្ទុ",
+            "points_earned": "ពិន្ទុទទួលបាន",
+            "points_redeemed": "ពិន្ទុប្រើ",
+            "points_adjusted": "ពិន្ទុកែប្រែ",
+            "balance": "សមតុល្យ",
+            "no_history": "មិនទាន់មានប្រវត្តិពិន្ទុទេ។ ចាប់ផ្តើមបញ្ជាទិញដើម្បីទទួលបានពិន្ទុ!",
+            "how_to_earn": "របៀបទទួលពិន្ទុ",
+            "earn_methods": {
+                "place_orders": "បញ្ជាទិញ",
+                "place_orders_desc": "ទទួលបាន 1-3 ពិន្ទុក្នុងមួយដុល្លារដែលចំណាយតាមថ្នាក់របស់អ្នក",
+                "write_reviews": "សរសេរពិនិត្យ",
+                "write_reviews_desc": "ទទួលបាន 50 ពិន្ទុបូនាស់សម្រាប់ការពិនិត្យម្តងៗ",
+                "birthday_bonus": "បូនាស់ថ្ងៃកំណើត",
+                "birthday_bonus_desc": "ទទួលបាន 200 ពិន្ទុក្នុងខែកំណើតរបស់អ្នក"
+            },
+            "tiers": {
+                "bronze": "សំរិទ្ធ",
+                "silver": "ប្រាក់",
+                "gold": "មាស",
+                "platinum": "ផ្លាទីន"
+            },
+            "tier_benefits": {
+                "bronze": "• 1 ពិន្ទុក្នុង $1\n• រង្វាន់ថ្ងៃកំណើត",
+                "silver": "• ពិន្ទុ 1.5x\n• ដឹកជញ្ជូនឥតគិតថ្លៃ\n• ការគាំទ្រអាទិភាព",
+                "gold": "• ពិន្ទុ 2x\n• មុខម្ហូបពិសេស\n• ព្រឹត្តិការណ៍ VIP",
+                "platinum": "• ពិន្ទុ 3x\n• អ្នកយកចិត្តទុកដាក់ផ្ទាល់ខ្លួន\n• ការដំឡើងកម្រិតឥតគិតថ្លៃ"
+            }
+        },
+        "profile": {
+            "title": "ប្រវត្តិរូបរបស់ខ្ញុំ",
+            "subtitle": "គ្រប់គ្រងព័ត៌មានគណនីរបស់អ្នក",
+            "edit": "កែសម្រួលប្រវត្តិរូប",
+            "save": "រក្សាទុកការផ្លាស់ប្តូរ",
+            "saving": "កំពុងរក្សាទុក...",
+            "cancel": "បោះបង់",
+            "personal_info": "ព័ត៌មានផ្ទាល់ខ្លួន",
+            "full_name": "ឈ្មោះពេញ",
+            "email": "អ៊ីមែល",
+            "phone": "លេខទូរស័ព្ទ",
+            "birth_date": "ថ្ងៃកំណើត",
+            "gender": "ភេទ",
+            "language": "ភាសាពេញចិត្ត",
+            "marketing_consent": "ទទួលអ៊ីមែលផ្សព្វផ្សាយ និងការផ្តល់ជូន",
+            "genders": {
+                "na": "មិនចង់និយាយ",
+                "male": "ប្រុស",
+                "female": "ស្រី",
+                "other": "ផ្សេងៗ"
+            },
+            "addresses": {
+                "title": "អាសយដ្ឋានដឹកជញ្ជូន",
+                "add": "បន្ថែមអាសយដ្ឋាន",
+                "edit": "កែសម្រួលអាសយដ្ឋាន",
+                "add_btn": "បន្ថែម",
+                "update": "ធ្វើបច្ចុប្បន្នភាព",
+                "address_suffix": "អាសយដ្ឋាន",
+                "default": "លំនាំដើម",
+                "set_default": "កំណត់ជាលំនាំដើម",
+                "delete_confirm": "តើអ្នកប្រាកដថាចង់លុបអាសយដ្ឋាននេះមែនទេ?",
+                "no_addresses": "មិនទាន់មានអាសយដ្ឋានដឹកជញ្ជូនទេ។ បន្ថែមមួយដើម្បីធ្វើឱ្យការបញ្ជាទិញលឿនជាងមុន!",
+                "instructions": "ការណែនាំ",
+                "pin_location": "កំណត់ទីតាំងរបស់អ្នក",
+                "use_my_location": "ប្រើទីតាំងរបស់ខ្ញុំ",
+                "finding": "កំពុងរកទីតាំងរបស់អ្នក...",
+                "drag_marker": "អូសសញ្ញាសម្គាល់ដើម្បីកែតម្រូវទីតាំងពិតប្រាកដរបស់អ្នក",
+                "label": "ស្លាក",
+                "label_placeholder": "ឧទាហរណ៍៖ ផ្ទះ, ការិយាល័យ, ល។",
+                "line1": "អាសយដ្ឋានបន្ទាត់ទី 1",
+                "line2": "អាសយដ្ឋានបន្ទាត់ទី 2 (ជាជម្រើស)",
+                "city": "ក្រុង",
+                "province": "ខេត្ត",
+                "postal_code": "លេខប្រៃសណីយ៍",
+                "country": "ប្រទេស",
+                "delivery_instructions": "ការណែនាំដឹកជញ្ជូន",
+                "delivery_instructions_placeholder": "ឧទាហរណ៍៖ ចុចកណ្តឹងពីរដង, លេខកូដច្រកចូល 1234..."
+            },
+            "messages": {
+                "update_success": "ធ្វើបច្ចុប្បន្នភាពប្រវត្តិរូបបានជោគជ័យ!",
+                "update_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពប្រវត្តិរូប",
+                "address_added": "បន្ថែមអាសយដ្ឋានបានជោគជ័យ!",
+                "address_add_error": "បរាជ័យក្នុងការបន្ថែមអាសយដ្ឋាន",
+                "address_updated": "ធ្វើបច្ចុប្បន្នភាពអាសយដ្ឋានបានជោគជ័យ!",
+                "address_update_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពអាសយដ្ឋាន",
+                "address_deleted": "លុបអាសយដ្ឋានបានជោគជ័យ!",
+                "address_delete_error": "បរាជ័យក្នុងការលុបអាសយដ្ឋាន",
+                "default_updated": "ធ្វើបច្ចុប្បន្នភាពអាសយដ្ឋានលំនាំដើម!",
+                "default_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពអាសយដ្ឋានលំនាំដើម",
+                "geo_not_supported": "ទីតាំងភូមិសាស្ត្រមិនត្រូវបានគាំទ្រដោយកម្មវិធីរុករករបស់អ្នកទេ",
+                "geo_error": "មិនអាចទទួលយកទីតាំងរបស់អ្នកបានទេ"
+            }
+        },
+        "settings": {
+            "title": "ការកំណត់",
+            "subtitle": "គ្រប់គ្រងចំណូលចិត្តកម្មវិធី និងការកំណត់គណនី",
+            "sections": {
+                "notifications": "ការជូនដំណឹង",
+                "notifications_desc": "គ្រប់គ្រងចំណូលចិត្តការជូនដំណឹង",
+                "appearance": "រូបរាង",
+                "appearance_desc": "តុបតែងរូបរាងកម្មវិធី",
+                "privacy": "ភាពឯកជន និងសុវត្ថិភាព",
+                "privacy_desc": "គ្រប់គ្រងការកំណត់ភាពឯកជន",
+                "language": "ភាសា",
+                "language_desc": "ជ្រើសរើសភាសាពេញចិត្ត",
+                "account": "គណនី",
+                "account_desc": "គ្រប់គ្រងការកំណត់គណនី"
+            },
+            "notifications": {
+                "title": "ចំណូលចិត្តការជូនដំណឹង",
+                "subtitle": "ជ្រើសរើសការជូនដំណឹងដែលអ្នកចង់ទទួល",
+                "order_updates": "ការថ្មីនៃការបញ្ជាទិញ",
+                "order_updates_desc": "ទទួលការជូនដំណឹងអំពីស្ថានភាពការបញ្ជាទិញ",
+                "promotions": "ការផ្សព្វផ្សាយ និងការផ្តល់ជូន",
+                "promotions_desc": "ទទួលកិច្ចព្រមព្រៀងពិសេស និងបញ្ចុះតម្លៃ",
+                "newsletter": "ព័ត៌មានប្រចាំសប្តាហ៍",
+                "newsletter_desc": "ការថ្មី និងមុខម្ហូបថ្មី",
+                "sms": "ការជូនដំណឹងតាម SMS",
+                "sms_desc": "ទទួលសារជូនដំណឹង",
+                "push": "ការជូនដំណឹងផ្សេងៗ",
+                "push_desc": "ការជូនដំណឹងតាមកម្មវិធីរុករក"
+            },
+            "appearance": {
+                "title": "រូបរាង",
+                "subtitle": "តុបតែងរូបរាងកម្មវិធីលើឧបករណ៍របស់អ្នក",
+                "theme": "ស្បែក",
+                "light": "ភ្លឺ",
+                "dark": "ងងឹត",
+                "system": "ប្រព័ន្ធ"
+            },
+            "privacy": {
+                "title": "ភាពឯកជន និងសុវត្ថិភាព",
+                "subtitle": "គ្រប់គ្រងចំណូលចិត្តភាពឯកជន និងសុវត្ថិភាព",
+                "public_profile": "ប្រវត្តិរូបសាធារណៈ",
+                "public_profile_desc": "អនុញ្ញាតឱ្យអ្នកដទៃមើលប្រវត្តិរូបរបស់អ្នក",
+                "share_history": "ចែករំលែកប្រវត្តិការបញ្ជាទិញ",
+                "share_history_desc": "ចែករំលែកទិន្នន័យការបញ្ជាទិញសម្រាប់ការណែនាំ",
+                "analytics": "វិភាគការប្រើប្រាស់",
+                "analytics_desc": "ជួយយើងកែលម្អជាមួយទិន្នន័យអនាមិក",
+                "change_password": "ផ្លាស់ប្តូរពាក្យសម្ងាត់",
+                "change_password_desc": "ធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់គណនី"
+            },
+            "language": {
+                "title": "ភាសា",
+                "subtitle": "ជ្រើសរើសភាសាពេញចិត្ត",
+                "english": "អង់គ្លេស",
+                "khmer": "ខ្មែរ",
+                "chinese": "ចិន",
+                "japanese": "ជប៉ុន"
+            },
+            "account": {
+                "title": "ការកំណត់គណនី",
+                "subtitle": "គ្រប់គ្រងព័ត៌មានគណនី",
+                "linked_accounts": "គណនីភ្ជាប់",
+                "email": "អ៊ីមែល",
+                "phone": "ទូរស័ព្ទ",
+                "connected": "បានភ្ជាប់",
+                "add": "បន្ថែម",
+                "danger_zone": "តំបន់គ្រោះថ្នាក់",
+                "danger_desc": "លុបគណនី និងទិន្នន័យទាំងអស់ជាអចិន្ត្រៃយ៍។ សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+                "delete_account": "លុបគណនី"
+            },
+            "modals": {
+                "change_password": {
+                    "title": "ផ្លាស់ប្តូរពាក្យសម្ងាត់",
+                    "current": "ពាក្យសម្ងាត់បច្ចុប្បន្ន",
+                    "new": "ពាក្យសម្ងាត់ថ្មី",
+                    "confirm": "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី",
+                    "submit": "ផ្លាស់ប្តូរពាក្យសម្ងាត់",
+                    "cancel": "បោះបង់",
+                    "show": "បង្ហាញ",
+                    "hide": "លាក់"
+                },
+                "add_phone": {
+                    "title": "បន្ថែមលេខទូរស័ព្ទ",
+                    "label": "លេខទូរស័ព្ទ",
+                    "placeholder": "+855 12 345 678",
+                    "submit": "រក្សាទុក",
+                    "cancel": "បោះបង់"
+                },
+                "delete_confirm": {
+                    "title": "លុបគណនី?",
+                    "message": "តើអ្នកប្រាកដទេ? នេះនឹងលុបគណនី និងទិន្នន័យទាំងអស់ជាអចិន្ត្រៃយ៍។ សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+                    "confirm": "បាទ លុបគណនីរបស់ខ្ញុំ",
+                    "cancel": "បោះបង់"
+                }
+            },
+            "messages": {
+                "settings_saved": "រក្សាទុកការកំណត់បានជោគជ័យ!",
+                "settings_error": "បរាជ័យក្នុងការរក្សាទុកការកំណត់។ សូមព្យាយាមម្តងទៀត។",
+                "notification_updated": "ធ្វើបច្ចុប្បន្នភាពចំណូលចិត្តការជូនដំណឹង",
+                "notification_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពចំណូលចិត្តការជូនដំណឹង",
+                "privacy_updated": "ធ្វើបច្ចុប្បន្នភាពការកំណត់ភាពឯកជន",
+                "privacy_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពការកំណត់ភាពឯកជន",
+                "theme_updated": "ធ្វើបច្ចុប្បន្នភាពស្បែក",
+                "theme_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពស្បែក",
+                "language_updated": "ធ្វើបច្ចុប្បន្នភាពភាសា",
+                "language_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពភាសា",
+                "password_changed": "ផ្លាស់ប្តូរពាក្យសម្ងាត់បានជោគជ័យ!",
+                "password_error": "បរាជ័យក្នុងការផ្លាស់ប្តូរពាក្យសម្ងាត់",
+                "phone_updated": "ធ្វើបច្ចុប្បន្នភាពលេខទូរស័ព្ទបានជោគជ័យ!",
+                "phone_error": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពលេខទូរស័ព្ទ"
+            }
+        },
+        "help": {
+            "title": "ជំនួយ និងគាំទ្រ",
+            "subtitle": "ស្វែងរកចម្លើយសម្រាប់សំណួរទូទៅ ឬទាក់ទងក្រុមគាំទ្ររបស់យើង",
+            "search_placeholder": "ស្វែងរកជំនួយ...",
+            "categories_title": "ប្រភេទ",
+            "categories": {
+                "all": "ប្រធានបទទាំងអស់",
+                "ordering": "ការបញ្ជាទិញ",
+                "payment": "ការបង់ប្រាក់",
+                "delivery": "ការដឹកជញ្ជូន",
+                "rewards": "រង្វាន់",
+                "account": "គណនី"
+            },
+            "quick_contact": {
+                "call": {
+                    "title": "ទូរស័ព្ទមកយើង",
+                    "subtitle": "មាន 9AM - 10PM"
+                },
+                "email": {
+                    "title": "អ៊ីមែលមកយើង",
+                    "subtitle": "យើងឆ្លើយក្នុងរយៈពេល 24 ម៉ោង"
+                },
+                "chat": {
+                    "title": "ជជែកផ្ទាល់",
+                    "subtitle": "ជជែកជាមួយក្រុមរបស់យើង",
+                    "action": "ចាប់ផ្តើមជជែក"
+                }
+            },
+            "faq": {
+                "title": "សំណួរដែលសួរញឹកញាប់",
+                "no_results": "រកមិនឃើញលទ្ធផលសម្រាប់ \":query\"",
+                "questions": {
+                    "q1": {
+                        "question": "តើខ្ញុំធ្វើដូចម្តេចដើម្បីបញ្ជាទិញ?",
+                        "answer": "អ្នកអាចបញ្ជាទិញដោយរុករកម៉ឺនុយរបស់យើង បន្ថែមមុខទំនិញទៅកន្ត្រក រួចបន្តទៅការទូទាត់។ អ្នកអាចជ្រើសរើសរវាងការដឹកជញ្ជូន ឬយកដោយខ្លួនឯង។"
+                    },
+                    "q2": {
+                        "question": "តើអ្នកទទួលវិធីបង់ប្រាក់អ្វីខ្លះ?",
+                        "answer": "យើងទទួលកាតឥណទាន/ឥណពន្ធ (Visa, Mastercard), កាបូបឌីជីថល និងសាច់ប្រាក់នៅពេលដឹកជញ្ជូន។ ការបង់ប្រាក់អនឡាញទាំងអស់ត្រូវបានដំណើរការដោយសុវត្ថិភាព។"
+                    },
+                    "q3": {
+                        "question": "តើការដឹកជញ្ជូនចំណាយពេលប៉ុន្មាន?",
+                        "answer": "ការដឹកជញ្ជូនជាធម្មតាចំណាយពេល 30-45 នាទីអាស្រ័យលើទីតាំង និងបរិមាណការបញ្ជាទិញរបស់អ្នក។ អ្នកអាចតាមដានការបញ្ជាទិញរបស់អ្នកក្នុងពេលជាក់ស្តែង។"
+                    },
+                    "q4": {
+                        "question": "តើខ្ញុំអាចកែប្រែ ឬបោះបង់ការបញ្ជាទិញបានទេ?",
+                        "answer": "អ្នកអាចកែប្រែ ឬបោះបង់ការបញ្ជាទិញក្នុងរយៈពេល 5 នាទីបន្ទាប់ពីធ្វើការបញ្ជាទិញ។ បន្ទាប់ពីនេះ សូមទាក់ទងក្រុមគាំទ្ររបស់យើងសម្រាប់ជំនួយ។"
+                    },
+                    "q5": {
+                        "question": "តើពិន្ទុភក្តីភាពដំណើរការយ៉ាងដូចម្តេច?",
+                        "answer": "អ្នកទទួលបាន 1 ពិន្ទុសម្រាប់រាល់ $1 ដែលចំណាយ។ ពិន្ទុអាចប្រើសម្រាប់បញ្ចុះតម្លៃលើការបញ្ជាទិញនាពេលអនាគត។ ពិនិត្យសមតុល្យភក្តីភាពរបស់អ្នកក្នុងកម្មវិធី។"
+                    },
+                    "q6": {
+                        "question": "តើគោលការណ៍សងប្រាក់វិញរបស់អ្នកជាអ្វី?",
+                        "answer": "ប្រសិនបើអ្នកមិនពេញចិត្តនឹងការបញ្ជាទិញរបស់អ្នក សូមទាក់ទងមកយើងក្នុងរយៈពេល 24 ម៉ោង។ យើងផ្តល់ការសងប្រាក់ ឬជំនួសសម្រាប់បញ្ហាគុណភាព។"
+                    },
+                    "q7": {
+                        "question": "តើខ្ញុំធ្វើបច្ចុប្បន្នភាពអាសយដ្ឋានដឹកជញ្ជូនយ៉ាងដូចម្តេច?",
+                        "answer": "ទៅកាន់ប្រវត្តិរូប → អាសយដ្ឋានរបស់ខ្ញុំដើម្បីបន្ថែម កែសម្រួល ឬលុបអាសយដ្ឋានដឹកជញ្ជូន។ អ្នកក៏អាចបន្ថែមអាសយដ្ឋានថ្មីអំឡុងការទូទាត់។"
+                    },
+                    "q8": {
+                        "question": "តើអ្នកមានសម្រាប់កម្រិតអាហារទេ?",
+                        "answer": "បាទ! មុខទំនិញក្នុងម៉ឺនុយត្រូវបានដាក់ស្លាកជាមួយព័ត៌មានអាហារ (បន្លែ វីហ្សិន មិនមានជាតិជ្រាប់ ល។)។ អ្នកក៏អាចបន្ថែមការណែនាំពិសេសនៅពេលបញ្ជាទិញ។"
+                    }
+                }
+            },
+            "contact_form": {
+                "title": "នៅតែត្រូវការជំនួយទេ? ទាក់ទងមកយើង",
+                "subject_label": "ប្រធានបទ",
+                "subject_placeholder": "តើអ្នកត្រូវការជំនួយអ្វី?",
+                "message_label": "សារ",
+                "message_placeholder": "ពិពណ៌នាបញ្ហា ឬសំណួររបស់អ្នកលម្អិត...",
+                "send_button": "ផ្ញើសារ",
+                "sending": "កំពុងផ្ញើ..."
+            },
+            "visit": {
+                "title": "មកទស្សនាយើង",
+                "address": "អាសយដ្ឋាន",
+                "address_line1": "123 ផ្លូវអាហារ, ភ្នំពេញ",
+                "address_line2": "កម្ពុជា",
+                "hours": "ម៉ោងបើក",
+                "hours_weekday": "ច័ន្ទ - សុក្រ: 9:00 AM - 10:00 PM",
+                "hours_weekend": "សៅរ៍ - អាទិត្យ: 10:00 AM - 11:00 PM"
+            },
+            "messages": {
+                "success": "ផ្ញើសារបានជោគជ័យ! យើងនឹងទាក់ទងអ្នកក្នុងពេលឆាប់ៗ។",
+                "error": "បរាជ័យក្នុងការផ្ញើសារ។ សូមព្យាយាមម្តងទៀត។",
+                "fill_fields": "សូមបំពេញគ្រប់វាល"
+            }
+        },
+        "notifications": {
+            "title": "ការជូនដំណឹង",
+            "unread": "អ្នកមានការជូនដំណឹងមិនទាន់អាន :count",
+            "all_caught_up": "ទាំងអស់ស្រេចហើយ!",
+            "mark_all_read": "សម្គាល់ទាំងអស់ថាបានអាន",
+            "search_placeholder": "ស្វែងរកការជូនដំណឹង...",
+            "types": {
+                "all": "ទាំងអស់",
+                "order": "ការបញ្ជាទិញ",
+                "promotion": "ការផ្សព្វផ្សាយ",
+                "reward": "រង្វាន់",
+                "system": "ប្រព័ន្ធ"
+            },
+            "empty": {
+                "title": "មិនមានការជូនដំណឹង",
+                "search": "មិនមានការជូនដំណឹងផ្គូផ្គងនឹងការស្វែងរករបស់អ្នកទេ។",
+                "all_caught_up": "អ្នកបានទទួលទាំងអស់ហើយ!"
+            },
+            "messages": {
+                "marked_read": "សម្គាល់ការជូនដំណឹងថាបានអាន",
+                "all_marked_read": "សម្គាល់ការជូនដំណឹងទាំងអស់ថាបានអាន",
+                "deleted": "លុបការជូនដំណឹង"
+            }
+        },
+        "feedback": {
+            "title": "មតិកែលម្អ និងការវាយតម្លៃ",
+            "subtitle": "ការដាក់មតិកែលម្អរបស់អតិថិជនត្រូវបានបិទជាបណ្ដោះអាសន្នក្នុងកំណែកម្មវិធីនេះ។",
+            "alternative": "អ្នកនៅតែអាចចែករំលែកមតិ ឬបញ្ហាដោយផ្ទាល់ជាមួយបុគ្គលិកភោជនីយដ្ឋាន។"
+        },
+        "order_tracking": {
+            "title": "តាមដានការបញ្ជាទិញ",
+            "order_info": "ការបញ្ជាទិញ #:id",
+            "delivery": "ដឹកជញ្ជូន",
+            "pickup": "យកដោយខ្លួនឯង",
+            "estimated": "ប៉ាន់ស្មាន :time",
+            "order_complete": "ការបញ្ជាទិញបានបញ្ចប់!",
+            "thank_you": "សូមអរគុណសម្រាប់ការបញ្ជាទិញរបស់អ្នក!",
+            "processing": "ការបញ្ជាទិញ :mode របស់អ្នកកំពុងដំណើរការ",
+            "in_progress": "កំពុងដំណើរការ...",
+            "status": {
+                "pending": {
+                    "label": "កំពុងរង់ចាំ",
+                    "description": "ការបញ្ជាទិញរបស់អ្នកកំពុងរង់ចាំការអនុម័ត"
+                },
+                "received": {
+                    "label": "បានអនុម័ត",
+                    "description": "ការបញ្ជាទិញរបស់អ្នកត្រូវបានបញ្ជាក់"
+                },
+                "preparing": {
+                    "label": "កំពុងរៀបចំ",
+                    "description": "ចុងភៅរបស់យើងកំពុងធ្វើការបញ្ជាទិញរបស់អ្នក"
+                },
+                "ready": {
+                    "label": "រួចរាល់",
+                    "description_delivery": "កំពុងដឹកជញ្ជូន",
+                    "description_pickup": "រួចរាល់សម្រាប់យក"
+                },
+                "completed": {
+                    "label": "បានបញ្ចប់",
+                    "description": "ការបញ្ជាទិញបានបញ្ចប់"
+                },
+                "delivered": {
+                    "label_delivery": "បានដឹកជញ្ជូន",
+                    "label_pickup": "បានយក",
+                    "description": "រីករាយជាមួយអាហាររបស់អ្នក!"
+                }
+            },
+            "order_details": "ព័ត៌មានលម្អិតការបញ្ជាទិញ",
+            "quantity": "ចំនួន: :qty",
+            "total": "សរុប",
+            "need_help": "ត្រូវការជំនួយជាមួយការបញ្ជាទិញរបស់អ្នក?",
+            "call_us": "ទូរស័ព្ទមកយើងនៅ :phone"
+        },
+        "table_scan": {
+            "scanning": "កំពុងស្កែនតុ...",
+            "validating": "កំពុងផ្ទៀងផ្ទាត់ QR code...",
+            "error_title": "មិនអាចស្កែនបាន",
+            "try_again": "ព្យាយាមម្តងទៀត",
+            "qr_error": "កំហុស QR",
+            "invalid_qr": "QR code មិនត្រឹមត្រូវ ឬផុតកំណត់។ សូមសួរបុគ្គលិកសម្រាប់ជំនួយ។",
+            "table_not_found": "រកមិនឃើញតុ។ សូមសួរបុគ្គលិកសម្រាប់ជំនួយ។",
+            "connection_error": "មិនអាចភ្ជាប់បាន។ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិតរបស់អ្នក។",
+            "welcome": "ស្វាគមន៍!",
+            "ready_to_order": "អ្នកបានអង្គុយ ហើយត្រៀមខ្លួនបញ្ជាទិញ",
+            "your_table": "តុរបស់អ្នក",
+            "table_number": "តុ :code",
+            "location": "ទីតាំង",
+            "capacity": "សមត្ថភាព",
+            "capacity_guests": "រហូតដល់ :count នាក់",
+            "view_current_order": "មើលការបញ្ជាទិញបច្ចុប្បន្ន",
+            "add_more_items": "បន្ថែមមុខទំនិញ",
+            "loading_menu": "កំពុងផ្ទុកម៉ឺនុយ...",
+            "start_ordering": "ចាប់ផ្តើមបញ្ជាទិញ",
+            "session_active": "វគ្គសកម្ម",
+            "orders_linked": "ការបញ្ជាទិញរបស់អ្នកនឹងភ្ជាប់ទៅតុនេះ"
+        },
+        "restaurant_dashboard": {
+            "welcome": "ស្វាគមន៍មកវិញ!",
+            "welcome_message": "ត្រៀមខ្លួនបំពេញចិត្តរបស់អ្នក? រកមើលមុខម្ហូបពិសេសថ្ងៃនេះ និងបញ្ជាទិញមុខម្ហូបដែលអ្នកចូលចិត្តម្តងទៀតគ្រាន់តែចុចម្តង។",
+            "browse_menu": "រកមើលម៉ឺនុយ",
+            "quick_reorder": "បញ្ជាទិញរហ័ស",
+            "stats": {
+                "total_orders": "ការបញ្ជាទិញសរុប",
+                "loyalty_points": "ពិន្ទុភក្តីភាព",
+                "total_spent": "ចំណាយសរុប",
+                "next_reward": "ទៅ :reward"
+            },
+            "todays_specials": "មុខម្ហូបពិសេសថ្ងៃនេះ",
+            "todays_specials_desc": "មុខម្ហូបដែលធ្វើដោយដៃជាមួយគ្រឿងផ្សំល្អបំផុត",
+            "popular_now": "ពេញនិយមឥឡូវនេះ",
+            "popular_now_desc": "អ្វីដែលអ្នកស្រលាញ់អាហារផ្សេងកំពុងបញ្ជាទិញ",
+            "view_all": "មើលទាំងអស់",
+            "quick_actions": "សកម្មភាពរហ័ស",
+            "categories": {
+                "beverages": "ភេសជ្ជៈ",
+                "main_course": "មុខម្ហូបសំខាន់",
+                "desserts": "បង្អែម",
+                "quick_bites": "អាហារសម្រន់រហ័ស"
+            },
+            "recent_achievements": "សមិទ្ធិផលថ្មីៗ",
+            "added_to_cart": ":item បានបន្ថែមទៅកន្ត្រក"
+        }
+    },
+    "analytics": {
+        "title": "វិភាគ",
+        "sales": {
+            "title": "វិភាគការលក់",
+            "subtitle": "តាមដានប្រាក់ចំណូល និន្នាការ និងការយល់ដឹងអំពីប្រសិទ្ធភាព",
+            "export_pdf": "PDF",
+            "export_csv": "CSV",
+            "stats": {
+                "revenue": "ប្រាក់ចំណូលសរុប",
+                "orders": "ការបញ្ជាទិញសរុប",
+                "avg_order": "មធ្យមតម្លៃការបញ្ជាទិញ",
+                "customers": "អតិថិជន"
+            },
+            "charts": {
+                "revenue_trends": "និន្នាការប្រាក់ចំណូល",
+                "by_category": "ការលក់តាមប្រភេទ",
+                "peak_hours": "ម៉ោងកំពូល",
+                "top_items": "មុខម្ហូបលក់ដាច់"
+            },
+            "empty": {
+                "revenue": "មិនមានទិន្នន័យប្រាក់ចំណូល",
+                "category": "មិនមានទិន្នន័យការលក់តាមប្រភេទ",
+                "peak_hours": "មិនមានទិន្នន័យម៉ោងកំពូល",
+                "top_items": "មិនមានទិន្នន័យមុខម្ហូបលក់ដាច់"
+            },
+            "item_sold": "លក់",
+            "presets": {
+                "7d": "7D",
+                "30d": "30D",
+                "90d": "90D"
+            }
+        },
+        "audit": {
+            "title": "កំណត់ហេតុត្រួតពិនិត្យ",
+            "subtitle": "តាមដានសកម្មភាព និងការផ្លាស់ប្តូរទាំងអស់របស់ប្រព័ន្ធ",
+            "refresh": "ធ្វើឲ្យថ្មី",
+            "export_csv": "CSV",
+            "pagination": {
+                "show": "បង្ហាញ",
+                "per_page": "ក្នុងមួយទំព័រ",
+                "previous": "មុន",
+                "next": "បន្ទាប់",
+                "page_of": "ទំព័រ {page} នៃ {lastPage}"
+            },
+            "filters": {
+                "search": "ស្វែងរកកំណត់ហេតុតាម IP សកម្មភាព ផ្លូវ...",
+                "more": "ច្រើនទៀត",
+                "clear": "សម្អាត",
+                "labels": {
+                    "action": "សកម្មភាព",
+                    "date": "កាលបរិច្ឆេទ",
+                    "risk": "ហានិភ័យ",
+                    "user": "អ្នកប្រើ",
+                    "guard": "Guard",
+                    "source": "ប្រភព",
+                    "status": "ស្ថានភាព"
+                },
+                "presets": {
+                    "today": "ថ្ងៃនេះ",
+                    "deletes": "លុប",
+                    "high_risk": "ហានិភ័យខ្ពស់",
+                    "failed": "បរាជ័យ"
+                },
+                "date_options": {
+                    "all": "គ្រប់ពេល",
+                    "today": "ថ្ងៃនេះ",
+                    "yesterday": "ម្សិលមិញ",
+                    "week": "៧ ថ្ងៃចុងក្រោយ",
+                    "month": "៣០ ថ្ងៃចុងក្រោយ",
+                    "custom": "ជួរពេលកំណត់"
+                },
+                "action_options": {
+                    "all": "សកម្មភាពទាំងអស់",
+                    "created": "បានបង្កើត",
+                    "updated": "បានធ្វើបច្ចុប្បន្នភាព",
+                    "deleted": "បានលុប",
+                    "login": "ចូលប្រព័ន្ធ",
+                    "logout": "ចេញប្រព័ន្ធ"
+                },
+                "risk_options": {
+                    "all": "កម្រិតហានិភ័យទាំងអស់",
+                    "low": "ទាប",
+                    "medium": "មធ្យម",
+                    "high": "ខ្ពស់",
+                    "critical": "ធ្ងន់ធ្ងរ"
+                },
+                "status_options": {
+                    "all": "ស្ថានភាពទាំងអស់",
+                    "success": "ជោគជ័យ",
+                    "failed": "បរាជ័យ"
+                },
+                "dynamic_options": {
+                    "all_users": "អ្នកប្រើទាំងអស់",
+                    "all_guards": "Guard ទាំងអស់",
+                    "all_sources": "ប្រភពទាំងអស់"
+                }
+            },
+            "stats": {
+                "total_logs": "កំណត់ហេតុសរុប",
+                "today": "ថ្ងៃនេះ",
+                "active_users": "អ្នកប្រើសកម្ម",
+                "top_action": "សកម្មភាពចម្បង",
+                "success_rate": "អត្រាជោគជ័យ",
+                "by_source": "តាមប្រភព",
+                "by_guard": "តាម Guard",
+                "top_actions": "សកម្មភាពចម្បង",
+                "suffixes": {
+                    "this_week": "សប្តាហ៍នេះ",
+                    "today": "ថ្ងៃនេះ",
+                    "failed": "បរាជ័យ"
+                }
+            }
+        },
+        "marketing": {
+            "title": "ទីផ្សារ",
+            "promotions": {
+                "title": "ប្រូម៉ូសិន",
+                "subtitle": "គ្រប់គ្រងយុទ្ធនាការ",
+                "create_button": "បង្កើតប្រូម៉ូសិន",
+                "stats": {
+                    "total": "សរុប",
+                    "active": "សកម្ម",
+                    "usage": "ការប្រើប្រាស់",
+                    "savings": "ការសន្សំ"
+                },
+                "filters": {
+                    "search": "ស្វែងរក...",
+                    "status": {
+                        "all": "ទាំងអស់",
+                        "active": "សកម្ម",
+                        "inactive": "មិនសកម្ម"
+                    },
+                    "type": {
+                        "all": "ប្រភេទទាំងអស់",
+                        "percentage": "ភាគរយ",
+                        "fixed_amount": "ចំនួនថេរ",
+                        "buy_x_get_y": "ទិញ X ទទួល Y"
+                    }
+                },
+                "table": {
+                    "headers": {
+                        "name_code": "ឈ្មោះ / កូដ",
+                        "type": "ប្រភេទ",
+                        "discount": "បញ្ចុះតម្លៃ",
+                        "usage": "ការប្រើប្រាស់",
+                        "valid_until": "មានសុពលភាពដល់",
+                        "actions": "សកម្មភាព"
+                    },
+                    "empty": {
+                        "title": "រកមិនឃើញប្រូម៉ូសិន",
+                        "subtitle": "បង្កើតប្រូម៉ូសិនដំបូង"
+                    },
+                    "loading": "កំពុងផ្ទុក..."
+                },
+                "form": {
+                    "create_title": "បង្កើតប្រូម៉ូសិន",
+                    "edit_title": "កែប្រែប្រូម៉ូសិន",
+                    "fields": {
+                        "name": "ឈ្មោះ",
+                        "description": "ពិពណ៌នា",
+                        "code": "កូដ",
+                        "type": "ប្រភេទ",
+                        "discount_value": "តម្លៃបញ្ចុះ",
+                        "min_order": "ចំនួនទឹកប្រាក់បញ្ជាទិញអប្បបរមា",
+                        "max_discount": "បញ្ចុះអតិបរមា",
+                        "usage_limit": "កំណត់ចំនួនប្រើប្រាស់",
+                        "start_date": "ថ្ងៃចាប់ផ្តើម",
+                        "end_date": "ថ្ងៃបញ្ចប់",
+                        "applicable_to": "អនុវត្តលើ",
+                        "terms": "លក្ខខណ្ឌ និងបទបញ្ជា",
+                        "buy_qty": "ចំនួនទិញ",
+                        "get_qty": "ចំនួនទទួល"
+                    },
+                    "placeholders": {
+                        "name": "ការលក់រដូវក្តៅ",
+                        "code": "SUMMER2024",
+                        "discount": "0"
+                    },
+                    "options": {
+                        "percentage": "ភាគរយ",
+                        "fixed_amount": "ចំនួនថេរ",
+                        "buy_x_get_y": "ទិញ X ទទួល Y",
+                        "all_items": "មុខម្ហូបទាំងអស់",
+                        "categories": "ប្រភេទជាក់លាក់",
+                        "items": "មុខម្ហូបជាក់លាក់"
+                    }
+                },
+                "messages": {
+                    "created": "ប្រូម៉ូសិនត្រូវបានបង្កើតដោយជោគជ័យ",
+                    "updated": "ប្រូម៉ូសិនត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ",
+                    "deleted": "ប្រូម៉ូសិនត្រូវបានលុបដោយជោគជ័យ",
+                    "delete_confirm": "តើអ្នកច្បាស់ទេថាចង់លុបប្រូម៉ូសិននេះ?",
+                    "failed": "ប្រតិបត្តិការបរាជ័យ"
+                }
+            },
+            "loyalty": {
+                "title": "ពិន្ទុភាពស្មោះត្រង់",
+                "subtitle": "រង្វាន់អតិថិជន",
+                "add_button": "បន្ថែមប្រតិបត្តិការ",
+                "stats": {
+                    "earned": "បានទទួល",
+                    "redeemed": "បានប្តូរ",
+                    "customers": "អតិថិជន",
+                    "txns": "ប្រតិបត្តិការ"
+                },
+                "filters": {
+                    "search": "ស្វែងរក...",
+                    "type": {
+                        "all": "ទាំងអស់",
+                        "earn": "ទទួល",
+                        "redeem": "ប្តូរ",
+                        "adjust": "កែតម្រូវ"
+                    }
+                },
+                "table": {
+                    "headers": {
+                        "customer": "អតិថិជន",
+                        "type": "ប្រភេទ",
+                        "points": "ពិន្ទុ",
+                        "balance": "សមតុល្យ",
+                        "date": "កាលបរិច្ឆេទ",
+                        "actions": "សកម្មភាព"
+                    },
+                    "empty": {
+                        "title": "រកមិនឃើញប្រតិបត្តិការ",
+                        "subtitle": "បង្កើតប្រតិបត្តិការដំបូង"
+                    },
+                    "loading": "កំពុងផ្ទុក..."
+                },
+                "form": {
+                    "create_title": "ប្រតិបត្តិការថ្មី",
+                    "edit_title": "កែប្រែប្រតិបត្តិការ",
+                    "fields": {
+                        "customer": "អតិថិជន",
+                        "type": "ប្រភេទ",
+                        "points": "ពិន្ទុ",
+                        "date": "កាលបរិច្ឆេទ",
+                        "notes": "កំណត់ចំណាំ"
+                    },
+                    "placeholders": {
+                        "search_customer": "ជ្រើសរើសអតិថិជន",
+                        "points_earn": "ឧ. 100",
+                        "points_adjust": "ឧ. 50 ឬ -50",
+                        "notes": "កំណត់ចំណាំ..."
+                    },
+                    "options": {
+                        "earn": "ទទួល",
+                        "redeem": "ប្តូរ",
+                        "adjust": "កែតម្រូវ"
+                    }
+                },
+                "messages": {
+                    "created": "ប្រតិបត្តិការត្រូវបានបង្កើតដោយជោគជ័យ",
+                    "updated": "ប្រតិបត្តិការត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ",
+                    "deleted": "ប្រតិបត្តិការត្រូវបានលុបដោយជោគជ័យ",
+                    "delete_confirm": "តើអ្នកច្បាស់ទេថាចង់លុបប្រតិបត្តិការនេះ?",
+                    "failed": "ប្រតិបត្តិការបរាជ័យ"
+                }
+            }
+        },
+        "system": {
+            "configuration": {
+                "title": "ការកំណត់រចនាសម្ព័ន្ធប្រព័ន្ធ",
+                "subtitle": "គ្រប់គ្រងតារាងរក្សាទុក និងការកំណត់ប្រព័ន្ធ",
+                "tabs": {
+                    "order_types": "ប្រភេទការបញ្ជាទិញ",
+                    "order_statuses": "ស្ថានភាពការបញ្ជាទិញ",
+                    "payment_statuses": "ស្ថានភាពការទូទាត់",
+                    "loyalty_tiers": "កម្រិតភាពស្មោះត្រង់"
+                },
+                "table": {
+                    "headers": {
+                        "display_order": "លំដាប់បង្ហាញ",
+                        "name_code": "ឈ្មោះ / កូដ",
+                        "visuals": "រូបរាង",
+                        "status": "ស្ថានភាព",
+                        "attributes": "លក្ខណៈ",
+                        "actions": "សកម្មភាព"
+                    }
+                },
+                "modal": {
+                    "edit_title": "កែប្រែ {name}",
+                    "fields": {
+                        "name": "ឈ្មោះ",
+                        "icon": "រូបតំណាង (Lucide)",
+                        "color": "ពណ៌ (Hex)",
+                        "display_order": "លំដាប់បង្ហាញ",
+                        "active": "សកម្ម",
+                        "capabilities": "សមត្ថភាព",
+                        "workflow": "លំហូរការងារ",
+                        "attributes": "លក្ខណៈ",
+                        "rules": "ច្បាប់ និងរង្វាន់",
+                        "min_spent": "ចំណាយអប្បបរមា ($)",
+                        "max_spent": "ចំណាយអតិបរមា ($)",
+                        "discount_percent": "ភាគរយបញ្ចុះ",
+                        "multiplier": "គុណកត្តាពិន្ទុ",
+                        "workflow_pos": "ទីតាំងលំហូរការងារ (1-10)"
+                    },
+                    "options": {
+                        "allows_delivery": "អនុញ្ញាតដឹកជញ្ជូន",
+                        "allows_pickup": "អនុញ្ញាតយកទៅផ្ទះ",
+                        "allows_table": "អនុញ្ញាតតុ",
+                        "is_terminal": "ស្ថានភាពចុងក្រោយ",
+                        "show_customer": "បង្ហាញទៅអតិថិជន",
+                        "is_successful": "ជោគជ័យ"
+                    },
+                    "buttons": {
+                        "cancel": "បោះបង់",
+                        "save": "រក្សាទុកការកែប្រែ"
+                    }
+                }
+            },
+            "translations": {
+                "title": "ការបកប្រែ",
+                "subtitle": "គ្រប់គ្រងមាតិកាពហុភាសា",
+                "save_button": "រក្សាទុកការកែប្រែ",
+                "saving": "កំពុងរក្សាទុក...",
+                "stats": {
+                    "keys": "សោ",
+                    "missing_cat": "ខ្វះប្រភេទ",
+                    "missing_items": "ខ្វះធាតុ",
+                    "progress": "វឌ្ឍនភាព"
+                },
+                "filters": {
+                    "search": "ស្វែងរក...",
+                    "categories": "ប្រភេទ",
+                    "menu_items": "មុខម្ហូប"
+                },
+                "table": {
+                    "headers": {
+                        "id": "លេខសម្គាល់",
+                        "english": "អង់គ្លេស (លំនាំដើម)",
+                        "khmer": "ខ្មែរ (ការបកប្រែ)"
+                    },
+                    "empty": "រកមិនឃើញការបកប្រែ",
+                    "loading": "កំពុងផ្ទុក..."
+                },
+                "placeholders": {
+                    "en_name": "ឈ្មោះអង់គ្លេស",
+                    "en_desc": "ពិពណ៌នាអង់គ្លេស",
+                    "km_name": "ឈ្មោះខ្មែរ",
+                    "km_desc": "ពិពណ៌នាខ្មែរ"
+                },
+                "messages": {
+                    "saved": "បានរក្សាទុកការបកប្រែដោយជោគជ័យ",
+                    "failed": "រក្សាទុកការបកប្រែមិនបាន"
+                }
+            }
+        }
+    },
+    "receipts": {
+        "payment": {
+            "title": "បង្កាន់ដៃ - :number",
+            "receipt_number": "លេខបង្កាន់ដៃ",
+            "date": "កាលបរិច្ឆេទ",
+            "time": "ម៉ោង",
+            "order": "ការបញ្ជាទិញ",
+            "table": "តុ",
+            "type": "ប្រភេទ",
+            "customer": "អតិថិជន",
+            "order_items": "មុខម្ហូបដែលបានបញ្ជាទិញ",
+            "item": "មុខម្ហូប",
+            "qty": "ចំនួន",
+            "price": "តម្លៃ",
+            "total": "សរុប",
+            "subtotal": "សរុបរង",
+            "tax": "ពន្ធ (:rate%)",
+            "service_charge": "ថ្លៃសេវាកម្ម",
+            "discount": "បញ្ចុះតម្លៃ",
+            "amount_paid": "ប្រាក់បានបង់",
+            "cash_received": "ប្រាក់បានទទួល",
+            "change": "ប្រាក់អាប់",
+            "transaction_label": "លេខប្រតិបត្តិការ:",
+            "tel": "ទូរស័ព្ទ:",
+            "status": {
+                "completed": "បានបញ្ចប់",
+                "pending": "កំពុងរង់ចាំ"
+            }
+        },
+        "thermal": {
+            "title": "បង្កាន់ដៃ",
+            "receipt": "បង្កាន់ដៃ",
+            "date": "កាលបរិច្ឆេទ",
+            "order": "ការបញ្ជាទិញ",
+            "table": "តុ",
+            "subtotal": "សរុបរង",
+            "tax": "ពន្ធ (:rate%)",
+            "service_charge": "សេវាកម្ម",
+            "discount": "បញ្ចុះតម្លៃ",
+            "total": "សរុប",
+            "payment": "ការទូទាត់",
+            "paid": "បានបង់",
+            "cash": "ប្រាក់សាច់",
+            "change": "ប្រាក់អាប់",
+            "transaction_label": "លេខប្រតិបត្តិការ:",
+            "tel": "ទូរស័ព្ទ:"
+        }
+    },
+    "invoices": {
+        "pdf": {
+            "title": "វិក័យប័ត្រ - :number",
+            "invoice": "វិក័យប័ត្រ",
+            "invoice_number": "លេខវិក័យប័ត្រ",
+            "date": "កាលបរិច្ឆេទ",
+            "order_ref": "លេខយោងការបញ្ជាទិញ",
+            "bill_to": "វិក័យប័ត្រដល់",
+            "description": "បរិយាយ",
+            "quantity": "បរិមាណ",
+            "unit_price": "តម្លៃឯកតា",
+            "total": "សរុប",
+            "subtotal": "សរុបរង",
+            "tax": "ពន្ធ",
+            "discount": "បញ្ចុះតម្លៃ",
+            "due": "នៅសល់ត្រូវបង់",
+            "thank_you": "អរគុណសម្រាប់អាជីវកម្មរបស់អ្នក!",
+            "generated_on": "បង្កើតនៅ :date",
+            "tel": "ទូរស័ព្ទ:",
+            "status": {
+                "paid": "បានបង់",
+                "unpaid": "មិនទាន់បង់",
+                "partial": "បង់ខ្លះ"
+            }
+        }
+    },
+    "exports": {
+        "sales_analytics": {
+            "title": "របាយការណ៍វិភាគការលក់",
+            "heading": "របាយការណ៍វិភាគការលក់",
+            "chart_placeholder": "ការបង្ហាញក្រាហ្វមាននៅលើផ្ទាំងគ្រប់គ្រងអន្តរកម្ម",
+            "system_name": "ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន NKH",
+            "generated_on": "បង្កើតនៅ :date",
+            "stats": {
+                "total_revenue": "ចំណូលសរុប",
+                "total_orders": "ការបញ្ជាទិញសរុប",
+                "avg_order_value": "តម្លៃមធ្យមក្នុងមួយបញ្ជាទិញ",
+                "customers": "អតិថិជន"
+            },
+            "sections": {
+                "revenue_trends": "និន្នាការចំណូល",
+                "top_items": "មុខម្ហូបលក់ដាច់បំផុត",
+                "by_category": "ការលក់តាមប្រភេទ"
+            },
+            "table": {
+                "date": "កាលបរិច្ឆេទ",
+                "orders": "ការបញ្ជាទិញ",
+                "revenue": "ចំណូល",
+                "item_name": "ឈ្មោះមុខម្ហូប",
+                "quantity_sold": "ចំនួនលក់",
+                "category": "ប្រភេទ",
+                "percentage": "ភាគរយ"
+            }
+        },
+        "payroll": {
+            "title": "របាយការណ៍ប្រាក់ឈ្នួល",
+            "heading": "របាយការណ៍ប្រាក់ឈ្នួល",
+            "system_name": "ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន NKH",
+            "generated_on": "បង្កើតនៅ :date",
+            "totals": "សរុប",
+            "stats": {
+                "employees": "បុគ្គលិក",
+                "gross_pay": "ប្រាក់ឈ្នួលសរុប",
+                "bonuses": "ប្រាក់បន្ថែម",
+                "deductions": "ការកាត់ប្រាក់",
+                "net_pay": "ប្រាក់សុទ្ធ",
+                "avg_net_pay": "ប្រាក់សុទ្ធមធ្យម"
+            },
+            "sections": {
+                "details": "លម្អិតប្រាក់ឈ្នួល"
+            },
+            "table": {
+                "employee": "បុគ្គលិក",
+                "period": "រយៈពេល",
+                "base_pay": "ប្រាក់មូលដ្ឋាន",
+                "overtime": "ម៉ោងបន្ថែម",
+                "bonuses": "ប្រាក់បន្ថែម",
+                "deductions": "ការកាត់ប្រាក់",
+                "net_pay": "ប្រាក់សុទ្ធ",
+                "status": "ស្ថានភាព"
+            },
+            "status": {
+                "draft": "ព្រាង",
+                "finalized": "បានបញ្ចប់",
+                "paid": "បានបង់",
+                "pending": "កំពុងរង់ចាំ"
+            }
+        },
+        "inventory": {
+            "title": "របាយការណ៍ស្តុក",
+            "heading": "របាយការណ៍ស្តុក",
+            "system_name": "ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន NKH",
+            "generated_on": "បង្កើតនៅ :date",
+            "stats": {
+                "total_inventory_value": "តម្លៃស្តុកសរុប",
+                "items_in_stock": "ទំនិញនៅក្នុងស្តុក",
+                "waste_value": "តម្លៃខូចខាត",
+                "avg_turnover_rate": "អត្រាបង្វិលមធ្យម"
+            },
+            "sections": {
+                "cost_analysis": "វិភាគតម្លៃតាមប្រភេទ",
+                "highest_cost_items": "ទំនិញថ្លៃបំផុត",
+                "turnover_by_category": "អត្រាបង្វិលតាមប្រភេទ"
+            },
+            "table": {
+                "category": "ប្រភេទ",
+                "total_cost": "ថ្លៃសរុប",
+                "percentage": "ភាគរយ",
+                "item_name": "ឈ្មោះទំនិញ",
+                "quantity": "បរិមាណ",
+                "cost_per_unit": "ថ្លៃក្នុងមួយឯកតា",
+                "turnover_rate": "អត្រាបង្វិល",
+                "status": "ស្ថានភាព"
+            },
+            "turnover_status": {
+                "excellent": "ល្អបំផុត",
+                "good": "ល្អ",
+                "needs_attention": "ត្រូវការយកចិត្តទុកដាក់"
+            }
+        },
+        "financial": {
+            "title": "ផ្ទាំងគ្រប់គ្រងហិរញ្ញវត្ថុ",
+            "heading": "ផ្ទាំងគ្រប់គ្រងហិរញ្ញវត្ថុ - របាយការណ៍ P&L",
+            "system_name": "ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន NKH",
+            "generated_on": "បង្កើតនៅ :date",
+            "pl": {
+                "total_revenue": "ចំណូលសរុប",
+                "cogs": "ថ្លៃទំនិញលក់ (COGS)",
+                "operating_expenses": "ចំណាយប្រតិបត្តិការ",
+                "net_profit": "ប្រាក់ចំណេញសុទ្ធ",
+                "profit_margin": "អត្រាចំណេញ"
+            },
+            "stats": {
+                "total_revenue": "ចំណូលសរុប",
+                "total_expenses": "ចំណាយសរុប",
+                "net_profit": "ប្រាក់ចំណេញសុទ្ធ",
+                "profit_margin": "អត្រាចំណេញ"
+            },
+            "sections": {
+                "expense_breakdown": "ការបំបែកចំណាយ",
+                "margins_by_category": "អត្រាចំណេញតាមប្រភេទ",
+                "cogs_breakdown": "ការបំបែកថ្លៃទំនិញលក់"
+            },
+            "table": {
+                "category": "ប្រភេទ",
+                "amount": "ចំនួនទឹកប្រាក់",
+                "percentage": "ភាគរយ",
+                "change_percent": "ភាគរយបម្រែបម្រួល",
+                "revenue": "ចំណូល",
+                "cost": "ថ្លៃដើម",
+                "margin_percent": "អត្រាចំណេញ",
+                "status": "ស្ថានភាព",
+                "component": "ធាតុផ្សំ",
+                "percent_of_revenue": "ភាគរយនៃចំណូល"
+            },
+            "margin_status": {
+                "excellent": "ល្អបំផុត",
+                "good": "ល្អ",
+                "needs_improvement": "ត្រូវការកែលម្អ"
+            }
+        }
+    },
+    "reports": {
+        "layout": {
+            "brand": "ភោជនីយដ្ឋាន NKH",
+            "system_name": "ប្រព័ន្ធភោជនីយដ្ឋាន NKH",
+            "generated_on": "បង្កើតនៅ :date"
+        },
+        "sales": {
+            "title": "របាយការណ៍លក់",
+            "period": "រយៈពេល",
+            "total_orders": "ការបញ្ជាទិញសរុប",
+            "total_revenue": "ចំណូលសរុប",
+            "items_count": ":count មុខ",
+            "customer": {
+                "guest": "ភ្ញៀវ",
+                "walk_in": "ភ្ញៀវដើរចូល"
+            },
+            "table": {
+                "order_id": "លេខបញ្ជាទិញ",
+                "date": "កាលបរិច្ឆេទ",
+                "customer": "អតិថិជន",
+                "items": "មុខម្ហូប",
+                "amount": "ចំនួនទឹកប្រាក់"
+            }
+        },
+        "inventory": {
+            "title": "របាយការណ៍ស្តុក",
+            "report_type": "ប្រភេទរបាយការណ៍",
+            "items_count": "ចំនួនទំនិញ",
+            "total_value": "តម្លៃស្តុកសរុប",
+            "low": "ទាប",
+            "na": "មិនមាន",
+            "units": "ឯកតា",
+            "table": {
+                "item_name": "ឈ្មោះទំនិញ",
+                "supplier": "អ្នកផ្គត់ផ្គង់",
+                "current_stock": "ស្តុកបច្ចុប្បន្ន",
+                "min_level": "កម្រិតអប្បបរមា",
+                "unit_cost": "ថ្លៃឯកតា",
+                "total_value": "តម្លៃសរុប"
+            }
+        }
+    },
+    "common": {
+        "ui": {
+            "user_menu": {
+                "roles": {
+                    "admin": "អ្នកគ្រប់គ្រង",
+                    "employee": "បុគ្គលិក",
+                    "customer": "អតិថិជន"
+                },
+                "actions": {
+                    "sign_in": "ចូល",
+                    "sign_out": "ចេញ",
+                    "manage_account": "គ្រប់គ្រងគណនី"
+                },
+                "theme": {
+                    "dark": "រូបភាពងងឹត",
+                    "light": "រូបភាពភ្លឺ"
+                }
+            },
+            "notifications": {
+                "title": "ការជូនដំណឹង",
+                "new": ":count ថ្មី",
+                "mark_all_read": "សម្គាល់ទាំងអស់ថាបានអាន",
+                "empty": "មិនមានការជូនដំណឹងទេ",
+                "view_all": "មើលការជូនដំណឹងទាំងអស់"
+            }
+        }
+    },
+    "layout": {
+        "ui": {
+            "user_menu": {
+                "items": {
+                    "profile": "ប្រវត្តិរូបរបស់ខ្ញុំ",
+                    "orders": "ការបញ្ជាទិញរបស់ខ្ញុំ",
+                    "addresses": "អាសយដ្ឋានរបស់ខ្ញុំ",
+                    "loyalty": "ភក្តីភាព និងរង្វាន់",
+                    "settings": "ការកំណត់",
+                    "help": "ជំនួយ និងគាំទ្រ",
+                    "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+                    "manage_users": "គ្រប់គ្រងអ្នកប្រើប្រាស់",
+                    "analytics": "វិភាគ",
+                    "manage_orders": "គ្រប់គ្រងការបញ្ជាទិញ",
+                    "system_settings": "ការកំណត់ប្រព័ន្ធ",
+                    "audit_logs": "កំណត់ត្រាសវនកម្ម",
+                    "schedule": "កាលវិភាគរបស់ខ្ញុំ",
+                    "performance": "សមត្ថភាព",
+                    "notifications": "ការជូនដំណឹង"
+                }
             }
         }
     }

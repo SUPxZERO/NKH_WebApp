@@ -50,7 +50,18 @@ interface Address {
 
 export default function Profile() {
     const queryClient = useQueryClient();
-    const { t } = useTranslation();
+    const translationContext = useTranslation();
+    const t = translationContext?.t || ((key: string) => key);
+
+    // Safely get translation with fallback
+    const getTitle = () => {
+        try {
+            const title = t('profile.title');
+            return typeof title === 'string' && title ? title : 'My Profile';
+        } catch {
+            return 'My Profile';
+        }
+    };
     const [editMode, setEditMode] = useState(false);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -275,7 +286,7 @@ export default function Profile() {
         <RequireAuth roles={['customer']}>
             <CustomerLayout>
                 <Head>
-                    <title>{t('profile.title')} - NKH Restaurant</title>
+                    <title>{getTitle()} - NKH Restaurant</title>
                 </Head>
                 <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}

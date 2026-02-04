@@ -15,15 +15,17 @@ import { RequireAuth } from '@/app/providers/AuthProvider';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import { apiGet } from '@/app/utils/api';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 const TIERS = {
-    bronze: { name: 'Bronze', color: 'from-orange-700 to-orange-800', icon: '🥉', next: 'silver', threshold: 2000 },
-    silver: { name: 'Silver', color: 'from-gray-400 to-gray-500', icon: '🥈', next: 'gold', threshold: 5000 },
-    gold: { name: 'Gold', color: 'from-yellow-500 to-yellow-600', icon: '🥇', next: 'platinum', threshold: 10000 },
-    platinum: { name: 'Platinum', color: 'from-purple-600 to-purple-700', icon: '💎', next: null, threshold: null },
+    bronze: { name: 'customer_pages.loyalty.tiers.bronze', color: 'from-orange-700 to-orange-800', icon: '🥉', next: 'silver', threshold: 2000 },
+    silver: { name: 'customer_pages.loyalty.tiers.silver', color: 'from-gray-400 to-gray-500', icon: '🥈', next: 'gold', threshold: 5000 },
+    gold: { name: 'customer_pages.loyalty.tiers.gold', color: 'from-yellow-500 to-yellow-600', icon: '🥇', next: 'platinum', threshold: 10000 },
+    platinum: { name: 'customer_pages.loyalty.tiers.platinum', color: 'from-purple-600 to-purple-700', icon: '💎', next: null, threshold: null },
 };
 
 export default function Loyalty() {
+    const { t } = useTranslation();
     // Fetch loyalty stats
     const { data: loyaltyStatsData } = useQuery({
         queryKey: ['customer', 'loyalty', 'stats'],
@@ -53,10 +55,10 @@ export default function Loyalty() {
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                             <Award className="w-8 h-8 text-purple-600" />
-                            Loyalty Program
+                            {t('customer_pages.loyalty.title')}
                         </h1>
                         <p className="text-gray-600 dark:text-gray-400 mt-2">
-                            Track your rewards and unlock exclusive benefits
+                            {t('customer_pages.loyalty.subtitle')}
                         </p>
                     </div>
 
@@ -69,10 +71,10 @@ export default function Loyalty() {
                                 <div className="text-center">
                                     <div className="text-6xl mb-3">{tierInfo?.icon}</div>
                                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                                        {tierInfo?.name} Member
+                                        {t('customer_pages.loyalty.member', { tier: t(tierInfo?.name) })}
                                     </h2>
                                     <p className="text-gray-600 dark:text-gray-400 mt-1">
-                                        Current Tier
+                                        {t('customer_pages.loyalty.current_tier')}
                                     </p>
                                 </div>
 
@@ -83,10 +85,10 @@ export default function Loyalty() {
                                     </div>
                                     <p className="text-gray-600 dark:text-gray-400">
                                         <Star className="w-4 h-4 inline mr-1" />
-                                        Points Available
+                                        {t('customer_pages.loyalty.points_available')}
                                     </p>
                                     <p className="text-sm text-gray-500 mt-2">
-                                        = ${((stats?.points_balance || 0) * 0.01).toFixed(2)} in value
+                                        {t('customer_pages.loyalty.in_value', { amount: ((stats?.points_balance || 0) * 0.01).toFixed(2) })}
                                     </p>
                                 </div>
 
@@ -97,10 +99,10 @@ export default function Loyalty() {
                                     </div>
                                     <p className="text-gray-600 dark:text-gray-400">
                                         <TrendingUp className="w-4 h-4 inline mr-1" />
-                                        Lifetime Spend
+                                        {t('customer_pages.loyalty.lifetime_spend')}
                                     </p>
                                     <p className="text-sm text-gray-500 mt-2">
-                                        {stats?.total_orders || 0} orders
+                                        {t('customer_pages.loyalty.orders_count', { count: stats?.total_orders || 0 })}
                                     </p>
                                 </div>
                             </div>
@@ -110,7 +112,7 @@ export default function Loyalty() {
                                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                                            Progress to {nextTier.name}
+                                            {t('customer_pages.loyalty.progress_to', { tier: t(nextTier.name) })}
                                         </span>
                                         <span className="text-sm font-semibold text-gray-900 dark:text-white">
                                             ${parseFloat(stats?.lifetime_spend || 0).toFixed(0)} / ${stats?.next_tier_threshold || 0}
@@ -125,7 +127,10 @@ export default function Loyalty() {
                                         />
                                     </div>
                                     <p className="text-xs text-center text-gray-500 mt-2">
-                                        ${((stats?.next_tier_threshold || 0) - parseFloat(stats?.lifetime_spend || 0)).toFixed(0)} more to unlock {nextTier.name} tier!
+                                        {t('customer_pages.loyalty.more_to_unlock', {
+                                            amount: ((stats?.next_tier_threshold || 0) - parseFloat(stats?.lifetime_spend || 0)).toFixed(0),
+                                            tier: t(nextTier.name)
+                                        })}
                                     </p>
                                 </div>
                             )}
@@ -142,18 +147,15 @@ export default function Loyalty() {
                                 <CardContent className="p-4 text-center">
                                     <div className="text-3xl mb-2">{tier.icon}</div>
                                     <h3 className="font-semibold text-gray-900 dark:text-white">
-                                        {tier.name}
+                                        {t(tier.name)}
                                     </h3>
                                     {tier.threshold && (
                                         <p className="text-xs text-gray-500 mt-1">
-                                            ${tier.threshold}+ spend
+                                            {t('customer_pages.loyalty.spend_threshold', { amount: tier.threshold })}
                                         </p>
                                     )}
-                                    <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
-                                        {key === 'bronze' && '• 1 point per $1\n• Birthday reward'}
-                                        {key === 'silver' && '• 1.5x points\n• Free delivery\n• Priority support'}
-                                        {key === 'gold' && '• 2x points\n• Exclusive menu items\n• VIP events'}
-                                        {key === 'platinum' && '• 3x points\n• Personal concierge\n• Complimentary upgrades'}
+                                    <div className="mt-3 text-xs text-gray-600 dark:text-gray-400 whitespace-pre-line">
+                                        {t(`customer_pages.loyalty.tier_benefits.${key}`)}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -165,7 +167,7 @@ export default function Loyalty() {
                         <CardContent className="p-6">
                             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                                 <Calendar className="w-5 h-5 inline mr-2" />
-                                Points History
+                                {t('customer_pages.loyalty.points_history')}
                             </h2>
 
                             <div className="space-y-3">
@@ -191,8 +193,8 @@ export default function Loyalty() {
                                             </div>
                                             <div>
                                                 <p className="font-medium text-gray-900 dark:text-white">
-                                                    {transaction.type === 'earn' ? 'Points Earned' : (
-                                                        transaction.type === 'redeem' ? 'Points Redeemed' : 'Points Adjusted'
+                                                    {transaction.type === 'earn' ? t('customer_pages.loyalty.points_earned') : (
+                                                        transaction.type === 'redeem' ? t('customer_pages.loyalty.points_redeemed') : t('customer_pages.loyalty.points_adjusted')
                                                     )}
                                                 </p>
                                                 <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -209,7 +211,7 @@ export default function Loyalty() {
                                                 {transaction.points > 0 ? '+' : ''}{transaction.points}
                                             </p>
                                             <p className="text-xs text-gray-500">
-                                                Balance: {transaction.balance_after}
+                                                {t('customer_pages.loyalty.balance')}: {transaction.balance_after}
                                             </p>
                                         </div>
                                     </motion.div>
@@ -219,7 +221,7 @@ export default function Loyalty() {
                                     <div className="text-center py-12">
                                         <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                                         <p className="text-gray-600 dark:text-gray-400">
-                                            No points history yet. Start ordering to earn points!
+                                            {t('customer_pages.loyalty.no_history')}
                                         </p>
                                     </div>
                                 )}
@@ -232,37 +234,37 @@ export default function Loyalty() {
                         <CardContent className="p-6">
                             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                                 <Gift className="w-5 h-5 inline mr-2" />
-                                How to Earn Points
+                                {t('customer_pages.loyalty.how_to_earn')}
                             </h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
                                     <div className="text-2xl mb-2">🛍️</div>
                                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                                        Place Orders
+                                        {t('customer_pages.loyalty.earn_methods.place_orders')}
                                     </h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        Earn 1-3 points per $1 spent based on your tier
+                                        {t('customer_pages.loyalty.earn_methods.place_orders_desc')}
                                     </p>
                                 </div>
 
                                 <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
                                     <div className="text-2xl mb-2">📝</div>
                                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                                        Write Reviews
+                                        {t('customer_pages.loyalty.earn_methods.write_reviews')}
                                     </h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        Earn 50 bonus points for each review
+                                        {t('customer_pages.loyalty.earn_methods.write_reviews_desc')}
                                     </p>
                                 </div>
 
                                 <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
                                     <div className="text-2xl mb-2">🎂</div>
                                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                                        Birthday Bonus
+                                        {t('customer_pages.loyalty.earn_methods.birthday_bonus')}
                                     </h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        Get 200 points on your birthday month
+                                        {t('customer_pages.loyalty.earn_methods.birthday_bonus_desc')}
                                     </p>
                                 </div>
                             </div>

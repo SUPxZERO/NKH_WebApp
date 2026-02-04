@@ -94,7 +94,7 @@ const EmployeeStatsRibbon = ({ stats }: { stats: any }) => {
 };
 
 export default function Employees() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [openCreate, setOpenCreate] = useState(false);
@@ -313,7 +313,7 @@ export default function Employees() {
               <div className="p-12 text-center">
                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                   <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                  Loading...
+                  {t('common.loading')}
                 </div>
               </div>
             ) : employeeList.length === 0 ? (
@@ -364,7 +364,7 @@ export default function Employees() {
                   </div>
                   <div className="col-span-2 text-sm text-foreground flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                    {employee.hire_date ? new Date(employee.hire_date).toLocaleDateString() : 'N/A'}
+                    {employee.hire_date ? new Date(employee.hire_date).toLocaleDateString(locale) : 'N/A'}
                   </div>
                   <div className="col-span-1">
                     <span className={cn(
@@ -404,7 +404,7 @@ export default function Employees() {
           {isLoading ? (
             <div className="p-6 text-center text-muted-foreground text-sm">
               <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              Loading...
+              {t('common.loading')}
             </div>
           ) : employeeList.length === 0 ? (
             <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">

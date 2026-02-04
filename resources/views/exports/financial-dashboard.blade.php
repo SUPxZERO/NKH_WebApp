@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <title>Financial Dashboard</title>
+    <title>{{ __('exports.financial.title') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -129,30 +129,30 @@
 </head>
 <body>
     <div class="header">
-        <h1>💰 Financial Dashboard - P&L Statement</h1>
+        <h1>{{ __('exports.financial.heading') }}</h1>
         <div class="date-range">{{ $start_date }} - {{ $end_date }}</div>
     </div>
 
     <!-- P&L Summary -->
     <div class="pl-statement">
         <div class="pl-row">
-            <span>Total Revenue</span>
+            <span>{{ __('exports.financial.pl.total_revenue') }}</span>
             <span>${{ number_format($profitLoss['total_revenue'] ?? 0, 2) }}</span>
         </div>
         <div class="pl-row">
-            <span>Cost of Goods Sold (COGS)</span>
+            <span>{{ __('exports.financial.pl.cogs') }}</span>
             <span>(${{ number_format($profitLoss['cogs'] ?? 0, 2) }})</span>
         </div>
         <div class="pl-row">
-            <span>Operating Expenses</span>
+            <span>{{ __('exports.financial.pl.operating_expenses') }}</span>
             <span>(${{ number_format($profitLoss['total_expenses'] ?? 0, 2) }})</span>
         </div>
         <div class="pl-row total {{ ($profitLoss['net_profit'] ?? 0) >= 0 ? 'positive' : 'negative' }}">
-            <span>Net Profit</span>
+            <span>{{ __('exports.financial.pl.net_profit') }}</span>
             <span>${{ number_format($profitLoss['net_profit'] ?? 0, 2) }}</span>
         </div>
         <div class="pl-row">
-            <span>Profit Margin</span>
+            <span>{{ __('exports.financial.pl.profit_margin') }}</span>
             <span>{{ number_format($profitLoss['profit_margin'] ?? 0, 1) }}%</span>
         </div>
     </div>
@@ -160,35 +160,35 @@
     <!-- Key Metrics -->
     <div class="stats-grid">
         <div class="stat-card {{ ($profitLoss['total_revenue'] ?? 0) > 0 ? 'positive' : '' }}">
-            <div class="stat-label">Total Revenue</div>
+            <div class="stat-label">{{ __('exports.financial.stats.total_revenue') }}</div>
             <div class="stat-value positive">${{ number_format($profitLoss['total_revenue'] ?? 0, 2) }}</div>
         </div>
         <div class="stat-card negative">
-            <div class="stat-label">Total Expenses</div>
+            <div class="stat-label">{{ __('exports.financial.stats.total_expenses') }}</div>
             <div class="stat-value negative">${{ number_format($profitLoss['total_expenses'] ?? 0, 2) }}</div>
         </div>
         <div class="stat-card {{ ($profitLoss['net_profit'] ?? 0) >= 0 ? 'positive' : 'negative' }}">
-            <div class="stat-label">Net Profit</div>
+            <div class="stat-label">{{ __('exports.financial.stats.net_profit') }}</div>
             <div class="stat-value {{ ($profitLoss['net_profit'] ?? 0) >= 0 ? 'positive' : 'negative' }}">
                 ${{ number_format($profitLoss['net_profit'] ?? 0, 2) }}
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Profit Margin</div>
+            <div class="stat-label">{{ __('exports.financial.stats.profit_margin') }}</div>
             <div class="stat-value">{{ number_format($profitLoss['profit_margin'] ?? 0, 1) }}%</div>
         </div>
     </div>
 
     <!-- Expense Breakdown -->
     <div class="section">
-        <div class="section-title">📊 Expense Breakdown</div>
+        <div class="section-title">{{ __('exports.financial.sections.expense_breakdown') }}</div>
         <table>
             <thead>
                 <tr>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Percentage</th>
-                    <th>Change %</th>
+                    <th>{{ __('exports.financial.table.category') }}</th>
+                    <th>{{ __('exports.financial.table.amount') }}</th>
+                    <th>{{ __('exports.financial.table.percentage') }}</th>
+                    <th>{{ __('exports.financial.table.change_percent') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -208,15 +208,15 @@
 
     <!-- Profit Margins by Category -->
     <div class="section">
-        <div class="section-title">🎯 Profit Margins by Category</div>
+        <div class="section-title">{{ __('exports.financial.sections.margins_by_category') }}</div>
         <table>
             <thead>
                 <tr>
-                    <th>Category</th>
-                    <th>Revenue</th>
-                    <th>Cost</th>
-                    <th>Margin %</th>
-                    <th>Status</th>
+                    <th>{{ __('exports.financial.table.category') }}</th>
+                    <th>{{ __('exports.financial.table.revenue') }}</th>
+                    <th>{{ __('exports.financial.table.cost') }}</th>
+                    <th>{{ __('exports.financial.table.margin_percent') }}</th>
+                    <th>{{ __('exports.financial.table.status') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -228,11 +228,11 @@
                     <td>{{ number_format($margin['margin'], 1) }}%</td>
                     <td>
                         @if($margin['margin'] > 30)
-                            Excellent
+                            {{ __('exports.financial.margin_status.excellent') }}
                         @elseif($margin['margin'] > 15)
-                            Good
+                            {{ __('exports.financial.margin_status.good') }}
                         @else
-                            Needs Improvement
+                            {{ __('exports.financial.margin_status.needs_improvement') }}
                         @endif
                     </td>
                 </tr>
@@ -243,13 +243,13 @@
 
     <!-- COGS Breakdown -->
     <div class="section">
-        <div class="section-title">🛒 Cost of Goods Sold Breakdown</div>
+        <div class="section-title">{{ __('exports.financial.sections.cogs_breakdown') }}</div>
         <table>
             <thead>
                 <tr>
-                    <th>Component</th>
-                    <th>Amount</th>
-                    <th>% of Revenue</th>
+                    <th>{{ __('exports.financial.table.component') }}</th>
+                    <th>{{ __('exports.financial.table.amount') }}</th>
+                    <th>{{ __('exports.financial.table.percent_of_revenue') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -268,7 +268,7 @@
     </div>
 
     <div class="footer">
-        Generated on {{ date('F d, Y \a\t H:i') }} | NKH Restaurant Management System
+        {{ __('exports.financial.generated_on', ['date' => date('F d, Y \\a\\t H:i')]) }} | {{ __('exports.financial.system_name') }}
     </div>
 </body>
 </html>

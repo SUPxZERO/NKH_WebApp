@@ -94,7 +94,7 @@ export default function Performance() {
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                                 )}
                             >
-                                {p.charAt(0).toUpperCase() + p.slice(1)}
+                                {t(`employee.performance.period.${p}`)}
                             </button>
                         ))}
                     </div>
@@ -123,7 +123,7 @@ export default function Performance() {
                                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-blue-500/10 relative overflow-hidden">
                                     <Clock className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                                     <div className="relative z-10">
-                                        <p className="text-[10px] sm:text-xs font-medium text-blue-100 uppercase tracking-wide">Hours</p>
+                                        <p className="text-[10px] sm:text-xs font-medium text-blue-100 uppercase tracking-wide">{t('employee.performance.labels.hours')}</p>
                                         <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
                                             {stats?.hours_worked ?? 0}h
                                         </p>
@@ -143,12 +143,12 @@ export default function Performance() {
                                 <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-emerald-500/10 relative overflow-hidden">
                                     <DollarSign className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                                     <div className="relative z-10">
-                                        <p className="text-[10px] sm:text-xs font-medium text-emerald-100 uppercase tracking-wide">Earnings</p>
+                                        <p className="text-[10px] sm:text-xs font-medium text-emerald-100 uppercase tracking-wide">{t('employee.performance.labels.earnings')}</p>
                                         <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
                                             ${stats?.earnings ?? 0}
                                         </p>
                                         <p className="text-[10px] sm:text-xs text-emerald-200 mt-1">
-                                            base wage
+                                            {t('employee.performance.labels.base_wage')}
                                         </p>
                                     </div>
                                 </div>
@@ -163,12 +163,12 @@ export default function Performance() {
                                 <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-purple-500/10 relative overflow-hidden">
                                     <TrendingUp className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                                     <div className="relative z-10">
-                                        <p className="text-[10px] sm:text-xs font-medium text-purple-100 uppercase tracking-wide">Tips</p>
+                                        <p className="text-[10px] sm:text-xs font-medium text-purple-100 uppercase tracking-wide">{t('employee.performance.labels.tips')}</p>
                                         <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
                                             ${stats?.tips ?? 0}
                                         </p>
                                         <p className="text-[10px] sm:text-xs text-purple-200 mt-1">
-                                            estimated
+                                            {t('employee.performance.labels.estimated')}
                                         </p>
                                     </div>
                                 </div>
@@ -183,12 +183,15 @@ export default function Performance() {
                                 <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-amber-500/10 relative overflow-hidden">
                                     <Star className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                                     <div className="relative z-10">
-                                        <p className="text-[10px] sm:text-xs font-medium text-amber-100 uppercase tracking-wide">Rating</p>
+                                        <p className="text-[10px] sm:text-xs font-medium text-amber-100 uppercase tracking-wide">{t('employee.performance.labels.rating')}</p>
                                         <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
-                                            {stats?.rating && stats.rating > 0 ? stats.rating : 'N/A'}
+                                            {stats?.rating && stats.rating > 0 ? stats.rating : t('employee.performance.labels.na')}
                                         </p>
                                         <p className="text-[10px] sm:text-xs text-amber-200 mt-1">
-                                            {stats?.rank_percentile ? `top ${stats.rank_percentile}%` : 'customer feedback'}
+                                            {stats?.rank_percentile
+                                                ? t('employee.performance.labels.top_percentile', { percentile: stats.rank_percentile })
+                                                : t('employee.performance.labels.customer_feedback')
+                                            }
                                         </p>
                                     </div>
                                 </div>
@@ -205,7 +208,14 @@ export default function Performance() {
                                 <CardHeader className="py-3 px-4 sm:px-6 border-b border-gray-100 dark:border-gray-700/50">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                                            {period === 'week' ? 'Weekly' : period === 'month' ? 'Monthly' : period === 'year' ? 'Yearly' : 'Daily'} Activity
+                                            {period === 'week'
+                                                ? t('employee.performance.period.week')
+                                                : period === 'month'
+                                                    ? t('employee.performance.period.month')
+                                                    : period === 'year'
+                                                        ? t('employee.performance.period.year')
+                                                        : t('employee.performance.period.day')
+                                            } {t('employee.performance.activity')}
                                         </h3>
                                         <span className="text-xs text-gray-500 dark:text-gray-400">
                                             {stats?.period_label}
@@ -239,7 +249,7 @@ export default function Performance() {
                                                             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                                                             backgroundColor: 'white'
                                                         }}
-                                                        formatter={(value: number | undefined) => [`${value ?? 0}h`, 'Hours']}
+                                                        formatter={(value: number | undefined) => [`${value ?? 0}h`, t('employee.performance.labels.hours')]}
                                                     />
                                                     <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
                                                         {stats.chart_data.map((entry, index) => (
@@ -256,7 +266,7 @@ export default function Performance() {
                                         <div className="h-64 flex items-center justify-center text-gray-400 dark:text-gray-500">
                                             <div className="text-center">
                                                 <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                                <p className="text-sm">No activity data for this period</p>
+                                                <p className="text-sm">{t('employee.performance.no_activity')}</p>
                                             </div>
                                         </div>
                                     )}

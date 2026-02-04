@@ -32,24 +32,24 @@ interface Ticket {
     admin_notes?: string;
 }
 
-const faqs = [
+const faqs = (t: (key: string, replacements?: Record<string, any>) => any) => ([
     {
-        question: "How do I swap my shift?",
-        answer: "Go to the Schedule page, select your shift, and click 'Request Swap'. A manager will need to approve it."
+        question: t('employee.help.faqs.swap.question'),
+        answer: t('employee.help.faqs.swap.answer')
     },
     {
-        question: "The POS is frozen, what do I do?",
-        answer: "Try refreshing the page (F5). If that fails, restart the tablet. Report critical technical issues via a 'Critical' support ticket."
+        question: t('employee.help.faqs.pos.question'),
+        answer: t('employee.help.faqs.pos.answer')
     },
     {
-        question: "How do I request time off?",
-        answer: "Navigate to Schedule > Time Off Requests and submit a new request with the dates and reason."
+        question: t('employee.help.faqs.time_off.question'),
+        answer: t('employee.help.faqs.time_off.answer')
     },
     {
-        question: "Where can I see my pay?",
-        answer: "Payroll information is available under User Profile > Payroll (if enabled for your role) or contact HR directly."
+        question: t('employee.help.faqs.pay.question'),
+        answer: t('employee.help.faqs.pay.answer')
     }
-];
+]);
 
 export default function HelpSupport() {
     const { t } = useLanguage();
@@ -132,8 +132,8 @@ export default function HelpSupport() {
                     <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                         {[
                             { id: 'faq', label: t('employee.help.faq'), icon: Search },
-                            { id: 'tickets', label: 'My Tickets', icon: FileText },
-                            { id: 'new', label: 'New Ticket', icon: Plus },
+                            { id: 'tickets', label: t('employee.help.tabs.my_tickets'), icon: FileText },
+                            { id: 'new', label: t('employee.help.tabs.new_ticket'), icon: Plus },
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -157,8 +157,8 @@ export default function HelpSupport() {
                         {/* FAQ TAB */}
                         {activeTab === 'faq' && (
                             <div className="space-y-4">
-                                <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">Frequently Asked Questions</h2>
-                                {faqs.map((faq, index) => (
+                                <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">{t('employee.help.faq_title')}</h2>
+                                {faqs(t).map((faq, index) => (
                                     <div
                                         key={index}
                                         className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden"
@@ -184,7 +184,7 @@ export default function HelpSupport() {
                         {activeTab === 'tickets' && (
                             <div>
                                 <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Track your requests</h2>
+                                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{t('employee.help.track_requests')}</h2>
                                     <Button size="sm" onClick={() => setActiveTab('new')} variant="outline">{t('employee.common.next')}</Button>
                                 </div>
 
@@ -194,7 +194,7 @@ export default function HelpSupport() {
                                     </div>
                                 ) : tickets?.length === 0 ? (
                                     <div className="text-center py-12 text-slate-500">
-                                        You haven't submitted any tickets yet.
+                                        {t('employee.help.no_tickets')}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
@@ -212,10 +212,10 @@ export default function HelpSupport() {
                                                 <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 line-clamp-2">{ticket.description}</p>
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className={cn("capitalize", getPriorityColor(ticket.priority))}>
-                                                        {ticket.priority} Priority
+                                                        {t('employee.help.priority_label', { priority: ticket.priority })}
                                                     </span>
                                                     {ticket.admin_notes && (
-                                                        <span className="text-blue-600 dark:text-blue-400 font-medium">1 Response</span>
+                                                        <span className="text-blue-600 dark:text-blue-400 font-medium">{t('employee.help.one_response')}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -228,59 +228,59 @@ export default function HelpSupport() {
                         {/* NEW TICKET TAB */}
                         {activeTab === 'new' && (
                             <div className="max-w-2xl mx-auto">
-                                <h2 className="text-xl font-semibold mb-6 text-slate-900 dark:text-white">Submit a Support Ticket</h2>
+                                <h2 className="text-xl font-semibold mb-6 text-slate-900 dark:text-white">{t('employee.help.new_ticket_title')}</h2>
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('employee.help.form.category')}</label>
                                             <select
                                                 value={form.category}
                                                 onChange={e => setForm({ ...form, category: e.target.value })}
                                                 className="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700"
                                             >
-                                                <option value="it_support">IT / Technical Issue</option>
-                                                <option value="hr">HR / Payroll</option>
-                                                <option value="maintenance">Facility Maintenance</option>
-                                                <option value="operations">General Operations</option>
-                                                <option value="other">Other</option>
+                                                <option value="it_support">{t('employee.help.form.category_options.it_support')}</option>
+                                                <option value="hr">{t('employee.help.form.category_options.hr')}</option>
+                                                <option value="maintenance">{t('employee.help.form.category_options.maintenance')}</option>
+                                                <option value="operations">{t('employee.help.form.category_options.operations')}</option>
+                                                <option value="other">{t('employee.help.form.category_options.other')}</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Priority</label>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('employee.help.form.priority')}</label>
                                             <select
                                                 value={form.priority}
                                                 onChange={e => setForm({ ...form, priority: e.target.value })}
                                                 className="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700"
                                             >
-                                                <option value="low">Low - General Question</option>
-                                                <option value="medium">Medium - Needs Attention</option>
-                                                <option value="high">High - Impacting Work</option>
-                                                <option value="critical">Critical - Emergency</option>
+                                                <option value="low">{t('employee.help.form.priority_options.low')}</option>
+                                                <option value="medium">{t('employee.help.form.priority_options.medium')}</option>
+                                                <option value="high">{t('employee.help.form.priority_options.high')}</option>
+                                                <option value="critical">{t('employee.help.form.priority_options.critical')}</option>
                                             </select>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('employee.help.form.subject')}</label>
                                         <input
                                             type="text"
                                             required
                                             value={form.subject}
                                             onChange={e => setForm({ ...form, subject: e.target.value })}
                                             className="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700"
-                                            placeholder="Brief summary of the issue"
+                                            placeholder={t('employee.help.form.subject_placeholder')}
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('employee.help.form.description')}</label>
                                         <textarea
                                             required
                                             rows={5}
                                             value={form.description}
                                             onChange={e => setForm({ ...form, description: e.target.value })}
                                             className="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700 p-3"
-                                            placeholder="Please provide detailed information..."
+                                            placeholder={t('employee.help.form.description_placeholder')}
                                         />
                                     </div>
 
@@ -297,7 +297,7 @@ export default function HelpSupport() {
                                             disabled={createTicketMutation.isPending}
                                             className="bg-fuchsia-600 hover:bg-fuchsia-700"
                                         >
-                                            {createTicketMutation.isPending ? 'Submitting...' : t('employee.help.contact')}
+                                            {createTicketMutation.isPending ? t('employee.common.submitting') : t('employee.help.contact')}
                                             <Send className="w-4 h-4 ml-2" />
                                         </Button>
                                     </div>

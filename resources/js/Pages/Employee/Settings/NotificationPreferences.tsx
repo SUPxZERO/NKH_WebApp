@@ -4,12 +4,14 @@ import { apiGet, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Bell, Loader2, Clock, Mail, Smartphone, MessageSquare, AlertCircle } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface NotificationState {
     [key: string]: boolean;
 }
 
 export default function NotificationPreferences() {
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
 
     // State to hold local boolean values for the UI switches
@@ -73,12 +75,12 @@ export default function NotificationPreferences() {
         },
         onSuccess: (data) => {
             if (data) {
-                toastSuccess('Preference updated');
+                toastSuccess(t('employee.notification_preferences.messages.updated'));
                 queryClient.invalidateQueries({ queryKey: ['employeeSettings'] });
             }
         },
         onError: () => {
-            toastError('Failed to update preference');
+            toastError(t('employee.notification_preferences.messages.update_failed'));
         },
     });
 
@@ -90,20 +92,20 @@ export default function NotificationPreferences() {
 
     const notificationGroups = [
         {
-            title: 'In-App Notifications',
-            description: 'Notifications shown within the application',
+            title: t('employee.notification_preferences.groups.in_app.title'),
+            description: t('employee.notification_preferences.groups.in_app.description'),
             items: [
-                { key: 'orderAlerts', icon: Bell, label: 'Order Alerts', desc: 'Get notified for new orders and status changes' },
-                { key: 'shiftReminders', icon: Clock, label: 'Shift Reminders', desc: 'Receive reminders before your shift starts' },
-                { key: 'announcements', icon: MessageSquare, label: 'System Announcements', desc: 'Important updates from management' },
+                { key: 'orderAlerts', icon: Bell, label: t('employee.notification_preferences.items.order_alerts.label'), desc: t('employee.notification_preferences.items.order_alerts.desc') },
+                { key: 'shiftReminders', icon: Clock, label: t('employee.notification_preferences.items.shift_reminders.label'), desc: t('employee.notification_preferences.items.shift_reminders.desc') },
+                { key: 'announcements', icon: MessageSquare, label: t('employee.notification_preferences.items.announcements.label'), desc: t('employee.notification_preferences.items.announcements.desc') },
             ]
         },
         {
-            title: 'External Notifications',
-            description: 'Notifications sent outside the app',
+            title: t('employee.notification_preferences.groups.external.title'),
+            description: t('employee.notification_preferences.groups.external.description'),
             items: [
-                { key: 'emailNotifications', icon: Mail, label: 'Email Notifications', desc: 'Receive important updates via email' },
-                { key: 'pushNotifications', icon: Smartphone, label: 'Push Notifications', desc: 'Receive alerts on your mobile device' },
+                { key: 'emailNotifications', icon: Mail, label: t('employee.notification_preferences.items.email.label'), desc: t('employee.notification_preferences.items.email.desc') },
+                { key: 'pushNotifications', icon: Smartphone, label: t('employee.notification_preferences.items.push.label'), desc: t('employee.notification_preferences.items.push.desc') },
             ]
         }
     ];
@@ -121,10 +123,10 @@ export default function NotificationPreferences() {
             <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                     <Bell className="w-5 h-5 text-blue-500" />
-                    Notification Preferences
+                    {t('employee.notification_preferences.title')}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Choose what notifications you'd like to receive
+                    {t('employee.notification_preferences.subtitle')}
                 </p>
             </div>
 
@@ -192,9 +194,9 @@ export default function NotificationPreferences() {
             <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
                 <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                 <div>
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Important</p>
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('employee.notification_preferences.note.title')}</p>
                     <p className="text-sm text-amber-700 dark:text-amber-400">
-                        Critical shift and order notifications will always be sent regardless of your preferences to ensure you don't miss important work updates.
+                        {t('employee.notification_preferences.note.body')}
                     </p>
                 </div>
             </div>

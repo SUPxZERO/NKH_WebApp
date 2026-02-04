@@ -230,7 +230,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                                            Hi, {(user.name || 'User').split(' ')[0]}!
+                                            {t('common.ui.user_menu.greeting', { name: (user.name || 'User').split(' ')[0] })}
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                             {user.email}

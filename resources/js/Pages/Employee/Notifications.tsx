@@ -20,7 +20,7 @@ interface Notification {
 }
 
 export default function Notifications() {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const queryClient = useQueryClient();
 
     // Fetch Notifications
@@ -69,7 +69,7 @@ export default function Notifications() {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-US', {
+        return new Intl.DateTimeFormat(locale || 'en-US', {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
@@ -104,8 +104,8 @@ export default function Notifications() {
                         ) : notificationsData?.length === 0 ? (
                             <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                                <h3 className="text-lg font-medium text-slate-900 dark:text-white">All caught up!</h3>
-                                <p className="text-slate-500">You have no new notifications.</p>
+                                <h3 className="text-lg font-medium text-slate-900 dark:text-white">{t('employee.notifications.empty_title')}</h3>
+                                <p className="text-slate-500">{t('employee.notifications.empty_message')}</p>
                             </div>
                         ) : (
                             notificationsData?.map((notification) => (

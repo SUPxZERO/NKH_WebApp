@@ -39,35 +39,35 @@ interface SettingSection {
 }
 
 const sections: SettingSection[] = [
-    { id: 'profile', title: 'Profile', icon: User, description: 'Manage your personal information' },
-    { id: 'work', title: 'Work Preferences', icon: Briefcase, description: 'Set your work station and shift preferences' },
-    { id: 'notifications', title: 'Notifications', icon: Bell, description: 'Manage notification preferences' },
-    { id: 'security', title: 'Security', icon: Shield, description: 'Password and security settings' },
-    { id: 'appearance', title: 'Appearance', icon: Moon, description: 'Customize application look' },
-    { id: 'language', title: 'Language', icon: Globe, description: 'Choose your preferred language' },
+    { id: 'profile', title: 'employee.settings.sections.profile.title', icon: User, description: 'employee.settings.sections.profile.description' },
+    { id: 'work', title: 'employee.settings.sections.work.title', icon: Briefcase, description: 'employee.settings.sections.work.description' },
+    { id: 'notifications', title: 'employee.settings.sections.notifications.title', icon: Bell, description: 'employee.settings.sections.notifications.description' },
+    { id: 'security', title: 'employee.settings.sections.security.title', icon: Shield, description: 'employee.settings.sections.security.description' },
+    { id: 'appearance', title: 'employee.settings.sections.appearance.title', icon: Moon, description: 'employee.settings.sections.appearance.description' },
+    { id: 'language', title: 'employee.settings.sections.language.title', icon: Globe, description: 'employee.settings.sections.language.description' },
 ];
 
 const workStations = [
-    { id: 'pos', label: 'POS / Cashier', icon: '💳' },
-    { id: 'kitchen', label: 'Kitchen', icon: '👨‍🍳' },
-    { id: 'delivery', label: 'Delivery', icon: '🚗' },
-    { id: 'service', label: 'Table Service', icon: '🍽️' },
+    { id: 'pos', label: 'employee.settings.workstations.pos', icon: '💳' },
+    { id: 'kitchen', label: 'employee.settings.workstations.kitchen', icon: '👨‍🍳' },
+    { id: 'delivery', label: 'employee.settings.workstations.delivery', icon: '🚗' },
+    { id: 'service', label: 'employee.settings.workstations.service', icon: '🍽️' },
 ];
 
 const shiftTimes = [
-    { id: 'morning', label: 'Morning', time: '6AM - 2PM', icon: '🌅' },
-    { id: 'afternoon', label: 'Afternoon', time: '2PM - 10PM', icon: '☀️' },
-    { id: 'evening', label: 'Evening', time: '6PM - 2AM', icon: '🌙' },
+    { id: 'morning', label: 'employee.settings.shifts.morning.label', time: 'employee.settings.shifts.morning.time', icon: '🌅' },
+    { id: 'afternoon', label: 'employee.settings.shifts.afternoon.label', time: 'employee.settings.shifts.afternoon.time', icon: '☀️' },
+    { id: 'evening', label: 'employee.settings.shifts.evening.label', time: 'employee.settings.shifts.evening.time', icon: '🌙' },
 ];
 
 const daysOfWeek = [
-    { id: 'mon', label: 'Mon' },
-    { id: 'tue', label: 'Tue' },
-    { id: 'wed', label: 'Wed' },
-    { id: 'thu', label: 'Thu' },
-    { id: 'fri', label: 'Fri' },
-    { id: 'sat', label: 'Sat' },
-    { id: 'sun', label: 'Sun' },
+    { id: 'mon', label: 'employee.settings.days.mon' },
+    { id: 'tue', label: 'employee.settings.days.tue' },
+    { id: 'wed', label: 'employee.settings.days.wed' },
+    { id: 'thu', label: 'employee.settings.days.thu' },
+    { id: 'fri', label: 'employee.settings.days.fri' },
+    { id: 'sat', label: 'employee.settings.days.sat' },
+    { id: 'sun', label: 'employee.settings.days.sun' },
 ];
 
 export default function Settings() {
@@ -206,10 +206,10 @@ export default function Settings() {
     const saveEmergencyMutation = useMutation({
         mutationFn: (data: any) => apiPut('/api/employee/settings/emergency-contact', data),
         onSuccess: () => {
-            toastSuccess('Emergency contact saved');
+            toastSuccess(t('employee.settings.emergency_saved'));
             queryClient.invalidateQueries({ queryKey: ['employeeEmergencyContact'] });
         },
-        onError: () => toastError('Failed to save emergency contact')
+        onError: () => toastError(t('employee.settings.emergency_failed'))
     });
 
     const handleSaveWorkPrefs = () => {
@@ -236,7 +236,7 @@ export default function Settings() {
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <User className="w-5 h-5 text-blue-500" />
-                                Personal Information
+                                {t('employee.settings.profile.title')}
                             </h2>
 
                             <div className="flex items-center gap-6 mb-8">
@@ -249,7 +249,7 @@ export default function Settings() {
                                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{profileForm.name}</h3>
                                     <p className="text-gray-500 dark:text-gray-400">{profileForm.email}</p>
                                     <span className="inline-block mt-2 px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                        Employee
+                                        {t('employee.settings.profile.employee_badge')}
                                     </span>
                                 </div>
                             </div>
@@ -258,7 +258,7 @@ export default function Settings() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         <User className="w-4 h-4 inline mr-2" />
-                                        Full Name
+                                        {t('employee.settings.profile.full_name')}
                                     </label>
                                     <input
                                         type="text"
@@ -270,7 +270,7 @@ export default function Settings() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         <Mail className="w-4 h-4 inline mr-2" />
-                                        Email
+                                        {t('employee.settings.profile.email')}
                                     </label>
                                     <input
                                         type="email"
@@ -282,13 +282,13 @@ export default function Settings() {
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         <Phone className="w-4 h-4 inline mr-2" />
-                                        Phone Number
+                                        {t('employee.settings.profile.phone')}
                                     </label>
                                     <input
                                         type="tel"
                                         value={profileForm.phone}
                                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                                        placeholder="+855 12 345 6789"
+                                        placeholder={t('employee.settings.profile.phone_placeholder')}
                                         className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     />
                                 </div>
@@ -312,42 +312,42 @@ export default function Settings() {
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <AlertCircle className="w-5 h-5 text-red-500" />
-                                Emergency Contact
+                                {t('employee.settings.emergency.title')}
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('employee.settings.emergency.name')}</label>
                                     <input
                                         type="text"
                                         value={emergencyContact.emergency_contact_name}
                                         onChange={(e) => setEmergencyContact({ ...emergencyContact, emergency_contact_name: e.target.value })}
-                                        placeholder="John Doe"
+                                        placeholder={t('employee.settings.emergency.name_placeholder')}
                                         className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('employee.settings.emergency.phone')}</label>
                                     <input
                                         type="tel"
                                         value={emergencyContact.emergency_contact_phone}
                                         onChange={(e) => setEmergencyContact({ ...emergencyContact, emergency_contact_phone: e.target.value })}
-                                        placeholder="+855 12 345 6789"
+                                        placeholder={t('employee.settings.emergency.phone_placeholder')}
                                         className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Relationship</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('employee.settings.emergency.relationship')}</label>
                                     <select
                                         value={emergencyContact.emergency_contact_relation}
                                         onChange={(e) => setEmergencyContact({ ...emergencyContact, emergency_contact_relation: e.target.value })}
                                         className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">Select...</option>
-                                        <option value="spouse">Spouse</option>
-                                        <option value="parent">Parent</option>
-                                        <option value="sibling">Sibling</option>
-                                        <option value="friend">Friend</option>
-                                        <option value="other">Other</option>
+                                        <option value="">{t('employee.settings.emergency.select')}</option>
+                                        <option value="spouse">{t('employee.settings.emergency.relationship_options.spouse')}</option>
+                                        <option value="parent">{t('employee.settings.emergency.relationship_options.parent')}</option>
+                                        <option value="sibling">{t('employee.settings.emergency.relationship_options.sibling')}</option>
+                                        <option value="friend">{t('employee.settings.emergency.relationship_options.friend')}</option>
+                                        <option value="other">{t('employee.settings.emergency.relationship_options.other')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -374,9 +374,9 @@ export default function Settings() {
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
                                 <Briefcase className="w-5 h-5 text-blue-500" />
-                                Preferred Work Stations
+                                {t('employee.settings.work.title')}
                             </h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Select the stations you prefer working at</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('employee.settings.work.description')}</p>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {workStations.map((station) => (
@@ -400,7 +400,7 @@ export default function Settings() {
                                                 ? "text-blue-700 dark:text-blue-300"
                                                 : "text-gray-600 dark:text-gray-400"
                                         )}>
-                                            {station.label}
+                                            {t(station.label)}
                                         </span>
                                         {workPrefs.preferred_stations.includes(station.id) && (
                                             <Check className="w-4 h-4 text-blue-500" />
@@ -414,9 +414,9 @@ export default function Settings() {
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
                                 <Clock className="w-5 h-5 text-blue-500" />
-                                Preferred Shift Times
+                                {t('employee.settings.shifts.title')}
                             </h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Select your preferred working hours</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('employee.settings.shifts.description')}</p>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 {shiftTimes.map((shift) => (
@@ -440,8 +440,8 @@ export default function Settings() {
                                                 workPrefs.preferred_shifts.includes(shift.id)
                                                     ? "text-blue-700 dark:text-blue-300"
                                                     : "text-gray-700 dark:text-gray-300"
-                                            )}>{shift.label}</p>
-                                            <p className="text-xs text-gray-500">{shift.time}</p>
+                                            )}>{t(shift.label)}</p>
+                                            <p className="text-xs text-gray-500">{t(shift.time)}</p>
                                         </div>
                                         {workPrefs.preferred_shifts.includes(shift.id) && (
                                             <Check className="w-4 h-4 text-blue-500 ml-auto" />
@@ -453,8 +453,8 @@ export default function Settings() {
 
                         {/* Available Days */}
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Available Days</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Select the days you're available to work</p>
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('employee.settings.days.title')}</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('employee.settings.days.description')}</p>
 
                             <div className="flex flex-wrap gap-2">
                                 {daysOfWeek.map((day) => (
@@ -471,7 +471,7 @@ export default function Settings() {
                                                 : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300'
                                         )}
                                     >
-                                        {day.label}
+                                        {t(day.label)}
                                     </button>
                                 ))}
                             </div>
@@ -481,8 +481,8 @@ export default function Settings() {
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Maximum Hours Per Week</h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Set your preferred maximum working hours</p>
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('employee.settings.max_hours.title')}</h2>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('employee.settings.max_hours.description')}</p>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <input
@@ -493,7 +493,7 @@ export default function Settings() {
                                         max={60}
                                         className="w-20 px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-center text-lg font-semibold text-gray-900 dark:text-white"
                                     />
-                                    <span className="text-gray-500">hours</span>
+                                    <span className="text-gray-500">{t('employee.settings.max_hours.unit')}</span>
                                 </div>
                             </div>
                         </div>
@@ -526,13 +526,13 @@ export default function Settings() {
             case 'appearance':
                 return (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Appearance</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Choose how the app looks on your device</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('employee.settings.appearance.title')}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('employee.settings.appearance.description')}</p>
                         <div className="grid grid-cols-3 gap-4">
                             {[
-                                { id: 'light', icon: Sun, label: 'Light', desc: 'Bright and clean' },
-                                { id: 'dark', icon: Moon, label: 'Dark', desc: 'Easy on the eyes' },
-                                { id: 'system', icon: SettingsIcon, label: 'System', desc: 'Match device' },
+                                { id: 'light', icon: Sun, label: 'employee.settings.appearance.options.light', desc: 'employee.settings.appearance.options.light_desc' },
+                                { id: 'dark', icon: Moon, label: 'employee.settings.appearance.options.dark', desc: 'employee.settings.appearance.options.dark_desc' },
+                                { id: 'system', icon: SettingsIcon, label: 'employee.settings.appearance.options.system', desc: 'employee.settings.appearance.options.system_desc' },
                             ].map((item) => (
                                 <button
                                     key={item.id}
@@ -547,9 +547,9 @@ export default function Settings() {
                                     <item.icon className={cn("w-8 h-8", theme === item.id ? "text-blue-600" : "text-gray-500")} />
                                     <div className="text-center">
                                         <p className={cn("font-semibold", theme === item.id ? "text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300")}>
-                                            {item.label}
+                                            {t(item.label)}
                                         </p>
-                                        <p className="text-xs text-gray-500">{item.desc}</p>
+                                        <p className="text-xs text-gray-500">{t(item.desc)}</p>
                                     </div>
                                 </button>
                             ))}
@@ -560,8 +560,8 @@ export default function Settings() {
             case 'language':
                 return (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Language</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Choose your preferred language</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('employee.settings.language.title')}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('employee.settings.language.description')}</p>
                         <div className="space-y-2">
                             {[
                                 { code: 'en', name: 'English', native: 'English', flag: '🇺🇸' },
@@ -573,7 +573,7 @@ export default function Settings() {
                                     onClick={() => {
                                         setLanguage(lang.code);
                                         localStorage.setItem('language', lang.code);
-                                        toastSuccess(`Language changed to ${lang.name}`);
+                                        toastSuccess(t('employee.settings.language.changed', { name: lang.name }));
                                     }}
                                     className={cn(
                                         'flex items-center justify-between w-full p-4 rounded-xl transition-all',
@@ -612,7 +612,7 @@ export default function Settings() {
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
                             <SettingsIcon className="w-6 h-6 text-white" />
                         </div>
-                        Settings
+                        {t('employee.settings.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2 ml-15">{t('employee.settings.title')}</p>
                 </div>
@@ -635,7 +635,7 @@ export default function Settings() {
                                     )}
                                 >
                                     <Icon className="w-4 h-4" />
-                                    <span className="font-medium text-sm">{section.title}</span>
+                                    <span className="font-medium text-sm">{t(section.title)}</span>
                                 </button>
                             );
                         })}
@@ -662,7 +662,7 @@ export default function Settings() {
                                             )}
                                         >
                                             <Icon className={cn('w-5 h-5', isActive && 'text-blue-500')} />
-                                            <span className="font-medium">{section.title}</span>
+                                            <span className="font-medium">{t(section.title)}</span>
                                             {isActive && <ChevronRight className="w-4 h-4 ml-auto text-blue-500" />}
                                         </button>
                                     );

@@ -5,8 +5,10 @@ import { apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Lock, Key, Eye, EyeOff, Shield, CheckCircle } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 export default function SecuritySettings() {
+    const { t } = useLanguage();
     const [passwordForm, setPasswordForm] = useState({
         current_password: '',
         new_password: '',
@@ -27,26 +29,32 @@ export default function SecuritySettings() {
     };
 
     const passwordStrength = getPasswordStrength(passwordForm.new_password);
-    const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+    const strengthLabels = [
+        t('employee.security.strength.very_weak'),
+        t('employee.security.strength.weak'),
+        t('employee.security.strength.fair'),
+        t('employee.security.strength.good'),
+        t('employee.security.strength.strong'),
+    ];
     const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
 
     // Password Update Mutation
     const updatePasswordMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/user/change-password', data),
         onSuccess: () => {
-            toastSuccess('Password changed successfully');
+            toastSuccess(t('employee.security.messages.changed'));
             setPasswordForm({ current_password: '', new_password: '', new_password_confirmation: '' });
         },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed to change password')
+        onError: (err: any) => toastError(err.response?.data?.message || t('employee.security.messages.change_failed'))
     });
 
     const handleChangePassword = () => {
         if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
-            toastError('Passwords do not match');
+            toastError(t('employee.security.messages.mismatch'));
             return;
         }
         if (passwordForm.new_password.length < 8) {
-            toastError('Password must be at least 8 characters');
+            toastError(t('employee.security.messages.min_length'));
             return;
         }
         updatePasswordMutation.mutate(passwordForm);
@@ -59,15 +67,15 @@ export default function SecuritySettings() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
                     <Lock className="w-5 h-5 text-blue-500" />
-                    Change Password
+                    {t('employee.security.title')}
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Update your password to keep your account secure</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('employee.security.subtitle')}</p>
 
                 <div className="space-y-4">
                     {/* Current Password */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Current Password
+                            {t('employee.security.current_password')}
                         </label>
                         <div className="relative">
                             <input
@@ -75,7 +83,7 @@ export default function SecuritySettings() {
                                 value={passwordForm.current_password}
                                 onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
                                 className="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                placeholder="Enter your current password"
+                                placeholder={t('employee.security.current_password_placeholder')}
                             />
                             <button
                                 type="button"
@@ -90,7 +98,7 @@ export default function SecuritySettings() {
                     {/* New Password */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            New Password
+                            {t('employee.security.new_password')}
                         </label>
                         <div className="relative">
                             <input
@@ -98,7 +106,7 @@ export default function SecuritySettings() {
                                 value={passwordForm.new_password}
                                 onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
                                 className="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                placeholder="Enter a new password"
+                                placeholder={t('employee.security.new_password_placeholder')}
                             />
                             <button
                                 type="button"
@@ -126,11 +134,11 @@ export default function SecuritySettings() {
                                     ))}
                                 </div>
                                 <p className="text-xs text-gray-500">
-                                    Strength: <span className={cn(
+                                    {t('employee.security.strength.label')}: <span className={cn(
                                         passwordStrength >= 4 ? 'text-green-600' :
                                             passwordStrength >= 3 ? 'text-blue-600' :
                                                 passwordStrength >= 2 ? 'text-yellow-600' : 'text-red-600'
-                                    )}>{strengthLabels[passwordStrength - 1] || 'Very Weak'}</span>
+                                    )}>{strengthLabels[passwordStrength - 1] || t('employee.security.strength.very_weak')}</span>
                                 </p>
                             </div>
                         )}
@@ -139,7 +147,7 @@ export default function SecuritySettings() {
                     {/* Confirm Password */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Confirm New Password
+                            {t('employee.security.confirm_password')}
                         </label>
                         <div className="relative">
                             <input
@@ -151,7 +159,7 @@ export default function SecuritySettings() {
                                     passwordForm.new_password_confirmation && (passwordsMatch ? "border-green-500" : "border-red-500"),
                                     !passwordForm.new_password_confirmation && "border-gray-200 dark:border-gray-700"
                                 )}
-                                placeholder="Confirm your new password"
+                                placeholder={t('employee.security.confirm_password_placeholder')}
                             />
                             {passwordForm.new_password_confirmation && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -166,7 +174,7 @@ export default function SecuritySettings() {
                             )}
                         </div>
                         {passwordForm.new_password_confirmation && !passwordsMatch && (
-                            <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                            <p className="text-xs text-red-500 mt-1">{t('employee.security.messages.mismatch')}</p>
                         )}
                     </div>
                 </div>
@@ -177,7 +185,7 @@ export default function SecuritySettings() {
                     className="mt-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white disabled:opacity-50"
                 >
                     <Key className="w-4 h-4 mr-2" />
-                    {updatePasswordMutation.isPending ? 'Changing Password...' : 'Change Password'}
+                    {updatePasswordMutation.isPending ? t('employee.security.changing') : t('employee.security.change')}
                 </Button>
             </div>
 
@@ -185,24 +193,24 @@ export default function SecuritySettings() {
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
                 <h3 className="font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2 mb-4">
                     <Shield className="w-5 h-5" />
-                    Security Tips
+                    {t('employee.security.tips.title')}
                 </h3>
                 <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-400">
                     <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        Use at least 8 characters with a mix of letters, numbers, and symbols
+                        {t('employee.security.tips.items.length')}
                     </li>
                     <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        Don't use personal information like your name or birthday
+                        {t('employee.security.tips.items.personal_info')}
                     </li>
                     <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        Use a unique password that you don't use elsewhere
+                        {t('employee.security.tips.items.unique')}
                     </li>
                     <li className="flex items-start gap-2">
                         <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        Change your password regularly for better security
+                        {t('employee.security.tips.items.change_regularly')}
                     </li>
                 </ul>
             </div>

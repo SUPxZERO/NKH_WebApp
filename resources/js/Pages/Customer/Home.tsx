@@ -235,7 +235,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
       quantity: 1,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(`${item.name} added to cart!`);
+    toastSuccess(t('menu.added_to_cart', { name: item.name }));
     setMode(isTableOrder ? 'dine-in' : 'delivery');
     setOpen(true);
   }

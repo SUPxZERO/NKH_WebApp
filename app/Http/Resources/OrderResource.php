@@ -42,6 +42,7 @@ class OrderResource extends JsonResource
             'rejection_reason' => $this->rejection_reason,
             'table' => new DiningTableResource($this->whenLoaded('table')),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
+            'location' => new LocationResource($this->whenLoaded('location')),
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'invoice' => new InvoiceResource($this->whenLoaded('invoice')),
             'time_slot' => $this->when($this->timeSlot, function() {

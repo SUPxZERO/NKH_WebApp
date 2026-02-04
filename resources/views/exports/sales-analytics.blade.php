@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <title>Sales Analytics Report</title>
+    <title>{{ __('exports.sales_analytics.title') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -100,42 +100,42 @@
 </head>
 <body>
     <div class="header">
-        <h1>📊 Sales Analytics Report</h1>
+        <h1>{{ __('exports.sales_analytics.heading') }}</h1>
         <div class="date-range">{{ $start_date }} - {{ $end_date }}</div>
     </div>
 
     <!-- Overview Stats -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Total Revenue</div>
+            <div class="stat-label">{{ __('exports.sales_analytics.stats.total_revenue') }}</div>
             <div class="stat-value">${{ number_format($overview['total_revenue'] ?? 0, 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Total Orders</div>
+            <div class="stat-label">{{ __('exports.sales_analytics.stats.total_orders') }}</div>
             <div class="stat-value">{{ number_format($overview['total_orders'] ?? 0) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Avg Order Value</div>
+            <div class="stat-label">{{ __('exports.sales_analytics.stats.avg_order_value') }}</div>
             <div class="stat-value">${{ number_format($overview['avg_order_value'] ?? 0, 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Customers</div>
+            <div class="stat-label">{{ __('exports.sales_analytics.stats.customers') }}</div>
             <div class="stat-value">{{ number_format($overview['unique_customers'] ?? 0) }}</div>
         </div>
     </div>
 
     <!-- Sales Trends -->
     <div class="section">
-        <div class="section-title">📈 Revenue Trends</div>
+        <div class="section-title">{{ __('exports.sales_analytics.sections.revenue_trends') }}</div>
         <div class="chart-placeholder">
-            Chart visualization available in interactive dashboard
+            {{ __('exports.sales_analytics.chart_placeholder') }}
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Orders</th>
-                    <th>Revenue</th>
+                    <th>{{ __('exports.sales_analytics.table.date') }}</th>
+                    <th>{{ __('exports.sales_analytics.table.orders') }}</th>
+                    <th>{{ __('exports.sales_analytics.table.revenue') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -152,14 +152,14 @@
 
     <!-- Top Selling Items -->
     <div class="section">
-        <div class="section-title">🏆 Top Selling Items</div>
+        <div class="section-title">{{ __('exports.sales_analytics.sections.top_items') }}</div>
         <table>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Item Name</th>
-                    <th>Quantity Sold</th>
-                    <th>Revenue</th>
+                    <th>{{ __('exports.sales_analytics.table.item_name') }}</th>
+                    <th>{{ __('exports.sales_analytics.table.quantity_sold') }}</th>
+                    <th>{{ __('exports.sales_analytics.table.revenue') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -177,13 +177,13 @@
 
     <!-- Sales by Category -->
     <div class="section">
-        <div class="section-title">📦 Sales by Category</div>
+        <div class="section-title">{{ __('exports.sales_analytics.sections.by_category') }}</div>
         <table>
             <thead>
                 <tr>
-                    <th>Category</th>
-                    <th>Revenue</th>
-                    <th>Percentage</th>
+                    <th>{{ __('exports.sales_analytics.table.category') }}</th>
+                    <th>{{ __('exports.sales_analytics.table.revenue') }}</th>
+                    <th>{{ __('exports.sales_analytics.table.percentage') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -202,7 +202,7 @@
     </div>
 
     <div class="footer">
-        Generated on {{ date('F d, Y \a\t H:i') }} | NKH Restaurant Management System
+        {{ __('exports.sales_analytics.generated_on', ['date' => date('F d, Y \\a\\t H:i')]) }} | {{ __('exports.sales_analytics.system_name') }}
     </div>
 </body>
 </html>

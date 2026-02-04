@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>@yield('title') - NKH Restaurant</title>
+    <title>@yield('title') - {{ __('reports.layout.brand') }}</title>
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
@@ -87,14 +87,14 @@
 </head>
 <body>
     <div class="header">
-        <h1>NKH Restaurant System</h1>
+        <h1>{{ __('reports.layout.system_name') }}</h1>
         <p>@yield('title')</p>
     </div>
 
     @yield('content')
 
     <div class="footer">
-        Generated on {{ date('Y-m-d H:i:s') }}
+        {{ __('reports.layout.generated_on', ['date' => date('Y-m-d H:i:s')]) }}
     </div>
 </body>
 </html>

@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Award, Star } from 'lucide-react';
+import { Award, Star, TrendingUp } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface TopItem {
     name: string;
-    quantity: number;
+    count?: number;
+    quantity?: number;
 }
 
 interface BoldTopItemsChartProps {
@@ -22,139 +24,129 @@ const barGradients = [
     '#fb7185', // lighter rose
 ];
 
-export function BoldTopItemsChart({ data = [], className }: BoldTopItemsChartProps) {
-    // Ensure data is an array before operations
-    const safeData = Array.isArray(data) ? data : [];
-    const totalQuantity = safeData.reduce((acc, item) => acc + item.quantity, 0);
+export function BoldTopItemsChart({ data, className }: BoldTopItemsChartProps) {
+    const { t } = useTranslation();
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+    // Filter out invalid items and sort by count provided by API
+    const items = (data || [])
+        .map(item => ({
+            ...item,
+            count: item.count || item.quantity || 0
+        }))
+        .filter(item => item.name && typeof item.count === 'number')
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5); // Take top 5
+
+    // Normalize counts for bar width calculation
+    const maxCount = Math.max(...items.map(i => i.count), 1);
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={cn(
-                'relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-6',
-                // Light mode
-                'bg-white border border-gray-200',
-                // Dark mode
-                'dark:bg-gradient-to-br dark:from-gray-900/95 dark:via-gray-800/95 dark:to-gray-900/95',
-                'dark:border-white/10 dark:backdrop-blur-xl',
-                'shadow-xl dark:shadow-2xl dark:shadow-fuchsia-500/20',
-                className
-            )}
-        >
+        <div className={cn(
+            'relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6',
+            // Light mode: clean white
+            'bg-white border border-gray-100',
+            // Dark mode: deep gradient
+            'dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-black',
+            'dark:border-white/5',
+            'shadow-xl dark:shadow-2xl',
+            className
+        )}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-3 sm:mb-6">
-                <div className="flex items-center gap-2 sm:gap-3">
-                    <motion.div
-                        animate={{
-                            rotate: [0, 10, -10, 0],
-                        }}
-                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                        className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 shadow-lg shadow-orange-500/40"
-                    >
-                        <Award className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                    </motion.div>
-                    <div>
-                        <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg">Top Selling</h3>
-                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Best performers</p>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-                    <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400" />
-                    <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">{totalQuantity} sold</span>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-emerald-500" />
+                        {t('admin.dashboard.top_items.title')}
+                    </h3>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 pl-7">
+                        {t('admin.dashboard.top_items.subtitle')}
+                    </p>
                 </div>
             </div>
 
-            {/* Chart */}
-            <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={safeData} layout="vertical" margin={{ left: 10, right: 10 }}>
-                        <defs>
-                            {barGradients.map((color, i) => (
-                                <linearGradient key={i} id={`barGrad${i}`} x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor={color} stopOpacity={0.8} />
-                                    <stop offset="100%" stopColor={color} stopOpacity={1} />
-                                </linearGradient>
-                            ))}
-                        </defs>
-                        <XAxis
-                            type="number"
-                            tickLine={false}
-                            axisLine={false}
-                            tick={{ fill: '#9ca3af', fontSize: 12 }}
-                        />
-                        <YAxis
-                            dataKey="name"
-                            type="category"
-                            width={100}
-                            tickLine={false}
-                            axisLine={false}
-                            tick={{ fontSize: 11, fontWeight: 500 }}
-                            tickFormatter={(value) => value.length > 12 ? `${value.slice(0, 12)}...` : value}
-                            className="fill-gray-700 dark:fill-white"
-                        />
-                        <Tooltip
-                            contentStyle={{
-                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '12px',
-                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                            }}
-                            labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                            formatter={(value) => [`${typeof value === 'number' ? value : 0} sold`, 'Quantity']}
-                            cursor={{ fill: 'rgba(156,163,175,0.1)' }}
-                        />
-                        <Bar
-                            dataKey="quantity"
-                            radius={[0, 8, 8, 0]}
-                            barSize={24}
-                        >
-                            {safeData.map((_, index) => (
-                                <Cell
-                                    key={index}
-                                    fill={`url(#barGrad${index % barGradients.length})`}
-                                    style={{
-                                        filter: `drop-shadow(0 4px 6px ${barGradients[index % barGradients.length]}40)`,
+            {/* List */}
+            <div className="space-y-3 sm:space-y-4">
+                {items.length > 0 ? (
+                    items.map((item, index) => {
+                        const percentage = (item.count / maxCount) * 100;
+                        const isHovered = hoveredIndex === index;
+
+                        return (
+                            <motion.div
+                                key={`${item.name}-${index}`}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                onMouseEnter={() => setHoveredIndex(index)}
+                                onMouseLeave={() => setHoveredIndex(null)}
+                                className="relative group cursor-default"
+                            >
+                                {/* Background Highlight */}
+                                <motion.div
+                                    animate={{
+                                        opacity: isHovered ? 1 : 0,
+                                        scale: isHovered ? 1 : 0.98,
                                     }}
+                                    className="absolute inset-0 -mx-2 -my-1.5 rounded-xl bg-gray-50 dark:bg-white/5"
                                 />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
+
+                                <div className="relative flex items-center gap-3 sm:gap-4 ml-1">
+                                    {/* Rank Badge */}
+                                    <div className={cn(
+                                        "flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full text-xs sm:text-sm font-bold shadow-sm transition-all",
+                                        index === 0 ? "bg-amber-400 text-amber-900 shadow-amber-400/50 scale-110" :
+                                            index === 1 ? "bg-gray-300 text-gray-800 shadow-gray-300/50 scale-105" :
+                                                index === 2 ? "bg-orange-300 text-orange-800 shadow-orange-300/50 scale-105" :
+                                                    "bg-gray-100 dark:bg-gray-800 text-gray-500"
+                                    )}>
+                                        {index + 1}
+                                    </div>
+
+                                    {/* Item Info */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <span className={cn(
+                                                "text-sm font-semibold truncate transition-colors",
+                                                isHovered ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white"
+                                            )}>
+                                                {item.name}
+                                            </span>
+                                            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">
+                                                {t('admin.dashboard.top_items.sold', { count: item.count.toString() })}
+                                            </span>
+                                        </div>
+
+                                        {/* Bar */}
+                                        <div className="h-1.5 sm:h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                transition={{ duration: 1, delay: 0.2 + index * 0.1 }}
+                                                className={cn(
+                                                    "h-full rounded-full shadow-[0_0_10px_rgba(0,0,0,0.3)]",
+                                                    index === 0 ? "bg-gradient-to-r from-amber-400 to-orange-500" :
+                                                        index === 1 ? "bg-gradient-to-r from-gray-300 to-gray-400" :
+                                                            index === 2 ? "bg-gradient-to-r from-orange-300 to-orange-400" :
+                                                                "bg-gradient-to-r from-emerald-500 to-teal-500"
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        );
+                    })
+                ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+                        No data available
+                    </div>
+                )}
             </div>
 
-            {/* Top 3 badges */}
-            {safeData.length >= 3 && (
-                <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-white/5">
-                    {safeData.slice(0, 3).map((item, i) => (
-                        <motion.div
-                            key={item.name}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 + i * 0.1 }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5"
-                        >
-                            <span className={cn(
-                                'text-xs font-bold',
-                                i === 0 && 'text-amber-500 dark:text-amber-400',
-                                i === 1 && 'text-gray-500 dark:text-gray-300',
-                                i === 2 && 'text-orange-500 dark:text-orange-400'
-                            )}>
-                                #{i + 1}
-                            </span>
-                            <span className="text-xs text-gray-600 dark:text-gray-300 truncate max-w-[80px]">
-                                {item.name}
-                            </span>
-                        </motion.div>
-                    ))}
-                </div>
-            )}
-
-            {/* Decorative elements */}
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-orange-500/10 dark:from-orange-500/20 to-amber-500/5 dark:to-amber-500/10 rounded-full blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-amber-500/10 dark:from-amber-500/20 to-red-500/5 dark:to-red-500/10 rounded-full blur-3xl" />
-        </motion.div>
+            {/* Decorative Overlay */}
+            <div className="absolute inset-0 pointer-events-none rounded-3xl ring-1 ring-inset ring-black/5 dark:ring-white/5" />
+        </div>
     );
 }
 

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <title>Inventory Reports</title>
+    <title>{{ __('exports.inventory.title') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,39 +91,39 @@
 </head>
 <body>
     <div class="header">
-        <h1>📦 Inventory Reports</h1>
+        <h1>{{ __('exports.inventory.heading') }}</h1>
         <div class="date-range">{{ $start_date }} - {{ $end_date }}</div>
     </div>
 
     <!-- Overview Stats -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Total Inventory Value</div>
+            <div class="stat-label">{{ __('exports.inventory.stats.total_inventory_value') }}</div>
             <div class="stat-value">${{ number_format($valuation['total_value'] ?? 0, 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Items in Stock</div>
+            <div class="stat-label">{{ __('exports.inventory.stats.items_in_stock') }}</div>
             <div class="stat-value">{{ number_format($valuation['items_count'] ?? 0) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Waste Value</div>
+            <div class="stat-label">{{ __('exports.inventory.stats.waste_value') }}</div>
             <div class="stat-value">${{ number_format($wasteData['total_waste_value'] ?? 0, 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Avg Turnover Rate</div>
+            <div class="stat-label">{{ __('exports.inventory.stats.avg_turnover_rate') }}</div>
             <div class="stat-value">{{ number_format($turnover['avg_turnover'] ?? 0, 1) }}x</div>
         </div>
     </div>
 
     <!-- Cost Analysis -->
     <div class="section">
-        <div class="section-title">💰 Cost Analysis by Category</div>
+        <div class="section-title">{{ __('exports.inventory.sections.cost_analysis') }}</div>
         <table>
             <thead>
                 <tr>
-                    <th>Category</th>
-                    <th>Total Cost</th>
-                    <th>Percentage</th>
+                    <th>{{ __('exports.inventory.table.category') }}</th>
+                    <th>{{ __('exports.inventory.table.total_cost') }}</th>
+                    <th>{{ __('exports.inventory.table.percentage') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -143,15 +143,15 @@
 
     <!-- Highest Cost Items -->
     <div class="section">
-        <div class="section-title">📊 Highest Cost Items</div>
+        <div class="section-title">{{ __('exports.inventory.sections.highest_cost_items') }}</div>
         <table>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Item Name</th>
-                    <th>Quantity</th>
-                    <th>Cost per Unit</th>
-                    <th>Total Cost</th>
+                    <th>{{ __('exports.inventory.table.item_name') }}</th>
+                    <th>{{ __('exports.inventory.table.quantity') }}</th>
+                    <th>{{ __('exports.inventory.table.cost_per_unit') }}</th>
+                    <th>{{ __('exports.inventory.table.total_cost') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -170,13 +170,13 @@
 
     <!-- Turnover Analysis -->
     <div class="section">
-        <div class="section-title">🔄 Turnover by Category</div>
+        <div class="section-title">{{ __('exports.inventory.sections.turnover_by_category') }}</div>
         <table>
             <thead>
                 <tr>
-                    <th>Category</th>
-                    <th>Turnover Rate</th>
-                    <th>Status</th>
+                    <th>{{ __('exports.inventory.table.category') }}</th>
+                    <th>{{ __('exports.inventory.table.turnover_rate') }}</th>
+                    <th>{{ __('exports.inventory.table.status') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -186,11 +186,11 @@
                     <td>{{ number_format($cat['turnover_rate'], 1) }}x</td>
                     <td>
                         @if($cat['turnover_rate'] > 10)
-                            Excellent
+                            {{ __('exports.inventory.turnover_status.excellent') }}
                         @elseif($cat['turnover_rate'] > 5)
-                            Good
+                            {{ __('exports.inventory.turnover_status.good') }}
                         @else
-                            Needs Attention
+                            {{ __('exports.inventory.turnover_status.needs_attention') }}
                         @endif
                     </td>
                 </tr>
@@ -200,7 +200,7 @@
     </div>
 
     <div class="footer">
-        Generated on {{ date('F d, Y \a\t H:i') }} | NKH Restaurant Management System
+        {{ __('exports.inventory.generated_on', ['date' => date('F d, Y \\a\\t H:i')]) }} | {{ __('exports.inventory.system_name') }}
     </div>
 </body>
 </html>

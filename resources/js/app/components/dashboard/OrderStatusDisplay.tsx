@@ -5,6 +5,7 @@ import {
     Package, Truck, AlertCircle, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface OrderStatusData {
     status: string;
@@ -91,6 +92,7 @@ const defaultConfig = {
 };
 
 export function OrderStatusDisplay({ data = [], className }: OrderStatusDisplayProps) {
+    const { t } = useTranslation();
     // Normalize data to array format (handle null/undefined)
     const normalizedData: OrderStatusData[] = !data
         ? []
@@ -129,8 +131,8 @@ export function OrderStatusDisplay({ data = [], className }: OrderStatusDisplayP
                         <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                     </motion.div>
                     <div>
-                        <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg">Order Status</h3>
-                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Real-time breakdown</p>
+                        <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg">{t('admin.dashboard.order_status.title')}</h3>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t('admin.dashboard.order_status.subtitle')}</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -142,7 +144,7 @@ export function OrderStatusDisplay({ data = [], className }: OrderStatusDisplayP
                     >
                         {totalOrders}
                     </motion.span>
-                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">total orders</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{t('admin.dashboard.order_status.total_orders')}</p>
                 </div>
             </div>
 
@@ -152,6 +154,12 @@ export function OrderStatusDisplay({ data = [], className }: OrderStatusDisplayP
                     const config = statusConfig[item.status.toLowerCase()] || defaultConfig;
                     const Icon = config.icon;
                     const percentage = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
+
+                    // Determine translation key
+                    const statusKey = item.status.toLowerCase();
+                    const label = statusConfig[statusKey]
+                        ? t(`admin.dashboard.order_status.${statusKey}`)
+                        : (config.label === 'Unknown' ? t('admin.dashboard.order_status.unknown') : item.status);
 
                     return (
                         <motion.div
@@ -180,7 +188,7 @@ export function OrderStatusDisplay({ data = [], className }: OrderStatusDisplayP
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between mb-1 sm:mb-1.5">
                                         <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-white capitalize">
-                                            {config.label || item.status}
+                                            {label}
                                         </span>
                                         <motion.span
                                             key={item.count}
@@ -240,7 +248,7 @@ export function OrderStatusDisplay({ data = [], className }: OrderStatusDisplayP
             {normalizedData.length === 0 && (
                 <div className="text-center py-6 sm:py-8">
                     <Package className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-400 dark:text-gray-600 mb-2 sm:mb-3" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No orders today</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin.dashboard.order_status.no_orders')}</p>
                 </div>
             )}
 

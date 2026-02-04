@@ -29,21 +29,22 @@ import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import { GlobalSearch, useGlobalSearch } from '@/app/components/ui/GlobalSearch';
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 type Props = { children: React.ReactNode };
 
 const navigation = [
-  { name: 'Dashboard', href: '/employee/dashboard', icon: Home },
-  { name: 'POS', href: '/employee/pos', icon: CreditCard },
-  { name: 'Kitchen', href: '/employee/kitchen', icon: ChefHat },
-  { name: 'Delivery', href: '/employee/delivery-orders', icon: Truck },
-  { name: 'Schedule', href: '/employee/schedule', icon: CalendarDays },
-  { name: 'Performance', href: '/employee/performance', icon: Activity },
+  { name: 'layout.employee.nav.dashboard', href: '/employee/dashboard', icon: Home },
+  { name: 'layout.employee.nav.pos', href: '/employee/pos', icon: CreditCard },
+  { name: 'layout.employee.nav.kitchen', href: '/employee/kitchen', icon: ChefHat },
+  { name: 'layout.employee.nav.delivery', href: '/employee/delivery-orders', icon: Truck },
+  { name: 'layout.employee.nav.schedule', href: '/employee/schedule', icon: CalendarDays },
+  { name: 'layout.employee.nav.performance', href: '/employee/performance', icon: Activity },
 ];
 
 const secondaryNav = [
-  { name: 'Support', href: '/employee/support', icon: HelpCircle },
-  { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
+  { name: 'layout.employee.nav.support', href: '/employee/support', icon: HelpCircle },
+  { name: 'layout.employee.nav.feedback', href: '/employee/feedback', icon: MessageSquare },
 ];
 
 export default function EmployeeLayout({ children }: Props) {
@@ -51,6 +52,7 @@ export default function EmployeeLayout({ children }: Props) {
   const { url, props } = usePage<{ auth: { user: any } }>();
   const user = props.auth?.user;
   const search = useGlobalSearch();
+  const { t } = useLanguage();
 
   // Smart Polling for Notifications - 60s
   useSmartPolling(['admin-notifications'], 60000);
@@ -62,9 +64,9 @@ export default function EmployeeLayout({ children }: Props) {
   // Get current time for greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('layout.employee.greeting.morning');
+    if (hour < 17) return t('layout.employee.greeting.afternoon');
+    return t('layout.employee.greeting.evening');
   };
 
   return (
@@ -105,8 +107,8 @@ export default function EmployeeLayout({ children }: Props) {
                       />
                     </div>
                     <div>
-                      <h2 className="font-bold text-gray-900 dark:text-white">Employee Portal</h2>
-                      <p className="text-xs text-fuchsia-500">NKH Restaurant</p>
+                      <h2 className="font-bold text-gray-900 dark:text-white">{t('layout.employee.portal_title')}</h2>
+                      <p className="text-xs text-fuchsia-500">{t('layout.footer.brand_title')}</p>
                     </div>
                   </div>
                   <button
@@ -137,14 +139,14 @@ export default function EmployeeLayout({ children }: Props) {
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <Icon className="w-5 h-5" />
-                        <span className="font-medium">{item.name}</span>
+                        <span className="font-medium">{t(item.name)}</span>
                       </Link>
                     );
                   })}
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">More</p>
+                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('layout.employee.more')}</p>
                   <div className="space-y-1">
                     {secondaryNav.map((item) => {
                       const Icon = item.icon;
@@ -162,7 +164,7 @@ export default function EmployeeLayout({ children }: Props) {
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           <Icon className="w-5 h-5" />
-                          <span>{item.name}</span>
+                          <span>{t(item.name)}</span>
                         </Link>
                       );
                     })}
@@ -177,7 +179,7 @@ export default function EmployeeLayout({ children }: Props) {
                   className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 font-medium transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
-                  Sign Out
+                  {t('layout.employee.sign_out')}
                 </button>
               </div>
             </div>
@@ -198,16 +200,16 @@ export default function EmployeeLayout({ children }: Props) {
                 <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 p-1.5 backdrop-blur-sm">
                   <img
                     src="/Nkhlogo.png"
-                    alt="NKH Restaurant"
+                    alt={t('layout.footer.brand_title')}
                     className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.4)]"
                   />
                 </div>
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                  NKH Restaurant
+                  {t('layout.footer.brand_title')}
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">Employee Portal</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">{t('layout.employee.portal_title')}</p>
               </div>
             </Link>
 
@@ -228,7 +230,7 @@ export default function EmployeeLayout({ children }: Props) {
                     )}
                   >
                     <Icon className="w-4 h-4" />
-                    <span>{item.name}</span>
+                    <span>{t(item.name)}</span>
                   </Link>
                 );
               })}
@@ -240,7 +242,7 @@ export default function EmployeeLayout({ children }: Props) {
               <button
                 onClick={search.open}
                 className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-                title="Search (Ctrl+K)"
+                title={t('layout.employee.search_title')}
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -248,7 +250,7 @@ export default function EmployeeLayout({ children }: Props) {
               {/* Quick Stats Badge (Desktop Only) */}
               <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full border border-emerald-500/20">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">On Duty</span>
+                <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">{t('layout.employee.on_duty')}</span>
               </div>
 
               {/* Notifications */}
@@ -285,7 +287,7 @@ export default function EmployeeLayout({ children }: Props) {
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              © 2024 NKH Restaurant. Employee Portal v2.0
+              {t('layout.employee.footer', { year: String(new Date().getFullYear()) })}
             </p>
             <div className="flex items-center gap-4">
               {secondaryNav.map((item) => (
@@ -294,7 +296,7 @@ export default function EmployeeLayout({ children }: Props) {
                   href={item.href}
                   className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
-                  {item.name}
+                  {t(item.name)}
                 </Link>
               ))}
             </div>

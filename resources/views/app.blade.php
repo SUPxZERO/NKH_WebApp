@@ -12,7 +12,7 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="NKH Restaurant">
+        <meta name="apple-mobile-web-app-title" content="{{ __('meta.app_title') }}">
         <meta name="msapplication-TileColor" content="#e879f9">
         
         <!-- PWA Manifest -->

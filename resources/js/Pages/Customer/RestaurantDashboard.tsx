@@ -32,6 +32,8 @@ import { animationVariants, createStaggerAnimation } from '@/design-system/anima
 import { cn } from '@/app/utils/cn';
 import { useCartStore } from '@/app/store/cart';
 import { toastSuccess } from '@/app/utils/toast';
+import { useLanguage } from '@/app/context/LanguageContext';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface CustomerStats {
   total_orders: number;
@@ -65,6 +67,9 @@ const rarityColors = {
 export default function RestaurantDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'favorites' | 'rewards'>('overview');
   const cart = useCartStore();
+  const { locale } = useLanguage();
+  const translationContext = useTranslation();
+  const t = translationContext?.t || ((key: string) => key);
 
   // Handle adding items to cart
   const handleAddToCart = useCallback((item: MenuItem, quantity: number) => {
@@ -76,22 +81,22 @@ export default function RestaurantDashboard() {
       quantity,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(`${item.name} added to cart`);
-  }, [cart]);
+    toastSuccess(t('customer_pages.restaurant_dashboard.added_to_cart', { item: item.name }));
+  }, [cart, t]);
 
   const { data: customerStats, isLoading } = useQuery({
-    queryKey: ['customer.dashboard'],
+    queryKey: ['customer.dashboard', locale],
     queryFn: () => apiGet<ApiResponse<CustomerStats>>('/customer/dashboard').then(r => r.data),
     staleTime: 1000 * 60 * 5,
   });
 
   const { data: popularItems = [] } = useQuery({
-    queryKey: ['popular-items'],
+    queryKey: ['popular-items', locale],
     queryFn: () => apiGet<ApiResponse<MenuItem[]>>('/menu/popular').then(r => r.data),
   });
 
   const { data: todaySpecials = [] } = useQuery({
-    queryKey: ['today-specials'],
+    queryKey: ['today-specials', locale],
     queryFn: () => apiGet<ApiResponse<MenuItem[]>>('/menu/specials').then(r => r.data),
   });
 
@@ -115,7 +120,7 @@ export default function RestaurantDashboard() {
 
   return (
     <RestaurantLayout role="customer">
-      <motion.div 
+      <motion.div
         className="space-y-8"
         variants={createStaggerAnimation(0.1)}
         initial="initial"
@@ -133,12 +138,12 @@ export default function RestaurantDashboard() {
               transition={{ delay: 0.2 }}
             >
               <h1 className="text-3xl md:text-4xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-3">
-                Welcome back! 👋
+                {t('customer_pages.restaurant_dashboard.welcome')} 👋
               </h1>
               <p className="text-lg text-neutral-600 dark:text-neutral-300 mb-6 max-w-2xl">
-                Ready to satisfy your cravings? Discover today's chef specials and reorder your favorites with just a tap.
+                {t('customer_pages.restaurant_dashboard.welcome_message')}
               </p>
-              
+
               <div className="flex flex-wrap gap-4">
                 <RestaurantButton
                   variant="primary"
@@ -147,14 +152,14 @@ export default function RestaurantDashboard() {
                   leftIcon={<Utensils className="w-5 h-5" />}
                   rightIcon={<ArrowRight className="w-5 h-5" />}
                 >
-                  Browse Menu
+                  {t('customer_pages.restaurant_dashboard.browse_menu')}
                 </RestaurantButton>
                 <RestaurantButton
                   variant="secondary"
                   size="lg"
                   leftIcon={<Clock className="w-5 h-5" />}
                 >
-                  Quick Reorder
+                  {t('customer_pages.restaurant_dashboard.quick_reorder')}
                 </RestaurantButton>
               </div>
             </motion.div>
@@ -163,7 +168,7 @@ export default function RestaurantDashboard() {
           {/* 🎨 Decorative Elements */}
           <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-primary-400/20 blur-3xl" />
           <div className="absolute -left-20 -bottom-20 w-72 h-72 rounded-full bg-orange-400/20 blur-3xl" />
-          
+
           {/* ✨ Floating Food Icons */}
           <motion.div
             className="absolute top-8 right-8 text-4xl"
@@ -196,7 +201,7 @@ export default function RestaurantDashboard() {
                 {customerStats?.total_orders || 0}
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Total Orders
+                {t('customer_pages.restaurant_dashboard.stats.total_orders')}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -211,7 +216,7 @@ export default function RestaurantDashboard() {
                 {customerStats?.loyalty_points || 0}
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Loyalty Points
+                {t('customer_pages.restaurant_dashboard.stats.loyalty_points')}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -226,7 +231,7 @@ export default function RestaurantDashboard() {
                 ${customerStats?.total_spent || 0}
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Total Spent
+                {t('customer_pages.restaurant_dashboard.stats.total_spent')}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -241,7 +246,7 @@ export default function RestaurantDashboard() {
                 {customerStats?.next_reward?.points_needed || 0} pts
               </div>
               <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                to {customerStats?.next_reward?.reward_name || 'Next Reward'}
+                {t('customer_pages.restaurant_dashboard.stats.next_reward', { reward: customerStats?.next_reward?.reward_name || 'Next Reward' })}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -252,14 +257,14 @@ export default function RestaurantDashboard() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-2">
-                Today's Chef Specials
+                {t('customer_pages.restaurant_dashboard.todays_specials')}
               </h2>
               <p className="text-neutral-600 dark:text-neutral-400">
-                Handcrafted dishes made with the finest ingredients
+                {t('customer_pages.restaurant_dashboard.todays_specials_desc')}
               </p>
             </div>
             <RestaurantButton variant="ghost" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              View All
+              {t('customer_pages.restaurant_dashboard.view_all')}
             </RestaurantButton>
           </div>
 
@@ -282,14 +287,14 @@ export default function RestaurantDashboard() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-2">
-                Popular Right Now
+                {t('customer_pages.restaurant_dashboard.popular_now')}
               </h2>
               <p className="text-neutral-600 dark:text-neutral-400">
-                What other food lovers are ordering
+                {t('customer_pages.restaurant_dashboard.popular_now_desc')}
               </p>
             </div>
             <RestaurantButton variant="ghost" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              View All
+              {t('customer_pages.restaurant_dashboard.view_all')}
             </RestaurantButton>
           </div>
 
@@ -310,24 +315,24 @@ export default function RestaurantDashboard() {
         {/* 📱 Quick Actions */}
         <motion.section variants={animationVariants.fadeIn}>
           <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-6">
-            Quick Actions
+            {t('customer_pages.restaurant_dashboard.quick_actions')}
           </h2>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: <Coffee className="w-6 h-6" />, label: 'Beverages', color: 'from-blue-500 to-blue-600' },
-              { icon: <ChefHat className="w-6 h-6" />, label: 'Main Course', color: 'from-red-500 to-red-600' },
-              { icon: <IceCream className="w-6 h-6" />, label: 'Desserts', color: 'from-pink-500 to-pink-600' },
-              { icon: <Zap className="w-6 h-6" />, label: 'Quick Bites', color: 'from-yellow-500 to-yellow-600' },
+              { icon: <Coffee className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.beverages'), color: 'from-blue-500 to-blue-600' },
+              { icon: <ChefHat className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.main_course'), color: 'from-red-500 to-red-600' },
+              { icon: <IceCream className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.desserts'), color: 'from-pink-500 to-pink-600' },
+              { icon: <Zap className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.quick_bites'), color: 'from-yellow-500 to-yellow-600' },
             ].map((action, index) => (
               <motion.div
                 key={action.label}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <RestaurantCard 
-                  variant="glass" 
-                  hover 
+                <RestaurantCard
+                  variant="glass"
+                  hover
                   className="cursor-pointer text-center"
                 >
                   <CardContent>
@@ -351,12 +356,12 @@ export default function RestaurantDashboard() {
         {customerStats?.achievements && customerStats.achievements.length > 0 && (
           <motion.section variants={animationVariants.fadeIn}>
             <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-6">
-              Recent Achievements
+              {t('customer_pages.restaurant_dashboard.recent_achievements')}
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {customerStats.achievements.slice(0, 3).map((achievement) => (
-                <RestaurantCard 
+                <RestaurantCard
                   key={achievement.id}
                   variant="premium"
                   className="text-center"

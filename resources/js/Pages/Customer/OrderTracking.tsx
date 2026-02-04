@@ -9,11 +9,14 @@ import { ApiResponse, Order } from '@/app/types/domain';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { CheckCircle, Clock, Truck, ChefHat, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export default function OrderTracking() {
   const { props } = usePage();
   const orderId = (props as any).orderId;
-  
+  const translationContext = useTranslation();
+  const t = translationContext?.t || ((key: string) => key);
+
   const { data: order, isLoading } = useQuery({
     queryKey: ['customer.order', orderId],
     queryFn: () => apiGet<ApiResponse<Order>>(`/customer/orders/${orderId}`).then(r => r.data),
@@ -31,7 +34,7 @@ export default function OrderTracking() {
 
   const getStatusIcon = (status: string, isActive: boolean, isCompleted: boolean) => {
     const iconClass = `w-6 h-6 ${isCompleted ? 'text-emerald-400' : isActive ? 'text-fuchsia-400' : 'text-gray-400'}`;
-    
+
     switch (status) {
       case 'pending': return <Clock className={iconClass} />;
       case 'received': return <CheckCircle className={iconClass} />;
@@ -44,12 +47,12 @@ export default function OrderTracking() {
   };
 
   const statusSteps = [
-    { key: 'pending', label: 'Order Pending', description: 'Your order is waiting for approval' },
-    { key: 'received', label: 'Order Approved', description: 'Your order has been confirmed' },
-    { key: 'preparing', label: 'Preparing', description: 'Our chefs are working on your order' },
-    { key: 'ready', label: 'Ready', description: order?.mode === 'delivery' ? 'Out for delivery' : 'Ready for pickup' },
-    { key: 'completed', label: 'Completed', description: 'Order has been completed' },
-    { key: 'delivered', label: order?.mode === 'delivery' ? 'Delivered' : 'Picked up', description: 'Enjoy your meal!' }
+    { key: 'pending', label: t('customer_pages.order_tracking.status.pending.label'), description: t('customer_pages.order_tracking.status.pending.description') },
+    { key: 'received', label: t('customer_pages.order_tracking.status.received.label'), description: t('customer_pages.order_tracking.status.received.description') },
+    { key: 'preparing', label: t('customer_pages.order_tracking.status.preparing.label'), description: t('customer_pages.order_tracking.status.preparing.description') },
+    { key: 'ready', label: t('customer_pages.order_tracking.status.ready.label'), description: order?.mode === 'delivery' ? t('customer_pages.order_tracking.status.ready.description_delivery') : t('customer_pages.order_tracking.status.ready.description_pickup') },
+    { key: 'completed', label: t('customer_pages.order_tracking.status.completed.label'), description: t('customer_pages.order_tracking.status.completed.description') },
+    { key: 'delivered', label: order?.mode === 'delivery' ? t('customer_pages.order_tracking.status.delivered.label_delivery') : t('customer_pages.order_tracking.status.delivered.label_pickup'), description: t('customer_pages.order_tracking.status.delivered.description') }
   ];
 
   const currentStep = order ? getStatusStep(order.status) : 0;
@@ -59,10 +62,10 @@ export default function OrderTracking() {
     <CustomerLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Order Tracking</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('customer_pages.order_tracking.title')}</h1>
           {order && (
             <p className="text-gray-600 dark:text-gray-300">
-              Order #{order.id} • {order.mode === 'delivery' ? 'Delivery' : 'Pickup'}
+              {t('customer_pages.order_tracking.order_info', { id: order.id })} • {order.mode === 'delivery' ? t('customer_pages.order_tracking.delivery') : t('customer_pages.order_tracking.pickup')}
             </p>
           )}
         </div>
@@ -84,12 +87,12 @@ export default function OrderTracking() {
               <CardHeader>
                 <div className="text-center">
                   <div className="text-lg font-semibold mb-1">
-                    {order.status === 'delivered' ? 'Order Complete!' : `Estimated ${estimatedTime}`}
+                    {order.status === 'delivered' ? t('customer_pages.order_tracking.order_complete') : t('customer_pages.order_tracking.estimated', { time: estimatedTime })}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {order.status === 'delivered' 
-                      ? 'Thank you for your order!' 
-                      : `Your ${order.mode} order is being processed`
+                    {order.status === 'delivered'
+                      ? t('customer_pages.order_tracking.thank_you')
+                      : t('customer_pages.order_tracking.processing', { mode: order.mode === 'delivery' ? t('customer_pages.order_tracking.delivery').toLowerCase() : t('customer_pages.order_tracking.pickup').toLowerCase() })
                     }
                   </div>
                 </div>
@@ -98,7 +101,7 @@ export default function OrderTracking() {
                 <div className="relative">
                   {/* Progress Line */}
                   <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
-                  <motion.div 
+                  <motion.div
                     className="absolute left-8 top-0 w-0.5 bg-gradient-to-b from-fuchsia-500 to-pink-500"
                     initial={{ height: 0 }}
                     animate={{ height: `${(currentStep / (statusSteps.length - 1)) * 100}%` }}
@@ -149,7 +152,7 @@ export default function OrderTracking() {
                                 animate={{ opacity: [1, 0.5, 1] }}
                                 transition={{ repeat: Infinity, duration: 2 }}
                               >
-                                In progress...
+                                {t('customer_pages.order_tracking.in_progress')}
                               </motion.div>
                             )}
                           </div>
@@ -164,7 +167,7 @@ export default function OrderTracking() {
             {/* Order Details */}
             <Card>
               <CardHeader>
-                <h3 className="font-semibold">Order Details</h3>
+                <h3 className="font-semibold">{t('customer_pages.order_tracking.order_details')}</h3>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -172,7 +175,7 @@ export default function OrderTracking() {
                     <div key={index} className="flex items-center justify-between">
                       <div>
                         <div className="font-medium">{item.name}</div>
-                        <div className="text-sm text-gray-500">Qty: {item.quantity}</div>
+                        <div className="text-sm text-gray-500">{t('customer_pages.order_tracking.quantity', { qty: item.quantity })}</div>
                       </div>
                       <div className="font-medium">
                         ${(item.unit_price * item.quantity).toFixed(2)}
@@ -181,7 +184,7 @@ export default function OrderTracking() {
                   ))}
                   <div className="border-t border-white/10 pt-3 mt-3">
                     <div className="flex justify-between font-semibold text-lg">
-                      <span>Total</span>
+                      <span>{t('customer_pages.order_tracking.total')}</span>
                       <span>${order.total.toFixed(2)}</span>
                     </div>
                   </div>
@@ -193,9 +196,9 @@ export default function OrderTracking() {
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-sm text-gray-500">
-                  Need help with your order?{' '}
+                  {t('customer_pages.order_tracking.need_help')}{' '}
                   <a href="tel:+1234567890" className="text-fuchsia-400 hover:underline">
-                    Call us at (123) 456-7890
+                    {t('customer_pages.order_tracking.call_us', { phone: '(123) 456-7890' })}
                   </a>
                 </div>
               </CardContent>

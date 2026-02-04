@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTableStore } from '@/app/store/tableStore';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface TableLayoutProps {
     children: React.ReactNode;
@@ -23,6 +24,7 @@ interface TableLayoutProps {
 export default function TableLayout({ children, title, showBack = false, hideNav = false }: TableLayoutProps) {
     const { tableCode, tableName, getItemCount } = useTableStore();
     const cartCount = getItemCount();
+    const { t } = useTranslation();
 
     // Active route detection could be added here if needed for navigation highlighting
 
@@ -56,11 +58,11 @@ export default function TableLayout({ children, title, showBack = false, hideNav
 
                         <div>
                             <h1 className="font-bold text-lg leading-tight tracking-wide">
-                                NKH<span className="text-fuchsia-500">.</span>
+                                {t('layout.table_brand')}
                             </h1>
                             {tableCode && (
                                 <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">
-                                    Table {tableCode}
+                                    {t('layout.table_label', { code: tableCode })}
                                 </p>
                             )}
                         </div>
@@ -103,7 +105,7 @@ export default function TableLayout({ children, title, showBack = false, hideNav
                             )}
                         >
                             <Utensils className="w-6 h-6 mb-0.5" />
-                            <span className="text-[10px] font-bold tracking-wide">Menu</span>
+                            <span className="text-[10px] font-bold tracking-wide">{t('layout.table_nav.menu')}</span>
                         </Link>
 
                         <Link
@@ -116,7 +118,7 @@ export default function TableLayout({ children, title, showBack = false, hideNav
                             )}
                         >
                             <Receipt className="w-6 h-6 mb-0.5" />
-                            <span className="text-[10px] font-bold tracking-wide">Orders</span>
+                            <span className="text-[10px] font-bold tracking-wide">{t('layout.table_nav.orders')}</span>
                         </Link>
 
                         {/* Tray Button (Center Highlighted) */}
@@ -138,7 +140,7 @@ export default function TableLayout({ children, title, showBack = false, hideNav
                                 )}
                             </div>
                             <div className="text-center mt-1.5">
-                                <span className={cn("text-[10px] font-bold tracking-wide transition-colors", cartCount > 0 ? "text-fuchsia-400" : "text-slate-500 group-hover:text-slate-300")}>Tray</span>
+                                <span className={cn("text-[10px] font-bold tracking-wide transition-colors", cartCount > 0 ? "text-fuchsia-400" : "text-slate-500 group-hover:text-slate-300")}>{t('layout.table_nav.tray')}</span>
                             </div>
                         </Link>
                     </div>

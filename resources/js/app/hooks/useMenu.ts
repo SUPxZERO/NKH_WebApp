@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/libs/apiClient';
 import { ApiResponse, Category, MenuItem } from '@/app/types/domain';
+import { useLanguage } from '../context/LanguageContext';
 
 export function useCategories(subCategoriesOnly: boolean = false) {
+  const { locale } = useLanguage();
   return useQuery({
-    queryKey: ['categories', subCategoriesOnly],
+    queryKey: ['categories', subCategoriesOnly, locale],
     queryFn: async () => apiGet<ApiResponse<Category[]>>('/categories', {
       params: {
         // location_id: 1, // Let backend handle default
@@ -16,8 +18,9 @@ export function useCategories(subCategoriesOnly: boolean = false) {
 }
 
 export function useMenuItems(params?: { category_id?: number; search?: string }) {
+  const { locale } = useLanguage();
   return useQuery({
-    queryKey: ['menu', params],
+    queryKey: ['menu', params, locale],
     queryFn: async () =>
       apiGet<ApiResponse<MenuItem[]>>('/menu', {
         params: { ...params } // Let backend handle default location

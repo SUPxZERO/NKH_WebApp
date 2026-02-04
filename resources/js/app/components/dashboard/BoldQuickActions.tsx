@@ -1,138 +1,140 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from '@inertiajs/react';
-import { ChevronRight } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import {
+    ShoppingBag,
+    Plus,
+    UserPlus,
+    Settings,
+    Zap,
+    ChevronRight
+} from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
-interface QuickAction {
+
+
+export interface QuickAction {
     label: string;
     icon: string;
     href: string;
 }
 
 interface BoldQuickActionsProps {
-    actions: QuickAction[];
-    iconMap: Record<string, React.ComponentType<{ className?: string }>>;
     className?: string;
+    actions?: QuickAction[];
+    iconMap?: Record<string, React.ComponentType<{ className?: string }>>;
 }
 
-const actionGradients = [
-    'from-fuchsia-500 via-purple-500 to-pink-500',
-    'from-blue-500 via-cyan-500 to-teal-500',
-    'from-orange-500 via-amber-500 to-yellow-500',
-    'from-emerald-500 via-green-500 to-teal-500',
-    'from-rose-500 via-red-500 to-orange-500',
-    'from-indigo-500 via-purple-500 to-fuchsia-500',
-];
+export function BoldQuickActions({ className, actions: propActions, iconMap }: BoldQuickActionsProps) {
+    const { t } = useTranslation();
 
-const actionShadows = [
-    'shadow-fuchsia-500/40',
-    'shadow-blue-500/40',
-    'shadow-orange-500/40',
-    'shadow-emerald-500/40',
-    'shadow-rose-500/40',
-    'shadow-indigo-500/40',
-];
+    const defaultActions = [
+        {
+            label: t('admin.dashboard.quick_actions.actions.new_order'),
+            icon: ShoppingBag,
+            color: 'from-emerald-400 to-teal-500',
+            shadow: 'shadow-emerald-500/30',
+            onClick: () => router.visit('/admin/orders')
+        },
+        {
+            label: t('admin.dashboard.quick_actions.actions.add_menu_item'),
+            icon: Plus,
+            color: 'from-blue-400 to-indigo-500',
+            shadow: 'shadow-blue-500/30',
+            onClick: () => router.visit('/admin/menu-items')
+        },
+        {
+            label: t('admin.dashboard.quick_actions.actions.staff_schedule'),
+            icon: UserPlus,
+            color: 'from-purple-400 to-pink-500',
+            shadow: 'shadow-purple-500/30',
+            onClick: () => router.visit('/admin/shifts')
+        },
+        {
+            label: t('admin.dashboard.quick_actions.actions.settings'),
+            icon: Settings,
+            color: 'from-orange-400 to-amber-500',
+            shadow: 'shadow-orange-500/30',
+            onClick: () => router.visit('/admin/settings')
+        }
+    ];
 
-const actionLightBgs = [
-    'from-fuchsia-50 to-purple-50',
-    'from-blue-50 to-cyan-50',
-    'from-orange-50 to-amber-50',
-    'from-emerald-50 to-green-50',
-    'from-rose-50 to-red-50',
-    'from-indigo-50 to-purple-50',
-];
-
-export function BoldQuickActions({ actions, iconMap, className }: BoldQuickActionsProps) {
-    if (!actions || actions.length === 0) return null;
+    // Always use the translated default actions
+    // (The props are kept for API compatibility but intentionally ignored
+    //  because the backend sends generic role-based actions, not the specific
+    //  quick actions we want to display here)
 
     return (
-        <div className={cn('flex sm:grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 justify-center sm:justify-normal gap-4 sm:gap-4', className)}>
-            {actions.map((action, index) => {
-                const IconComponent = iconMap[action.icon] || iconMap['chart-bar'];
-                const gradient = actionGradients[index % actionGradients.length];
-                const shadow = actionShadows[index % actionShadows.length];
-                const lightBg = actionLightBgs[index % actionLightBgs.length];
+        <div className={cn(
+            'relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6',
+            // Light mode: clean white
+            'bg-white border border-gray-100',
+            // Dark mode: deep gradient
+            'dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-black',
+            'dark:border-white/5',
+            'shadow-xl dark:shadow-2xl',
+            className
+        )}>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg shadow-violet-500/20">
+                    <Zap className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+                        {t('admin.dashboard.quick_actions.title')}
+                    </h3>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {t('admin.dashboard.quick_actions.subtitle')}
+                    </p>
+                </div>
+            </div>
 
-                return (
-                    <motion.div
-                        key={action.label}
-                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ delay: index * 0.05, type: 'spring', stiffness: 100 }}
-                        whileHover={{ y: -8, scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="relative group "
-                    >
-                        {/* Glow effect - dark mode only */}
-                        <div className={cn(
-                            'absolute inset-0 rounded-xl sm:rounded-2xl blur-xl opacity-0 dark:group-hover:opacity-50 transition-opacity duration-300',
-                            `bg-gradient-to-r ${gradient}`
-                        )} />
-
-                        <Link
-                            href={action.href}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {defaultActions.map((action, index) => {
+                    const Icon = action.icon;
+                    return (
+                        <motion.button
+                            key={action.label + index}
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={action.onClick}
                             className={cn(
-                                'relative flex flex-col items-center gap-1.5 sm:gap-3 p-2.5 sm:p-5 rounded-xl sm:rounded-2xl',
-                                // Light mode
-                                `bg-gradient-to-br ${lightBg}`,
-                                'border border-gray-200',
-                                // Dark mode
-                                'dark:bg-gradient-to-br dark:from-gray-900/95 dark:via-gray-800/95 dark:to-gray-900/95',
-                                'dark:border-white/10 dark:backdrop-blur-xl',
-                                'shadow-lg dark:shadow-2xl transition-all duration-300',
-                                'group-hover:border-gray-300 dark:group-hover:border-white/20',
-                                `dark:${shadow}`
+                                "group relative overflow-hidden p-4 rounded-2xl text-left transition-all duration-300",
+                                // Light: colorful but subtle backgrounds
+                                "bg-gray-50 hover:bg-white border border-gray-100 hover:border-transparent hover:shadow-xl",
+                                // Dark: glassmorphism
+                                "dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/5",
                             )}
                         >
-                            {/* Animated border on hover - dark mode only */}
-                            <motion.div
-                                className={cn(
-                                    'absolute inset-0 rounded-xl sm:rounded-2xl p-[1px] opacity-0 dark:group-hover:opacity-100 transition-opacity',
-                                    `bg-gradient-to-r ${gradient}`
-                                )}
-                            >
-                                <div className="w-full h-full rounded-xl sm:rounded-2xl bg-gray-900" />
-                            </motion.div>
+                            {/* Hover Gradient Overlay */}
+                            <div className={cn(
+                                "absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-br",
+                                action.color
+                            )} />
 
-                            {/* Icon */}
-                            <motion.div
-                                whileHover={{ rotate: 10 }}
-                                className={cn(
-                                    'relative z-10 flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl',
-                                    'bg-gradient-to-br shadow-lg',
-                                    gradient,
-                                    shadow
-                                )}
-                            >
-                                {IconComponent && <IconComponent className="w-4 h-4 sm:w-6 sm:h-6 text-white" />}
-
-                                {/* Icon pulse - dark mode only */}
-                                <motion.div
-                                    animate={{ scale: [1, 1.3], opacity: [0.5, 0] }}
-                                    transition={{ duration: 1.5, repeat: Infinity }}
-                                    className={cn('absolute inset-0 rounded-lg sm:rounded-xl opacity-0 dark:opacity-100', `bg-gradient-to-br ${gradient}`)}
-                                />
-                            </motion.div>
-
-                            {/* Label */}
-                            <span className="relative z-10 text-[10px] sm:text-sm font-bold text-gray-700 dark:text-white text-center leading-tight">
-                                {action.label}
-                            </span>
+                            <div className="relative z-10 flex flex-col gap-3">
+                                <div className={cn(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-lg transform group-hover:scale-110 transition-transform duration-300",
+                                    action.color,
+                                    action.shadow
+                                )}>
+                                    <Icon className="w-5 h-5 text-white" />
+                                </div>
+                                <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                                    {action.label}
+                                </span>
+                            </div>
 
                             {/* Arrow indicator */}
-                            <motion.div
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 0, x: -10 }}
-                                whileHover={{ opacity: 1, x: 0 }}
-                                className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/60"
-                            >
-                                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                            </motion.div>
-                        </Link>
-                    </motion.div>
-                );
-            })}
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-2 group-hover:translate-x-0">
+                                <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                            </div>
+                        </motion.button>
+                    );
+                })}
+            </div>
         </div>
     );
 }

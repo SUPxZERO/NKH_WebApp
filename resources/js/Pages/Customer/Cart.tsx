@@ -240,7 +240,7 @@ export default function Cart() {
             {/* Cart Items */}
             <motion.div variants={itemVariants} className="space-y-3">
               <h2 className="text-base font-semibold text-gray-900 dark:text-white sm:hidden">
-                Items ({cart.items.length})
+                {t('cart.items')} ({cart.items.length})
               </h2>
               <AnimatePresence mode="popLayout">
                 {cart.items.map((item) => (

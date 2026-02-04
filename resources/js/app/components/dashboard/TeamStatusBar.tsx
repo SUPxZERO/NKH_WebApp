@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from '@inertiajs/react';
 import { Users, Clock, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface TeamMember {
     position: string;
@@ -26,6 +27,7 @@ const positionColors: Record<string, string> = {
 };
 
 export function TeamStatusBar({ total, byPosition, className }: TeamStatusProps) {
+    const { t } = useTranslation();
     const positions = Object.entries(byPosition).map(([position, count]) => ({
         position,
         count,
@@ -44,13 +46,13 @@ export function TeamStatusBar({ total, byPosition, className }: TeamStatusProps)
                         <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Team on Duty</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Today's shift</p>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">{t('admin.dashboard.team_status.title')}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin.dashboard.team_status.subtitle')}</p>
                     </div>
                 </div>
                 <div className="text-right">
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">{total}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">staff members</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('admin.dashboard.team_status.staff_members')}</p>
                 </div>
             </div>
 
@@ -81,7 +83,7 @@ export function TeamStatusBar({ total, byPosition, className }: TeamStatusProps)
             ) : (
                 <div className="text-center py-6 text-gray-500 dark:text-gray-400">
                     <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p>No shifts scheduled for today</p>
+                    <p>{t('admin.dashboard.team_status.no_shifts')}</p>
                 </div>
             )}
 
@@ -91,7 +93,7 @@ export function TeamStatusBar({ total, byPosition, className }: TeamStatusProps)
                     href="/admin/shifts"
                     className="flex items-center justify-center gap-2 text-sm font-medium text-fuchsia-600 dark:text-fuchsia-400 hover:text-fuchsia-700 dark:hover:text-fuchsia-300 transition-colors"
                 >
-                    View Full Schedule
+                    {t('admin.dashboard.team_status.view_schedule')}
                     <CheckCircle2 className="w-4 h-4" />
                 </Link>
             </div>

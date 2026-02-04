@@ -87,7 +87,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center">
                     <Banknote className="w-12 h-12 mx-auto mb-3 text-white" />
                     <h2 className="text-xl font-bold text-white">{t('employee.delivery.collect_payment')}</h2>
-                    <p className="text-white/80">Order #{order.order_number}</p>
+                    <p className="text-white/80">{t('employee.delivery.order_number', { number: order.order_number })}</p>
                 </div>
 
                 {/* Content */}
@@ -133,7 +133,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                                 min={totalAmount}
                                 value={amountReceived}
                                 onChange={(e) => setAmountReceived(e.target.value)}
-                                placeholder="0.00"
+                                placeholder={t('employee.delivery.amount_placeholder')}
                                 className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-2xl font-bold text-white text-center focus:border-blue-500 focus:outline-none"
                                 autoFocus
                             />
@@ -163,7 +163,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                             type="text"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            placeholder="e.g. Exact change, Left at door..."
+                            placeholder={t('employee.delivery.notes_placeholder')}
                             className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:border-blue-500 focus:outline-none"
                         />
                     </div>
@@ -187,7 +187,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                             ) : (
                                 <>
                                     <CheckCircle2 className="w-5 h-5 mr-2" />
-                                    Collect
+                                    {t('employee.delivery.collect')}
                                 </>
                             )}
                         </Button>
@@ -227,7 +227,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
             toastSuccess(t('employee.delivery.order_claimed'));
             qc.invalidateQueries({ queryKey: ['driver.orders'] });
         },
-        onError: (err: any) => toastError(err?.response?.data?.message || 'Failed to claim')
+        onError: (err: any) => toastError(err?.response?.data?.message || t('employee.delivery.claim_failed'))
     });
 
     const statusMutation = useMutation({
@@ -245,7 +245,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
     };
 
     const handleClaim = (id: number) => {
-        if (confirm('Claim this delivery order?')) {
+        if (confirm(t('employee.delivery.confirm_claim'))) {
             claimMutation.mutate(id);
         }
     };
@@ -258,7 +258,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
         if (needsPayment) {
             onCollectPayment(order);
         } else {
-            if (confirm('Complete this delivery?')) {
+            if (confirm(t('employee.delivery.confirm_complete'))) {
                 statusMutation.mutate({ id: order.id, status: 'delivered' });
             }
         }
@@ -347,7 +347,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                             order.status === 'delivered' ? "bg-green-500/20 text-green-500" :
                                                 "bg-blue-500/20 text-blue-500"
                                     )}>
-                                        {order.status.replace(/_/g, ' ')}
+                                        {t(`employee.delivery.status.${order.status}`, { default: order.status.replace(/_/g, ' ') })}
                                     </div>
                                 </div>
 
@@ -358,18 +358,18 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                             className="underline decoration-dotted hover:text-blue-400 cursor-pointer"
                                             onClick={() => order.delivery_address && openMap(order.delivery_address)}
                                         >
-                                            {order.delivery_address || "No address provided"}
+                                            {order.delivery_address || t('employee.delivery.no_address')}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-gray-300">
                                         <Phone className="w-4 h-4 text-gray-500" />
-                                        <span>{order.customer_phone || "No phone"}</span>
+                                        <span>{order.customer_phone || t('employee.delivery.no_phone')}</span>
                                     </div>
                                     {/* Show Payment Status */}
                                     <div className="flex items-center gap-2 text-gray-300">
                                         <Banknote className="w-4 h-4 text-gray-500" />
                                         <span className={order.payment_status === 'paid' ? 'text-green-400' : 'text-orange-400'}>
-                                            {order.payment_status?.toUpperCase() || 'UNPAID'}
+                                            {order.payment_status ? t(`employee.delivery.payment_status.${order.payment_status}`) : t('employee.delivery.payment_status.unpaid')}
                                         </span>
                                     </div>
                                 </div>
@@ -436,7 +436,7 @@ export default function DeliveryOrders() {
 
     return (
         <EmployeeLayout>
-            <Head title="Delivery & Pickup Orders" />
+            <Head title={t('employee.delivery.page_title')} />
 
             <div className="max-w-6xl mx-auto space-y-6 p-4">
                 {/* Header */}
@@ -523,7 +523,7 @@ export default function DeliveryOrders() {
                                                             </div>
                                                             <div>
                                                                 <h3 className="font-bold text-white">#{order.order_number}</h3>
-                                                                <p className="text-xs text-gray-400 capitalize">{order.order_type}</p>
+                                                                <p className="text-xs text-gray-400 capitalize">{t(`employee.delivery.order_type.${order.order_type}`)}</p>
                                                             </div>
                                                         </div>
                                                         <div className="text-right">
@@ -556,7 +556,7 @@ export default function DeliveryOrders() {
 
                                                         <div className="flex items-center gap-2 text-sm text-gray-300">
                                                             <Clock className="w-4 h-4 text-gray-500" />
-                                                            <span>Placed {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                            <span>{t('employee.delivery.placed_at', { time: new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}</span>
                                                         </div>
                                                     </div>
 

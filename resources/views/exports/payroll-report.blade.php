@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <title>Payroll Report</title>
+    <title>{{ __('exports.payroll.title') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -126,53 +126,53 @@
 </head>
 <body>
     <div class="header">
-        <h1>💰 Payroll Report</h1>
+        <h1>{{ __('exports.payroll.heading') }}</h1>
         <div class="period">{{ $period }}</div>
     </div>
 
     <!-- Summary Stats -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Employees</div>
+            <div class="stat-label">{{ __('exports.payroll.stats.employees') }}</div>
             <div class="stat-value">{{ number_format($summary['total_employees']) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Gross Pay</div>
+            <div class="stat-label">{{ __('exports.payroll.stats.gross_pay') }}</div>
             <div class="stat-value">${{ number_format($summary['total_gross_pay'], 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Bonuses</div>
+            <div class="stat-label">{{ __('exports.payroll.stats.bonuses') }}</div>
             <div class="stat-value">${{ number_format($summary['total_bonuses'], 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Deductions</div>
+            <div class="stat-label">{{ __('exports.payroll.stats.deductions') }}</div>
             <div class="stat-value">${{ number_format($summary['total_deductions'], 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Net Pay</div>
+            <div class="stat-label">{{ __('exports.payroll.stats.net_pay') }}</div>
             <div class="stat-value">${{ number_format($summary['total_net_pay'], 2) }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Avg Net Pay</div>
+            <div class="stat-label">{{ __('exports.payroll.stats.avg_net_pay') }}</div>
             <div class="stat-value">${{ number_format($summary['avg_net_pay'], 2) }}</div>
         </div>
     </div>
 
     <!-- Payroll Details -->
     <div class="section">
-        <div class="section-title">📋 Payroll Details</div>
+        <div class="section-title">{{ __('exports.payroll.sections.details') }}</div>
         <table>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Employee</th>
-                    <th>Period</th>
-                    <th class="text-right">Base Pay</th>
-                    <th class="text-right">Overtime</th>
-                    <th class="text-right">Bonuses</th>
-                    <th class="text-right">Deductions</th>
-                    <th class="text-right">Net Pay</th>
-                    <th>Status</th>
+                    <th>{{ __('exports.payroll.table.employee') }}</th>
+                    <th>{{ __('exports.payroll.table.period') }}</th>
+                    <th class="text-right">{{ __('exports.payroll.table.base_pay') }}</th>
+                    <th class="text-right">{{ __('exports.payroll.table.overtime') }}</th>
+                    <th class="text-right">{{ __('exports.payroll.table.bonuses') }}</th>
+                    <th class="text-right">{{ __('exports.payroll.table.deductions') }}</th>
+                    <th class="text-right">{{ __('exports.payroll.table.net_pay') }}</th>
+                    <th>{{ __('exports.payroll.table.status') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -188,13 +188,20 @@
                     <td class="text-right">${{ number_format($payroll['net_pay'], 2) }}</td>
                     <td>
                         <span class="status-badge status-{{ $payroll['status'] }}">
-                            {{ ucfirst($payroll['status']) }}
+                            @php
+                                $statusKey = 'exports.payroll.status.' . $payroll['status'];
+                                $statusLabel = __($statusKey);
+                                if ($statusLabel === $statusKey) {
+                                    $statusLabel = ucfirst($payroll['status']);
+                                }
+                            @endphp
+                            {{ $statusLabel }}
                         </span>
                     </td>
                 </tr>
                 @endforeach
                 <tr class="totals-row">
-                    <td colspan="3"><strong>TOTALS</strong></td>
+                    <td colspan="3"><strong>{{ __('exports.payroll.totals') }}</strong></td>
                     <td class="text-right">${{ number_format($payrolls->sum('base_pay'), 2) }}</td>
                     <td class="text-right">${{ number_format($payrolls->sum('overtime_pay'), 2) }}</td>
                     <td class="text-right">${{ number_format($summary['total_bonuses'], 2) }}</td>
@@ -207,7 +214,7 @@
     </div>
 
     <div class="footer">
-        Generated on {{ $generated_at }} | NKH Restaurant Management System
+        {{ __('exports.payroll.generated_on', ['date' => $generated_at]) }} | {{ __('exports.payroll.system_name') }}
     </div>
 </body>
 </html>

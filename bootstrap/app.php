@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->encryptCookies(except: [
             'table_session',
+            'NEXT_LOCALE', // Allow reading unencrypted locale cookie
         ]);
 
         // Web middleware - Telegram auth MUST run before Authenticate
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->api(append: [
+            \App\Http\Middleware\SetLocale::class, // Sprint P-Translation: Enable locale for API
             \App\Http\Middleware\AuditMiddleware::class, // Audit request tracing
         ]);
 

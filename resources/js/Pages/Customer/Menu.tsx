@@ -86,7 +86,7 @@ export default function Menu() {
       await toggleFavorite(itemId);
     } catch (error) {
       console.error('Favorite toggle failed:', error);
-      toastError('Failed to update favorites');
+      toastError(t('menu.favorite_error') as string);
     }
   };
 
@@ -164,7 +164,7 @@ export default function Menu() {
       quantity: 1,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(t('menu.added_to_cart_msg', { name: item.name }) as string || `${item.name} added to cart`);
+    toastSuccess(t('menu.added_to_cart_msg', { name: item.name }) as string);
   };
 
   const clearAllFilters = () => {
@@ -181,8 +181,8 @@ export default function Menu() {
   return (
     <CustomerLayout>
       <Head>
-        <title>Menu - NKH Restaurant | Browse Our Delicious Selection</title>
-        <meta name="description" content="Browse our full menu of delicious dishes. Filter by category, search for your favorites, and order online for delivery or pickup." />
+        <title>{t('menu.page_title') as string}</title>
+        <meta name="description" content={t('menu.page_desc') as string} />
       </Head>
 
       <div className="space-y-3 sm:space-y-4">
@@ -633,7 +633,7 @@ export default function Menu() {
                           onClick={() => setSearchQuery('')}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-400 text-sm font-medium"
                         >
-                          Search: "{searchQuery}"
+                          {t('menu.search_filter', { query: searchQuery })}
                           <X className="w-3 h-3" />
                         </button>
                       )}

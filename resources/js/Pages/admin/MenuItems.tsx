@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { useTranslation } from '@/app/hooks/useTranslation';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
 import { MenuItem, Category } from '@/app/types/domain';
@@ -101,6 +102,7 @@ export default function MenuItems() {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const qc = useQueryClient();
   const { t } = useTranslation();
+  const { locale } = useLanguage();
 
   // Preview modal state
   const [previewItemId, setPreviewItemId] = useState<number | null>(null);
@@ -130,7 +132,7 @@ export default function MenuItems() {
 
   // Fetch menu items
   const { data: menuItems, isLoading } = useQuery({
-    queryKey: ['menu-items', page, search, categoryFilter, currentLocationId, featuredFilter],
+    queryKey: ['menu-items', page, search, categoryFilter, currentLocationId, featuredFilter, locale],
     queryFn: () => {
       let url = `/menu-items?page=${page}&per_page=${perPage}&search=${search}`;
       if (categoryFilter !== 'all') url += `&category_id=${categoryFilter}`;
@@ -141,7 +143,7 @@ export default function MenuItems() {
 
   // Fetch all categories for selection (flat list)
   const { data: categories } = useQuery({
-    queryKey: ['categories-flat'],
+    queryKey: ['categories-flat', locale],
     queryFn: () => apiGet('/categories?flat_list=true')
   });
 

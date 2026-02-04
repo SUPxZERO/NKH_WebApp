@@ -63,7 +63,7 @@ export default function CustomerLayout({ children, className }: Props) {
   const { user } = useAuth();
 
   const userAvatar = user?.avatar;
-  const userName = user?.name || 'User';
+  const userName = user?.name || t('layout.nav.user_fallback');
   const userEmail = user?.email || '';
 
   // Subscribe to real-time customer notifications
@@ -211,7 +211,7 @@ export default function CustomerLayout({ children, className }: Props) {
                 <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 backdrop-blur-sm">
                   <img
                     src="/Nkhlogo.png"
-                    alt="NKH Restaurant"
+                    alt={t('layout.footer.brand_title')}
                     className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.4)]"
                   />
                 </div>
@@ -280,7 +280,7 @@ export default function CustomerLayout({ children, className }: Props) {
               <button
                 onClick={search.open}
                 className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-                title="Search"
+                title={t('layout.nav.search_title')}
               >
                 <Search className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
@@ -302,7 +302,7 @@ export default function CustomerLayout({ children, className }: Props) {
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-                title="Profile"
+                title={t('layout.nav.profile_title')}
               >
                 <User className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
@@ -364,7 +364,7 @@ export default function CustomerLayout({ children, className }: Props) {
                 <div className="relative w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 shadow-lg shadow-fuchsia-500/20">
                   <img
                     src="/Nkhlogo.png"
-                    alt="NKH Restaurant"
+                    alt={t('layout.footer.brand_title')}
                     className="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]"
                   />
                 </div>

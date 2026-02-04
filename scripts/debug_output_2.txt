@@ -1,0 +1,35 @@
+﻿--- MenuItem Translations ---
+[
+    {
+        "id": 1,
+        "menu_item_id": 1,
+        "locale": "en",
+        "name": "Fried Spring Rolls",
+        "description": "Crispy fried vegetable spring rolls",
+        "created_at": "2026-01-22T13:08:18.000000Z",
+        "updated_at": "2026-01-22T13:08:18.000000Z"
+    },
+    {
+        "id": 2,
+        "menu_item_id": 1,
+        "locale": "km",
+        "name": "\u1794\u17b6\u179a\u17b6\u17c6\u1784\u1794\u1784\u17d2\u1785\u17bb\u1780\u1785\u17c0\u1793",
+        "description": "\u1798\u17d2\u17a0\u17bc\u1794\u1786\u17d2\u1784\u17b6\u1789\u17cb\u1796\u17b7\u179f\u17c1\u179f",
+        "created_at": "2026-01-22T13:08:18.000000Z",
+        "updated_at": "2026-01-22T13:08:18.000000Z"
+    }
+]
+--- Category Translations ---
+[
+    {
+        "id": 346,
+        "category_id": 180,
+        "locale": "en",
+        "name": "hui",
+        "description": "",
+        "created_at": "2026-01-26T08:26:00.000000Z",
+        "updated_at": "2026-01-26T08:26:00.000000Z"
+    }
+]
+--- Current Locale ---
+en

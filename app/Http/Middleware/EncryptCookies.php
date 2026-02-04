@@ -14,5 +14,6 @@ class EncryptCookies extends Middleware
     protected $except = [
         'XSRF-TOKEN',
         'table_session',
+        'NEXT_LOCALE', // Allows reading locale set by JS
     ];
 }

@@ -24,6 +24,7 @@ import { cn } from '@/app/utils/cn';
 import { apiGet, apiPost, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { formatDistanceToNow, format } from 'date-fns';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface Notification {
     id: number;
@@ -63,18 +64,21 @@ const getNotificationColor = (type: Notification['type']) => {
     }
 };
 
-const typeLabels = {
-    all: 'All',
-    order: 'Orders',
-    promotion: 'Promotions',
-    reward: 'Rewards',
-    system: 'System',
-};
-
 export default function Notifications() {
     const queryClient = useQueryClient();
+    const translationContext = useTranslation();
+    const t = translationContext?.t || ((key: string) => key);
+
     const [filter, setFilter] = useState<'all' | Notification['type']>('all');
     const [searchQuery, setSearchQuery] = useState('');
+
+    const typeLabels = {
+        all: t('customer_pages.notifications.types.all'),
+        order: t('customer_pages.notifications.types.order'),
+        promotion: t('customer_pages.notifications.types.promotion'),
+        reward: t('customer_pages.notifications.types.reward'),
+        system: t('customer_pages.notifications.types.system'),
+    };
 
     // Fetch notifications
     const { data: notificationsData, isLoading } = useQuery({
@@ -108,7 +112,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            toastSuccess('Notification marked as read');
+            toastSuccess(t('customer_pages.notifications.messages.marked_read'));
         },
     });
 
@@ -119,7 +123,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            toastSuccess('All notifications marked as read');
+            toastSuccess(t('customer_pages.notifications.messages.all_marked_read'));
         },
     });
 
@@ -130,7 +134,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            toastSuccess('Notification deleted');
+            toastSuccess(t('customer_pages.notifications.messages.deleted'));
         },
     });
 
@@ -151,10 +155,10 @@ export default function Notifications() {
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                                Notifications
+                                {t('customer_pages.notifications.title')}
                             </h1>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">
-                                {unreadCount > 0 ? `You have ${unreadCount} unread notifications` : 'All caught up!'}
+                                {unreadCount > 0 ? t('customer_pages.notifications.unread', { count: unreadCount }) : t('customer_pages.notifications.all_caught_up')}
                             </p>
                         </div>
                         {unreadCount > 0 && (
@@ -165,7 +169,7 @@ export default function Notifications() {
                                 className="flex items-center gap-2"
                             >
                                 <CheckCheck className="w-4 h-4" />
-                                Mark All Read
+                                {t('customer_pages.notifications.mark_all_read')}
                             </Button>
                         )}
                     </div>
@@ -181,7 +185,7 @@ export default function Notifications() {
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search notifications..."
+                                        placeholder={t('customer_pages.notifications.search_placeholder')}
                                         className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none text-gray-900 dark:text-white placeholder-gray-500"
                                     />
                                 </div>
@@ -219,10 +223,10 @@ export default function Notifications() {
                             <CardContent className="p-12 text-center">
                                 <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                                    No notifications
+                                    {t('customer_pages.notifications.empty.title')}
                                 </h3>
                                 <p className="text-gray-500 dark:text-gray-400">
-                                    {searchQuery ? 'No notifications match your search.' : 'You\'re all caught up!'}
+                                    {searchQuery ? t('customer_pages.notifications.empty.search') : t('customer_pages.notifications.empty.all_caught_up')}
                                 </p>
                             </CardContent>
                         </Card>

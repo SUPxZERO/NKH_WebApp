@@ -80,10 +80,10 @@ export default function Feedback() {
                                 {isAnonymous ? <Shield className="w-5 h-5 text-green-400" /> : <ShieldOff className="w-5 h-5 text-slate-400" />}
                                 <div>
                                     <p className="font-semibold text-sm">
-                                        {isAnonymous ? t('employee.settings.privacy') : "Public Mode"}
+                                        {isAnonymous ? t('employee.feedback.anonymous') : t('employee.feedback.public_mode')}
                                     </p>
                                     <p className="text-xs opacity-80">
-                                        {isAnonymous ? "Your identity will be hidden" : "Your name will be attached"}
+                                        {isAnonymous ? t('employee.feedback.identity_hidden') : t('employee.feedback.name_attached')}
                                     </p>
                                 </div>
                             </div>
@@ -103,10 +103,10 @@ export default function Feedback() {
                             {/* Type Selector */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 {[
-                                    { id: 'general', label: t('employee.common.confirm') },
+                                    { id: 'general', label: t('employee.feedback.type.general') },
                                     { id: 'suggestion', label: t('employee.feedback.type.suggestion') },
                                     { id: 'complaint', label: t('employee.feedback.type.issue') },
-                                    { id: 'shift_rating', label: 'Rate Shift' },
+                                    { id: 'shift_rating', label: t('employee.feedback.type.shift_rating') },
                                 ].map((t) => (
                                     <button
                                         key={t.id}
@@ -128,7 +128,7 @@ export default function Feedback() {
                             {(type === 'shift_rating' || type === 'general') && (
                                 <div className="text-center py-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                                        How would you rate it?
+                                        {t('employee.feedback.rate_prompt')}
                                     </label>
                                     <div className="flex justify-center gap-2">
                                         {[1, 2, 3, 4, 5].map((star) => (
@@ -152,7 +152,7 @@ export default function Feedback() {
                                         ))}
                                     </div>
                                     <p className="text-sm font-medium text-slate-500 mt-2 h-5">
-                                        {['', 'Very Poor', 'Poor', 'Average', 'Good', 'Excellent'][(hoverRating || rating)]}
+                                        {t(`employee.feedback.rating.${['none', 'very_poor', 'poor', 'average', 'good', 'excellent'][(hoverRating || rating)]}`)}
                                     </p>
                                 </div>
                             )}
@@ -165,9 +165,9 @@ export default function Feedback() {
                                 <textarea
                                     className="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700 p-4 min-h-[120px] focus:ring-2 focus:ring-purple-500"
                                     placeholder={
-                                        type === 'suggestion' ? "I think we could improve..." :
-                                            type === 'complaint' ? "I'm concerned about..." :
-                                                "Share your details..."
+                                        type === 'suggestion' ? t('employee.feedback.placeholders.suggestion') :
+                                            type === 'complaint' ? t('employee.feedback.placeholders.complaint') :
+                                                t('employee.feedback.placeholders.general')
                                     }
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
@@ -179,14 +179,14 @@ export default function Feedback() {
                                 disabled={submitFeedbackMutation.isPending}
                                 className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
                             >
-                                {submitFeedbackMutation.isPending ? `${t('employee.feedback.submit')}...` : t('employee.feedback.submit')}
+                                {submitFeedbackMutation.isPending ? t('employee.common.submitting') : t('employee.feedback.submit')}
                                 <Send className="w-5 h-5 ml-2" />
                             </Button>
                         </form>
                     </div>
 
                     <p className="text-center text-xs text-slate-400 mt-8">
-                        Your feedback helps us create a better workplace for everyone.
+                        {t('employee.feedback.footer')}
                     </p>
                 </div>
             </div>

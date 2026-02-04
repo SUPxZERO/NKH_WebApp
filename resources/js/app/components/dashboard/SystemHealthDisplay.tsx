@@ -4,6 +4,7 @@ import {
     Zap, Database, Clock, CheckCircle, AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface SystemHealthProps {
     health?: {
@@ -42,6 +43,7 @@ const statusColors = {
 };
 
 export function SystemHealthDisplay({ health, className }: SystemHealthProps) {
+    const { t } = useTranslation();
     const getStatusType = (status: string) => {
         if (status === 'healthy' || status === 'active') return 'healthy';
         if (status === 'warning' || status === 'degraded') return 'warning';
@@ -50,25 +52,25 @@ export function SystemHealthDisplay({ health, className }: SystemHealthProps) {
 
     const cards = [
         {
-            title: 'API Gateway',
+            title: t('admin.dashboard.health.api'),
             icon: Zap,
             status: health?.api?.status || 'healthy',
             value: health?.api?.uptime || '99.9%',
-            label: 'Uptime',
+            label: t('admin.dashboard.health.uptime'),
         },
         {
-            title: 'Database',
+            title: t('admin.dashboard.health.database'),
             icon: Database,
             status: health?.database?.connections === 'active' ? 'healthy' : 'warning',
             value: health?.database?.connections || 'Active',
-            label: 'Connection',
+            label: t('admin.dashboard.health.connection'),
         },
         {
-            title: 'Job Queue',
+            title: t('admin.dashboard.health.queue'),
             icon: Clock,
             status: (health?.queue?.pending || 0) > 10 ? 'warning' : 'healthy',
             value: String(health?.queue?.pending || 0),
-            label: 'Pending',
+            label: t('admin.dashboard.health.pending'),
         },
     ];
 
@@ -149,7 +151,7 @@ export function SystemHealthDisplay({ health, className }: SystemHealthProps) {
                                                 className={cn('w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full', colors.pulse)}
                                             />
                                             <span className={cn('text-[10px] sm:text-xs font-medium capitalize', colors.text)}>
-                                                {card.status}
+                                                {t(`admin.dashboard.health.${card.status}`)}
                                             </span>
                                         </div>
                                     </div>

@@ -40,7 +40,7 @@ interface Order {
     ordered_at: string;
     pickup_time?: string;
     completed_at?: string;
-    location: {
+    location?: {
         id: number;
         name: string;
         address?: string;
@@ -222,6 +222,11 @@ export default function Orders() {
         });
     };
 
+    const formatPrice = (value: number | string | undefined): string => {
+        const num = Number(value) || 0;
+        return num.toFixed(2);
+    };
+
     const OrderCard = ({ order }: { order: Order }) => {
         const isExpanded = expandedOrder === order.id;
         const statusInfo = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending;
@@ -306,10 +311,12 @@ export default function Orders() {
                             {order.order_type === 'delivery' && <Truck className="w-3.5 h-3.5" />}
                             <span className="capitalize">{t(`customer_pages.orders.types.${order.order_type}`)}</span>
                         </div>
-                        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
-                            <Store className="w-3.5 h-3.5" />
-                            <span className="truncate max-w-[80px] sm:max-w-none">{order.location.name}</span>
-                        </div>
+                        {order.location && (
+                            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
+                                <Store className="w-3.5 h-3.5" />
+                                <span className="truncate max-w-[80px] sm:max-w-none">{order.location.name}</span>
+                            </div>
+                        )}
                         {order.time_slot && (
                             <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-gradient-to-r from-purple-500/10 to-fuchsia-500/10 text-purple-600 dark:text-purple-400">
                                 <Clock className="w-3.5 h-3.5" />
@@ -343,7 +350,7 @@ export default function Orders() {
                         <div className="text-right">
                             <p className="text-[10px] text-muted-foreground uppercase tracking-wide hidden sm:block">{t('customer_pages.orders.order_card.total')}</p>
                             <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
-                                ${order.total_amount.toFixed(2)}
+                                ${formatPrice(order.total_amount)}
                             </p>
                         </div>
                     </div>
@@ -426,7 +433,7 @@ export default function Orders() {
                                                         <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
                                                             x{item.quantity}
                                                         </span>
-                                                        <span>${item.unit_price.toFixed(2)}</span>
+                                                        <span>${formatPrice(item.unit_price)}</span>
                                                     </div>
                                                     {item.special_instructions && (
                                                         <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
@@ -436,7 +443,7 @@ export default function Orders() {
                                                     )}
                                                 </div>
                                                 <span className="text-foreground font-bold text-sm sm:text-lg">
-                                                    ${item.total_price.toFixed(2)}
+                                                    ${formatPrice(item.total_price)}
                                                 </span>
                                             </div>
                                         ))}
@@ -470,32 +477,32 @@ export default function Orders() {
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">{t('customer_pages.orders.order_card.subtotal')}</span>
-                                            <span className="text-foreground font-medium">${order.subtotal.toFixed(2)}</span>
+                                            <span className="text-foreground font-medium">${formatPrice(order.subtotal)}</span>
                                         </div>
                                         {order.delivery_fee > 0 && (
                                             <div className="flex justify-between">
                                                 <span className="text-muted-foreground flex items-center gap-1">
                                                     <Truck className="w-3.5 h-3.5" /> {t('customer_pages.orders.order_card.delivery')}
                                                 </span>
-                                                <span className="text-foreground font-medium">${order.delivery_fee.toFixed(2)}</span>
+                                                <span className="text-foreground font-medium">${formatPrice(order.delivery_fee)}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">{t('customer_pages.orders.order_card.tax')}</span>
-                                            <span className="text-foreground font-medium">${order.tax_amount.toFixed(2)}</span>
+                                            <span className="text-foreground font-medium">${formatPrice(order.tax_amount)}</span>
                                         </div>
                                         {order.discount_amount > 0 && (
                                             <div className="flex justify-between">
                                                 <span className="text-emerald-600 dark:text-emerald-400">{t('customer_pages.orders.order_card.discount')}</span>
                                                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                                                    -${order.discount_amount.toFixed(2)}
+                                                    -${formatPrice(order.discount_amount)}
                                                 </span>
                                             </div>
                                         )}
                                         <div className="flex justify-between pt-2 border-t border-border">
                                             <span className="text-foreground font-bold">{t('customer_pages.orders.order_card.total')}</span>
                                             <span className="font-bold bg-gradient-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
-                                                ${order.total_amount.toFixed(2)}
+                                                ${formatPrice(order.total_amount)}
                                             </span>
                                         </div>
                                     </div>

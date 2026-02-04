@@ -160,21 +160,7 @@ const StatsCard = ({
   </motion.button>
 );
 
-// Time ago formatter
-const formatTimeAgo = (dateString: string) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  return `${diffDays}d ago`;
-};
+// Time ago formatter moved inside component to access translations
 
 // Order Timeline Progress
 const OrderProgress = ({ status }: { status: string }) => {
@@ -229,6 +215,22 @@ export default function Orders() {
   useEffect(() => {
     setPage(1);
   }, [search, statusFilter, typeFilter]);
+
+
+  const formatTimeAgo = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return t('admin.common.time.just_now');
+    if (diffMins < 60) return t('admin.common.time.minutes_ago', { count: diffMins });
+    if (diffHours < 24) return t('admin.common.time.hours_ago', { count: diffHours });
+    return t('admin.common.time.days_ago', { count: diffDays });
+  };
 
   const getAmount = (value: any): number => {
     if (value === null || value === undefined || value === '') return 0;
@@ -321,14 +323,8 @@ export default function Orders() {
     return flow[currentStatus] || null;
   };
 
+
   const getNextStatusLabel = (currentStatus: string): string => {
-    // const labels: Record<string, string> = {
-    //   pending: 'Receive',
-    //   received: 'Start Prep',
-    //   preparing: 'Ready',
-    //   ready: 'Complete'
-    // };
-    // return labels[currentStatus] || 'Update';
     const mapping: Record<string, string> = {
       pending: 'receive',
       received: 'start_prep',
@@ -548,7 +544,7 @@ export default function Orders() {
                   </span>
                 </label>
                 <p className="text-xs text-gray-500 dark:text-gray-500">
-                  Showing {orderList.length} of {ordersData?.meta?.total || orderList.length}
+                  {t('admin.common.pagination.showing_of_total', { count: orderList.length, total: ordersData?.meta?.total || orderList.length })}
                 </p>
               </div>
 
@@ -666,8 +662,10 @@ export default function Orders() {
           {ordersData?.meta && ordersData.meta.last_page > 1 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Page <span className="font-semibold text-gray-900 dark:text-white">{page}</span> of{' '}
-                <span className="font-semibold text-gray-900 dark:text-white">{ordersData.meta.last_page}</span>
+                {t('admin.common.pagination.page_of_total', {
+                  current: <span className="font-semibold text-gray-900 dark:text-white">{page}</span>,
+                  total: <span className="font-semibold text-gray-900 dark:text-white">{ordersData.meta.last_page}</span>
+                })}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -677,7 +675,7 @@ export default function Orders() {
                   onClick={() => setPage(p => p - 1)}
                   className="h-10 px-4 border-gray-200 dark:border-gray-700"
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                  <ChevronLeft className="w-4 h-4 mr-1" /> {t('admin.common.pagination.previous')}
                 </Button>
                 <div className="hidden sm:flex items-center gap-1">
                   {Array.from({ length: Math.min(5, ordersData.meta.last_page) }, (_, i) => {
@@ -714,7 +712,7 @@ export default function Orders() {
                   onClick={() => setPage(p => p + 1)}
                   className="h-10 px-4 border-gray-200 dark:border-gray-700"
                 >
-                  Next <ChevronRight className="w-4 h-4 ml-1" />
+                  {t('admin.common.pagination.next')} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>

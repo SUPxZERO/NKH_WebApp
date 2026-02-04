@@ -24,6 +24,7 @@ import {
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface CashConfirmModalProps {
     payment: PendingCashPayment;
@@ -32,6 +33,7 @@ interface CashConfirmModalProps {
 }
 
 function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalProps) {
+    const { t } = useLanguage();
     const [cashReceived, setCashReceived] = useState<string>('');
     const [notes, setNotes] = useState('');
     const confirmMutation = useConfirmCashPayment();
@@ -59,10 +61,10 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                 cashReceived: received,
                 notes: notes || undefined,
             });
-            toastSuccess('Payment confirmed!');
+            toastSuccess(t('employee.cash.modal.confirm_success'));
             onConfirmed();
         } catch (error: any) {
-            toastError(error?.message || 'Failed to confirm payment');
+            toastError(error?.message || t('employee.cash.modal.confirm_failed'));
         }
     };
 
@@ -84,15 +86,15 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                 {/* Header */}
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-center">
                     <Banknote className="w-12 h-12 mx-auto mb-3 text-white" />
-                    <h2 className="text-xl font-bold text-white">Confirm Cash Payment</h2>
-                    <p className="text-white/80">Order #{payment.order.order_number}</p>
+                    <h2 className="text-xl font-bold text-white">{t('employee.cash.modal.title')}</h2>
+                    <p className="text-white/80">{t('employee.cash.modal.order_number', { number: payment.order.order_number })}</p>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 space-y-6">
                     {/* Amount Due */}
                     <div className="text-center">
-                        <p className="text-sm text-gray-400">Amount Due</p>
+                        <p className="text-sm text-gray-400">{t('employee.cash.modal.amount_due')}</p>
                         <p className="text-4xl font-bold text-white">
                             ${amountDue.toFixed(2)}
                         </p>
@@ -119,7 +121,7 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                     {/* Cash Received Input */}
                     <div>
                         <label className="block text-sm text-gray-400 mb-2">
-                            Cash Received
+                            {t('employee.cash.modal.cash_received')}
                         </label>
                         <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
@@ -131,7 +133,7 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                                 min={amountDue}
                                 value={cashReceived}
                                 onChange={(e) => setCashReceived(e.target.value)}
-                                placeholder="0.00"
+                                placeholder={t('employee.cash.modal.cash_received_placeholder')}
                                 className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-2xl font-bold text-white text-center focus:border-emerald-500 focus:outline-none"
                                 autoFocus
                             />
@@ -143,7 +145,7 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                         'p-4 rounded-xl text-center transition-all',
                         isValid ? 'bg-emerald-500/20' : 'bg-red-500/20'
                     )}>
-                        <p className="text-sm text-gray-400">Change to Give</p>
+                        <p className="text-sm text-gray-400">{t('employee.cash.modal.change_due')}</p>
                         <p className={cn(
                             'text-3xl font-bold',
                             isValid ? 'text-emerald-400' : 'text-red-400'
@@ -152,7 +154,7 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                         </p>
                         {!isValid && received > 0 && (
                             <p className="text-sm text-red-400 mt-1">
-                                Insufficient amount
+                                {t('employee.cash.modal.insufficient')}
                             </p>
                         )}
                     </div>
@@ -160,13 +162,13 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                     {/* Notes */}
                     <div>
                         <label className="block text-sm text-gray-400 mb-2">
-                            Notes (optional)
+                            {t('employee.cash.modal.notes_label')}
                         </label>
                         <input
                             type="text"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Add notes..."
+                            placeholder={t('employee.cash.modal.notes_placeholder')}
                             className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:border-fuchsia-500 focus:outline-none"
                         />
                     </div>
@@ -178,7 +180,7 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                             onClick={onClose}
                             className="flex-1"
                         >
-                            Cancel
+                            {t('employee.common.cancel')}
                         </Button>
                         <Button
                             onClick={handleConfirm}
@@ -190,7 +192,7 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
                             ) : (
                                 <>
                                     <CheckCircle2 className="w-5 h-5 mr-2" />
-                                    Confirm
+                                    {t('employee.common.confirm')}
                                 </>
                             )}
                         </Button>
@@ -202,6 +204,7 @@ function CashConfirmModal({ payment, onClose, onConfirmed }: CashConfirmModalPro
 }
 
 export default function CashPaymentQueue() {
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
     const { data: pendingPayments, isLoading, refetch } = usePendingCashPayments();
     const { data: stats } = useCashPaymentStats();
@@ -210,6 +213,10 @@ export default function CashPaymentQueue() {
     const [selectedPayment, setSelectedPayment] = useState<PendingCashPayment | null>(null);
     const [rejectingId, setRejectingId] = useState<number | null>(null);
     const [rejectReason, setRejectReason] = useState('');
+    const pendingCount = pendingPayments?.length || 0;
+    const waitingLabel = pendingCount === 1
+        ? t('employee.cash.queue.waiting_one', { count: pendingCount })
+        : t('employee.cash.queue.waiting_other', { count: pendingCount });
 
     const handleConfirmed = () => {
         setSelectedPayment(null);
@@ -219,7 +226,7 @@ export default function CashPaymentQueue() {
 
     const handleReject = async (paymentId: number) => {
         if (!rejectReason.trim()) {
-            toastError('Please provide a reason');
+            toastError(t('employee.cash.queue.reason_required'));
             return;
         }
 
@@ -228,12 +235,12 @@ export default function CashPaymentQueue() {
                 paymentId,
                 reason: rejectReason,
             });
-            toastSuccess('Payment rejected');
+            toastSuccess(t('employee.cash.queue.rejected'));
             setRejectingId(null);
             setRejectReason('');
             queryClient.invalidateQueries({ queryKey: ['pending-cash-payments'] });
         } catch (error: any) {
-            toastError(error?.message || 'Failed to reject');
+            toastError(error?.message || t('employee.cash.queue.reject_failed'));
         }
     };
 
@@ -245,25 +252,25 @@ export default function CashPaymentQueue() {
                     <Card className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/30">
                         <CardContent className="p-4 text-center">
                             <p className="text-2xl font-bold text-amber-400">{stats.pending_count}</p>
-                            <p className="text-sm text-gray-400">Pending</p>
+                            <p className="text-sm text-gray-400">{t('employee.cash.stats.pending')}</p>
                         </CardContent>
                     </Card>
                     <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-500/30">
                         <CardContent className="p-4 text-center">
                             <p className="text-2xl font-bold text-emerald-400">{stats.total_confirmed}</p>
-                            <p className="text-sm text-gray-400">Confirmed Today</p>
+                            <p className="text-sm text-gray-400">{t('employee.cash.stats.confirmed_today')}</p>
                         </CardContent>
                     </Card>
                     <Card className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border-blue-500/30">
                         <CardContent className="p-4 text-center">
                             <p className="text-2xl font-bold text-blue-400">${stats.total_amount.toFixed(2)}</p>
-                            <p className="text-sm text-gray-400">Total Collected</p>
+                            <p className="text-sm text-gray-400">{t('employee.cash.stats.total_collected')}</p>
                         </CardContent>
                     </Card>
                     <Card className="bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border-purple-500/30">
                         <CardContent className="p-4 text-center">
                             <p className="text-2xl font-bold text-purple-400">${stats.total_change_given.toFixed(2)}</p>
-                            <p className="text-sm text-gray-400">Change Given</p>
+                            <p className="text-sm text-gray-400">{t('employee.cash.stats.change_given')}</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -276,15 +283,15 @@ export default function CashPaymentQueue() {
                         <Banknote className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-white">Pending Cash Payments</h2>
+                        <h2 className="text-lg font-semibold text-white">{t('employee.cash.queue.title')}</h2>
                         <p className="text-sm text-gray-400">
-                            {pendingPayments?.length || 0} payment{pendingPayments?.length !== 1 ? 's' : ''} waiting
+                            {waitingLabel}
                         </p>
                     </div>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => refetch()}>
                     <RefreshCw className="w-4 h-4 mr-2" />
-                    Refresh
+                    {t('employee.common.refresh')}
                 </Button>
             </div>
 
@@ -297,8 +304,8 @@ export default function CashPaymentQueue() {
                 <Card className="bg-white/5 border-dashed border-white/20">
                     <CardContent className="py-12 text-center">
                         <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-emerald-400" />
-                        <p className="text-lg font-medium text-white">All caught up!</p>
-                        <p className="text-sm text-gray-400">No pending cash payments</p>
+                        <p className="text-lg font-medium text-white">{t('employee.cash.queue.empty_title')}</p>
+                        <p className="text-sm text-gray-400">{t('employee.cash.queue.empty_subtitle')}</p>
                     </CardContent>
                 </Card>
             ) : (
@@ -344,7 +351,9 @@ export default function CashPaymentQueue() {
                                                         ${payment.amount.toFixed(2)}
                                                     </p>
                                                     <p className="text-xs text-gray-400">
-                                                        {payment.order.items_count} item{payment.order.items_count !== 1 ? 's' : ''}
+                                                        {payment.order.items_count === 1
+                                                            ? t('employee.cash.queue.items_one', { count: payment.order.items_count })
+                                                            : t('employee.cash.queue.items_other', { count: payment.order.items_count })}
                                                     </p>
                                                 </div>
 
@@ -354,7 +363,7 @@ export default function CashPaymentQueue() {
                                                             type="text"
                                                             value={rejectReason}
                                                             onChange={(e) => setRejectReason(e.target.value)}
-                                                            placeholder="Reason..."
+                                                            placeholder={t('employee.cash.queue.reason_placeholder')}
                                                             className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white w-32"
                                                             autoFocus
                                                         />
@@ -364,7 +373,7 @@ export default function CashPaymentQueue() {
                                                             onClick={() => handleReject(payment.id)}
                                                             className="text-red-400"
                                                         >
-                                                            Confirm
+                                                            {t('employee.common.confirm')}
                                                         </Button>
                                                         <Button
                                                             size="sm"
@@ -374,7 +383,7 @@ export default function CashPaymentQueue() {
                                                                 setRejectReason('');
                                                             }}
                                                         >
-                                                            Cancel
+                                                            {t('employee.common.cancel')}
                                                         </Button>
                                                     </div>
                                                 ) : (
@@ -393,7 +402,7 @@ export default function CashPaymentQueue() {
                                                             className="bg-emerald-600 hover:bg-emerald-700"
                                                         >
                                                             <Banknote className="w-4 h-4 mr-2" />
-                                                            Confirm
+                                                            {t('employee.common.confirm')}
                                                         </Button>
                                                     </div>
                                                 )}

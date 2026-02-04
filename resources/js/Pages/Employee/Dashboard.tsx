@@ -105,7 +105,7 @@ export default function EmployeeDashboard() {
     const timeOffMutation = useMutation({
         mutationFn: (data: any) => apiPost('/employee/time-off-requests', data),
         onSuccess: () => {
-            toastSuccess('Time off request submitted successfully');
+            toastSuccess(t('employee.dashboard.time_off.submitted'));
             setShowTimeOffModal(false);
             setTimeOffData({ request_type: 'vacation', start_date: '', end_date: '', reason: '' });
             qc.invalidateQueries({ queryKey: ['employee.dashboard.stats'] });
@@ -125,9 +125,9 @@ export default function EmployeeDashboard() {
 
     const getGreeting = () => {
         const hour = new Date().getHours();
-        if (hour < 12) return 'Good Morning';
-        if (hour < 17) return 'Good Afternoon';
-        return 'Good Evening';
+        if (hour < 12) return t('employee.dashboard.greeting.morning');
+        if (hour < 17) return t('employee.dashboard.greeting.afternoon');
+        return t('employee.dashboard.greeting.evening');
     };
 
     const formatTime = (time: string) => {
@@ -158,7 +158,7 @@ export default function EmployeeDashboard() {
                                 {getGreeting()}!
                             </h1>
                             <p className="text-xs sm:text-base text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
-                                {stats?.position || 'Employee'}
+                                {stats?.position || t('employee.dashboard.position_fallback')}
                             </p>
                         </div>
                         {/* Mobile Action Buttons (Visible only on mobile) */}
@@ -176,7 +176,7 @@ export default function EmployeeDashboard() {
                         <Link href="/employee/schedule">
                             <Button variant="outline" size="sm" className="gap-2">
                                 <Calendar className="w-4 h-4" />
-                                {t('employee.dashboard.schedule')}
+                                {t('employee.schedule.title')}
                             </Button>
                         </Link>
                         <Link href="/employee/pos">
@@ -246,7 +246,7 @@ export default function EmployeeDashboard() {
                         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-3 sm:p-4 text-white shadow-lg shadow-orange-500/10 relative overflow-hidden">
                             <ClipboardList className="absolute right-[-10px] bottom-[-10px] w-16 h-16 opacity-10" />
                             <div className="relative z-10">
-                                <p className="text-[10px] sm:text-xs font-medium text-orange-100 uppercase tracking-wide">Orders</p>
+                                <p className="text-[10px] sm:text-xs font-medium text-orange-100 uppercase tracking-wide">{t('employee.dashboard.orders')}</p>
                                 <p className="text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1">
                                     {statsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : stats?.orders_today || 0}
                                 </p>
@@ -292,14 +292,14 @@ export default function EmployeeDashboard() {
                                             {t('employee.dashboard.shift.swap')}
                                         </Button>
                                         <Button size="sm" variant="secondary" onClick={() => setShowTimeOffModal(true)} className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 border-0 text-white h-9">
-                                            {t('employee.dashboard.time_off')}
+                                            {t('employee.dashboard.time_off.label')}
                                         </Button>
                                     </div>
                                 </div>
                             </motion.div>
                         ) : (
                             <Card className="p-6 text-center border-dashed">
-                                <p className="text-gray-500">No upcoming shifts</p>
+                                <p className="text-gray-500">{t('employee.dashboard.shift.none_upcoming')}</p>
                             </Card>
                         )}
 
@@ -307,10 +307,10 @@ export default function EmployeeDashboard() {
                         <div className="space-y-3">
                             <div className="flex items-center justify-between px-1">
                                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{t('employee.dashboard.upcoming')}</h3>
-                                <Link href="/employee/schedule" className="text-xs text-blue-600 hover:underline">View All</Link>
+                                <Link href="/employee/schedule" className="text-xs text-blue-600 hover:underline">{t('employee.common.view_all')}</Link>
                             </div>
                             {upcomingShifts.length === 0 ? (
-                                <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg">No more shifts this week</p>
+                                <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg">{t('employee.dashboard.shift.none_this_week')}</p>
                             ) : (
                                 <div className="space-y-2">
                                     {upcomingShifts.slice(0, 3).map((shift) => (
@@ -342,25 +342,25 @@ export default function EmployeeDashboard() {
                                 <Link href="/employee/pos">
                                     <div className="flex flex-col items-center justify-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
                                         <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 mb-1" />
-                                        <span className="text-xs font-medium text-gray-900 dark:text-white">POS</span>
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">{t('employee.pos.title')}</span>
                                     </div>
                                 </Link>
                                 <Link href="/employee/kitchen">
                                     <div className="flex flex-col items-center justify-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-100 dark:border-orange-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
                                         <ClipboardList className="w-5 h-5 text-orange-600 dark:text-orange-400 mb-1" />
-                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Kitchen</span>
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">{t('employee.kitchen.title')}</span>
                                     </div>
                                 </Link>
                                 <Link href="/employee/schedule">
                                     <div className="flex flex-col items-center justify-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
                                         <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400 mb-1" />
-                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Schedule</span>
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">{t('employee.schedule.title')}</span>
                                     </div>
                                 </Link>
                                 <Link href="/employee/performance">
                                     <div className="flex flex-col items-center justify-center p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800 active:scale-95 transition-transform cursor-pointer h-20 sm:h-24">
                                         <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400 mb-1" />
-                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Stats</span>
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">{t('employee.performance.title')}</span>
                                     </div>
                                 </Link>
                             </div>
@@ -372,15 +372,15 @@ export default function EmployeeDashboard() {
                                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('employee.dashboard.time_off_balance')}</h3>
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center p-2 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-                                        <span className="text-xs text-gray-600 dark:text-gray-400">Vacation</span>
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">{t('employee.dashboard.time_off.types.vacation')}</span>
                                         <span className="text-sm font-bold text-purple-600 dark:text-purple-400">{stats?.vacation_balance || 0}d</span>
                                     </div>
                                     <div className="flex justify-between items-center p-2 bg-orange-50 dark:bg-orange-900/10 rounded-lg">
-                                        <span className="text-xs text-gray-600 dark:text-gray-400">Sick</span>
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">{t('employee.dashboard.time_off.types.sick')}</span>
                                         <span className="text-sm font-bold text-orange-600 dark:text-orange-400">{stats?.sick_balance || 0}d</span>
                                     </div>
                                     <div className="flex justify-between items-center p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                                        <span className="text-xs text-gray-600 dark:text-gray-400">Personal</span>
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">{t('employee.dashboard.time_off.types.personal')}</span>
                                         <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{stats?.personal_balance || 0}d</span>
                                     </div>
                                 </div>
@@ -401,7 +401,7 @@ export default function EmployeeDashboard() {
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                                         <Bell className="w-4 h-4 text-amber-500" />
-                                        Latest Announcements
+                                        {t('employee.dashboard.announcements.title')}
                                     </h3>
                                 </div>
                             </CardHeader>
@@ -409,7 +409,7 @@ export default function EmployeeDashboard() {
                                 {announcements.length === 0 ? (
                                     <div className="flex items-center gap-2 text-gray-500 text-sm">
                                         <CheckCircle className="w-4 h-4 text-green-500" />
-                                        <span>No new announcements</span>
+                                        <span>{t('employee.dashboard.announcements.empty')}</span>
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
@@ -441,27 +441,27 @@ export default function EmployeeDashboard() {
             <Modal
                 isOpen={showTimeOffModal}
                 onClose={() => setShowTimeOffModal(false)}
-                title="Request Time Off"
+                title={t('employee.dashboard.time_off.title')}
             >
                 <div className="space-y-3 sm:space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
-                            Request Type
+                            {t('employee.dashboard.time_off.request_type')}
                         </label>
                         <select
                             value={timeOffData.request_type}
                             onChange={(e) => setTimeOffData({ ...timeOffData, request_type: e.target.value })}
                             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl text-sm sm:text-base"
                         >
-                            <option value="vacation">Vacation</option>
-                            <option value="sick">Sick Leave</option>
-                            <option value="personal">Personal</option>
+                            <option value="vacation">{t('employee.dashboard.time_off.types.vacation')}</option>
+                            <option value="sick">{t('employee.dashboard.time_off.types.sick_leave')}</option>
+                            <option value="personal">{t('employee.dashboard.time_off.types.personal')}</option>
                         </select>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
-                                Start Date
+                                {t('employee.dashboard.time_off.start_date')}
                             </label>
                             <input
                                 type="date"
@@ -472,7 +472,7 @@ export default function EmployeeDashboard() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
-                                End Date
+                                {t('employee.dashboard.time_off.end_date')}
                             </label>
                             <input
                                 type="date"
@@ -484,13 +484,13 @@ export default function EmployeeDashboard() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
-                            Reason (Optional)
+                            {t('employee.dashboard.time_off.reason_optional')}
                         </label>
                         <textarea
                             value={timeOffData.reason}
                             onChange={(e) => setTimeOffData({ ...timeOffData, reason: e.target.value })}
                             rows={3}
-                            placeholder="Brief description..."
+                            placeholder={t('employee.dashboard.time_off.reason_placeholder')}
                             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl resize-none text-sm sm:text-base"
                         />
                     </div>

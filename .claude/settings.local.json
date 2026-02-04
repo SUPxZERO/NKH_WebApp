@@ -47,7 +47,8 @@
       "Bash(task_output b816589)",
       "Bash(php:*)",
       "Bash(sqlite3:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(node -e:*)"
     ]
   }
 }

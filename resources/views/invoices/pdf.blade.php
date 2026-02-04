@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Invoice - {{ $invoice_number }}</title>
+    <title>{{ __('invoices.pdf.title', ['number' => $invoice_number]) }}</title>
     <style>
         * {
             margin: 0;
@@ -177,22 +177,22 @@
             <div class="company-info">
                 <h1>{{ $company_name }}</h1>
                 <p>{{ $company_address }}</p>
-                @if($company_phone)<p>Tel: {{ $company_phone }}</p>@endif
+                @if($company_phone)<p>{{ __('invoices.pdf.tel') }} {{ $company_phone }}</p>@endif
             </div>
             <div class="invoice-details">
-                <h2>Invoice</h2>
+                <h2>{{ __('invoices.pdf.invoice') }}</h2>
                 <table class="invoice-meta-table">
                     <tr>
-                        <td class="invoice-meta-label">Invoice #:</td>
+                        <td class="invoice-meta-label">{{ __('invoices.pdf.invoice_number') }}:</td>
                         <td>{{ $invoice_number }}</td>
                     </tr>
                     <tr>
-                        <td class="invoice-meta-label">Date:</td>
+                        <td class="invoice-meta-label">{{ __('invoices.pdf.date') }}:</td>
                         <td>{{ $issued_date }}</td>
                     </tr>
                     @if($order_ref)
                     <tr>
-                        <td class="invoice-meta-label">Order Ref:</td>
+                        <td class="invoice-meta-label">{{ __('invoices.pdf.order_ref') }}:</td>
                         <td>#{{ $order_ref }}</td>
                     </tr>
                     @endif
@@ -201,7 +201,7 @@
         </div>
 
         <div class="bill-to">
-            <h3>Bill To</h3>
+            <h3>{{ __('invoices.pdf.bill_to') }}</h3>
             <div class="customer-name">{{ $customer_name }}</div>
             @if($customer_email)<div>{{ $customer_email }}</div>@endif
             @if($customer_phone)<div>{{ $customer_phone }}</div>@endif
@@ -210,10 +210,10 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width: 50%;">Description</th>
-                    <th class="text-center">Quantity</th>
-                    <th class="text-right">Unit Price</th>
-                    <th class="text-right">Total</th>
+                    <th style="width: 50%;">{{ __('invoices.pdf.description') }}</th>
+                    <th class="text-center">{{ __('invoices.pdf.quantity') }}</th>
+                    <th class="text-right">{{ __('invoices.pdf.unit_price') }}</th>
+                    <th class="text-right">{{ __('invoices.pdf.total') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -234,33 +234,40 @@
         <div class="totals-section">
             <table class="totals-table">
                 <tr>
-                    <td class="totals-label">Subtotal:</td>
+                    <td class="totals-label">{{ __('invoices.pdf.subtotal') }}:</td>
                     <td class="totals-value">{{ $currency }}{{ number_format($subtotal, 2) }}</td>
                 </tr>
                 @if($tax > 0)
                 <tr>
-                    <td class="totals-label">Tax:</td>
+                    <td class="totals-label">{{ __('invoices.pdf.tax') }}:</td>
                     <td class="totals-value">{{ $currency }}{{ number_format($tax, 2) }}</td>
                 </tr>
                 @endif
                 @if($discount > 0)
                 <tr>
-                    <td class="totals-label">Discount:</td>
+                    <td class="totals-label">{{ __('invoices.pdf.discount') }}:</td>
                     <td class="totals-value" style="color: #27ae60;">-{{ $currency }}{{ number_format($discount, 2) }}</td>
                 </tr>
                 @endif
                 <tr class="grand-total">
-                    <td class="totals-label">Total:</td>
+                    <td class="totals-label">{{ __('invoices.pdf.total') }}:</td>
                     <td class="totals-value">{{ $currency }}{{ number_format($total, 2) }}</td>
                 </tr>
                 <tr>
                     <td colspan="2" class="text-right">
                         <span class="payment-status-badge status-{{ $status }}">
-                            {{ ucfirst($status) }}
+                            @php
+                                $statusKey = 'invoices.pdf.status.' . $status;
+                                $statusLabel = __($statusKey);
+                                if ($statusLabel === $statusKey) {
+                                    $statusLabel = ucfirst($status);
+                                }
+                            @endphp
+                            {{ $statusLabel }}
                         </span>
                         @if($status !== 'paid')
                         <div style="margin-top: 5px; color: #e74c3c;">
-                            Due: {{ $currency }}{{ number_format($amount_due, 2) }}
+                            {{ __('invoices.pdf.due') }}: {{ $currency }}{{ number_format($amount_due, 2) }}
                         </div>
                         @endif
                     </td>
@@ -270,8 +277,8 @@
         </div>
 
         <div class="footer">
-            <p>Thank you for your business!</p>
-            <p>Generated on {{ date('Y-m-d H:i:s') }}</p>
+            <p>{{ __('invoices.pdf.thank_you') }}</p>
+            <p>{{ __('invoices.pdf.generated_on', ['date' => date('Y-m-d H:i:s')]) }}</p>
         </div>
     </div>
 </body>

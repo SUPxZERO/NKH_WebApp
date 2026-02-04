@@ -79,7 +79,7 @@ interface ShiftSwap {
 }
 
 export default function Schedule() {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const [showTimeOffModal, setShowTimeOffModal] = useState(false);
     const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
     const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
@@ -356,10 +356,16 @@ export default function Schedule() {
         }
     };
 
+    const getStatusLabel = (status: string) => {
+        const key = `employee.schedule.status.${status}`;
+        const label = t(key);
+        return label === key ? status.toUpperCase() : label;
+    };
+
     return (
         <EmployeeLayout>
             <Head>
-                <title>{t('employee.schedule.title')} - NKH Restaurant</title>
+                <title>{t('employee.schedule.title')} - {t('meta.app_title')}</title>
             </Head>
 
             <div className="space-y-6">
@@ -427,7 +433,7 @@ export default function Schedule() {
                                             <div>
                                                 <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.next_shift')}</div>
                                                 <div className="text-3xl font-bold text-white mb-2">
-                                                    {new Date(nextShift.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                                    {new Date(nextShift.date).toLocaleDateString(locale || 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                                                 </div>
                                                 <div className="flex flex-wrap gap-4 text-lg">
                                                     <div className="flex items-center gap-2">
@@ -515,10 +521,12 @@ export default function Schedule() {
                                         <div className="flex items-center justify-between mb-4 bg-white/5 p-2 rounded-lg">
                                             <Button variant="ghost" size="sm" onClick={handlePrev}>&lt;</Button>
                                             <div className="font-bold text-lg">
-                                                {viewMode === 'week'
-                                                    ? `Week of ${getWeekDays()[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                                                    : currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                                                }
+                                            {viewMode === 'week'
+                                                ? t('employee.schedule.week_of', {
+                                                    date: getWeekDays()[0].toLocaleDateString(locale || 'en-US', { month: 'short', day: 'numeric' })
+                                                })
+                                                : currentDate.toLocaleDateString(locale || 'en-US', { month: 'long', year: 'numeric' })
+                                            }
                                             </div>
                                             <Button variant="ghost" size="sm" onClick={handleNext}>&gt;</Button>
                                         </div>
@@ -539,8 +547,8 @@ export default function Schedule() {
                                                                 }`}
                                                         >
                                                             <div className="w-24 flex-shrink-0">
-                                                                <div className="font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                                                                <div className="text-sm text-gray-400">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                                                                <div className="font-semibold">{day.toLocaleDateString(locale || 'en-US', { weekday: 'short' })}</div>
+                                                                <div className="text-sm text-gray-400">{day.toLocaleDateString(locale || 'en-US', { month: 'short', day: 'numeric' })}</div>
                                                             </div>
 
                                                             <div className="flex-1">
@@ -573,7 +581,15 @@ export default function Schedule() {
                                             </div>
                                         ) : (
                                             <div className="grid grid-cols-7 gap-px bg-white/10 rounded-xl overflow-hidden border border-white/10">
-                                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                                                {[
+                                                    t('employee.schedule.days.sun'),
+                                                    t('employee.schedule.days.mon'),
+                                                    t('employee.schedule.days.tue'),
+                                                    t('employee.schedule.days.wed'),
+                                                    t('employee.schedule.days.thu'),
+                                                    t('employee.schedule.days.fri'),
+                                                    t('employee.schedule.days.sat'),
+                                                ].map(d => (
                                                     <div key={d} className="bg-gray-900/90 p-2 text-center text-sm font-semibold text-gray-400">
                                                         {d}
                                                     </div>
@@ -635,7 +651,7 @@ export default function Schedule() {
                                                     {getStatusIcon(request.status)}
                                                     <div>
                                                         <div className="font-medium">
-                                                            {new Date(request.start_date).toLocaleDateString()} - {new Date(request.end_date).toLocaleDateString()}
+                                                            {new Date(request.start_date).toLocaleDateString(locale || 'en-US')} - {new Date(request.end_date).toLocaleDateString(locale || 'en-US')}
                                                         </div>
                                                         <div className="text-sm text-gray-400">{request.reason}</div>
                                                     </div>
@@ -646,7 +662,7 @@ export default function Schedule() {
                                                         ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                                                         : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                                                     }`}>
-                                                    {request.status.toUpperCase()}
+                                                    {getStatusLabel(request.status)}
                                                 </div>
                                             </div>
                                         ))}
@@ -674,7 +690,7 @@ export default function Schedule() {
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div>
                                                         <div className="font-bold text-lg text-white">
-                                                            {new Date(swap.shift.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                                            {new Date(swap.shift.date).toLocaleDateString(locale || 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                                         </div>
                                                         <div className="text-fuchsia-400 font-medium">
                                                             {swap.shift.start_time} - {swap.shift.end_time}
@@ -688,11 +704,11 @@ export default function Schedule() {
                                                 <div className="space-y-2 text-sm text-gray-400 mb-4">
                                                     <div className="flex items-center gap-2">
                                                         <MapPin className="w-4 h-4" />
-                                                        {swap.shift.location?.name || 'Unknown Location'}
+                                                        {swap.shift.location?.name || t('employee.schedule.unknown_location')}
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <Briefcase className="w-4 h-4" />
-                                                        <span>Offered by {swap.requester?.user?.name || 'Unknown'}</span>
+                                                        <span>{t('employee.schedule.offered_by', { name: swap.requester?.user?.name || t('employee.schedule.unknown') })}</span>
                                                     </div>
                                                 </div>
 
@@ -758,7 +774,7 @@ export default function Schedule() {
                             onChange={(e) => setTimeOffData({ ...timeOffData, reason: e.target.value })}
                             rows={3}
                             className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-gray-400"
-                            placeholder="Vacation, doctor appointment, etc."
+                            placeholder={t('employee.schedule.reason_placeholder')}
                         />
                     </div>
 
@@ -792,30 +808,30 @@ export default function Schedule() {
                 >
                     <div className="space-y-4">
                         <div>
-                            <div className="text-sm text-gray-400 mb-1">Date</div>
+                            <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.details.date')}</div>
                             <div className="text-lg font-semibold">
-                                {new Date(selectedShift.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                {new Date(selectedShift.date).toLocaleDateString(locale || 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                             </div>
                         </div>
 
                         <div>
-                            <div className="text-sm text-gray-400 mb-1">Time</div>
+                            <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.details.time')}</div>
                             <div className="text-lg font-semibold">{selectedShift.start_time} - {selectedShift.end_time}</div>
                         </div>
 
                         <div>
-                            <div className="text-sm text-gray-400 mb-1">Position</div>
+                            <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.details.position')}</div>
                             <div className="text-lg font-semibold">{selectedShift.position}</div>
                         </div>
 
                         <div>
-                            <div className="text-sm text-gray-400 mb-1">Location</div>
+                            <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.details.location')}</div>
                             <div className="text-lg font-semibold">{selectedShift.location_name}</div>
                         </div>
 
                         {selectedShift.notes && (
                             <div>
-                                <div className="text-sm text-gray-400 mb-1">Notes</div>
+                                <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.details.notes')}</div>
                                 <div className="p-3 bg-white/5 rounded-lg text-gray-300">{selectedShift.notes}</div>
                             </div>
                         )}
@@ -825,14 +841,14 @@ export default function Schedule() {
                                 onClick={() => setSwapModalOpen(true)}
                                 className="flex-1 bg-amber-600 hover:bg-amber-700"
                             >
-                                Request Swap
+                                {t('employee.schedule.request_swap')}
                             </Button>
                             <Button
                                 onClick={() => setSelectedShift(null)}
                                 className="flex-1"
                                 variant="outline"
                             >
-                                Close
+                                {t('employee.common.close')}
                             </Button>
                         </div>
                     </div>
@@ -842,35 +858,35 @@ export default function Schedule() {
             <Modal
                 isOpen={swapModalOpen}
                 onClose={() => setSwapModalOpen(false)}
-                title="Request Shift Swap"
+                title={t('employee.schedule.swap_title')}
                 className="max-w-md"
             >
                 <form onSubmit={handleSwapRequest} className="space-y-4">
                     <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg mb-4">
-                        Requesting to swap/drop shift on: <br />
-                        <strong>{selectedShift && new Date(selectedShift.date).toLocaleDateString()}</strong>
+                        {t('employee.schedule.swap_requesting')} <br />
+                        <strong>{selectedShift && new Date(selectedShift.date).toLocaleDateString(locale || 'en-US')}</strong>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Type</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">{t('employee.schedule.swap_type')}</label>
                         <select
                             value={swapType}
                             onChange={(e) => setSwapType(e.target.value as any)}
                             className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 dark:text-white"
                         >
-                            <option className="dark:text-black" value="give_away">Give Away (Drop)</option>
-                            <option className="dark:text-black" value="trade">Trade Request</option>
+                            <option className="dark:text-black" value="give_away">{t('employee.schedule.swap_give_away')}</option>
+                            <option className="dark:text-black" value="trade">{t('employee.schedule.swap_trade')}</option>
                         </select>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Reason (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">{t('employee.schedule.swap_reason_optional')}</label>
                         <textarea
                             value={swapReason}
                             onChange={(e) => setSwapReason(e.target.value)}
                             rows={2}
                             className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white"
-                            placeholder="Why do you need to swap?"
+                            placeholder={t('employee.schedule.swap_reason_placeholder')}
                         />
                     </div>
 
@@ -881,14 +897,14 @@ export default function Schedule() {
                             onClick={() => setSwapModalOpen(false)}
                             className="flex-1"
                         >
-                            Cancel
+                            {t('employee.common.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             disabled={swapMutation.isPending}
                             className="flex-1 bg-amber-600 hover:bg-amber-700"
                         >
-                            {swapMutation.isPending ? 'Submitting...' : 'Confirm Request'}
+                            {swapMutation.isPending ? t('employee.common.submitting') : t('employee.schedule.confirm_request')}
                         </Button>
                     </div>
                 </form>

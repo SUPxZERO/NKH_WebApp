@@ -29,6 +29,7 @@ import { Button } from '@/app/components/ui/Button';
 import { cn } from '@/app/utils/cn';
 import { apiGet, apiPut, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface SettingSection {
     id: string;
@@ -71,18 +72,23 @@ const defaultSettings: UserSettings = {
     language: 'en',
 };
 
-const sections: SettingSection[] = [
-    { id: 'notifications', title: 'Notifications', icon: Bell, description: 'Manage your notification preferences' },
-    { id: 'appearance', title: 'Appearance', icon: Moon, description: 'Customize how the app looks' },
-    { id: 'privacy', title: 'Privacy & Security', icon: Shield, description: 'Control your privacy settings' },
-    { id: 'language', title: 'Language', icon: Globe, description: 'Choose your preferred language' },
-    { id: 'account', title: 'Account', icon: Lock, description: 'Manage your account settings' },
-];
+// Will be dynamically created in component with translations
 
 export default function Settings() {
     const queryClient = useQueryClient();
     const { props } = usePage();
     const user = (props.auth as any)?.user;
+    const translationContext = useTranslation();
+    const t = translationContext?.t || ((key: string) => key);
+    const { locale, setLocale } = translationContext || { locale: 'en', setLocale: () => {} };
+
+    const sections: SettingSection[] = [
+        { id: 'notifications', title: t('customer_pages.settings.sections.notifications'), icon: Bell, description: t('customer_pages.settings.sections.notifications_desc') },
+        { id: 'appearance', title: t('customer_pages.settings.sections.appearance'), icon: Moon, description: t('customer_pages.settings.sections.appearance_desc') },
+        { id: 'privacy', title: t('customer_pages.settings.sections.privacy'), icon: Shield, description: t('customer_pages.settings.sections.privacy_desc') },
+        { id: 'language', title: t('customer_pages.settings.sections.language'), icon: Globe, description: t('customer_pages.settings.sections.language_desc') },
+        { id: 'account', title: t('customer_pages.settings.sections.account'), icon: Lock, description: t('customer_pages.settings.sections.account_desc') },
+    ];
 
     const [activeSection, setActiveSection] = useState('notifications');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -169,10 +175,10 @@ export default function Settings() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['userSettings'] });
-            toastSuccess('Settings saved successfully!');
+            toastSuccess(t('customer_pages.settings.messages.settings_saved'));
         },
         onError: () => {
-            toastError('Failed to save settings. Please try again.');
+            toastError(t('customer_pages.settings.messages.settings_error'));
         },
     });
 
@@ -185,10 +191,10 @@ export default function Settings() {
             return apiPut('/api/customer/settings/notifications', newNotifications);
         },
         onSuccess: () => {
-            toastSuccess('Notification preference updated');
+            toastSuccess(t('customer_pages.settings.messages.notification_updated'));
         },
         onError: () => {
-            toastError('Failed to update notification preference');
+            toastError(t('customer_pages.settings.messages.notification_error'));
         },
     });
 
@@ -201,10 +207,10 @@ export default function Settings() {
             return apiPut('/api/customer/settings/privacy', newPrivacy);
         },
         onSuccess: () => {
-            toastSuccess('Privacy setting updated');
+            toastSuccess(t('customer_pages.settings.messages.privacy_updated'));
         },
         onError: () => {
-            toastError('Failed to update privacy setting');
+            toastError(t('customer_pages.settings.messages.privacy_error'));
         },
     });
 
@@ -216,10 +222,10 @@ export default function Settings() {
             return apiPut('/api/customer/settings/theme', { theme: newTheme });
         },
         onSuccess: () => {
-            toastSuccess('Theme updated');
+            toastSuccess(t('customer_pages.settings.messages.theme_updated'));
         },
         onError: () => {
-            toastError('Failed to update theme');
+            toastError(t('customer_pages.settings.messages.theme_error'));
         },
     });
 
@@ -227,14 +233,15 @@ export default function Settings() {
     const updateLanguageMutation = useMutation({
         mutationFn: async (newLanguage: string) => {
             setLanguage(newLanguage);
-            localStorage.setItem('language', newLanguage);
+            // Use the actual language context to change language
+            setLocale(newLanguage);
             return apiPut('/api/customer/settings/language', { language: newLanguage });
         },
         onSuccess: () => {
-            toastSuccess('Language updated');
+            toastSuccess(t('customer_pages.settings.messages.language_updated'));
         },
         onError: () => {
-            toastError('Failed to update language');
+            toastError(t('customer_pages.settings.messages.language_error'));
         },
     });
 
@@ -244,7 +251,7 @@ export default function Settings() {
             return apiPost('/api/customer/change-password', passwordForm);
         },
         onSuccess: () => {
-            toastSuccess('Password changed successfully!');
+            toastSuccess(t('customer_pages.settings.messages.password_changed'));
             setShowPasswordModal(false);
             setPasswordForm({
                 current_password: '',
@@ -253,7 +260,7 @@ export default function Settings() {
             });
         },
         onError: (error: any) => {
-            const message = error?.response?.data?.message || 'Failed to change password';
+            const message = error?.response?.data?.message || t('customer_pages.settings.messages.password_error');
             toastError(message);
         },
     });
@@ -264,11 +271,11 @@ export default function Settings() {
             return apiPut('/api/customer/phone', { phone: phoneNumber });
         },
         onSuccess: () => {
-            toastSuccess('Phone number updated!');
+            toastSuccess(t('customer_pages.settings.messages.phone_updated'));
             setShowPhoneModal(false);
         },
         onError: () => {
-            toastError('Failed to update phone number');
+            toastError(t('customer_pages.settings.messages.phone_error'));
         },
     });
 
@@ -294,18 +301,18 @@ export default function Settings() {
             case 'notifications':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notification Preferences</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('customer_pages.settings.notifications.title')}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Choose what notifications you'd like to receive
+                            {t('customer_pages.settings.notifications.subtitle')}
                         </p>
 
                         <div className="space-y-3 mt-6">
                             {[
-                                { key: 'orderUpdates', label: 'Order Updates', desc: 'Get notified about your order status' },
-                                { key: 'promotions', label: 'Promotions & Offers', desc: 'Receive special deals and discounts' },
-                                { key: 'newsletter', label: 'Newsletter', desc: 'Weekly updates and new menu items' },
-                                { key: 'smsNotifications', label: 'SMS Notifications', desc: 'Receive text messages for updates' },
-                                { key: 'pushNotifications', label: 'Push Notifications', desc: 'Browser notifications' },
+                                { key: 'orderUpdates', label: t('customer_pages.settings.notifications.order_updates'), desc: t('customer_pages.settings.notifications.order_updates_desc') },
+                                { key: 'promotions', label: t('customer_pages.settings.notifications.promotions'), desc: t('customer_pages.settings.notifications.promotions_desc') },
+                                { key: 'newsletter', label: t('customer_pages.settings.notifications.newsletter'), desc: t('customer_pages.settings.notifications.newsletter_desc') },
+                                { key: 'smsNotifications', label: t('customer_pages.settings.notifications.sms'), desc: t('customer_pages.settings.notifications.sms_desc') },
+                                { key: 'pushNotifications', label: t('customer_pages.settings.notifications.push'), desc: t('customer_pages.settings.notifications.push_desc') },
                             ].map((item) => (
                                 <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                                     <div>
@@ -334,15 +341,15 @@ export default function Settings() {
             case 'appearance':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Appearance</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('customer_pages.settings.appearance.title')}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Customize how the application looks on your device
+                            {t('customer_pages.settings.appearance.subtitle')}
                         </p>
 
                         <div className="mt-6 space-y-4">
                             {/* Theme Selection */}
                             <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                                <p className="font-medium text-gray-900 dark:text-white mb-4">Theme</p>
+                                <p className="font-medium text-gray-900 dark:text-white mb-4">{t('customer_pages.settings.appearance.theme')}</p>
                                 <div className="grid grid-cols-3 gap-4">
                                     <button
                                         onClick={() => updateThemeMutation.mutate('light')}
@@ -355,7 +362,7 @@ export default function Settings() {
                                         )}
                                     >
                                         <Sun className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
-                                        <p className="font-medium text-gray-900 dark:text-white text-sm">Light</p>
+                                        <p className="font-medium text-gray-900 dark:text-white text-sm">{t('customer_pages.settings.appearance.light')}</p>
                                     </button>
                                     <button
                                         onClick={() => updateThemeMutation.mutate('dark')}
@@ -368,7 +375,7 @@ export default function Settings() {
                                         )}
                                     >
                                         <Moon className="w-8 h-8 mx-auto mb-2 text-purple-500" />
-                                        <p className="font-medium text-gray-900 dark:text-white text-sm">Dark</p>
+                                        <p className="font-medium text-gray-900 dark:text-white text-sm">{t('customer_pages.settings.appearance.dark')}</p>
                                     </button>
                                     <button
                                         onClick={() => updateThemeMutation.mutate('system')}
@@ -384,7 +391,7 @@ export default function Settings() {
                                             <Sun className="w-4 h-4 text-yellow-500" />
                                             <Moon className="w-4 h-4 text-purple-500 -ml-1" />
                                         </div>
-                                        <p className="font-medium text-gray-900 dark:text-white text-sm">System</p>
+                                        <p className="font-medium text-gray-900 dark:text-white text-sm">{t('customer_pages.settings.appearance.system')}</p>
                                     </button>
                                 </div>
                             </div>
@@ -395,16 +402,16 @@ export default function Settings() {
             case 'privacy':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Privacy & Security</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('customer_pages.settings.privacy.title')}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Control your privacy and security preferences
+                            {t('customer_pages.settings.privacy.subtitle')}
                         </p>
 
                         <div className="space-y-3 mt-6">
                             {[
-                                { key: 'showProfile', label: 'Public Profile', desc: 'Allow others to see your profile' },
-                                { key: 'shareOrderHistory', label: 'Share Order History', desc: 'Share order data for recommendations' },
-                                { key: 'allowAnalytics', label: 'Usage Analytics', desc: 'Help us improve with anonymous usage data' },
+                                { key: 'showProfile', label: t('customer_pages.settings.privacy.public_profile'), desc: t('customer_pages.settings.privacy.public_profile_desc') },
+                                { key: 'shareOrderHistory', label: t('customer_pages.settings.privacy.share_history'), desc: t('customer_pages.settings.privacy.share_history_desc') },
+                                { key: 'allowAnalytics', label: t('customer_pages.settings.privacy.analytics'), desc: t('customer_pages.settings.privacy.analytics_desc') },
                             ].map((item) => (
                                 <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                                     <div>
@@ -437,8 +444,8 @@ export default function Settings() {
                                 <div className="flex items-center gap-3">
                                     <Lock className="w-5 h-5 text-gray-500" />
                                     <div className="text-left">
-                                        <p className="font-medium text-gray-900 dark:text-white">Change Password</p>
-                                        <p className="text-sm text-gray-500">Update your account password</p>
+                                        <p className="font-medium text-gray-900 dark:text-white">{t('customer_pages.settings.privacy.change_password')}</p>
+                                        <p className="text-sm text-gray-500">{t('customer_pages.settings.privacy.change_password_desc')}</p>
                                     </div>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -450,17 +457,15 @@ export default function Settings() {
             case 'language':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Language</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('customer_pages.settings.language.title')}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Choose your preferred language
+                            {t('customer_pages.settings.language.subtitle')}
                         </p>
 
                         <div className="space-y-2 mt-6">
                             {[
-                                { code: 'en', name: 'English', native: 'English' },
-                                { code: 'km', name: 'Khmer', native: 'ភាសាខ្មែរ' },
-                                { code: 'zh', name: 'Chinese', native: '中文' },
-                                { code: 'ja', name: 'Japanese', native: '日本語' },
+                                { code: 'en', name: t('customer_pages.settings.language.english'), native: 'English' },
+                                { code: 'km', name: t('customer_pages.settings.language.khmer'), native: 'ភាសាខ្មែរ' },
                             ].map((lang) => (
                                 <button
                                     key={lang.code}
@@ -468,7 +473,7 @@ export default function Settings() {
                                     disabled={updateLanguageMutation.isPending}
                                     className={cn(
                                         'flex items-center justify-between w-full p-4 rounded-xl transition-all',
-                                        language === lang.code
+                                        locale === lang.code
                                             ? 'bg-fuchsia-100 dark:bg-fuchsia-900/20 border-2 border-fuchsia-500'
                                             : 'bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent hover:border-gray-300'
                                     )}
@@ -480,7 +485,7 @@ export default function Settings() {
                                             <p className="text-sm text-gray-500">{lang.native}</p>
                                         </div>
                                     </div>
-                                    {language === lang.code && (
+                                    {locale === lang.code && (
                                         <Check className="w-5 h-5 text-fuchsia-500" />
                                     )}
                                 </button>
@@ -492,9 +497,9 @@ export default function Settings() {
             case 'account':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Account Settings</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('customer_pages.settings.account.title')}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Manage your account information
+                            {t('customer_pages.settings.account.subtitle')}
                         </p>
 
                         {/* Account Info */}
@@ -512,19 +517,19 @@ export default function Settings() {
 
                         {/* Linked Accounts */}
                         <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                            <p className="font-medium text-gray-900 dark:text-white mb-3">Linked Accounts</p>
+                            <p className="font-medium text-gray-900 dark:text-white mb-3">{t('customer_pages.settings.account.linked_accounts')}</p>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <Mail className="w-5 h-5 text-gray-500" />
-                                        <span className="text-sm text-gray-700 dark:text-gray-300">Email</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">{t('customer_pages.settings.account.email')}</span>
                                     </div>
-                                    <span className="text-sm text-green-600 dark:text-green-400">Connected</span>
+                                    <span className="text-sm text-green-600 dark:text-green-400">{t('customer_pages.settings.account.connected')}</span>
                                 </div>
                                 <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <Smartphone className="w-5 h-5 text-gray-500" />
-                                        <span className="text-sm text-gray-700 dark:text-gray-300">Phone</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">{t('customer_pages.settings.account.phone')}</span>
                                     </div>
                                     {user?.phone ? (
                                         <span className="text-sm text-green-600 dark:text-green-400">{user.phone}</span>
@@ -533,7 +538,7 @@ export default function Settings() {
                                             onClick={() => setShowPhoneModal(true)}
                                             className="text-sm text-fuchsia-600 dark:text-fuchsia-400 hover:underline"
                                         >
-                                            Add
+                                            {t('customer_pages.settings.account.add')}
                                         </button>
                                     )}
                                 </div>
@@ -545,16 +550,16 @@ export default function Settings() {
                             <div className="flex items-start gap-3">
                                 <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="font-medium text-red-800 dark:text-red-300">Danger Zone</p>
+                                    <p className="font-medium text-red-800 dark:text-red-300">{t('customer_pages.settings.account.danger_zone')}</p>
                                     <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                                        Once you delete your account, there is no going back. Please be certain.
+                                        {t('customer_pages.settings.account.danger_desc')}
                                     </p>
                                     <button
                                         onClick={() => setShowDeleteConfirm(true)}
                                         className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
                                     >
                                         <Trash2 className="w-4 h-4" />
-                                        Delete Account
+                                        {t('customer_pages.settings.account.delete_account')}
                                     </button>
                                 </div>
                             </div>
@@ -575,10 +580,10 @@ export default function Settings() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                                Settings
+                                {t('customer_pages.settings.title')}
                             </h1>
                             <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm sm:text-base">
-                                Manage your account preferences
+                                {t('customer_pages.settings.subtitle')}
                             </p>
                         </div>
                         <Button
@@ -681,7 +686,7 @@ export default function Settings() {
                                 className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
                             >
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Change Password</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('customer_pages.settings.modals.change_password.title')}</h3>
                                     <button
                                         onClick={() => setShowPasswordModal(false)}
                                         className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -692,7 +697,7 @@ export default function Settings() {
                                 <form onSubmit={(e) => { e.preventDefault(); changePasswordMutation.mutate(); }} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-1">
-                                            Current Password
+                                            {t('customer_pages.settings.modals.change_password.current')}
                                         </label>
                                         <div className="relative">
                                             <input
@@ -713,7 +718,7 @@ export default function Settings() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-1">
-                                            New Password
+                                            {t('customer_pages.settings.modals.change_password.new')}
                                         </label>
                                         <div className="relative">
                                             <input
@@ -735,7 +740,7 @@ export default function Settings() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-1">
-                                            Confirm New Password
+                                            {t('customer_pages.settings.modals.change_password.confirm')}
                                         </label>
                                         <input
                                             type="password"
@@ -751,7 +756,7 @@ export default function Settings() {
                                             onClick={() => setShowPasswordModal(false)}
                                             className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                         >
-                                            Cancel
+                                            {t('customer_pages.settings.modals.change_password.cancel')}
                                         </button>
                                         <button
                                             type="submit"
@@ -761,7 +766,7 @@ export default function Settings() {
                                             {changePasswordMutation.isPending ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />
                                             ) : (
-                                                'Change Password'
+                                                t('customer_pages.settings.modals.change_password.submit')
                                             )}
                                         </button>
                                     </div>
@@ -782,7 +787,7 @@ export default function Settings() {
                                 className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6"
                             >
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Add Phone Number</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('customer_pages.settings.modals.add_phone.title')}</h3>
                                     <button
                                         onClick={() => setShowPhoneModal(false)}
                                         className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -793,13 +798,13 @@ export default function Settings() {
                                 <form onSubmit={(e) => { e.preventDefault(); updatePhoneMutation.mutate(); }} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-1">
-                                            Phone Number
+                                            {t('customer_pages.settings.modals.add_phone.label')}
                                         </label>
                                         <input
                                             type="tel"
                                             value={phoneNumber}
                                             onChange={(e) => setPhoneNumber(e.target.value)}
-                                            placeholder="+855 12 345 6789"
+                                            placeholder={t('customer_pages.settings.modals.add_phone.placeholder')}
                                             className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none"
                                             required
                                         />
@@ -810,7 +815,7 @@ export default function Settings() {
                                             onClick={() => setShowPhoneModal(false)}
                                             className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                         >
-                                            Cancel
+                                            {t('customer_pages.settings.modals.add_phone.cancel')}
                                         </button>
                                         <button
                                             type="submit"
@@ -820,7 +825,7 @@ export default function Settings() {
                                             {updatePhoneMutation.isPending ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />
                                             ) : (
-                                                'Save Phone'
+                                                t('customer_pages.settings.modals.add_phone.submit')
                                             )}
                                         </button>
                                     </div>
@@ -844,9 +849,9 @@ export default function Settings() {
                                     <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <AlertTriangle className="w-8 h-8 text-red-600" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Delete Account?</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('customer_pages.settings.modals.delete_confirm.title')}</h3>
                                     <p className="text-gray-500 dark:text-gray-400 mt-2">
-                                        This action cannot be undone. All your data, orders, and preferences will be permanently deleted.
+                                        {t('customer_pages.settings.modals.delete_confirm.message')}
                                     </p>
                                 </div>
                                 <div className="flex gap-3 mt-6">
@@ -854,13 +859,13 @@ export default function Settings() {
                                         onClick={() => setShowDeleteConfirm(false)}
                                         className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                     >
-                                        Cancel
+                                        {t('customer_pages.settings.modals.delete_confirm.cancel')}
                                     </button>
                                     <button
                                         onClick={handleDeleteAccount}
                                         className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors"
                                     >
-                                        Delete Account
+                                        {t('customer_pages.settings.modals.delete_confirm.confirm')}
                                     </button>
                                 </div>
                             </motion.div>

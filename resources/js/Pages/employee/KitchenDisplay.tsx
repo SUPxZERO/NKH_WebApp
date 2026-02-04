@@ -57,17 +57,27 @@ interface KitchenOrder {
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 
 export default function KitchenDisplay() {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
     useOrderUpdates();
     useSmartPolling(['kitchen'], 5000); // Poll every 5s for kitchen updates
     const qc = useQueryClient();
+    const orderTypeLabels: Record<string, string> = {
+        'dine-in': t('employee.kitchen.order_type.dine_in'),
+        pickup: t('employee.kitchen.order_type.pickup'),
+        delivery: t('employee.kitchen.order_type.delivery'),
+    };
+    const itemStatusLabels: Record<string, string> = {
+        served: t('employee.kitchen.item_status.served'),
+        preparing: t('employee.kitchen.item_status.preparing'),
+        pending: t('employee.kitchen.item_status.pending'),
+    };
 
 
     // Fetch orders
     const { data: orders, isLoading } = useQuery<{ data: KitchenOrder[] }>({
-        queryKey: ['kitchen.orders'],
+        queryKey: ['kitchen.orders', locale],
         queryFn: () => apiGet('/kitchen/orders'),
         staleTime: 0,
     });
@@ -151,13 +161,13 @@ export default function KitchenDisplay() {
             switch (order.status) {
                 case 'pending':
                 case 'received':
-                    return 'NEW';
+                    return t('employee.kitchen.status_labels.new');
                 case 'preparing':
-                    return 'PREPARING';
+                    return t('employee.kitchen.status_labels.preparing');
                 case 'ready':
-                    return 'READY';
+                    return t('employee.kitchen.status_labels.ready');
                 default:
-                    return order.status.toUpperCase();
+                    return t('employee.kitchen.status_labels.default', { status: order.status });
             }
         };
 
@@ -196,24 +206,24 @@ export default function KitchenDisplay() {
                     <div className={`${getStatusColor()} p-4 text-white`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <UtensilsCrossed className="w-8 h-8" />
-                                <div>
-                                    <h2 className="text-2xl font-bold">Order #{order.order_number}</h2>
-                                    <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
-                                        <span className="capitalize px-2 py-0.5 rounded bg-white/20 font-bold">{order.type.replace('-', ' ')}</span>
-                                        {order.table_number && (
-                                            <span className="flex items-center gap-1 font-bold bg-white/20 px-2 py-0.5 rounded">
-                                                <QrCode className="w-4 h-4" />
-                                                Table {order.table_number}
-                                            </span>
-                                        )}
+                                    <UtensilsCrossed className="w-8 h-8" />
+                                    <div>
+                                        <h2 className="text-2xl font-bold">{t('employee.kitchen.order_number', { number: order.order_number })}</h2>
+                                        <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
+                                            <span className="capitalize px-2 py-0.5 rounded bg-white/20 font-bold">{orderTypeLabels[order.type] ?? order.type.replace('-', ' ')}</span>
+                                            {order.table_number && (
+                                                <span className="flex items-center gap-1 font-bold bg-white/20 px-2 py-0.5 rounded">
+                                                    <QrCode className="w-4 h-4" />
+                                                    {t('employee.kitchen.table_number', { number: order.table_number })}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="text-right">
                                     <div className={`text-xl font-bold ${isUrgent ? 'animate-pulse' : ''}`}>
-                                        ⏱ {age} min
+                                        ⏱ {t('employee.kitchen.age_minutes', { minutes: age })}
                                     </div>
                                     <div className="text-sm font-semibold px-2 py-0.5 bg-white/20 rounded">
                                         {getStatusLabel()}
@@ -297,7 +307,7 @@ export default function KitchenDisplay() {
                                                         item.status === 'preparing' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
                                                             'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
                                                         }`}>
-                                                        {item.status}
+                                                        {itemStatusLabels[item.status] ?? item.status}
                                                     </span>
                                                 )}
                                             </div>
@@ -308,10 +318,10 @@ export default function KitchenDisplay() {
                                             )}
                                             {item.unit_price && (
                                                 <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    ${item.unit_price.toFixed(2)} each
+                                                    {t('employee.kitchen.unit_price_each', { price: item.unit_price.toFixed(2) })}
                                                     {item.total_price && (
                                                         <span className="ml-2 font-medium">
-                                                            • Total: ${item.total_price.toFixed(2)}
+                                                            • {t('employee.kitchen.item_total', { total: item.total_price.toFixed(2) })}
                                                         </span>
                                                     )}
                                                 </div>
@@ -326,7 +336,7 @@ export default function KitchenDisplay() {
                         {(order.subtotal || order.total_amount) && (
                             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
                                 <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
-                                    <span>Total Amount</span>
+                                    <span>{t('employee.kitchen.total_amount')}</span>
                                     <span>${(order.total_amount || order.subtotal || 0).toFixed(2)}</span>
                                 </div>
                             </div>
@@ -344,7 +354,7 @@ export default function KitchenDisplay() {
                                 className="w-full h-14 text-xl font-bold"
                                 disabled={updateStatusMutation.isPending}
                             >
-                                {updateStatusMutation.isPending ? 'Updating...' : nextAction.label}
+                                {updateStatusMutation.isPending ? t('employee.kitchen.updating') : nextAction.label}
                             </Button>
                         </div>
                     )}
@@ -379,24 +389,24 @@ export default function KitchenDisplay() {
                             {order.table_number ? (
                                 <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 font-bold text-sm">
                                     <QrCode className="w-3.5 h-3.5" />
-                                    <span>Table {order.table_number}</span>
+                                    <span>{t('employee.kitchen.table_number', { number: order.table_number })}</span>
                                 </div>
                             ) : (
                                 <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 text-sm font-medium capitalize">
                                     {order.type === 'delivery' ? <Truck className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
-                                    <span>{order.type}</span>
+                                    <span>{orderTypeLabels[order.type] ?? order.type}</span>
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className="text-right">
                         <div className={`text-lg font-bold ${isUrgent ? 'text-red-600 animate-pulse' : 'text-gray-700 dark:text-gray-300'}`}>
-                            ⏱ {age} min
+                            ⏱ {t('employee.kitchen.age_minutes', { minutes: age })}
                         </div>
                         {isUrgent && (
                             <div className="text-xs text-red-600 font-semibold flex items-center gap-1">
                                 <AlertCircle className="w-3 h-3" />
-                                URGENT
+                                {t('employee.kitchen.urgent')}
                             </div>
                         )}
                     </div>
@@ -412,14 +422,14 @@ export default function KitchenDisplay() {
                             <div className="flex-1 min-w-0">
                                 <div className="font-medium text-gray-900 dark:text-white truncate">{item.name}</div>
                                 {item.notes && (
-                                    <div className="text-xs text-orange-600 dark:text-orange-400 italic truncate">Note: {item.notes}</div>
+                                    <div className="text-xs text-orange-600 dark:text-orange-400 italic truncate">{t('employee.kitchen.note')}: {item.notes}</div>
                                 )}
                             </div>
                         </div>
                     ))}
                     {hasMoreItems && (
                         <div className="text-center py-2 text-sm text-fuchsia-600 dark:text-fuchsia-400 font-medium">
-                            + {itemCount - 3} more items (tap to view all)
+                            {t('employee.kitchen.more_items', { count: itemCount - 3 })}
                         </div>
                     )}
                 </div>
@@ -427,7 +437,7 @@ export default function KitchenDisplay() {
                 {/* Order Notes Preview */}
                 {order.notes && (
                     <div className="mb-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 truncate">
-                        <strong>Note:</strong> {order.notes}
+                        <strong>{t('employee.kitchen.note')}:</strong> {order.notes}
                     </div>
                 )}
 

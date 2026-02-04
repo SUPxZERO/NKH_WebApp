@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Receipt - {{ $receipt_number }}</title>
+    <title>{{ __('receipts.payment.title', ['number' => $receipt_number]) }}</title>
     <style>
         * {
             margin: 0;
@@ -225,50 +225,59 @@
             <div class="business-info">
                 @if($location_name){{ $location_name }}<br>@endif
                 {{ $business_address }}
-                @if($business_phone)<br>Tel: {{ $business_phone }}@endif
+                @if($business_phone)<br>{{ __('receipts.payment.tel') }} {{ $business_phone }}@endif
             </div>
         </div>
         
         <!-- Receipt Info -->
         <div class="receipt-info">
             <div class="receipt-info-item">
-                <div class="receipt-info-label">Receipt #</div>
+                <div class="receipt-info-label">{{ __('receipts.payment.receipt_number') }}</div>
                 <div class="receipt-info-value">{{ $receipt_number }}</div>
             </div>
             <div class="receipt-info-item">
-                <div class="receipt-info-label">Date</div>
+                <div class="receipt-info-label">{{ __('receipts.payment.date') }}</div>
                 <div class="receipt-info-value">{{ $receipt_date->format('M d, Y') }}</div>
             </div>
             <div class="receipt-info-item">
-                <div class="receipt-info-label">Time</div>
+                <div class="receipt-info-label">{{ __('receipts.payment.time') }}</div>
                 <div class="receipt-info-value">{{ $receipt_date->format('h:i A') }}</div>
             </div>
         </div>
         
         @if($order_number)
         <div style="margin-bottom: 15px;">
-            <strong>Order:</strong> #{{ $order_number }}
-            @if($table_number) | <strong>Table:</strong> {{ $table_number }}@endif
-            @if($order_type) | <strong>Type:</strong> {{ ucfirst($order_type) }}@endif
+            <strong>{{ __('receipts.payment.order') }}:</strong> #{{ $order_number }}
+            @if($table_number) | <strong>{{ __('receipts.payment.table') }}:</strong> {{ $table_number }}@endif
+            @if($order_type)
+                @php
+                    $orderTypeKey = 'order_type.' . $order_type;
+                    $orderTypeLabel = __($orderTypeKey);
+                    if ($orderTypeLabel === $orderTypeKey) {
+                        $orderTypeLabel = ucfirst($order_type);
+                    }
+                @endphp
+                | <strong>{{ __('receipts.payment.type') }}:</strong> {{ $orderTypeLabel }}
+            @endif
         </div>
         @endif
         
         @if($customer_name)
         <div style="margin-bottom: 15px;">
-            <strong>Customer:</strong> {{ $customer_name }}
+            <strong>{{ __('receipts.payment.customer') }}:</strong> {{ $customer_name }}
             @if($customer_phone) ({{ $customer_phone }})@endif
         </div>
         @endif
         
         <!-- Items -->
-        <div class="section-title">Order Items</div>
+        <div class="section-title">{{ __('receipts.payment.order_items') }}</div>
         <table class="items-table">
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>Total</th>
+                    <th>{{ __('receipts.payment.item') }}</th>
+                    <th>{{ __('receipts.payment.qty') }}</th>
+                    <th>{{ __('receipts.payment.price') }}</th>
+                    <th>{{ __('receipts.payment.total') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -289,33 +298,33 @@
         <!-- Totals -->
         <div class="totals">
             <div class="totals-row subtotal">
-                <span>Subtotal</span>
+                <span>{{ __('receipts.payment.subtotal') }}</span>
                 <span>${{ number_format($subtotal, 2) }}</span>
             </div>
             
             @if($tax_amount > 0)
             <div class="totals-row subtotal">
-                <span>Tax ({{ $tax_rate }}%)</span>
+                <span>{{ __('receipts.payment.tax', ['rate' => $tax_rate]) }}</span>
                 <span>${{ number_format($tax_amount, 2) }}</span>
             </div>
             @endif
             
             @if($service_charge > 0)
             <div class="totals-row subtotal">
-                <span>Service Charge</span>
+                <span>{{ __('receipts.payment.service_charge') }}</span>
                 <span>${{ number_format($service_charge, 2) }}</span>
             </div>
             @endif
             
             @if($discount_amount > 0)
             <div class="totals-row discount">
-                <span>Discount</span>
+                <span>{{ __('receipts.payment.discount') }}</span>
                 <span>-${{ number_format($discount_amount, 2) }}</span>
             </div>
             @endif
             
             <div class="totals-row grand-total">
-                <span>Total</span>
+                <span>{{ __('receipts.payment.total') }}</span>
                 <span>${{ number_format($total_amount, 2) }}</span>
             </div>
         </div>
@@ -324,21 +333,28 @@
         <div class="payment-info">
             <div class="payment-method">
                 <span class="payment-method-label">{{ $payment_method }}</span>
-                <span class="payment-status {{ $payment_status }}">{{ ucfirst($payment_status) }}</span>
+                @php
+                    $paymentStatusKey = 'receipts.payment.status.' . $payment_status;
+                    $paymentStatusLabel = __($paymentStatusKey);
+                    if ($paymentStatusLabel === $paymentStatusKey) {
+                        $paymentStatusLabel = ucfirst($payment_status);
+                    }
+                @endphp
+                <span class="payment-status {{ $payment_status }}">{{ $paymentStatusLabel }}</span>
             </div>
             <div style="margin-top: 10px;">
-                <strong>Amount Paid:</strong> ${{ number_format($amount_paid, 2) }} {{ $currency }}
+                <strong>{{ __('receipts.payment.amount_paid') }}:</strong> ${{ number_format($amount_paid, 2) }} {{ $currency }}
             </div>
             
             @if($cash_received)
             <div class="cash-details">
                 <div class="totals-row">
-                    <span>Cash Received</span>
+                    <span>{{ __('receipts.payment.cash_received') }}</span>
                     <span>${{ number_format($cash_received, 2) }}</span>
                 </div>
                 @if($change_given)
                 <div class="totals-row">
-                    <span>Change</span>
+                    <span>{{ __('receipts.payment.change') }}</span>
                     <span>${{ number_format($change_given, 2) }}</span>
                 </div>
                 @endif
@@ -351,7 +367,7 @@
             <div class="thank-you">{{ $thank_you_message }}</div>
             <div class="footer-text">{{ $footer_text }}</div>
             @if($transaction_id)
-            <div class="transaction-id">TXN: {{ $transaction_id }}</div>
+            <div class="transaction-id">{{ __('receipts.payment.transaction_label') }} {{ $transaction_id }}</div>
             @endif
         </div>
     </div>

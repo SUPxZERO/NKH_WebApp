@@ -22,6 +22,15 @@ function createClient(): AxiosInstance {
     withCredentials: true,
   });
 
+  // Helper to read cookie by name
+  const getCookie = (name: string) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    return null;
+  };
+
   let isRefreshing = false;
   let refreshPromise: Promise<AxiosResponse<any, any>> | null = null;
 
@@ -41,6 +50,12 @@ function createClient(): AxiosInstance {
   }
 
   instance.interceptors.request.use(async (config) => {
+    // Inject Locale Header from Cookie if available
+    const locale = getCookie('NEXT_LOCALE');
+    if (locale) {
+      config.headers['X-Inertia-Locale'] = locale;
+    }
+
     // For non-GET requests, make sure we have a CSRF cookie first
     const method = (config.method || 'get').toLowerCase();
     if (method !== 'get' && method !== 'head' && method !== 'options') {

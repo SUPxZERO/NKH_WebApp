@@ -41,6 +41,24 @@ export default function POS() {
   // Smart Polling for Orders and Tables
   useSmartPolling(['orders', 'tables'], 10000);
   const { t } = useLanguage();
+  const orderTypeLabels: Record<string, string> = {
+    dine_in: t('employee.pos.order_type.dine_in'),
+    takeout: t('employee.pos.order_type.takeout'),
+    pickup: t('employee.pos.order_type.pickup'),
+    delivery: t('employee.pos.order_type.delivery'),
+  };
+  const paymentStatusLabels: Record<string, string> = {
+    paid: t('employee.pos.payment_status.paid'),
+    partial: t('employee.pos.payment_status.partial'),
+    pending: t('employee.pos.payment_status.pending'),
+    failed: t('employee.pos.payment_status.failed'),
+  };
+  const tableStatusLabels: Record<string, string> = {
+    available: t('employee.pos.table_status.available'),
+    occupied: t('employee.pos.table_status.occupied'),
+    reserved: t('employee.pos.table_status.reserved'),
+    unavailable: t('employee.pos.table_status.unavailable'),
+  };
 
   const [categoryId, setCategoryId] = React.useState<number | undefined>();
   const [search, setSearch] = useState<string>('');
@@ -277,7 +295,7 @@ export default function POS() {
     if (cart.items.length === 0) return;
 
     if (selectedTableData && selectedTableData.status !== 'available') {
-      toastError(t('employee.pos.table_occupied', { code: selectedTableData.code, status: selectedTableData.status }));
+      toastError(t('employee.pos.table_occupied', { code: selectedTableData.code, status: tableStatusLabels[selectedTableData.status] || selectedTableData.status }));
       return;
     }
     createOrderMutation.mutate();
@@ -419,13 +437,13 @@ export default function POS() {
                               order.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-800' :
                                 'bg-red-100 text-red-800'}`
                           }>
-                            {order.payment_status}
+                            {paymentStatusLabels[order.payment_status] ?? order.payment_status}
                           </div>
                         </div>
                         <div className="flex justify-between items-center text-sm mb-3">
                           <div className="flex gap-2">
-                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs">{order.order_type}</span>
-                            <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">{order.items_count} items</span>
+                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs">{orderTypeLabels[order.order_type] ?? order.order_type}</span>
+                            <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">{order.items_count} {t('employee.pos.items')}</span>
                           </div>
                           <div className="text-gray-400">{new Date(order.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</div>
                         </div>
@@ -632,10 +650,10 @@ export default function POS() {
                       const statusLabel = table.status === 'available'
                         ? null
                         : table.status === 'occupied'
-                          ? 'Occupied'
+                          ? tableStatusLabels.occupied
                           : table.status === 'reserved'
-                            ? 'Reserved'
-                            : 'Unavailable';
+                            ? tableStatusLabels.reserved
+                            : tableStatusLabels.unavailable;
 
                       return (
                         <button
@@ -663,11 +681,11 @@ export default function POS() {
                   </div>
 
                   {/* Quick Status Actions */}
-                  {selectedTableData && (
+                      {selectedTableData && (
                     <div className="space-y-2 pt-2">
                       <div className="text-xs text-muted-foreground">
-                        Selected: <span className="font-semibold text-foreground">{selectedTableData.code}</span>
-                        {' '}• Status: <span className="font-semibold text-foreground">{selectedTableData.status}</span>
+                        {t('employee.pos.selected')}: <span className="font-semibold text-foreground">{selectedTableData.code}</span>
+                        {' '}• {t('employee.pos.status')}: <span className="font-semibold text-foreground">{tableStatusLabels[selectedTableData.status] ?? selectedTableData.status}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <Button
@@ -735,7 +753,7 @@ export default function POS() {
                         variant="success"
                         onClick={() => handleNumpadClick('✓')}
                       >
-                        ✓ Add {selectedItem.name}
+                        ✓ {t('employee.pos.add_selected', { name: selectedItem.name })}
                       </Button>
                     )}
                   </CardContent>

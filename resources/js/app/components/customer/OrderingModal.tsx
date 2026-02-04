@@ -10,6 +10,7 @@ import { MenuItem, OrderItem } from '@/app/types/domain';
 import { useCartStore } from '@/app/store/cart';
 import { toastSuccess, toastInfo } from '@/app/utils/toast';
 import { ShoppingCart, XCircle, LogIn, ArrowRight, Star, Clock, TrendingUp, Plus } from 'lucide-react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface OrderingModalProps {
   open: boolean;
@@ -25,6 +26,8 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
   const { data: menu, isLoading: menuLoading } = useMenuItems({ category_id: categoryId });
 
   const cart = useCartStore();
+
+  const { t } = useTranslation();
 
   // Get auth state from Inertia props
   const { auth } = usePage().props as { auth?: { user?: any } };
@@ -339,15 +342,15 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                 leftIcon={isAuthenticated ? <ArrowRight className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
               >
                 {cart.items.length === 0
-                  ? 'Add items to continue'
+                  ? t('cart.add_items_btn')
                   : isAuthenticated
-                    ? 'Go to Cart'
-                    : 'Sign in to Continue'
+                    ? t('cart.go_to_cart_btn')
+                    : t('cart.sign_in_modal_title')
                 }
               </Button>
               {!isAuthenticated && cart.items.length > 0 && (
                 <p className="text-xs text-center text-gray-500">
-                  You'll need to sign in to complete your order
+                  {t('cart.sign_in_required_msg')}
                 </p>
               )}
             </CardFooter>
