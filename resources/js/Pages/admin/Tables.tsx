@@ -368,7 +368,7 @@ export default function Tables() {
           </head>
           <body>
             <div class="qr-container">
-              <img src="${qrImageData}" alt="QR Code" />
+              <img src="${qrImageData}" alt="${t('admin.tables.print.qr_alt')}" />
               <h1>${t('admin.tables.print.table_prefix')} ${selectedTableForQr.code}</h1>
               <p>${mainFloorText}</p>
             </div>
@@ -524,7 +524,7 @@ export default function Tables() {
                         </span>
                         {table.qr_token ? (
                           <span className="px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                            <QrCode size={10} /> QR
+                            <QrCode size={10} /> {t('admin.tables.table.qr_badge')}
                           </span>
                         ) : (
                           <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-500/10 text-gray-500 border border-gray-500/20">
@@ -533,7 +533,7 @@ export default function Tables() {
                         )}
                       </div>
                       <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button size="sm" variant="secondary" onClick={() => openQrModalForTable(table)} className="h-8 w-8 p-0 border-border" title="View QR Code">
+                        <Button size="sm" variant="secondary" onClick={() => openQrModalForTable(table)} className="h-8 w-8 p-0 border-border" title={t('common.actions.view_qr_code')}>
                           <QrCode size={14} />
                         </Button>
                         <Button size="sm" variant="secondary" onClick={() => handleEdit(table)} className="h-8 w-8 p-0 border-border">
@@ -690,7 +690,7 @@ export default function Tables() {
             </select>
           </div>
           <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('admin.common.cancel') || 'Cancel'}</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('admin.common.cancel')}</Button>
             <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700">{t('layout.actions.save')}</Button>
           </div>
         </form>
@@ -726,7 +726,7 @@ export default function Tables() {
               </div>
             ) : qrImageData ? (
               <div className="bg-white p-4 rounded-xl shadow-lg">
-                <img src={qrImageData} alt="QR Code" className="w-48 h-48" />
+                <img src={qrImageData} alt={t('admin.tables.modal.qr_alt') as string} className="w-48 h-48" />
               </div>
             ) : (
               <div className="w-48 h-48 bg-secondary rounded-xl flex flex-col items-center justify-center text-muted-foreground">

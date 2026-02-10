@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 // Extend window to access L
 declare global {
@@ -59,6 +60,7 @@ export default function Map({
     routes = [],
     markerColorMap,
 }: MapProps) {
+    const { t } = useTranslation();
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<any>(null);
     const markersRef = useRef<any[]>([]);
@@ -168,7 +170,7 @@ export default function Map({
                 zIndexOffset: 1000, // Always on top
             }).addTo(mapInstanceRef.current);
 
-            marker.bindPopup('Your Location');
+            marker.bindPopup(t('common.ui.map.user_location') as string);
             userMarkerRef.current = marker;
         }
     }, [L, showUserLocation, userLocation, createUserLocationIcon]);

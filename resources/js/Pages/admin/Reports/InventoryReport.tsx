@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -15,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/Ca
 
 // Reusing StatCard from SalesReport with modifications
 const StatCard = ({ title, value, subValue, icon: Icon, color, index = 0 }: any) => {
+    const { t } = useTranslation();
     const colorStyles: Record<string, { gradient: string; iconBg: string; text: string; border: string }> = {
         blue: {
             gradient: 'from-blue-500/20 to-cyan-500/10',
@@ -73,6 +75,7 @@ const StatCard = ({ title, value, subValue, icon: Icon, color, index = 0 }: any)
 };
 
 export default function InventoryReport() {
+    const { t, locale } = useTranslation();
     const [startDate, setStartDate] = useState<Date | undefined>(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     );
@@ -80,10 +83,13 @@ export default function InventoryReport() {
     const [range, setRange] = useState('30days');
 
     const getQueryParams = () => {
+        let params = '';
         if (startDate && endDate) {
-            return `start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}&range=custom`;
+            params = `start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}&range=custom`;
+        } else {
+            params = `range=${range}`;
         }
-        return `range=${range}`;
+        return `${params}&locale=${locale}`;
     };
 
     // --- Queries ---
@@ -148,19 +154,19 @@ export default function InventoryReport() {
                     >
                         <div>
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
-                                Inventory Report
+                                {t('reports.inventory.title')}
                             </h1>
                             <p className="text-muted-foreground mt-1 flex items-center gap-2">
                                 <Package className="w-4 h-4 text-emerald-500" />
-                                Stock valuation, waste tracking, and usage analytics
+                                {t('reports.inventory.subtitle')}
                             </p>
                         </div>
                         <div className="flex gap-2">
                             <Button onClick={handleExportPDF} variant="secondary">
-                                <FileText className="w-4 h-4 mr-2" /> PDF
+                                <FileText className="w-4 h-4 mr-2" /> {t('reports.inventory.actions.pdf')}
                             </Button>
                             <Button onClick={handleExportCSV} variant="secondary">
-                                <Download className="w-4 h-4 mr-2" /> CSV
+                                <Download className="w-4 h-4 mr-2" /> {t('reports.inventory.actions.csv')}
                             </Button>
                         </div>
                     </motion.div>
@@ -168,25 +174,25 @@ export default function InventoryReport() {
                     {/* Stats Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <StatCard
-                            title="Total Stock Value"
+                            title={t('reports.inventory.stats.total_value')}
                             value={`$${Number(valuation?.total_value || 0).toLocaleString()}`}
-                            subValue={`${valuation?.items_count || 0} Items in Stock`}
+                            subValue={`${valuation?.items_count || 0} ${t('reports.inventory.stats.items_in_stock')}`}
                             icon={DollarSign}
                             color="emerald"
                             index={0}
                         />
                         <StatCard
-                            title="Waste Cost"
+                            title={t('reports.inventory.stats.waste_cost')}
                             value={`$${Number(waste?.total_waste_value || 0).toLocaleString()}`}
-                            subValue={`${waste?.waste_percent || 0}% of Revenue`}
+                            subValue={`${waste?.waste_percent || 0}${t('reports.inventory.stats.percent_revenue')}`}
                             icon={Trash2}
                             color="rose"
                             index={1}
                         />
                         <StatCard
-                            title="Avg Turnover Rate"
+                            title={t('reports.inventory.stats.avg_turnover')}
                             value={`${turnover?.avg_turnover || 0}x`}
-                            subValue="Stock Replacement Rate"
+                            subValue={t('reports.inventory.stats.replacement_rate')}
                             icon={RefreshCw}
                             color="blue"
                             index={2}
@@ -207,8 +213,8 @@ export default function InventoryReport() {
                             onEndDateChange={(d) => setEndDate(d ?? undefined)}
                         />
                         <div className="flex gap-2">
-                            <Button size="sm" variant={range === '7days' ? 'primary' : 'secondary'} onClick={() => updateRange('7days')}>7 Days</Button>
-                            <Button size="sm" variant={range === '30days' ? 'primary' : 'secondary'} onClick={() => updateRange('30days')}>30 Days</Button>
+                            <Button size="sm" variant={range === '7days' ? 'primary' : 'secondary'} onClick={() => updateRange('7days')}>{t('reports.inventory.filters.days_7')}</Button>
+                            <Button size="sm" variant={range === '30days' ? 'primary' : 'secondary'} onClick={() => updateRange('30days')}>{t('reports.inventory.filters.days_30')}</Button>
                         </div>
                     </motion.div>
 
@@ -224,13 +230,13 @@ export default function InventoryReport() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Trash2 className="w-5 h-5 text-rose-500" />
-                                        Waste Breakdown
+                                        {t('reports.inventory.waste.title')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
                                         {waste?.by_reason?.length === 0 ? (
-                                            <p className="text-center text-muted-foreground py-8">No waste recorded for this period.</p>
+                                            <p className="text-center text-muted-foreground py-8">{t('reports.inventory.waste.empty')}</p>
                                         ) : (
                                             waste?.by_reason?.map((item: any, idx: number) => (
                                                 <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-border/50">
@@ -259,7 +265,7 @@ export default function InventoryReport() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Activity className="w-5 h-5 text-blue-500" />
-                                        Daily Usage
+                                        {t('reports.inventory.usage.title')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-0">
@@ -267,14 +273,14 @@ export default function InventoryReport() {
                                         <table className="w-full text-sm text-left">
                                             <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 sticky top-0">
                                                 <tr>
-                                                    <th className="px-4 py-3">Date</th>
-                                                    <th className="px-4 py-3 text-right">Items Used / Sold</th>
+                                                    <th className="px-4 py-3">{t('reports.inventory.usage.table.date')}</th>
+                                                    <th className="px-4 py-3 text-right">{t('reports.inventory.usage.table.used_sold')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-border/50">
                                                 {usage?.data?.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={2} className="px-4 py-8 text-center text-muted-foreground">No usage data found.</td>
+                                                        <td colSpan={2} className="px-4 py-8 text-center text-muted-foreground">{t('reports.inventory.usage.empty')}</td>
                                                     </tr>
                                                 ) : (
                                                     usage?.data?.map((row: any, idx: number) => (
@@ -304,7 +310,7 @@ export default function InventoryReport() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <RefreshCw className="w-5 h-5 text-amber-500" />
-                                    Turnover Rate by Category
+                                    {t('reports.inventory.turnover.title')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -314,9 +320,9 @@ export default function InventoryReport() {
                                             <p className="text-xs text-muted-foreground uppercase">{cat.category}</p>
                                             <div className="flex items-end gap-2 mt-1">
                                                 <span className="text-xl font-bold text-foreground">{Number(cat.turnover_rate).toFixed(1)}x</span>
-                                                <span className="text-xs text-muted-foreground mb-1">rate</span>
+                                                <span className="text-xs text-muted-foreground mb-1">{t('reports.inventory.turnover.rate')}</span>
                                             </div>
-                                            <p className="text-xs text-muted-foreground mt-2">{cat.items} items</p>
+                                            <p className="text-xs text-muted-foreground mt-2">{cat.items} {t('reports.inventory.turnover.items')}</p>
                                         </div>
                                     ))}
                                 </div>

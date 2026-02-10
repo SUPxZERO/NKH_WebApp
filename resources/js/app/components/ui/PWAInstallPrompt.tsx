@@ -4,8 +4,10 @@ import { Download, X, Smartphone } from 'lucide-react';
 import Button from './Button';
 import { Card, CardContent } from './Card';
 import { usePWA } from '@/app/utils/pwa';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export function PWAInstallPrompt() {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
   const { canInstall, promptInstall, isMobile } = usePWA();
 
@@ -48,18 +50,18 @@ export function PWAInstallPrompt() {
               
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm mb-1">
-                  Install NKH Restaurant
+                  {t('common.ui.pwa_install.title')}
                 </h3>
                 <p className="text-xs text-gray-400 mb-3">
-                  Get the full app experience with offline access and push notifications.
+                  {t('common.ui.pwa_install.description')}
                 </p>
                 
                 <div className="flex gap-2">
                   <Button size="sm" onClick={handleInstall}>
-                    Install
+                    {t('common.ui.pwa_install.actions.install')}
                   </Button>
                   <Button variant="ghost" size="sm" onClick={handleDismiss}>
-                    Not now
+                    {t('common.ui.pwa_install.actions.dismiss')}
                   </Button>
                 </div>
               </div>

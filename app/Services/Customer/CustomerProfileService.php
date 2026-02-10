@@ -6,6 +6,7 @@ namespace App\Services\Customer;
 
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\CustomerResource;
@@ -115,8 +116,9 @@ class CustomerProfileService
             // Backend fields (kept for backward compatibility if needed)
             'points' => $customer->points_balance ?? 0,
             'tier' => $customer->customer_tier,
+            // order_status_id: 4=Pending, 5=Received, 6=Preparing, 7=Ready
             'active_orders' => Order::where('customer_id', $customer->id)
-                ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
+                ->whereIn('order_status_id', [4, 5, 6, 7])
                 ->count(),
             'total_orders' => $customer->orders()->count(),
 
@@ -126,10 +128,10 @@ class CustomerProfileService
             'points_earned_this_month' => (int) $pointsEarnedThisMonth,
             'available_rewards' => $availableRewardsCount,
 
-            // Fix unread notifications safely
-            'unread_notifications' => method_exists($customer, 'unreadNotifications')
-                ? $customer->unreadNotifications()->count()
-                : 0,
+            // Unread notifications count from user_notifications table
+            'unread_notifications' => UserNotification::where('user_id', $customer->user_id)
+                ->where('read', false)
+                ->count(),
         ];
     }
 }

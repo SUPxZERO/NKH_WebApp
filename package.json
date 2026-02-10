@@ -52,6 +52,7 @@
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
         "lucide-react": "^0.544.0",
+        "puppeteer": "^24.37.1",
         "pusher-js": "^8.4.0",
         "react-datepicker": "^8.10.0",
         "react-hook-form": "^7.63.0",

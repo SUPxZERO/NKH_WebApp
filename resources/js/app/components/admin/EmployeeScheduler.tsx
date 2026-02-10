@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { Calendar, Clock, User } from 'lucide-react';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface Employee {
   id: number;
@@ -28,10 +29,16 @@ interface Props {
 }
 
 export default function EmployeeScheduler({ employees, shifts, onScheduleShift, isLoading }: Props) {
+  const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedEmployee, setSelectedEmployee] = useState<number | null>(null);
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('17:00');
+  const statusLabels: Record<Shift['status'], string> = {
+    scheduled: t('admin.employee_scheduler.status.scheduled'),
+    confirmed: t('admin.employee_scheduler.status.confirmed'),
+    completed: t('admin.employee_scheduler.status.completed'),
+  };
 
   const handleSchedule = () => {
     if (selectedEmployee && selectedDate) {
@@ -54,7 +61,7 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            <h3 className="font-semibold">Employee Scheduler</h3>
+            <h3 className="font-semibold">{t('admin.employee_scheduler.title')}</h3>
           </div>
           <input
             type="date"
@@ -81,7 +88,7 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
                   onChange={(e) => setSelectedEmployee(Number(e.target.value) || null)}
                   className="bg-transparent border border-white/10 rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value="">Select Employee</option>
+                  <option value="">{t('admin.employee_scheduler.select_employee')}</option>
                   {employees.map(emp => (
                     <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
                   ))}
@@ -99,7 +106,7 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
                   className="bg-transparent border border-white/10 rounded-lg px-3 py-2 text-sm"
                 />
                 <Button onClick={handleSchedule} disabled={!selectedEmployee}>
-                  Schedule
+                  {t('admin.employee_scheduler.actions.schedule')}
                 </Button>
               </div>
             </div>
@@ -131,11 +138,11 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
                             shift.status === 'confirmed' ? 'bg-blue-500/20 text-blue-400' :
                             'bg-orange-500/20 text-orange-400'
                           }`}>
-                            {shift.status}
+                            {statusLabels[shift.status] || shift.status}
                           </div>
                         </div>
                       ) : (
-                        <div className="text-xs text-gray-500">Not scheduled</div>
+                        <div className="text-xs text-gray-500">{t('admin.employee_scheduler.not_scheduled')}</div>
                       )}
                     </div>
                   </div>

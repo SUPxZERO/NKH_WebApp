@@ -1,35 +1,55 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <title>{{ __('exports.inventory.title') }}</title>
     <style>
+        @font-face {
+            font-family: 'Noto Sans Khmer';
+            src: url('{{ str_replace("\\", "/", storage_path("fonts/NotoSansKhmer-Regular.ttf")) }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Noto Sans Khmer';
+            src: url('{{ str_replace("\\", "/", storage_path("fonts/NotoSansKhmer-Bold.ttf")) }}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Noto Sans Khmer', Arial, sans-serif;
             margin: 20px;
             color: #333;
         }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
             border-bottom: 3px solid #10b981;
         }
+
         .header h1 {
             color: #10b981;
             margin: 0;
             font-size: 28px;
         }
+
         .header .date-range {
             color: #666;
             font-size: 14px;
             margin-top: 10px;
         }
+
         .stats-grid {
             display: flex;
             justify-content: space-between;
             margin-bottom: 30px;
         }
+
         .stat-card {
             flex: 1;
             padding: 15px;
@@ -38,20 +58,24 @@
             border-left: 4px solid #10b981;
             border-radius: 4px;
         }
+
         .stat-label {
             font-size: 12px;
             color: #666;
             text-transform: uppercase;
             margin-bottom: 5px;
         }
+
         .stat-value {
             font-size: 24px;
             font-weight: bold;
             color: #333;
         }
+
         .section {
             margin-bottom: 30px;
         }
+
         .section-title {
             font-size: 18px;
             color: #10b981;
@@ -59,11 +83,13 @@
             padding-bottom: 5px;
             border-bottom: 2px solid #e5e7eb;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
+
         table th {
             background: #10b981;
             color: white;
@@ -71,14 +97,17 @@
             text-align: left;
             font-size: 14px;
         }
+
         table td {
             padding: 8px 10px;
             border-bottom: 1px solid #e5e7eb;
             font-size: 13px;
         }
+
         table tr:nth-child(even) {
             background: #f8f9fa;
         }
+
         .footer {
             margin-top: 40px;
             padding-top: 15px;
@@ -89,6 +118,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>{{ __('exports.inventory.heading') }}</h1>
@@ -131,11 +161,11 @@
                     $totalCost = array_sum(array_column($costAnalysis['categories'] ?? [], 'value'));
                 @endphp
                 @foreach($costAnalysis['categories'] ?? [] as $category)
-                <tr>
-                    <td>{{ $category['name'] }}</td>
-                    <td>${{ number_format($category['value'], 2) }}</td>
-                    <td>{{ $totalCost > 0 ? number_format(($category['value'] / $totalCost) * 100, 1) : 0 }}%</td>
-                </tr>
+                    <tr>
+                        <td>{{ $category['name'] }}</td>
+                        <td>${{ number_format($category['value'], 2) }}</td>
+                        <td>{{ $totalCost > 0 ? number_format(($category['value'] / $totalCost) * 100, 1) : 0 }}%</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -156,13 +186,13 @@
             </thead>
             <tbody>
                 @foreach($costAnalysis['top_items'] ?? [] as $index => $item)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $item['name'] }}</td>
-                    <td>{{ number_format($item['quantity']) }} {{ $item['unit'] }}</td>
-                    <td>${{ number_format($item['cost_per_unit'], 2) }}</td>
-                    <td>${{ number_format($item['total_cost'], 2) }}</td>
-                </tr>
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $item['name'] }}</td>
+                        <td>{{ number_format($item['quantity']) }} {{ $item['unit'] }}</td>
+                        <td>${{ number_format($item['cost_per_unit'], 2) }}</td>
+                        <td>${{ number_format($item['total_cost'], 2) }}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -181,26 +211,28 @@
             </thead>
             <tbody>
                 @foreach($turnover['by_category'] ?? [] as $cat)
-                <tr>
-                    <td>{{ $cat['category'] }}</td>
-                    <td>{{ number_format($cat['turnover_rate'], 1) }}x</td>
-                    <td>
-                        @if($cat['turnover_rate'] > 10)
-                            {{ __('exports.inventory.turnover_status.excellent') }}
-                        @elseif($cat['turnover_rate'] > 5)
-                            {{ __('exports.inventory.turnover_status.good') }}
-                        @else
-                            {{ __('exports.inventory.turnover_status.needs_attention') }}
-                        @endif
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{ $cat['category'] }}</td>
+                        <td>{{ number_format($cat['turnover_rate'], 1) }}x</td>
+                        <td>
+                            @if($cat['turnover_rate'] > 10)
+                                {{ __('exports.inventory.turnover_status.excellent') }}
+                            @elseif($cat['turnover_rate'] > 5)
+                                {{ __('exports.inventory.turnover_status.good') }}
+                            @else
+                                {{ __('exports.inventory.turnover_status.needs_attention') }}
+                            @endif
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
     <div class="footer">
-        {{ __('exports.inventory.generated_on', ['date' => date('F d, Y \\a\\t H:i')]) }} | {{ __('exports.inventory.system_name') }}
+        {{ __('exports.inventory.generated_on', ['date' => date('F d, Y \\a\\t H:i')]) }} |
+        {{ __('exports.inventory.system_name') }}
     </div>
 </body>
+
 </html>

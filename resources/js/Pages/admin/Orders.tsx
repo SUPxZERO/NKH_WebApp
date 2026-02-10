@@ -278,21 +278,21 @@ export default function Orders() {
     mutationFn: ({ id, status }: { id: number, status: string }) =>
       apiPut(`/api/admin/orders/${id}/status`, { status }),
     onSuccess: () => {
-      toastSuccess('Status updated');
+      toastSuccess(t('admin.orders.messages.status_updated'));
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
     },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
+    onError: (error: any) => toastError(error.response?.data?.message || t('admin.orders.messages.update_failed'))
   });
 
   const updatePaymentMutation = useMutation({
     mutationFn: ({ id, status }: { id: number, status: 'paid' | 'unpaid' }) =>
       apiPatch(`/api/admin/orders/${id}/payment-status`, { payment_status: status }),
     onSuccess: () => {
-      toastSuccess('Payment updated');
+      toastSuccess(t('admin.orders.messages.payment_updated'));
       qc.invalidateQueries({ queryKey: ['admin/orders'] });
       setOpenView(false);
     },
-    onError: (error: any) => toastError(error.response?.data?.message || 'Failed')
+    onError: (error: any) => toastError(error.response?.data?.message || t('admin.orders.messages.update_failed'))
   });
 
 
@@ -414,7 +414,7 @@ export default function Orders() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder={(t('admin.orders.search_placeholder') as string) || "Search..."}
+                  placeholder={(t('admin.orders.search_placeholder') as string) || (t('admin.common.search') as string)}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full h-12 pl-12 pr-4 bg-gray-50/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent transition-all"
@@ -771,7 +771,7 @@ export default function Orders() {
                   <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{t('admin.orders.modal.customer_details')}</h3>
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                      {(selectedOrder.customer?.user?.name || 'G')[0].toUpperCase()}
+                      {(selectedOrder.customer?.user?.name || (t('admin.orders.card.guest') as string))[0].toUpperCase()}
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 dark:text-white">{selectedOrder.customer?.user?.name || t('admin.orders.card.guest')}</p>
@@ -815,7 +815,7 @@ export default function Orders() {
                         ? "text-emerald-600 dark:text-emerald-400"
                         : "text-red-600 dark:text-red-400"
                     )}>
-                      {selectedOrder.payment_status === 'paid' ? 'Paid' : 'Unpaid'}
+                      {selectedOrder.payment_status === 'paid' ? t('admin.orders.card.paid') : t('admin.orders.card.unpaid')}
                     </p>
                   </div>
                 </div>
@@ -824,7 +824,7 @@ export default function Orders() {
                 <div className="mb-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <ChefHat className="w-5 h-5 text-fuchsia-600" />
-                    Order Items ({selectedOrder.items?.length || 0})
+                    {t('admin.orders.modal.items_title', { count: selectedOrder.items?.length || 0 })}
                   </h3>
                   <div className="space-y-2">
                     {selectedOrder.items?.map((item: any) => (
@@ -835,7 +835,7 @@ export default function Orders() {
                           </span>
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">{item.menu_item?.name || item.name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">${getAmount(item.unit_price).toFixed(2)} each</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">${getAmount(item.unit_price).toFixed(2)} {t('admin.orders.modal.each')}</p>
                           </div>
                         </div>
                         <span className="font-bold text-gray-900 dark:text-white">${getAmount(item.total_price).toFixed(2)}</span>
@@ -849,7 +849,7 @@ export default function Orders() {
                   <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
                     <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-2">
                       <AlertTriangle className="w-4 h-4" />
-                      Special Instructions
+                      {t('admin.orders.modal.instructions_title')}
                     </div>
                     <p className="text-sm text-amber-700 dark:text-amber-300">{(selectedOrder as any).special_instructions}</p>
                   </div>
@@ -866,7 +866,7 @@ export default function Orders() {
                         onClick={() => { handleQuickStatus(selectedOrder.id, 'received'); setOpenView(false); }}
                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12"
                       >
-                        <CheckCircle className="w-5 h-5 mr-2" /> Receive Order
+                        <CheckCircle className="w-5 h-5 mr-2" /> {t('admin.orders.modal.actions.receive')}
                       </Button>
                     )}
                     {selectedOrder.status === 'received' && (
@@ -874,7 +874,7 @@ export default function Orders() {
                         onClick={() => { handleQuickStatus(selectedOrder.id, 'preparing'); setOpenView(false); }}
                         className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-12"
                       >
-                        <ChefHat className="w-5 h-5 mr-2" /> Start Preparing
+                        <ChefHat className="w-5 h-5 mr-2" /> {t('admin.orders.modal.actions.start_preparing')}
                       </Button>
                     )}
                     {selectedOrder.status === 'preparing' && (
@@ -882,7 +882,7 @@ export default function Orders() {
                         onClick={() => { handleQuickStatus(selectedOrder.id, 'ready'); setOpenView(false); }}
                         className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white h-12"
                       >
-                        <Sparkles className="w-5 h-5 mr-2" /> Mark Ready
+                        <Sparkles className="w-5 h-5 mr-2" /> {t('admin.orders.modal.actions.mark_ready')}
                       </Button>
                     )}
                     {selectedOrder.status === 'ready' && (
@@ -890,7 +890,7 @@ export default function Orders() {
                         onClick={() => { handleQuickStatus(selectedOrder.id, 'completed'); setOpenView(false); }}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white h-12"
                       >
-                        <CheckCircle className="w-5 h-5 mr-2" /> Complete Order
+                        <CheckCircle className="w-5 h-5 mr-2" /> {t('admin.orders.modal.actions.complete')}
                       </Button>
                     )}
                   </div>
@@ -903,14 +903,14 @@ export default function Orders() {
                       className="flex-1 h-11 border-gray-200 dark:border-gray-700"
                     >
                       <DollarSign className="w-4 h-4 mr-2" />
-                      {selectedOrder.payment_status === 'paid' ? 'Mark Unpaid' : 'Mark Paid'}
+                      {selectedOrder.payment_status === 'paid' ? t('admin.orders.modal.actions.mark_unpaid') : t('admin.orders.modal.actions.mark_paid')}
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => setOpenView(false)}
                       className="flex-1 h-11"
                     >
-                      Close
+                      {t('admin.orders.modal.actions.close')}
                     </Button>
                   </div>
                 </div>

@@ -421,7 +421,7 @@ export default function Settings() {
                       onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                       rows={2}
                       className="w-full px-3 sm:px-4 py-2 text-sm bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-purple-500"
-                      placeholder={t('admin.settings.profile.location.address_placeholder') as string || "Your address will appear here after selecting on map"}
+                      placeholder={t('admin.settings.profile.location.address_placeholder') as string}
                     />
                   </div>
                   <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
@@ -630,7 +630,7 @@ export default function Settings() {
                           <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.system.modal.key')} *</label>
                           <input type="text" value={newSetting.key}
                             onChange={(e) => setNewSetting({ ...newSetting, key: e.target.value })}
-                            placeholder={t('admin.settings.system.modal.key_placeholder') as string || "e.g., general.site_name"}
+                            placeholder={t('admin.settings.system.modal.key_placeholder') as string}
                             className="w-full px-3 sm:px-4 py-2 h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
                           <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('admin.settings.system.modal.key_hint')}</p>
                         </div>
@@ -639,7 +639,7 @@ export default function Settings() {
                           <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">{t('admin.settings.system.modal.value')} *</label>
                           <input type="text" value={newSetting.value}
                             onChange={(e) => setNewSetting({ ...newSetting, value: e.target.value })}
-                            placeholder={(t('admin.settings.system.modal.value_placeholder') as string) || "Setting value"}
+                            placeholder={t('admin.settings.system.modal.value_placeholder') as string}
                             className="w-full px-3 sm:px-4 py-2 h-10 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-purple-500" />
                         </div>
 

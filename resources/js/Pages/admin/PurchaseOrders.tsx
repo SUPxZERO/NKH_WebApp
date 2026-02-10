@@ -395,20 +395,20 @@ export default function PurchaseOrders() {
                                         <div className="col-span-1 font-bold text-emerald-600 dark:text-emerald-400">${parseFloat(String(po.total_amount)).toFixed(2)}</div>
                                         <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {po.status === 'draft' && (
-                                                <Button size="sm" onClick={() => submitMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-blue-600 hover:bg-blue-700 text-white" title="Submit for Approval">
+                                                <Button size="sm" onClick={() => submitMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-blue-600 hover:bg-blue-700 text-white" title={t('common.actions.submit_for_approval')}>
                                                     <Send size={14} />
                                                 </Button>
                                             )}
-                                            {po.status === 'pending' && <Button size="sm" onClick={() => approveMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-emerald-600 hover:bg-emerald-700 text-white" title="Approve"><CheckCircle size={14} /></Button>}
-                                            {po.status === 'approved' && <Button size="sm" onClick={() => markOrderedMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-purple-600 hover:bg-purple-700 text-white" title="Mark Ordered"><Send size={14} /></Button>}
+                                            {po.status === 'pending' && <Button size="sm" onClick={() => approveMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-emerald-600 hover:bg-emerald-700 text-white" title={t('common.actions.approve')}><CheckCircle size={14} /></Button>}
+                                            {po.status === 'approved' && <Button size="sm" onClick={() => markOrderedMutation.mutate(po.id)} className="h-7 w-7 p-0 bg-purple-600 hover:bg-purple-700 text-white" title={t('common.actions.mark_ordered')}><Send size={14} /></Button>}
                                             {(po.status === 'ordered' || po.status === 'partially_received') && (
-                                                <Button size="sm" onClick={() => { setSelectedPO(po); setReceiveItems(po.items?.map(i => ({ item_id: i.id!, quantity_received: 0 })) || []); setOpenReceive(true); }} className="h-7 w-7 p-0 bg-blue-600 hover:bg-blue-700 text-white" title="Receive Items"><Package size={14} /></Button>
+                                                <Button size="sm" onClick={() => { setSelectedPO(po); setReceiveItems(po.items?.map(i => ({ item_id: i.id!, quantity_received: 0 })) || []); setOpenReceive(true); }} className="h-7 w-7 p-0 bg-blue-600 hover:bg-blue-700 text-white" title={t('common.actions.receive_items')}><Package size={14} /></Button>
                                             )}
-                                            <Button size="sm" variant="ghost" onClick={() => { setSelectedPO(po); setOpenView(true); }} className="h-7 w-7 p-0 hover:text-blue-500" title="View Details"><Eye size={14} /></Button>
+                                            <Button size="sm" variant="ghost" onClick={() => { setSelectedPO(po); setOpenView(true); }} className="h-7 w-7 p-0 hover:text-blue-500" title={t('common.actions.view_details')}><Eye size={14} /></Button>
                                             {['draft', 'pending'].includes(po.status) && (
                                                 <>
-                                                    <Button size="sm" variant="ghost" onClick={() => handleEdit(po)} className="h-7 w-7 p-0 hover:text-amber-500" title="Edit"><Edit size={14} /></Button>
-                                                    <Button size="sm" variant="ghost" onClick={() => confirm('Delete?') && deleteMutation.mutate(po.id)} className="h-7 w-7 p-0 hover:text-red-500" title="Delete"><Trash2 size={14} /></Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => handleEdit(po)} className="h-7 w-7 p-0 hover:text-amber-500" title={t('common.actions.edit')}><Edit size={14} /></Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => confirm('Delete?') && deleteMutation.mutate(po.id)} className="h-7 w-7 p-0 hover:text-red-500" title={t('common.actions.delete')}><Trash2 size={14} /></Button>
                                                 </>
                                             )}
                                         </div>

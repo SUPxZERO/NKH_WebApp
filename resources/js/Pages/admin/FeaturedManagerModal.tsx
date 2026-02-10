@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useLanguage } from '@/app/context/LanguageContext';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/app/libs/apiClient';
 import { MenuItem } from '@/app/types/domain';
@@ -20,7 +20,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
     onClose,
     locationId
 }) => {
-    const { t } = useLanguage();
+    const { t } = useTranslation();
     const qc = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -118,7 +118,7 @@ export const FeaturedManagerModal: React.FC<FeaturedManagerModalProps> = ({
                                 <button
                                     onClick={() => handleRemove(item.id)}
                                     className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors opacity-0 group-hover:opacity-100"
-                                    title="Remove from featured"
+                                    title={t('admin.menu.featured_manager.remove_tooltip')}
                                 >
                                     <X className="w-4 h-4" />
                                 </button>

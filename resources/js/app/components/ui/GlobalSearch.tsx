@@ -55,39 +55,38 @@ interface SearchGroup {
   results: SearchResult[];
 }
 
-// Navigation items by layout type
-const adminNavigation: SearchResult[] = [
-  { id: 'admin-dashboard', title: 'Dashboard', subtitle: 'Overview & Analytics', type: 'page', icon: <LayoutDashboard className="w-4 h-4" />, href: '/admin/dashboard' },
-  { id: 'admin-orders', title: 'Orders', subtitle: 'Manage customer orders', type: 'page', icon: <ShoppingBag className="w-4 h-4" />, href: '/admin/orders' },
-  { id: 'admin-menu-items', title: 'Menu Items', subtitle: 'Food & beverages', type: 'page', icon: <Utensils className="w-4 h-4" />, href: '/admin/menu-items' },
-  { id: 'admin-categories', title: 'Categories', subtitle: 'Menu categories', type: 'page', icon: <Hash className="w-4 h-4" />, href: '/admin/categories' },
-  { id: 'admin-recipes', title: 'Recipes', subtitle: 'Recipe management', type: 'page', icon: <ChefHat className="w-4 h-4" />, href: '/admin/recipes' },
-  { id: 'admin-customers', title: 'Customers', subtitle: 'Customer management', type: 'page', icon: <Users className="w-4 h-4" />, href: '/admin/customers' },
-  { id: 'admin-employees', title: 'Employees', subtitle: 'Staff management', type: 'page', icon: <Users className="w-4 h-4" />, href: '/admin/employees' },
-  { id: 'admin-inventory', title: 'Inventory', subtitle: 'Stock management', type: 'page', icon: <Package className="w-4 h-4" />, href: '/admin/inventory' },
-  { id: 'admin-ingredients', title: 'Ingredients', subtitle: 'Ingredient list', type: 'page', icon: <Package className="w-4 h-4" />, href: '/admin/ingredients' },
-  { id: 'admin-reservations', title: 'Reservations', subtitle: 'Table bookings', type: 'page', icon: <Calendar className="w-4 h-4" />, href: '/admin/reservations' },
-  { id: 'admin-analytics', title: 'Sales Analytics', subtitle: 'Reports & insights', type: 'page', icon: <TrendingUp className="w-4 h-4" />, href: '/admin/sales-analytics' },
-  { id: 'admin-promotions', title: 'Promotions', subtitle: 'Discounts & offers', type: 'page', icon: <Star className="w-4 h-4" />, href: '/admin/promotions' },
-  { id: 'admin-settings', title: 'Settings', subtitle: 'System configuration', type: 'page', icon: <Settings className="w-4 h-4" />, href: '/admin/settings' },
+const getAdminNavigation = (t: (key: string) => any): SearchResult[] => [
+  { id: 'admin-dashboard', title: t('common.ui.search.navigation.admin.dashboard.title'), subtitle: t('common.ui.search.navigation.admin.dashboard.subtitle'), type: 'page', icon: <LayoutDashboard className="w-4 h-4" />, href: '/admin/dashboard' },
+  { id: 'admin-orders', title: t('common.ui.search.navigation.admin.orders.title'), subtitle: t('common.ui.search.navigation.admin.orders.subtitle'), type: 'page', icon: <ShoppingBag className="w-4 h-4" />, href: '/admin/orders' },
+  { id: 'admin-menu-items', title: t('common.ui.search.navigation.admin.menu_items.title'), subtitle: t('common.ui.search.navigation.admin.menu_items.subtitle'), type: 'page', icon: <Utensils className="w-4 h-4" />, href: '/admin/menu-items' },
+  { id: 'admin-categories', title: t('common.ui.search.navigation.admin.categories.title'), subtitle: t('common.ui.search.navigation.admin.categories.subtitle'), type: 'page', icon: <Hash className="w-4 h-4" />, href: '/admin/categories' },
+  { id: 'admin-recipes', title: t('common.ui.search.navigation.admin.recipes.title'), subtitle: t('common.ui.search.navigation.admin.recipes.subtitle'), type: 'page', icon: <ChefHat className="w-4 h-4" />, href: '/admin/recipes' },
+  { id: 'admin-customers', title: t('common.ui.search.navigation.admin.customers.title'), subtitle: t('common.ui.search.navigation.admin.customers.subtitle'), type: 'page', icon: <Users className="w-4 h-4" />, href: '/admin/customers' },
+  { id: 'admin-employees', title: t('common.ui.search.navigation.admin.employees.title'), subtitle: t('common.ui.search.navigation.admin.employees.subtitle'), type: 'page', icon: <Users className="w-4 h-4" />, href: '/admin/employees' },
+  { id: 'admin-inventory', title: t('common.ui.search.navigation.admin.inventory.title'), subtitle: t('common.ui.search.navigation.admin.inventory.subtitle'), type: 'page', icon: <Package className="w-4 h-4" />, href: '/admin/inventory' },
+  { id: 'admin-ingredients', title: t('common.ui.search.navigation.admin.ingredients.title'), subtitle: t('common.ui.search.navigation.admin.ingredients.subtitle'), type: 'page', icon: <Package className="w-4 h-4" />, href: '/admin/ingredients' },
+  { id: 'admin-reservations', title: t('common.ui.search.navigation.admin.reservations.title'), subtitle: t('common.ui.search.navigation.admin.reservations.subtitle'), type: 'page', icon: <Calendar className="w-4 h-4" />, href: '/admin/reservations' },
+  { id: 'admin-analytics', title: t('common.ui.search.navigation.admin.analytics.title'), subtitle: t('common.ui.search.navigation.admin.analytics.subtitle'), type: 'page', icon: <TrendingUp className="w-4 h-4" />, href: '/admin/sales-analytics' },
+  { id: 'admin-promotions', title: t('common.ui.search.navigation.admin.promotions.title'), subtitle: t('common.ui.search.navigation.admin.promotions.subtitle'), type: 'page', icon: <Star className="w-4 h-4" />, href: '/admin/promotions' },
+  { id: 'admin-settings', title: t('common.ui.search.navigation.admin.settings.title'), subtitle: t('common.ui.search.navigation.admin.settings.subtitle'), type: 'page', icon: <Settings className="w-4 h-4" />, href: '/admin/settings' },
 ];
 
-const employeeNavigation: SearchResult[] = [
-  { id: 'emp-dashboard', title: 'Dashboard', subtitle: 'Your overview', type: 'page', icon: <Home className="w-4 h-4" />, href: '/employee/dashboard' },
-  { id: 'emp-pos', title: 'POS', subtitle: 'Point of Sale', type: 'page', icon: <CreditCard className="w-4 h-4" />, href: '/employee/pos' },
-  { id: 'emp-kitchen', title: 'Kitchen Display', subtitle: 'Order preparation', type: 'page', icon: <ChefHat className="w-4 h-4" />, href: '/employee/kitchen' },
-  { id: 'emp-delivery', title: 'Delivery Orders', subtitle: 'Manage deliveries', type: 'page', icon: <Package className="w-4 h-4" />, href: '/employee/delivery-orders' },
-  { id: 'emp-schedule', title: 'My Schedule', subtitle: 'Shifts & time off', type: 'page', icon: <Calendar className="w-4 h-4" />, href: '/employee/schedule' },
-  { id: 'emp-performance', title: 'Performance', subtitle: 'Your stats', type: 'page', icon: <TrendingUp className="w-4 h-4" />, href: '/employee/performance' },
+const getEmployeeNavigation = (t: (key: string) => any): SearchResult[] => [
+  { id: 'emp-dashboard', title: t('common.ui.search.navigation.employee.dashboard.title'), subtitle: t('common.ui.search.navigation.employee.dashboard.subtitle'), type: 'page', icon: <Home className="w-4 h-4" />, href: '/employee/dashboard' },
+  { id: 'emp-pos', title: t('common.ui.search.navigation.employee.pos.title'), subtitle: t('common.ui.search.navigation.employee.pos.subtitle'), type: 'page', icon: <CreditCard className="w-4 h-4" />, href: '/employee/pos' },
+  { id: 'emp-kitchen', title: t('common.ui.search.navigation.employee.kitchen.title'), subtitle: t('common.ui.search.navigation.employee.kitchen.subtitle'), type: 'page', icon: <ChefHat className="w-4 h-4" />, href: '/employee/kitchen' },
+  { id: 'emp-delivery', title: t('common.ui.search.navigation.employee.delivery.title'), subtitle: t('common.ui.search.navigation.employee.delivery.subtitle'), type: 'page', icon: <Package className="w-4 h-4" />, href: '/employee/delivery-orders' },
+  { id: 'emp-schedule', title: t('common.ui.search.navigation.employee.schedule.title'), subtitle: t('common.ui.search.navigation.employee.schedule.subtitle'), type: 'page', icon: <Calendar className="w-4 h-4" />, href: '/employee/schedule' },
+  { id: 'emp-performance', title: t('common.ui.search.navigation.employee.performance.title'), subtitle: t('common.ui.search.navigation.employee.performance.subtitle'), type: 'page', icon: <TrendingUp className="w-4 h-4" />, href: '/employee/performance' },
 ];
 
-const customerNavigation: SearchResult[] = [
-  { id: 'cust-home', title: 'Home', subtitle: 'Back to home', type: 'page', icon: <Home className="w-4 h-4" />, href: '/' },
-  { id: 'cust-menu', title: 'Menu', subtitle: 'Browse our dishes', type: 'page', icon: <Utensils className="w-4 h-4" />, href: '/menu' },
-  { id: 'cust-dashboard', title: 'My Dashboard', subtitle: 'Account overview', type: 'page', icon: <LayoutDashboard className="w-4 h-4" />, href: '/dashboard' },
-  { id: 'cust-orders', title: 'My Orders', subtitle: 'Order history', type: 'page', icon: <ShoppingBag className="w-4 h-4" />, href: '/customer/orders' },
-  { id: 'cust-cart', title: 'Cart', subtitle: 'View your cart', type: 'page', icon: <ShoppingBag className="w-4 h-4" />, href: '/cart' },
-  { id: 'cust-reservation', title: 'Book a Table', subtitle: 'Make a reservation', type: 'page', icon: <Calendar className="w-4 h-4" />, href: '/reservation' },
+const getCustomerNavigation = (t: (key: string) => any): SearchResult[] => [
+  { id: 'cust-home', title: t('common.ui.search.navigation.customer.home.title'), subtitle: t('common.ui.search.navigation.customer.home.subtitle'), type: 'page', icon: <Home className="w-4 h-4" />, href: '/' },
+  { id: 'cust-menu', title: t('common.ui.search.navigation.customer.menu.title'), subtitle: t('common.ui.search.navigation.customer.menu.subtitle'), type: 'page', icon: <Utensils className="w-4 h-4" />, href: '/menu' },
+  { id: 'cust-dashboard', title: t('common.ui.search.navigation.customer.dashboard.title'), subtitle: t('common.ui.search.navigation.customer.dashboard.subtitle'), type: 'page', icon: <LayoutDashboard className="w-4 h-4" />, href: '/dashboard' },
+  { id: 'cust-orders', title: t('common.ui.search.navigation.customer.orders.title'), subtitle: t('common.ui.search.navigation.customer.orders.subtitle'), type: 'page', icon: <ShoppingBag className="w-4 h-4" />, href: '/customer/orders' },
+  { id: 'cust-cart', title: t('common.ui.search.navigation.customer.cart.title'), subtitle: t('common.ui.search.navigation.customer.cart.subtitle'), type: 'page', icon: <ShoppingBag className="w-4 h-4" />, href: '/cart' },
+  { id: 'cust-reservation', title: t('common.ui.search.navigation.customer.reservation.title'), subtitle: t('common.ui.search.navigation.customer.reservation.subtitle'), type: 'page', icon: <Calendar className="w-4 h-4" />, href: '/reservation' },
 ];
 
 interface GlobalSearchProps {
@@ -106,12 +105,12 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
   // Get base navigation based on variant
   const baseNavigation = useMemo(() => {
     switch (variant) {
-      case 'admin': return adminNavigation;
-      case 'employee': return employeeNavigation;
-      case 'customer': return customerNavigation;
+      case 'admin': return getAdminNavigation(t);
+      case 'employee': return getEmployeeNavigation(t);
+      case 'customer': return getCustomerNavigation(t);
       default: return [];
     }
-  }, [variant]);
+  }, [variant, t]);
 
   // Search for menu items (for customer and admin)
   const { data: menuResults, isLoading: menuLoading } = useQuery({
@@ -119,14 +118,16 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
     queryFn: async () => {
       if (!query || query.length < 2) return [];
       const response = await apiGet(`/menu-items?search=${encodeURIComponent(query)}&per_page=5`);
+      const menuItemFallback = t('common.ui.search.menu_item_fallback') as string;
+      const popularBadge = t('common.ui.search.badges.popular') as string;
       return (response?.data || []).map((item: any) => ({
         id: `menu-${item.id}`,
         title: item.name,
-        subtitle: `$${item.price} - ${item.category?.name || 'Menu Item'}`,
+        subtitle: `$${item.price} - ${item.category?.name || menuItemFallback}`,
         type: 'menu_item' as const,
         icon: <Utensils className="w-4 h-4" />,
         href: variant === 'admin' ? `/admin/menu-items` : `/menu?item=${item.id}`,
-        badge: item.is_popular ? 'Popular' : undefined,
+        badge: item.is_popular ? popularBadge : undefined,
       }));
     },
     enabled: isOpen && query.length >= 2 && (variant === 'admin' || variant === 'customer'),
@@ -139,9 +140,10 @@ export function GlobalSearch({ variant, isOpen, onClose }: GlobalSearchProps) {
     queryFn: async () => {
       if (!query || query.length < 2) return [];
       const response = await apiGet(`/admin/orders?search=${encodeURIComponent(query)}&per_page=5`);
+      const orderPrefix = t('admin.dashboard.tasks.order_prefix') as string;
       return (response?.data || []).map((order: any) => ({
         id: `order-${order.id}`,
-        title: `Order #${order.order_number}`,
+        title: `${orderPrefix}${order.order_number}`,
         subtitle: `${order.status} - $${order.total}`,
         type: 'order' as const,
         icon: <ShoppingBag className="w-4 h-4" />,

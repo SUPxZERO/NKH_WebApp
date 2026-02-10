@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { cn } from '@/app/utils/cn';
 import { User } from 'lucide-react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface AvatarProps {
     src?: string | null;
@@ -38,9 +39,10 @@ export default function Avatar({
     className,
     fallbackColor = 'default'
 }: AvatarProps) {
+    const { t } = useTranslation();
 
     const initials = useMemo(() => {
-        if (!name) return '?';
+        if (!name) return t('common.ui.avatar.fallback_initials') as string;
         return name
             .split(' ')
             .map(part => part[0])
@@ -71,7 +73,7 @@ export default function Avatar({
             {src ? (
                 <img
                     src={src}
-                    alt={alt || name || 'Avatar'}
+                    alt={alt || name || (t('common.ui.avatar.alt') as string)}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                         // Fallback to initials on error by hiding img

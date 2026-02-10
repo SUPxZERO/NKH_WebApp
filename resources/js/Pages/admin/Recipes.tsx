@@ -114,31 +114,31 @@ export default function Recipes() {
 
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/recipes', data),
-        onSuccess: () => { toastSuccess('Recipe created'); closeModal(); qc.invalidateQueries({ queryKey: ['recipes'] }); qc.invalidateQueries({ queryKey: ['recipes-stats'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.recipes.toasts.created')); closeModal(); qc.invalidateQueries({ queryKey: ['recipes'] }); qc.invalidateQueries({ queryKey: ['recipes-stats'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.common.error.failed'))
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/recipes/${id}`, data),
-        onSuccess: () => { toastSuccess('Recipe updated'); closeModal(); qc.invalidateQueries({ queryKey: ['recipes'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.recipes.toasts.updated')); closeModal(); qc.invalidateQueries({ queryKey: ['recipes'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.common.error.failed'))
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/recipes/${id}`),
-        onSuccess: () => { toastSuccess('Recipe deleted'); qc.invalidateQueries({ queryKey: ['recipes'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.recipes.toasts.deleted')); qc.invalidateQueries({ queryKey: ['recipes'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.common.error.failed'))
     });
 
     const duplicateMutation = useMutation({
         mutationFn: (id: number) => apiPost(`/api/admin/recipes/${id}/duplicate`, {}),
-        onSuccess: () => { toastSuccess('Recipe duplicated'); qc.invalidateQueries({ queryKey: ['recipes'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.recipes.toasts.duplicated')); qc.invalidateQueries({ queryKey: ['recipes'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.common.error.failed'))
     });
 
     const toggleStatusMutation = useMutation({
         mutationFn: ({ id, is_active }: { id: number, is_active: boolean }) => apiPut(`/api/admin/recipes/${id}`, { is_active }),
-        onSuccess: () => { toastSuccess('Status updated'); qc.invalidateQueries({ queryKey: ['recipes'] }); }
+        onSuccess: () => { toastSuccess(t('admin.recipes.toasts.status_updated')); qc.invalidateQueries({ queryKey: ['recipes'] }); }
     });
 
     const closeModal = () => {
@@ -174,7 +174,7 @@ export default function Recipes() {
             setCostingData(data);
             setOpenCosting(true);
         } catch (error) {
-            toastError('Failed to load costing data');
+            toastError(t('admin.recipes.toasts.failed_costing'));
             // Mock data if API fails for demo
             setCostingData({
                 total_cost: Number(recipe.total_cost),
@@ -183,7 +183,7 @@ export default function Recipes() {
                 breakdown: recipe.ingredients?.map(i => ({
                     ingredient_name: i.ingredient?.name || `Ingredient #${i.ingredient_id}`,
                     quantity: i.quantity,
-                    unit: 'units',
+                    unit: t('admin.recipes.common.units'),
                     cost_per_unit: 5,
                     total_cost: i.quantity * 5,
                     percentage: 25
@@ -195,7 +195,7 @@ export default function Recipes() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (formData.ingredients.length === 0) return toastError('Add at least one ingredient');
+        if (formData.ingredients.length === 0) return toastError(t('admin.recipes.toasts.add_ingredient'));
         const data = {
             ...formData,
             menu_item_id: formData.menu_item_id ? parseInt(formData.menu_item_id) : null,
@@ -274,7 +274,7 @@ export default function Recipes() {
                         <div className="flex gap-2 sm:gap-4">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                <Input placeholder={t('admin.recipes.common.search_placeholder')} value={search} onChange={(e) => setSearch(e.target.value)}
                                     className="pl-9 sm:pl-10 h-10 text-sm bg-background/50 border-border/50 focus:border-purple-500 text-foreground" />
                             </div>
                             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
@@ -310,7 +310,7 @@ export default function Recipes() {
 
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
-                                <div className="p-8 sm:p-12 text-center text-muted-foreground text-sm">Loading...</div>
+                                <div className="p-8 sm:p-12 text-center text-muted-foreground text-sm">{t('admin.recipes.common.loading')}</div>
                             ) : recipeList.length === 0 ? (
                                 <div className="p-8 sm:p-12 text-center">
                                     <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
@@ -344,8 +344,8 @@ export default function Recipes() {
                                                         <span className="text-sm font-bold text-emerald-500 flex-shrink-0">${costPerServing.toFixed(2)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                                        <span>{recipe.ingredients?.length || 0} items</span>
-                                                        <span className="flex items-center gap-1"><Clock size={10} />{(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)} min</span>
+                                                        <span>{recipe.ingredients?.length || 0} {t('admin.recipes.common.items')}</span>
+                                                        <span className="flex items-center gap-1"><Clock size={10} />{(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)} {t('admin.recipes.common.min')}</span>
                                                         <span className={cn("w-1.5 h-1.5 rounded-full", recipe.is_active ? "bg-emerald-500" : "bg-red-500")} />
                                                     </div>
                                                 </div>
@@ -361,7 +361,7 @@ export default function Recipes() {
                                                     <button onClick={() => handleViewCosting(recipe)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500"><TrendingUp size={16} /></button>
                                                     <button onClick={() => duplicateMutation.mutate(recipe.id)} className="p-2 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-500"><Copy size={16} /></button>
                                                     <button onClick={() => handleEdit(recipe)} className="p-2 rounded-lg hover:bg-purple-500/10 text-muted-foreground hover:text-purple-500"><Edit size={16} /></button>
-                                                    <button onClick={() => confirm('Delete recipe?') && deleteMutation.mutate(recipe.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500"><Trash2 size={16} /></button>
+                                                    <button onClick={() => confirm(t('admin.recipes.common.delete_confirm')) && deleteMutation.mutate(recipe.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500"><Trash2 size={16} /></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -375,7 +375,7 @@ export default function Recipes() {
                                                     </div>
                                                     {recipeName}
                                                 </div>
-                                                <div className="text-xs text-muted-foreground ml-10">{recipe.ingredients?.length || 0} ingredients • {servings} servings</div>
+                                                <div className="text-xs text-muted-foreground ml-10">{recipe.ingredients?.length || 0} {t('admin.recipes.common.ingredients')} • {servings} {t('admin.recipes.common.servings')}</div>
                                             </div>
                                             <div className="col-span-2 text-sm text-foreground">{recipe.menu_item?.name || '-'}</div>
                                             <div className="col-span-2">
@@ -383,14 +383,14 @@ export default function Recipes() {
                                                     ${costPerServing.toFixed(2)}
                                                     {recipe.menu_item && (
                                                         <span className={cn("text-xs font-normal", (recipe.menu_item.price > costPerServing) ? "text-emerald-500" : "text-red-500")}>
-                                                            / ${(Number(recipe.menu_item.price) - costPerServing).toFixed(2)} profit
+                                                            / ${(Number(recipe.menu_item.price) - costPerServing).toFixed(2)} {t('admin.recipes.common.profit')}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-muted-foreground text-xs">Batch: ${totalCost.toFixed(2)}</div>
+                                                <div className="text-muted-foreground text-xs">{t('admin.recipes.common.batch')}: ${totalCost.toFixed(2)}</div>
                                             </div>
                                             <div className="col-span-2 text-sm text-muted-foreground flex items-center gap-1">
-                                                <Clock size={12} /> {(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)} min
+                                                <Clock size={12} /> {(recipe.prep_time_minutes || 0) + (recipe.cook_time_minutes || 0)} {t('admin.recipes.common.min')}
                                             </div>
                                             <div className="col-span-1">
                                                 <button onClick={() => toggleStatusMutation.mutate({ id: recipe.id, is_active: !recipe.is_active })} className="transition-transform active:scale-95">
@@ -401,10 +401,10 @@ export default function Recipes() {
                                                 </button>
                                             </div>
                                             <div className="col-span-2 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button size="sm" variant="ghost" onClick={() => handleViewCosting(recipe)} className="h-8 w-8 p-0 hover:text-emerald-600" title="Costing"><TrendingUp size={16} /></Button>
-                                                <Button size="sm" variant="ghost" onClick={() => duplicateMutation.mutate(recipe.id)} className="h-8 w-8 p-0 hover:text-blue-500" title="Duplicate"><Copy size={16} /></Button>
+                                                <Button size="sm" variant="ghost" onClick={() => handleViewCosting(recipe)} className="h-8 w-8 p-0 hover:text-emerald-600" title={t('common.actions.costing')}><TrendingUp size={16} /></Button>
+                                                <Button size="sm" variant="ghost" onClick={() => duplicateMutation.mutate(recipe.id)} className="h-8 w-8 p-0 hover:text-blue-500" title={t('common.actions.duplicate')}><Copy size={16} /></Button>
                                                 <Button size="sm" variant="ghost" onClick={() => handleEdit(recipe)} className="h-8 w-8 p-0 hover:text-purple-500"><Edit size={16} /></Button>
-                                                <Button size="sm" variant="ghost" onClick={() => confirm('Delete recipe?') && deleteMutation.mutate(recipe.id)} className="h-8 w-8 p-0 hover:text-red-500"><Trash2 size={16} /></Button>
+                                                <Button size="sm" variant="ghost" onClick={() => confirm(t('admin.recipes.common.delete_confirm')) && deleteMutation.mutate(recipe.id)} className="h-8 w-8 p-0 hover:text-red-500"><Trash2 size={16} /></Button>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -417,14 +417,14 @@ export default function Recipes() {
                     {paginationMeta.last_page > 1 && (
                         <div className="flex items-center justify-between gap-2 px-1">
                             <div className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                                {((paginationMeta.current_page - 1) * perPage) + 1}-{Math.min(paginationMeta.current_page * perPage, paginationMeta.total)} of {paginationMeta.total}
+                                {((paginationMeta.current_page - 1) * perPage) + 1}-{Math.min(paginationMeta.current_page * perPage, paginationMeta.total)} {t('admin.recipes.common.of')} {paginationMeta.total}
                             </div>
                             <div className="flex gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                                <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="border-border h-9 px-3">Prev</Button>
+                                <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="border-border h-9 px-3">{t('admin.recipes.common.prev')}</Button>
                                 <span className="text-sm font-medium text-foreground px-3 py-2 rounded-lg bg-secondary border border-border sm:hidden">
                                     {page}/{paginationMeta.last_page}
                                 </span>
-                                <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.min(paginationMeta.last_page, p + 1))} disabled={page === paginationMeta.last_page} className="border-border h-9 px-3">Next</Button>
+                                <Button size="sm" variant="secondary" onClick={() => setPage(p => Math.min(paginationMeta.last_page, p + 1))} disabled={page === paginationMeta.last_page} className="border-border h-9 px-3">{t('admin.recipes.common.next')}</Button>
                             </div>
                         </div>
                     )}
@@ -434,7 +434,7 @@ export default function Recipes() {
                 <Modal open={openCreate || openEdit} onClose={closeModal} title={editingRecipe ? t('admin.recipes.edit_recipe') : t('admin.recipes.create_recipe')} size="xl">
                     <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <Input label={t('admin.recipes.form.recipe_name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Signature Burger Sauce" />
+                            <Input label={t('admin.recipes.form.recipe_name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder={t('admin.recipes.common.example_name')} />
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-1">{t('admin.recipes.form.linked_menu_item')}</label>
                                 <select value={formData.menu_item_id} onChange={(e) => setFormData({ ...formData, menu_item_id: e.target.value })}

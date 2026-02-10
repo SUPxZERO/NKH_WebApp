@@ -3,6 +3,7 @@ import { MenuItem } from '@/app/types/domain';
 import Button from '@/app/components/ui/Button';
 import { ShoppingCart, Info } from 'lucide-react';
 import { Skeleton } from '@/app/components/ui/Loading';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface POSMenuGridProps {
     items: MenuItem[];
@@ -13,6 +14,7 @@ interface POSMenuGridProps {
 }
 
 const MenuItemCard = memo(({ item, viewMode, onClick, onViewDetails }: { item: MenuItem, viewMode: 'grid' | 'list', onClick: () => void, onViewDetails?: () => void }) => {
+    const { t } = useLanguage();
     if (viewMode === 'grid') {
         return (
             <div
@@ -42,7 +44,7 @@ const MenuItemCard = memo(({ item, viewMode, onClick, onViewDetails }: { item: M
                                 onViewDetails();
                             }}
                             className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm flex items-center justify-center text-white transition-colors z-10"
-                            title="View details"
+                            title={t('common.actions.view_details')}
                         >
                             <Info className="w-4 h-4" />
                         </button>
@@ -67,7 +69,7 @@ const MenuItemCard = memo(({ item, viewMode, onClick, onViewDetails }: { item: M
                         <div
                             className="h-8 px-3 rounded-full bg-gray-100 dark:bg-gray-700 group-hover:bg-fuchsia-600 group-hover:text-white dark:text-gray-200 text-xs font-bold flex items-center gap-1.5 transition-colors"
                         >
-                            <span>Add</span>
+                            <span>{t('employee.pos.menu_grid.add')}</span>
                             <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
                                 <ShoppingCart className="w-2.5 h-2.5" />
                             </div>
@@ -105,6 +107,7 @@ const MenuItemCard = memo(({ item, viewMode, onClick, onViewDetails }: { item: M
                             onViewDetails();
                         }}
                         className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        title={t('employee.pos.menu_grid.view_details')}
                     >
                         <Info className="w-5 h-5" />
                     </button>
@@ -112,7 +115,7 @@ const MenuItemCard = memo(({ item, viewMode, onClick, onViewDetails }: { item: M
                 <button
                     className="h-9 px-4 rounded-lg bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300 font-medium text-sm hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/40 transition-colors"
                 >
-                    Add
+                    {t('employee.pos.menu_grid.add')}
                 </button>
             </div>
         </div>

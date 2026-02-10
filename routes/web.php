@@ -29,6 +29,10 @@ use App\Http\Middleware\EnsureCustomerAccess;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+// Legal pages
+Route::get('/terms', fn() => Inertia::render('Legal/Terms'))->name('legal.terms');
+Route::get('/privacy', fn() => Inertia::render('Legal/Privacy'))->name('legal.privacy');
+
 // DEVELOPMENT ONLY: Test payment page access
 if (config('app.env') !== 'production') {
     Route::get('/test-payment', function () {
@@ -96,6 +100,7 @@ Route::prefix('customer')->middleware([EnsureCustomerAccess::class])->group(func
     Route::get('/orders/{orderId}', fn($orderId) => Inertia::render('Customer/OrderDetails', ['orderId' => $orderId]))->name('customer.orders.show');
     Route::get('/loyalty', fn() => Inertia::render('Customer/Loyalty'))->name('customer.loyalty');
     Route::get('/reservations', fn() => Inertia::render('Customer/Reservations'))->name('customer.reservations');
+    Route::get('/notifications', fn() => Inertia::render('Customer/Notifications'))->name('customer.notifications');
     Route::get('/feedback', fn() => Inertia::render('Customer/Feedback'))->name('customer.feedback');
     Route::get('/settings', fn() => Inertia::render('Customer/Settings'))->name('customer.settings');
     Route::get('/help', fn() => Inertia::render('Customer/HelpSupport'))->name('customer.help');
@@ -148,6 +153,7 @@ Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,manager,chie
     Route::get('dashboard/data', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'getData'])->name('admin.dashboard.data');
 
     Route::get('notifications', fn() => Inertia::render('admin/Notifications'))->name('admin.notifications');
+    Route::get('my-notifications', fn() => Inertia::render('admin/MyNotifications'))->name('admin.my-notifications');
     Route::get('audit-logs', fn() => Inertia::render('admin/AuditLogs'))->name('admin.audit-logs');
 
     // Menu Management

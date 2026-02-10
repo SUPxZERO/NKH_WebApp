@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/app/utils/cn';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, ArrowUpRight } from 'lucide-react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   hover?: boolean;
@@ -214,6 +215,7 @@ const colorStyles = {
 };
 
 export function StatCard({ title, value, icon, change, color = 'primary', className, index = 0 }: StatCardProps) {
+  const { t } = useTranslation();
   const styles = colorStyles[color];
 
   return (
@@ -251,7 +253,9 @@ export function StatCard({ title, value, icon, change, color = 'primary', classN
                   <TrendingDown className="w-4 h-4" />
                 )}
                 <span>{Math.abs(change.value)}%</span>
-                <span className="text-muted-foreground font-normal text-xs">vs last period</span>
+                <span className="text-muted-foreground font-normal text-xs">
+                  {t('common.ui.card.stats.vs_last_period')}
+                </span>
               </div>
             )}
           </div>
@@ -281,6 +285,7 @@ interface FeatureCardProps {
 }
 
 export function FeatureCard({ title, description, icon, color = 'primary', className, onClick, index = 0 }: FeatureCardProps) {
+  const { t } = useTranslation();
   const styles = colorStyles[color];
 
   return (
@@ -323,7 +328,7 @@ export function FeatureCard({ title, description, icon, color = 'primary', class
           "mt-4 inline-flex items-center gap-1 text-sm font-semibold transition-all group-hover:gap-2",
           styles.text
         )}>
-          Learn more <ArrowUpRight className="w-4 h-4" />
+          {t('common.ui.card.feature.learn_more')} <ArrowUpRight className="w-4 h-4" />
         </div>
       </div>
     </motion.div>

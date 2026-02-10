@@ -40,7 +40,7 @@ import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 export default function POS() {
   // Smart Polling for Orders and Tables
   useSmartPolling(['orders', 'tables'], 10000);
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const orderTypeLabels: Record<string, string> = {
     dine_in: t('employee.pos.order_type.dine_in'),
     takeout: t('employee.pos.order_type.takeout'),
@@ -219,7 +219,7 @@ export default function POS() {
       try {
         setHeldOrders(JSON.parse(saved));
       } catch (e) {
-        console.error('Failed to load held orders', e);
+        console.error(t('employee.pos.messages.load_held_failed'), e);
       }
     }
   }, []);
@@ -304,7 +304,7 @@ export default function POS() {
   const updateTableStatusMutation = useMutation({
     mutationFn: async (status: Table['status']) => {
       if (!selectedTable) {
-        throw new Error('No table selected');
+        throw new Error(t('employee.pos.messages.no_table_selected') as string);
       }
 
       if (selectedTableData?.status === status) {
@@ -332,7 +332,7 @@ export default function POS() {
             <h1 className="text-2xl font-bold text-foreground">{t('employee.pos.title')}</h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date().toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
+              {new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })} • {new Date().toLocaleDateString(locale, { weekday: 'long', month: 'short', day: 'numeric' })}
             </p>
           </div>
           <div className="flex bg-gray-100 p-1 rounded-xl dark:bg-gray-800/80 shadow-sm w-full sm:w-auto">
@@ -445,10 +445,10 @@ export default function POS() {
                             <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs">{orderTypeLabels[order.order_type] ?? order.order_type}</span>
                             <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">{order.items_count} {t('employee.pos.items')}</span>
                           </div>
-                          <div className="text-gray-400">{new Date(order.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</div>
+                          <div className="text-gray-400">{new Date(order.created_at).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}</div>
                         </div>
                         <div className="pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                          <div className="font-bold text-xl">${order.total_amount.toFixed(2)}</div>
+                          <div className="font-bold text-xl">{t('employee.common.currency_symbol')}{order.total_amount.toFixed(2)}</div>
                           <Button size="sm" className="bg-blue-600 h-10 px-4">{t('employee.pos.pay')}</Button>
                         </div>
                       </div>
@@ -491,7 +491,7 @@ export default function POS() {
                           )}
                           {/* Price Tag Overlay */}
                           <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                            ${item.price.toFixed(2)}
+                            {t('employee.common.currency_symbol')}{item.price.toFixed(2)}
                           </div>
                         </div>
 
@@ -592,7 +592,7 @@ export default function POS() {
                           <div>
                             <div className="font-medium text-foreground">{t('employee.pos.table')} {h.tableId || t('employee.pos.walk_in')}</div>
                             <div className="text-xs text-muted-foreground">
-                              {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • ${h.total.toFixed(2)}
+                              {new Date(h.timestamp).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })} • {t('employee.common.currency_symbol')}{h.total.toFixed(2)}
                             </div>
                           </div>
                           <Button size="sm" variant="secondary" onClick={() => restoreHeldOrder(h.id)}>
@@ -787,7 +787,7 @@ export default function POS() {
                         <div key={it.menu_item_id} className="flex items-start justify-between gap-2 pb-3 border-b border-border last:border-0">
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-foreground truncate">{it.name}</div>
-                            <div className="text-xs text-muted-foreground">${it.unit_price.toFixed(2)} × {it.quantity}</div>
+                            <div className="text-xs text-muted-foreground">{t('employee.common.currency_symbol')}{it.unit_price.toFixed(2)} × {it.quantity}</div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <button
@@ -817,15 +817,15 @@ export default function POS() {
                   <div className="mt-4 space-y-2 text-base border-t border-border pt-4">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employee.pos.subtotal')}</span>
-                      <span className="font-semibold text-foreground">${cart.subtotal.toFixed(2)}</span>
+                      <span className="font-semibold text-foreground">{t('employee.common.currency_symbol')}{cart.subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('employee.pos.tax')}</span>
-                      <span className="font-semibold text-foreground">${cart.tax.toFixed(2)}</span>
+                      <span className="font-semibold text-foreground">{t('employee.common.currency_symbol')}{cart.tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-xl mt-3 pt-3 border-t border-border">
                       <span className="text-foreground">{t('employee.pos.total')}</span>
-                      <span className="text-primary">${cart.total.toFixed(2)}</span>
+                      <span className="text-primary">{t('employee.common.currency_symbol')}{cart.total.toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-3 gap-2">
@@ -891,7 +891,7 @@ export default function POS() {
                   <ShoppingCart className="w-5 h-5 mb-1" />
                   <span className="text-xs font-medium flex items-center gap-1">
                     {t('employee.pos.cart')}
-                    {cart.total > 0 && <span className="text-green-600 dark:text-green-400 font-bold">(${cart.total.toFixed(0)})</span>}
+                    {cart.total > 0 && <span className="text-green-600 dark:text-green-400 font-bold">({t('employee.common.currency_symbol')}{cart.total.toFixed(0)})</span>}
                   </span>
                 </div>
               </button>

@@ -16,11 +16,15 @@ class CustomerNotificationController extends Controller
     public function index(): JsonResponse
     {
         $user = Auth::user();
-        
+
+        \Log::info("CustomerNotificationController::index - User ID: " . ($user ? $user->id : 'NULL') . " - Name: " . ($user ? $user->name : 'NULL'));
+
         $notifications = UserNotification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(50)
             ->get();
+
+        \Log::info("CustomerNotificationController::index - Found " . $notifications->count() . " notifications for user " . $user->id);
 
         $unreadCount = UserNotification::where('user_id', $user->id)
             ->where('read', false)
@@ -39,7 +43,7 @@ class CustomerNotificationController extends Controller
     public function markAsRead(int $notificationId): JsonResponse
     {
         $user = Auth::user();
-        
+
         $notification = UserNotification::where('id', $notificationId)
             ->where('user_id', $user->id)
             ->first();
@@ -65,7 +69,7 @@ class CustomerNotificationController extends Controller
     public function markAllAsRead(): JsonResponse
     {
         $user = Auth::user();
-        
+
         UserNotification::where('user_id', $user->id)
             ->where('read', false)
             ->update([
@@ -85,7 +89,7 @@ class CustomerNotificationController extends Controller
     public function destroy(int $notificationId): JsonResponse
     {
         $user = Auth::user();
-        
+
         $notification = UserNotification::where('id', $notificationId)
             ->where('user_id', $user->id)
             ->first();
@@ -111,7 +115,7 @@ class CustomerNotificationController extends Controller
     public function unreadCount(): JsonResponse
     {
         $user = Auth::user();
-        
+
         $count = UserNotification::where('user_id', $user->id)
             ->where('read', false)
             ->count();

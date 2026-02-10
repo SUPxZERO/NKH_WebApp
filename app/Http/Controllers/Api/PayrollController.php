@@ -379,22 +379,28 @@ class PayrollController extends Controller
                 ->whereMonth('period_start', $date->month);
         }
 
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
+        }
+
         $payrolls = $query->orderBy('period_start', 'desc')->get();
 
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="payroll-report-' . date('Y-m-d') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="' . __('exports.payroll.title') . '-' . date('Y-m-d') . '.csv"',
         ];
 
         $callback = function () use ($payrolls, $validated) {
             $file = fopen('php://output', 'w');
+            // Add BOM for UTF-8 (Excel support)
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             // Title & Period
-            fputcsv($file, ['Payroll Report']);
+            fputcsv($file, [__('exports.payroll.heading')]);
             if (isset($validated['month'])) {
-                fputcsv($file, ['Period:', Carbon::parse($validated['month'])->format('F Y')]);
+                fputcsv($file, [__('exports.payroll.table.period') . ':', Carbon::parse($validated['month'])->format('F Y')]);
             } else {
-                fputcsv($file, ['Period:', 'All Records']);
+                fputcsv($file, [__('exports.payroll.table.period') . ':', __('exports.payroll.period_all') ?? 'All Records']);
             }
             fputcsv($file, []);
 
@@ -403,15 +409,24 @@ class PayrollController extends Controller
             $totalGrossPay = $payrolls->sum('gross_pay');
             $employeeCount = $payrolls->count();
 
-            fputcsv($file, ['SUMMARY']);
-            fputcsv($file, ['Total Employees', $employeeCount]);
-            fputcsv($file, ['Total Gross Pay', '$' . number_format($totalGrossPay, 2)]);
-            fputcsv($file, ['Total Net Pay', '$' . number_format($totalNetPay, 2)]);
+            fputcsv($file, [__('exports.payroll.sections.summary') ?? 'SUMMARY']);
+            fputcsv($file, [__('exports.payroll.stats.employees'), $employeeCount]);
+            fputcsv($file, [__('exports.payroll.stats.gross_pay'), '$' . number_format($totalGrossPay, 2)]);
+            fputcsv($file, [__('exports.payroll.stats.net_pay'), '$' . number_format($totalNetPay, 2)]);
             fputcsv($file, []);
 
             // Payroll Details
-            fputcsv($file, ['PAYROLL DETAILS']);
-            fputcsv($file, ['Employee', 'Period', 'Base Pay', 'Overtime', 'Bonuses', 'Deductions', 'Net Pay', 'Status']);
+            fputcsv($file, [__('exports.payroll.sections.details')]);
+            fputcsv($file, [
+                __('exports.payroll.table.employee'),
+                __('exports.payroll.table.period'),
+                __('exports.payroll.table.base_pay'),
+                __('exports.payroll.table.overtime'),
+                __('exports.payroll.table.bonuses'),
+                __('exports.payroll.table.deductions'),
+                __('exports.payroll.table.net_pay'),
+                __('exports.payroll.table.status')
+            ]);
 
             foreach ($payrolls as $payroll) {
                 fputcsv($file, [
@@ -447,6 +462,10 @@ class PayrollController extends Controller
             $date = Carbon::parse($validated['month']);
             $query->whereYear('period_start', $date->year)
                 ->whereMonth('period_start', $date->month);
+        }
+
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
         }
 
         $payrolls = $query->orderBy('period_start', 'desc')->get();
@@ -487,7 +506,11 @@ class PayrollController extends Controller
             'generated_at' => now()->format('F d, Y \a\t H:i'),
         ];
 
-        $pdf = Pdf::loadView('exports.payroll-report', $data);
-        return $pdf->download('payroll-report-' . date('Y-m-d') . '.pdf');
+        $filename = 'payroll-report-' . date('Y-m-d') . '.pdf';
+        $pdfContent = app(\App\Services\PdfService::class)->generate('exports.payroll-report', $data);
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

@@ -274,8 +274,11 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // SECURITY: Admin routes ALWAYS require authentication
 // No bypasses for development environments - use proper test credentials instead
 $adminMiddleware = [
+    \App\Http\Middleware\EncryptCookies::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
     \Illuminate\Session\Middleware\StartSession::class,
     \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \App\Http\Middleware\SetLocale::class,
     'auth:sanctum',
     // Support multiple admin roles: super-admin, admin, and specific manager roles
     'role:super-admin,admin,chief,service-manager,finance-manager,hr-manager,inventory-manager,operations-manager,viewer',
@@ -322,6 +325,13 @@ Route::prefix('employee')
         Route::post('payments/{payment}/confirm-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'confirmCashPayment']);
         Route::post('payments/{payment}/reject-cash', [\App\Http\Controllers\Api\CashPaymentController::class, 'rejectCashPayment']);
         Route::get('payments/cash-stats', [\App\Http\Controllers\Api\CashPaymentController::class, 'cashStats']);
+
+        // Employee Personal Notifications
+        Route::get('notifications', [\App\Http\Controllers\Api\EmployeeNotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [\App\Http\Controllers\Api\EmployeeNotificationController::class, 'unreadCount']);
+        Route::post('notifications/{notification}/read', [\App\Http\Controllers\Api\EmployeeNotificationController::class, 'markAsRead']);
+        Route::post('notifications/mark-all-read', [\App\Http\Controllers\Api\EmployeeNotificationController::class, 'markAllAsRead']);
+        Route::delete('notifications/{notification}', [\App\Http\Controllers\Api\EmployeeNotificationController::class, 'destroy']);
     });
 
 // Customer Dashboard Routes - MOVED TO WEB.PHP to share session state
@@ -362,8 +372,12 @@ Route::prefix('customer')
         Route::get('favorites/ids', [App\Http\Controllers\Api\CustomerDashboardController::class, 'getExplicitFavorites']);
         Route::post('favorites/toggle', [App\Http\Controllers\Api\CustomerDashboardController::class, 'toggleFavorite']);
 
-        // Notifications
-        Route::get('notifications', [App\Http\Controllers\Api\CustomerDashboardController::class, 'notifications']);
+        // Notifications (uses UserNotification model, keyed by user_id)
+        Route::get('notifications', [App\Http\Controllers\Api\CustomerNotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [App\Http\Controllers\Api\CustomerNotificationController::class, 'unreadCount']);
+        Route::post('notifications/{notification}/read', [App\Http\Controllers\Api\CustomerNotificationController::class, 'markAsRead']);
+        Route::post('notifications/mark-all-read', [App\Http\Controllers\Api\CustomerNotificationController::class, 'markAllAsRead']);
+        Route::delete('notifications/{notification}', [App\Http\Controllers\Api\CustomerNotificationController::class, 'destroy']);
 
         // Loyalty
         Route::get('loyalty/stats', [App\Http\Controllers\Api\CustomerDashboardController::class, 'loyaltyStats']);

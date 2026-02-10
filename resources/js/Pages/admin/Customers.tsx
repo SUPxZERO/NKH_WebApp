@@ -76,10 +76,10 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
 const CustomerStatsRibbon = ({ stats }: { stats: any }) => (
   <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
     <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-      <StatCard title="Total" value={stats.total} icon={Users} color="purple" index={0} />
-      <StatCard title="Active" value={stats.active} icon={UserPlus} color="emerald" index={1} />
-      <StatCard title="VIP" value={stats.vip} icon={Crown} color="amber" index={2} />
-      <StatCard title="Points" value={stats.totalPoints.toLocaleString()} icon={Gift} color="blue" index={3} />
+      <StatCard title={stats.totalLabel} value={stats.total} icon={Users} color="purple" index={0} />
+      <StatCard title={stats.activeLabel} value={stats.active} icon={UserPlus} color="emerald" index={1} />
+      <StatCard title={stats.vipLabel} value={stats.vip} icon={Crown} color="amber" index={2} />
+      <StatCard title={stats.pointsLabel} value={stats.totalPoints.toLocaleString()} icon={Gift} color="blue" index={3} />
     </div>
   </div>
 );
@@ -520,7 +520,7 @@ export default function Customers() {
               <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('profile.gender')}</label>
               <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                 className="w-full h-10 bg-secondary/50 border border-border rounded-lg px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
-                <option value="">{t('admin.nav.dashboard.select') || 'Select'}</option>
+                <option value="">{t('admin.common.select') || 'Select'}</option>
                 <option value="male">{t('profile.genders.male')}</option>
                 <option value="female">{t('profile.genders.female')}</option>
                 <option value="other">{t('profile.genders.other')}</option>
@@ -547,7 +547,7 @@ export default function Customers() {
               <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('admin.people.customers.location_label')}</label>
               <select value={formData.preferred_location_id} onChange={(e) => setFormData({ ...formData, preferred_location_id: e.target.value })}
                 className="w-full h-10 bg-secondary/50 border border-border rounded-lg px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
-                <option value="">{t('admin.nav.dashboard.select') || 'Select'}</option>
+                <option value="">{t('admin.common.select') || 'Select'}</option>
                 {(locations as any)?.data?.map((loc: Location) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}

@@ -25,8 +25,8 @@ type SignInForm = {
 const roleConfig = {
   customer: {
     icon: UtensilsCrossed,
-    label: 'Customer',
-    description: 'Order food & track deliveries',
+    label: 'auth.roles.customer',
+    description: 'auth.roles.customer_desc',
     gradient: 'from-emerald-400 via-teal-500 to-cyan-500',
     bgGlow: 'bg-emerald-500/30',
     borderColor: 'border-emerald-400/50',
@@ -34,8 +34,8 @@ const roleConfig = {
   },
   employee: {
     icon: User,
-    label: 'Employee',
-    description: 'POS & order management',
+    label: 'auth.roles.employee',
+    description: 'auth.roles.employee_desc',
     gradient: 'from-blue-400 via-indigo-500 to-purple-500',
     bgGlow: 'bg-blue-500/30',
     borderColor: 'border-blue-400/50',
@@ -43,8 +43,8 @@ const roleConfig = {
   },
   admin: {
     icon: Shield,
-    label: 'Admin',
-    description: 'Full system control',
+    label: 'auth.roles.admin',
+    description: 'auth.roles.admin_desc',
     gradient: 'from-fuchsia-400 via-pink-500 to-rose-500',
     bgGlow: 'bg-fuchsia-500/30',
     borderColor: 'border-fuchsia-400/50',
@@ -164,7 +164,7 @@ export default function SignIn() {
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-fuchsia-500/30">
                 <img
                   src="/Nkhlogo.png"
-                  alt="NKH Restaurant"
+                  alt={t('auth.brand_alt') as string}
                   className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]"
                 />
               </div>
@@ -187,7 +187,10 @@ export default function SignIn() {
             transition={{ delay: 0.4 }}
             className="text-gray-400 text-sm sm:text-base lg:text-lg px-4"
           >
-            {t('auth.sign_in_subtitle', { brand: '' })} <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">NKH Restaurant</span>
+            {t('auth.sign_in_subtitle', { brand: '' })}{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400 font-semibold">
+              {t('auth.brand_name')}
+            </span>
           </motion.p>
         </div>
 
@@ -302,6 +305,7 @@ export default function SignIn() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 sm:right-4 text-gray-500 hover:text-white transition-colors"
+                      aria-label={showPassword ? t('common.ui.input.actions.hide_password') as string : t('common.ui.input.actions.show_password') as string}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </button>
@@ -341,7 +345,7 @@ export default function SignIn() {
               <LoadingButton
                 type="submit"
                 loading={isLoading}
-                loadingText="Signing in..."
+                loadingText={t('auth.signing_in') as string}
                 className={cn(
                   "w-full h-12 sm:h-14 rounded-xl font-semibold text-white transition-all text-sm sm:text-base",
                   "bg-gradient-to-r from-fuchsia-600 via-purple-600 to-pink-600",
@@ -407,7 +411,7 @@ export default function SignIn() {
                 <p className={cn(
                   "font-semibold text-[11px] sm:text-sm capitalize",
                   color === 'emerald' ? 'text-emerald-400' : color === 'blue' ? 'text-blue-400' : 'text-purple-400'
-                )}>{role}</p>
+                )}>{t(`auth.roles.${role}` as any)}</p>
               </motion.button>
             ))}
           </div>

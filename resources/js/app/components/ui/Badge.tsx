@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/app/utils/cn';
 import { CheckCircle, Clock, AlertCircle, XCircle, Loader2, Flame, Star, Zap } from 'lucide-react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: 'default' | 'secondary' | 'success' | 'warning' | 'destructive' | 'info' | 'outline' | 'gradient';
@@ -65,47 +66,47 @@ interface StatusBadgeProps {
   children?: React.ReactNode;
 }
 
-const statusConfig: Record<OrderStatus, {
+const getStatusConfig = (t: (key: string) => any): Record<OrderStatus, {
   label: string;
   icon: React.ReactNode;
   classes: string;
-}> = {
+}> => ({
   pending: {
-    label: 'Pending',
+    label: t('common.ui.badge.status.pending'),
     icon: <Clock className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30',
   },
   received: {
-    label: 'Received',
+    label: t('common.ui.badge.status.received'),
     icon: <CheckCircle className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
   },
   preparing: {
-    label: 'Preparing',
+    label: t('common.ui.badge.status.preparing'),
     icon: <Loader2 className="w-3 h-3 animate-spin" />,
     classes: 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
   },
   ready: {
-    label: 'Ready',
+    label: t('common.ui.badge.status.ready'),
     icon: <Zap className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
   },
   completed: {
-    label: 'Completed',
+    label: t('common.ui.badge.status.completed'),
     icon: <CheckCircle className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-green-500/20 to-teal-500/20 text-green-600 dark:text-green-400 border-green-500/30',
   },
   delivered: {
-    label: 'Delivered',
+    label: t('common.ui.badge.status.delivered'),
     icon: <CheckCircle className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-600 dark:text-teal-400 border-teal-500/30',
   },
   cancelled: {
-    label: 'Cancelled',
+    label: t('common.ui.badge.status.cancelled'),
     icon: <XCircle className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border-red-500/30',
   },
-};
+});
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,
@@ -114,6 +115,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   className,
   children,
 }) => {
+  const { t } = useTranslation();
+  const statusConfig = getStatusConfig(t);
   const config = statusConfig[status] || statusConfig.pending;
 
   return (
@@ -138,40 +141,42 @@ interface FoodBadgeProps {
   className?: string;
 }
 
-const foodBadgeConfig: Record<string, { label: string; icon: React.ReactNode; classes: string }> = {
+const getFoodBadgeConfig = (t: (key: string) => any): Record<string, { label: string; icon: React.ReactNode; classes: string }> => ({
   popular: {
-    label: 'Popular',
+    label: t('common.ui.badge.food.popular'),
     icon: <Flame className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent shadow-sm shadow-orange-500/25',
   },
   new: {
-    label: 'New',
+    label: t('common.ui.badge.food.new'),
     icon: <Star className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-transparent shadow-sm shadow-emerald-500/25',
   },
   spicy: {
-    label: 'Spicy',
+    label: t('common.ui.badge.food.spicy'),
     icon: <Flame className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-red-500 to-rose-500 text-white border-transparent shadow-sm shadow-red-500/25',
   },
   chef: {
-    label: "Chef's Pick",
+    label: t('common.ui.badge.food.chef'),
     icon: <Star className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white border-transparent shadow-sm shadow-fuchsia-500/25',
   },
   vegan: {
-    label: 'Vegan',
+    label: t('common.ui.badge.food.vegan'),
     icon: null,
     classes: 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 dark:text-green-400 border-green-500/30',
   },
   discount: {
-    label: 'Sale',
+    label: t('common.ui.badge.food.discount'),
     icon: <Zap className="w-3 h-3" />,
     classes: 'bg-gradient-to-r from-yellow-400 to-orange-400 text-black border-transparent shadow-sm shadow-yellow-500/25',
   },
-};
+});
 
 export const FoodBadge: React.FC<FoodBadgeProps> = ({ type, size = 'sm', className }) => {
+  const { t } = useTranslation();
+  const foodBadgeConfig = getFoodBadgeConfig(t);
   const config = foodBadgeConfig[type];
   if (!config) return null;
 
@@ -204,6 +209,7 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   color = 'destructive',
   className,
 }) => {
+  const { t } = useTranslation();
   if (count === 0) return null;
 
   const colors = {
@@ -221,7 +227,7 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
         className
       )}
     >
-      {count > max ? `${max}+` : count}
+      {count > max ? t('common.ui.badge.notification.overflow', { max: max.toString() }) : count}
     </span>
   );
 };

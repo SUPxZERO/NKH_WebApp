@@ -166,11 +166,12 @@ export default function KitchenDisplay() {
                     return t('employee.kitchen.status_labels.preparing');
                 case 'ready':
                     return t('employee.kitchen.status_labels.ready');
+                case 'completed':
+                    return t('employee.kitchen.status_labels.completed');
                 default:
-                    return t('employee.kitchen.status_labels.default', { status: order.status });
+                    return t(`employee.kitchen.status_labels.${order.status}`);
             }
         };
-
         const getNextAction = () => {
             switch (order.status) {
                 case 'pending':
@@ -206,19 +207,19 @@ export default function KitchenDisplay() {
                     <div className={`${getStatusColor()} p-4 text-white`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                    <UtensilsCrossed className="w-8 h-8" />
-                                    <div>
-                                        <h2 className="text-2xl font-bold">{t('employee.kitchen.order_number', { number: order.order_number })}</h2>
-                                        <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
-                                            <span className="capitalize px-2 py-0.5 rounded bg-white/20 font-bold">{orderTypeLabels[order.type] ?? order.type.replace('-', ' ')}</span>
-                                            {order.table_number && (
-                                                <span className="flex items-center gap-1 font-bold bg-white/20 px-2 py-0.5 rounded">
-                                                    <QrCode className="w-4 h-4" />
-                                                    {t('employee.kitchen.table_number', { number: order.table_number })}
-                                                </span>
-                                            )}
-                                        </div>
+                                <UtensilsCrossed className="w-8 h-8" />
+                                <div>
+                                    <h2 className="text-2xl font-bold">{t('employee.kitchen.order_number_short', { number: order.order_number })}</h2>
+                                    <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
+                                        <span className="capitalize px-2 py-0.5 rounded bg-white/20 font-bold">{orderTypeLabels[order.type] || order.type}</span>
+                                        {order.table_number && (
+                                            <span className="flex items-center gap-1 font-bold bg-white/20 px-2 py-0.5 rounded">
+                                                <QrCode className="w-4 h-4" />
+                                                {t('employee.kitchen.table_number', { number: order.table_number })}
+                                            </span>
+                                        )}
                                     </div>
+                                </div>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="text-right">
@@ -286,7 +287,7 @@ export default function KitchenDisplay() {
                         <div>
                             <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                                 <ChefHat className="w-5 h-5" />
-                                {t('employee.kitchen.order_items')} ({order.items.length})
+                                {t('employee.kitchen.order_items', { count: order.items.length })}
                             </h3>
                             <div className="space-y-3">
                                 {order.items.map((item, index) => (
@@ -318,10 +319,10 @@ export default function KitchenDisplay() {
                                             )}
                                             {item.unit_price && (
                                                 <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    {t('employee.kitchen.unit_price_each', { price: item.unit_price.toFixed(2) })}
+                                                    {t('employee.kitchen.unit_price_each', { price: t('employee.common.currency_symbol') + item.unit_price.toFixed(2) })}
                                                     {item.total_price && (
                                                         <span className="ml-2 font-medium">
-                                                            • {t('employee.kitchen.item_total', { total: item.total_price.toFixed(2) })}
+                                                            • {t('employee.kitchen.item_total', { total: t('employee.common.currency_symbol') + item.total_price.toFixed(2) })}
                                                         </span>
                                                     )}
                                                 </div>
@@ -337,7 +338,7 @@ export default function KitchenDisplay() {
                             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
                                 <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
                                     <span>{t('employee.kitchen.total_amount')}</span>
-                                    <span>${(order.total_amount || order.subtotal || 0).toFixed(2)}</span>
+                                    <span>{t('employee.common.currency_symbol')}{(order.total_amount || order.subtotal || 0).toFixed(2)}</span>
                                 </div>
                             </div>
                         )}
@@ -376,14 +377,14 @@ export default function KitchenDisplay() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className={`p-4 rounded-xl border-l-4 ${statusColor} bg-white dark:bg-gray-800 shadow-lg cursor-pointer hover:shadow-xl transition-shadow`}
+                className={`p-4 rounded-xl border-t-2 ${statusColor} bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-lg cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 active:scale-[0.98] border border-gray-200 dark:border-gray-700`}
                 onClick={() => setSelectedOrder(order)}
             >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
                     <div>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                            #{order.order_number}
+                            {t('employee.kitchen.order_number_short', { number: order.order_number })}
                         </div>
                         <div className="flex flex-wrap gap-2 mt-1">
                             {order.table_number ? (
@@ -460,16 +461,22 @@ export default function KitchenDisplay() {
 
     return (
         <EmployeeLayout>
-            <Head>
-                <title>{t('employee.kitchen.title')} - NKH Restaurant</title>
-            </Head>
+            <Head title={`${t('employee.kitchen.title')} - NKH Restaurant`} />
 
-            <div className="space-y-4">
-                {/* Header */}
-                <div className="flex items-center justify-between">
+            <div className="space-y-6 relative">
+                {/* Background Decoration */}
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+                <div className="flex items-center justify-between bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm p-4 rounded-2xl border border-white/20 dark:border-white/10 shadow-sm">
                     <div className="flex items-center gap-3">
-                        <ChefHat className="w-8 h-8 text-fuchsia-600" />
-                        <h1 className="text-3xl font-bold">{t('employee.kitchen.system')}</h1>
+                        <div className="w-12 h-12 rounded-xl bg-fuchsia-600 flex items-center justify-center text-white shadow-lg shadow-fuchsia-600/20">
+                            <ChefHat className="w-7 h-7" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+                                {t('employee.kitchen.system')}
+                            </h1>
+                            <p className="text-[10px] text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-[0.2em] font-black">{t('employee.kitchen.kds_subtitle')}</p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button
@@ -490,15 +497,18 @@ export default function KitchenDisplay() {
                 {/* 3-Column Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Column 1: NEW/WAITING */}
-                    <div>
-                        <div className="mb-4 p-4 rounded-xl bg-red-500 text-white">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
+                    <div className="flex flex-col h-full min-h-[500px]">
+                        <div className="mb-4 p-5 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg shadow-red-500/20 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md">
                                     <AlertCircle className="w-6 h-6" />
-                                    <h2 className="text-xl font-bold">{t('employee.kitchen.new')}</h2>
                                 </div>
-                                <div className="text-3xl font-bold">{groupedOrders.pending.length}</div>
+                                <div>
+                                    <h2 className="text-xl font-bold">{t('employee.kitchen.new')}</h2>
+                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('employee.kitchen.status_awaiting')}</p>
+                                </div>
                             </div>
+                            <div className="text-4xl font-black tabular-nums">{groupedOrders.pending.length}</div>
                         </div>
 
                         <div className="space-y-4">
@@ -520,7 +530,7 @@ export default function KitchenDisplay() {
                                             showAction
                                             actionLabel={t('employee.kitchen.start_prep')}
                                             onAction={handleStartPrep}
-                                            statusColor="border-red-500"
+                                            statusColor="border-rose-500"
                                         />
                                     ))
                                 )}
@@ -529,15 +539,18 @@ export default function KitchenDisplay() {
                     </div>
 
                     {/* Column 2: PREPARING */}
-                    <div>
-                        <div className="mb-4 p-4 rounded-xl bg-yellow-500 text-white">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
+                    <div className="flex flex-col h-full min-h-[500px]">
+                        <div className="mb-4 p-5 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/20 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md">
                                     <Flame className="w-6 h-6" />
-                                    <h2 className="text-xl font-bold">{t('employee.kitchen.preparing')}</h2>
                                 </div>
-                                <div className="text-3xl font-bold">{groupedOrders.preparing.length}</div>
+                                <div>
+                                    <h2 className="text-xl font-bold">{t('employee.kitchen.preparing')}</h2>
+                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('employee.kitchen.status_in_progress')}</p>
+                                </div>
                             </div>
+                            <div className="text-4xl font-black tabular-nums">{groupedOrders.preparing.length}</div>
                         </div>
 
                         <div className="space-y-4">
@@ -559,7 +572,7 @@ export default function KitchenDisplay() {
                                             showAction
                                             actionLabel={t('employee.kitchen.mark_ready')}
                                             onAction={handleMarkReady}
-                                            statusColor="border-yellow-500"
+                                            statusColor="border-orange-500"
                                         />
                                     ))
                                 )}
@@ -568,15 +581,18 @@ export default function KitchenDisplay() {
                     </div>
 
                     {/* Column 3: READY */}
-                    <div>
-                        <div className="mb-4 p-4 rounded-xl bg-green-500 text-white">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
+                    <div className="flex flex-col h-full min-h-[500px]">
+                        <div className="mb-4 p-5 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 text-white shadow-lg shadow-green-500/20 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md">
                                     <CheckCircle className="w-6 h-6" />
-                                    <h2 className="text-xl font-bold">{t('employee.kitchen.ready')}</h2>
                                 </div>
-                                <div className="text-3xl font-bold">{groupedOrders.ready.length}</div>
+                                <div>
+                                    <h2 className="text-xl font-bold">{t('employee.kitchen.ready')}</h2>
+                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('employee.kitchen.status_finished')}</p>
+                                </div>
                             </div>
+                            <div className="text-4xl font-black tabular-nums">{groupedOrders.ready.length}</div>
                         </div>
 
                         <div className="space-y-4">
@@ -598,7 +614,7 @@ export default function KitchenDisplay() {
                                             showAction
                                             actionLabel={t('employee.kitchen.delivered')}
                                             onAction={handleMarkCompleted}
-                                            statusColor="border-green-500"
+                                            statusColor="border-emerald-500"
                                         />
                                     ))
                                 )}

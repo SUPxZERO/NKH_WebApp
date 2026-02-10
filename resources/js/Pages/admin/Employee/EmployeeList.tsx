@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { apiGet, apiDelete } from '@/app/libs/apiClient';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
@@ -20,6 +21,7 @@ import {
 import { toastSuccess, toastError } from '@/app/utils/toast';
 
 export default function EmployeeList() {
+    const { t } = useLanguage();
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [locationFilter, setLocationFilter] = useState('');
@@ -205,21 +207,21 @@ export default function EmployeeList() {
                                                             <button
                                                                 onClick={() => handleView(employee.id)}
                                                                 className="p-2 hover:bg-blue-100 text-blue-600 rounded transition"
-                                                                title="View"
+                                                                title={t('common.actions.view')}
                                                             >
                                                                 <Eye className="w-4 h-4" />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleEdit(employee.id)}
                                                                 className="p-2 hover:bg-yellow-100 text-yellow-600 rounded transition"
-                                                                title="Edit"
+                                                                title={t('common.actions.edit')}
                                                             >
                                                                 <Edit2 className="w-4 h-4" />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(employee.id)}
                                                                 className="p-2 hover:bg-red-100 text-red-600 rounded transition"
-                                                                title="Deactivate"
+                                                                title={t('common.actions.deactivate')}
                                                                 disabled={deleteMutation.isPending}
                                                             >
                                                                 <Trash2 className="w-4 h-4" />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { Modal } from '@/app/components/ui/Modal';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
@@ -45,6 +46,7 @@ export default function PromotionFormModal({
   error,
   isLoading
 }: PromotionFormModalProps) {
+  const { t } = useTranslation();
   // Fetch categories and menu items for selection
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
@@ -90,7 +92,7 @@ export default function PromotionFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={editingPromotion ? 'Edit Promotion' : 'Create Promotion'}
+      title={editingPromotion ? t('marketing.promotions.form.edit_title') : t('marketing.promotions.form.create_title')}
       size="xl"
     >
       <form onSubmit={onSubmit} className="space-y-6">
@@ -102,28 +104,28 @@ export default function PromotionFormModal({
 
         {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Basic Information</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('marketing.promotions.form.sections.basic_info')}</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Promotion Name *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.name')} *</label>
               <Input
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="bg-background border-border text-foreground h-11"
-                placeholder="e.g., Summer Sale 2024"
+                placeholder={t('marketing.promotions.form.placeholders.name')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Promo Code</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.code')}</label>
               <div className="flex gap-2">
                 <Input
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                   className="bg-background border-border text-foreground flex-1 h-11"
-                  placeholder="SUMMER2024"
+                  placeholder={t('marketing.promotions.form.placeholders.code')}
                 />
                 <Button
                   type="button"
@@ -131,41 +133,41 @@ export default function PromotionFormModal({
                   onClick={generatePromoCode}
                   className="h-11 px-4"
                 >
-                  Generate
+                  {t('marketing.promotions.form.buttons.generate')}
                 </Button>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.description')}</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
               className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-foreground placeholder:text-muted-foreground h-24 resize-none"
-              placeholder="Describe your promotion..."
+              placeholder={t('marketing.promotions.form.placeholders.description')}
             />
           </div>
         </div>
 
         {/* Discount Configuration */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Discount Configuration</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('marketing.promotions.form.sections.discount_config')}</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Discount Type *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.type')} *</label>
               <select
                 required
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 className="w-full bg-background border border-border rounded-xl px-3 py-2.5 h-11 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 touch-manipulation"
               >
-                <option value="percentage" className="bg-background text-foreground">Percentage Off</option>
-                <option value="fixed_amount" className="bg-background text-foreground">Fixed Amount Off</option>
-                <option value="buy_x_get_y" className="bg-background text-foreground">Buy X Get Y Free</option>
-                <option value="free_item" className="bg-background text-foreground">Free Item</option>
+                <option value="percentage" className="bg-background text-foreground">{t('marketing.promotions.form.options.percentage')}</option>
+                <option value="fixed_amount" className="bg-background text-foreground">{t('marketing.promotions.form.options.fixed_amount')}</option>
+                <option value="buy_x_get_y" className="bg-background text-foreground">{t('marketing.promotions.form.options.buy_x_get_y')}</option>
+                <option value="free_item" className="bg-background text-foreground">{t('marketing.promotions.form.options.free_item')}</option>
               </select>
             </div>
 
@@ -173,7 +175,7 @@ export default function PromotionFormModal({
             {(formData.type === 'percentage' || formData.type === 'fixed_amount') && (
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  {formData.type === 'percentage' ? 'Percentage (%)' : 'Amount ($)'} *
+                  {formData.type === 'percentage' ? t('marketing.promotions.form.fields.percentage') : t('marketing.promotions.form.fields.amount')} *
                 </label>
                 <Input
                   type="number"
@@ -184,7 +186,7 @@ export default function PromotionFormModal({
                   value={formData.discount_value}
                   onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
                   className="bg-background border-border text-foreground h-11"
-                  placeholder={formData.type === 'percentage' ? '10' : '5.00'}
+                  placeholder={formData.type === 'percentage' ? t('marketing.promotions.form.placeholders.discount_pct') : t('marketing.promotions.form.placeholders.discount_amt')}
                 />
               </div>
             )}
@@ -193,7 +195,7 @@ export default function PromotionFormModal({
             {formData.type === 'buy_x_get_y' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Buy Quantity *</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.buy_quantity')} *</label>
                   <Input
                     type="number"
                     min="1"
@@ -202,11 +204,11 @@ export default function PromotionFormModal({
                     value={formData.buy_quantity}
                     onChange={(e) => setFormData({ ...formData, buy_quantity: e.target.value })}
                     className="bg-background border-border text-foreground h-11"
-                    placeholder="2"
+                    placeholder={t('marketing.promotions.form.placeholders.qty_placeholder')}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Get Free Quantity *</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.get_quantity')} *</label>
                   <Input
                     type="number"
                     min="1"
@@ -215,7 +217,7 @@ export default function PromotionFormModal({
                     value={formData.get_quantity}
                     onChange={(e) => setFormData({ ...formData, get_quantity: e.target.value })}
                     className="bg-background border-border text-foreground h-11"
-                    placeholder="1"
+                    placeholder={t('marketing.promotions.form.placeholders.qty_placeholder')}
                   />
                 </div>
               </>
@@ -224,7 +226,7 @@ export default function PromotionFormModal({
             {/* Free item discount value (item ID or placeholder) */}
             {formData.type === 'free_item' && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Free Item Value *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.free_item_value')} *</label>
                 <Input
                   type="number"
                   min="1"
@@ -233,7 +235,7 @@ export default function PromotionFormModal({
                   value={formData.discount_value}
                   onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
                   className="bg-background border-border text-foreground h-11"
-                  placeholder="1"
+                  placeholder={t('marketing.promotions.form.placeholders.qty_placeholder')}
                 />
               </div>
             )}
@@ -241,7 +243,7 @@ export default function PromotionFormModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Minimum Order Amount ($)</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.min_order')}</label>
               <Input
                 type="number"
                 step="0.01"
@@ -249,13 +251,13 @@ export default function PromotionFormModal({
                 value={formData.min_order_amount}
                 onChange={(e) => setFormData({ ...formData, min_order_amount: e.target.value })}
                 className="bg-background border-border text-foreground"
-                placeholder="0.00"
+                placeholder={t('marketing.promotions.form.placeholders.min_order')}
               />
             </div>
 
             {formData.type === 'percentage' && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Maximum Discount Amount ($)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.max_discount')}</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -263,7 +265,7 @@ export default function PromotionFormModal({
                   value={formData.max_discount_amount}
                   onChange={(e) => setFormData({ ...formData, max_discount_amount: e.target.value })}
                   className="bg-background border-border text-foreground h-11"
-                  placeholder="No limit"
+                  placeholder={t('marketing.promotions.form.placeholders.no_limit')}
                 />
               </div>
             )}
@@ -272,23 +274,23 @@ export default function PromotionFormModal({
 
         {/* Usage & Validity */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Usage & Validity</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('marketing.promotions.form.sections.usage_validity')}</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Usage Limit</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.usage_limit')}</label>
               <Input
                 type="number"
                 min="1"
                 value={formData.usage_limit}
                 onChange={(e) => setFormData({ ...formData, usage_limit: e.target.value })}
                 className="bg-background border-border text-foreground"
-                placeholder="Unlimited"
+                placeholder={t('marketing.promotions.form.placeholders.unlimited')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Start Date *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.start_date')} *</label>
               <Input
                 type="datetime-local"
                 required
@@ -299,7 +301,7 @@ export default function PromotionFormModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">End Date *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.end_date')} *</label>
               <Input
                 type="datetime-local"
                 required
@@ -313,28 +315,28 @@ export default function PromotionFormModal({
 
         {/* Applicability */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Applicability</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('marketing.promotions.form.sections.applicability')}</h3>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Applies To</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.applies_to')}</label>
             <select
               value={formData.applicable_to}
               onChange={(e) => setFormData({ ...formData, applicable_to: e.target.value as any, selected_categories: [], selected_items: [] })}
               className="w-full bg-background border border-border rounded-xl px-3 py-2.5 h-11 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 touch-manipulation"
             >
-              <option value="all" className="bg-background text-foreground">All Items</option>
-              <option value="categories" className="bg-background text-foreground">Specific Categories</option>
-              <option value="items" className="bg-background text-foreground">Specific Items</option>
+              <option value="all" className="bg-background text-foreground">{t('marketing.promotions.form.options.all_items')}</option>
+              <option value="categories" className="bg-background text-foreground">{t('marketing.promotions.form.options.categories')}</option>
+              <option value="items" className="bg-background text-foreground">{t('marketing.promotions.form.options.items')}</option>
             </select>
           </div>
 
           {/* Category Selection */}
           {formData.applicable_to === 'categories' && (
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Select Categories *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.select_categories')} *</label>
               <div className="max-h-48 overflow-y-auto bg-secondary/30 border border-border rounded-lg p-3 space-y-2">
                 {categories.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">Loading categories...</p>
+                  <p className="text-muted-foreground text-sm">{t('marketing.promotions.form.helpers.loading_categories')}</p>
                 ) : (
                   categories.map((cat: any) => (
                     <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1 rounded">
@@ -350,7 +352,7 @@ export default function PromotionFormModal({
                 )}
               </div>
               {(formData.selected_categories || []).length > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">{formData.selected_categories.length} categories selected</p>
+                <p className="text-xs text-muted-foreground mt-1">{formData.selected_categories.length} {t('marketing.promotions.form.helpers.categories_selected')}</p>
               )}
             </div>
           )}
@@ -358,10 +360,10 @@ export default function PromotionFormModal({
           {/* Item Selection */}
           {formData.applicable_to === 'items' && (
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Select Menu Items *</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.select_items')} *</label>
               <div className="max-h-48 overflow-y-auto bg-secondary/30 border border-border rounded-lg p-3 space-y-2">
                 {menuItems.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">Loading items...</p>
+                  <p className="text-muted-foreground text-sm">{t('marketing.promotions.form.helpers.loading_items')}</p>
                 ) : (
                   menuItems.map((item: any) => (
                     <label key={item.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1 rounded">
@@ -378,19 +380,19 @@ export default function PromotionFormModal({
                 )}
               </div>
               {(formData.selected_items || []).length > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">{formData.selected_items.length} items selected</p>
+                <p className="text-xs text-muted-foreground mt-1">{formData.selected_items.length} {t('marketing.promotions.form.helpers.items_selected')}</p>
               )}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Terms & Conditions</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('marketing.promotions.form.fields.terms')}</label>
             <textarea
               value={formData.terms_conditions}
               onChange={(e) => setFormData({ ...formData, terms_conditions: e.target.value })}
               rows={4}
               className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-foreground placeholder:text-muted-foreground h-28 resize-none"
-              placeholder="Enter terms and conditions for this promotion..."
+              placeholder={t('marketing.promotions.form.placeholders.terms')}
             />
           </div>
 
@@ -403,7 +405,7 @@ export default function PromotionFormModal({
               className="rounded border-border bg-background text-primary"
             />
             <label htmlFor="is_active" className="text-sm text-foreground">
-              Active promotion
+              {t('marketing.promotions.form.fields.is_active')}
             </label>
           </div>
         </div>
@@ -416,7 +418,7 @@ export default function PromotionFormModal({
             onClick={onClose}
             className="flex-1 h-12"
           >
-            Cancel
+            {t('marketing.promotions.form.buttons.cancel')}
           </Button>
           <Button
             type="submit"
@@ -424,7 +426,7 @@ export default function PromotionFormModal({
             disabled={isLoading}
             className="flex-1 h-12"
           >
-            {editingPromotion ? 'Update' : 'Create'} Promotion
+            {editingPromotion ? t('marketing.promotions.form.buttons.update') : t('marketing.promotions.form.buttons.create')}
           </Button>
         </div>
       </form>

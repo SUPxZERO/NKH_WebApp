@@ -331,7 +331,7 @@ export default function Orders() {
                         {order.preview_image && (
                             <img
                                 src={order.preview_image}
-                                alt="Order preview"
+                                alt={t('customer_pages.orders.order_card.preview_alt')}
                                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl object-cover border border-border shadow-sm"
                             />
                         )}
@@ -652,7 +652,9 @@ export default function Orders() {
                                 <Package className="w-8 h-8 text-fuchsia-500" />
                             </div>
                             <h3 className="text-xl font-bold text-foreground mb-2">
-                                {filterStatus === 'all' ? 'No orders yet' : `No ${filterStatus} orders`}
+                                {filterStatus === 'all'
+                                    ? t('customer_pages.orders.empty.no_orders')
+                                    : t('customer_pages.orders.empty.no_filtered', { status: filterStatus })}
                             </h3>
                             <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
                                 {filterStatus === 'all'
@@ -823,7 +825,7 @@ export default function Orders() {
                                             {cancelOrderMutation.isPending ? (
                                                 <>
                                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                                    Cancelling...
+                                                    {t('customer_pages.orders.actions.cancelling')}
                                                 </>
                                             ) : (
                                                 <>
@@ -837,7 +839,7 @@ export default function Orders() {
                                     {cancelOrderMutation.isError && (
                                         <div className="mt-3 p-2.5 rounded-lg bg-gradient-to-r from-red-500/10 to-rose-500/5 border border-red-500/20">
                                             <p className="text-xs text-red-500 text-center font-medium">
-                                                Failed to cancel order. Try again.
+                                                {t('customer_pages.orders.cancel_modal.error')}
                                             </p>
                                         </div>
                                     )}
@@ -875,7 +877,7 @@ export default function Orders() {
                                                 {t('customer_pages.orders.reorder_modal.title')}
                                             </h3>
                                             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                                                Add all items from this order to your cart
+                                                {t('customer_pages.orders.reorder_modal.message')}
                                             </p>
                                         </div>
                                     </div>
@@ -911,7 +913,7 @@ export default function Orders() {
                                                             console.error('Reorder failed', err);
                                                             setIsReordering(false);
                                                             setConfirmReorderId(null);
-                                                            alert('Failed to reorder items. Please try again.');
+                                                            alert(t('customer_pages.orders.reorder_modal.error'));
                                                         });
                                                 }
                                             }}
@@ -920,7 +922,7 @@ export default function Orders() {
                                             {isReordering ? (
                                                 <>
                                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                                    Adding...
+                                                    {t('customer_pages.orders.reorder_modal.adding')}
                                                 </>
                                             ) : (
                                                 <>

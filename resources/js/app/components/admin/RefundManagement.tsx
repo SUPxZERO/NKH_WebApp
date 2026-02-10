@@ -30,35 +30,10 @@ import {
     RefundFilters,
 } from '@/app/hooks/useRefunds';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-
-const statusConfig: Record<string, { color: string; bg: string; icon: React.ReactNode; label: string }> = {
-    pending: {
-        color: 'text-amber-400',
-        bg: 'bg-amber-500/20',
-        icon: <Clock className="w-4 h-4" />,
-        label: 'Pending',
-    },
-    approved: {
-        color: 'text-blue-400',
-        bg: 'bg-blue-500/20',
-        icon: <CheckCircle2 className="w-4 h-4" />,
-        label: 'Approved',
-    },
-    completed: {
-        color: 'text-green-400',
-        bg: 'bg-green-500/20',
-        icon: <CheckCircle2 className="w-4 h-4" />,
-        label: 'Completed',
-    },
-    rejected: {
-        color: 'text-red-400',
-        bg: 'bg-red-500/20',
-        icon: <XCircle className="w-4 h-4" />,
-        label: 'Rejected',
-    },
-};
+import { useLanguage } from '@/app/context/LanguageContext';
 
 export default function RefundManagement() {
+    const { t } = useLanguage();
     const [filters, setFilters] = useState<RefundFilters>({ per_page: 20 });
     const [selectedRefund, setSelectedRefund] = useState<Refund | null>(null);
     const [showRejectModal, setShowRejectModal] = useState(false);
@@ -71,14 +46,41 @@ export default function RefundManagement() {
     const rejectMutation = useRejectRefund();
     const processMutation = useProcessRefund();
 
-    const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+    const statusConfig: Record<string, { color: string; bg: string; icon: React.ReactNode; label: string }> = {
+        pending: {
+            color: 'text-amber-400',
+            bg: 'bg-amber-500/20',
+            icon: <Clock className="w-4 h-4" />,
+            label: t('admin.refunds.status.pending'),
+        },
+        approved: {
+            color: 'text-blue-400',
+            bg: 'bg-blue-500/20',
+            icon: <CheckCircle2 className="w-4 h-4" />,
+            label: t('admin.refunds.status.approved'),
+        },
+        completed: {
+            color: 'text-green-400',
+            bg: 'bg-green-500/20',
+            icon: <CheckCircle2 className="w-4 h-4" />,
+            label: t('admin.refunds.status.completed'),
+        },
+        rejected: {
+            color: 'text-red-400',
+            bg: 'bg-red-500/20',
+            icon: <XCircle className="w-4 h-4" />,
+            label: t('admin.refunds.status.rejected'),
+        },
+    };
+
+    const formatCurrency = (amount: number) => `${t('common.currency_symbol')}${amount.toFixed(2)}`;
 
     const handleApprove = async (refund: Refund) => {
         try {
             await approveMutation.mutateAsync(refund.id);
-            toastSuccess('Refund approved');
+            toastSuccess(t('admin.refunds.toasts.approved'));
         } catch (error: any) {
-            toastError(error.message || 'Failed to approve refund');
+            toastError(error.message || t('admin.refunds.toasts.approve_failed'));
         }
     };
 
@@ -86,21 +88,21 @@ export default function RefundManagement() {
         if (!selectedRefund || !rejectReason.trim()) return;
         try {
             await rejectMutation.mutateAsync({ refundId: selectedRefund.id, reason: rejectReason });
-            toastSuccess('Refund rejected');
+            toastSuccess(t('admin.refunds.toasts.rejected'));
             setShowRejectModal(false);
             setRejectReason('');
             setSelectedRefund(null);
         } catch (error: any) {
-            toastError(error.message || 'Failed to reject refund');
+            toastError(error.message || t('admin.refunds.toasts.reject_failed'));
         }
     };
 
     const handleProcess = async (refund: Refund) => {
         try {
             await processMutation.mutateAsync(refund.id);
-            toastSuccess('Refund processed successfully');
+            toastSuccess(t('admin.refunds.toasts.processed'));
         } catch (error: any) {
-            toastError(error.message || 'Failed to process refund');
+            toastError(error.message || t('admin.refunds.toasts.process_failed'));
         }
     };
 
@@ -122,7 +124,7 @@ export default function RefundManagement() {
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-400">Pending</p>
+                                <p className="text-sm text-gray-400">{t('admin.refunds.stats.pending')}</p>
                                 <p className="text-2xl font-bold text-amber-400">{stats?.pending_count || 0}</p>
                                 <p className="text-xs text-gray-500">{formatCurrency(stats?.pending_amount || 0)}</p>
                             </div>
@@ -135,9 +137,9 @@ export default function RefundManagement() {
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-400">Approved</p>
+                                <p className="text-sm text-gray-400">{t('admin.refunds.stats.approved')}</p>
                                 <p className="text-2xl font-bold text-blue-400">{stats?.approved_count || 0}</p>
-                                <p className="text-xs text-gray-500">Ready to process</p>
+                                <p className="text-xs text-gray-500">{t('admin.refunds.stats.ready_to_process')}</p>
                             </div>
                             <CheckCircle2 className="w-10 h-10 text-blue-400/30" />
                         </div>
@@ -148,9 +150,9 @@ export default function RefundManagement() {
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-400">Completed Today</p>
+                                <p className="text-sm text-gray-400">{t('admin.refunds.stats.completed_today')}</p>
                                 <p className="text-2xl font-bold text-green-400">{formatCurrency(stats?.completed_amount_today || 0)}</p>
-                                <p className="text-xs text-gray-500">This month: {formatCurrency(stats?.completed_amount_month || 0)}</p>
+                                <p className="text-xs text-gray-500">{t('admin.refunds.stats.this_month', { amount: formatCurrency(stats?.completed_amount_month || 0) })}</p>
                             </div>
                             <RotateCcw className="w-10 h-10 text-green-400/30" />
                         </div>
@@ -161,9 +163,9 @@ export default function RefundManagement() {
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-400">Rejected</p>
+                                <p className="text-sm text-gray-400">{t('admin.refunds.stats.rejected')}</p>
                                 <p className="text-2xl font-bold text-red-400">{stats?.rejected_count || 0}</p>
-                                <p className="text-xs text-gray-500">All time</p>
+                                <p className="text-xs text-gray-500">{t('admin.refunds.stats.all_time')}</p>
                             </div>
                             <XCircle className="w-10 h-10 text-red-400/30" />
                         </div>
@@ -181,32 +183,32 @@ export default function RefundManagement() {
                             value={filters.status || ''}
                             onChange={(e) => setFilters({ ...filters, status: e.target.value || undefined })}
                         >
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="completed">Completed</option>
-                            <option value="rejected">Rejected</option>
+                            <option value="">{t('admin.refunds.filters.all_status')}</option>
+                            <option value="pending">{t('admin.refunds.status.pending')}</option>
+                            <option value="approved">{t('admin.refunds.status.approved')}</option>
+                            <option value="completed">{t('admin.refunds.status.completed')}</option>
+                            <option value="rejected">{t('admin.refunds.status.rejected')}</option>
                         </select>
                         <Input
                             type="date"
                             className="w-auto"
                             value={filters.from_date || ''}
                             onChange={(e) => setFilters({ ...filters, from_date: e.target.value || undefined })}
-                            placeholder="From Date"
+                            placeholder={t('admin.refunds.filters.from_date')}
                         />
                         <Input
                             type="date"
                             className="w-auto"
                             value={filters.to_date || ''}
                             onChange={(e) => setFilters({ ...filters, to_date: e.target.value || undefined })}
-                            placeholder="To Date"
+                            placeholder={t('admin.refunds.filters.to_date')}
                         />
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setFilters({ per_page: 20 })}
                         >
-                            Clear Filters
+                            {t('admin.refunds.filters.clear')}
                         </Button>
                     </div>
                 </CardContent>
@@ -215,7 +217,7 @@ export default function RefundManagement() {
             {/* Refunds List */}
             <Card>
                 <CardHeader>
-                    <h2 className="text-lg font-semibold">Refund Requests</h2>
+                    <h2 className="text-lg font-semibold">{t('admin.refunds.title')}</h2>
                 </CardHeader>
                 <CardContent className="p-0">
                     {isLoading ? (
@@ -225,20 +227,20 @@ export default function RefundManagement() {
                     ) : !refundsData?.data?.length ? (
                         <div className="text-center py-12 text-gray-400">
                             <RotateCcw className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                            <p>No refunds found</p>
+                            <p>{t('admin.refunds.empty')}</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="bg-white/5">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">ID</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Order</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Amount</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Reason</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Requested</th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Actions</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.refunds.table.id')}</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.refunds.table.order')}</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.refunds.table.amount')}</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.refunds.table.reason')}</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.refunds.table.status')}</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.refunds.table.requested')}</th>
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">{t('admin.refunds.table.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
@@ -260,7 +262,7 @@ export default function RefundManagement() {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <span className="text-sm font-medium">
-                                                            {refund.payment?.invoice?.order?.order_number || 'N/A'}
+                                                            {refund.payment?.invoice?.order?.order_number || t('common.na')}
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3">
@@ -310,7 +312,7 @@ export default function RefundManagement() {
                                                                     </Button>
                                                                 </>
                                                             )}
-                                                            {refund.status === 'approved' && (
+                                                                    {refund.status === 'approved' && (
                                                                 <Button
                                                                     size="sm"
                                                                     className="bg-violet-600 hover:bg-violet-700"
@@ -320,7 +322,7 @@ export default function RefundManagement() {
                                                                     {processMutation.isPending ? (
                                                                         <Loader2 className="w-4 h-4 animate-spin" />
                                                                     ) : (
-                                                                        'Process'
+                                                                        t('admin.refunds.actions.process')
                                                                     )}
                                                                 </Button>
                                                             )}
@@ -341,15 +343,15 @@ export default function RefundManagement() {
                                                                 >
                                                                     <div className="py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                                                                         <div>
-                                                                            <p className="text-xs text-gray-500">Payment Ref</p>
-                                                                            <p className="text-sm font-mono">{refund.payment?.reference_number || 'N/A'}</p>
+                                                                            <p className="text-xs text-gray-500">{t('admin.refunds.details.payment_ref')}</p>
+                                                                            <p className="text-sm font-mono">{refund.payment?.reference_number || t('common.na')}</p>
                                                                         </div>
                                                                         <div>
-                                                                            <p className="text-xs text-gray-500">Payment Method</p>
-                                                                            <p className="text-sm">{refund.payment?.payment_method?.name || 'N/A'}</p>
+                                                                            <p className="text-xs text-gray-500">{t('admin.refunds.details.payment_method')}</p>
+                                                                            <p className="text-sm">{refund.payment?.payment_method?.name || t('common.na')}</p>
                                                                         </div>
                                                                         <div>
-                                                                            <p className="text-xs text-gray-500">Requested By</p>
+                                                                            <p className="text-xs text-gray-500">{t('admin.refunds.details.requested_by')}</p>
                                                                             <p className="text-sm">
                                                                                 {refund.initiator?.first_name} {refund.initiator?.last_name}
                                                                             </p>
@@ -357,7 +359,9 @@ export default function RefundManagement() {
                                                                         {refund.approver && (
                                                                             <div>
                                                                                 <p className="text-xs text-gray-500">
-                                                                                    {refund.status === 'rejected' ? 'Rejected By' : 'Approved By'}
+                                                                                    {refund.status === 'rejected'
+                                                                                        ? t('admin.refunds.details.rejected_by')
+                                                                                        : t('admin.refunds.details.approved_by')}
                                                                                 </p>
                                                                                 <p className="text-sm">
                                                                                     {refund.approver?.first_name} {refund.approver?.last_name}
@@ -366,19 +370,19 @@ export default function RefundManagement() {
                                                                         )}
                                                                         {refund.notes && (
                                                                             <div className="col-span-2">
-                                                                                <p className="text-xs text-gray-500">Notes</p>
+                                                                                <p className="text-xs text-gray-500">{t('admin.refunds.details.notes')}</p>
                                                                                 <p className="text-sm text-gray-300">{refund.notes}</p>
                                                                             </div>
                                                                         )}
                                                                         {refund.rejection_reason && (
                                                                             <div className="col-span-2">
-                                                                                <p className="text-xs text-red-400">Rejection Reason</p>
+                                                                                <p className="text-xs text-red-400">{t('admin.refunds.details.rejection_reason')}</p>
                                                                                 <p className="text-sm text-red-300">{refund.rejection_reason}</p>
                                                                             </div>
                                                                         )}
                                                                         {refund.gateway_reference && (
                                                                             <div>
-                                                                                <p className="text-xs text-gray-500">Gateway Ref</p>
+                                                                                <p className="text-xs text-gray-500">{t('admin.refunds.details.gateway_ref')}</p>
                                                                                 <p className="text-sm font-mono text-green-400">{refund.gateway_reference}</p>
                                                                             </div>
                                                                         )}
@@ -400,8 +404,11 @@ export default function RefundManagement() {
                     {refundsData && refundsData.meta.last_page > 1 && (
                         <div className="flex items-center justify-between px-4 py-3 border-t border-white/10">
                             <p className="text-sm text-gray-400">
-                                Page {refundsData.meta.current_page} of {refundsData.meta.last_page}
-                                ({refundsData.meta.total} total)
+                                {t('admin.refunds.pagination.page_of', {
+                                    current: refundsData.meta.current_page,
+                                    pages: refundsData.meta.last_page,
+                                    total: refundsData.meta.total,
+                                })}
                             </p>
                             <div className="flex gap-2">
                                 <Button
@@ -410,7 +417,7 @@ export default function RefundManagement() {
                                     disabled={refundsData.meta.current_page === 1}
                                     onClick={() => setFilters({ ...filters, page: (filters.page || 1) - 1 })}
                                 >
-                                    Previous
+                                    {t('admin.refunds.pagination.previous')}
                                 </Button>
                                 <Button
                                     size="sm"
@@ -418,7 +425,7 @@ export default function RefundManagement() {
                                     disabled={refundsData.meta.current_page === refundsData.meta.last_page}
                                     onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
                                 >
-                                    Next
+                                    {t('admin.refunds.pagination.next')}
                                 </Button>
                             </div>
                         </div>
@@ -434,19 +441,21 @@ export default function RefundManagement() {
                     setRejectReason('');
                     setSelectedRefund(null);
                 }}
-                title="Reject Refund"
+                title={t('admin.refunds.modal.reject_title')}
             >
                 <div className="space-y-4">
                     <p className="text-gray-400">
-                        Are you sure you want to reject refund #{selectedRefund?.id} for{' '}
-                        <span className="text-white font-bold">{formatCurrency(selectedRefund?.amount || 0)}</span>?
+                        {t('admin.refunds.modal.confirm_reject', {
+                            id: selectedRefund?.id || 0,
+                            amount: formatCurrency(selectedRefund?.amount || 0),
+                        })}
                     </p>
                     <div>
-                        <label className="block text-sm text-gray-400 mb-2">Rejection Reason *</label>
+                        <label className="block text-sm text-gray-400 mb-2">{t('admin.refunds.modal.rejection_reason_label')}</label>
                         <textarea
                             className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white resize-none"
                             rows={3}
-                            placeholder="Enter reason for rejection..."
+                            placeholder={t('admin.refunds.modal.rejection_reason_placeholder')}
                             value={rejectReason}
                             onChange={(e) => setRejectReason(e.target.value)}
                         />
@@ -459,7 +468,7 @@ export default function RefundManagement() {
                                 setRejectReason('');
                             }}
                         >
-                            Cancel
+                            {t('admin.refunds.modal.cancel')}
                         </Button>
                         <Button
                             className="bg-red-600 hover:bg-red-700"
@@ -469,7 +478,7 @@ export default function RefundManagement() {
                             {rejectMutation.isPending ? (
                                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
                             ) : null}
-                            Reject Refund
+                            {t('admin.refunds.modal.confirm_button')}
                         </Button>
                     </div>
                 </div>

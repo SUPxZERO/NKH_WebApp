@@ -316,13 +316,13 @@ export default function LoyaltyPoints() {
                 className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-purple-500/5 hover:to-transparent transition-all group"
               >
                 <div className="col-span-3">
-                  <div className="font-semibold text-foreground">{transaction.customer?.user?.name || 'Unknown'}</div>
+                  <div className="font-semibold text-foreground">{transaction.customer?.user?.name || t('admin.dashboard.order_status.unknown')}</div>
                   <div className="text-xs text-muted-foreground">ID: {transaction.customer_id}</div>
                 </div>
                 <div className="col-span-2">
                   <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getTypeColor(transaction.type))}>
                     {transaction.type === 'earn' ? <ArrowUpRight size={12} /> : transaction.type === 'redeem' ? <ArrowDownLeft size={12} /> : <Edit size={12} />}
-                    {transaction.type.toUpperCase()}
+                    {t(`marketing.loyalty.filters.type.${transaction.type}`)}
                   </span>
                 </div>
                 <div className="col-span-2">
@@ -335,7 +335,7 @@ export default function LoyaltyPoints() {
                 </div>
                 <div className="col-span-2 text-sm">
                   <div className="text-foreground">{new Date(transaction.occurred_at).toLocaleDateString()}</div>
-                  {transaction.order_id && <div className="text-xs text-purple-600">Order #{transaction.order_id}</div>}
+                  {transaction.order_id && <div className="text-xs text-purple-600">{t('admin.dashboard.tasks.order_prefix')}{transaction.order_id}</div>}
                 </div>
                 <div className="col-span-1 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                   <Button size="sm" variant="ghost" onClick={() => handleEdit(transaction)} className="h-7 w-7 p-0 hover:bg-purple-500/20 hover:text-purple-600"><Edit size={14} /></Button>
@@ -369,7 +369,7 @@ export default function LoyaltyPoints() {
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0">
-                    <div className="font-semibold text-foreground text-sm truncate">{transaction.customer?.user?.name || 'Unknown'}</div>
+                    <div className="font-semibold text-foreground text-sm truncate">{transaction.customer?.user?.name || t('admin.dashboard.order_status.unknown')}</div>
                     <div className="text-[10px] text-muted-foreground">{new Date(transaction.occurred_at).toLocaleDateString()}</div>
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
@@ -384,7 +384,7 @@ export default function LoyaltyPoints() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium border flex items-center gap-1", getTypeColor(transaction.type))}>
                     {transaction.type === 'earn' ? <ArrowUpRight size={10} /> : transaction.type === 'redeem' ? <ArrowDownLeft size={10} /> : <Edit size={10} />}
-                    {transaction.type.toUpperCase()}
+                    {t(`marketing.loyalty.filters.type.${transaction.type}`)}
                   </span>
                   <span className={cn("text-sm font-bold", transaction.points > 0 ? "text-emerald-600" : "text-red-600")}>
                     {transaction.points > 0 ? '+' : ''}{transaction.points}
@@ -428,8 +428,8 @@ export default function LoyaltyPoints() {
               className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all" placeholder={t('marketing.loyalty.form.placeholders.notes')} />
           </div>
           <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">Cancel</Button>
-            <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700">Save</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('layout.actions.cancel')}</Button>
+            <Button type="submit" className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700">{t('layout.actions.save')}</Button>
           </div>
         </form>
       </Modal>

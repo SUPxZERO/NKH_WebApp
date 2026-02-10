@@ -247,13 +247,13 @@ export default function Translations() {
                                     className={cn("flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all",
                                         translationType === 'categories' ? "bg-white dark:bg-slate-800 text-fuchsia-600 dark:text-fuchsia-400 shadow-sm" : "text-muted-foreground hover:text-foreground")}>
                                     <span className="hidden sm:inline">{t('system.translations.filters.categories')}</span>
-                                    <span className="sm:hidden">Cat</span>
+                                    <span className="sm:hidden">{t('system.translations.filters.categories_short')}</span>
                                 </button>
                                 <button onClick={() => setTranslationType('menu_items')}
                                     className={cn("flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all",
                                         translationType === 'menu_items' ? "bg-white dark:bg-slate-800 text-fuchsia-600 dark:text-fuchsia-400 shadow-sm" : "text-muted-foreground hover:text-foreground")}>
                                     <span className="hidden sm:inline">{t('system.translations.filters.menu_items')}</span>
-                                    <span className="sm:hidden">Items</span>
+                                    <span className="sm:hidden">{t('system.translations.filters.menu_items_short')}</span>
                                 </button>
                             </div>
                         </div>
@@ -386,14 +386,14 @@ export default function Translations() {
                                         </div>
                                         <span className="font-mono text-xs text-muted-foreground">#{item.id}</span>
                                         <span className="text-sm text-foreground font-medium truncate flex-1">
-                                            {item.translations.en?.name || 'Untitled'}
+                                            {item.translations.en?.name || t('system.translations.table.untitled')}
                                         </span>
                                     </div>
 
                                     {/* English Section */}
                                     <div className="mb-3">
                                         <div className="flex items-center gap-1.5 mb-1.5">
-                                            <span className="text-[10px] font-bold text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-wider">English</span>
+                                            <span className="text-[10px] font-bold text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-wider">{t('system.translations.labels.english')}</span>
                                             {enEdited && <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></span>}
                                         </div>
                                         <div className="space-y-2">
@@ -416,7 +416,7 @@ export default function Translations() {
                                     {/* Khmer Section */}
                                     <div>
                                         <div className="flex items-center gap-1.5 mb-1.5">
-                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Khmer</span>
+                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{t('system.translations.labels.khmer')}</span>
                                             {kmEdited && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>}
                                         </div>
                                         <div className="space-y-2">

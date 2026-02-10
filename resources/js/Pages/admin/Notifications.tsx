@@ -298,7 +298,7 @@ export default function Notifications() {
                       </div>
                       <span className={cn("px-2 py-1 rounded-md text-[10px] font-medium border flex items-center gap-1 flex-shrink-0", getTypeColor(notification.type))}>
                         {getTypeIcon(notification.type)}
-                        <span className="hidden sm:inline">{notification.type.toUpperCase()}</span>
+                        <span className="hidden sm:inline">{t(`admin.notifications.types.${notification.type}`)}</span>
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
@@ -332,7 +332,7 @@ export default function Notifications() {
                     </div>
                     <div className="col-span-2">
                       <span className={cn("px-2 py-1 rounded-md text-xs font-medium border flex items-center gap-1 w-fit", getTypeColor(notification.type))}>
-                        {getTypeIcon(notification.type)} {notification.type.toUpperCase()}
+                        {getTypeIcon(notification.type)} {t(`admin.notifications.types.${notification.type}`)}
                       </span>
                     </div>
                     <div className="col-span-2">
@@ -379,11 +379,11 @@ export default function Notifications() {
               <label className="block text-sm font-medium text-foreground mb-1">{t('admin.notifications.modal.send.form.type')}</label>
               <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm">
-                <option value="info">Info</option>
-                <option value="success">Success</option>
-                <option value="warning">Warning</option>
-                <option value="error">Error</option>
-                <option value="system">System</option>
+                <option value="info">{t('admin.notifications.types.info')}</option>
+                <option value="success">{t('admin.notifications.types.success')}</option>
+                <option value="warning">{t('admin.notifications.types.warning')}</option>
+                <option value="error">{t('admin.notifications.types.error')}</option>
+                <option value="system">{t('admin.notifications.types.system')}</option>
               </select>
             </div>
             <div>
@@ -411,7 +411,7 @@ export default function Notifications() {
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-3">
               <h3 className="text-base sm:text-lg font-bold text-foreground">{selectedNotification.title}</h3>
-              <Badge className={cn("flex-shrink-0", getTypeColor(selectedNotification.type))}>{selectedNotification.type.toUpperCase()}</Badge>
+              <Badge className={cn("flex-shrink-0", getTypeColor(selectedNotification.type))}>{t(`admin.notifications.types.${selectedNotification.type}`)}</Badge>
             </div>
             <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-border text-foreground/80 text-sm whitespace-pre-wrap">
               {selectedNotification.message}

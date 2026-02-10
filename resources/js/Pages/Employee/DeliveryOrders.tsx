@@ -96,7 +96,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                     <div className="text-center">
                         <p className="text-sm text-gray-400">{t('employee.delivery.total_due')}</p>
                         <p className="text-4xl font-bold text-white">
-                            ${totalAmount.toFixed(2)}
+                            {t('employee.common.currency_symbol')}{totalAmount.toFixed(2)}
                         </p>
                     </div>
 
@@ -113,7 +113,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                                         : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                 )}
                             >
-                                ${amount}
+                                {t('employee.common.currency_symbol')}{amount}
                             </button>
                         ))}
                     </div>
@@ -125,7 +125,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                         </label>
                         <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-                                $
+                                {t('employee.common.currency_symbol')}
                             </span>
                             <input
                                 type="number"
@@ -150,7 +150,7 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
                             'text-3xl font-bold',
                             isValid ? 'text-emerald-400' : 'text-red-400'
                         )}>
-                            ${change.toFixed(2)}
+                            {t('employee.common.currency_symbol')}{change.toFixed(2)}
                         </p>
                     </div>
 
@@ -210,7 +210,7 @@ interface DriverModeProps {
 }
 
 function DriverMode({ onCollectPayment }: DriverModeProps) {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const qc = useQueryClient();
     const [subTab, setSubTab] = useState<'my_deliveries' | 'available'>('my_deliveries');
     const [viewType, setViewType] = useState<'list' | 'map'>('list');
@@ -420,7 +420,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
 }
 
 export default function DeliveryOrders() {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const qc = useQueryClient();
     const [viewMode, setViewMode] = useState<'collection' | 'driver'>('collection');
 
@@ -556,14 +556,14 @@ export default function DeliveryOrders() {
 
                                                         <div className="flex items-center gap-2 text-sm text-gray-300">
                                                             <Clock className="w-4 h-4 text-gray-500" />
-                                                            <span>{t('employee.delivery.placed_at', { time: new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}</span>
+                                                            <span>{t('employee.delivery.placed_at', { time: new Date(order.created_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })}</span>
                                                         </div>
                                                     </div>
 
                                                     {/* Footer Amount & Action */}
                                                     <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
                                                         <div className="text-2xl font-bold text-white">
-                                                            ${order.total_amount.toFixed(2)}
+                                                            {t('employee.common.currency_symbol')}{order.total_amount.toFixed(2)}
                                                         </div>
                                                         <Button
                                                             onClick={() => setSelectedOrder(order)}

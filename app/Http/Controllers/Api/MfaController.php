@@ -24,7 +24,7 @@ class MfaController extends Controller
     public function setup(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         if ($user->mfa_enabled) {
             return response()->json([
                 'message' => 'MFA is already enabled for this account.',
@@ -33,7 +33,7 @@ class MfaController extends Controller
 
         // Generate a new secret (base32 encoded, 16 characters)
         $secret = $this->generateSecret();
-        
+
         // Store temporarily (not enabled yet until verified)
         $user->mfa_secret = encrypt($secret);
         $user->save();
@@ -65,7 +65,7 @@ class MfaController extends Controller
         ]);
 
         $user = $request->user();
-        
+
         if ($user->mfa_enabled) {
             return response()->json([
                 'message' => 'MFA is already enabled.',
@@ -89,7 +89,7 @@ class MfaController extends Controller
 
         // Enable MFA and generate backup codes
         $backupCodes = $this->generateBackupCodes();
-        
+
         $user->mfa_enabled = true;
         $user->save();
 
@@ -155,14 +155,14 @@ class MfaController extends Controller
     /**
      * Validate MFA code during login.
      */
-    public function validate(Request $request): JsonResponse
+    public function validateLoginCode(Request $request): JsonResponse
     {
         $request->validate([
             'code' => 'required|string',
         ]);
 
         $user = $request->user();
-        
+
         if (!$user->mfa_enabled) {
             return response()->json([
                 'message' => 'MFA is not enabled for this account.',
@@ -238,13 +238,13 @@ class MfaController extends Controller
     {
         // Decode base32 secret
         $key = $this->base32Decode($secret);
-        
+
         // Pack counter as 64-bit big-endian
         $data = pack('N*', 0) . pack('N*', $counter);
-        
+
         // Generate HMAC-SHA1
         $hash = hash_hmac('sha1', $data, $key, true);
-        
+
         // Dynamic truncation
         $offset = ord($hash[19]) & 0x0F;
         $code = (
@@ -265,15 +265,16 @@ class MfaController extends Controller
         $map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
         $input = strtoupper($input);
         $input = str_replace('=', '', $input);
-        
+
         $buffer = 0;
         $bits = 0;
         $output = '';
 
         foreach (str_split($input) as $char) {
             $val = strpos($map, $char);
-            if ($val === false) continue;
-            
+            if ($val === false)
+                continue;
+
             $buffer = ($buffer << 5) | $val;
             $bits += 5;
 
@@ -313,7 +314,7 @@ class MfaController extends Controller
     protected function verifyBackupCode(int $userId, string $code): bool
     {
         $storedCodes = cache()->get("mfa_backup_codes:{$userId}", []);
-        
+
         foreach ($storedCodes as $index => $hashedCode) {
             if (Hash::check($code, $hashedCode)) {
                 // Remove used code

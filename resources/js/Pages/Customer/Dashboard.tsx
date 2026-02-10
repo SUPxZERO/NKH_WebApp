@@ -126,22 +126,22 @@ export default function Dashboard() {
 
   // Actions
   const handleCancelReservation = async (reservationId: number) => {
-    if (!window.confirm('Cancel this reservation?')) return;
+    if (!window.confirm(t('customer_pages.dashboard.messages.cancel_reservation_confirm'))) return;
     try {
       await apiDelete(`/customer/reservations/${reservationId}`);
       await refetchReservations();
     } catch (error: any) {
-      alert(error?.response?.data?.message || 'Failed to cancel reservation.');
+      alert(error?.response?.data?.message || t('customer_pages.dashboard.messages.cancel_reservation_failed'));
     }
   };
 
   const handleRedeemReward = async (reward: Reward) => {
     if (!profile || profile.loyalty_points < reward.points_required) {
-      alert('You don\'t have enough points for this reward!');
+      alert(t('customer_pages.dashboard.rewards_modal.not_enough_points'));
       return;
     }
 
-    if (window.confirm(`Redeem ${reward.title} for ${reward.points_required} points?`)) {
+    if (window.confirm(t('customer_pages.dashboard.rewards_modal.confirm_redeem', { title: reward.title, points: reward.points_required }))) {
       try {
         const response = await apiPost<{
           message: string;
@@ -152,7 +152,7 @@ export default function Dashboard() {
           reward_title: reward.title,
         });
 
-        alert(`✅ ${response.message}\nCode: ${response.data.redemption_code}`);
+        alert(`✅ ${t('customer_pages.dashboard.rewards_modal.success')}\n${t('customer_pages.dashboard.rewards_modal.code')}: ${response.data.redemption_code}`);
 
         await Promise.all([
           refetchProfile(),
@@ -162,7 +162,7 @@ export default function Dashboard() {
 
         setShowRewardsModal(false);
       } catch (error: any) {
-        alert(`❌ Error: ${error?.response?.data?.message || 'Failed to redeem reward.'}`);
+        alert(`❌ ${error?.response?.data?.message || t('customer_pages.dashboard.rewards_modal.redeem_error')}`);
       }
     }
   };
@@ -170,9 +170,7 @@ export default function Dashboard() {
   return (
     <RequireAuth roles={['customer']}>
       <CustomerLayout>
-        <Head>
-          <title>Dashboard - NKH Restaurant</title>
-        </Head>
+        <Head title={`${t('customer_pages.dashboard.title')} - ${t('customer_pages.dashboard.meta_title_suffix')}`} />
 
         <motion.div
           className="space-y-4 sm:space-y-6 md:space-y-8"
@@ -203,7 +201,7 @@ export default function Dashboard() {
 
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4 font-display">
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-200 to-pink-200">
-                      {auth.user?.name || profile?.name || 'Guest'}!
+                      {auth.user?.name || profile?.name || t('customer_pages.dashboard.guest')}!
                     </span>
                   </h1>
 
@@ -285,7 +283,7 @@ export default function Dashboard() {
                   <h1 className="text-4xl font-bold text-white mb-4 font-display">
                     {t('customer_pages.dashboard.welcome')} <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-200 to-pink-200">
-                      {auth.user?.name || profile?.name || 'Guest'}!
+                      {auth.user?.name || profile?.name || t('customer_pages.dashboard.guest')}!
                     </span>
                   </h1>
 

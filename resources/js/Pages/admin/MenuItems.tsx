@@ -294,7 +294,7 @@ export default function MenuItems() {
               <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
-                placeholder={(t('admin.menu.search_placeholder') as string) || "Search..."}
+                placeholder={(t('admin.menu.search_placeholder') as string) || t('admin.common.search') || "Search..."}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="w-full h-10 sm:h-12 pl-9 sm:pl-12 pr-3 sm:pr-4 bg-secondary/50 border border-border rounded-lg sm:rounded-xl text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -328,7 +328,7 @@ export default function MenuItems() {
                   <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-white/20 flex items-center justify-center">
                     <Package className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <p className="text-white font-bold text-sm sm:text-lg">{selectedItems.size} selected</p>
+                  <p className="text-white font-bold text-sm sm:text-lg">{t('admin.common.selected_count', { count: selectedItems.size.toString() })}</p>
                 </div>
                 <div className="flex gap-1.5 sm:gap-3">
                   <Button size="sm" onClick={handleBulkEnable} variant="success" className="h-8 sm:h-10 px-2 sm:px-4">
@@ -471,7 +471,7 @@ export default function MenuItems() {
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleFeaturedMutation.mutate({ id: item.id, is_featured: !item.is_featured }); }}
                         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-amber-500/10"
-                        title="Toggle Featured"
+                        title={t('common.actions.toggle_featured')}
                       >
                         {item.is_featured ? (
                           <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -481,7 +481,7 @@ export default function MenuItems() {
                       </button>
 
                       {item.is_popular ? (
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30" title="Popular Item">
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/30" title={t('common.actions.popular_item')}>
                           <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                         </div>
                       ) : (
@@ -504,9 +504,9 @@ export default function MenuItems() {
                       </button>
                     </div>
                     <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                      <Button size="sm" variant="ghost" onClick={() => handlePreview(item)} className="h-9 w-9 p-0 hover:bg-blue-500/10 hover:text-blue-500" title="Preview"><Maximize2 className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="secondary" onClick={() => handleEdit(item)} className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30" title="Edit"><Edit className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)} className="h-9 w-9 p-0" title="Delete"><Trash2 className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => handlePreview(item)} className="h-9 w-9 p-0 hover:bg-blue-500/10 hover:text-blue-500" title={t('common.actions.preview')}><Maximize2 className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="secondary" onClick={() => handleEdit(item)} className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30" title={t('common.actions.edit')}><Edit className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)} className="h-9 w-9 p-0" title={t('common.actions.delete')}><Trash2 className="w-4 h-4" /></Button>
                     </div>
                   </div>
                 </motion.div>
@@ -521,7 +521,7 @@ export default function MenuItems() {
                 <div className="h-9 px-4 rounded-lg bg-secondary border border-border flex items-center gap-2">
                   <Package className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">{(menuItems as any).meta.total}</span>
-                  <span className="text-sm text-muted-foreground">items</span>
+                  <span className="text-sm text-muted-foreground">{t('admin.common.pagination.items')}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-between sm:justify-end">
@@ -533,7 +533,7 @@ export default function MenuItems() {
                   className="h-9 sm:h-10 px-2 sm:px-4"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline ml-1">Prev</span>
+                  <span className="hidden sm:inline ml-1">{t('admin.common.pagination.prev')}</span>
                 </Button>
                 <span className="text-sm font-medium text-foreground px-3 py-2 rounded-lg bg-secondary border border-border">
                   {page} / {Math.ceil(((menuItems as any)?.meta?.total || 0) / perPage)}
@@ -545,7 +545,7 @@ export default function MenuItems() {
                   onClick={() => setPage(p => p + 1)}
                   className="h-9 sm:h-10 px-2 sm:px-4"
                 >
-                  <span className="hidden sm:inline mr-1">Next</span>
+                  <span className="hidden sm:inline mr-1">{t('admin.common.pagination.next')}</span>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>

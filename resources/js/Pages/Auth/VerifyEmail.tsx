@@ -188,7 +188,7 @@ export default function VerifyEmail() {
         >
           <div className="text-center space-y-1">
             <p className="text-xs text-gray-500">
-              💡 {t('auth.didnt_receive_email')}
+              {t('auth.hint_prefix')}{' '}{t('auth.didnt_receive_email')}
             </p>
             <p className="text-xs text-gray-500">
               {t('auth.need_help')} {' '}

@@ -1,36 +1,56 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <title>{{ __('exports.payroll.title') }}</title>
     <style>
+        @font-face {
+            font-family: 'Noto Sans Khmer';
+            src: url('{{ str_replace("\\", "/", storage_path("fonts/NotoSansKhmer-Regular.ttf")) }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Noto Sans Khmer';
+            src: url('{{ str_replace("\\", "/", storage_path("fonts/NotoSansKhmer-Bold.ttf")) }}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Noto Sans Khmer', Arial, sans-serif;
             margin: 20px;
             color: #333;
             font-size: 12px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
             border-bottom: 3px solid #3b82f6;
         }
+
         .header h1 {
             color: #3b82f6;
             margin: 0;
             font-size: 28px;
         }
+
         .header .period {
             color: #666;
             font-size: 14px;
             margin-top: 10px;
         }
+
         .stats-grid {
             display: table;
             width: 100%;
             margin-bottom: 30px;
         }
+
         .stat-card {
             display: table-cell;
             width: 16.66%;
@@ -39,23 +59,28 @@
             border-left: 4px solid #3b82f6;
             text-align: center;
         }
+
         .stat-card:not(:last-child) {
             border-right: 1px solid #e5e7eb;
         }
+
         .stat-label {
             font-size: 10px;
             color: #666;
             text-transform: uppercase;
             margin-bottom: 5px;
         }
+
         .stat-value {
             font-size: 16px;
             font-weight: bold;
             color: #333;
         }
+
         .section {
             margin-bottom: 30px;
         }
+
         .section-title {
             font-size: 16px;
             color: #3b82f6;
@@ -63,11 +88,13 @@
             padding-bottom: 5px;
             border-bottom: 2px solid #e5e7eb;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
+
         table th {
             background: #3b82f6;
             color: white;
@@ -75,17 +102,21 @@
             text-align: left;
             font-size: 11px;
         }
+
         table td {
             padding: 8px 6px;
             border-bottom: 1px solid #e5e7eb;
             font-size: 11px;
         }
+
         table tr:nth-child(even) {
             background: #f8f9fa;
         }
+
         .text-right {
             text-align: right;
         }
+
         .status-badge {
             display: inline-block;
             padding: 2px 8px;
@@ -93,18 +124,23 @@
             font-size: 10px;
             font-weight: bold;
         }
+
         .status-draft {
             background: #fef3c7;
             color: #92400e;
         }
-        .status-finalized, .status-paid {
+
+        .status-finalized,
+        .status-paid {
             background: #d1fae5;
             color: #065f46;
         }
+
         .status-pending {
             background: #e0e7ff;
             color: #3730a3;
         }
+
         .footer {
             margin-top: 40px;
             padding-top: 15px;
@@ -113,17 +149,20 @@
             color: #999;
             font-size: 11px;
         }
+
         .totals-row {
             background: #3b82f6 !important;
             color: white;
             font-weight: bold;
         }
+
         .totals-row td {
             border-bottom: none;
             padding: 10px 6px;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>{{ __('exports.payroll.heading') }}</h1>
@@ -177,28 +216,28 @@
             </thead>
             <tbody>
                 @foreach($payrolls as $index => $payroll)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $payroll['employee_name'] }}</td>
-                    <td>{{ $payroll['period'] }}</td>
-                    <td class="text-right">${{ number_format($payroll['base_pay'], 2) }}</td>
-                    <td class="text-right">${{ number_format($payroll['overtime_pay'], 2) }}</td>
-                    <td class="text-right">${{ number_format($payroll['bonuses'], 2) }}</td>
-                    <td class="text-right">${{ number_format($payroll['deductions'], 2) }}</td>
-                    <td class="text-right">${{ number_format($payroll['net_pay'], 2) }}</td>
-                    <td>
-                        <span class="status-badge status-{{ $payroll['status'] }}">
-                            @php
-                                $statusKey = 'exports.payroll.status.' . $payroll['status'];
-                                $statusLabel = __($statusKey);
-                                if ($statusLabel === $statusKey) {
-                                    $statusLabel = ucfirst($payroll['status']);
-                                }
-                            @endphp
-                            {{ $statusLabel }}
-                        </span>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $payroll['employee_name'] }}</td>
+                        <td>{{ $payroll['period'] }}</td>
+                        <td class="text-right">${{ number_format($payroll['base_pay'], 2) }}</td>
+                        <td class="text-right">${{ number_format($payroll['overtime_pay'], 2) }}</td>
+                        <td class="text-right">${{ number_format($payroll['bonuses'], 2) }}</td>
+                        <td class="text-right">${{ number_format($payroll['deductions'], 2) }}</td>
+                        <td class="text-right">${{ number_format($payroll['net_pay'], 2) }}</td>
+                        <td>
+                            <span class="status-badge status-{{ $payroll['status'] }}">
+                                @php
+                                    $statusKey = 'exports.payroll.status.' . $payroll['status'];
+                                    $statusLabel = __($statusKey);
+                                    if ($statusLabel === $statusKey) {
+                                        $statusLabel = ucfirst($payroll['status']);
+                                    }
+                                @endphp
+                                {{ $statusLabel }}
+                            </span>
+                        </td>
+                    </tr>
                 @endforeach
                 <tr class="totals-row">
                     <td colspan="3"><strong>{{ __('exports.payroll.totals') }}</strong></td>
@@ -217,4 +256,5 @@
         {{ __('exports.payroll.generated_on', ['date' => $generated_at]) }} | {{ __('exports.payroll.system_name') }}
     </div>
 </body>
+
 </html>

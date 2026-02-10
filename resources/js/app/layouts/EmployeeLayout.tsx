@@ -29,22 +29,23 @@ import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import { GlobalSearch, useGlobalSearch } from '@/app/components/ui/GlobalSearch';
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
+import { LanguageSwitcher } from '@/app/components/common/LanguageSwitcher';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 type Props = { children: React.ReactNode };
 
 const navigation = [
-  { name: 'layout.employee.nav.dashboard', href: '/employee/dashboard', icon: Home },
-  { name: 'layout.employee.nav.pos', href: '/employee/pos', icon: CreditCard },
-  { name: 'layout.employee.nav.kitchen', href: '/employee/kitchen', icon: ChefHat },
-  { name: 'layout.employee.nav.delivery', href: '/employee/delivery-orders', icon: Truck },
-  { name: 'layout.employee.nav.schedule', href: '/employee/schedule', icon: CalendarDays },
-  { name: 'layout.employee.nav.performance', href: '/employee/performance', icon: Activity },
+  { name: 'employee.nav.dashboard', href: '/employee/dashboard', icon: Home },
+  { name: 'employee.nav.pos', href: '/employee/pos', icon: CreditCard },
+  { name: 'employee.nav.kitchen', href: '/employee/kitchen', icon: ChefHat },
+  { name: 'employee.nav.delivery', href: '/employee/delivery-orders', icon: Truck },
+  { name: 'employee.nav.schedule', href: '/employee/schedule', icon: CalendarDays },
+  { name: 'employee.nav.performance', href: '/employee/performance', icon: Activity },
 ];
 
 const secondaryNav = [
-  { name: 'layout.employee.nav.support', href: '/employee/support', icon: HelpCircle },
-  { name: 'layout.employee.nav.feedback', href: '/employee/feedback', icon: MessageSquare },
+  { name: 'employee.nav.support', href: '/employee/support', icon: HelpCircle },
+  { name: 'employee.nav.feedback', href: '/employee/feedback', icon: MessageSquare },
 ];
 
 export default function EmployeeLayout({ children }: Props) {
@@ -64,9 +65,9 @@ export default function EmployeeLayout({ children }: Props) {
   // Get current time for greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return t('layout.employee.greeting.morning');
-    if (hour < 17) return t('layout.employee.greeting.afternoon');
-    return t('layout.employee.greeting.evening');
+    if (hour < 12) return t('employee.greeting.morning');
+    if (hour < 17) return t('employee.greeting.afternoon');
+    return t('employee.greeting.evening');
   };
 
   return (
@@ -106,17 +107,20 @@ export default function EmployeeLayout({ children }: Props) {
                         className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]"
                       />
                     </div>
-                    <div>
-                      <h2 className="font-bold text-gray-900 dark:text-white">{t('layout.employee.portal_title')}</h2>
-                      <p className="text-xs text-fuchsia-500">{t('layout.footer.brand_title')}</p>
+                    <div className="hidden lg:block text-left">
+                      <h2 className="font-bold text-gray-900 dark:text-white leading-tight">{t('employee.portal_title')}</h2>
+                      <p className="text-xs text-fuchsia-500 font-medium">{t('footer.brand_title')}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <LanguageSwitcher />
+                    <button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -146,7 +150,7 @@ export default function EmployeeLayout({ children }: Props) {
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('layout.employee.more')}</p>
+                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('employee.more')}</p>
                   <div className="space-y-1">
                     {secondaryNav.map((item) => {
                       const Icon = item.icon;
@@ -158,8 +162,8 @@ export default function EmployeeLayout({ children }: Props) {
                           className={cn(
                             'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
                             isActive
-                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                              ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-600 dark:text-gray-400'
                           )}
                           onClick={() => setMobileMenuOpen(false)}
                         >
@@ -176,10 +180,10 @@ export default function EmployeeLayout({ children }: Props) {
               <div className="p-4 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 font-medium transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors group"
                 >
-                  <LogOut className="w-5 h-5" />
-                  {t('layout.employee.sign_out')}
+                  <LogOut className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                  {t('employee.sign_out')}
                 </button>
               </div>
             </div>
@@ -209,12 +213,12 @@ export default function EmployeeLayout({ children }: Props) {
                 <h1 className="text-lg font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
                   {t('layout.footer.brand_title')}
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">{t('layout.employee.portal_title')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">{t('employee.portal_title')}</p>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center bg-gray-100/80 dark:bg-gray-800/80 p-1 rounded-xl">
+            <nav className="hidden lg:flex items-center bg-gray-100/60 dark:bg-gray-800/60 p-1 rounded-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm shadow-sm">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = url.startsWith(item.href);
@@ -225,7 +229,7 @@ export default function EmployeeLayout({ children }: Props) {
                     className={cn(
                       'flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium',
                       isActive
-                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm border border-gray-100 dark:border-gray-600'
                         : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300'
                     )}
                   >
@@ -242,15 +246,19 @@ export default function EmployeeLayout({ children }: Props) {
               <button
                 onClick={search.open}
                 className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-                title={t('layout.employee.search_title')}
+                title={t('employee.search_title')}
               >
                 <Search className="w-5 h-5" />
               </button>
 
+              <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block" />
+
+              <LanguageSwitcher />
+
               {/* Quick Stats Badge (Desktop Only) */}
               <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full border border-emerald-500/20">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">{t('layout.employee.on_duty')}</span>
+                <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">{t('employee.on_duty')}</span>
               </div>
 
               {/* Notifications */}
@@ -287,7 +295,7 @@ export default function EmployeeLayout({ children }: Props) {
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('layout.employee.footer', { year: String(new Date().getFullYear()) })}
+              {t('employee.footer', { year: String(new Date().getFullYear()) })}
             </p>
             <div className="flex items-center gap-4">
               {secondaryNav.map((item) => (

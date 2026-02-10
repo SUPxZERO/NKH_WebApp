@@ -11,6 +11,7 @@ interface TimePickerProps {
 
 export function TimePicker({ value, onChange, minHour24 = 0, maxHour24 = 24, disabled }: TimePickerProps) {
     const { t } = useTranslation();
+    const timeSeparator = t('common.ui.time_picker.separator') as string;
     const [hour, setHour] = React.useState(value?.hour ?? 12);
     const [minute, setMinute] = React.useState(value?.minute ?? 0);
     const [period, setPeriod] = React.useState<'AM' | 'PM'>(value?.period ?? 'PM');
@@ -112,6 +113,7 @@ export function TimePicker({ value, onChange, minHour24 = 0, maxHour24 = 24, dis
                 </div>
 
                 <span className="text-2xl font-bold text-gray-400 mx-1">:</span>
+                <span className="sr-only">{timeSeparator}</span>
 
                 {/* Minute Select */}
                 <div className="relative">

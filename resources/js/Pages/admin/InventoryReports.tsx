@@ -190,19 +190,19 @@ export default function InventoryReports() {
                                     onClick={() => setQuickDate(7)}
                                     className="px-3 py-1.5 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
-                                    7D
+                                    {t('admin.inventory.reports.presets.7d')}
                                 </button>
                                 <button
                                     onClick={() => setQuickDate(30)}
                                     className="px-3 py-1.5 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
-                                    30D
+                                    {t('admin.inventory.reports.presets.30d')}
                                 </button>
                                 <button
                                     onClick={() => setQuickDate(90)}
                                     className="px-3 py-1.5 text-xs rounded-lg bg-card hover:bg-muted border border-border text-foreground transition-colors"
                                 >
-                                    90D
+                                    {t('admin.inventory.reports.presets.90d')}
                                 </button>
                             </div>
                         </div>

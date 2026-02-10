@@ -28,7 +28,7 @@ class TelegramCheckoutController extends Controller
     /**
      * Validate cart before checkout
      */
-    public function validate(Request $request): JsonResponse
+    public function validateCart(Request $request): JsonResponse
     {
         /** @var TelegramUser $user */
         $user = $request->user('telegram');

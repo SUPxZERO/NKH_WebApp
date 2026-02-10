@@ -21,6 +21,7 @@ import {
 import Button from '@/app/components/ui/Button';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface DriverMapViewProps {
     onCollectPayment: (order: any) => void;
@@ -41,6 +42,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) {
     const qc = useQueryClient();
+    const { t } = useLanguage();
     const { location: driverLocation, loading: locationLoading, requestPermission } = useDriverLocation();
     const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
     const [viewFilter, setViewFilter] = useState<'all' | 'my_deliveries' | 'available'>('all');
@@ -72,11 +74,11 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
     const claimMutation = useMutation({
         mutationFn: (orderId: number) => apiPost(`/employee/driver/orders/${orderId}/claim`, {}),
         onSuccess: () => {
-            toastSuccess('Order claimed successfully!');
+            toastSuccess(t('employee.delivery.messages.claimed') as string);
             qc.invalidateQueries({ queryKey: ['driver.orders'] });
             setSelectedOrder(null);
         },
-        onError: (err: any) => toastError(err?.response?.data?.message || 'Failed to claim order'),
+        onError: (err: any) => toastError(err?.response?.data?.message || t('employee.delivery.claim_failed') as string),
     });
 
     // Update status mutation  
@@ -84,10 +86,10 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
         mutationFn: (vars: { id: number; status: string }) =>
             apiPut(`/employee/driver/orders/${vars.id}/status`, { status: vars.status }),
         onSuccess: () => {
-            toastSuccess('Status updated!');
+            toastSuccess(t('employee.delivery.messages.status_updated') as string);
             qc.invalidateQueries({ queryKey: ['driver.orders'] });
         },
-        onError: (err: any) => toastError(err?.response?.data?.message || 'Failed to update status'),
+        onError: (err: any) => toastError(err?.response?.data?.message || t('employee.delivery.messages.status_update_failed') as string),
     });
 
     // Filter orders based on view
@@ -116,10 +118,10 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                 id: order.id,
                 lat: order.delivery_latitude,
                 lng: order.delivery_longitude,
-                title: `Order #${order.order_number}`,
+                title: t('employee.delivery.order_number', { number: order.order_number }),
                 color: STATUS_COLORS[order.status] || '#6B7280',
             }));
-    }, [filteredOrders]);
+    }, [filteredOrders, t]);
 
     // Calculate map center (driver location or average of orders)
     const mapCenter: [number, number] = useMemo(() => {
@@ -158,17 +160,17 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
 
     // Handle claim order
     const handleClaim = useCallback((order: any) => {
-        if (confirm(`Claim order #${order.order_number}?`)) {
+        if (confirm(t('employee.delivery.confirm_claim_number', { number: order.order_number }) as string)) {
             claimMutation.mutate(order.id);
         }
-    }, [claimMutation]);
+    }, [claimMutation, t]);
 
     // Handle start delivery
     const handleStartDelivery = useCallback((order: any) => {
-        if (confirm('Mark as out for delivery?')) {
+        if (confirm(t('employee.delivery.confirm_out_for_delivery') as string)) {
             statusMutation.mutate({ id: order.id, status: 'out_for_delivery' });
         }
-    }, [statusMutation]);
+    }, [statusMutation, t]);
 
     // Handle complete delivery
     const handleComplete = useCallback((order: any) => {
@@ -178,11 +180,16 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
         if (needsPayment) {
             onCollectPayment(order);
         } else {
-            if (confirm('Mark order as delivered?')) {
+            if (confirm(t('employee.delivery.confirm_delivered') as string)) {
                 statusMutation.mutate({ id: order.id, status: 'delivered' });
             }
         }
-    }, [statusMutation, onCollectPayment]);
+    }, [statusMutation, onCollectPayment, t]);
+
+    const missingCoordinatesCount = filteredOrders.length - markers.length;
+    const missingCoordinatesText = missingCoordinatesCount === 1
+        ? t('employee.delivery.map.not_shown_one', { count: missingCoordinatesCount.toString() })
+        : t('employee.delivery.map.not_shown_other', { count: missingCoordinatesCount.toString() });
 
     return (
         <div className="flex flex-col h-full">
@@ -197,7 +204,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                             viewFilter === 'all' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
                         )}
                     >
-                        All Orders
+                        {t('employee.delivery.map.filters.all')}
                     </button>
                     <button
                         onClick={() => setViewFilter('my_deliveries')}
@@ -206,7 +213,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                             viewFilter === 'my_deliveries' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
                         )}
                     >
-                        My Deliveries
+                        {t('employee.delivery.map.filters.my_deliveries')}
                     </button>
                     <button
                         onClick={() => setViewFilter('available')}
@@ -215,7 +222,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                             viewFilter === 'available' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
                         )}
                     >
-                        Available
+                        {t('employee.delivery.map.filters.available')}
                     </button>
                 </div>
 
@@ -224,12 +231,12 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                     {locationLoading ? (
                         <span className="text-gray-400">
                             <RefreshCw className="w-4 h-4 inline animate-spin mr-1" />
-                            Getting location...
+                            {t('employee.delivery.map.location.loading')}
                         </span>
                     ) : driverLocation ? (
                         <span className="text-green-400">
                             <Navigation className="w-4 h-4 inline mr-1" />
-                            Location active
+                            {t('employee.delivery.map.location.active')}
                         </span>
                     ) : (
                         <Button
@@ -239,7 +246,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                             className="text-xs"
                         >
                             <Locate className="w-4 h-4 mr-1" />
-                            Enable Location
+                            {t('employee.delivery.map.location.enable')}
                         </Button>
                     )}
                 </div>
@@ -263,7 +270,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                     </div>
                 ) : error ? (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 z-10">
-                        <p className="text-red-400">Failed to load orders</p>
+                        <p className="text-red-400">{t('employee.delivery.map.load_failed')}</p>
                     </div>
                 ) : (
                     <Map
@@ -279,26 +286,26 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                 )}
 
                 {/* Orders without coordinates notification */}
-                {filteredOrders.length > markers.length && (
+                {missingCoordinatesCount > 0 && (
                     <div className="absolute top-4 left-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 text-sm text-yellow-400 max-w-xs">
-                        <p className="font-medium">⚠️ Some orders don't have map coordinates</p>
+                        <p className="font-medium">{t('employee.delivery.map.missing_coords_title')}</p>
                         <p className="text-xs mt-1">
-                            {filteredOrders.length - markers.length} order(s) not shown on map
+                            {missingCoordinatesText}
                         </p>
                     </div>
                 )}
 
                 {/* Legend */}
                 <div className="absolute bottom-4 left-4 bg-gray-900/90 border border-white/20 rounded-lg p-3 text-xs">
-                    <p className="font-medium text-white mb-2">Order Status</p>
+                    <p className="font-medium text-white mb-2">{t('employee.delivery.map.legend_title')}</p>
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: STATUS_COLORS.ready }}></div>
-                            <span className="text-gray-300">Ready</span>
+                            <span className="text-gray-300">{t('employee.delivery.status.ready')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: STATUS_COLORS.out_for_delivery }}></div>
-                            <span className="text-gray-300">Out for Delivery</span>
+                            <span className="text-gray-300">{t('employee.delivery.status.out_for_delivery')}</span>
                         </div>
                     </div>
                 </div>
@@ -312,7 +319,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                             <div className="flex justify-between items-start mb-3">
                                 <div>
                                     <h3 className="font-bold text-lg text-white">
-                                        Order #{selectedOrder.order_number}
+                                        {t('employee.delivery.order_number', { number: selectedOrder.order_number })}
                                     </h3>
                                     <p className="text-sm text-gray-400">{selectedOrder.customer?.user?.name}</p>
                                 </div>
@@ -328,33 +335,35 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                                 <div className="flex items-start gap-2">
                                     <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
                                     <div>
-                                        <div className="text-gray-400 text-xs">Delivery Address</div>
-                                        <div className="text-white">{selectedOrder.delivery_address || 'N/A'}</div>
+                                        <div className="text-gray-400 text-xs">{t('employee.delivery.map.delivery_address')}</div>
+                                        <div className="text-white">{selectedOrder.delivery_address || t('employee.common.na')}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <Phone className="w-4 h-4 text-gray-500 mt-0.5" />
                                     <div>
-                                        <div className="text-gray-400 text-xs">Phone</div>
-                                        <div className="text-white">{selectedOrder.customer_phone || 'N/A'}</div>
+                                        <div className="text-gray-400 text-xs">{t('employee.delivery.customer.phone')}</div>
+                                        <div className="text-white">{selectedOrder.customer_phone || t('employee.common.na')}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <DollarSign className="w-4 h-4 text-gray-500 mt-0.5" />
                                     <div>
-                                        <div className="text-gray-400 text-xs">Total</div>
-                                        <div className="text-white font-bold">${selectedOrder.total_amount}</div>
+                                        <div className="text-gray-400 text-xs">{t('employee.delivery.map.total')}</div>
+                                        <div className="text-white font-bold">{t('employee.common.currency_symbol')}{selectedOrder.total_amount}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <TruckIcon className="w-4 h-4 text-gray-500 mt-0.5" />
                                     <div>
-                                        <div className="text-gray-400 text-xs">Payment</div>
+                                        <div className="text-gray-400 text-xs">{t('employee.delivery.map.payment')}</div>
                                         <div className={cn(
                                             'font-medium',
                                             selectedOrder.payment_status === 'paid' ? 'text-green-400' : 'text-orange-400'
                                         )}>
-                                            {selectedOrder.payment_status?.toUpperCase()}
+                                            {selectedOrder.payment_status
+                                                ? t(`employee.delivery.payment_status.${selectedOrder.payment_status}`)
+                                                : t('employee.common.na')}
                                         </div>
                                     </div>
                                 </div>
@@ -373,7 +382,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                                     className="flex-1"
                                 >
                                     <Navigation className="w-4 h-4 mr-1" />
-                                    Navigate
+                                    {t('employee.delivery.map.navigate')}
                                 </Button>
 
                                 {!selectedOrder.driver_id ? (
@@ -384,7 +393,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                                         className="flex-1 bg-blue-600 hover:bg-blue-500"
                                     >
                                         <CheckCircle className="w-4 h-4 mr-1" />
-                                        Claim
+                                        {t('employee.delivery.map.actions.claim')}
                                     </Button>
                                 ) : selectedOrder.status === 'ready' || selectedOrder.status === 'preparing' ? (
                                     <Button
@@ -394,7 +403,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                                         className="flex-1 bg-yellow-600 hover:bg-yellow-500"
                                     >
                                         <TruckIcon className="w-4 h-4 mr-1" />
-                                        Start Delivery
+                                        {t('employee.delivery.map.actions.start_delivery')}
                                     </Button>
                                 ) : selectedOrder.status === 'out_for_delivery' ? (
                                     <Button
@@ -404,7 +413,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                                         className="flex-1 bg-green-600 hover:bg-green-500"
                                     >
                                         <CheckCircle className="w-4 h-4 mr-1" />
-                                        Complete
+                                        {t('employee.delivery.map.actions.complete')}
                                     </Button>
                                 ) : null}
                             </div>

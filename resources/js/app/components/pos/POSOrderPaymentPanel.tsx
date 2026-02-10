@@ -6,6 +6,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { apiGet, apiPost } from '@/app/utils/api';
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface Props {
     order: any;
@@ -14,6 +15,13 @@ interface Props {
 }
 
 export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Props) {
+    const { t } = useLanguage();
+
+    const methodLabels: Record<string, string> = {
+        cash: t('employee.pos.payment.cash'),
+        card: t('employee.pos.payment.card'),
+        qr: t('employee.pos.payment.qr'),
+    };
     // Mode: 'full' (default) or 'split'
     const [mode, setMode] = useState<'full' | 'split'>('full');
 
@@ -79,7 +87,7 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
 
     const handlePayment = async () => {
         if (!amountToPay || parseFloat(amountToPay) <= 0) {
-            toastError("Invalid amount");
+            toastError(t('employee.pos.payment.invalid_amount'));
             return;
         }
 
@@ -92,20 +100,13 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
                 tip: tipAmount
             });
 
-            toastSuccess('Payment recorded');
+            toastSuccess(t('employee.pos.payment.payment_recorded'));
             await refetchStatus();
 
             // Check if fully paid
-            // We need to wait for the refetch or check the response
-            // For now, let's manually assume if remaining was covered
             const newRemaining = remainingBalance - parseFloat(amountToPay);
 
             if (newRemaining <= 0.01) {
-                // Determine if we need to call 'complete' or if backend auto-completes
-                // SplitPaymentController::addPayment just adds payment. 
-                // We should probably call complete or the status refetch will show 'paid'.
-                // Ideally, backend auto-completes logic.
-                // Let's call complete api just in case to verify
                 try {
                     await apiPost(`/api/payments/split/${order.id}/complete`, {});
                 } catch (e) {
@@ -119,7 +120,7 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
                 setCustomTipAmount('');
             }
         } catch (error: any) {
-            toastError(error?.message || 'Payment failed');
+            toastError(error?.message || t('employee.pos.payment.payment_failed'));
         } finally {
             setIsSubmitting(false);
         }
@@ -133,20 +134,20 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
             onClick={onClose}
         >
             <div
-                className="w-full max-w-2xl bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shrink-0">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h2 className="text-2xl font-bold">Payment</h2>
-                            <p className="opacity-80">Order #{order.order_number}</p>
+                            <h2 className="text-2xl font-bold">{t('employee.pos.payment.title')}</h2>
+                            <p className="opacity-80">{t('employee.pos.order_number', { number: order.order_number })}</p>
                         </div>
                         <div className="text-right">
-                            <div className="text-sm opacity-80">Remaining Balance</div>
-                            <div className="text-3xl font-bold">${(remainingBalance || 0).toFixed(2)}</div>
-                            <div className="text-xs opacity-60">Total: ${totalAmount.toFixed(2)}</div>
+                            <div className="text-sm opacity-80">{t('employee.pos.payment.remaining_balance')}</div>
+                            <div className="text-3xl font-bold">{t('employee.common.currency_symbol')}{(remainingBalance || 0).toFixed(2)}</div>
+                            <div className="text-xs opacity-60">{t('employee.pos.payment.total')}: {t('employee.common.currency_symbol')}{totalAmount.toFixed(2)}</div>
                         </div>
                     </div>
                 </div>
@@ -156,40 +157,40 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
                     <div className="w-2/3 p-6 space-y-6 overflow-y-auto">
 
                         {/* Mode Toggle */}
-                        <div className="flex gap-2 p-1 bg-gray-800 rounded-lg">
+                        <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
                             <button
                                 onClick={() => setMode('full')}
-                                className={cn("flex-1 py-2 rounded-md font-medium text-sm transition-colors", mode === 'full' ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white")}
+                                className={cn("flex-1 py-2 rounded-md font-medium text-sm transition-colors", mode === 'full' ? "bg-blue-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white")}
                             >
-                                Pay Full Balance
+                                {t('employee.pos.payment.pay_full')}
                             </button>
                             <button
                                 onClick={() => setMode('split')}
-                                className={cn("flex-1 py-2 rounded-md font-medium text-sm transition-colors", mode === 'split' ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white")}
+                                className={cn("flex-1 py-2 rounded-md font-medium text-sm transition-colors", mode === 'split' ? "bg-blue-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white")}
                             >
                                 <Split className="w-4 h-4 inline mr-2" />
-                                Split Bill
+                                {t('employee.pos.payment.split_bill')}
                             </button>
                         </div>
 
                         {/* Split Controls */}
                         {mode === 'split' && (
                             <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                                <div className="text-sm font-semibold text-gray-400">Split Method</div>
+                                <div className="text-sm font-semibold text-gray-500 dark:text-gray-400">{t('employee.pos.payment.split_method')}</div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => { setSplitType('custom'); setAmountToPay(''); }}
-                                        className={cn("p-3 rounded-xl border text-left", splitType === 'custom' ? "bg-blue-500/20 border-blue-500 text-blue-400" : "bg-white/5 border-white/10 text-gray-400")}
+                                        className={cn("p-3 rounded-xl border text-left", splitType === 'custom' ? "bg-blue-500/10 border-blue-500 text-blue-600 dark:text-blue-400" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}
                                     >
-                                        <div className="font-bold">By Amount</div>
-                                        <div className="text-xs opacity-70">Enter any amount</div>
+                                        <div className="font-bold">{t('employee.pos.payment.by_amount')}</div>
+                                        <div className="text-xs opacity-70">{t('employee.pos.payment.enter_any_amount')}</div>
                                     </button>
                                     <div className="flex gap-2">
                                         {[2, 3, 4].map(parts => (
                                             <button
                                                 key={parts}
                                                 onClick={() => { setSplitType('equal'); setSplitParts(parts); }}
-                                                className={cn("flex-1 rounded-xl border font-bold", splitType === 'equal' && splitParts === parts ? "bg-blue-500/20 border-blue-500 text-blue-400" : "bg-white/5 border-white/10 text-gray-400")}
+                                                className={cn("flex-1 rounded-xl border font-bold", splitType === 'equal' && splitParts === parts ? "bg-blue-500/10 border-blue-500 text-blue-600 dark:text-blue-400" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}
                                             >
                                                 1/{parts}
                                             </button>
@@ -201,60 +202,59 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
 
                         {/* Amount Input */}
                         <div>
-                            <label className="text-sm font-semibold text-gray-400 mb-2 block">
-                                {mode === 'full' ? 'Payment Amount' : 'Amount to Pay Now'}
+                            <label className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2 block">
+                                {mode === 'full' ? t('employee.pos.payment.payment_amount') : t('employee.pos.payment.amount_to_pay_now')}
                             </label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl font-bold">$</span>
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl font-bold">{t('employee.common.currency_symbol')}</span>
                                 <input
                                     type="number"
                                     value={amountToPay}
                                     onChange={(e) => setAmountToPay(e.target.value)}
-                                    // disabled={mode === 'full'} // Allow editing even in full if they want to pay partial manually? Maybe 'Custom' split handles that. Let's disable for Full to avoid confusion.
                                     readOnly={mode === 'full' || splitType === 'equal'} // Read only for full or auto-split
-                                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-2xl font-bold text-white focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-2xl font-bold text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none disabled:opacity-50"
                                 />
                             </div>
                         </div>
 
                         {/* Method Selector */}
                         <div>
-                            <div className="text-sm font-semibold text-gray-400 mb-2">Payment Method</div>
+                            <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">{t('employee.pos.payment.payment_method')}</div>
                             <div className="grid grid-cols-3 gap-3">
                                 <button
                                     onClick={() => setMethod('cash')}
-                                    className={cn("flex flex-col items-center p-3 rounded-xl border transition-all", method === 'cash' ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "bg-white/5 border-white/10 text-gray-400")}
+                                    className={cn("flex flex-col items-center p-3 rounded-xl border transition-all", method === 'cash' ? "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}
                                 >
                                     <Banknote className="w-5 h-5 mb-1" />
-                                    <span className="text-sm font-medium">Cash</span>
+                                    <span className="text-sm font-medium">{t('employee.pos.payment.cash')}</span>
                                 </button>
                                 <button
                                     onClick={() => setMethod('card')}
-                                    className={cn("flex flex-col items-center p-3 rounded-xl border transition-all", method === 'card' ? "bg-blue-500/20 border-blue-500 text-blue-400" : "bg-white/5 border-white/10 text-gray-400")}
+                                    className={cn("flex flex-col items-center p-3 rounded-xl border transition-all", method === 'card' ? "bg-blue-500/10 border-blue-500 text-blue-600 dark:text-blue-400" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}
                                 >
                                     <CreditCard className="w-5 h-5 mb-1" />
-                                    <span className="text-sm font-medium">Card</span>
+                                    <span className="text-sm font-medium">{t('employee.pos.payment.card')}</span>
                                 </button>
                                 <button
                                     onClick={() => setMethod('qr')}
-                                    className={cn("flex flex-col items-center p-3 rounded-xl border transition-all", method === 'qr' ? "bg-purple-500/20 border-purple-500 text-purple-400" : "bg-white/5 border-white/10 text-gray-400")}
+                                    className={cn("flex flex-col items-center p-3 rounded-xl border transition-all", method === 'qr' ? "bg-purple-500/10 border-purple-500 text-purple-600 dark:text-purple-400" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}
                                 >
                                     <QrCode className="w-5 h-5 mb-1" />
-                                    <span className="text-sm font-medium">QR</span>
+                                    <span className="text-sm font-medium">{t('employee.pos.payment.qr')}</span>
                                 </button>
                             </div>
                         </div>
 
                         {/* Tip Section */}
                         <div>
-                            <div className="text-sm font-semibold text-gray-400 mb-2">Add Tip</div>
+                            <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">{t('employee.pos.payment.add_tip')}</div>
                             <div className="grid grid-cols-4 gap-2">
-                                <button onClick={() => setTipType('none')} className={cn("py-2 rounded-lg border text-sm font-medium", tipType === 'none' ? "bg-white text-gray-900 border-white" : "bg-white/5 border-white/10 text-gray-400")}>None</button>
+                                <button onClick={() => setTipType('none')} className={cn("py-2 rounded-lg border text-sm font-medium", tipType === 'none' ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-transparent shadow-sm" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}>{t('employee.pos.payment.none')}</button>
                                 {[10, 15, 20].map(pct => (
                                     <button
                                         key={pct}
                                         onClick={() => { setTipType('percent'); setTipPercent(pct); }}
-                                        className={cn("py-2 rounded-lg border text-sm font-medium", tipType === 'percent' && tipPercent === pct ? "bg-blue-500/20 border-blue-500 text-blue-400" : "bg-white/5 border-white/10 text-gray-400")}
+                                        className={cn("py-2 rounded-lg border text-sm font-medium", tipType === 'percent' && tipPercent === pct ? "bg-blue-500/10 border-blue-500 text-blue-600 dark:text-blue-400" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}
                                     >
                                         {pct}%
                                     </button>
@@ -262,17 +262,17 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
                             </div>
                             <button
                                 onClick={() => setTipType('custom')}
-                                className={cn("w-full mt-2 py-2 rounded-lg border text-sm font-medium", tipType === 'custom' ? "bg-blue-500/20 border-blue-500 text-blue-400" : "bg-white/5 border-white/10 text-gray-400")}
+                                className={cn("w-full mt-2 py-2 rounded-lg border text-sm font-medium", tipType === 'custom' ? "bg-blue-500/10 border-blue-500 text-blue-600 dark:text-blue-400" : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500")}
                             >
-                                Custom Amount via Input
+                                {t('employee.pos.payment.custom_tip')}
                             </button>
                             {tipType === 'custom' && (
                                 <input
                                     type="number"
-                                    placeholder="Enter tip amount"
+                                    placeholder={t('employee.pos.payment.enter_tip_amount')}
                                     value={customTipAmount}
                                     onChange={(e) => setCustomTipAmount(e.target.value)}
-                                    className="w-full mt-2 p-2 bg-white/5 border border-white/10 rounded-lg text-white"
+                                    className="w-full mt-2 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white"
                                 />
                             )}
                         </div>
@@ -280,40 +280,40 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
                     </div>
 
                     {/* Right: Summary & History */}
-                    <div className="w-1/3 bg-gray-800/50 p-6 border-l border-gray-700 flex flex-col">
+                    <div className="w-1/3 bg-gray-50 dark:bg-gray-800/50 p-6 border-l border-gray-200 dark:border-gray-700 flex flex-col">
                         <div className="flex-1 overflow-y-auto space-y-4">
-                            <h3 className="font-semibold text-white">Payment Summary</h3>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{t('employee.pos.payment.summary')}</h3>
 
                             <div className="space-y-2 text-sm">
-                                <div className="flex justify-between text-gray-400">
-                                    <span>Amount</span>
-                                    <span>${(parseFloat(amountToPay) || 0).toFixed(2)}</span>
+                                <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                                    <span>{t('employee.pos.payment.amount')}</span>
+                                    <span>{t('employee.common.currency_symbol')}{(parseFloat(amountToPay) || 0).toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-400">
-                                    <span>Tip {tipType === 'percent' && `(${tipPercent}%)`}</span>
-                                    <span>${tipAmount.toFixed(2)}</span>
+                                <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                                    <span>{t('employee.pos.payment.tip')} {tipType === 'percent' && `(${tipPercent}%)`}</span>
+                                    <span>{t('employee.common.currency_symbol')}{tipAmount.toFixed(2)}</span>
                                 </div>
-                                <div className="h-px bg-white/10 my-2"></div>
-                                <div className="flex justify-between text-xl font-bold text-white">
-                                    <span>Total Charge</span>
-                                    <span>${finalTotal.toFixed(2)}</span>
+                                <div className="h-px bg-gray-200 dark:bg-white/10 my-2"></div>
+                                <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-white">
+                                    <span>{t('employee.pos.payment.total_charge')}</span>
+                                    <span>{t('employee.common.currency_symbol')}{finalTotal.toFixed(2)}</span>
                                 </div>
                             </div>
 
                             {/* Split History */}
                             {mode === 'split' && invoice && invoice.amount_paid > 0 && (
-                                <div className="mt-6 pt-6 border-t border-white/10">
-                                    <h4 className="font-semibold text-white mb-3">Paid So Far</h4>
+                                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-white/10">
+                                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">{t('employee.pos.payment.paid_so_far')}</h4>
                                     <div className="space-y-2">
                                         {statusData?.payments?.map((p: any) => (
-                                            <div key={p.id} className="text-xs bg-white/5 p-2 rounded flex justify-between">
-                                                <span>{p.method}</span>
-                                                <span className="font-mono">${p.amount.toFixed(2)}</span>
+                                            <div key={p.id} className="text-xs bg-white dark:bg-white/5 p-2 rounded flex justify-between border border-gray-100 dark:border-transparent">
+                                                <span>{methodLabels[p.method] || p.method}</span>
+                                                <span className="font-mono">{t('employee.common.currency_symbol')}{p.amount.toFixed(2)}</span>
                                             </div>
                                         ))}
-                                        <div className="flex justify-between text-sm font-bold pt-2">
-                                            <span>Total Paid</span>
-                                            <span>${invoice.amount_paid.toFixed(2)}</span>
+                                        <div className="flex justify-between text-sm font-bold pt-2 text-gray-900 dark:text-white">
+                                            <span>{t('employee.pos.payment.total_paid')}</span>
+                                            <span>{t('employee.common.currency_symbol')}{invoice.amount_paid.toFixed(2)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -327,37 +327,29 @@ export default function POSOrderPaymentPanel({ order, onClose, onSuccess }: Prop
                                     {quickAmounts.map(amt => (
                                         <button
                                             key={amt}
-                                            // Typically for quick cash, we might update amountToPay? No, amountToPay is fixed for split. 
-                                            // For Full Pay: Cash Received logic is tricky here if we allow tips.
-                                            // If user gives $50 for $45. $5 is tip? Or $5 change?
-                                            // Let's assume standard behavior: Pay exact amount + Tip logic above handles the charge.
-                                            // If we want "Cash Received" input to calc change, we need that UI back.
-                                            // Simplifying: Just assume exact payment for the Charge Amount.
-                                            // OR: If cash, maybe show "Calculate Change" modal?
-                                            // For now, let's keep it simple: "Confirm Pay $X"
-                                            className="py-1 px-2 rounded bg-emerald-500/10 text-emerald-400 text-xs"
+                                            className="py-1 px-2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs border border-emerald-500/20"
                                             onClick={() => { /* maybe auto-fill something? */ }}
                                         >
-                                            ${amt}
+                                            {t('employee.common.currency_symbol')}{amt}
                                         </button>
                                     ))}
                                 </div>
                             )}
 
                             <Button
-                                className="w-full py-4 text-lg font-bold bg-green-600 hover:bg-green-700"
+                                className="w-full py-4 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20"
                                 onClick={handlePayment}
                                 loading={isSubmitting}
                                 disabled={isSubmitting || !amountToPay || parseFloat(amountToPay) <= 0}
                             >
-                                Pay ${(finalTotal).toFixed(2)}
+                                {t('employee.pos.payment.pay_amount', { amount: t('employee.common.currency_symbol') + finalTotal.toFixed(2) })}
                             </Button>
                             <Button
                                 variant="secondary"
                                 className="w-full"
                                 onClick={onClose}
                             >
-                                Cancel
+                                {t('employee.pos.payment.cancel')}
                             </Button>
                         </div>
                     </div>

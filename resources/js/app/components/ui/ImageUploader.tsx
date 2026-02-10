@@ -100,6 +100,7 @@ export function ImageUploader({
                 type="button"
                 onClick={handleRemove}
                 className="p-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors"
+                aria-label={t('common.ui.image_uploader.remove') as string}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -125,6 +126,7 @@ export function ImageUploader({
           type="file"
           accept={accept}
           onChange={handleFileInput}
+          aria-label={displayPlaceholder as string}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
       </div>

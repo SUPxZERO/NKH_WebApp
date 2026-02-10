@@ -128,6 +128,9 @@ export default function AddressPicker({
     const [isGettingLocation, setIsGettingLocation] = useState(false);
     const [showMapModal, setShowMapModal] = useState(false);
 
+    // Check if site is using HTTPS (geolocation requires secure context)
+    const isSecureContext = window.isSecureContext;
+
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -205,10 +208,26 @@ export default function AddressPicker({
         setIsGettingLocation(true);
 
         try {
+            // Check permission state first
+            if (navigator.permissions) {
+                try {
+                    const permissionStatus = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+                    console.log('Geolocation permission state:', permissionStatus.state);
+
+                    if (permissionStatus.state === 'denied') {
+                        alert('Location access is blocked.\n\nPlease:\n1. Click the lock icon (🔒) in the address bar\n2. Click "Site settings"\n3. Find "Location" and change to "Allow"\n4. Refresh the page and try again\n\nOr use "Pick on Map" instead.');
+                        setIsGettingLocation(false);
+                        return;
+                    }
+                } catch (permError) {
+                    console.log('Permission API not supported, continuing with geolocation request');
+                }
+            }
+
             const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
                     enableHighAccuracy: true,
-                    timeout: 10000,
+                    timeout: 15000,
                     maximumAge: 60000,
                 });
             });
@@ -233,10 +252,24 @@ export default function AddressPicker({
             }
         } catch (error: any) {
             console.error('Geolocation error:', error);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
+
             let message = 'Unable to get your location. ';
-            if (error.code === 1) message += 'Please allow location access.';
-            else if (error.code === 2) message += 'Position unavailable.';
-            else if (error.code === 3) message += 'Request timed out.';
+
+            if (error.code === 1) {
+                // PERMISSION_DENIED - shouldn't happen often since button is disabled on HTTP
+                message += 'Please allow location access in your browser settings.';
+            } else if (error.code === 2) {
+                // POSITION_UNAVAILABLE
+                message += 'Your position is currently unavailable. This might be due to GPS signal issues.';
+            } else if (error.code === 3) {
+                // TIMEOUT
+                message += 'The request timed out. Please try again.';
+            } else {
+                message += error.message || 'An unknown error occurred.';
+            }
+
             alert(message);
         } finally {
             setIsGettingLocation(false);
@@ -289,11 +322,13 @@ export default function AddressPicker({
                 <button
                     type="button"
                     onClick={handleGetCurrentLocation}
-                    disabled={disabled || isGettingLocation}
+                    disabled={disabled || isGettingLocation || !isSecureContext}
+                    title={!isSecureContext ? 'Location feature requires HTTPS. Use "Pick on Map" instead.' : 'Get your current location'}
                     className={cn(
                         'flex items-center gap-2 px-4 py-2 rounded-xl border transition-all',
-                        'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-transparent',
-                        'hover:from-blue-600 hover:to-cyan-600 shadow-lg hover:shadow-xl',
+                        !isSecureContext
+                            ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed opacity-50'
+                            : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-transparent hover:from-blue-600 hover:to-cyan-600 shadow-lg hover:shadow-xl',
                         'disabled:opacity-50 disabled:cursor-not-allowed'
                     )}
                 >
@@ -303,6 +338,7 @@ export default function AddressPicker({
                         <Crosshair className="w-4 h-4" />
                     )}
                     {isGettingLocation ? 'Getting Location...' : 'Use My Location'}
+                    {!isSecureContext && <span className="text-xs">(Requires HTTPS)</span>}
                 </button>
 
                 <button
@@ -570,7 +606,8 @@ function InteractiveMapModal({
             const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
                     enableHighAccuracy: true,
-                    timeout: 10000,
+                    timeout: 15000,
+                    maximumAge: 60000,
                 });
             });
 
@@ -582,8 +619,24 @@ function InteractiveMapModal({
                 mapRef.current.setView([latitude, longitude], 16);
                 markerRef.current.setLatLng([latitude, longitude]);
             }
-        } catch {
-            alert('Unable to get location. Please allow location access.');
+        } catch (error: any) {
+            console.error('Modal geolocation error:', error);
+            console.error('Error code:', error?.code);
+            console.error('Error message:', error?.message);
+
+            let message = 'Unable to get location. ';
+
+            if (error?.code === 1) {
+                message += 'Please allow location access in your browser settings.';
+            } else if (error?.code === 2) {
+                message += 'Position unavailable due to GPS signal issues.';
+            } else if (error?.code === 3) {
+                message += 'Request timed out. Please try again.';
+            } else {
+                message += error?.message || 'Please check your browser settings.';
+            }
+
+            alert(message);
         } finally {
             setIsGettingLocation(false);
         }

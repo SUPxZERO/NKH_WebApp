@@ -88,7 +88,15 @@ After this update:
 ## Recent Progress (Post-Handoff)
 
 ### Scan State
-- Scan completed across all files (index = 78,698). Current stats (from state file):
+- Scan completed across all files (index = 78,698). Current stats (from state file, confirmed Feb 5, 2026):
+  - Fully: **43**
+  - Partial: **895**
+  - Not: **43,278**
+  - Non-text: **34,482**
+
+### Scan State (Snapshot Feb 5, 2026)
+- Source: `storage/translation_scan_state.json`
+- Totals (index = 78,698):
   - Fully: **43**
   - Partial: **895**
   - Not: **43,278**
@@ -101,6 +109,15 @@ After this update:
 - `resources/js/Pages/Employee/CashPayments.tsx` localized via `CashPaymentQueue`.
 - `resources/js/app/components/payment/CashPaymentQueue.tsx` localized; added `employee.cash.*`.
 - `resources/js/Pages/Employee/Settings/SecuritySettings.tsx` localized; added `employee.security.*`.
+- `resources/js/Pages/Employee/components/MyRequestsTab.tsx` localized shift-swap UI; added `employee.schedule.swap.*` keys and `employee.common.na`.
+- `resources/js/Pages/Employee/DriverMapView.tsx` localized driver map UI (filters, alerts, legend, detail panel, actions) and added `employee.delivery.map.*`, `employee.delivery.messages.*`, confirm strings, plus `employee.common.currency_symbol`.
+- `resources/js/Pages/Employee/Schedule.tsx` updated date formatting to use `locale` directly (removed hardcoded `en-US` fallback).
+- `resources/js/Pages/Employee/Dashboard.tsx` updated date formatting to use `locale` directly (removed hardcoded `en-US`).
+- `resources/js/Pages/Employee/HelpSupport.tsx` localized ticket list labels (category/status/priority) and added `employee.help.priority_short.*` + `employee.help.status.*`.
+- `resources/js/Pages/Employee/DeliveryOrders.tsx` replaced hardcoded currency symbols and time formatting with `employee.common.currency_symbol` and `locale`.
+- `resources/js/Pages/Employee/POS.tsx` replaced hardcoded currency symbols and time formatting with `employee.common.currency_symbol` and `locale`.
+- `resources/js/Pages/Employee/POS.tsx` localized remaining error strings (held orders load + no table selected); added `employee.pos.messages.load_held_failed` and `employee.pos.messages.no_table_selected`.
+- `resources/js/Pages/Employee/KitchenDisplay.tsx` replaced hardcoded currency symbol with `employee.common.currency_symbol`.
 - Other Employee screens already localized earlier: `Dashboard`, `Notifications`, `Schedule`, `Performance`, `TimeClock`, `DeliveryOrders`, `HelpSupport`, `Feedback`, `Settings`, etc.
 
 ### Customer Pages Updated
@@ -108,6 +125,13 @@ After this update:
 - `resources/js/Pages/Customer/Menu.tsx` localized remaining UI strings; added `menu.favorite_error`, `menu.page_title`, `menu.page_desc`, `menu.search_filter`.
 - `resources/js/Pages/Customer/Cart.tsx` localized mobile “Items” header.
 - `resources/js/Pages/Customer/Checkout.tsx` localized remaining hardcoded labels; added `checkout.table_fallback`, `checkout.floor_fallback`, `checkout.details`.
+- `resources/js/Pages/Customer/Orders.tsx` localized remaining hardcoded strings; added `customer_pages.orders.order_card.preview_alt`, `customer_pages.orders.cancel_modal.error`, `customer_pages.orders.reorder_modal.adding`, `customer_pages.orders.reorder_modal.error`.
+- `resources/js/Pages/Customer/Payment.tsx` localized remaining hardcoded strings; added `payment.simulated_failure_reason`, `payment.fallbacks.order_number`, `payment.messages.unknown_error`.
+- `resources/js/Pages/Customer/Profile.tsx` localized remaining hardcoded strings; added `profile.meta_title_suffix`, `profile.fallbacks.title`, `profile.addresses.default_country`, `profile.messages.geocoding_failed`.
+- `resources/js/Pages/Customer/Dashboard.tsx` localized remaining hardcoded strings; added `customer_pages.dashboard.meta_title_suffix`, `customer_pages.dashboard.guest`, `customer_pages.dashboard.messages.*`, `customer_pages.dashboard.rewards_modal.redeem_error`.
+- `resources/js/Pages/admin/Dashboard.tsx` localized remaining hardcoded strings; added `admin.dashboard.title`, `admin.dashboard.fallbacks.user_name`, `admin.dashboard.tasks.order_prefix`, `admin.dashboard.tasks.table_prefix`.
+- `resources/js/Pages/admin/Orders.tsx` localized remaining hardcoded strings (toasts, search fallback, modal labels/actions, payment status, special instructions, items header, per-item “each”, guest initial); added `admin.orders.messages.*`, `admin.orders.modal.*`.
+- `resources/js/Pages/admin/Units.tsx` localized toasts, confirm, search placeholder, loading text, and form placeholders; added `admin.units.search_placeholder`, `admin.units.loading`, `admin.units.placeholders.*`.
 
 ### Layouts Updated (Both Layout Folders)
 - `resources/js/Layouts/AuthenticatedLayout.tsx` logo alt localized.
@@ -128,22 +152,41 @@ After this update:
 - `checkout.table_fallback`, `checkout.floor_fallback`, `checkout.details`
 - `layout.nav.user_fallback`, `layout.nav.search_title`, `layout.nav.profile_title`
 - `layout.employee.*`, `layout.admin.*`, `layout.restaurant.*`, `layout.table_brand`, `layout.table_label`, `layout.table_nav.*`
+- `customer_pages.orders.order_card.preview_alt`, `customer_pages.orders.cancel_modal.error`, `customer_pages.orders.reorder_modal.adding`, `customer_pages.orders.reorder_modal.error`
+- `payment.simulated_failure_reason`, `payment.fallbacks.order_number`, `payment.messages.unknown_error`
+- `profile.meta_title_suffix`, `profile.fallbacks.title`, `profile.addresses.default_country`, `profile.messages.geocoding_failed`
+- `customer_pages.dashboard.meta_title_suffix`, `customer_pages.dashboard.guest`, `customer_pages.dashboard.messages.cancel_reservation_confirm`, `customer_pages.dashboard.messages.cancel_reservation_failed`, `customer_pages.dashboard.rewards_modal.redeem_error`
+- `admin.dashboard.title`, `admin.dashboard.fallbacks.user_name`, `admin.dashboard.tasks.order_prefix`, `admin.dashboard.tasks.table_prefix`
+- `admin.orders.messages.status_updated`, `admin.orders.messages.payment_updated`, `admin.orders.messages.update_failed`
+- `admin.orders.modal.items_title`, `admin.orders.modal.each`, `admin.orders.modal.instructions_title`, `admin.orders.modal.actions.*`
+- `admin.units.search_placeholder`, `admin.units.loading`, `admin.units.placeholders.*`
 
 ### Scan State Notes
 - Scanner does not detect `t(...)` inside TSX files reliably; many TSX files remain marked `not` even after localization. Keep this in mind when using scan results to drive work.
 
+### Admin Pages Updated (Latest)
+- `resources/js/Pages/admin/Suppliers.tsx` localized phone/email fallbacks; replaced hardcoded `'-'` with `admin.common.na`.
+
+### Admin Components Updated
+- `resources/js/app/components/admin/EmployeeScheduler.tsx` localized scheduler UI; added `admin.employee_scheduler.*`.
+- `resources/js/app/components/admin/NotificationCenter.tsx` localized notification panel UI; added `admin.notification_center.*`.
+- `resources/js/app/components/admin/RefundManagement.tsx` localized refund management UI; added `admin.refunds.*`.
+- `resources/js/app/components/admin/RefundModal.tsx` localized refund request modal; added `admin.refunds.request_modal.*` and `admin.refunds.reasons.*`.
+
 ## Next Steps (Recommended)
-1. Resume chunked translation scan to complete full file coverage:
-   - Use `storage/translation_scan_state.json`
-   - Continue in batches of 5,000–10,000 files until `index` reaches file count.
+1. Narrow focus to project-owned files:
+   - Prioritize `resources/`, `app/`, `routes/`, `lang/`, `database/`, `config/`.
+   - Deprioritize `node_modules/`, `vendor/`, `public/build/`, and `storage/framework/` items in scan results.
 2. Use scan results to drive micro-tasks:
-   - For each `not` or `partial` file, replace hardcoded strings with i18n keys.
-3. After each micro-task, re-run scan and update coverage map.
+   - For each `not` or `partial` file in app-owned paths, replace hardcoded strings with i18n keys.
+3. After each micro-task, refresh scan stats (or targeted scan) and update the snapshot section.
 
 ## Files Updated (Paths)
 - `lang/en/validation.php`
+- `lang/en.json`
 - `lang/km/validation.php`
 - `lang/km.json`
+- `resources/js/Pages/admin/Orders.tsx`
 - (Generated scan list) `storage/translation_scan_files.txt`
 - (Partial scan state) `storage/translation_scan_state.json`
  - plus numerous localized TSX/Blade files; see “Recent Progress” section.

@@ -336,10 +336,10 @@ export default function Suppliers() {
                                 </div>
                                 <div className="col-span-3 text-sm">
                                     <div className="flex items-center gap-2 text-foreground">
-                                        <Phone size={12} className="text-fuchsia-500" /> {supplier.phone || '-'}
+                                        <Phone size={12} className="text-fuchsia-500" /> {supplier.phone || t('admin.common.na')}
                                     </div>
                                     <div className="flex items-center gap-2 mt-1 text-muted-foreground">
-                                        <Mail size={12} className="text-fuchsia-500" /> {supplier.email || '-'}
+                                        <Mail size={12} className="text-fuchsia-500" /> {supplier.email || t('admin.common.na')}
                                     </div>
                                 </div>
                                 <div className="col-span-3">

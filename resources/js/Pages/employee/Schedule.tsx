@@ -364,9 +364,7 @@ export default function Schedule() {
 
     return (
         <EmployeeLayout>
-            <Head>
-                <title>{t('employee.schedule.title')} - {t('meta.app_title')}</title>
-            </Head>
+            <Head title={`${t('employee.schedule.title')} - ${t('meta.app_title')}`} />
 
             <div className="space-y-6">
                 {/* Header & Tabs */}
@@ -433,7 +431,7 @@ export default function Schedule() {
                                             <div>
                                                 <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.next_shift')}</div>
                                                 <div className="text-3xl font-bold text-white mb-2">
-                                                    {new Date(nextShift.date).toLocaleDateString(locale || 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                                    {new Date(nextShift.date).toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })}
                                                 </div>
                                                 <div className="flex flex-wrap gap-4 text-lg">
                                                     <div className="flex items-center gap-2">
@@ -478,7 +476,7 @@ export default function Schedule() {
                                 <CardContent className="p-6">
                                     <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.total_shifts')}</div>
                                     <div className="text-4xl font-bold text-white">{shifts?.data?.length || 0}</div>
-                                    <div className="text-sm text-gray-400 mt-1">{t('employee.schedule.upcoming_shiftstext')}</div>
+                                    <div className="text-sm text-gray-400 mt-1">{t('employee.schedule.upcoming_shifts')}</div>
                                 </CardContent>
                             </Card>
 
@@ -521,12 +519,12 @@ export default function Schedule() {
                                         <div className="flex items-center justify-between mb-4 bg-white/5 p-2 rounded-lg">
                                             <Button variant="ghost" size="sm" onClick={handlePrev}>&lt;</Button>
                                             <div className="font-bold text-lg">
-                                            {viewMode === 'week'
-                                                ? t('employee.schedule.week_of', {
-                                                    date: getWeekDays()[0].toLocaleDateString(locale || 'en-US', { month: 'short', day: 'numeric' })
-                                                })
-                                                : currentDate.toLocaleDateString(locale || 'en-US', { month: 'long', year: 'numeric' })
-                                            }
+                                                {viewMode === 'week'
+                                                    ? t('employee.schedule.week_of', {
+                                                        date: getWeekDays()[0].toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+                                                    })
+                                                    : currentDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
+                                                }
                                             </div>
                                             <Button variant="ghost" size="sm" onClick={handleNext}>&gt;</Button>
                                         </div>
@@ -547,8 +545,8 @@ export default function Schedule() {
                                                                 }`}
                                                         >
                                                             <div className="w-24 flex-shrink-0">
-                                                                <div className="font-semibold">{day.toLocaleDateString(locale || 'en-US', { weekday: 'short' })}</div>
-                                                                <div className="text-sm text-gray-400">{day.toLocaleDateString(locale || 'en-US', { month: 'short', day: 'numeric' })}</div>
+                                                                <div className="font-semibold">{day.toLocaleDateString(locale, { weekday: 'short' })}</div>
+                                                                <div className="text-sm text-gray-400">{day.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}</div>
                                                             </div>
 
                                                             <div className="flex-1">
@@ -651,7 +649,7 @@ export default function Schedule() {
                                                     {getStatusIcon(request.status)}
                                                     <div>
                                                         <div className="font-medium">
-                                                            {new Date(request.start_date).toLocaleDateString(locale || 'en-US')} - {new Date(request.end_date).toLocaleDateString(locale || 'en-US')}
+                                                            {new Date(request.start_date).toLocaleDateString(locale)} - {new Date(request.end_date).toLocaleDateString(locale)}
                                                         </div>
                                                         <div className="text-sm text-gray-400">{request.reason}</div>
                                                     </div>
@@ -690,7 +688,7 @@ export default function Schedule() {
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div>
                                                         <div className="font-bold text-lg text-white">
-                                                            {new Date(swap.shift.date).toLocaleDateString(locale || 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                                            {new Date(swap.shift.date).toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' })}
                                                         </div>
                                                         <div className="text-fuchsia-400 font-medium">
                                                             {swap.shift.start_time} - {swap.shift.end_time}
@@ -810,7 +808,7 @@ export default function Schedule() {
                         <div>
                             <div className="text-sm text-gray-400 mb-1">{t('employee.schedule.details.date')}</div>
                             <div className="text-lg font-semibold">
-                                {new Date(selectedShift.date).toLocaleDateString(locale || 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                {new Date(selectedShift.date).toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })}
                             </div>
                         </div>
 
@@ -864,7 +862,7 @@ export default function Schedule() {
                 <form onSubmit={handleSwapRequest} className="space-y-4">
                     <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm rounded-lg mb-4">
                         {t('employee.schedule.swap_requesting')} <br />
-                        <strong>{selectedShift && new Date(selectedShift.date).toLocaleDateString(locale || 'en-US')}</strong>
+                        <strong>{selectedShift && new Date(selectedShift.date).toLocaleDateString(locale)}</strong>
                     </div>
 
                     <div>

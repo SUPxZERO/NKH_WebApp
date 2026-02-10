@@ -144,7 +144,13 @@ class AnalyticsController extends Controller
             ])
             ->first();
 
-        $data = $summary->toArray();
+        $data = $summary ? $summary->toArray() : [
+            'total_orders' => 0,
+            'total_revenue' => 0,
+            'avg_order_value' => 0,
+            'min_order' => 0,
+            'max_order' => 0
+        ];
         $data['total_orders'] = (int) ($data['total_orders'] ?? 0);
         $data['total_revenue'] = (float) ($data['total_revenue'] ?? 0);
         $data['avg_order_value'] = (float) ($data['avg_order_value'] ?? 0);
@@ -175,9 +181,19 @@ class AnalyticsController extends Controller
             'end_date' => $dates['end']->format('M d, Y'),
         ];
 
+        // Set locale if provided in request
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
+        }
+
         // Generate PDF
-        $pdf = Pdf::loadView('exports.sales-analytics', $data);
-        return $pdf->download('sales-analytics-' . date('Y-m-d') . '.pdf');
+        // Generate PDF
+        $filename = __('exports.sales_analytics.title') . '-' . date('Y-m-d') . '.pdf';
+        $pdfContent = app(\App\Services\PdfService::class)->generate('exports.sales-analytics', $data);
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     /**
@@ -193,6 +209,10 @@ class AnalyticsController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
+        }
+
         $dates = $this->getDateRangeFromRequest($request);
 
         // Gather data matching PDF structure
@@ -201,22 +221,24 @@ class AnalyticsController extends Controller
         $topItems = $this->getTopItemsData($dates);
         $categories = $this->getCategoryData($dates);
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="sales-analytics-' . date('Y-m-d') . '.csv"',
-        ];
-
         $callback = function () use ($overview, $trends, $topItems, $categories, $dates) {
             $file = fopen('php://output', 'w');
+            // Add BOM for UTF-8 (Excel support)
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             // 1. Title & Period
-            fputcsv($file, ['Sales Analytics Report']);
-            fputcsv($file, ['Period:', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
+            fputcsv($file, [__('exports.sales_analytics.heading')]);
+            fputcsv($file, [__('reports.sales.filters.all_time') . ':', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
             fputcsv($file, []); // Spacer
 
             // 2. Overview
-            fputcsv($file, ['OVERVIEW']);
-            fputcsv($file, ['Total Revenue', 'Total Orders', 'Avg Order Value', 'Unique Customers']);
+            fputcsv($file, [__('admin.dashboard.analytics')]);
+            fputcsv($file, [
+                __('exports.sales_analytics.stats.total_revenue'),
+                __('exports.sales_analytics.stats.total_orders'),
+                __('exports.sales_analytics.stats.avg_order_value'),
+                __('exports.sales_analytics.stats.customers')
+            ]);
             fputcsv($file, [
                 $overview['total_revenue'],
                 $overview['total_orders'],
@@ -226,16 +248,24 @@ class AnalyticsController extends Controller
             fputcsv($file, []);
 
             // 3. Trends
-            fputcsv($file, ['SALES TRENDS']);
-            fputcsv($file, ['Date', 'Orders', 'Revenue']);
+            fputcsv($file, [__('exports.sales_analytics.sections.revenue_trends')]);
+            fputcsv($file, [
+                __('exports.sales_analytics.table.date'),
+                __('exports.sales_analytics.table.orders'),
+                __('exports.sales_analytics.table.revenue')
+            ]);
             foreach ($trends as $trend) {
                 fputcsv($file, [$trend['date'], $trend['orders'], $trend['revenue']]);
             }
             fputcsv($file, []);
 
             // 4. Top Selling Items
-            fputcsv($file, ['TOP SELLING ITEMS']);
-            fputcsv($file, ['Item Name', 'Quantity Sold', 'Revenue']);
+            fputcsv($file, [__('exports.sales_analytics.sections.top_items')]);
+            fputcsv($file, [
+                __('exports.sales_analytics.table.item_name'),
+                __('exports.sales_analytics.table.quantity_sold'),
+                __('exports.sales_analytics.table.revenue')
+            ]);
             foreach ($topItems as $item) {
                 // $item is array from getTopItemsData
                 fputcsv($file, [$item['name'], $item['quantity_sold'], $item['revenue']]);
@@ -243,8 +273,11 @@ class AnalyticsController extends Controller
             fputcsv($file, []);
 
             // 5. Sales by Category
-            fputcsv($file, ['SALES BY CATEGORY']);
-            fputcsv($file, ['Category', 'Revenue']);
+            fputcsv($file, [__('exports.sales_analytics.sections.by_category')]);
+            fputcsv($file, [
+                __('exports.sales_analytics.table.category'),
+                __('exports.sales_analytics.table.revenue')
+            ]);
             foreach ($categories as $cat) {
                 // $cat is array from getCategoryData
                 fputcsv($file, [$cat['name'], $cat['value']]);
@@ -253,7 +286,10 @@ class AnalyticsController extends Controller
             fclose($file);
         };
 
-        return response()->stream($callback, 200, $headers);
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . __('exports.sales_analytics.title') . '-' . date('Y-m-d') . '.csv"',
+        ]);
     }
 
     /**
@@ -313,9 +349,13 @@ class AnalyticsController extends Controller
             ->limit(10)
             ->get()
             ->map(function ($item) {
-                $itemArray = $item->toArray();
-                $itemArray['unit'] = $item->unit?->code ?? 'unit';
-                return $itemArray;
+                return [
+                    'name' => $item->name,
+                    'quantity' => $item->quantity,
+                    'cost_per_unit' => $item->cost_per_unit,
+                    'total_cost' => $item->total_cost,
+                    'unit' => $item->unit?->code ?? 'unit'
+                ];
             })
             ->toArray();
 
@@ -341,24 +381,36 @@ class AnalyticsController extends Controller
             'end_date' => $dates['end']->format('M d, Y'),
         ];
 
-        $pdf = Pdf::loadView('exports.inventory-reports', $data);
-        return $pdf->download('inventory-report-' . date('Y-m-d') . '.pdf');
+        // Set locale if provided
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
+        }
+
+        $filename = __('exports.inventory.title') . '-' . date('Y-m-d') . '.pdf';
+        $pdfContent = app(\App\Services\PdfService::class)->generate('exports.inventory-reports', $data);
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function exportInventoryCSV(Request $request)
     {
-        $dates = $this->getDateRangeFromRequest($request);
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
+        }
 
         $currentValue = Inventory::join('ingredients', 'inventory.ingredient_id', '=', 'ingredients.id')
             ->sum(DB::raw('inventory.quantity * ingredients.cost_per_unit'));
 
-        $csv = "Metric,Value\n";
-        $csv .= "Total Inventory Value," . number_format($currentValue, 2) . "\n";
-        $csv .= "Report Date," . date('Y-m-d') . "\n";
+        $csv = chr(0xEF) . chr(0xBB) . chr(0xBF);
+        $csv .= __('exports.inventory.table.status') . "," . __('reports.inventory.table.total_value') . "\n";
+        $csv .= __('exports.inventory.stats.total_inventory_value') . "," . number_format($currentValue, 2) . "\n";
+        $csv .= __('exports.inventory.table.date') . "," . date('Y-m-d') . "\n";
 
         return response($csv)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="inventory-report-' . date('Y-m-d') . '.csv"');
+            ->header('Content-Disposition', 'attachment; filename="' . __('exports.inventory.title') . '-' . date('Y-m-d') . '.csv"');
     }
 
     /**
@@ -487,8 +539,16 @@ class AnalyticsController extends Controller
             'end_date' => $dates['end']->format('M d, Y'),
         ];
 
-        $pdf = Pdf::loadView('exports.financial-dashboard', $data);
-        return $pdf->download('financial-report-' . date('Y-m-d') . '.pdf');
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
+        }
+
+        $filename = __('exports.financial.title') . '-' . date('Y-m-d') . '.pdf';
+        $pdfContent = app(\App\Services\PdfService::class)->generate('exports.financial-dashboard', $data);
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function exportFinancialCSV(Request $request)
@@ -545,41 +605,47 @@ class AnalyticsController extends Controller
             ->get();
 
 
+        if ($request->has('locale')) {
+            app()->setLocale($request->get('locale'));
+        }
+
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="financial-report-' . date('Y-m-d') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="' . __('exports.financial.title') . '-' . date('Y-m-d') . '.csv"',
         ];
 
         $callback = function () use ($dates, $revenue, $revenueChange, $cogsValue, $expenses, $totalExpenses, $netProfit, $margin, $expenseBreakdown, $cogsBreakdown) {
             $file = fopen('php://output', 'w');
+            // Add BOM for UTF-8 (Excel support)
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             // 1. Title
-            fputcsv($file, ['Financial Dashboard Report']);
-            fputcsv($file, ['Period:', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
+            fputcsv($file, [__('exports.financial.heading')]);
+            fputcsv($file, [__('reports.sales.filters.all_time') . ':', $dates['start']->format('Y-m-d') . ' to ' . $dates['end']->format('Y-m-d')]);
             fputcsv($file, []);
 
             // 2. Summary
-            fputcsv($file, ['PROFIT & LOSS SUMMARY']);
-            fputcsv($file, ['Total Revenue', number_format($revenue, 2)]);
-            fputcsv($file, ['Revenue Change (%)', number_format($revenueChange, 1) . '%']);
-            fputcsv($file, ['Cost of Goods Sold (COGS)', number_format($cogsValue, 2)]);
-            fputcsv($file, ['Operating Expenses', number_format($expenses, 2)]);
-            fputcsv($file, ['Total Expenses', number_format($totalExpenses, 2)]);
-            fputcsv($file, ['Net Profit', number_format($netProfit, 2)]);
-            fputcsv($file, ['Profit Margin (%)', number_format($margin, 1) . '%']);
+            fputcsv($file, [__('exports.financial.sections.pl_summary') ?? 'PROFIT & LOSS SUMMARY']);
+            fputcsv($file, [__('exports.financial.pl.total_revenue'), number_format($revenue, 2)]);
+            fputcsv($file, [__('exports.financial.table.change_percent'), number_format($revenueChange, 1) . '%']);
+            fputcsv($file, [__('exports.financial.pl.cogs'), number_format($cogsValue, 2)]);
+            fputcsv($file, [__('exports.financial.pl.operating_expenses'), number_format($expenses, 2)]);
+            fputcsv($file, [__('exports.financial.stats.total_expenses'), number_format($totalExpenses, 2)]);
+            fputcsv($file, [__('exports.financial.pl.net_profit'), number_format($netProfit, 2)]);
+            fputcsv($file, [__('exports.financial.pl.profit_margin'), number_format($margin, 1) . '%']);
             fputcsv($file, []);
 
             // 3. Expense Breakdown
-            fputcsv($file, ['EXPENSE BREAKDOWN']);
-            fputcsv($file, ['Category', 'Amount']);
+            fputcsv($file, [__('exports.financial.sections.expense_breakdown')]);
+            fputcsv($file, [__('exports.financial.table.category'), __('exports.financial.table.amount')]);
             foreach ($expenseBreakdown as $exp) {
                 fputcsv($file, [$exp->category, number_format($exp->amount, 2)]);
             }
             fputcsv($file, []);
 
             // 4. COGS Breakdown
-            fputcsv($file, ['COGS BREAKDOWN']);
-            fputcsv($file, ['Category', 'Amount']);
+            fputcsv($file, [__('exports.financial.sections.cogs_breakdown')]);
+            fputcsv($file, [__('exports.financial.table.category'), __('exports.financial.table.amount')]);
             foreach ($cogsBreakdown as $cogs) {
                 fputcsv($file, [$cogs->name ?? 'Uncategorized', number_format((float) ($cogs->value ?? 0), 2)]);
             }

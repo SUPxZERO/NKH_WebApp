@@ -118,20 +118,20 @@ export default function Units() {
     // Mutations
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/units', data),
-        onSuccess: () => { toastSuccess('Unit created'); closeModal(); qc.invalidateQueries({ queryKey: ['units'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.units.messages.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['units'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.units.messages.failed') as string)
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/units/${id}`, data),
-        onSuccess: () => { toastSuccess('Unit updated'); closeModal(); qc.invalidateQueries({ queryKey: ['units'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.units.messages.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['units'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.units.messages.failed') as string)
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/units/${id}`),
-        onSuccess: () => { toastSuccess('Unit deleted'); qc.invalidateQueries({ queryKey: ['units'] }); },
-        onError: (err: any) => toastError(err.response?.data?.message || 'Failed')
+        onSuccess: () => { toastSuccess(t('admin.units.messages.deleted') as string); qc.invalidateQueries({ queryKey: ['units'] }); },
+        onError: (err: any) => toastError(err.response?.data?.message || t('admin.units.messages.failed') as string)
     });
 
     const closeModal = () => {
@@ -164,7 +164,7 @@ export default function Units() {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Delete this unit?')) deleteMutation.mutate(id);
+        if (confirm(t('admin.units.messages.delete_confirm') as string)) deleteMutation.mutate(id);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -248,7 +248,7 @@ export default function Units() {
                         <div className="flex gap-2 sm:gap-4">
                             <div className="relative flex-1 min-w-0">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
+                                <Input placeholder={t('admin.units.search_placeholder') as string} value={search} onChange={(e) => setSearch(e.target.value)}
                                     className="pl-9 h-10 text-sm bg-background/50 border-border/50 focus:border-purple-500 transition-all" />
                             </div>
                             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
@@ -285,7 +285,7 @@ export default function Units() {
                         </div>
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
-                                <div className="p-12 text-center text-muted-foreground">Loading...</div>
+                                <div className="p-12 text-center text-muted-foreground">{t('admin.units.loading')}</div>
                             ) : unitList.length === 0 ? (
                                 <div className="p-12 text-center">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
@@ -342,7 +342,7 @@ export default function Units() {
                     {/* Mobile Cards - Hidden on desktop */}
                     <div className="md:hidden space-y-2">
                         {isLoading ? (
-                            <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
+                            <div className="p-8 text-center text-muted-foreground text-sm">{t('admin.units.loading')}</div>
                         ) : unitList.length === 0 ? (
                             <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">
                                 <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-secondary/50 flex items-center justify-center">
@@ -399,12 +399,12 @@ export default function Units() {
             <Modal open={openCreate || openEdit} onClose={closeModal} title={editingUnit ? t('admin.units.edit_unit') : t('admin.units.new_unit')} size="lg">
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <Input label={t('admin.units.form.code') as string} value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
-                        <Input label={t('admin.units.form.name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="e.g. Kilogram" className="h-10 text-sm" />
+                        <Input label={t('admin.units.form.code') as string} value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required placeholder={t('admin.units.placeholders.code') as string} className="h-10 text-sm" />
+                        <Input label={t('admin.units.form.name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder={t('admin.units.placeholders.name') as string} className="h-10 text-sm" />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <Input label={t('admin.units.form.display') as string} value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required placeholder="e.g. kg" className="h-10 text-sm" />
+                        <Input label={t('admin.units.form.display') as string} value={formData.display_name} onChange={(e) => setFormData({ ...formData, display_name: e.target.value })} required placeholder={t('admin.units.placeholders.display') as string} className="h-10 text-sm" />
                         <div className="flex items-center sm:pt-6">
                             <label className="flex items-center gap-2 sm:gap-3 cursor-pointer p-2.5 sm:p-3 rounded-lg border border-border/50 bg-secondary/30 w-full hover:bg-secondary/50 transition-colors">
                                 <input type="checkbox" checked={formData.is_base_unit} onChange={(e) => setFormData({ ...formData, is_base_unit: e.target.checked })}
@@ -429,7 +429,7 @@ export default function Units() {
                                         {baseUnits?.map((u: Unit) => <option key={u.code} value={u.code}>{u.name} ({u.code})</option>)}
                                     </select>
                                 </div>
-                                <Input label={t('admin.units.form.factor') as string} type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} placeholder="1 = X base" className="h-10 text-sm" />
+                                <Input label={t('admin.units.form.factor') as string} type="number" step="0.001" value={formData.conversion_factor} onChange={(e) => setFormData({ ...formData, conversion_factor: e.target.value })} placeholder={t('admin.units.placeholders.factor') as string} className="h-10 text-sm" />
                             </div>
                         </div>
                     )}

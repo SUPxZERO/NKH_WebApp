@@ -77,25 +77,13 @@ export default function Reservations() {
     if (diffMins < 60) {
       return isPast
         ? t('admin.common.time.minutes_ago', { count: diffMins })
-        : `${t('admin.common.time.minutes_ago', { count: diffMins }).replace('ago', '')} (future)`; // Needs improvement for 'in X minutes'
-      // For simplicity in this task, let's just stick to timeago format or leave basic English if 'in X minutes' key missing.
-      // Actually I didn't add future keys. 
-      // Only 'ago' keys. 
-      // Let's fallback to English for future dates for now or use generic formatter?
-      // User requested Admin translation.
-      // Let's assume most are in past (created/reserved). 
-      // But reservations can be future.
-      // I'll stick to English for future for now to minimize risk, or reuse 'minutes_ago' but it says 'ago'.
+        : t('admin.common.time.in_minutes', { count: diffMins });
     }
-    // Reverting to simplistic approach for now as I missed 'in X minutes' keys.
-    // I will use LocaleDateString for anything > 24h.
-    // For < 24h, I'll use English or try to reuse keys if appropriate. 
-    // Wait, 'minutes_ago' is ":count min ago".
-    // I can't use it for "in :count min".
-    // I'll leave the English logic for future dates and only translate past dates.
-
-    if (diffMins < 60) return isPast ? t('admin.common.time.minutes_ago', { count: diffMins }) : `in ${diffMins}m`;
-    if (diffHours < 24) return isPast ? t('admin.common.time.hours_ago', { count: diffHours }) : `in ${diffHours}h`;
+    if (diffHours < 24) {
+      return isPast
+        ? t('admin.common.time.hours_ago', { count: diffHours })
+        : t('admin.common.time.in_hours', { count: diffHours });
+    }
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
@@ -258,12 +246,12 @@ export default function Reservations() {
           <div className="mb-4 sm:mb-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide">
             <div className="flex sm:grid sm:grid-cols-5 gap-2.5 sm:gap-3 min-w-max sm:min-w-0 px-1">
               {[
-                { label: t('admin.reservations.stats.total'), value: stats.total, color: 'fuchsia', icon: CalendarDays, filter: 'all' },
-                { label: t('admin.reservations.stats.pending'), value: stats.pending, color: 'blue', icon: Clock, filter: 'pending' },
-                { label: t('admin.reservations.stats.confirmed'), value: stats.confirmed, color: 'purple', icon: CheckCircle, filter: 'confirmed' },
-                { label: t('admin.reservations.stats.seated'), value: stats.seated, color: 'emerald', icon: Utensils, filter: 'seated' },
-                { label: t('admin.reservations.stats.late'), value: stats.late, color: 'amber', icon: AlertCircle, filter: '' }
-              ].map(({ label, value, color, icon: Icon, filter }, idx) => (
+                { id: 'total', label: t('admin.reservations.stats.total'), value: stats.total, color: 'fuchsia', icon: CalendarDays, filter: 'all' },
+                { id: 'pending', label: t('admin.reservations.stats.pending'), value: stats.pending, color: 'blue', icon: Clock, filter: 'pending' },
+                { id: 'confirmed', label: t('admin.reservations.stats.confirmed'), value: stats.confirmed, color: 'purple', icon: CheckCircle, filter: 'confirmed' },
+                { id: 'seated', label: t('admin.reservations.stats.seated'), value: stats.seated, color: 'emerald', icon: Utensils, filter: 'seated' },
+                { id: 'late', label: t('admin.reservations.stats.late'), value: stats.late, color: 'amber', icon: AlertCircle, filter: '' }
+              ].map(({ id, label, value, color, icon: Icon, filter }, idx) => (
                 <motion.button
                   key={filter || `stat-${idx}`}
                   whileTap={{ scale: 0.97 }}
@@ -279,7 +267,7 @@ export default function Reservations() {
                   </div>
                   <p className="text-2xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
                   <p className="text-xs sm:text-xs font-medium text-gray-500 dark:text-gray-400">{label}</p>
-                  {value > 0 && (label === 'Pending' || label === 'Late') && (
+                  {value > 0 && (id === 'pending' || id === 'late') && (
                     <span className={cn("absolute top-2.5 right-2.5 w-2 h-2 rounded-full animate-pulse", `bg-${color}-500`)} />
                   )}
                 </motion.button>
@@ -349,17 +337,17 @@ export default function Reservations() {
                       <div className="flex-1 min-w-0 pt-0.5">
                         <div className="flex items-center gap-2.5 mb-2">
                           <div className="w-8 h-8 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                            {res.customer?.user?.name?.charAt(0) || 'G'}
+                            {(res.customer?.user?.name || (t('admin.reservations.view.guest') as string)).charAt(0)}
                           </div>
-                          <span className="font-semibold text-base text-gray-900 dark:text-white truncate">{res.customer?.user?.name || 'Guest'}</span>
+                          <span className="font-semibold text-base text-gray-900 dark:text-white truncate">{res.customer?.user?.name || t('admin.reservations.view.guest')}</span>
                           <StatusBadge status={res.status} />
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{res.guest_count} {t('admin.reservations.view.guests')}</span>
-                          <span className="flex items-center gap-1.5"><Armchair className="w-4 h-4" />Table {res.table?.code || 'N/A'}</span>
+                          <span className="flex items-center gap-1.5"><Armchair className="w-4 h-4" />{t('admin.reservations.view.table_code', { code: res.table?.code || t('admin.common.na') })}</span>
                         </div>
                         <div className="hidden md:flex items-center gap-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="flex items-center gap-1.5"><Timer className="w-4 h-4" />{res.duration_minutes} min</span>
+                          <span className="flex items-center gap-1.5"><Timer className="w-4 h-4" />{res.duration_minutes} {t('admin.reservations.view.minutes_short')}</span>
                         </div>
                       </div>
                       {/* Actions */}
@@ -415,10 +403,10 @@ export default function Reservations() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-xl font-bold">
-                      {selectedReservation.customer?.user?.name?.charAt(0) || 'G'}
+                      {(selectedReservation.customer?.user?.name || (t('admin.reservations.view.guest') as string)).charAt(0)}
                     </div>
                     <div>
-                      <h2 className="font-bold text-lg">{selectedReservation.customer?.user?.name || 'Guest'}</h2>
+                      <h2 className="font-bold text-lg">{selectedReservation.customer?.user?.name || t('admin.reservations.view.guest')}</h2>
                       <StatusBadge status={selectedReservation.status} size="lg" />
                     </div>
                   </div>
@@ -429,7 +417,7 @@ export default function Reservations() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                     <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Calendar className="w-4 h-4" /><span className="text-xs font-medium uppercase">{t('admin.reservations.form.date_time')}</span></div>
-                    <p className="font-bold text-gray-900 dark:text-white">{selectedReservation.reserved_for ? new Date(selectedReservation.reserved_for).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) : 'N/A'}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">{selectedReservation.reserved_for ? new Date(selectedReservation.reserved_for).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) : t('admin.common.na')}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-300">{selectedReservation.reserved_for ? new Date(selectedReservation.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
@@ -440,12 +428,12 @@ export default function Reservations() {
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
                   <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2"><Armchair className="w-4 h-4" /><span className="text-xs font-medium uppercase">{t('admin.reservations.view.table_assignment')}</span></div>
-                  <p className="font-bold text-gray-900 dark:text-white">Table {selectedReservation.table?.code || 'N/A'}</p>
+                  <p className="font-bold text-gray-900 dark:text-white">{t('admin.reservations.view.table_code', { code: selectedReservation.table?.code || t('admin.common.na') })}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-300">{selectedReservation.duration_minutes} {t('admin.reservations.view.duration')}</p>
                 </div>
                 {selectedReservation.notes && (
                   <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-2"><AlertCircle className="w-4 h-4" />Notes</div>
+                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-2"><AlertCircle className="w-4 h-4" />{t('admin.reservations.form.notes')}</div>
                     <p className="text-sm text-amber-700 dark:text-amber-300">{selectedReservation.notes}</p>
                   </div>
                 )}
@@ -474,7 +462,7 @@ export default function Reservations() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.customer')} *</label>
               <select required value={formData.customer_id} onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation">
-                <option value="">Select</option>{customers?.data?.map((c: Customer) => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
+                <option value="">{t('admin.reservations.form.select')}</option>{customers?.data?.map((c: Customer) => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
               </select>
             </div>
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.guests')} *</label>
@@ -487,18 +475,18 @@ export default function Reservations() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.location')} *</label>
               <select required value={formData.location_id} onChange={(e) => setFormData({ ...formData, location_id: e.target.value, floor_id: '', table_id: '' })} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white touch-manipulation">
-                <option value="">Select</option>{locations?.data?.map((loc: any) => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
+                <option value="">{t('admin.reservations.form.select')}</option>{locations?.data?.map((loc: any) => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
               </select>
             </div>
             <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.floor')} *</label>
               <select required value={formData.floor_id} onChange={(e) => setFormData({ ...formData, floor_id: e.target.value, table_id: '' })} disabled={!formData.location_id} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:opacity-50 touch-manipulation">
-                <option value="">Select</option>{floors?.data?.map((f: any) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                <option value="">{t('admin.reservations.form.select')}</option>{floors?.data?.map((f: any) => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
             </div>
           </div>
           <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.reservations.form.table')} *</label>
             <select required value={formData.table_id} onChange={(e) => setFormData({ ...formData, table_id: e.target.value })} disabled={!formData.floor_id} className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:opacity-50 touch-manipulation">
-              <option value="">Select</option>{tables?.data?.map((t: DiningTable) => <option key={t.id} value={t.id}>Table {t.code} ({t.capacity} seats)</option>)}
+              <option value="">{t('admin.reservations.form.select')}</option>{tables?.data?.map((table: DiningTable) => <option key={table.id} value={table.id}>{t('admin.reservations.form.table_option', { code: table.code, count: table.capacity })}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

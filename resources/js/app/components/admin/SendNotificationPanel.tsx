@@ -28,6 +28,7 @@ import {
 import { apiGet, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface TargetOptions {
     target_types: Record<string, string>;
@@ -44,39 +45,39 @@ interface User {
 }
 
 // Fallback data when API fails
-const FALLBACK_OPTIONS: TargetOptions = {
+const buildFallbackOptions = (t: (key: string, params?: Record<string, any>) => string): TargetOptions => ({
     target_types: {
-        all_users: 'All Users',
-        all_customers: 'All Customers',
-        all_employees: 'All Employees',
-        by_role: 'By Role/Position',
-        by_tier: 'By Customer Tier',
-        by_location: 'By Location',
-        specific_users: 'Specific Users',
-        recent_customers: 'Recent Customers (Last 30 Days)',
+        all_users: t('admin.notifications.send_notification.target_types.all_users'),
+        all_customers: t('admin.notifications.send_notification.target_types.all_customers'),
+        all_employees: t('admin.notifications.send_notification.target_types.all_employees'),
+        by_role: t('admin.notifications.send_notification.target_types.by_role'),
+        by_tier: t('admin.notifications.send_notification.target_types.by_tier'),
+        by_location: t('admin.notifications.send_notification.target_types.by_location'),
+        specific_users: t('admin.notifications.send_notification.target_types.specific_users'),
+        recent_customers: t('admin.notifications.send_notification.target_types.recent_customers'),
     },
     roles: {
-        admin: 'Admin',
-        manager: 'Manager',
-        waiter: 'Waiter',
-        chef: 'Chef',
-        cashier: 'Cashier',
-        delivery: 'Delivery',
+        admin: t('admin.notifications.send_notification.roles.admin'),
+        manager: t('admin.notifications.send_notification.roles.manager'),
+        waiter: t('admin.notifications.send_notification.roles.waiter'),
+        chef: t('admin.notifications.send_notification.roles.chef'),
+        cashier: t('admin.notifications.send_notification.roles.cashier'),
+        delivery: t('admin.notifications.send_notification.roles.delivery'),
     },
     tiers: {
-        bronze: 'Bronze',
-        silver: 'Silver',
-        gold: 'Gold',
-        platinum: 'Platinum',
+        bronze: t('admin.notifications.send_notification.tiers.bronze'),
+        silver: t('admin.notifications.send_notification.tiers.silver'),
+        gold: t('admin.notifications.send_notification.tiers.gold'),
+        platinum: t('admin.notifications.send_notification.tiers.platinum'),
     },
     locations: [],
     notification_types: {
-        order: 'Order Update',
-        promotion: 'Promotion',
-        reward: 'Reward/Loyalty',
-        system: 'System Announcement',
+        order: t('admin.notifications.send_notification.notification_types.order'),
+        promotion: t('admin.notifications.send_notification.notification_types.promotion'),
+        reward: t('admin.notifications.send_notification.notification_types.reward'),
+        system: t('admin.notifications.send_notification.notification_types.system'),
     },
-};
+});
 
 const typeIcons: Record<string, React.ElementType> = {
     order: ShoppingBag,
@@ -104,6 +105,7 @@ const targetIcons: Record<string, React.ElementType> = {
 };
 
 export default function SendNotificationPanel() {
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -132,9 +134,30 @@ export default function SendNotificationPanel() {
 
     // Use fetched options or fallback
     const options = useMemo(() => {
-        if (optionsData) return optionsData;
-        return FALLBACK_OPTIONS;
-    }, [optionsData]);
+        const localOptions = buildFallbackOptions(t);
+
+        if (optionsData) {
+            // Helper to merge API keys with local translations
+            const mergeWithTranslation = (apiObj: Record<string, string>, localObj: Record<string, string>) => {
+                return Object.keys(apiObj).reduce((acc, key) => {
+                    acc[key] = localObj[key] || apiObj[key];
+                    return acc;
+                }, {} as Record<string, string>);
+            };
+
+            return {
+                ...optionsData,
+                // Use API keys (to ensure backend compatibility) but prefer translated labels from localOptions
+                target_types: mergeWithTranslation(optionsData.target_types, localOptions.target_types),
+                roles: mergeWithTranslation(optionsData.roles, localOptions.roles),
+                tiers: mergeWithTranslation(optionsData.tiers, localOptions.tiers),
+                notification_types: mergeWithTranslation(optionsData.notification_types, localOptions.notification_types),
+                // Keep locations from API as they are dynamic
+                locations: optionsData.locations,
+            };
+        }
+        return localOptions;
+    }, [optionsData, t]);
 
     // Preview recipients
     const previewMutation = useMutation({
@@ -176,12 +199,12 @@ export default function SendNotificationPanel() {
             });
         },
         onSuccess: (data: any) => {
-            toastSuccess(data.message || 'Notification sent successfully!');
+            toastSuccess(data.message || t('admin.notifications.send_notification.toasts.sent'));
             resetForm();
             queryClient.invalidateQueries({ queryKey: ['admin-notifications'] });
         },
         onError: () => {
-            toastError('Failed to send notification');
+            toastError(t('admin.notifications.send_notification.toasts.send_failed'));
         },
     });
 
@@ -230,9 +253,9 @@ export default function SendNotificationPanel() {
                         <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800 animate-pulse" />
                     </div>
                     <div className="text-left">
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Send Notification</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{t('admin.notifications.send_notification.title')}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Send targeted notifications to users
+                            {t('admin.notifications.send_notification.subtitle')}
                         </p>
                     </div>
                 </div>
@@ -260,7 +283,7 @@ export default function SendNotificationPanel() {
                             {optionsLoading && (
                                 <div className="flex items-center justify-center gap-3 py-4 text-gray-500">
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    <span>Loading options...</span>
+                                    <span>{t('admin.notifications.send_notification.loading_options')}</span>
                                 </div>
                             )}
 
@@ -268,14 +291,14 @@ export default function SendNotificationPanel() {
                                 <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-600/30">
                                     <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 text-sm">
                                         <AlertCircle className="w-4 h-4" />
-                                        <span>Using fallback options. Some features may be limited.</span>
+                                        <span>{t('admin.notifications.send_notification.fallback_notice')}</span>
                                     </div>
                                     <button
                                         onClick={() => refetchOptions()}
                                         className="flex items-center gap-1 px-3 py-1 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
                                     >
                                         <RefreshCw className="w-3 h-3" />
-                                        Retry
+                                        {t('admin.notifications.send_notification.retry')}
                                     </button>
                                 </div>
                             )}
@@ -284,7 +307,7 @@ export default function SendNotificationPanel() {
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     <Target className="w-4 h-4 text-fuchsia-500" />
-                                    Send To
+                                    {t('admin.notifications.send_notification.send_to')}
                                 </label>
                                 <div className="relative">
                                     <select
@@ -310,10 +333,10 @@ export default function SendNotificationPanel() {
                                 >
                                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         <Users className="w-4 h-4 text-blue-500" />
-                                        Select Roles
+                                        {t('admin.notifications.send_notification.select_roles')}
                                         {selectedRoles.length > 0 && (
                                             <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full">
-                                                {selectedRoles.length} selected
+                                                {t('admin.notifications.send_notification.selected_count', { count: selectedRoles.length })}
                                             </span>
                                         )}
                                     </label>
@@ -352,10 +375,10 @@ export default function SendNotificationPanel() {
                                 >
                                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         <Crown className="w-4 h-4 text-yellow-500" />
-                                        Select Customer Tiers
+                                        {t('admin.notifications.send_notification.select_tiers')}
                                         {selectedTiers.length > 0 && (
                                             <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full">
-                                                {selectedTiers.length} selected
+                                                {t('admin.notifications.send_notification.selected_count', { count: selectedTiers.length })}
                                             </span>
                                         )}
                                     </label>
@@ -402,12 +425,12 @@ export default function SendNotificationPanel() {
                                 >
                                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         <Building className="w-4 h-4 text-emerald-500" />
-                                        Select Locations
+                                        {t('admin.notifications.send_notification.select_locations')}
                                     </label>
                                     {options.locations.length === 0 ? (
                                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl text-center text-gray-500 text-sm">
                                             <Building className="w-6 h-6 mx-auto mb-2 opacity-50" />
-                                            No locations available
+                                            {t('admin.notifications.send_notification.no_locations')}
                                         </div>
                                     ) : (
                                         <div className="flex flex-wrap gap-2">
@@ -446,7 +469,7 @@ export default function SendNotificationPanel() {
                                 >
                                     <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         <Search className="w-4 h-4 text-purple-500" />
-                                        Search & Select Users
+                                        {t('admin.notifications.send_notification.search_users')}
                                     </label>
                                     <div className="relative">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -454,7 +477,7 @@ export default function SendNotificationPanel() {
                                             type="text"
                                             value={userSearch}
                                             onChange={(e) => setUserSearch(e.target.value)}
-                                            placeholder="Type at least 2 characters to search..."
+                                            placeholder={t('admin.notifications.send_notification.search_placeholder')}
                                             className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500 transition-all"
                                         />
                                         {isSearching && (
@@ -541,7 +564,7 @@ export default function SendNotificationPanel() {
                                             {previewMutation.isPending ? (
                                                 <>
                                                     <Loader2 className="w-5 h-5 text-fuchsia-500 animate-spin" />
-                                                    <span className="text-sm text-fuchsia-700 dark:text-fuchsia-300">Calculating recipients...</span>
+                                                    <span className="text-sm text-fuchsia-700 dark:text-fuchsia-300">{t('admin.notifications.send_notification.preview.calculating')}</span>
                                                 </>
                                             ) : (
                                                 <>
@@ -553,7 +576,9 @@ export default function SendNotificationPanel() {
                                                             {recipientCount.toLocaleString()}
                                                         </span>
                                                         <span className="text-sm text-fuchsia-700/70 dark:text-fuchsia-300/70 ml-1.5">
-                                                            recipient{recipientCount !== 1 ? 's' : ''} will receive this notification
+                                                            {recipientCount === 1
+                                                                ? t('admin.notifications.send_notification.preview.recipient_one')
+                                                                : t('admin.notifications.send_notification.preview.recipient_other')}
                                                         </span>
                                                     </div>
                                                 </>
@@ -567,7 +592,7 @@ export default function SendNotificationPanel() {
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     <Sparkles className="w-4 h-4 text-purple-500" />
-                                    Notification Type
+                                    {t('admin.notifications.send_notification.notification_type')}
                                 </label>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     {Object.entries(options.notification_types).map(([key, label]) => {
@@ -595,18 +620,18 @@ export default function SendNotificationPanel() {
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     <Mail className="w-4 h-4 text-gray-500" />
-                                    Title <span className="text-red-500">*</span>
+                                    {t('admin.notifications.send_notification.title_label')} <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="Enter notification title..."
+                                    placeholder={t('admin.notifications.send_notification.title_placeholder')}
                                     maxLength={255}
                                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500 transition-all"
                                 />
                                 <div className="text-right text-xs text-gray-400">
-                                    {title.length}/255
+                                    {t('admin.notifications.send_notification.char_count', { count: title.length, total: 255 })}
                                 </div>
                             </div>
 
@@ -614,18 +639,18 @@ export default function SendNotificationPanel() {
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     <Megaphone className="w-4 h-4 text-gray-500" />
-                                    Message <span className="text-red-500">*</span>
+                                    {t('admin.notifications.send_notification.message_label')} <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="Enter your notification message..."
+                                    placeholder={t('admin.notifications.send_notification.message_placeholder')}
                                     rows={4}
                                     maxLength={1000}
                                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500 transition-all"
                                 />
                                 <div className="text-right text-xs text-gray-400">
-                                    {message.length}/1000
+                                    {t('admin.notifications.send_notification.char_count', { count: message.length, total: 1000 })}
                                 </div>
                             </div>
 
@@ -633,14 +658,14 @@ export default function SendNotificationPanel() {
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     <Info className="w-4 h-4 text-gray-400" />
-                                    Action URL
-                                    <span className="text-xs text-gray-400">(Optional)</span>
+                                    {t('admin.notifications.send_notification.action_url_label')}
+                                    <span className="text-xs text-gray-400">({t('admin.notifications.send_notification.optional')})</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={actionUrl}
                                     onChange={(e) => setActionUrl(e.target.value)}
-                                    placeholder="/menu or https://example.com"
+                                    placeholder={t('admin.notifications.send_notification.action_url_placeholder')}
                                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500 transition-all"
                                 />
                             </div>
@@ -651,7 +676,7 @@ export default function SendNotificationPanel() {
                                     onClick={() => resetForm()}
                                     className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-200 font-medium"
                                 >
-                                    Cancel
+                                    {t('admin.notifications.send_notification.cancel')}
                                 </button>
                                 <button
                                     onClick={() => sendMutation.mutate()}
@@ -666,15 +691,15 @@ export default function SendNotificationPanel() {
                                     {sendMutation.isPending ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Sending...
+                                            {t('admin.notifications.send_notification.sending')}
                                         </>
                                     ) : (
                                         <>
                                             <Send className="w-5 h-5" />
-                                            Send Notification
+                                            {t('admin.notifications.send_notification.send_button')}
                                             {recipientCount > 0 && (
                                                 <span className="ml-1 text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                                                    to {recipientCount}
+                                                    {t('admin.notifications.send_notification.to_count', { count: recipientCount })}
                                                 </span>
                                             )}
                                         </>

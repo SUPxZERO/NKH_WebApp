@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { useModalHotkeys } from '@/app/hooks/useShortcuts';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export interface ModalProps {
   open?: boolean;
@@ -35,6 +36,7 @@ export function Modal({
   className
 }: PropsWithChildren<ModalProps>) {
   const isModalOpen = open ?? isOpen ?? false;
+  const { t } = useTranslation();
 
   useModalHotkeys(
     isModalOpen,
@@ -116,7 +118,7 @@ export function Modal({
                 </div>
                 {!hideClose && (
                   <button
-                    aria-label="Close modal"
+                    aria-label={t('common.ui.modal.close') as string}
                     onClick={onClose}
                     className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                   >

@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { apiGet } from '@/app/utils/api';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface CartIconProps {
     className?: string;
@@ -19,6 +20,7 @@ interface CartData {
 }
 
 export default function CartIcon({ className }: CartIconProps) {
+    const { t } = useTranslation();
     // Fetch cart data
     const { data: cartData } = useQuery({
         queryKey: ['cart'],
@@ -45,6 +47,7 @@ export default function CartIcon({ className }: CartIconProps) {
                 'relative p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors',
                 className
             )}
+            aria-label={t('common.ui.cart.icon_label', { count: itemCount.toString() }) as string}
         >
             <ShoppingCart className="w-5 h-5" />
             {itemCount > 0 && (
@@ -54,7 +57,7 @@ export default function CartIcon({ className }: CartIconProps) {
                     key={itemCount}
                     className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium"
                 >
-                    {itemCount > 99 ? '99+' : itemCount}
+                    {itemCount > 99 ? t('common.ui.cart.count_overflow') : itemCount}
                 </motion.span>
             )}
         </Link>

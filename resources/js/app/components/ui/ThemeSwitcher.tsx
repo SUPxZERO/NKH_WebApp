@@ -3,6 +3,7 @@ import { Sun, Moon, Monitor } from 'lucide-react';
 import { useThemeStore, ThemeMode } from '@/app/store/theme';
 import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface ThemeSwitcherProps {
   className?: string;
@@ -11,11 +12,15 @@ interface ThemeSwitcherProps {
 
 export function ThemeSwitcher({ className, size = 'md' }: ThemeSwitcherProps) {
   const { mode, setTheme } = useThemeStore();
+  const { t } = useTranslation();
+  const lightLabel = t('common.ui.theme_toggle.light') as string;
+  const darkLabel = t('common.ui.theme_toggle.dark') as string;
+  const systemLabel = t('common.ui.theme_toggle.system') as string;
 
   const themes: { mode: ThemeMode; icon: React.ReactNode; label: string }[] = [
-    { mode: 'light', icon: <Sun className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />, label: 'Light' },
-    { mode: 'dark', icon: <Moon className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />, label: 'Dark' },
-    { mode: 'system', icon: <Monitor className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />, label: 'System' },
+    { mode: 'light', icon: <Sun className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />, label: lightLabel },
+    { mode: 'dark', icon: <Moon className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />, label: darkLabel },
+    { mode: 'system', icon: <Monitor className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />, label: systemLabel },
   ];
 
   const sizeClasses = {
@@ -49,7 +54,7 @@ export function ThemeSwitcher({ className, size = 'md' }: ThemeSwitcherProps) {
                 ? 'text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             )}
-            aria-label={`Set theme to ${theme.label}`}
+            aria-label={t('common.ui.theme_toggle.actions.set_theme', { theme: theme.label }) as string}
             aria-pressed={mode === theme.mode}
           >
             {mode === theme.mode && (

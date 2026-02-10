@@ -42,7 +42,7 @@ import {
 const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899'];
 
 export default function FinancialDashboard() {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const [startDate, setStartDate] = React.useState<Date | undefined>(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     );
@@ -50,10 +50,13 @@ export default function FinancialDashboard() {
 
     // Build query params based on date range
     const getQueryParams = () => {
+        let params = '';
         if (startDate && endDate) {
-            return `start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`;
+            params = `start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`;
+        } else {
+            params = 'range=30days';
         }
-        return 'range=30days';
+        return `${params}&locale=${locale}`;
     };
 
     // Quick date preset buttons
@@ -188,19 +191,19 @@ export default function FinancialDashboard() {
                                         onClick={() => setQuickDate(7)}
                                         className="px-2.5 sm:px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs rounded-lg bg-card hover:bg-accent border border-border text-foreground transition-colors"
                                     >
-                                        7D
+                                        {t('finance.presets.7d')}
                                     </button>
                                     <button
                                         onClick={() => setQuickDate(30)}
                                         className="px-2.5 sm:px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs rounded-lg bg-card hover:bg-accent border border-border text-foreground transition-colors"
                                     >
-                                        30D
+                                        {t('finance.presets.30d')}
                                     </button>
                                     <button
                                         onClick={() => setQuickDate(90)}
                                         className="px-2.5 sm:px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs rounded-lg bg-card hover:bg-accent border border-border text-foreground transition-colors"
                                     >
-                                        90D
+                                        {t('finance.presets.90d')}
                                     </button>
                                 </div>
                             </div>

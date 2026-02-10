@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\Promotion;
 use App\Models\UserNotification;
 use App\Models\BroadcastNotification;
-use App\Models\NotificationPreference;
+use App\Models\UserSetting;
 use App\Events\CustomerNotificationSent;
 use App\Events\AdminNotificationSent;
 use Illuminate\Support\Collection;
@@ -55,15 +55,23 @@ class NotificationService
 
         $notifications = collect();
 
+        Log::info("NotificationService::send - Starting send to {$recipients->count()} recipients - Type: {$type} - RespectPreferences: " . ($respectPreferences ? 'YES' : 'NO'));
+
         foreach ($recipients as $user) {
             try {
                 $notification = null;
 
+                // DEBUG: Log recipient details
+                $hasCustomer = $user->customer()->exists();
+                $hasEmployee = $user->employee()->exists();
+                Log::info("NotificationService::send - Processing User {$user->id} ({$user->name}) - Customer: " . ($hasCustomer ? 'YES' : 'NO') . " - Employee: " . ($hasEmployee ? 'YES' : 'NO') . " - Type: {$type}");
+
                 // Check user preferences before sending
                 if ($respectPreferences) {
-                    $inAppEnabled = NotificationPreference::isEnabled($user->id, $type, 'in_app');
+                    $inAppEnabled = $this->checkPreference($user->id, $type, 'in_app');
+                    Log::info("NotificationService::send - User {$user->id} - checkPreference result: " . ($inAppEnabled ? 'TRUE' : 'FALSE'));
                     if (!$inAppEnabled) {
-                        Log::debug("Skipping notification for user {$user->id} - in_app disabled for {$type}");
+                        Log::warning("Skipping notification for user {$user->id} - preference check failed for type {$type}");
                         continue;
                     }
                 }
@@ -86,7 +94,7 @@ class NotificationService
 
                 // Broadcast channel (real-time push)
                 if (in_array('broadcast', $channels) && $notification) {
-                    $pushEnabled = !$respectPreferences || NotificationPreference::isEnabled($user->id, $type, 'push');
+                    $pushEnabled = !$respectPreferences || $this->checkPreference($user->id, $type, 'push');
                     if ($pushEnabled) {
                         $this->broadcast($notification, $user);
                     }
@@ -94,7 +102,7 @@ class NotificationService
 
                 // Email channel
                 if (in_array('email', $channels)) {
-                    $emailEnabled = !$respectPreferences || NotificationPreference::isEnabled($user->id, $type, 'email');
+                    $emailEnabled = !$respectPreferences || $this->checkPreference($user->id, $type, 'email');
                     if ($emailEnabled) {
                         $this->sendEmail($user, $type, $title, $message, $actionUrl);
                     }
@@ -143,7 +151,7 @@ class NotificationService
         }
 
         $data = $this->getOrderNotificationData($order, $event, $customMessage);
-        
+
         $notifications = $this->send(
             $user,
             self::TYPE_ORDER,
@@ -164,9 +172,9 @@ class NotificationService
         try {
             // Check for TelegramUser via User->Customer OR directly via Order->Customer
             // Priority: Order Customer relationship is source of truth for "who made this order"
-            $customer = $order->customer; 
+            $customer = $order->customer;
             if (!$customer && $order->user) {
-                 $customer = $order->user->customer;
+                $customer = $order->user->customer;
             }
 
             if ($customer) {
@@ -174,29 +182,29 @@ class NotificationService
                 if (!$customer->relationLoaded('telegramUser')) {
                     $customer->load('telegramUser');
                 }
-                
+
                 $telegramUser = $customer->telegramUser;
-                
+
                 // Also check for direct TelegramUser on order (Guest checkout feature from TelegramCheckoutController)
                 if (!$telegramUser && $order->telegram_user_id) {
-                     // If explicit telegram user ID is on the order, we can use that (though usually linked to customer)
-                     // But let's assume OrderCalculationService/Checkout linked them correctly.
-                     // Accessing the model if needed, but let's rely on standard relationships unless we load it manually.
-                     // Actually, TelegramOrderNotificationService::getTelegramUserForOrder handles this logic perfectly!
-                     // So we just need to pass the order to the service.
+                    // If explicit telegram user ID is on the order, we can use that (though usually linked to customer)
+                    // But let's assume OrderCalculationService/Checkout linked them correctly.
+                    // Accessing the model if needed, but let's rely on standard relationships unless we load it manually.
+                    // Actually, TelegramOrderNotificationService::getTelegramUserForOrder handles this logic perfectly!
+                    // So we just need to pass the order to the service.
                 }
 
                 if ($telegramUser || $order->telegram_user_id) {
-                     // Determine if notifications are enabled if we have the user object
-                     if ($telegramUser && !$telegramUser->notifications_enabled) {
+                    // Determine if notifications are enabled if we have the user object
+                    if ($telegramUser && !$telegramUser->notifications_enabled) {
                         Log::warning("⚠️ Telegram notifications disabled for user {$telegramUser->id}");
                         return;
                     }
-                    
+
                     // Use TelegramOrderNotificationService for tracking and retry support
                     $notificationService = app(\App\Services\Telegram\TelegramOrderNotificationService::class);
                     $notification = $notificationService->sendStatusNotification($order, $event);
-                    
+
                     Log::info("📤 Telegram notification tracked: " . ($notification ? "ID #{$notification->id} (sent: " . ($notification->sent ? 'Yes' : 'No') . ")" : 'Failed to create'));
                 } else {
                     // Silent fail/log if no telegram user is found - perfectly normal for non-telegram users
@@ -214,7 +222,7 @@ class NotificationService
     protected function getOrderNotificationData(Order $order, string $event, ?string $customMessage): array
     {
         $orderNumber = $order->order_number ?? "#{$order->id}";
-        
+
         $templates = [
             'placed' => [
                 'title' => 'Order Confirmed! 🎉',
@@ -671,10 +679,10 @@ class NotificationService
             $q->whereHas('employee', function ($eq) use ($locationIds) {
                 $eq->whereIn('location_id', $locationIds);
             })
-            // Or customers with preferred location
-            ->orWhereHas('customer', function ($cq) use ($locationIds) {
-                $cq->whereIn('preferred_location_id', $locationIds);
-            });
+                // Or customers with preferred location
+                ->orWhereHas('customer', function ($cq) use ($locationIds) {
+                    $cq->whereIn('preferred_location_id', $locationIds);
+                });
         })->get();
     }
 
@@ -724,7 +732,7 @@ class NotificationService
     public function getRecentCustomers(int $days = 30): Collection
     {
         $cutoffDate = now()->subDays($days);
-        
+
         return User::whereHas('customer.orders', function ($q) use ($cutoffDate) {
             $q->where('created_at', '>=', $cutoffDate);
         })->get();
@@ -794,5 +802,45 @@ class NotificationService
     public function getRecipientCountPreview(string $targetType, array $params = []): int
     {
         return $this->getRecipientsByTarget($targetType, $params)->count();
+    }
+
+    /**
+     * Check if a notification is enabled for a user
+     */
+    protected function checkPreference(int $userId, string $type, string $channel): bool
+    {
+        // Default to true if setting missing (ensure important notifications flow)
+        $userSetting = UserSetting::where('user_id', $userId)->first();
+        if (!$userSetting)
+            return true;
+
+        // Merge with defaults to ensure all keys exist
+        $defaults = UserSetting::getDefaults()['notifications'];
+        $prefs = array_merge($defaults, $userSetting->notifications ?? []);
+
+        // Logging for debug
+        // Log::info("Checking pref for User {$userId}: Type={$type} Channel={$channel}", $prefs);
+
+        // 1. Check Global Type Switches first (overrides channel)
+        // Use strict check for existing keys since we merged defaults
+        if ($type === self::TYPE_ORDER && isset($prefs['orderUpdates']) && !$prefs['orderUpdates']) {
+            return false;
+        }
+        if ($type === self::TYPE_PROMOTION && isset($prefs['promotions']) && !$prefs['promotions']) {
+            return false;
+        }
+
+        // 2. Check Channel specific switches
+        if ($channel === 'push' || $channel === 'broadcast') {
+            if (isset($prefs['pushNotifications']) && !$prefs['pushNotifications'])
+                return false;
+        }
+
+        if ($channel === 'email') {
+            if ($type === self::TYPE_PROMOTION && isset($prefs['newsletter']) && !$prefs['newsletter'])
+                return false;
+        }
+
+        return true;
     }
 }

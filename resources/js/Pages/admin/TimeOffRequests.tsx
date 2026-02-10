@@ -78,12 +78,12 @@ export default function TimeOffRequests() {
 
     const requestTypes: Record<string, string> = {
         vacation: t('admin.hr.time_off.types.vacation'),
-        sick_leave: t('admin.hr.time_off.types.sick'),
+        sick_leave: t('admin.hr.time_off.types.sick_leave'),
         personal: t('admin.hr.time_off.types.personal'),
-        bereavement: 'Bereavement',
-        maternity: 'Maternity',
-        paternity: 'Paternity',
-        unpaid: 'Unpaid',
+        bereavement: t('admin.hr.time_off.types.bereavement'),
+        maternity: t('admin.hr.time_off.types.maternity'),
+        paternity: t('admin.hr.time_off.types.paternity'),
+        unpaid: t('admin.hr.time_off.types.unpaid'),
         other: t('admin.hr.time_off.types.other')
     };
 
@@ -115,50 +115,50 @@ export default function TimeOffRequests() {
     const createMutation = useMutation({
         mutationFn: (data: any) => apiPost('/api/admin/time-off-requests', data),
         onSuccess: () => {
-            toastSuccess('Time-off request submitted!');
+            toastSuccess(t('admin.hr.time_off.messages.submitted') as string);
             setOpenCreate(false);
             resetForm();
             qc.invalidateQueries({ queryKey: ['time-off-requests'] });
             qc.invalidateQueries({ queryKey: ['time-off-stats'] });
         },
-        onError: (error: any) => setError(error.response?.data?.message || 'Failed to create request')
+        onError: (error: any) => setError(error.response?.data?.message || t('admin.hr.time_off.messages.create_failed') as string)
     });
 
     const approveMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) =>
             apiPost(`/api/admin/time-off-requests/${id}/approve`, data),
         onSuccess: () => {
-            toastSuccess('Request approved!');
+            toastSuccess(t('admin.hr.time_off.messages.approved') as string);
             setOpenApprove(false);
             setSelectedRequest(null);
             setApprovalNotes('');
             qc.invalidateQueries({ queryKey: ['time-off-requests'] });
             qc.invalidateQueries({ queryKey: ['time-off-stats'] });
         },
-        onError: (error: any) => toastError(error.response?.data?.message || 'Failed to approve')
+        onError: (error: any) => toastError(error.response?.data?.message || t('admin.hr.time_off.messages.approve_failed') as string)
     });
 
     const rejectMutation = useMutation({
         mutationFn: ({ id, data }: { id: number, data: any }) =>
             apiPost(`/api/admin/time-off-requests/${id}/reject`, data),
         onSuccess: () => {
-            toastSuccess('Request rejected');
+            toastSuccess(t('admin.hr.time_off.messages.rejected') as string);
             setOpenReject(false);
             setSelectedRequest(null);
             setApprovalNotes('');
             qc.invalidateQueries({ queryKey: ['time-off-requests'] });
             qc.invalidateQueries({ queryKey: ['time-off-stats'] });
         },
-        onError: (error: any) => toastError(error.response?.data?.message || 'Failed to reject')
+        onError: (error: any) => toastError(error.response?.data?.message || t('admin.hr.time_off.messages.reject_failed') as string)
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: number) => apiDelete(`/api/admin/time-off-requests/${id}`),
         onSuccess: () => {
-            toastSuccess('Request deleted');
+            toastSuccess(t('admin.hr.time_off.messages.deleted') as string);
             qc.invalidateQueries({ queryKey: ['time-off-requests'] });
         },
-        onError: (error: any) => toastError(error.response?.data?.message || 'Failed to delete')
+        onError: (error: any) => toastError(error.response?.data?.message || t('admin.hr.time_off.messages.delete_failed') as string)
     });
 
     const resetForm = () => {
@@ -200,7 +200,7 @@ export default function TimeOffRequests() {
 
     const handleReject = () => {
         if (!selectedRequest || !approvalNotes.trim()) {
-            setError('Rejection reason is required');
+            setError(t('admin.hr.time_off.messages.rejection_required') as string);
             return;
         }
 
@@ -253,7 +253,7 @@ export default function TimeOffRequests() {
                                     className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm flex-shrink-0 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-700 hover:to-pink-700"
                                 >
                                     <Plus className="w-4 h-4 sm:mr-2" />
-                                    <span className="hidden sm:inline">New Request</span>
+                                    <span className="hidden sm:inline">{t('admin.hr.time_off.actions.new_request')}</span>
                                 </Button>
                             </div>
 
@@ -269,7 +269,7 @@ export default function TimeOffRequests() {
                                         <div className="text-base sm:text-lg md:text-xl font-bold text-green-600 dark:text-green-400">{stats?.approved || 0}</div>
                                     </div>
                                     <div className="bg-card backdrop-blur-md rounded-xl p-2.5 sm:p-3 md:p-4 border border-border min-w-[90px]">
-                                        <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">{t('admin.hr.time_off.table.days')}</div>
+                                        <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">{t('admin.hr.time_off.stats.days')}</div>
                                         <div className="text-base sm:text-lg md:text-xl font-bold text-blue-600 dark:text-blue-400">{stats?.total_days_approved || 0}</div>
                                     </div>
                                 </div>
@@ -288,7 +288,7 @@ export default function TimeOffRequests() {
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                                 <Input
-                                    placeholder={t('admin.common.search') + "..."}
+                                    placeholder={t('admin.hr.time_off.filters.search')}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="pl-9 h-10 text-sm bg-card border-border"
@@ -296,7 +296,7 @@ export default function TimeOffRequests() {
                             </div>
                             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                                 className="h-10 bg-card border border-border rounded-lg px-2 text-sm text-foreground w-24">
-                                <option value="all">All</option>
+                                <option value="all">{t('admin.hr.time_off.stats.all')}</option>
                                 <option value="pending">{t('admin.hr.time_off.stats.pending')}</option>
                                 <option value="approved">{t('admin.hr.time_off.stats.approved')}</option>
                                 <option value="rejected">{t('admin.hr.time_off.stats.rejected')}</option>
@@ -308,7 +308,7 @@ export default function TimeOffRequests() {
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                                 <Input
-                                    placeholder="Search requests..."
+                                    placeholder={t('admin.hr.time_off.filters.search')}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="pl-10 h-10 bg-card border-border text-foreground"
@@ -317,7 +317,7 @@ export default function TimeOffRequests() {
 
                             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
                                 className="h-10 bg-card border border-border rounded-lg px-3 text-sm text-foreground dark:[color-scheme:dark]">
-                                <option value="all">{t('admin.hr.time_off.stats.all') || 'All Status'}</option>
+                                <option value="all">{t('admin.hr.time_off.filters.all_status')}</option>
                                 <option value="pending">{t('admin.hr.time_off.stats.pending')}</option>
                                 <option value="approved">{t('admin.hr.time_off.stats.approved')}</option>
                                 <option value="rejected">{t('admin.hr.time_off.stats.rejected')}</option>
@@ -325,7 +325,7 @@ export default function TimeOffRequests() {
 
                             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
                                 className="h-10 bg-card border border-border rounded-lg px-3 text-sm text-foreground dark:[color-scheme:dark]">
-                                <option value="all">{t('admin.hr.time_off.table.type') || 'All Types'}</option>
+                                <option value="all">{t('admin.hr.time_off.filters.all_types')}</option>
                                 {Object.entries(requestTypes).map(([key, label]) => (
                                     <option key={key} value={key}>{label}</option>
                                 ))}
@@ -333,14 +333,14 @@ export default function TimeOffRequests() {
 
                             <select value={employeeFilter} onChange={(e) => setEmployeeFilter(e.target.value)}
                                 className="h-10 bg-card border border-border rounded-lg px-3 text-sm text-foreground dark:[color-scheme:dark]">
-                                <option value="all">All Employees</option>
+                                <option value="all">{t('admin.hr.time_off.filters.all_employees')}</option>
                                 {employees?.data?.map((emp: Employee) => (
                                     <option key={emp.id} value={emp.id}>{emp.user?.name || emp.name}</option>
                                 ))}
                             </select>
 
                             <Button variant="secondary" onClick={() => { setSearch(''); setStatusFilter('all'); setTypeFilter('all'); setEmployeeFilter('all'); }}
-                                className="h-10 text-sm border-border hover:bg-accent">Clear</Button>
+                                className="h-10 text-sm border-border hover:bg-accent">{t('admin.hr.time_off.filters.clear')}</Button>
                         </div>
                     </motion.div>
 
@@ -368,7 +368,7 @@ export default function TimeOffRequests() {
                                                 <div className="min-w-0">
                                                     <h3 className="font-semibold text-foreground text-sm sm:text-base md:text-lg flex items-center gap-1.5 sm:gap-2 truncate">
                                                         <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                                                        <span className="truncate">{request.employee?.user?.name || request.employee?.name || 'Unknown'}</span>
+                                                        <span className="truncate">{request.employee?.user?.name || request.employee?.name || t('admin.hr.time_off.table.unknown_employee')}</span>
                                                     </h3>
                                                     <Badge className="mt-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30 text-[10px] sm:text-xs">
                                                         {requestTypes[request.type as keyof typeof requestTypes]}
@@ -389,15 +389,16 @@ export default function TimeOffRequests() {
                                                 </div>
                                                 <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
                                                     <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
-                                                    {request.days_requested} day{request.days_requested > 1 ? 's' : ''}
+                                                    {request.days_requested}{' '}
+                                                    {request.days_requested === 1 ? t('admin.hr.time_off.table.day') : t('admin.hr.time_off.table.days')}
                                                 </div>
                                                 <div className="flex items-start text-xs sm:text-sm text-muted-foreground hidden sm:flex">
                                                     <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0 mt-0.5" />
-                                                    <span className="line-clamp-2">{request.reason || 'No reason provided'}</span>
+                                                    <span className="line-clamp-2">{request.reason || t('admin.hr.time_off.table.no_reason')}</span>
                                                 </div>
                                                 {request.approvedBy && (
                                                     <div className="flex items-center text-xs text-muted-foreground mt-2 pt-2 border-t border-border hidden sm:flex">
-                                                        <span className="font-semibold mr-1">Approved by:</span>
+                                                        <span className="font-semibold mr-1">{t('admin.hr.time_off.table.approved_by')}</span>
                                                         {request.approvedBy.user?.name || request.approvedBy.name}
                                                     </div>
                                                 )}
@@ -424,8 +425,8 @@ export default function TimeOffRequests() {
                                             <Button size="sm" variant="secondary" onClick={() => { setSelectedRequest(request); setOpenView(true); }}
                                                 className="w-full h-8 sm:h-9 text-xs sm:text-sm border-border hover:bg-accent">
                                                 <Eye className="w-3 h-3 sm:mr-1" />
-                                                <span className="hidden sm:inline">{t('admin.inventory.adjustments.table.details')}</span>
-                                                <span className="sm:hidden">{t('admin.inventory.adjustments.table.details')}</span>
+                                                <span className="hidden sm:inline">{t('admin.hr.time_off.actions.view_details')}</span>
+                                                <span className="sm:hidden">{t('admin.hr.time_off.actions.view_details')}</span>
                                             </Button>
                                         </CardContent>
                                     </Card>
@@ -436,7 +437,7 @@ export default function TimeOffRequests() {
 
                     {/* Create Modal - Mobile optimized */}
                     <Modal open={openCreate} onClose={() => { setOpenCreate(false); resetForm(); }}
-                        title="New Request" size="lg">
+                        title={t('admin.hr.time_off.actions.new_request')} size="lg">
                         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                             {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2 sm:p-3 text-red-600 dark:text-red-400 text-xs sm:text-sm">{error}</div>}
 
@@ -445,7 +446,7 @@ export default function TimeOffRequests() {
                                     <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">{t('admin.hr.time_off.table.employee')} *</label>
                                     <select required value={formData.employee_id} onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
                                         className="w-full h-10 bg-card border border-border rounded-lg px-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 transition-all outline-none">
-                                        <option value="">Select</option>
+                                        <option value="">{t('admin.hr.time_off.form.select_employee')}</option>
                                         {employees?.data?.map((emp: Employee) => (
                                             <option key={emp.id} value={emp.id}>{emp.user?.name || emp.name}</option>
                                         ))}
@@ -463,7 +464,7 @@ export default function TimeOffRequests() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">Start *</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">{t('admin.hr.time_off.form.start_date')} *</label>
                                     <Input type="date" required value={formData.start_date}
                                         min={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
@@ -471,7 +472,7 @@ export default function TimeOffRequests() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">End *</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">{t('admin.hr.time_off.form.end_date')} *</label>
                                     <Input type="date" required value={formData.end_date}
                                         min={formData.start_date || new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
@@ -482,9 +483,15 @@ export default function TimeOffRequests() {
                                 {formData.start_date && formData.end_date && (
                                     <div className="sm:col-span-2 bg-secondary/20 p-2 sm:p-3 rounded-lg flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                                         <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                                        <span>Duration: <span className="font-semibold text-foreground">
-                                            {Math.max(0, Math.ceil((new Date(formData.end_date).getTime() - new Date(formData.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}
-                                        </span> {t('admin.hr.time_off.table.days').toLowerCase()}</span>
+                                        <span>
+                                            {t('admin.hr.time_off.form.duration')}:{' '}
+                                            <span className="font-semibold text-foreground">
+                                                {Math.max(0, Math.ceil((new Date(formData.end_date).getTime() - new Date(formData.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}
+                                            </span>{' '}
+                                            {(Math.max(0, Math.ceil((new Date(formData.end_date).getTime() - new Date(formData.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)) === 1
+                                                ? t('admin.hr.time_off.table.day')
+                                                : t('admin.hr.time_off.table.days')}
+                                        </span>
                                     </div>
                                 )}
 
@@ -492,31 +499,30 @@ export default function TimeOffRequests() {
                                     <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">{t('admin.hr.time_off.table.reason')} *</label>
                                     <textarea required value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                                         className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 transition-all outline-none" rows={2}
-                                        maxLength={500} placeholder="Why are you requesting time off?" />
+                                        maxLength={500} placeholder={t('admin.hr.time_off.form.reason_placeholder') as string} />
                                 </div>
 
                                 <div className="sm:col-span-2 hidden sm:block">
-                                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">Notes</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">{t('admin.hr.time_off.table.notes')}</label>
                                     <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                         className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 transition-all outline-none" rows={2}
-                                        placeholder="Additional details..." />
+                                        placeholder={t('admin.hr.time_off.form.notes_placeholder') as string} />
                                 </div>
                             </div>
 
                             <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
                                 <Button type="button" variant="secondary" onClick={() => { setOpenCreate(false); resetForm(); }}
-                                    className="flex-1 h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('admin.inventory.adjustments.form.cancel')}</Button>
+                                    className="flex-1 h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('layout.actions.cancel')}</Button>
                                 <Button type="submit" variant="primary" disabled={createMutation.isPending}
                                     className="flex-1 h-10 sm:h-11 text-sm bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700">
-                                    {createMutation.isPending ? 'Saving...' : 'Submit'}
+                                    {createMutation.isPending ? t('admin.hr.time_off.form.saving') : t('admin.hr.time_off.form.submit')}
                                 </Button>
                             </div>
                         </form>
                     </Modal>
 
-                    {/* View Modal - Mobile optimized */}
                     <Modal open={openView} onClose={() => { setOpenView(false); setSelectedRequest(null); }}
-                        title={t('admin.inventory.adjustments.table.details')} size="lg">
+                        title={t('admin.hr.time_off.actions.view_details')} size="lg">
                         {selectedRequest && (
                             <div className="space-y-4 sm:space-y-6">
                                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -531,11 +537,11 @@ export default function TimeOffRequests() {
                                         </Badge>
                                     </div>
                                     <div>
-                                        <h3 className="text-xs sm:text-sm text-muted-foreground">Start</h3>
+                                        <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.hr.time_off.form.start_date')}</h3>
                                         <p className="text-sm text-foreground">{new Date(selectedRequest.start_date).toLocaleDateString()}</p>
                                     </div>
                                     <div>
-                                        <h3 className="text-xs sm:text-sm text-muted-foreground">End</h3>
+                                        <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.hr.time_off.form.end_date')}</h3>
                                         <p className="text-sm text-foreground">{new Date(selectedRequest.end_date).toLocaleDateString()}</p>
                                     </div>
                                     <div>
@@ -543,7 +549,7 @@ export default function TimeOffRequests() {
                                         <p className="text-sm text-foreground font-semibold">{selectedRequest.days_requested}</p>
                                     </div>
                                     <div>
-                                        <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.common.status') || 'Status'}</h3>
+                                        <h3 className="text-xs sm:text-sm text-muted-foreground">{t('admin.common.status')}</h3>
                                         <Badge className={`${getStatusColor(selectedRequest.status)} text-[10px] sm:text-xs`}>
                                             {selectedRequest.status.toUpperCase()}
                                         </Badge>
@@ -557,20 +563,20 @@ export default function TimeOffRequests() {
 
                                 {selectedRequest.notes && (
                                     <div>
-                                        <h3 className="text-xs sm:text-sm text-muted-foreground mb-1.5">Notes</h3>
+                                        <h3 className="text-xs sm:text-sm text-muted-foreground mb-1.5">{t('admin.hr.time_off.table.notes')}</h3>
                                         <p className="text-foreground text-xs sm:text-sm">{selectedRequest.notes}</p>
                                     </div>
                                 )}
 
                                 {selectedRequest.approval_notes && (
                                     <div>
-                                        <h3 className="text-xs sm:text-sm text-muted-foreground mb-1.5">Approval Notes</h3>
+                                        <h3 className="text-xs sm:text-sm text-muted-foreground mb-1.5">{t('admin.hr.time_off.table.approval_notes')}</h3>
                                         <p className="text-foreground text-xs sm:text-sm">{selectedRequest.approval_notes}</p>
                                     </div>
                                 )}
 
                                 <Button variant="secondary" onClick={() => { setOpenView(false); setSelectedRequest(null); }}
-                                    className="w-full h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('admin.inventory.adjustments.form.cancel')}</Button>
+                                    className="w-full h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('layout.actions.close')}</Button>
                             </div>
                         )}
                     </Modal>
@@ -583,14 +589,14 @@ export default function TimeOffRequests() {
                                 {t('admin.hr.time_off.actions.approve_confirm')} <span className="font-semibold text-foreground">{selectedRequest?.employee?.name}</span>?
                             </p>
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">{t('admin.hr.time_off.table.notes')} (optional)</label>
+                                <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5">{t('admin.hr.time_off.form.notes_optional')}</label>
                                 <textarea value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)}
                                     className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground" rows={2}
-                                    placeholder="Add comments..." />
+                                    placeholder={t('admin.hr.time_off.actions.comments_placeholder') as string} />
                             </div>
                             <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
                                 <Button variant="secondary" onClick={() => { setOpenApprove(false); setApprovalNotes(''); }}
-                                    className="flex-1 h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('admin.inventory.adjustments.form.cancel')}</Button>
+                                    className="flex-1 h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('layout.actions.cancel')}</Button>
                                 <Button variant="primary" onClick={handleApprove} disabled={approveMutation.isPending}
                                     className="flex-1 h-10 sm:h-11 text-sm bg-green-600 hover:bg-green-700">{t('admin.hr.time_off.actions.approve')}</Button>
                             </div>
@@ -613,7 +619,7 @@ export default function TimeOffRequests() {
                             </div>
                             <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
                                 <Button variant="secondary" onClick={() => { setOpenReject(false); setApprovalNotes(''); setError(''); }}
-                                    className="flex-1 h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('admin.inventory.adjustments.form.cancel')}</Button>
+                                    className="flex-1 h-10 sm:h-11 text-sm border-border hover:bg-accent">{t('layout.actions.cancel')}</Button>
                                 <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending}
                                     className="flex-1 h-10 sm:h-11 text-sm bg-red-600 hover:bg-red-700">{t('admin.hr.time_off.actions.reject')}</Button>
                             </div>

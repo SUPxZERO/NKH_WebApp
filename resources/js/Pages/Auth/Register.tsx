@@ -33,8 +33,11 @@ const InputField = React.forwardRef(({
   toggleValue = false,
   onToggle = () => { },
   ...props
-}: any, ref: any) => (
-  <div className="space-y-2">
+}: any, ref: any) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="space-y-2">
     <label className="block text-sm font-medium text-gray-300">{label}</label>
     <div className="relative group">
       <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
@@ -51,6 +54,7 @@ const InputField = React.forwardRef(({
             type="button"
             onClick={onToggle}
             className="absolute right-4 text-gray-500 hover:text-white transition-colors"
+            aria-label={toggleValue ? t('common.ui.input.actions.hide_password') as string : t('common.ui.input.actions.show_password') as string}
           >
             {toggleValue ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
@@ -67,7 +71,8 @@ const InputField = React.forwardRef(({
       </motion.p>
     )}
   </div>
-));
+  );
+});
 
 // Set display name for debugging
 InputField.displayName = 'InputField';
@@ -197,7 +202,7 @@ export default function Register() {
               <div className="relative w-24 h-24 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 backdrop-blur-sm rounded-2xl border border-fuchsia-500/30">
                 <img
                   src="/Nkhlogo.png"
-                  alt="NKH Restaurant"
+                  alt={t('auth.brand_alt') as string}
                   className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]"
                 />
               </div>
@@ -211,7 +216,10 @@ export default function Register() {
             transition={{ delay: 0.3 }}
             className="text-3xl font-black text-white mb-2 tracking-tight"
           >
-            {t('auth.join_title', { brand: '' })} <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">NKH Restaurant</span>
+            {t('auth.join_title', { brand: '' })}{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">
+              {t('auth.brand_name')}
+            </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}

@@ -70,14 +70,14 @@ export default function NotificationDropdown({ className, variant = 'customer' }
     const queryClient = useQueryClient();
 
     // Determine API prefix based on variant
-    const apiPrefix = variant === 'admin' ? '/api/admin' : variant === 'employee' ? '/api/employee' : '/api/customer';
+    const apiPrefix = variant === 'admin' ? '/api/admin/my-notifications' : variant === 'employee' ? '/api/employee/notifications' : '/api/customer/notifications';
 
     // Fetch notifications
     const { data: notificationsData, isLoading } = useQuery({
         queryKey: ['notifications', variant],
         queryFn: async () => {
             try {
-                const response = await apiGet(`${apiPrefix}/notifications`) as {
+                const response = await apiGet(`${apiPrefix}`) as {
                     success: boolean;
                     data: Notification[];
                     unread_count: number
@@ -97,7 +97,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
     // Mark as read mutation
     const markAsReadMutation = useMutation({
         mutationFn: async (notificationId: number) => {
-            return apiPost(`${apiPrefix}/notifications/${notificationId}/read`, {});
+            return apiPost(`${apiPrefix}/${notificationId}/read`, {});
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications', variant] });
@@ -107,7 +107,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
     // Mark all as read mutation
     const markAllReadMutation = useMutation({
         mutationFn: async () => {
-            return apiPost(`${apiPrefix}/notifications/mark-all-read`, {});
+            return apiPost(`${apiPrefix}/mark-all-read`, {});
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications', variant] });
@@ -165,7 +165,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                         animate={{ scale: 1 }}
                         className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium"
                     >
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                        {unreadCount > 9 ? t('common.ui.notifications.count_overflow') : unreadCount}
                     </motion.span>
                 )}
             </button>
@@ -213,6 +213,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                                             disabled={markAllReadMutation.isPending}
                                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
                                             title={t('common.ui.notifications.mark_all_read') as string}
+                                            aria-label={t('common.ui.notifications.mark_all_read') as string}
                                         >
                                             <CheckCheck className="w-4 h-4" />
                                         </button>
@@ -220,6 +221,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                                     <button
                                         onClick={() => setIsOpen(false)}
                                         className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
+                                        aria-label={t('common.ui.notifications.actions.close') as string}
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -291,7 +293,7 @@ export default function NotificationDropdown({ className, variant = 'customer' }
                             {notifications.length > 0 && (
                                 <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                                     <Link
-                                        href={variant === 'admin' ? '/admin/notifications' : variant === 'employee' ? '/employee/notifications' : '/customer/notifications'}
+                                        href={variant === 'admin' ? '/admin/my-notifications' : variant === 'employee' ? '/employee/notifications' : '/customer/notifications'}
                                         onClick={() => setIsOpen(false)}
                                         className={cn(
                                             'block w-full text-center py-2 text-sm font-medium rounded-xl transition-colors',

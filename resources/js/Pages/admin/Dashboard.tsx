@@ -127,7 +127,7 @@ export default function Dashboard({
 
   return (
     <AdminLayout>
-      <Head title="Dashboard" />
+      <Head title={t('admin.dashboard.title') as string} />
 
       {/* Light/Dark mode adaptive background */}
       <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-fuchsia-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950/50">
@@ -160,7 +160,7 @@ export default function Dashboard({
                   transition={{ delay: 0.1 }}
                   className="text-lg sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 dark:from-white dark:via-fuchsia-200 dark:to-purple-200 bg-clip-text text-transparent"
                 >
-                  {dashboardSummary?.greeting || t('admin.dashboard.welcome')}, {dashboardSummary?.user?.name?.split(' ')[0] || 'Admin'}!
+                  {dashboardSummary?.greeting || t('admin.dashboard.welcome')}, {dashboardSummary?.user?.name?.split(' ')[0] || t('admin.dashboard.fallbacks.user_name')}!
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, x: -20 }}
@@ -408,8 +408,8 @@ function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any)
                     <ReceiptText className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-bold text-white">Order #{task.order_number}</p>
-                    {task.table && <p className="text-sm text-gray-400">Table {task.table}</p>}
+                    <p className="font-bold text-white">{t('admin.dashboard.tasks.order_prefix')}{task.order_number}</p>
+                    {task.table && <p className="text-sm text-gray-400">{t('admin.dashboard.tasks.table_prefix')}{task.table}</p>}
                   </div>
                 </div>
                 <span className={cn(
@@ -419,7 +419,7 @@ function EmployeeDashboardContent({ myTasks, myPerformance, quickActions }: any)
                   task.status === 'pending' && "bg-amber-500/20 text-amber-400",
                   task.status === 'received' && "bg-blue-500/20 text-blue-400"
                 )}>
-                  {task.status}
+                  {t(`common.ui.badge.status.${task.status}` as any) || task.status}
                 </span>
               </motion.div>
             ))}

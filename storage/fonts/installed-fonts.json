@@ -1,0 +1,10 @@
+{
+    "battambang": {
+        "normal": "E:\\promgramming\\NKH_WebApp\\storage\\fonts\/battambang_normal_36f8133d7015cb19773c19b72e76ad0d",
+        "bold": "battambang_bold_10cfbb79c77eec383bb0334fe4170127"
+    },
+    "noto sans khmer": {
+        "normal": "E:\\promgramming\\NKH_WebApp\\storage\\fonts\/\/noto_sans_khmer_normal_8413bfd6137d97a3d4fd59d21212e0c0",
+        "bold": "noto_sans_khmer_bold_7c0f916015f4a837043916710580531e"
+    }
+}

@@ -254,7 +254,7 @@ export default function ForgotPassword() {
           className="mt-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl"
         >
           <p className="text-xs text-gray-500 text-center">
-            💡 {t('auth.didnt_receive_email')}{' '}
+            {t('auth.hint_prefix')}{' '}{t('auth.didnt_receive_email')}{' '}
             <a href="mailto:support@nkhrestaurant.com" className="text-fuchsia-400 hover:text-fuchsia-300 font-medium">
               support@nkhrestaurant.com
             </a>

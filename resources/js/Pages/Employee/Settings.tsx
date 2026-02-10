@@ -71,7 +71,7 @@ const daysOfWeek = [
 ];
 
 export default function Settings() {
-    const { t } = useLanguage();
+    const { t, locale, setLocale } = useLanguage();
     const queryClient = useQueryClient();
     const { props } = usePage<{ auth: { user: any } }>();
     const user = props.auth?.user;
@@ -101,7 +101,6 @@ export default function Settings() {
 
     // Theme state
     const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
-    const [language, setLanguage] = useState('en');
 
     // Fetch work preferences from API
     const { data: workPrefsData, isLoading: workPrefsLoading } = useQuery({
@@ -151,13 +150,10 @@ export default function Settings() {
         }
     }, [emergencyData]);
 
-    // Load theme/language from localStorage
+    // Load theme from localStorage
     useEffect(() => {
         const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system';
         if (savedTheme) setTheme(savedTheme);
-
-        const savedLang = localStorage.getItem('language');
-        if (savedLang) setLanguage(savedLang);
     }, []);
 
     // Theme Logic
@@ -566,18 +562,17 @@ export default function Settings() {
                             {[
                                 { code: 'en', name: 'English', native: 'English', flag: '🇺🇸' },
                                 { code: 'km', name: 'Khmer', native: 'ភាសាខ្មែរ', flag: '🇰🇭' },
-                                { code: 'zh', name: 'Chinese', native: '中文', flag: '🇨🇳' },
                             ].map((lang) => (
                                 <button
                                     key={lang.code}
                                     onClick={() => {
-                                        setLanguage(lang.code);
-                                        localStorage.setItem('language', lang.code);
-                                        toastSuccess(t('employee.settings.language.changed', { name: lang.name }));
+                                        if (lang.code !== locale) {
+                                            setLocale(lang.code);
+                                        }
                                     }}
                                     className={cn(
                                         'flex items-center justify-between w-full p-4 rounded-xl transition-all',
-                                        language === lang.code
+                                        locale === lang.code
                                             ? 'bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500'
                                             : 'bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent hover:border-gray-300'
                                     )}
@@ -589,7 +584,7 @@ export default function Settings() {
                                             <p className="text-sm text-gray-500">{lang.native}</p>
                                         </div>
                                     </div>
-                                    {language === lang.code && (
+                                    {locale === lang.code && (
                                         <Check className="w-5 h-5 text-blue-500" />
                                     )}
                                 </button>

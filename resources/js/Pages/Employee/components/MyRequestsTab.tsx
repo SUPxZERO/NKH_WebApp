@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { Skeleton } from '@/app/components/ui/Loading';
@@ -55,36 +56,37 @@ export default function MyRequestsTab({
     onCancelRequest,
     isCancelling,
 }: MyRequestsTabProps) {
+    const { t, locale } = useLanguage();
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'pending':
                 return (
                     <span className="px-3 py-1 rounded-full text-sm bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-                Pending
+                        {t('employee.schedule.swap.status.pending')}
                     </span >
                 );
             case 'accepted_by_peer':
                 return (
                     <span className="px-3 py-1 rounded-full text-sm bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center gap-1">
-                        < UserCheck className ="w-4 h-4" /> Awaiting Approval
+                        < UserCheck className ="w-4 h-4" /> {t('employee.schedule.swap.status.accepted_by_peer')}
                                 </span >
                             );
             case 'approved':
                 return (
                     <span className="px-3 py-1 rounded-full text-sm bg-green-500/20 text-green-400 border border-green-500/30">
-                        Approved
+                        {t('employee.schedule.swap.status.approved')}
                     </span >
                 );
             case 'denied':
                 return (
                     <span className="px-3 py-1 rounded-full text-sm bg-red-500/20 text-red-400 border border-red-500/30">
-                Denied
+                        {t('employee.schedule.swap.status.denied')}
                     </span >
                 );
             case 'cancelled':
                 return (
                     <span className="px-3 py-1 rounded-full text-sm bg-gray-500/20 text-gray-400 border border-gray-500/30">
-                Cancelled
+                        {t('employee.schedule.swap.status.cancelled')}
                     </span >
                 );
             default:
@@ -96,9 +98,9 @@ return (
     <div className="grid gap-4">
         < Card className ="bg-white/5 border-white/10">
             < CardHeader >
-            <h3 className="text-lg font-semibold">My Shift Swap Requests</h3>
+            <h3 className="text-lg font-semibold">{t('employee.schedule.swap.my_requests_title')}</h3>
                 < p className ="text-sm text-gray-400">
-                        Track all your shift swap requests and their status.
+                        {t('employee.schedule.swap.my_requests_subtitle')}
                     </p >
                 </CardHeader >
     <CardContent>
@@ -123,7 +125,7 @@ return (
                         < div >
                         <div className="font-bold text-xl text-white mb-1">
         {
-            new Date(swap.shift.date).toLocaleDateString('en-US', {
+            new Date(swap.shift.date).toLocaleDateString(locale, {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
@@ -141,22 +143,22 @@ return (
     <div className="grid grid-cols-2 gap-3 text-sm mb-4">
         < div className="flex items-center gap-2 text-gray-300">
             < Briefcase className ="w-4 h-4 text-fuchsia-400" />
-                < span > { swap.shift.position?.name || 'N/A' }</span >
+                < span > { swap.shift.position?.name || t('employee.common.na') }</span >
                                             </div >
     <div className="flex items-center gap-2 text-gray-300">
         < MapPin className ="w-4 h-4 text-fuchsia-400" />
-            < span > { swap.shift.location?.name || 'N/A' }</span >
+            < span > { swap.shift.location?.name || t('employee.common.na') }</span >
                                             </div >
     <div className="text-gray-400">
-Type: { ' ' }
+{t('employee.schedule.swap.type_label')}{' '}
 <span className="text-white capitalize">
-{ swap.type.replace('_', ' ') }
+{t(`employee.schedule.swap.type.${swap.type}`)}
                                                 </span >
                                             </div >
     <div className="text-gray-400">
-Created: { ' ' }
+{t('employee.schedule.swap.created_label')}{' '}
 <span className="text-white">
-{ new Date(swap.created_at).toLocaleDateString() }
+{ new Date(swap.created_at).toLocaleDateString(locale) }
                                                 </span >
                                             </div >
                                         </div >
@@ -164,7 +166,7 @@ Created: { ' ' }
 {
     swap.reason && (
         <div className="mb-4 p-3 bg-white/5 rounded-lg">
-        <div className="text-xs text-gray-400 mb-1">Reason:</div>
+        <div className="text-xs text-gray-400 mb-1">{t('employee.schedule.swap.reason_label')}</div>
         <div className="text-sm text-gray-200">{swap.reason}</div>
                                             </div>
                                         )}
@@ -174,8 +176,8 @@ Created: { ' ' }
         <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
             < div className="text-sm text-blue-300">
                 < UserCheck className ="w-4 h-4 inline mr-2" />
-                                                    Claimed by < strong > { swap.recipient.user?.name }</strong > -{ ' '}
-                                                    awaiting manager approval
+                                                    {t('employee.schedule.swap.claimed_by', { name: <strong>{swap.recipient.user?.name}</strong> })}{' '}
+                                                    {t('employee.schedule.swap.awaiting_manager')}
                                                 </div >
                                             </div >
                                         )
@@ -186,12 +188,12 @@ Created: { ' ' }
         <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
             < div className="text-sm text-green-300">
                 < CheckCircle className ="w-4 h-4 inline mr-2" />
-                                                    Approved on{ ' ' }
-    { new Date(swap.approved_at!).toLocaleDateString() }
-    {
-        swap.recipient &&
-        ` - Shift transferred to ${swap.recipient.user?.name}`
-    }
+                                                    {t('employee.schedule.swap.approved_on', { date: new Date(swap.approved_at!).toLocaleDateString(locale) })}
+                                                    {swap.recipient && (
+                                                        <>
+                                                            {' '}- {t('employee.schedule.swap.transferred_to', { name: swap.recipient.user?.name })}
+                                                        </>
+                                                    )}
                                                 </div >
                                             </div >
                                         )
@@ -202,12 +204,12 @@ Created: { ' ' }
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
             < div className="text-sm text-red-300">
                 < XCircle className ="w-4 h-4 inline mr-2" />
-                                                    Denied on { new Date(swap.approved_at!).toLocaleDateString() }
+                                                    {t('employee.schedule.swap.denied_on', { date: new Date(swap.approved_at!).toLocaleDateString(locale) })}
                                                 </div >
     {
         swap.denial_reason && (
             <div className="mt-2 text-xs text-red-200">
-                                                        Reason: { swap.denial_reason }
+                                                        {t('employee.schedule.swap.reason_label')} { swap.denial_reason }
                                                     </div >
                                                 )
 }
@@ -223,7 +225,7 @@ Created: { ' ' }
     leftIcon = {< Ban className ="w-4 h-4" />}
     disabled = { isCancelling }
         >
-        { isCancelling? 'Cancelling...': 'Cancel Request' }
+        { isCancelling ? t('employee.schedule.swap.cancelling') : t('employee.schedule.swap.cancel_request') }
                                             </Button >
                                         )
 }
@@ -234,7 +236,7 @@ Created: { ' ' }
                     ) : (
     <div className="text-center py-10 text-gray-400">
         < div className ="text-4xl mb-2">📋</div>
-            < p > You haven't created any shift swap requests yet.</p>
+            < p > {t('employee.schedule.swap.empty')}</p>
                         </div >
                     )}
                 </CardContent >

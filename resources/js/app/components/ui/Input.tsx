@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/app/utils/cn';
 import { AlertCircle, Check, Eye, EyeOff, Search, X } from 'lucide-react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -30,6 +31,7 @@ const sizes = {
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, hint, error, success, leftIcon, rightIcon, variant = 'default', inputSize = 'md', clearable, onClear, id, value, ...props }, ref) => {
+    const { t } = useTranslation();
     const inputId = id || props.name || `input-${Math.random().toString(36).slice(2)}`;
     const hasValue = value !== undefined && value !== '';
 
@@ -77,6 +79,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type="button"
               onClick={onClear}
               className="pr-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+              aria-label={t('common.ui.input.actions.clear') as string}
             >
               <X className="h-4 w-4" />
             </button>
@@ -125,6 +128,7 @@ export interface PasswordInputProps extends Omit<InputProps, 'type' | 'rightIcon
 export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
   ({ showStrength, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
+    const { t } = useTranslation();
 
     return (
       <Input
@@ -135,6 +139,7 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="hover:text-foreground transition-colors"
+            aria-label={showPassword ? t('common.ui.input.actions.hide_password') as string : t('common.ui.input.actions.show_password') as string}
           >
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
@@ -152,11 +157,12 @@ export interface SearchInputProps extends Omit<InputProps, 'leftIcon'> { }
 
 export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
   (props, ref) => {
+    const { t } = useTranslation();
     return (
       <Input
         ref={ref}
         leftIcon={<Search className="h-5 w-5" />}
-        placeholder={props.placeholder || 'Search...'}
+        placeholder={props.placeholder || (t('common.ui.search.placeholder.default') as string)}
         clearable
         {...props}
       />

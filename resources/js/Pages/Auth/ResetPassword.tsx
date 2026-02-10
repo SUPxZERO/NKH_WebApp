@@ -33,7 +33,7 @@ export default function ResetPassword() {
     email: z.string().email(t('auth.validation.email_invalid') as string),
     password: z.string().min(8, t('auth.validation.password_min_8') as string),
     password_confirmation: z.string(),
-    token: z.string().min(1, 'Reset token is required'),
+    token: z.string().min(1, t('auth.validation.token_required') as string),
   }).refine((data: any) => data.password === data.password_confirmation, {
     message: t('auth.validation.password_mismatch') as string,
     path: ['password_confirmation'],
@@ -178,6 +178,7 @@ export default function ResetPassword() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 text-gray-500 hover:text-white transition-colors"
+                      aria-label={showPassword ? t('common.ui.input.actions.hide_password') as string : t('common.ui.input.actions.show_password') as string}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -233,6 +234,7 @@ export default function ResetPassword() {
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-4 text-gray-500 hover:text-white transition-colors"
+                      aria-label={showConfirmPassword ? t('common.ui.input.actions.hide_password') as string : t('common.ui.input.actions.show_password') as string}
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>

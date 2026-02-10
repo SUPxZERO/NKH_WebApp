@@ -4,6 +4,7 @@ import { FoodDetailProvider } from '@/app/providers/FoodDetailProvider';
 import { AuthProvider } from '@/app/providers/AuthProvider';
 
 import { LanguageProvider } from '@/app/context/LanguageContext';
+import PWAInstallPrompt from '@/app/components/ui/PWAInstallPrompt';
 
 /**
  * Wrapper component that renders inside the Inertia App component.
@@ -20,6 +21,7 @@ export function InertiaWrapper({ children }: PropsWithChildren) {
         <AuthProvider>
           <ShortcutsProvider>
             {children}
+            <PWAInstallPrompt />
           </ShortcutsProvider>
         </AuthProvider>
       </FoodDetailProvider>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiPost } from '@/app/libs/apiClient';
 import { MenuItem, Category } from '@/app/types/domain';
@@ -47,6 +48,7 @@ const TabButton = ({ isActive, onClick, icon: Icon, label }: any) => (
 );
 
 const TagInput = ({ label, values, onChange, placeholder }: any) => {
+    const { t } = useTranslation();
     const [input, setInput] = useState('');
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -84,7 +86,7 @@ const TagInput = ({ label, values, onChange, placeholder }: any) => {
                     className="flex-1 min-w-[120px] bg-transparent outline-none text-sm placeholder:text-muted-foreground/50"
                 />
             </div>
-            <p className="text-xs text-muted-foreground">Press Enter to add</p>
+            <p className="text-xs text-muted-foreground">{t('admin.menu.modal.form.press_enter')}</p>
         </div>
     );
 };
@@ -96,6 +98,7 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
     categories,
     locationId
 }) => {
+    const { t } = useTranslation();
     const qc = useQueryClient();
     const [activeTab, setActiveTab] = useState<'general' | 'prep' | 'inventory' | 'nutrition'>('general');
     const [image, setImage] = useState<File | null>(null);
@@ -213,14 +216,14 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={editingItem ? 'Edit Menu Item' : 'Create Menu Item'} className="max-w-4xl">
+        <Modal isOpen={isOpen} onClose={onClose} title={editingItem ? t('admin.menu.modal.title_edit') : t('admin.menu.modal.title_create')} className="max-w-4xl">
             <form onSubmit={handleSubmit} className="flex flex-col h-[80vh] sm:h-auto">
                 {/* Tabs Header */}
                 <div className="flex border-b border-border overflow-x-auto scrollbar-hide mb-4">
-                    <TabButton isActive={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={LayoutDashboard} label="General" />
-                    <TabButton isActive={activeTab === 'prep'} onClick={() => setActiveTab('prep')} icon={Utensils} label="Preparation" />
-                    <TabButton isActive={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={Box} label="Inventory" />
-                    <TabButton isActive={activeTab === 'nutrition'} onClick={() => setActiveTab('nutrition')} icon={HeartPulse} label="Nutrition & Health" />
+                    <TabButton isActive={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={LayoutDashboard} label={t('admin.menu.modal.tabs.general')} />
+                    <TabButton isActive={activeTab === 'prep'} onClick={() => setActiveTab('prep')} icon={Utensils} label={t('admin.menu.modal.tabs.prep')} />
+                    <TabButton isActive={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} icon={Box} label={t('admin.menu.modal.tabs.inventory')} />
+                    <TabButton isActive={activeTab === 'nutrition'} onClick={() => setActiveTab('nutrition')} icon={HeartPulse} label={t('admin.menu.modal.tabs.nutrition')} />
                 </div>
 
                 {/* Tab Content - Scrollable area */}
@@ -230,12 +233,12 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
                     {activeTab === 'general' && (
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-                                <Input label="Slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
+                                <Input label={t('admin.menu.modal.form.name')} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                                <Input label={t('admin.menu.modal.form.slug')} value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-foreground mb-2">Description</label>
+                                    <label className="block text-sm font-semibold text-foreground mb-2">{t('admin.menu.modal.form.description')}</label>
                                     <textarea
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -243,43 +246,43 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-foreground mb-2">Category</label>
+                                    <label className="block text-sm font-semibold text-foreground mb-2">{t('admin.menu.modal.form.category')}</label>
                                     <select
                                         value={formData.category_id}
                                         onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                                         className="w-full h-10 sm:h-11 bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     >
-                                        <option value="">Select Category</option>
+                                        <option value="">{t('admin.menu.modal.form.select_category')}</option>
                                         {categories?.map((cat: any) => (
                                             <option key={cat.id} value={cat.id}>{cat.name || cat.translations?.[0]?.name}</option>
                                         ))}
                                     </select>
                                     <div className="mt-4">
-                                        <label className="block text-sm font-semibold text-foreground mb-2">Image</label>
+                                        <label className="block text-sm font-semibold text-foreground mb-2">{t('admin.menu.modal.form.image')}</label>
                                         <ImageUploader onChange={(file) => setImage(file)} value={editingItem?.image_path || null} />
                                     </div>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <Input label="Price ($)" type="number" step="0.01" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
-                                <Input label="Order Sort" type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
+                                <Input label={t('admin.menu.modal.form.price')} type="number" step="0.01" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
+                                <Input label={t('admin.menu.modal.form.order_sort')} type="number" value={formData.display_order} onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })} />
                             </div>
                             <div className="flex flex-wrap gap-6 pt-2">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="rounded border-border text-primary focus:ring-primary/20" />
-                                    <span className="text-sm font-medium">Active</span>
+                                    <span className="text-sm font-medium">{t('admin.menu.modal.form.active')}</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={formData.is_popular} onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })} className="rounded border-border text-primary focus:ring-primary/20" />
-                                    <span className="text-sm font-medium">Popular</span>
+                                    <span className="text-sm font-medium">{t('admin.menu.modal.form.popular')}</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={formData.is_featured} onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })} className="rounded border-border text-amber-500 focus:ring-amber-500/20" />
-                                    <span className="text-sm font-medium">Featured</span>
+                                    <span className="text-sm font-medium">{t('admin.menu.modal.form.featured')}</span>
                                 </label>
                             </div>
                             {formData.is_featured && (
-                                <Input label="Badge Text" value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} placeholder="e.g. Best Seller" />
+                                <Input label={t('admin.menu.modal.form.badge_text')} value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} placeholder={t('admin.menu.modal.form.badge_placeholder')} />
                             )}
                         </div>
                     )}
@@ -288,13 +291,13 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
                     {activeTab === 'prep' && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
-                                <Input label="Prep Time (mins)" type="number" value={formData.prep_time} onChange={(e) => setFormData({ ...formData, prep_time: e.target.value })} />
-                                <Input label="Cook Time (mins)" type="number" value={formData.cook_time} onChange={(e) => setFormData({ ...formData, cook_time: e.target.value })} />
+                                <Input label={t('admin.menu.modal.form.prep_time')} type="number" value={formData.prep_time} onChange={(e) => setFormData({ ...formData, prep_time: e.target.value })} />
+                                <Input label={t('admin.menu.modal.form.cook_time')} type="number" value={formData.cook_time} onChange={(e) => setFormData({ ...formData, cook_time: e.target.value })} />
                             </div>
-                            <Input label="Serving Size" value={formData.serving_size} onChange={(e) => setFormData({ ...formData, serving_size: e.target.value })} placeholder="e.g. 1 bowl, 250g" />
+                            <Input label={t('admin.menu.modal.form.serving_size')} value={formData.serving_size} onChange={(e) => setFormData({ ...formData, serving_size: e.target.value })} placeholder={t('admin.menu.modal.form.serving_placeholder')} />
 
                             <div>
-                                <label className="block text-sm font-semibold text-foreground mb-2">Spice Level (0-5)</label>
+                                <label className="block text-sm font-semibold text-foreground mb-2">{t('admin.menu.modal.form.spice_level')}</label>
                                 <div className="flex items-center gap-4">
                                     <input
                                         type="range"
@@ -310,12 +313,12 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-xs text-muted-foreground mt-1 px-1">
-                                    <span>None</span>
-                                    <span>Mild</span>
-                                    <span>Medium</span>
-                                    <span>Hot</span>
-                                    <span>Very Hot</span>
-                                    <span>Extreme</span>
+                                    <span>{t('admin.menu.modal.spice.none')}</span>
+                                    <span>{t('admin.menu.modal.spice.mild')}</span>
+                                    <span>{t('admin.menu.modal.spice.medium')}</span>
+                                    <span>{t('admin.menu.modal.spice.hot')}</span>
+                                    <span>{t('admin.menu.modal.spice.very_hot')}</span>
+                                    <span>{t('admin.menu.modal.spice.extreme')}</span>
                                 </div>
                             </div>
                         </div>
@@ -325,25 +328,25 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
                     {activeTab === 'inventory' && (
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <Input label="SKU / Code" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
-                                <Input label="Cost Price ($)" type="number" step="0.01" value={formData.cost} onChange={(e) => setFormData({ ...formData, cost: e.target.value })} />
+                                <Input label={t('admin.menu.modal.form.sku')} value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
+                                <Input label={t('admin.menu.modal.form.cost')} type="number" step="0.01" value={formData.cost} onChange={(e) => setFormData({ ...formData, cost: e.target.value })} />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-foreground mb-2">Availability Status</label>
+                                <label className="block text-sm font-semibold text-foreground mb-2">{t('admin.menu.modal.form.availability_status')}</label>
                                 <select
                                     value={formData.availability_status}
                                     onChange={(e) => setFormData({ ...formData, availability_status: e.target.value })}
                                     className="w-full h-10 sm:h-11 bg-secondary/50 border border-border rounded-lg sm:rounded-xl px-3 sm:px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                 >
-                                    <option value="available">Available (In Stock)</option>
-                                    <option value="low_stock">Low Stock</option>
-                                    <option value="out_of_stock">Out of Stock</option>
-                                    <option value="seasonal">Seasonal</option>
+                                    <option value="available">{t('admin.menu.modal.availability.available')}</option>
+                                    <option value="low_stock">{t('admin.menu.modal.availability.low_stock')}</option>
+                                    <option value="out_of_stock">{t('admin.menu.modal.availability.out_of_stock')}</option>
+                                    <option value="seasonal">{t('admin.menu.modal.availability.seasonal')}</option>
                                 </select>
                             </div>
 
-                            <Input label="Availability Note" value={formData.availability_note} onChange={(e) => setFormData({ ...formData, availability_note: e.target.value })} placeholder="e.g. Back in stock tomorrow" />
+                            <Input label={t('admin.menu.modal.form.availability_note')} value={formData.availability_note} onChange={(e) => setFormData({ ...formData, availability_note: e.target.value })} placeholder={t('admin.menu.modal.form.availability_placeholder')} />
                         </div>
                     )}
 
@@ -351,37 +354,37 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
                     {activeTab === 'nutrition' && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
-                                <Input label="Calories (kcal)" type="number" value={formData.calories} onChange={(e) => setFormData({ ...formData, calories: e.target.value })} />
+                                <Input label={t('admin.menu.modal.form.calories')} type="number" value={formData.calories} onChange={(e) => setFormData({ ...formData, calories: e.target.value })} />
                             </div>
 
                             <div>
-                                <h4 className="text-sm font-bold text-foreground mb-3 border-b border-border pb-2">Nutrition Facts (per serving)</h4>
+                                <h4 className="text-sm font-bold text-foreground mb-3 border-b border-border pb-2">{t('admin.menu.modal.form.nutrition_facts')}</h4>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                    <Input label="Protein (g)" type="number" step="0.1" value={String(formData.nutrition.protein)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, protein: e.target.value } })} />
-                                    <Input label="Carbs (g)" type="number" step="0.1" value={String(formData.nutrition.carbs)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, carbs: e.target.value } })} />
-                                    <Input label="Fat (g)" type="number" step="0.1" value={String(formData.nutrition.fat)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, fat: e.target.value } })} />
-                                    <Input label="Fiber (g)" type="number" step="0.1" value={String(formData.nutrition.fiber)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, fiber: e.target.value } })} />
-                                    <Input label="Sugar (g)" type="number" step="0.1" value={String(formData.nutrition.sugar)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, sugar: e.target.value } })} />
-                                    <Input label="Sodium (mg)" type="number" step="1" value={String(formData.nutrition.sodium)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, sodium: e.target.value } })} />
+                                    <Input label={t('admin.menu.modal.form.protein')} type="number" step="0.1" value={String(formData.nutrition.protein)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, protein: e.target.value } })} />
+                                    <Input label={t('admin.menu.modal.form.carbs')} type="number" step="0.1" value={String(formData.nutrition.carbs)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, carbs: e.target.value } })} />
+                                    <Input label={t('admin.menu.modal.form.fat')} type="number" step="0.1" value={String(formData.nutrition.fat)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, fat: e.target.value } })} />
+                                    <Input label={t('admin.menu.modal.form.fiber')} type="number" step="0.1" value={String(formData.nutrition.fiber)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, fiber: e.target.value } })} />
+                                    <Input label={t('admin.menu.modal.form.sugar')} type="number" step="0.1" value={String(formData.nutrition.sugar)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, sugar: e.target.value } })} />
+                                    <Input label={t('admin.menu.modal.form.sodium')} type="number" step="1" value={String(formData.nutrition.sodium)} onChange={(e) => setFormData({ ...formData, nutrition: { ...formData.nutrition, sodium: e.target.value } })} />
                                 </div>
                             </div>
 
                             <TagInput
-                                label="Ingredients"
+                                label={t('admin.menu.modal.form.ingredients')}
                                 values={formData.ingredients}
                                 onChange={(tags: string[]) => setFormData({ ...formData, ingredients: tags })}
-                                placeholder="Type ingredient and press Enter"
+                                placeholder={t('admin.menu.modal.form.ingredients_placeholder')}
                             />
 
                             <TagInput
-                                label="Allergens"
+                                label={t('admin.menu.modal.form.allergens')}
                                 values={formData.allergens}
                                 onChange={(tags: string[]) => setFormData({ ...formData, allergens: tags })}
-                                placeholder="e.g. Peanuts, Shellfish, Gluten"
+                                placeholder={t('admin.menu.modal.form.allergens_placeholder')}
                             />
 
                             <div>
-                                <label className="block text-sm font-semibold text-foreground mb-2">Dietary Tags</label>
+                                <label className="block text-sm font-semibold text-foreground mb-2">{t('admin.menu.modal.form.dietary_tags')}</label>
                                 <div className="flex flex-wrap gap-2">
                                     {['Vegetarian', 'Vegan', 'Gluten-Free', 'Halal', 'Keto', 'Spicy', 'Nut-Free', 'Dairy-Free'].map(tag => (
                                         <button
@@ -410,9 +413,9 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
                 {/* Footer Actions */}
                 <div className="flex gap-3 pt-4 mt-4 border-t border-border">
-                    <Button type="button" variant="secondary" onClick={onClose} className="flex-1 h-10 sm:h-11">Cancel</Button>
+                    <Button type="button" variant="secondary" onClick={onClose} className="flex-1 h-10 sm:h-11">{t('admin.menu.modal.actions.cancel')}</Button>
                     <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 h-10 sm:h-11">
-                        {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingItem ? 'Update Item' : 'Create Item')}
+                        {createMutation.isPending || updateMutation.isPending ? t('admin.menu.modal.actions.saving') : (editingItem ? t('admin.menu.modal.actions.update') : t('admin.menu.modal.actions.create'))}
                     </Button>
                 </div>
             </form>

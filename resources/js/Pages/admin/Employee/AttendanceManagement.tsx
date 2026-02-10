@@ -10,6 +10,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Search, Calendar, Download, Edit2, CheckCircle, AlertCircle, Clock, Users, Filter, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface AttendanceRecord {
     id: number;
@@ -26,6 +27,7 @@ interface AttendanceRecord {
 }
 
 export default function AttendanceManagement() {
+    const { t } = useLanguage();
     const [startDate, setStartDate] = useState(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     );
@@ -70,12 +72,12 @@ export default function AttendanceManagement() {
         mutationFn: (attendanceId: number) =>
             apiPost(`admin/attendance/${attendanceId}/adjust`, editData),
         onSuccess: () => {
-            toastSuccess('Attendance adjusted successfully');
+            toastSuccess(t('admin.hr.attendance.messages.adjusted') as string);
             setEditingId(null);
             qc.invalidateQueries({ queryKey: ['attendance.management'] });
         },
         onError: (error: any) => {
-            toastError(error.response?.data?.message || 'Failed to adjust attendance');
+            toastError(error.response?.data?.message || t('admin.hr.attendance.messages.adjust_failed') as string);
         },
     });
 
@@ -93,7 +95,7 @@ export default function AttendanceManagement() {
             });
 
             const csv = [
-                ['Employee', 'Date', 'Clock In', 'Clock Out', 'Total Hours', 'Status', 'Location'].join(','),
+                [t('admin.hr.attendance.table.employee'), t('admin.hr.attendance.table.date'), t('admin.hr.attendance.table.clock_in'), t('admin.hr.attendance.table.clock_out'), t('admin.hr.attendance.table.hours'), t('admin.hr.attendance.table.status'), t('admin.hr.attendance.table.location')].join(','),
                 ...(data as any).data.map((record: AttendanceRecord) =>
                     [
                         record.employee_name,
@@ -113,9 +115,9 @@ export default function AttendanceManagement() {
             a.href = url;
             a.download = `attendance_${startDate}_to_${endDate}.csv`;
             a.click();
-            toastSuccess('Attendance exported successfully');
+            toastSuccess(t('admin.hr.attendance.messages.exported') as string);
         } catch (error: any) {
-            toastError('Failed to export attendance');
+            toastError(t('admin.hr.attendance.messages.export_failed') as string);
         }
     };
 
@@ -127,10 +129,10 @@ export default function AttendanceManagement() {
     };
 
     const getStatusBadge = (record: AttendanceRecord) => {
-        if (record.is_late) return 'Late';
-        if (record.has_overtime) return 'Overtime';
-        if (record.status === 'absent') return 'Absent';
-        return 'Present';
+        if (record.is_late) return t('admin.hr.attendance.status.late');
+        if (record.has_overtime) return t('admin.hr.attendance.status.overtime');
+        if (record.status === 'absent') return t('admin.hr.attendance.status.absent');
+        return t('admin.hr.attendance.status.present');
     };
 
     const getStatusBadgeStyles = (record: AttendanceRecord) => {
@@ -148,7 +150,7 @@ export default function AttendanceManagement() {
 
     return (
         <AdminLayout>
-            <Head title="Attendance Management" />
+            <Head title={t('admin.hr.attendance.title')} />
 
             <div className="min-h-screen bg-background p-6 lg:p-8">
                 {/* Decorative Background Elements */}
@@ -168,19 +170,19 @@ export default function AttendanceManagement() {
                         <div>
                             <h1 className="text-4xl font-extrabold tracking-tight">
                                 <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                    Attendance Management
+                                    {t('admin.hr.attendance.title')}
                                 </span>
                             </h1>
                             <p className="text-muted-foreground mt-2 flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-amber-500" />
-                                View, filter, and adjust employee attendance records
+                                {t('admin.hr.attendance.subtitle')}
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border shadow-sm">
                                 <Users className="w-4 h-4 text-muted-foreground" />
                                 <span className="text-sm font-medium text-muted-foreground">
-                                    {(attendanceData as any)?.total || 0} Records
+                                    {(attendanceData as any)?.total || 0} {t('admin.hr.attendance.stats.records')}
                                 </span>
                             </div>
                         </div>
@@ -199,8 +201,8 @@ export default function AttendanceManagement() {
                                         <Filter className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-foreground">Filters</h3>
-                                        <p className="text-xs text-muted-foreground">Refine your search criteria</p>
+                                        <h3 className="text-lg font-bold text-foreground">{t('admin.hr.attendance.filters.title')}</h3>
+                                        <p className="text-xs text-muted-foreground">{t('admin.hr.attendance.filters.subtitle')}</p>
                                     </div>
                                 </div>
                             </CardHeader>
@@ -208,7 +210,7 @@ export default function AttendanceManagement() {
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
-                                            Start Date
+                                            {t('admin.hr.attendance.filters.start_date')}
                                         </label>
                                         <Input
                                             type="date"
@@ -222,7 +224,7 @@ export default function AttendanceManagement() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
-                                            End Date
+                                            {t('admin.hr.attendance.filters.end_date')}
                                         </label>
                                         <Input
                                             type="date"
@@ -236,12 +238,12 @@ export default function AttendanceManagement() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
-                                            Employee Search
+                                            {t('admin.hr.attendance.filters.employee_search')}
                                         </label>
                                         <div className="relative">
                                             <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
                                             <Input
-                                                placeholder="Search by name..."
+                                                placeholder={t('admin.hr.attendance.filters.search_placeholder') as string}
                                                 value={searchEmployee}
                                                 onChange={(e) => {
                                                     setSearchEmployee(e.target.value);
@@ -254,7 +256,7 @@ export default function AttendanceManagement() {
 
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-2">
-                                            Location
+                                            {t('admin.hr.attendance.filters.location')}
                                         </label>
                                         <select
                                             value={selectedLocation}
@@ -264,7 +266,7 @@ export default function AttendanceManagement() {
                                             }}
                                             className="w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 transition-all"
                                         >
-                                            <option value="">All Locations</option>
+                                            <option value="">{t('admin.hr.attendance.filters.all_locations')}</option>
                                             {(locations as any)?.data?.map((loc: any) => (
                                                 <option key={loc.id} value={loc.id}>
                                                     {loc.name}
@@ -277,7 +279,7 @@ export default function AttendanceManagement() {
                                 <div className="mt-4 flex gap-2">
                                     <Button onClick={handleExport} variant="outline" className="flex items-center gap-2">
                                         <Download size={18} />
-                                        Export CSV
+                                        {t('admin.hr.attendance.actions.export')}
                                     </Button>
                                 </div>
                             </CardContent>
@@ -298,14 +300,14 @@ export default function AttendanceManagement() {
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-bold text-foreground">
-                                            Attendance Records{' '}
+                                            {t('admin.hr.attendance.table.title')}{' '}
                                             {(attendanceData as any)?.total && (
                                                 <span className="text-muted-foreground font-normal">
                                                     ({(attendanceData as any).total})
                                                 </span>
                                             )}
                                         </h3>
-                                        <p className="text-xs text-muted-foreground">Complete attendance history</p>
+                                        <p className="text-xs text-muted-foreground">{t('admin.hr.attendance.table.subtitle')}</p>
                                     </div>
                                 </div>
                             </CardHeader>
@@ -319,8 +321,8 @@ export default function AttendanceManagement() {
                                         <div className="h-16 w-16 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-4">
                                             <AlertCircle className="h-8 w-8 text-muted-foreground" />
                                         </div>
-                                        <p className="text-muted-foreground font-medium">No attendance records found</p>
-                                        <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters</p>
+                                        <p className="text-muted-foreground font-medium">{t('admin.hr.attendance.messages.no_records')}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">{t('admin.hr.attendance.messages.try_filters')}</p>
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto">
@@ -328,28 +330,28 @@ export default function AttendanceManagement() {
                                             <thead className="bg-secondary/50 border-b border-border">
                                                 <tr>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Employee
+                                                        {t('admin.hr.attendance.table.employee')}
                                                     </th>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Date
+                                                        {t('admin.hr.attendance.table.date')}
                                                     </th>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Clock In
+                                                        {t('admin.hr.attendance.table.clock_in')}
                                                     </th>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Clock Out
+                                                        {t('admin.hr.attendance.table.clock_out')}
                                                     </th>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Hours
+                                                        {t('admin.hr.attendance.table.hours')}
                                                     </th>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Status
+                                                        {t('admin.hr.attendance.table.status')}
                                                     </th>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Location
+                                                        {t('admin.hr.attendance.table.location')}
                                                     </th>
                                                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                                                        Actions
+                                                        {t('admin.hr.attendance.table.actions')}
                                                     </th>
                                                 </tr>
                                             </thead>
@@ -448,14 +450,14 @@ export default function AttendanceManagement() {
                                                                         disabled={adjustMutation.isPending}
                                                                         className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
                                                                     >
-                                                                        Save
+                                                                        {t('admin.hr.attendance.actions.save')}
                                                                     </Button>
                                                                     <Button
                                                                         size="sm"
                                                                         variant="outline"
                                                                         onClick={() => setEditingId(null)}
                                                                     >
-                                                                        Cancel
+                                                                        {t('layout.actions.cancel')}
                                                                     </Button>
                                                                 </div>
                                                             ) : (

@@ -5,6 +5,7 @@ import { apiPost, apiDelete } from '@/app/libs/apiClient';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { router } from '@inertiajs/react';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface ProfilePictureUploadProps {
     currentAvatar?: string | null;
@@ -25,6 +26,7 @@ export default function ProfilePictureUpload({
     onDeleteSuccess,
     showDelete = true
 }: ProfilePictureUploadProps) {
+    const { t } = useTranslation();
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +63,7 @@ export default function ProfilePictureUpload({
     };
 
     const getInitials = (name: string) => {
-        if (!name) return '?';
+        if (!name) return t('common.ui.profile_picture.fallback_initials') as string;
         return name
             .split(' ')
             .map(part => part[0])
@@ -76,12 +78,12 @@ export default function ProfilePictureUpload({
 
         // Validations
         if (!file.type.startsWith('image/')) {
-            toastError('Please select an image file');
+            toastError(t('common.ui.profile_picture.messages.invalid_type') as string);
             return;
         }
 
         if (file.size > 2 * 1024 * 1024) { // 2MB
-            toastError('Image size should be less than 2MB');
+            toastError(t('common.ui.profile_picture.messages.size_limit', { size: '2' }) as string);
             return;
         }
 
@@ -99,7 +101,7 @@ export default function ProfilePictureUpload({
             // Use /customer/avatar route which supports both Auth and Telegram guests (Sprint P15)
             const response = await apiPost('customer/avatar', formData) as any;
 
-            toastSuccess('Profile picture updated');
+            toastSuccess(t('common.ui.profile_picture.messages.updated') as string);
             if (response.avatar_url) {
                 setPreviewUrl(response.avatar_url);
                 if (onUploadSuccess) onUploadSuccess(response.avatar_url);
@@ -109,7 +111,7 @@ export default function ProfilePictureUpload({
             }
         } catch (error: any) {
             console.error(error);
-            toastError(error.response?.data?.message || 'Failed to upload image');
+            toastError(error.response?.data?.message || t('common.ui.profile_picture.messages.upload_failed') as string);
             // Revert preview on error
             setPreviewUrl(currentAvatar || null);
         } finally {
@@ -120,19 +122,19 @@ export default function ProfilePictureUpload({
     const handleDelete = async () => {
         if (!previewUrl) return;
 
-        if (!confirm('Are you sure you want to remove your profile picture?')) return;
+        if (!confirm(t('common.ui.profile_picture.messages.confirm_remove') as string)) return;
 
         setIsDeleting(true);
         try {
             // Use /customer/avatar route which supports both Auth and Telegram guests (Sprint P15)
             await apiDelete('customer/avatar');
-            toastSuccess('Profile picture removed');
+            toastSuccess(t('common.ui.profile_picture.messages.removed') as string);
             setPreviewUrl(null);
             if (onDeleteSuccess) onDeleteSuccess();
             router.reload();
         } catch (error: any) {
             console.error(error);
-            toastError(error.response?.data?.message || 'Failed to remove image');
+            toastError(error.response?.data?.message || t('common.ui.profile_picture.messages.remove_failed'));
         } finally {
             setIsDeleting(false);
         }
@@ -147,7 +149,7 @@ export default function ProfilePictureUpload({
                 {previewUrl ? (
                     <img
                         src={previewUrl}
-                        alt={name || 'Profile'}
+                        alt={name || (t('common.ui.profile_picture.fallback_name') as string)}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                             // Fallback to initials if image fails to load
@@ -182,7 +184,7 @@ export default function ProfilePictureUpload({
                         'rounded-full bg-purple-600 text-white hover:bg-purple-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 w-6 h-6 sm:w-9 sm:h-9 flex items-center justify-center p-0',
                         // buttonSizes[size] // Overriding size padding for custom sizes
                     )}
-                    aria-label="Upload profile picture"
+                    aria-label={t('common.ui.profile_picture.actions.upload_aria') as string}
                 >
                     <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
@@ -196,7 +198,7 @@ export default function ProfilePictureUpload({
                             'rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-6 h-6 sm:w-9 sm:h-9 flex items-center justify-center p-0',
                             // buttonSizes[size] // Overriding size padding for custom sizes
                         )}
-                        aria-label="Delete profile picture"
+                        aria-label={t('common.ui.profile_picture.actions.delete_aria') as string}
                     >
                         <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>

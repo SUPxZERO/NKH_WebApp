@@ -102,6 +102,8 @@ const profilePaths: Record<UserRole, string> = {
 
 export default function UserProfileDropdown({ className, variant }: UserProfileDropdownProps) {
     const { t } = useTranslation();
+    const fallbackName = t('common.ui.user_menu.fallback_name') as string;
+    const fallbackInitials = t('common.ui.user_menu.fallback_initials') as string;
     const [isOpen, setIsOpen] = useState(false);
     const { isDark, toggle } = useThemeStore();
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -117,7 +119,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
 
     // Get initials from name safely
     const getInitials = (name: string) => {
-        if (!name) return '?';
+        if (!name) return fallbackInitials;
         return name
             .split(' ')
             .map(part => part[0])
@@ -175,10 +177,11 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="rounded-full hover:shadow-lg hover:scale-105 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                aria-label={t('common.ui.user_menu.actions.toggle_menu') as string}
             >
                 <Avatar
                     src={user.avatar}
-                    name={user.name || 'User'}
+                    name={user.name || fallbackName}
                     size="md"
                     fallbackColor={userRole === 'admin' ? 'purple' : userRole === 'employee' ? 'blue' : 'rose'}
                     className={cn(isOpen && 'ring-2 ring-offset-2 ring-purple-500/50')}
@@ -222,7 +225,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                     {/* Avatar */}
                                     <Avatar
                                         src={user.avatar}
-                                        name={user.name || 'User'}
+                                        name={user.name || fallbackName}
                                         size="lg"
                                         fallbackColor={userRole === 'admin' ? 'purple' : userRole === 'employee' ? 'blue' : 'rose'}
                                     />
@@ -230,7 +233,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                                            {t('common.ui.user_menu.greeting', { name: (user.name || 'User').split(' ')[0] })}
+                                            {t('common.ui.user_menu.greeting', { name: (user.name || fallbackName).split(' ')[0] })}
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                             {user.email}
@@ -249,6 +252,7 @@ export default function UserProfileDropdown({ className, variant }: UserProfileD
                                     <button
                                         onClick={() => setIsOpen(false)}
                                         className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                                        aria-label={t('common.ui.user_menu.actions.close_menu') as string}
                                     >
                                         <X className="w-5 h-5 text-gray-400" />
                                     </button>

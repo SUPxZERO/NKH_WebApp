@@ -69,7 +69,7 @@ interface Announcement {
 }
 
 export default function EmployeeDashboard() {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const [showTimeOffModal, setShowTimeOffModal] = useState(false);
     const [timeOffData, setTimeOffData] = useState({
         request_type: 'vacation',
@@ -137,7 +137,9 @@ export default function EmployeeDashboard() {
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        // Map locale to BCP 47 language tags
+        const localeTag = locale === 'km' ? 'km-KH' : 'en-US';
+        return date.toLocaleDateString(localeTag, { weekday: 'short', month: 'short', day: 'numeric' });
     };
 
     return (
@@ -316,7 +318,7 @@ export default function EmployeeDashboard() {
                                     {upcomingShifts.slice(0, 3).map((shift) => (
                                         <div key={shift.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
                                             <div className="w-10 h-10 bg-gray-50 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{new Date(shift.date).toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{new Date(shift.date).toLocaleDateString(locale === 'km' ? 'km-KH' : 'en-US', { weekday: 'short' })}</span>
                                                 <span className="text-sm font-bold text-gray-900 dark:text-white">{new Date(shift.date).getDate()}</span>
                                             </div>
                                             <div className="flex-1 min-w-0">

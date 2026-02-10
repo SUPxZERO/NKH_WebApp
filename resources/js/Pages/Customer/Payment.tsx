@@ -81,7 +81,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
         } else if (statusData.status === 'failed') {
             // On failure, do not redirect anywhere. Just stop polling and show error.
             setIsPolling(false);
-            toastError(t('payment.messages.failed', { reason: statusData.failure_reason || 'Unknown error' }) as string);
+            toastError(t('payment.messages.failed', { reason: statusData.failure_reason || t('payment.messages.unknown_error') }) as string);
         } else if (statusData.status === 'cancelled') {
             setIsPolling(false);
             toastError(t('payment.messages.cancelled') as string);
@@ -141,7 +141,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
             await simulateSuccess.mutateAsync(paymentData.payment.id);
             refetchStatus();
         } catch (error: any) {
-            toastError(error?.message || 'Simulation failed');
+            toastError(error?.message || t('payment.messages.simulation_failed') as string);
         }
     };
 
@@ -150,11 +150,11 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
         try {
             await simulateFailure.mutateAsync({
                 paymentId: paymentData.payment.id,
-                reason: 'Simulated failure',
+                reason: t('payment.simulated_failure_reason') as string,
             });
             refetchStatus();
         } catch (error: any) {
-            toastError(error?.message || 'Simulation failed');
+            toastError(error?.message || t('payment.messages.simulation_failed') as string);
         }
     };
 
@@ -285,7 +285,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                     {/* Cash Payment */}
                                     {paymentData.type === 'cash' && (
                                         <CashPaymentDisplay
-                                            orderNumber={paymentData.order?.order_number || 'N/A'}
+                                            orderNumber={paymentData.order?.order_number || t('payment.fallbacks.order_number')}
                                             amount={paymentData.payment?.amount || 0}
                                             currency={paymentData.payment?.currency || 'USD'}
                                             status={statusData?.status || paymentData.payment?.status || 'pending'}
@@ -302,7 +302,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                                 publishableKey={(paymentData as any).stripe.publishable_key}
                                                 amount={paymentData.payment?.amount || 0}
                                                 currency={paymentData.payment?.currency || 'USD'}
-                                                orderNumber={paymentData.order?.order_number || 'N/A'}
+                                                orderNumber={paymentData.order?.order_number || t('payment.fallbacks.order_number')}
                                                 onSuccess={() => {
                                                     toastSuccess(t('payment.messages.success') as string);
                                                     setTimeout(() => {

@@ -57,9 +57,9 @@ export default function Profile() {
     const getTitle = () => {
         try {
             const title = t('profile.title');
-            return typeof title === 'string' && title ? title : 'My Profile';
+            return typeof title === 'string' && title ? title : t('profile.fallbacks.title');
         } catch {
-            return 'My Profile';
+            return t('profile.fallbacks.title');
         }
     };
     const [editMode, setEditMode] = useState(false);
@@ -102,7 +102,7 @@ export default function Profile() {
         city: '',
         province: '',
         postal_code: '',
-        country: 'Cambodia',
+        country: t('profile.addresses.default_country'),
         latitude: 11.5564,
         longitude: 104.9282,
         delivery_instructions: '',
@@ -199,7 +199,7 @@ export default function Profile() {
             city: address.city,
             province: address.province,
             postal_code: address.postal_code,
-            country: address.country || 'Cambodia',
+            country: address.country || t('profile.addresses.default_country'),
             latitude: address.latitude || 11.5564,
             longitude: address.longitude || 104.9282,
             delivery_instructions: address.delivery_instructions || '',
@@ -224,7 +224,7 @@ export default function Profile() {
             city: '',
             province: '',
             postal_code: '',
-            country: 'Cambodia',
+            country: t('profile.addresses.default_country'),
             latitude: 11.5564,
             longitude: 104.9282,
             delivery_instructions: '',
@@ -252,7 +252,7 @@ export default function Profile() {
                 }));
             }
         } catch (error) {
-            console.error("Geocoding failed", error);
+            console.error(t('profile.messages.geocoding_failed'), error);
         } finally {
             setLoadingLocation(false);
         }
@@ -286,7 +286,7 @@ export default function Profile() {
         <RequireAuth roles={['customer']}>
             <CustomerLayout>
                 <Head>
-                    <title>{getTitle()} - NKH Restaurant</title>
+                        <title>{getTitle()} - {t('profile.meta_title_suffix')}</title>
                 </Head>
                 <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}

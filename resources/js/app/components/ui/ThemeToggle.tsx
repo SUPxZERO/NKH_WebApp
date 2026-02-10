@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { useThemeStore, ThemeMode } from '@/app/store/theme';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface ThemeToggleProps {
   className?: string;
@@ -12,6 +13,10 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ className, variant = 'default', showLabel = false }: ThemeToggleProps) {
   const { isDark, mode, toggle: toggleTheme, setTheme } = useThemeStore();
+  const { t } = useTranslation();
+  const lightLabel = t('common.ui.theme_toggle.light') as string;
+  const darkLabel = t('common.ui.theme_toggle.dark') as string;
+  const systemLabel = t('common.ui.theme_toggle.system') as string;
 
   // Minimal - just an icon button
   if (variant === 'minimal') {
@@ -24,8 +29,8 @@ export function ThemeToggle({ className, variant = 'default', showLabel = false 
           'text-muted-foreground hover:text-foreground',
           className
         )}
-        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        title={isDark ? t('common.ui.theme_toggle.actions.switch_to_light') : t('common.ui.theme_toggle.actions.switch_to_dark')}
+        aria-label={isDark ? t('common.ui.theme_toggle.actions.switch_to_light') : t('common.ui.theme_toggle.actions.switch_to_dark')}
       >
         {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
       </button>
@@ -47,7 +52,7 @@ export function ThemeToggle({ className, variant = 'default', showLabel = false 
       >
         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         {showLabel && (
-          <span className="text-sm font-medium">{isDark ? 'Light' : 'Dark'}</span>
+          <span className="text-sm font-medium">{isDark ? lightLabel : darkLabel}</span>
         )}
       </button>
     );
@@ -79,7 +84,7 @@ export function ThemeToggle({ className, variant = 'default', showLabel = false 
         </div>
         {showLabel && (
           <span className="font-medium text-foreground">
-            {isDark ? 'Light Mode' : 'Dark Mode'}
+            {isDark ? t('common.ui.theme_toggle.modes.light') : t('common.ui.theme_toggle.modes.dark')}
           </span>
         )}
         <div
@@ -100,9 +105,9 @@ export function ThemeToggle({ className, variant = 'default', showLabel = false 
 
   // Default - 3-way toggle (Light / Dark / System)
   const themes: { mode: ThemeMode; icon: React.ReactNode; label: string }[] = [
-    { mode: 'light', icon: <Sun className="w-4 h-4" />, label: 'Light' },
-    { mode: 'dark', icon: <Moon className="w-4 h-4" />, label: 'Dark' },
-    { mode: 'system', icon: <Monitor className="w-4 h-4" />, label: 'System' },
+    { mode: 'light', icon: <Sun className="w-4 h-4" />, label: lightLabel },
+    { mode: 'dark', icon: <Moon className="w-4 h-4" />, label: darkLabel },
+    { mode: 'system', icon: <Monitor className="w-4 h-4" />, label: systemLabel },
   ];
 
   return (
@@ -118,7 +123,7 @@ export function ThemeToggle({ className, variant = 'default', showLabel = false 
                 ? 'text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             )}
-            aria-label={`Set theme to ${theme.label}`}
+            aria-label={t('common.ui.theme_toggle.actions.set_theme', { theme: theme.label }) as string}
             aria-pressed={mode === theme.mode}
           >
             {mode === theme.mode && (

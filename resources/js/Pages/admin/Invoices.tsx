@@ -58,8 +58,10 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) 
   );
 };
 
-export default function Invoices() {
-  const { t } = useLanguage();
+export default function AdminInvoices() {
+  const { t, locale } = useLanguage();
+  // const [invoiceList, setInvoiceList] = useState<Invoice[]>([]); // Removed redeclaration
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -117,8 +119,7 @@ export default function Invoices() {
   };
 
   const handleDownload = (invoice: Invoice) => {
-    // Open the backend PDF route in a new tab/window which triggers download
-    const url = `/api/admin/invoices/${invoice.id}/pdf`;
+    const url = `/api/admin/invoices/${invoice.id}/pdf?locale=${locale}`;
     window.open(url, '_blank');
   };
 
@@ -155,7 +156,7 @@ export default function Invoices() {
             </div>
             <Button
               onClick={() => {
-                let url = `/api/admin/invoices/export/csv?`;
+                let url = `/api/admin/invoices/export/csv?locale=${locale}`;
                 if (statusFilter !== 'all') url += `&status=${statusFilter}`;
                 if (dateFilter !== 'all') {
                   const today = new Date();

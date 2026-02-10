@@ -1,0 +1,399 @@
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\EmployeeScheduler.tsx::text::Employee Scheduler
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\EmployeeScheduler.tsx::text::Select Employee
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\EmployeeScheduler.tsx::text::Schedule
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\EmployeeScheduler.tsx::text::Not scheduled
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\NotificationCenter.tsx::text::apiGet
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\NotificationCenter.tsx::text::Notifications
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\NotificationCenter.tsx::text::Mark all read
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\NotificationCenter.tsx::text::No notifications yet
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\NotificationCenter.tsx::text::Mark read
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Payment Analytics
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Revenue Trend
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::total revenue
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Payment Methods
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Peak Hours
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Top Customers
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Transaction Status Breakdown
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Completed
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Pending
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Failed
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::text::Cancelled
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::attr:title::Total Revenue
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::attr:title::Transactions
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::attr:title::Avg. Order Value
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\PaymentAnalyticsDashboard.tsx::attr:title::Success Rate
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Pending
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Approved
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Ready to process
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Completed Today
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Rejected
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::All time
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::All Status
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Completed
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Clear Filters
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Refund Requests
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::No refunds found
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::ID
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Reason
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Status
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Requested
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Actions
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Payment Ref
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Payment Method
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Requested By
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Notes
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Rejection Reason
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Gateway Ref
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Previous
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Next
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Rejection Reason *
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::attr:placeholder::From Date
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::attr:placeholder::To Date
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::attr:title::Reject Refund
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundManagement.tsx::attr:placeholder::Enter reason for rejection...
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Payment Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Already Refunded
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Refundable Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Refund Amount *
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Full Refund
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Reason *
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Specify Reason *
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Additional Notes
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::attr:title::Request Refund
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::attr:placeholder::Enter the refund reason...
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\RefundModal.tsx::attr:placeholder::Optional notes for this refund...
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Send Notification
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Send targeted notifications to users
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Retry
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Send To
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Select Locations
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::No locations available
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Search & Select Users
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Notification Type
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Title
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Message
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Action URL
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::attr:placeholder::Type at least 2 characters to search...
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::attr:placeholder::Enter notification title...
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::attr:placeholder::Enter your notification message...
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\SendNotificationPanel.tsx::attr:placeholder::/menu or https://example.com
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::Floor Plan Manager
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::Add Table
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::Available
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::Reserved
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::Occupied
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::No floor selected
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::text::Delete
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::attr:label::Table Number
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::attr:placeholder::e.g. T1, A5
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::attr:label::Capacity
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::attr:label::X Position
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\TableFloorManager.tsx::attr:label::Y Position
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\AuditEventCard.tsx::text::on
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\AuditEventCard.tsx::text::IP Address
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\AuditEventCard.tsx::text::Device
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\AuditEventCard.tsx::text::Route
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\AuditEventCard.tsx::text::Source
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\AuditEventCard.tsx::text::Changes
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\AuditTimeline.tsx::text::No audit logs found
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\DiffViewer.tsx::text::No data changes recorded
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\DiffViewer.tsx::text::Added
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\DiffViewer.tsx::text::Removed
+E:\promgramming\NKH_WebApp\resources\js\app\components\audit\DiffViewer.tsx::text::Modified
+E:\promgramming\NKH_WebApp\resources\js\app\components\cart\CartSummary.tsx::text::Tax
+E:\promgramming\NKH_WebApp\resources\js\app\components\cart\QuantitySelector.tsx::attr:aria-label::Decrease quantity
+E:\promgramming\NKH_WebApp\resources\js\app\components\cart\QuantitySelector.tsx::attr:aria-label::Increase quantity
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManager.tsx::text::Delivery Address
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Delivery Address
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Add New
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Add
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::No saved addresses
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Add Address
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::GPS
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Default
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Address Label *
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Street Address *
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::City *
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Province *
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Postal Code
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::GPS Coordinates
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Select location on map
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Delivery Instructions
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Set as default address
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::text::Update Address
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::attr:placeholder::Custom label
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::attr:label::Search Location (OpenStreetMap)
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::attr:placeholder::Start typing an address...
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::attr:placeholder::123 Main Street
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::attr:placeholder::Apt 4B
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::attr:placeholder::Phnom Penh
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressManagerEnhanced.tsx::attr:placeholder::Gate code, building entrance, special instructions...
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::text::Pick on Map
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::text::View larger
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::text::Pick Location on Map
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::text::Click on the map or drag the marker to set your location
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::text::Confirm Location
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::attr:title::View on OpenStreetMap
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\AddressPicker.tsx::attr:title::Location Map
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\CategoryFilter.tsx::text::All
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\NotificationPreferencesSettings.tsx::text::Failed to load notification preferences
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\NotificationPreferencesSettings.tsx::text::Notification Preferences
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\NotificationPreferencesSettings.tsx::text::Choose how and when you want to be notified
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\NotificationPreferencesSettings.tsx::text::Enable All
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\NotificationPreferencesSettings.tsx::text::Disable All
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\NotificationPreferencesSettings.tsx::text::Notification Type
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Browse Menu
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::All
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Popular
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Add
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Your Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Your cart is empty
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Add items from the menu
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Subtotal
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Delivery Fee
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Tax
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::text::Total
+E:\promgramming\NKH_WebApp\resources\js\app\components\customer\OrderingModal.tsx::attr:placeholder::Search menu...
+E:\promgramming\NKH_WebApp\resources\js\app\components\dashboard\ActivityFeed.tsx::text::No recent activity
+E:\promgramming\NKH_WebApp\resources\js\app\components\dashboard\AlertBanner.tsx::text::Attention Required
+E:\promgramming\NKH_WebApp\resources\js\app\components\dashboard\AlertBanner.tsx::text::View
+E:\promgramming\NKH_WebApp\resources\js\app\components\dashboard\BoldTopItemsChart.tsx::text::No data available
+E:\promgramming\NKH_WebApp\resources\js\app\components\dashboard\DashboardChart.tsx::text::Try again
+E:\promgramming\NKH_WebApp\resources\js\app\components\dashboard\DashboardChart.tsx::attr:aria-label::Refresh chart
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::apiGet
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Order Management
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Monitor and manage all restaurant orders
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Refresh
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::All Orders
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Pending
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Confirmed
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Preparing
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Ready
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Delivered
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Cancelled
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::View
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::No Orders Found
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Customer Information
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Order Details
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Order Items
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::text::Cancel Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\AdminOrderManagement.tsx::attr:placeholder::Search by order ID, customer name, or phone...
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::apiGet
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Welcome back! 👋
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Ready to order something delicious?
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Orders
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Spent
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Points
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Loyalty Progress
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Current Points
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::1000 points
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Recent Achievements
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Your latest accomplishments
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::View All
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Order History
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Your recent orders
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::New Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::View Details
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Reorder
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::No Orders Yet
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Start your culinary journey with us!
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Place Your First Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Favorite Items
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Items you love most
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Add to Cart
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::No Favorites Yet
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Heart items you love to see them here!
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Rewards & Offers
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Special deals just for you
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Rewards Coming Soon
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\EnhancedCustomerDashboard.tsx::text::Get Notified
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::apiGet
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Multi-Location Management
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Monitor and manage all restaurant locations
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Grid View
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Analytics
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Add Location
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Total Revenue Today
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Total Orders Today
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Total Staff
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Avg Rating
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Revenue
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Orders
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Staff
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Prep Time
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Location Performance Analytics
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Advanced Analytics Coming Soon
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Enable Analytics
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::text::Detailed Analytics
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:title::Add New Location
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:label::Location Name
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:placeholder::Downtown Branch
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:label::Manager Name
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:placeholder::John Doe
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:label::Address
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:placeholder::123 Main St
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:label::City
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:placeholder::New York
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:label::Phone
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:label::Email
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\MultiLocationManager.tsx::attr:placeholder::downtown@restaurant.com
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\QuickOrderPanel.tsx::text::Quick Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\QuickOrderPanel.tsx::text::Popular items for fast ordering
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\QuickOrderPanel.tsx::text::Popular
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\QuickOrderPanel.tsx::text::Add
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\SmartOrderRecommendations.tsx::text::apiGet
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\SmartOrderRecommendations.tsx::text::Smart Recommendations
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\SmartOrderRecommendations.tsx::text::Personalized just for you
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\SmartOrderRecommendations.tsx::text::View All
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\SmartOrderRecommendations.tsx::text::Hot
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\SmartOrderRecommendations.tsx::text::Fast
+E:\promgramming\NKH_WebApp\resources\js\app\components\enhanced\SmartOrderRecommendations.tsx::text::Add to Cart
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CardPaymentPlaceholder.tsx::text::Card Payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CardPaymentPlaceholder.tsx::text::Coming Soon
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CardPaymentPlaceholder.tsx::text::Secure payment powered by Stripe
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CardPaymentPlaceholder.tsx::text::VISA
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CardPaymentPlaceholder.tsx::text::Mastercard
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CardPaymentPlaceholder.tsx::text::AMEX
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CardPaymentPlaceholder.tsx::text::← Choose Another Method
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CashPaymentDisplay.tsx::text::Cash Payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CashPaymentDisplay.tsx::text::Amount to Pay
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CashPaymentDisplay.tsx::text::Go to
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CashPaymentDisplay.tsx::text::cashier counter
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CashPaymentDisplay.tsx::text::Pay
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CashPaymentDisplay.tsx::text::cash
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\CashPaymentDisplay.tsx::text::Choose another method
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::No payment methods available
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::Select Payment Method
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::Scan to pay
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::QR
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::Pay at counter
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::Cash
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::Card payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\PaymentMethodSelector.tsx::text::Card
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Payment Successful!
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Your order is being prepared
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Payment Failed
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Try Again
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Payment Cancelled
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Scan to Pay
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::QR Code Expired
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Generate New
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Reference
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Open
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::ABA Mobile
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::app
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Tap "Scan" or "KHQR"
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Scan this QR code
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Confirm payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Dev Mode
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Success
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::text::Failure
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\QRPaymentDisplay.tsx::attr:alt::Payment QR Code
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Failed to load receipt
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Receipt
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::PDF
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Print
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Email
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Receipt #
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Date
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Items
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Subtotal
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Discount
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Total
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Cash Received
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Change
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::attr:title::Email Receipt
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\ReceiptViewer.tsx::attr:placeholder::customer@example.com
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Unable to load payment status
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Split Payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Total
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Payment Progress
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Payments
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Add Payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::No payments yet
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Click "Add Payment" to start
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Payment Method
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\SplitPaymentPanel.tsx::text::Payment Complete!
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Secure Card Payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Total Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Card Details
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Secured by Stripe
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::VISA
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::MC
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::AMEX
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Pay
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Test Mode
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Stripe Not Configured
+E:\promgramming\NKH_WebApp\resources\js\app\components\payment\StripeCardForm.tsx::text::Go Back
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSMenuGrid.tsx::text::Add
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Payment
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Remaining Balance
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Pay Full Balance
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Split Bill
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Split Method
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::By Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Enter any amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Payment Method
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Cash
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Card
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::QR
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Add Tip
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::None
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Custom Amount via Input
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Payment Summary
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Total Charge
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Paid So Far
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Total Paid
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\pos\POSOrderPaymentPanel.tsx::attr:placeholder::Enter tip amount
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\CommandPalette.tsx::text::No commands found
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\CommandPalette.tsx::text::Navigate
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\CommandPalette.tsx::text::Select
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\CommandPalette.tsx::text::Esc
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\CommandPalette.tsx::text::Close
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\CommandPalette.tsx::attr:aria-label::Command palette
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\CommandPalette.tsx::attr:placeholder::Search commands...
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::text::Keyboard Shortcuts
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::text::No shortcuts found
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::text::or
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::text::Toggle this help
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::text::Esc
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::text::Close
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::attr:aria-label::Keyboard shortcuts
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::attr:aria-label::Close help
+E:\promgramming\NKH_WebApp\resources\js\app\components\shortcuts\HelpOverlay.tsx::attr:placeholder::Search shortcuts...
+E:\promgramming\NKH_WebApp\resources\js\app\components\ui\GlobalSearch.tsx::text::ESC
+E:\promgramming\NKH_WebApp\resources\js\app\components\ui\GlobalSearch.tsx::text::⇧K
+E:\promgramming\NKH_WebApp\resources\js\app\components\ui\Map.tsx::text::OpenStreetMap
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\ConfigurationEditor.tsx::text::No configuration set
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\ConfigurationEditor.tsx::text::Configuration
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\ConfigurationEditor.tsx::text::Add Field
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\ConfigurationEditor.tsx::attr:placeholder::Key (e.g. bank_account)
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\ConfigurationEditor.tsx::attr:placeholder::Value
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodAuditViewer.tsx::text::Change History
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::text::Promise
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::text::Method Name
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::text::Code / Type
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::text::Current Status
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::text::Editable Configuration
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::text::Cancel
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::text::Save Changes
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::attr:label::Processing Fee (%)
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::attr:label::Display Order
+E:\promgramming\NKH_WebApp\resources\js\app\components\admin\payment-methods\PaymentMethodForm.tsx::attr:label::Description

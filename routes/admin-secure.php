@@ -540,6 +540,14 @@ Route::middleware('permission:notifications.send')
         Route::post('send-to-users', [\App\Http\Controllers\Api\TargetedNotificationController::class, 'sendToUsers']);
     });
 
+// Admin Personal Notifications (Inbox) - No permission required, all admins can view their own
+Route::get('my-notifications', [\App\Http\Controllers\Api\AdminNotificationController::class, 'index']);
+Route::get('my-notifications/unread-count', [\App\Http\Controllers\Api\AdminNotificationController::class, 'unreadCount']);
+Route::post('my-notifications/{notification}/read', [\App\Http\Controllers\Api\AdminNotificationController::class, 'markAsRead']);
+Route::post('my-notifications/mark-all-read', [\App\Http\Controllers\Api\AdminNotificationController::class, 'markAllAsRead']);
+Route::delete('my-notifications/{notification}', [\App\Http\Controllers\Api\AdminNotificationController::class, 'destroy']);
+
+
 // Positions - requires employees.* permissions
 Route::middleware('permission:employees.view')
     ->group(function () {
