@@ -364,7 +364,7 @@ export default function Schedule() {
 
     return (
         <EmployeeLayout>
-            <Head title={`${t('employee.schedule.title')} - ${t('meta.app_title')}`} />
+            <Head title={`${t('employee.schedule.title')} - ${t('common.meta.app_title')}`} />
 
             <div className="space-y-6">
                 {/* Header & Tabs */}

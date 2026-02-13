@@ -47,12 +47,12 @@ export default function OrderTracking() {
   };
 
   const statusSteps = [
-    { key: 'pending', label: t('customer_pages.order_tracking.status.pending.label'), description: t('customer_pages.order_tracking.status.pending.description') },
-    { key: 'received', label: t('customer_pages.order_tracking.status.received.label'), description: t('customer_pages.order_tracking.status.received.description') },
-    { key: 'preparing', label: t('customer_pages.order_tracking.status.preparing.label'), description: t('customer_pages.order_tracking.status.preparing.description') },
-    { key: 'ready', label: t('customer_pages.order_tracking.status.ready.label'), description: order?.mode === 'delivery' ? t('customer_pages.order_tracking.status.ready.description_delivery') : t('customer_pages.order_tracking.status.ready.description_pickup') },
-    { key: 'completed', label: t('customer_pages.order_tracking.status.completed.label'), description: t('customer_pages.order_tracking.status.completed.description') },
-    { key: 'delivered', label: order?.mode === 'delivery' ? t('customer_pages.order_tracking.status.delivered.label_delivery') : t('customer_pages.order_tracking.status.delivered.label_pickup'), description: t('customer_pages.order_tracking.status.delivered.description') }
+    { key: 'pending', label: t('customer.order_tracking.status.pending.label'), description: t('customer.order_tracking.status.pending.description') },
+    { key: 'received', label: t('customer.order_tracking.status.received.label'), description: t('customer.order_tracking.status.received.description') },
+    { key: 'preparing', label: t('customer.order_tracking.status.preparing.label'), description: t('customer.order_tracking.status.preparing.description') },
+    { key: 'ready', label: t('customer.order_tracking.status.ready.label'), description: order?.mode === 'delivery' ? t('customer.order_tracking.status.ready.description_delivery') : t('customer.order_tracking.status.ready.description_pickup') },
+    { key: 'completed', label: t('customer.order_tracking.status.completed.label'), description: t('customer.order_tracking.status.completed.description') },
+    { key: 'delivered', label: order?.mode === 'delivery' ? t('customer.order_tracking.status.delivered.label_delivery') : t('customer.order_tracking.status.delivered.label_pickup'), description: t('customer.order_tracking.status.delivered.description') }
   ];
 
   const currentStep = order ? getStatusStep(order.status) : 0;
@@ -62,10 +62,10 @@ export default function OrderTracking() {
     <CustomerLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('customer_pages.order_tracking.title')}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('customer.order_tracking.title')}</h1>
           {order && (
             <p className="text-gray-600 dark:text-gray-300">
-              {t('customer_pages.order_tracking.order_info', { id: order.id })} • {order.mode === 'delivery' ? t('customer_pages.order_tracking.delivery') : t('customer_pages.order_tracking.pickup')}
+              {t('customer.order_tracking.order_info', { id: order.id })} • {order.mode === 'delivery' ? t('customer.order_tracking.delivery') : t('customer.order_tracking.pickup')}
             </p>
           )}
         </div>
@@ -87,12 +87,12 @@ export default function OrderTracking() {
               <CardHeader>
                 <div className="text-center">
                   <div className="text-lg font-semibold mb-1">
-                    {order.status === 'delivered' ? t('customer_pages.order_tracking.order_complete') : t('customer_pages.order_tracking.estimated', { time: estimatedTime })}
+                    {order.status === 'delivered' ? t('customer.order_tracking.order_complete') : t('customer.order_tracking.estimated', { time: estimatedTime })}
                   </div>
                   <div className="text-sm text-gray-500">
                     {order.status === 'delivered'
-                      ? t('customer_pages.order_tracking.thank_you')
-                      : t('customer_pages.order_tracking.processing', { mode: order.mode === 'delivery' ? t('customer_pages.order_tracking.delivery').toLowerCase() : t('customer_pages.order_tracking.pickup').toLowerCase() })
+                      ? t('customer.order_tracking.thank_you')
+                      : t('customer.order_tracking.processing', { mode: order.mode === 'delivery' ? t('customer.order_tracking.delivery').toLowerCase() : t('customer.order_tracking.pickup').toLowerCase() })
                     }
                   </div>
                 </div>
@@ -124,11 +124,10 @@ export default function OrderTracking() {
                           transition={{ delay: index * 0.1 }}
                         >
                           {/* Icon */}
-                          <div className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full border-2 ${
-                            isCompleted ? 'bg-emerald-500/20 border-emerald-400' :
-                            isActive ? 'bg-fuchsia-500/20 border-fuchsia-400' :
-                            'bg-gray-500/20 border-gray-400'
-                          }`}>
+                          <div className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full border-2 ${isCompleted ? 'bg-emerald-500/20 border-emerald-400' :
+                              isActive ? 'bg-fuchsia-500/20 border-fuchsia-400' :
+                                'bg-gray-500/20 border-gray-400'
+                            }`}>
                             {isCompleted ? (
                               <CheckCircle className="w-6 h-6 text-emerald-400" />
                             ) : (
@@ -138,9 +137,8 @@ export default function OrderTracking() {
 
                           {/* Content */}
                           <div className="flex-1 min-w-0 pt-2">
-                            <div className={`font-medium ${
-                              isCompleted || isActive ? 'text-current' : 'text-gray-500'
-                            }`}>
+                            <div className={`font-medium ${isCompleted || isActive ? 'text-current' : 'text-gray-500'
+                              }`}>
                               {step.label}
                             </div>
                             <div className="text-sm text-gray-500 mt-1">
@@ -152,7 +150,7 @@ export default function OrderTracking() {
                                 animate={{ opacity: [1, 0.5, 1] }}
                                 transition={{ repeat: Infinity, duration: 2 }}
                               >
-                                {t('customer_pages.order_tracking.in_progress')}
+                                {t('customer.order_tracking.in_progress')}
                               </motion.div>
                             )}
                           </div>
@@ -167,7 +165,7 @@ export default function OrderTracking() {
             {/* Order Details */}
             <Card>
               <CardHeader>
-                <h3 className="font-semibold">{t('customer_pages.order_tracking.order_details')}</h3>
+                <h3 className="font-semibold">{t('customer.order_tracking.order_details')}</h3>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -175,7 +173,7 @@ export default function OrderTracking() {
                     <div key={index} className="flex items-center justify-between">
                       <div>
                         <div className="font-medium">{item.name}</div>
-                        <div className="text-sm text-gray-500">{t('customer_pages.order_tracking.quantity', { qty: item.quantity })}</div>
+                        <div className="text-sm text-gray-500">{t('customer.order_tracking.quantity', { qty: item.quantity })}</div>
                       </div>
                       <div className="font-medium">
                         ${(item.unit_price * item.quantity).toFixed(2)}
@@ -184,7 +182,7 @@ export default function OrderTracking() {
                   ))}
                   <div className="border-t border-white/10 pt-3 mt-3">
                     <div className="flex justify-between font-semibold text-lg">
-                      <span>{t('customer_pages.order_tracking.total')}</span>
+                      <span>{t('customer.order_tracking.total')}</span>
                       <span>${order.total.toFixed(2)}</span>
                     </div>
                   </div>
@@ -196,9 +194,9 @@ export default function OrderTracking() {
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="text-sm text-gray-500">
-                  {t('customer_pages.order_tracking.need_help')}{' '}
+                  {t('customer.order_tracking.need_help')}{' '}
                   <a href="tel:+1234567890" className="text-fuchsia-400 hover:underline">
-                    {t('customer_pages.order_tracking.call_us', { phone: '(123) 456-7890' })}
+                    {t('customer.order_tracking.call_us', { phone: '(123) 456-7890' })}
                   </a>
                 </div>
               </CardContent>
@@ -207,7 +205,7 @@ export default function OrderTracking() {
         ) : (
           <Card>
             <CardContent className="p-8 text-center">
-              <div className="text-gray-500">Order not found</div>
+              <div className="text-gray-500">{t('customer.order_tracking.not_found')}</div>
             </CardContent>
           </Card>
         )}

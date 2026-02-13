@@ -106,7 +106,7 @@ class OrderPlacementService
                 'table_id' => $tableId,
                 'customer_id' => $customer->id,
                 'order_number' => $this->generateOrderNumber($data['location_id'], $isQrTableOrder ? 'TBL' : 'ONL'),
-                'order_type_id' => OrderType::where('code', $data['order_type'])->value('id') ?? OrderType::where('code', 'dine-in')->value('id'), // Default to dine-in
+                // 'order_type' => $data['order_type'], // FIX: Removed from mass assignment
                 'status' => $isQrTableOrder ? 'received' : 'pending',
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
@@ -123,6 +123,11 @@ class OrderPlacementService
                 'time_slot_id' => $slot ? $slot->id : null,
                 'payment_mode' => $isQrTableOrder ? ($data['payment_mode'] ?? Order::PAYMENT_MODE_PAY_AT_COUNTER) : ($data['payment_mode'] ?? 'pay_now'),
             ]);
+
+            // FIX: Explicitly set order_type to trigger the model mutator (setOrderTypeAttribute)
+            // This ensures order_type_id is correctly populated since it's guarded
+            $order->order_type = $data['order_type'];
+            $order->save();
 
             // Create order items
             foreach ($orderItemsData as $item) {

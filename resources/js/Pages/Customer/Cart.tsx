@@ -66,7 +66,7 @@ export default function Cart() {
   const handleUpdateQuantity = (menuItemId: number, quantity: number) => {
     if (quantity < 1) {
       cart.removeItem(menuItemId);
-      toastSuccess(t('cart.item_removed') as string);
+      toastSuccess(t('customer.cart.item_removed') as string);
     } else {
       cart.updateQty(menuItemId, quantity);
     }
@@ -74,23 +74,23 @@ export default function Cart() {
 
   const handleRemoveItem = (menuItemId: number) => {
     cart.removeItem(menuItemId);
-    toastSuccess(t('cart.item_removed') as string);
+    toastSuccess(t('customer.cart.item_removed') as string);
   };
 
   const handleClearCart = () => {
     cart.clear();
     setShowClearConfirm(false);
-    toastSuccess(t('cart.cart_cleared') as string);
+    toastSuccess(t('customer.cart.cart_cleared') as string);
   };
 
   const handleCheckout = () => {
     if (cart.items.length === 0) {
-      toastError(t('cart.empty_title') as string);
+      toastError(t('customer.cart.empty_title') as string);
       return;
     }
 
     if (!cart.location_id) {
-      toastError(t('cart.select_location') as string);
+      toastError(t('customer.cart.select_location') as string);
       return;
     }
 
@@ -100,7 +100,7 @@ export default function Cart() {
     if (!isAuthenticated && !isTelegram) {
       localStorage.setItem('pendingCheckout', 'true');
       localStorage.setItem('checkoutRedirectUrl', '/checkout');
-      toastInfo(t('cart.login_required') as string);
+      toastInfo(t('customer.cart.login_required') as string);
       // Sprint 3: Use router.visit for smooth navigation
       router.visit('/login?redirect=/checkout', {
         preserveScroll: false
@@ -119,8 +119,8 @@ export default function Cart() {
   return (
     <CustomerLayout>
       <Head>
-        <title>{t('cart.meta_title') as string}</title>
-        <meta name="description" content={t('cart.meta_desc') as string} />
+        <title>{t('customer.cart.meta_title') as string}</title>
+        <meta name="description" content={t('customer.cart.meta_desc') as string} />
       </Head>
 
       <motion.div
@@ -143,7 +143,7 @@ export default function Cart() {
             </button>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                {t('cart.title')}
+                {t('customer.cart.title')}
               </h1>
               {!isEmpty && (
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
@@ -158,7 +158,7 @@ export default function Cart() {
               onClick={() => setShowClearConfirm(true)}
               className="text-xs text-red-500 hover:text-red-600 p-2"
             >
-              {t('cart.clear')}
+              {t('customer.cart.clear')}
             </button>
           )}
         </motion.div>
@@ -182,10 +182,10 @@ export default function Cart() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                  {t('cart.clear_confirm_title')}
+                  {t('customer.cart.clear_confirm_title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  {t('cart.clear_confirm_desc')}
+                  {t('customer.cart.clear_confirm_desc')}
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -200,7 +200,7 @@ export default function Cart() {
                     className="flex-1"
                     onClick={handleClearCart}
                   >
-                    {t('cart.clear')}
+                    {t('customer.cart.clear')}
                   </Button>
                 </div>
               </motion.div>
@@ -240,7 +240,7 @@ export default function Cart() {
             {/* Cart Items */}
             <motion.div variants={itemVariants} className="space-y-3">
               <h2 className="text-base font-semibold text-gray-900 dark:text-white sm:hidden">
-                {t('cart.items')} ({cart.items.length})
+                {t('customer.cart.items')} ({cart.items.length})
               </h2>
               <AnimatePresence mode="popLayout">
                 {cart.items.map((item) => (
@@ -275,14 +275,14 @@ export default function Cart() {
                 onClick={() => router.visit('/menu')}
                 leftIcon={<ShoppingBag className="w-4 h-4" />}
               >
-                {t('cart.continue_shopping')}
+                {t('customer.cart.continue_shopping')}
               </Button>
             </motion.div>
           </div>
         )}
 
         {/* Spacer for mobile floating button */}
-        {!isEmpty && <div className="h-24 sm:h-0" />}
+        {!isEmpty && <div className="h-24 lg:h-0" />}
       </motion.div>
 
       {/* Mobile Floating Summary & Checkout */}
@@ -290,7 +290,7 @@ export default function Cart() {
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
+          className="fixed bottom-0 left-0 right-0  z-40 lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
         >
           {/* Collapsible Summary Toggle */}
           <details className="group">
@@ -302,24 +302,24 @@ export default function Cart() {
                 </span>
               </div>
               <span className="text-xs text-gray-400 group-open:rotate-180 transition-transform">
-                {t('cart.show_details')}
+                {t('customer.cart.show_details')}
               </span>
             </summary>
 
             {/* Expanded Details */}
             <div className="px-4 pb-4 space-y-2 border-t border-gray-100 dark:border-gray-800">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t('cart.subtotal')}</span>
+                <span className="text-gray-500">{t('customer.cart.subtotal')}</span>
                 <span>${cart.subtotal.toFixed(2)}</span>
               </div>
               {cart.mode === 'delivery' && cart.deliveryFee > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{t('cart.delivery')}</span>
+                  <span className="text-gray-500">{t('customer.cart.delivery')}</span>
                   <span>${cart.deliveryFee.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t('cart.tax')}</span>
+                <span className="text-gray-500">{t('customer.cart.tax')}</span>
                 <span>${cart.tax.toFixed(2)}</span>
               </div>
             </div>
@@ -332,7 +332,7 @@ export default function Cart() {
               disabled={!cart.location_id}
               className="w-full py-3.5 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white font-bold rounded-xl shadow-lg active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t('cart.checkout')} • ${cart.total.toFixed(2)}
+              {t('customer.cart.checkout')} • ${cart.total.toFixed(2)}
             </button>
           </div>
         </motion.div>

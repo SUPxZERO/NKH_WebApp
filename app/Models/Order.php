@@ -159,6 +159,23 @@ class Order extends Model
         }
     }
 
+    /**
+     * Legacy Mutator: Set order type code.
+     * Maps $order->order_type = 'code' to order_type_id.
+     * Fixes order type always defaulting to 'dine_in' because order_type_id is guarded.
+     */
+    public function setOrderTypeAttribute($value)
+    {
+        if ($value) {
+            $type = \App\Models\OrderType::where('code', $value)->first();
+            if ($type) {
+                $this->attributes['order_type_id'] = $type->id;
+            } else {
+                \Log::warning("Attempted to set invalid order type code: $value");
+            }
+        }
+    }
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

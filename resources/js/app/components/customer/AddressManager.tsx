@@ -3,6 +3,7 @@ import { useCustomerAddresses } from '@/app/hooks/useCustomer';
 import { CustomerAddress } from '@/app/types/domain';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Skeleton } from '@/app/components/ui/Loading';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface Props {
   selected?: CustomerAddress | null;
@@ -11,11 +12,12 @@ interface Props {
 
 export default function AddressManager({ selected, onSelect }: Props) {
   const { data: addresses, isLoading } = useCustomerAddresses();
+  const { t } = useTranslation();
 
   return (
     <Card>
       <CardHeader>
-        <div className="font-semibold">Delivery Address</div>
+        <div className="font-semibold">{t('customer.address_manager.delivery_address')}</div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -34,7 +36,7 @@ export default function AddressManager({ selected, onSelect }: Props) {
             ))}
           </div>
         )}
-        <div className="mt-3 text-xs text-gray-500">Map integration coming soon.</div>
+        <div className="mt-3 text-xs text-gray-500">{t('customer.address_manager.map_coming_soon')}</div>
       </CardContent>
     </Card>
   );

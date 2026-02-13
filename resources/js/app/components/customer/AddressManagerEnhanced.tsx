@@ -20,6 +20,7 @@ import { Skeleton } from '@/app/components/ui/Loading';
 import { Button } from '@/app/components/ui/Button';
 import AddressPicker, { AddressData } from './AddressPicker';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface AddressManagerProps {
     /** Currently selected address */
@@ -74,6 +75,7 @@ export default function AddressManagerEnhanced({
     className,
 }: AddressManagerProps) {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
     const [showModal, setShowModal] = useState(false);
     const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
     const [formData, setFormData] = useState<AddressFormData>(defaultFormData);
@@ -174,7 +176,7 @@ export default function AddressManagerEnhanced({
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this address?')) {
+        if (confirm(t('customer.address_manager.delete_confirm') as string)) {
             deleteMutation.mutate(id);
         }
     };
@@ -198,13 +200,13 @@ export default function AddressManagerEnhanced({
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Navigation className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-                            <span className="font-semibold text-white text-sm sm:text-base">Delivery Address</span>
+                            <span className="font-semibold text-white text-sm sm:text-base">{t('customer.address_manager.delivery_address')}</span>
                         </div>
                         {allowAdd && (
                             <Button size="sm" variant="outline" onClick={openAddModal} className="text-xs sm:text-sm">
                                 <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                <span className="hidden sm:inline">Add New</span>
-                                <span className="sm:hidden">Add</span>
+                                <span className="hidden sm:inline">{t('customer.address_manager.add_new')}</span>
+                                <span className="sm:hidden">{t('customer.address_manager.add_new')}</span>
                             </Button>
                         )}
                     </div>
@@ -218,11 +220,11 @@ export default function AddressManagerEnhanced({
                     ) : addresses.length === 0 ? (
                         <div className="p-6 text-center">
                             <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-3" />
-                            <p className="text-gray-400 mb-4 text-sm">No saved addresses</p>
+                            <p className="text-gray-400 mb-4 text-sm">{t('customer.address_manager.no_saved_addresses')}</p>
                             {allowAdd && (
                                 <Button size="sm" onClick={openAddModal}>
                                     <Plus className="w-4 h-4 mr-2" />
-                                    Add Address
+                                    {t('customer.address_manager.add_address')}
                                 </Button>
                             )}
                         </div>
@@ -260,7 +262,7 @@ export default function AddressManagerEnhanced({
                                                     )}
                                                     {!!address.is_default && (
                                                         <span className="text-[10px] px-1 py-0.5 rounded bg-purple-500/20 text-purple-400 hidden sm:inline">
-                                                            Default
+                                                            {t('customer.address_manager.default')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -337,7 +339,7 @@ export default function AddressManagerEnhanced({
                                 <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/10 px-6 py-4 flex items-center justify-between">
                                     <h2 className="text-xl font-bold text-white flex items-center gap-2">
                                         <Navigation className="w-6 h-6 text-purple-400" />
-                                        {editingAddress ? 'Edit Address' : 'Add New Address'}
+                                        {editingAddress ? t('customer.address_manager.edit_address') : t('customer.address_manager.add_new_address')}
                                     </h2>
                                     <button
                                         onClick={closeModal}
@@ -352,30 +354,33 @@ export default function AddressManagerEnhanced({
                                     {/* Address Label */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Address Label *
+                                            {t('customer.address_manager.address_label')} *
                                         </label>
                                         <div className="flex gap-2 flex-wrap">
-                                            {['Home', 'Office', 'Other'].map((label) => (
-                                                <button
-                                                    key={label}
-                                                    type="button"
-                                                    onClick={() => setFormData({ ...formData, label })}
-                                                    className={cn(
-                                                        'px-4 py-2 rounded-lg border transition-all flex items-center gap-2',
-                                                        formData.label === label
-                                                            ? 'border-purple-500 bg-purple-500/20 text-purple-300'
-                                                            : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20'
-                                                    )}
-                                                >
-                                                    {getAddressIcon(label)}
-                                                    {label}
-                                                </button>
-                                            ))}
+                                            {(['home', 'office', 'other'] as const).map((key) => {
+                                                const labelText = t(`customer_pages.address_manager.${key}`) as string;
+                                                return (
+                                                    <button
+                                                        key={key}
+                                                        type="button"
+                                                        onClick={() => setFormData({ ...formData, label: labelText })}
+                                                        className={cn(
+                                                            'px-4 py-2 rounded-lg border transition-all flex items-center gap-2',
+                                                            formData.label === labelText
+                                                                ? 'border-purple-500 bg-purple-500/20 text-purple-300'
+                                                                : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20'
+                                                        )}
+                                                    >
+                                                        {getAddressIcon(key)}
+                                                        {labelText}
+                                                    </button>
+                                                );
+                                            })}
                                             <input
                                                 type="text"
                                                 value={formData.label}
                                                 onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                                                placeholder="Custom label"
+                                                placeholder={t('customer.address_manager.custom_label_placeholder') as string}
                                                 className="flex-1 min-w-[120px] px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
                                             />
                                         </div>
@@ -383,8 +388,8 @@ export default function AddressManagerEnhanced({
 
                                     {/* OpenStreetMap Address Picker */}
                                     <AddressPicker
-                                        label="Search Location (OpenStreetMap)"
-                                        placeholder="Start typing an address..."
+                                        label={t('customer.address_manager.search_location') as string}
+                                        placeholder={t('customer.address_manager.search_placeholder') as string}
                                         showMap={true}
                                         mapHeight={250}
                                         initialAddress={editingAddress?.address_line_1}
@@ -397,7 +402,7 @@ export default function AddressManagerEnhanced({
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="md:col-span-2">
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Street Address *
+                                                {t('customer.address_manager.street_address')} *
                                             </label>
                                             <input
                                                 type="text"
@@ -405,14 +410,14 @@ export default function AddressManagerEnhanced({
                                                 onChange={(e) =>
                                                     setFormData({ ...formData, address_line_1: e.target.value })
                                                 }
-                                                placeholder="123 Main Street"
+                                                placeholder={t('customer.address_manager.street_placeholder') as string}
                                                 className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
                                             />
                                         </div>
 
                                         <div className="md:col-span-2">
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Apartment, Suite, etc.
+                                                {t('customer.address_manager.apartment_suite')}
                                             </label>
                                             <input
                                                 type="text"
@@ -420,27 +425,27 @@ export default function AddressManagerEnhanced({
                                                 onChange={(e) =>
                                                     setFormData({ ...formData, address_line_2: e.target.value })
                                                 }
-                                                placeholder="Apt 4B"
+                                                placeholder={t('customer.address_manager.suite_placeholder') as string}
                                                 className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
                                             />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                City *
+                                                {t('customer.address_manager.city')} *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={formData.city}
                                                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                                placeholder="Phnom Penh"
+                                                placeholder={t('customer.address.default_city')}
                                                 className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
                                             />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Province *
+                                                {t('customer.address_manager.province')} *
                                             </label>
                                             <input
                                                 type="text"
@@ -453,7 +458,7 @@ export default function AddressManagerEnhanced({
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Postal Code
+                                                {t('customer.address_manager.postal_code')}
                                             </label>
                                             <input
                                                 type="text"
@@ -468,7 +473,7 @@ export default function AddressManagerEnhanced({
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                GPS Coordinates
+                                                {t('customer.address_manager.gps_coordinates')}
                                             </label>
                                             <div className="px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm">
                                                 {formData.latitude && formData.longitude ? (
@@ -476,7 +481,7 @@ export default function AddressManagerEnhanced({
                                                         ✓ {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-gray-500">Select location on map</span>
+                                                    <span className="text-gray-500">{t('customer.address_manager.select_location_on_map')}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -485,14 +490,14 @@ export default function AddressManagerEnhanced({
                                     {/* Delivery Instructions */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Delivery Instructions
+                                            {t('customer.address_manager.delivery_instructions')}
                                         </label>
                                         <textarea
                                             value={formData.delivery_instructions}
                                             onChange={(e) =>
                                                 setFormData({ ...formData, delivery_instructions: e.target.value })
                                             }
-                                            placeholder="Gate code, building entrance, special instructions..."
+                                            placeholder={t('customer.address_manager.delivery_instructions_placeholder') as string}
                                             rows={3}
                                             className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 resize-none"
                                         />
@@ -508,7 +513,7 @@ export default function AddressManagerEnhanced({
                                             }
                                             className="w-5 h-5 rounded border-white/20 bg-white/5 text-purple-500 focus:ring-purple-500/50"
                                         />
-                                        <span className="text-gray-300">Set as default address</span>
+                                        <span className="text-gray-300">{t('customer.address_manager.set_as_default')}</span>
                                     </label>
                                 </div>
 
@@ -520,7 +525,7 @@ export default function AddressManagerEnhanced({
                                         onClick={closeModal}
                                         disabled={createMutation.isPending || updateMutation.isPending}
                                     >
-                                        Cancel
+                                        {t('customer.address_manager.cancel')}
                                     </Button>
                                     <Button
                                         className="flex-1"
@@ -533,16 +538,16 @@ export default function AddressManagerEnhanced({
                                         }
                                     >
                                         {createMutation.isPending || updateMutation.isPending ? (
-                                            <>Saving...</>
+                                            <>{t('customer.address_manager.saving')}</>
                                         ) : editingAddress ? (
                                             <>
                                                 <Check className="w-4 h-4 mr-2" />
-                                                Update Address
+                                                {t('customer.address_manager.update_address')}
                                             </>
                                         ) : (
                                             <>
                                                 <Plus className="w-4 h-4 mr-2" />
-                                                Add Address
+                                                {t('customer.address_manager.add_address')}
                                             </>
                                         )}
                                     </Button>

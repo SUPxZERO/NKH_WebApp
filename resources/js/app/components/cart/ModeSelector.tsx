@@ -24,7 +24,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
                 )}
             >
                 <Truck className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('cart.delivery')}</span>
+                <span className="hidden sm:inline">{t('customer.cart.delivery')}</span>
             </button>
 
             {/* Pickup Option */}
@@ -38,7 +38,7 @@ export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
                 )}
             >
                 <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('cart.pickup')}</span>
+                <span className="hidden sm:inline">{t('customer.cart.pickup')}</span>
             </button>
         </div>
     );

@@ -62,10 +62,10 @@ export function NotificationCenter() {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (minutes < 1) return t('admin.notification_center.time.just_now') as string;
-    if (minutes < 60) return t('admin.notification_center.time.minutes_ago', { count: minutes }) as string;
-    if (hours < 24) return t('admin.notification_center.time.hours_ago', { count: hours }) as string;
-    return t('admin.notification_center.time.days_ago', { count: days }) as string;
+    if (minutes < 1) return t('admin.notificationCenter.time.just_now') as string;
+    if (minutes < 60) return t('admin.notificationCenter.time.minutes_ago', { count: minutes }) as string;
+    if (hours < 24) return t('admin.notificationCenter.time.hours_ago', { count: hours }) as string;
+    return t('admin.notificationCenter.time.days_ago', { count: days }) as string;
   };
 
   return (
@@ -110,7 +110,7 @@ export function NotificationCenter() {
               <Card className="shadow-2xl border-white/20">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">{t('admin.notification_center.title')}</h3>
+                    <h3 className="font-semibold">{t('admin.notificationCenter.title')}</h3>
                     <div className="flex items-center gap-2">
                       {unreadCount > 0 && (
                         <Button
@@ -119,7 +119,7 @@ export function NotificationCenter() {
                           onClick={() => markAllAsReadMutation.mutate()}
                           disabled={markAllAsReadMutation.isPending}
                         >
-                          {t('admin.notification_center.mark_all_read')}
+                          {t('admin.notificationCenter.mark_all_read')}
                         </Button>
                       )}
                       <button
@@ -133,11 +133,11 @@ export function NotificationCenter() {
                 </CardHeader>
                 <CardContent className="p-0 max-h-80 overflow-y-auto">
                   {isLoading ? (
-                    <div className="p-4 text-center text-gray-500">{t('admin.notification_center.loading')}</div>
+                    <div className="p-4 text-center text-gray-500">{t('admin.notificationCenter.loading')}</div>
                   ) : notifications.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
                       <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p>{t('admin.notification_center.empty')}</p>
+                      <p>{t('admin.notificationCenter.empty')}</p>
                     </div>
                   ) : (
                     <div className="divide-y divide-white/10">
@@ -186,7 +186,7 @@ export function NotificationCenter() {
                                     className="text-xs text-fuchsia-400 hover:text-fuchsia-300 flex items-center gap-1"
                                   >
                                     <Check className="w-3 h-3" />
-                                    {t('admin.notification_center.mark_read')}
+                                    {t('admin.notificationCenter.mark_read')}
                                   </button>
                                 )}
                               </div>

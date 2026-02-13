@@ -81,7 +81,7 @@ export default function RestaurantDashboard() {
       quantity,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(t('customer_pages.restaurant_dashboard.added_to_cart', { item: item.name }));
+    toastSuccess(t('customer.restaurant_dashboard.added_to_cart', { item: item.name }));
   }, [cart, t]);
 
   const { data: customerStats, isLoading } = useQuery({
@@ -138,10 +138,10 @@ export default function RestaurantDashboard() {
               transition={{ delay: 0.2 }}
             >
               <h1 className="text-3xl md:text-4xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-3">
-                {t('customer_pages.restaurant_dashboard.welcome')} 👋
+                {t('customer.restaurant_dashboard.welcome')} 👋
               </h1>
               <p className="text-lg text-neutral-600 dark:text-neutral-300 mb-6 max-w-2xl">
-                {t('customer_pages.restaurant_dashboard.welcome_message')}
+                {t('customer.restaurant_dashboard.welcome_message')}
               </p>
 
               <div className="flex flex-wrap gap-4">
@@ -152,14 +152,14 @@ export default function RestaurantDashboard() {
                   leftIcon={<Utensils className="w-5 h-5" />}
                   rightIcon={<ArrowRight className="w-5 h-5" />}
                 >
-                  {t('customer_pages.restaurant_dashboard.browse_menu')}
+                  {t('customer.restaurant_dashboard.browse_menu')}
                 </RestaurantButton>
                 <RestaurantButton
                   variant="secondary"
                   size="lg"
                   leftIcon={<Clock className="w-5 h-5" />}
                 >
-                  {t('customer_pages.restaurant_dashboard.quick_reorder')}
+                  {t('customer.restaurant_dashboard.quick_reorder')}
                 </RestaurantButton>
               </div>
             </motion.div>
@@ -201,7 +201,7 @@ export default function RestaurantDashboard() {
                 {customerStats?.total_orders || 0}
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                {t('customer_pages.restaurant_dashboard.stats.total_orders')}
+                {t('customer.restaurant_dashboard.stats.total_orders')}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -216,7 +216,7 @@ export default function RestaurantDashboard() {
                 {customerStats?.loyalty_points || 0}
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                {t('customer_pages.restaurant_dashboard.stats.loyalty_points')}
+                {t('customer.restaurant_dashboard.stats.loyalty_points')}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -231,7 +231,7 @@ export default function RestaurantDashboard() {
                 ${customerStats?.total_spent || 0}
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                {t('customer_pages.restaurant_dashboard.stats.total_spent')}
+                {t('customer.restaurant_dashboard.stats.total_spent')}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -246,7 +246,7 @@ export default function RestaurantDashboard() {
                 {customerStats?.next_reward?.points_needed || 0} pts
               </div>
               <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                {t('customer_pages.restaurant_dashboard.stats.next_reward', { reward: customerStats?.next_reward?.reward_name || 'Next Reward' })}
+                {t('customer.restaurant_dashboard.stats.next_reward', { reward: customerStats?.next_reward?.reward_name || 'Next Reward' })}
               </p>
             </CardContent>
           </RestaurantCard>
@@ -257,14 +257,14 @@ export default function RestaurantDashboard() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-2">
-                {t('customer_pages.restaurant_dashboard.todays_specials')}
+                {t('customer.restaurant_dashboard.todays_specials')}
               </h2>
               <p className="text-neutral-600 dark:text-neutral-400">
-                {t('customer_pages.restaurant_dashboard.todays_specials_desc')}
+                {t('customer.restaurant_dashboard.todays_specials_desc')}
               </p>
             </div>
             <RestaurantButton variant="ghost" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              {t('customer_pages.restaurant_dashboard.view_all')}
+              {t('customer.restaurant_dashboard.view_all')}
             </RestaurantButton>
           </div>
 
@@ -287,14 +287,14 @@ export default function RestaurantDashboard() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-2">
-                {t('customer_pages.restaurant_dashboard.popular_now')}
+                {t('customer.restaurant_dashboard.popular_now')}
               </h2>
               <p className="text-neutral-600 dark:text-neutral-400">
-                {t('customer_pages.restaurant_dashboard.popular_now_desc')}
+                {t('customer.restaurant_dashboard.popular_now_desc')}
               </p>
             </div>
             <RestaurantButton variant="ghost" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              {t('customer_pages.restaurant_dashboard.view_all')}
+              {t('customer.restaurant_dashboard.view_all')}
             </RestaurantButton>
           </div>
 
@@ -315,15 +315,15 @@ export default function RestaurantDashboard() {
         {/* 📱 Quick Actions */}
         <motion.section variants={animationVariants.fadeIn}>
           <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-6">
-            {t('customer_pages.restaurant_dashboard.quick_actions')}
+            {t('customer.restaurant_dashboard.quick_actions')}
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: <Coffee className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.beverages'), color: 'from-blue-500 to-blue-600' },
-              { icon: <ChefHat className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.main_course'), color: 'from-red-500 to-red-600' },
-              { icon: <IceCream className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.desserts'), color: 'from-pink-500 to-pink-600' },
-              { icon: <Zap className="w-6 h-6" />, label: t('customer_pages.restaurant_dashboard.categories.quick_bites'), color: 'from-yellow-500 to-yellow-600' },
+              { icon: <Coffee className="w-6 h-6" />, label: t('customer.restaurant_dashboard.categories.beverages'), color: 'from-blue-500 to-blue-600' },
+              { icon: <ChefHat className="w-6 h-6" />, label: t('customer.restaurant_dashboard.categories.main_course'), color: 'from-red-500 to-red-600' },
+              { icon: <IceCream className="w-6 h-6" />, label: t('customer.restaurant_dashboard.categories.desserts'), color: 'from-pink-500 to-pink-600' },
+              { icon: <Zap className="w-6 h-6" />, label: t('customer.restaurant_dashboard.categories.quick_bites'), color: 'from-yellow-500 to-yellow-600' },
             ].map((action, index) => (
               <motion.div
                 key={action.label}
@@ -356,7 +356,7 @@ export default function RestaurantDashboard() {
         {customerStats?.achievements && customerStats.achievements.length > 0 && (
           <motion.section variants={animationVariants.fadeIn}>
             <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-100 mb-6">
-              {t('customer_pages.restaurant_dashboard.recent_achievements')}
+              {t('customer.restaurant_dashboard.recent_achievements')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

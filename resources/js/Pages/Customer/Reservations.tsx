@@ -165,11 +165,11 @@ export default function Reservations() {
         mutationFn: (data: any) => apiPost('/api/customer/reservations', data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customer', 'reservations'] });
-            toastSuccess(t('customer_pages.reservations.messages.reserved_success'));
+            toastSuccess(t('customer.reservations.messages.reserved_success'));
             closeModal();
         },
         onError: (error: any) => {
-            const msg = error?.response?.data?.message || t('customer_pages.reservations.messages.failed_create');
+            const msg = error?.response?.data?.message || t('customer.reservations.messages.failed_create');
             toastError(msg);
         }
     });
@@ -179,10 +179,10 @@ export default function Reservations() {
         mutationFn: (id: number) => apiDelete(`/api/customer/reservations/${id}`),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customer', 'reservations'] });
-            toastSuccess(t('customer_pages.reservations.messages.cancelled'));
+            toastSuccess(t('customer.reservations.messages.cancelled'));
         },
         onError: (error: any) => {
-            toastError(error?.response?.data?.message || t('customer_pages.reservations.messages.failed_cancel'));
+            toastError(error?.response?.data?.message || t('customer.reservations.messages.failed_cancel'));
         }
     });
 
@@ -205,7 +205,7 @@ export default function Reservations() {
 
     const handleBookReservation = () => {
         if (!locationId || !date || !time || !guestCount) {
-            toastError(t('customer_pages.reservations.messages.fill_required'));
+            toastError(t('customer.reservations.messages.fill_required'));
             return;
         }
 
@@ -230,7 +230,7 @@ export default function Reservations() {
     };
 
     const handleCancelReservation = (reservation: Reservation) => {
-        if (confirm(t('customer_pages.reservations.actions.cancel_confirm'))) {
+        if (confirm(t('customer.reservations.actions.cancel_confirm'))) {
             cancelReservationMutation.mutate(reservation.id);
         }
     };
@@ -263,7 +263,7 @@ export default function Reservations() {
     return (
         <RequireAuth roles={['customer']}>
             <CustomerLayout>
-                <Head title={t('customer_pages.reservations.title')} />
+                <Head title={t('customer.reservations.title')} />
 
                 <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 sm:space-y-6">
                     {/* Header */}
@@ -271,11 +271,11 @@ export default function Reservations() {
                         <div>
                             <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
                                 <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-fuchsia-600" />
-                                <span className="hidden sm:inline">{t('customer_pages.reservations.title')}</span>
-                                <span className="sm:hidden">{t('customer_pages.reservations.title_short')}</span>
+                                <span className="hidden sm:inline">{t('customer.reservations.title')}</span>
+                                <span className="sm:hidden">{t('customer.reservations.title_short')}</span>
                             </h1>
                             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 hidden sm:block">
-                                {t('customer_pages.reservations.subtitle')}
+                                {t('customer.reservations.subtitle')}
                             </p>
                         </div>
                         <Button
@@ -284,21 +284,21 @@ export default function Reservations() {
                             size="sm"
                         >
                             <Plus className="w-4 h-4 mr-1 sm:mr-2" />
-                            <span className="hidden sm:inline">{t('customer_pages.reservations.new_reservation')}</span>
-                            <span className="sm:hidden">{t('customer_pages.reservations.book')}</span>
+                            <span className="hidden sm:inline">{t('customer.reservations.new_reservation')}</span>
+                            <span className="sm:hidden">{t('customer.reservations.book')}</span>
                         </Button>
                     </div>
 
                     {/* Upcoming Reservations */}
                     <div>
                         <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
-                            {t('customer_pages.reservations.upcoming')}
+                            {t('customer.reservations.upcoming')}
                         </h2>
                         {reservationsLoading ? (
                             <Card>
                                 <CardContent className="p-8 sm:p-12 text-center">
                                     <div className="w-8 h-8 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('customer_pages.reservations.loading')}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('customer.reservations.loading')}</p>
                                 </CardContent>
                             </Card>
                         ) : upcomingReservations.length > 0 ? (
@@ -329,7 +329,7 @@ export default function Reservations() {
                                                             ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400"
                                                             : "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400"
                                                     )}>
-                                                        {reservation.status === 'confirmed' ? t('customer_pages.reservations.status.confirmed') : t('customer_pages.reservations.status.pending')}
+                                                        {reservation.status === 'confirmed' ? t('customer.reservations.status.confirmed') : t('customer.reservations.status.pending')}
                                                     </span>
                                                 </div>
 
@@ -350,12 +350,12 @@ export default function Reservations() {
                                                     </div>
                                                     <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                                         <Users className="w-3.5 h-3.5" />
-                                                        <span>{reservation.guest_count} {reservation.guest_count === 1 ? t('customer_pages.reservations.card.guest') : t('customer_pages.reservations.card.guests')}</span>
+                                                        <span>{reservation.guest_count} {reservation.guest_count === 1 ? t('customer.reservations.card.guest') : t('customer.reservations.card.guests')}</span>
                                                     </div>
                                                     {reservation.table && (
                                                         <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                                                             <Utensils className="w-3.5 h-3.5" />
-                                                            <span>{t('customer_pages.reservations.card.table')} {reservation.table.code || reservation.table.number}</span>
+                                                            <span>{t('customer.reservations.card.table')} {reservation.table.code || reservation.table.number}</span>
                                                         </div>
                                                     )}
                                                     {reservation.notes && (
@@ -375,7 +375,7 @@ export default function Reservations() {
                                                             className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-xs"
                                                         >
                                                             <X className="w-3.5 h-3.5 mr-1.5" />
-                                                            {t('customer_pages.reservations.actions.cancel')}
+                                                            {t('customer.reservations.actions.cancel')}
                                                         </Button>
                                                     </div>
                                                 )}
@@ -389,11 +389,11 @@ export default function Reservations() {
                                 <CardContent className="p-8 text-center">
                                     <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                        {t('customer_pages.reservations.no_upcoming')}
+                                        {t('customer.reservations.no_upcoming')}
                                     </p>
                                     <Button onClick={() => setShowBookingModal(true)} variant="primary" size="sm">
                                         <Plus className="w-4 h-4 mr-1.5" />
-                                        {t('customer_pages.reservations.make_reservation')}
+                                        {t('customer.reservations.make_reservation')}
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -404,7 +404,7 @@ export default function Reservations() {
                     {pastReservations.length > 0 && (
                         <div>
                             <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
-                                {t('customer_pages.reservations.past')}
+                                {t('customer.reservations.past')}
                             </h2>
                             <div className="space-y-2">
                                 {pastReservations.slice(0, 5).map((reservation) => (
@@ -425,7 +425,7 @@ export default function Reservations() {
                                                             {reservation.location?.name || 'Restaurant'}
                                                         </p>
                                                         <p className="text-xs text-gray-500">
-                                                            {reservation.guest_count} {reservation.guest_count !== 1 ? t('customer_pages.reservations.card.guests') : t('customer_pages.reservations.card.guest')}
+                                                            {reservation.guest_count} {reservation.guest_count !== 1 ? t('customer.reservations.card.guests') : t('customer.reservations.card.guest')}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -468,7 +468,7 @@ export default function Reservations() {
                                         <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
                                             <div className="flex items-center justify-between">
                                                 <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                                                    {t('customer_pages.reservations.modal.title')}
+                                                    {t('customer.reservations.modal.title')}
                                                 </h2>
                                                 <button
                                                     onClick={closeModal}
@@ -500,7 +500,7 @@ export default function Reservations() {
                                                     </span>
                                                 )}
                                                 <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg">
-                                                    {guestCount} {guestCount !== 1 ? t('customer_pages.reservations.card.guests') : t('customer_pages.reservations.card.guest')}
+                                                    {guestCount} {guestCount !== 1 ? t('customer.reservations.card.guests') : t('customer.reservations.card.guest')}
                                                 </span>
                                             </div>
 
@@ -508,21 +508,21 @@ export default function Reservations() {
                                                 {/* Left Column - Basic Info */}
                                                 <div className="space-y-4">
                                                     <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700 text-sm">
-                                                        {t('customer_pages.reservations.modal.basic_info')}
+                                                        {t('customer.reservations.modal.basic_info')}
                                                     </h3>
 
                                                     {/* Location */}
                                                     <div className="space-y-1.5">
                                                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                                             <MapPin className="inline w-3.5 h-3.5 mr-1" />
-                                                            {t('customer_pages.reservations.modal.location')} *
+                                                            {t('customer.reservations.modal.location')} *
                                                         </label>
                                                         <select
                                                             value={locationId}
                                                             onChange={(e) => setLocationId(Number(e.target.value) || '')}
                                                             className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white py-2.5 px-3 text-sm"
                                                         >
-                                                            <option value="">{t('customer_pages.reservations.modal.select')}</option>
+                                                            <option value="">{t('customer.reservations.modal.select')}</option>
                                                             {locations.map((loc: any) => (
                                                                 <option key={loc.id} value={loc.id}>{loc.name}</option>
                                                             ))}
@@ -533,7 +533,7 @@ export default function Reservations() {
                                                     <div className="space-y-1.5">
                                                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                                             <Calendar className="inline w-3.5 h-3.5 mr-1" />
-                                                            {t('customer_pages.reservations.modal.date')} *
+                                                            {t('customer.reservations.modal.date')} *
                                                         </label>
                                                         <DatePicker
                                                             selected={date}
@@ -549,7 +549,7 @@ export default function Reservations() {
                                                     <div className="space-y-1.5">
                                                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                                             <Clock className="inline w-3.5 h-3.5 mr-1" />
-                                                            {t('customer_pages.reservations.modal.time')} *
+                                                            {t('customer.reservations.modal.time')} *
                                                         </label>
                                                         <DatePicker
                                                             selected={time}
@@ -568,7 +568,7 @@ export default function Reservations() {
                                                     <div className="space-y-1.5">
                                                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                                             <Users className="inline w-3.5 h-3.5 mr-1" />
-                                                            {t('customer_pages.reservations.modal.guests')} *
+                                                            {t('customer.reservations.modal.guests')} *
                                                         </label>
                                                         <input
                                                             type="number"
@@ -584,27 +584,27 @@ export default function Reservations() {
                                                 {/* Middle Column - Floor & Table Selection */}
                                                 <div className="space-y-4">
                                                     <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700 text-sm">
-                                                        {t('customer_pages.reservations.modal.select_spot')}
+                                                        {t('customer.reservations.modal.select_spot')}
                                                     </h3>
 
                                                     {/* Floor Selection */}
                                                     <div className="space-y-1.5">
                                                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                                             <Layers className="inline w-3.5 h-3.5 mr-1" />
-                                                            {t('customer_pages.reservations.modal.floor')}
+                                                            {t('customer.reservations.modal.floor')}
                                                         </label>
                                                         {!locationId ? (
                                                             <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
-                                                                {t('customer_pages.reservations.modal.select_location')}
+                                                                {t('customer.reservations.modal.select_location')}
                                                             </p>
                                                         ) : floorsLoading ? (
                                                             <div className="flex items-center gap-2 py-2 text-xs text-gray-500">
                                                                 <div className="w-3.5 h-3.5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                                                                {t('customer_pages.reservations.loading')}
+                                                                {t('customer.reservations.loading')}
                                                             </div>
                                                         ) : floors.length === 0 ? (
                                                             <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
-                                                                {t('customer_pages.reservations.modal.no_floors')}
+                                                                {t('customer.reservations.modal.no_floors')}
                                                             </p>
                                                         ) : (
                                                             <div className="grid grid-cols-2 gap-2">
@@ -631,20 +631,20 @@ export default function Reservations() {
                                                     <div className="space-y-1.5">
                                                         <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                                                             <Armchair className="inline w-3.5 h-3.5 mr-1" />
-                                                            {t('customer_pages.reservations.modal.table')}
+                                                            {t('customer.reservations.modal.table')}
                                                         </label>
                                                         {!floorId ? (
                                                             <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
-                                                                {t('customer_pages.reservations.modal.select_floor')}
+                                                                {t('customer.reservations.modal.select_floor')}
                                                             </p>
                                                         ) : tablesLoading ? (
                                                             <div className="flex items-center gap-2 py-2 text-xs text-gray-500">
                                                                 <div className="w-3.5 h-3.5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                                                                {t('customer_pages.reservations.loading')}
+                                                                {t('customer.reservations.loading')}
                                                             </div>
                                                         ) : tables.length === 0 ? (
                                                             <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
-                                                                {t('customer_pages.reservations.modal.no_tables')}
+                                                                {t('customer.reservations.modal.no_tables')}
                                                             </p>
                                                         ) : (
                                                             <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
@@ -663,9 +663,9 @@ export default function Reservations() {
                                                                                     : "border-gray-200 dark:border-gray-600 hover:border-fuchsia-300 text-gray-700 dark:text-gray-300"
                                                                         )}
                                                                     >
-                                                                        <div className="font-semibold">{t('customer_pages.reservations.card.table')} {table.code}</div>
+                                                                        <div className="font-semibold">{t('customer.reservations.card.table')} {table.code}</div>
                                                                         <div className="text-[10px] mt-0.5">
-                                                                            {table.capacity} {t('customer_pages.reservations.modal.seats')}
+                                                                            {table.capacity} {t('customer.reservations.modal.seats')}
                                                                         </div>
                                                                     </button>
                                                                 ))}
@@ -677,35 +677,35 @@ export default function Reservations() {
                                                 {/* Right Column - Summary & Actions */}
                                                 <div className="space-y-4">
                                                     <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-600 text-sm">
-                                                        {t('customer_pages.reservations.modal.summary')}
+                                                        {t('customer.reservations.modal.summary')}
                                                     </h3>
 
                                                     <div className="space-y-2 text-xs sm:text-sm">
                                                         <div className="flex justify-between">
-                                                            <span className="text-gray-500">{t('customer_pages.reservations.modal.location')}</span>
+                                                            <span className="text-gray-500">{t('customer.reservations.modal.location')}</span>
                                                             <span className="font-medium">{selectedLocation?.name || '—'}</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                            <span className="text-gray-500">{t('customer_pages.reservations.modal.date')}</span>
+                                                            <span className="text-gray-500">{t('customer.reservations.modal.date')}</span>
                                                             <span className="font-medium">{date ? format(date, 'MMM d, yyyy') : '—'}</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                            <span className="text-gray-500">{t('customer_pages.reservations.modal.time')}</span>
+                                                            <span className="text-gray-500">{t('customer.reservations.modal.time')}</span>
                                                             <span className="font-medium">{time ? format(time, 'h:mm aa') : '—'}</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                            <span className="text-gray-500">{t('customer_pages.reservations.modal.guests')}</span>
+                                                            <span className="text-gray-500">{t('customer.reservations.modal.guests')}</span>
                                                             <span className="font-medium">{guestCount}</span>
                                                         </div>
                                                         {selectedFloor && (
                                                             <div className="flex justify-between">
-                                                                <span className="text-gray-500">{t('customer_pages.reservations.modal.floor')}</span>
+                                                                <span className="text-gray-500">{t('customer.reservations.modal.floor')}</span>
                                                                 <span className="font-medium">{selectedFloor.name}</span>
                                                             </div>
                                                         )}
                                                         {selectedTable && (
                                                             <div className="flex justify-between">
-                                                                <span className="text-gray-500">{t('customer_pages.reservations.modal.table')}</span>
+                                                                <span className="text-gray-500">{t('customer.reservations.modal.table')}</span>
                                                                 <span className="font-medium">{selectedTable.code}</span>
                                                             </div>
                                                         )}
@@ -714,12 +714,12 @@ export default function Reservations() {
                                                     {/* Notes */}
                                                     <div className="pt-2">
                                                         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                                            {t('customer_pages.reservations.modal.special_requests')}
+                                                            {t('customer.reservations.modal.special_requests')}
                                                         </label>
                                                         <textarea
                                                             value={notes}
                                                             onChange={(e) => setNotes(e.target.value)}
-                                                            placeholder={t('customer_pages.reservations.modal.notes_placeholder')}
+                                                            placeholder={t('customer.reservations.modal.notes_placeholder')}
                                                             className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-fuchsia-500 focus:ring-fuchsia-500 dark:bg-gray-700 dark:text-white text-xs"
                                                             rows={2}
                                                         />
@@ -736,7 +736,7 @@ export default function Reservations() {
                                                             size="sm"
                                                         >
                                                             <CheckCircle className="w-4 h-4 mr-1.5" />
-                                                            {t('customer_pages.reservations.modal.confirm')}
+                                                            {t('customer.reservations.modal.confirm')}
                                                         </Button>
 
                                                         <Button
@@ -745,12 +745,12 @@ export default function Reservations() {
                                                             className="w-full"
                                                             size="sm"
                                                         >
-                                                            {t('customer_pages.reservations.modal.cancel')}
+                                                            {t('customer.reservations.modal.cancel')}
                                                         </Button>
 
                                                         {!canBook && (
                                                             <p className="text-[10px] text-center text-amber-600 dark:text-amber-400">
-                                                                {t('customer_pages.reservations.modal.fill_required')}
+                                                                {t('customer.reservations.modal.fill_required')}
                                                             </p>
                                                         )}
                                                     </div>

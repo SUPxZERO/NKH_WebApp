@@ -109,7 +109,7 @@ export default function EmployeeLayout({ children }: Props) {
                     </div>
                     <div className="hidden lg:block text-left">
                       <h2 className="font-bold text-gray-900 dark:text-white leading-tight">{t('employee.portal_title')}</h2>
-                      <p className="text-xs text-fuchsia-500 font-medium">{t('footer.brand_title')}</p>
+                      <p className="text-xs text-fuchsia-500 font-medium">{t('employee.footer.brand_title')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

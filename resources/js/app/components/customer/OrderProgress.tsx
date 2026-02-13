@@ -18,8 +18,8 @@ export function OrderProgress({ currentStep, className }: OrderProgressProps) {
     const steps = [
         { id: 'menu', label: t('layout.nav.mobile_menu_title'), icon: ShoppingBag },
         { id: 'cart', label: t('layout.nav.cart'), icon: ShoppingCart },
-        { id: 'checkout', label: t('cart.checkout'), icon: MapPin },
-        { id: 'payment', label: t('checkout.payment_title'), icon: CreditCard },
+        { id: 'checkout', label: t('customer.cart.checkout'), icon: MapPin },
+        { id: 'payment', label: t('customer.checkout.payment_title'), icon: CreditCard },
     ] as const;
 
     const currentIndex = steps.findIndex(s => s.id === currentStep);

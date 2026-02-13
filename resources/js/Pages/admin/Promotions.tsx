@@ -85,10 +85,10 @@ const PromotionStatsRibbon = ({ stats }: { stats: any }) => {
   return (
     <div className="-mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto scrollbar-hide mb-4 sm:mb-6">
       <div className="flex sm:grid sm:grid-cols-4 gap-2 sm:gap-4 min-w-max sm:min-w-0">
-        <StatCard title={t('marketing.promotions.stats.total')} value={stats.total} icon={Tag} color="purple" index={0} />
-        <StatCard title={t('marketing.promotions.stats.active')} value={stats.active} icon={CheckCircle} color="emerald" index={1} />
-        <StatCard title={t('marketing.promotions.stats.usage')} value={stats.usage} icon={TrendingUp} color="blue" index={2} />
-        <StatCard title={t('marketing.promotions.stats.savings')} value={`$${stats.savings}`} icon={DollarSign} color="amber" index={3} />
+        <StatCard title={t('admin.marketing.promotions.stats.total')} value={stats.total} icon={Tag} color="purple" index={0} />
+        <StatCard title={t('admin.marketing.promotions.stats.active')} value={stats.active} icon={CheckCircle} color="emerald" index={1} />
+        <StatCard title={t('admin.marketing.promotions.stats.usage')} value={stats.usage} icon={TrendingUp} color="blue" index={2} />
+        <StatCard title={t('admin.marketing.promotions.stats.savings')} value={`$${stats.savings}`} icon={DollarSign} color="amber" index={3} />
       </div>
     </div>
   );
@@ -153,20 +153,20 @@ export default function Promotions() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: any) => apiPost('/api/admin/promotions', data),
-    onSuccess: () => { toastSuccess(t('marketing.promotions.messages.created')); closeModal(); qc.invalidateQueries({ queryKey: ['admin/promotions'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || t('marketing.promotions.messages.failed'))
+    onSuccess: () => { toastSuccess(t('admin.marketing.promotions.messages.created')); closeModal(); qc.invalidateQueries({ queryKey: ['admin/promotions'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.marketing.promotions.messages.failed'))
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/promotions/${id}`, data),
-    onSuccess: () => { toastSuccess(t('marketing.promotions.messages.updated')); closeModal(); qc.invalidateQueries({ queryKey: ['admin/promotions'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || t('marketing.promotions.messages.failed'))
+    onSuccess: () => { toastSuccess(t('admin.marketing.promotions.messages.updated')); closeModal(); qc.invalidateQueries({ queryKey: ['admin/promotions'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.marketing.promotions.messages.failed'))
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/admin/promotions/${id}`),
-    onSuccess: () => { toastSuccess(t('marketing.promotions.messages.deleted')); qc.invalidateQueries({ queryKey: ['admin/promotions'] }); },
-    onError: (err: any) => toastError(err.response?.data?.message || t('marketing.promotions.messages.failed'))
+    onSuccess: () => { toastSuccess(t('admin.marketing.promotions.messages.deleted')); qc.invalidateQueries({ queryKey: ['admin/promotions'] }); },
+    onError: (err: any) => toastError(err.response?.data?.message || t('admin.marketing.promotions.messages.failed'))
   });
 
   const closeModal = () => {
@@ -203,7 +203,7 @@ export default function Promotions() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm(t('marketing.promotions.messages.delete_confirm'))) deleteMutation.mutate(id);
+    if (confirm(t('admin.marketing.promotions.messages.delete_confirm'))) deleteMutation.mutate(id);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -250,12 +250,12 @@ export default function Promotions() {
               animate={{ opacity: 1, x: 0 }}
               className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent truncate"
             >
-              {t('marketing.promotions.title')}
+              {t('admin.marketing.promotions.title')}
             </motion.h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('marketing.promotions.subtitle')}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.marketing.promotions.subtitle')}</p>
           </div>
           <Button onClick={() => { closeModal(); setOpenCreate(true); }} variant="primary" className="h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm flex-shrink-0">
-            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('marketing.promotions.create_button')}</span>
+            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">{t('admin.marketing.promotions.create_button')}</span>
           </Button>
         </div>
 
@@ -271,14 +271,14 @@ export default function Promotions() {
           <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 md:gap-4">
             <div className="relative flex-1 sm:min-w-[200px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder={t('marketing.promotions.filters.search')} value={search} onChange={(e) => setSearch(e.target.value)}
+              <Input placeholder={t('admin.marketing.promotions.filters.search')} value={search} onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 sm:pl-10 h-10 text-sm" variant="filled" />
             </div>
             <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-3 sm:mx-0 px-3 sm:px-0">
               {[
-                { key: 'all', label: t('marketing.promotions.filters.status.all') },
-                { key: 'active', label: t('marketing.promotions.filters.status.active') },
-                { key: 'inactive', label: t('marketing.promotions.filters.status.inactive') }
+                { key: 'all', label: t('admin.marketing.promotions.filters.status.all') },
+                { key: 'active', label: t('admin.marketing.promotions.filters.status.active') },
+                { key: 'inactive', label: t('admin.marketing.promotions.filters.status.inactive') }
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -296,10 +296,10 @@ export default function Promotions() {
             </div>
             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
               className="bg-secondary border border-border rounded-lg sm:rounded-xl px-3 py-2 h-10 text-foreground text-xs sm:text-sm focus:border-fuchsia-500 transition-all touch-manipulation">
-              <option value="all">{t('marketing.promotions.filters.type.all')}</option>
-              <option value="percentage">{t('marketing.promotions.filters.type.percentage')}</option>
-              <option value="fixed_amount">{t('marketing.promotions.filters.type.fixed_amount')}</option>
-              <option value="buy_x_get_y">{t('marketing.promotions.filters.type.buy_x_get_y')}</option>
+              <option value="all">{t('admin.marketing.promotions.filters.type.all')}</option>
+              <option value="percentage">{t('admin.marketing.promotions.filters.type.percentage')}</option>
+              <option value="fixed_amount">{t('admin.marketing.promotions.filters.type.fixed_amount')}</option>
+              <option value="buy_x_get_y">{t('admin.marketing.promotions.filters.type.buy_x_get_y')}</option>
             </select>
           </div>
         </motion.div>
@@ -313,19 +313,19 @@ export default function Promotions() {
         >
           {/* Table Header with Gradient - Hidden on mobile */}
           <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
-            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.promotions.table.headers.name_code')}</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.promotions.table.headers.type')}</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.promotions.table.headers.discount')}</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.promotions.table.headers.usage')}</div>
-            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('marketing.promotions.table.headers.valid_until')}</div>
-            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('marketing.promotions.table.headers.actions')}</div>
+            <div className="col-span-3 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.marketing.promotions.table.headers.name_code')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.marketing.promotions.table.headers.type')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.marketing.promotions.table.headers.discount')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.marketing.promotions.table.headers.usage')}</div>
+            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.marketing.promotions.table.headers.valid_until')}</div>
+            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.marketing.promotions.table.headers.actions')}</div>
           </div>
           <div className="divide-y divide-border/30">
             {isLoading ? (
               <div className="p-8 sm:p-12 text-center">
                 <div className="inline-flex items-center gap-2 sm:gap-3 text-muted-foreground text-sm">
                   <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                  {t('marketing.promotions.table.loading')}
+                  {t('admin.marketing.promotions.table.loading')}
                 </div>
               </div>
             ) : promotionList.length === 0 ? (
@@ -333,8 +333,8 @@ export default function Promotions() {
                 <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                   <Tag className="w-6 h-6 sm:w-8 sm:h-8 text-fuchsia-500" />
                 </div>
-                <h3 className="text-foreground font-semibold text-sm sm:text-base">{t('marketing.promotions.table.empty.title')}</h3>
-                <p className="text-muted-foreground text-xs sm:text-sm mt-1">{t('marketing.promotions.table.empty.subtitle')}</p>
+                <h3 className="text-foreground font-semibold text-sm sm:text-base">{t('admin.marketing.promotions.table.empty.title')}</h3>
+                <p className="text-muted-foreground text-xs sm:text-sm mt-1">{t('admin.marketing.promotions.table.empty.subtitle')}</p>
               </div>
             ) : promotionList.map((promo: any, idx: number) => (
               <motion.div
@@ -424,7 +424,7 @@ export default function Promotions() {
           {promotions?.meta && (
             <div className="flex items-center justify-between gap-2 p-3 sm:p-4 border-t border-border/50 bg-gradient-to-r from-transparent via-fuchsia-500/5 to-transparent">
               <div className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                {((page - 1) * perPage) + 1}-{Math.min(page * perPage, promotions.meta.total)} {t('analytics.audit.pagination.page_of').replace('{page}', '').replace('{lastPage}', promotions.meta.total)}
+                {((page - 1) * perPage) + 1}-{Math.min(page * perPage, promotions.meta.total)} {t('admin.analytics.audit.pagination.page_of').replace('{page}', '').replace('{lastPage}', promotions.meta.total)}
               </div>
               <div className="flex gap-1.5 w-full sm:w-auto justify-between sm:justify-end">
                 <Button
@@ -434,7 +434,7 @@ export default function Promotions() {
                   onClick={() => setPage(p => p - 1)}
                   className="h-9 px-2 sm:px-3"
                 >
-                  <ChevronLeft className="w-4 h-4" /><span className="hidden sm:inline ml-1">{t('analytics.audit.pagination.previous')}</span>
+                  <ChevronLeft className="w-4 h-4" /><span className="hidden sm:inline ml-1">{t('admin.analytics.audit.pagination.previous')}</span>
                 </Button>
                 <span className="text-sm font-medium text-foreground px-3 py-2 rounded-lg bg-secondary border border-border sm:hidden">
                   {page}/{promotions.meta.last_page}
@@ -462,7 +462,7 @@ export default function Promotions() {
                   onClick={() => setPage(p => p + 1)}
                   className="h-9 px-2 sm:px-3"
                 >
-                  <span className="hidden sm:inline mr-1">{t('analytics.audit.pagination.next')}</span><ChevronRight className="w-4 h-4" />
+                  <span className="hidden sm:inline mr-1">{t('admin.analytics.audit.pagination.next')}</span><ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>

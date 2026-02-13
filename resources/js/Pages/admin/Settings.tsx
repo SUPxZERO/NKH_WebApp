@@ -321,7 +321,7 @@ export default function Settings() {
                       <h3 className="text-lg sm:text-xl font-semibold text-foreground">{profileForm.name}</h3>
                       <p className="text-sm sm:text-base text-muted-foreground">{profileForm.email}</p>
                       <span className="inline-block mt-0.5 sm:mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                        {t('layout.user_menu.roles.admin')}
+                        {t('layout.ui.user_menu.roles.admin')}
                       </span>
                     </div>
                   </div>

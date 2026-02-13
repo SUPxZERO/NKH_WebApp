@@ -517,13 +517,13 @@ export default function Customers() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label={t('auth.full_name') as string} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-10 text-sm" />
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('profile.gender')}</label>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">{t('customer.profile.gender')}</label>
               <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                 className="w-full h-10 bg-secondary/50 border border-border rounded-lg px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
                 <option value="">{t('admin.common.select') || 'Select'}</option>
-                <option value="male">{t('profile.genders.male')}</option>
-                <option value="female">{t('profile.genders.female')}</option>
-                <option value="other">{t('profile.genders.other')}</option>
+                <option value="male">{t('customer.profile.genders.male')}</option>
+                <option value="female">{t('customer.profile.genders.female')}</option>
+                <option value="other">{t('customer.profile.genders.other')}</option>
               </select>
             </div>
           </div>
@@ -536,7 +536,7 @@ export default function Customers() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label={editingCustomer ? t('auth.new_password_title') as string : t('auth.password_label') as string} type="password" value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })} required={!editingCustomer} className="h-10 text-sm" />
-            <Input label={t('profile.birth_date') as string} type="date" value={formData.birth_date}
+            <Input label={t('customer.profile.birth_date') as string} type="date" value={formData.birth_date}
               onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })} className="h-10 text-sm" />
           </div>
 
@@ -571,7 +571,7 @@ export default function Customers() {
           <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
             <Button type="button" variant="secondary" onClick={closeModal} className="flex-1 h-10 sm:h-11 text-sm">{t('common.cancel')}</Button>
             <Button type="submit" variant="primary" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 h-10 sm:h-11 text-sm">
-              {createMutation.isPending || updateMutation.isPending ? t('profile.saving') : (editingCustomer ? t('common.save') : t('layout.actions.create'))}
+              {createMutation.isPending || updateMutation.isPending ? t('customer.profile.saving') : (editingCustomer ? t('common.save') : t('layout.actions.create'))}
             </Button>
           </div>
         </form>

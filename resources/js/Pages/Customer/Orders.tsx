@@ -85,43 +85,43 @@ type FilterStatus = 'all' | 'pending' | 'completed' | 'cancelled';
 
 const statusConfig = {
     pending: {
-        label: 'customer_pages.orders.status.pending',
+        label: 'customer.orders.status.pending',
         color: 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30',
         icon: Clock,
         iconColor: 'text-amber-500'
     },
     received: {
-        label: 'customer_pages.orders.status.received',
+        label: 'customer.orders.status.received',
         color: 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30',
         icon: CheckCircle,
         iconColor: 'text-blue-500'
     },
     preparing: {
-        label: 'customer_pages.orders.status.preparing',
+        label: 'customer.orders.status.preparing',
         color: 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30',
         icon: Clock,
         iconColor: 'text-orange-500'
     },
     ready: {
-        label: 'customer_pages.orders.status.ready',
+        label: 'customer.orders.status.ready',
         color: 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
         icon: CheckCircle,
         iconColor: 'text-emerald-500'
     },
     completed: {
-        label: 'customer_pages.orders.status.completed',
+        label: 'customer.orders.status.completed',
         color: 'bg-gradient-to-r from-green-500/20 to-teal-500/20 text-green-600 dark:text-green-400 border border-green-500/30',
         icon: CheckCircle,
         iconColor: 'text-green-500'
     },
     cancelled: {
-        label: 'customer_pages.orders.status.cancelled',
+        label: 'customer.orders.status.cancelled',
         color: 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400 border border-red-500/30',
         icon: XCircle,
         iconColor: 'text-red-500'
     },
     delivered: {
-        label: 'customer_pages.orders.status.delivered',
+        label: 'customer.orders.status.delivered',
         color: 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/30',
         icon: Package,
         iconColor: 'text-teal-500'
@@ -130,15 +130,15 @@ const statusConfig = {
 
 const approvalConfig = {
     pending: {
-        label: 'customer_pages.orders.approval.pending',
+        label: 'customer.orders.approval.pending',
         color: 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
     },
     approved: {
-        label: 'customer_pages.orders.approval.approved',
+        label: 'customer.orders.approval.approved',
         color: 'bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
     },
     rejected: {
-        label: 'customer_pages.orders.approval.rejected',
+        label: 'customer.orders.approval.rejected',
         color: 'bg-gradient-to-r from-red-500/10 to-rose-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
     },
 };
@@ -296,7 +296,7 @@ export default function Orders() {
                                 : "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30"
                         )}>
                             <DollarSign className="w-3 h-3" />
-                            <span className="hidden sm:inline">{order.is_paid ? t('customer_pages.orders.payment.paid') : t('customer_pages.orders.payment.pending')}</span>
+                            <span className="hidden sm:inline">{order.is_paid ? t('customer.orders.payment.paid') : t('customer.orders.payment.pending')}</span>
                         </div>
                     </div>
 
@@ -309,7 +309,7 @@ export default function Orders() {
                         )}>
                             {order.order_type === 'pickup' && <ShoppingBag className="w-3.5 h-3.5" />}
                             {order.order_type === 'delivery' && <Truck className="w-3.5 h-3.5" />}
-                            <span className="capitalize">{t(`customer_pages.orders.types.${order.order_type}`)}</span>
+                            <span className="capitalize">{t(`customer.orders.types.${order.order_type}`)}</span>
                         </div>
                         {order.location && (
                             <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-secondary text-muted-foreground">
@@ -331,14 +331,14 @@ export default function Orders() {
                         {order.preview_image && (
                             <img
                                 src={order.preview_image}
-                                alt={t('customer_pages.orders.order_card.preview_alt')}
+                                alt={t('customer.orders.order_card.preview_alt')}
                                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl object-cover border border-border shadow-sm"
                             />
                         )}
                         <div className="flex-1 min-w-0">
                             <p className="font-semibold text-foreground flex items-center gap-1.5 text-sm">
                                 <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-                                {order.items_count} {t('customer_pages.dashboard.items')}
+                                {order.items_count} {t('customer.dashboard.items')}
                             </p>
                             <p className="text-xs text-muted-foreground mt-0.5 truncate">
                                 {order.items.slice(0, 2).map(item => item.name).join(', ')}
@@ -348,7 +348,7 @@ export default function Orders() {
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide hidden sm:block">{t('customer_pages.orders.order_card.total')}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide hidden sm:block">{t('customer.orders.order_card.total')}</p>
                             <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
                                 ${formatPrice(order.total_amount)}
                             </p>
@@ -364,14 +364,14 @@ export default function Orders() {
                             onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
                             rightIcon={<ChevronDown className={cn('w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300', isExpanded && 'rotate-180')} />}
                         >
-                            {isExpanded ? t('customer_pages.orders.actions.hide') : t('customer_pages.orders.actions.details')}
+                            {isExpanded ? t('customer.orders.actions.hide') : t('customer.orders.actions.details')}
                         </Button>
                         <Button
                             variant="outline"
                             size="sm"
                             className="h-9 sm:h-11 px-3"
                             onClick={() => window.location.href = `/customer/orders/${order.id}`}
-                            title={t('customer_pages.orders.actions.details')}
+                            title={t('customer.orders.actions.details')}
                         >
                             <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
@@ -381,7 +381,7 @@ export default function Orders() {
                                 size="sm"
                                 className="h-9 sm:h-11 px-3"
                                 onClick={() => setConfirmReorderId(order.id)}
-                                title={t('customer_pages.orders.actions.reorder')}
+                                title={t('customer.orders.actions.reorder')}
                             >
                                 <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </Button>
@@ -395,7 +395,7 @@ export default function Orders() {
                                 disabled={cancellingOrderId === order.id}
                             >
                                 <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                <span className="hidden sm:inline">{cancellingOrderId === order.id ? t('customer_pages.orders.actions.cancelling') : t('customer_pages.orders.actions.cancel')}</span>
+                                <span className="hidden sm:inline">{cancellingOrderId === order.id ? t('customer.orders.actions.cancelling') : t('customer.orders.actions.cancel')}</span>
                             </Button>
                         )}
                     </div>
@@ -415,7 +415,7 @@ export default function Orders() {
                                 <div>
                                     <h4 className="font-bold text-foreground mb-3 flex items-center gap-2 text-sm sm:text-base">
                                         <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                                        {t('customer_pages.orders.order_card.order_items')}
+                                        {t('customer.orders.order_card.order_items')}
                                     </h4>
                                     <div className="space-y-2">
                                         {order.items.map((item) => (
@@ -455,7 +455,7 @@ export default function Orders() {
                                     <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-emerald-500/10 to-green-500/5 border border-emerald-500/20">
                                         <h4 className="font-bold text-emerald-600 dark:text-emerald-400 mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2 text-sm">
                                             <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-                                            {t('customer_pages.orders.order_card.delivery_address')}
+                                            {t('customer.orders.order_card.delivery_address')}
                                         </h4>
                                         <p className="text-foreground text-sm">
                                             {order.delivery_address.address_line_1}
@@ -472,35 +472,35 @@ export default function Orders() {
                                 <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-card border border-border">
                                     <h4 className="font-bold text-foreground mb-3 flex items-center gap-1.5 sm:gap-2 text-sm">
                                         <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                                        {t('customer_pages.orders.order_card.price_breakdown')}
+                                        {t('customer.orders.order_card.price_breakdown')}
                                     </h4>
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">{t('customer_pages.orders.order_card.subtotal')}</span>
+                                            <span className="text-muted-foreground">{t('customer.orders.order_card.subtotal')}</span>
                                             <span className="text-foreground font-medium">${formatPrice(order.subtotal)}</span>
                                         </div>
                                         {order.delivery_fee > 0 && (
                                             <div className="flex justify-between">
                                                 <span className="text-muted-foreground flex items-center gap-1">
-                                                    <Truck className="w-3.5 h-3.5" /> {t('customer_pages.orders.order_card.delivery')}
+                                                    <Truck className="w-3.5 h-3.5" /> {t('customer.orders.order_card.delivery')}
                                                 </span>
                                                 <span className="text-foreground font-medium">${formatPrice(order.delivery_fee)}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between">
-                                            <span className="text-muted-foreground">{t('customer_pages.orders.order_card.tax')}</span>
+                                            <span className="text-muted-foreground">{t('customer.orders.order_card.tax')}</span>
                                             <span className="text-foreground font-medium">${formatPrice(order.tax_amount)}</span>
                                         </div>
                                         {order.discount_amount > 0 && (
                                             <div className="flex justify-between">
-                                                <span className="text-emerald-600 dark:text-emerald-400">{t('customer_pages.orders.order_card.discount')}</span>
+                                                <span className="text-emerald-600 dark:text-emerald-400">{t('customer.orders.order_card.discount')}</span>
                                                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                                                     -${formatPrice(order.discount_amount)}
                                                 </span>
                                             </div>
                                         )}
                                         <div className="flex justify-between pt-2 border-t border-border">
-                                            <span className="text-foreground font-bold">{t('customer_pages.orders.order_card.total')}</span>
+                                            <span className="text-foreground font-bold">{t('customer.orders.order_card.total')}</span>
                                             <span className="font-bold bg-gradient-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
                                                 ${formatPrice(order.total_amount)}
                                             </span>
@@ -519,8 +519,8 @@ export default function Orders() {
         <RequireAuth roles={['customer']}>
             <CustomerLayout>
                 <Head>
-                    <title>My Orders - NKH Restaurant</title>
-                    <meta name="description" content="View and manage your order history" />
+                    <title>{t('customer.orders.page_title')}</title>
+                    <meta name="description" content={t('customer.orders.page_description')} />
                 </Head>
 
                 <div className="space-y-4 sm:space-y-8">
@@ -533,11 +533,11 @@ export default function Orders() {
                         <div>
                             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
                                 <span className="bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                    {t('customer_pages.orders.title')}
+                                    {t('customer.orders.title')}
                                 </span>
                             </h1>
                             <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                                {t('customer_pages.orders.subtitle')}
+                                {t('customer.orders.subtitle')}
                             </p>
                         </div>
                         {data && (
@@ -567,7 +567,7 @@ export default function Orders() {
                             )}
                         >
                             <Filter className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.all')}</span>
+                            <span className="hidden sm:inline">{t('customer.orders.filters.all')}</span>
                         </button>
                         <button
                             onClick={() => setFilterStatus('pending')}
@@ -579,8 +579,8 @@ export default function Orders() {
                             )}
                         >
                             <Clock className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.active')}</span>
-                            <span className="sm:hidden">{t('customer_pages.orders.filters.active')}</span>
+                            <span className="hidden sm:inline">{t('customer.orders.filters.active')}</span>
+                            <span className="sm:hidden">{t('customer.orders.filters.active')}</span>
                         </button>
                         <button
                             onClick={() => setFilterStatus('completed')}
@@ -592,8 +592,8 @@ export default function Orders() {
                             )}
                         >
                             <CheckCircle className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.completed')}</span>
-                            <span className="sm:hidden">{t('customer_pages.orders.filters.completed')}</span>
+                            <span className="hidden sm:inline">{t('customer.orders.filters.completed')}</span>
+                            <span className="sm:hidden">{t('customer.orders.filters.completed')}</span>
                         </button>
                         <button
                             onClick={() => setFilterStatus('cancelled')}
@@ -605,8 +605,8 @@ export default function Orders() {
                             )}
                         >
                             <XCircle className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{t('customer_pages.orders.filters.cancelled')}</span>
-                            <span className="sm:hidden">{t('customer_pages.orders.filters.cancelled')}</span>
+                            <span className="hidden sm:inline">{t('customer.orders.filters.cancelled')}</span>
+                            <span className="sm:hidden">{t('customer.orders.filters.cancelled')}</span>
                         </button>
                     </motion.div>
 
@@ -618,7 +618,7 @@ export default function Orders() {
                                     <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             </div>
-                            <p className="mt-4 text-sm text-muted-foreground font-medium">{t('customer_pages.orders.loading')}</p>
+                            <p className="mt-4 text-sm text-muted-foreground font-medium">{t('customer.orders.loading')}</p>
                         </div>
                     )}
 
@@ -632,11 +632,11 @@ export default function Orders() {
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-3">
                                 <AlertTriangle className="w-6 h-6 text-red-500" />
                             </div>
-                            <h3 className="text-base font-bold text-foreground mb-1">{t('customer_pages.orders.error.title')}</h3>
-                            <p className="text-sm text-muted-foreground mb-3">{t('customer_pages.orders.error.message')}</p>
+                            <h3 className="text-base font-bold text-foreground mb-1">{t('customer.orders.error.title')}</h3>
+                            <p className="text-sm text-muted-foreground mb-3">{t('customer.orders.error.message')}</p>
                             <Button variant="destructive" size="sm" onClick={() => window.location.reload()}>
                                 <RefreshCcw className="w-3.5 h-3.5 mr-1.5" />
-                                {t('customer_pages.orders.actions.try_again')}
+                                {t('customer.orders.actions.try_again')}
                             </Button>
                         </motion.div>
                     )}
@@ -653,17 +653,17 @@ export default function Orders() {
                             </div>
                             <h3 className="text-xl font-bold text-foreground mb-2">
                                 {filterStatus === 'all'
-                                    ? t('customer_pages.orders.empty.no_orders')
-                                    : t('customer_pages.orders.empty.no_filtered', { status: filterStatus })}
+                                    ? t('customer.orders.empty.no_orders')
+                                    : t('customer.orders.empty.no_filtered', { status: filterStatus })}
                             </h3>
                             <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
                                 {filterStatus === 'all'
-                                    ? t('customer_pages.orders.empty.cta_browse')
-                                    : t('customer_pages.orders.empty.no_filtered', { status: filterStatus }) + ' ' + t('customer_pages.orders.empty.cta_filter')}
+                                    ? t('customer.orders.empty.cta_browse')
+                                    : t('customer.orders.empty.no_filtered', { status: filterStatus }) + ' ' + t('customer.orders.empty.cta_filter')}
                             </p>
                             <Button variant="primary" onClick={() => window.location.href = '/menu'}>
                                 <ShoppingBag className="w-4 h-4 mr-2" />
-                                {t('customer_pages.orders.empty.browse_menu')}
+                                {t('customer.orders.empty.browse_menu')}
                             </Button>
                         </motion.div>
                     )}
@@ -697,7 +697,7 @@ export default function Orders() {
                             className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 bg-card border border-border rounded-xl shadow-sm"
                         >
                             <div className="text-xs text-muted-foreground hidden sm:block">
-                                {t('customer_pages.orders.pagination.showing')} <span className="font-semibold text-foreground">{data.meta.from}</span> {t('customer_pages.orders.pagination.to')} <span className="font-semibold text-foreground">{data.meta.to}</span> {t('customer_pages.orders.pagination.of')} <span className="font-semibold text-foreground">{data.meta.total}</span> {t('customer_pages.orders.pagination.orders')}
+                                {t('customer.orders.pagination.showing')} <span className="font-semibold text-foreground">{data.meta.from}</span> {t('customer.orders.pagination.to')} <span className="font-semibold text-foreground">{data.meta.to}</span> {t('customer.orders.pagination.of')} <span className="font-semibold text-foreground">{data.meta.total}</span> {t('customer.orders.pagination.orders')}
                             </div>
                             <div className="flex items-center gap-1">
                                 <Button
@@ -708,7 +708,7 @@ export default function Orders() {
                                     className="h-9 px-3"
                                 >
                                     <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-                                    <span className="hidden sm:inline">{t('customer_pages.orders.pagination.prev')}</span>
+                                    <span className="hidden sm:inline">{t('customer.orders.pagination.prev')}</span>
                                 </Button>
                                 <div className="flex items-center gap-1">
                                     {Array.from({ length: Math.min(5, data.meta.last_page) }, (_, i) => {
@@ -745,7 +745,7 @@ export default function Orders() {
                                     onClick={() => setCurrentPage(p => p + 1)}
                                     className="h-9 px-3"
                                 >
-                                    <span className="hidden sm:inline">{t('customer_pages.orders.pagination.next')}</span>
+                                    <span className="hidden sm:inline">{t('customer.orders.pagination.next')}</span>
                                     <ChevronRight className="w-3.5 h-3.5 ml-1" />
                                 </Button>
                             </div>
@@ -779,7 +779,7 @@ export default function Orders() {
                                         </div>
                                         <div>
                                             <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                                                {t('customer_pages.orders.cancel_modal.title')}
+                                                {t('customer.orders.cancel_modal.title')}
                                             </h3>
                                             <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                                                 <Hash className="w-3 h-3" />
@@ -792,18 +792,18 @@ export default function Orders() {
                                 {/* Modal Body */}
                                 <div className="p-4 sm:p-6">
                                     <p className="text-sm text-muted-foreground mb-4">
-                                        {t('customer_pages.orders.cancel_modal.warning')}
+                                        {t('customer.orders.cancel_modal.warning')}
                                     </p>
 
                                     {/* Order Summary */}
                                     <div className="p-3 rounded-lg bg-secondary/50 border border-border mb-4">
                                         <div className="flex items-center justify-between mb-1.5">
-                                            <span className="text-xs text-muted-foreground">{t('customer_pages.orders.cancel_modal.order_total')}</span>
+                                            <span className="text-xs text-muted-foreground">{t('customer.orders.cancel_modal.order_total')}</span>
                                             <span className="text-base font-bold text-foreground">${orderToCancel.total_amount.toFixed(2)}</span>
                                         </div>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs text-muted-foreground">{t('customer_pages.orders.cancel_modal.items')}</span>
-                                            <span className="text-xs font-medium text-foreground">{orderToCancel.items_count} {t('customer_pages.dashboard.items')}</span>
+                                            <span className="text-xs text-muted-foreground">{t('customer.orders.cancel_modal.items')}</span>
+                                            <span className="text-xs font-medium text-foreground">{orderToCancel.items_count} {t('customer.dashboard.items')}</span>
                                         </div>
                                     </div>
 
@@ -814,7 +814,7 @@ export default function Orders() {
                                             onClick={() => setShowCancelModal(false)}
                                             disabled={cancelOrderMutation.isPending}
                                         >
-                                            {t('customer_pages.orders.cancel_modal.keep')}
+                                            {t('customer.orders.cancel_modal.keep')}
                                         </Button>
                                         <Button
                                             variant="destructive"
@@ -825,12 +825,12 @@ export default function Orders() {
                                             {cancelOrderMutation.isPending ? (
                                                 <>
                                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                                    {t('customer_pages.orders.actions.cancelling')}
+                                                    {t('customer.orders.actions.cancelling')}
                                                 </>
                                             ) : (
                                                 <>
                                                     <XCircle className="w-4 h-4 mr-1.5" />
-                                                    {t('customer_pages.orders.cancel_modal.confirm')}
+                                                    {t('customer.orders.cancel_modal.confirm')}
                                                 </>
                                             )}
                                         </Button>
@@ -839,7 +839,7 @@ export default function Orders() {
                                     {cancelOrderMutation.isError && (
                                         <div className="mt-3 p-2.5 rounded-lg bg-gradient-to-r from-red-500/10 to-rose-500/5 border border-red-500/20">
                                             <p className="text-xs text-red-500 text-center font-medium">
-                                                {t('customer_pages.orders.cancel_modal.error')}
+                                                {t('customer.orders.cancel_modal.error')}
                                             </p>
                                         </div>
                                     )}
@@ -874,10 +874,10 @@ export default function Orders() {
                                         </div>
                                         <div>
                                             <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                                                {t('customer_pages.orders.reorder_modal.title')}
+                                                {t('customer.orders.reorder_modal.title')}
                                             </h3>
                                             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                                                {t('customer_pages.orders.reorder_modal.message')}
+                                                {t('customer.orders.reorder_modal.message')}
                                             </p>
                                         </div>
                                     </div>
@@ -886,7 +886,7 @@ export default function Orders() {
                                 {/* Modal Body */}
                                 <div className="p-4 sm:p-6">
                                     <p className="text-sm text-muted-foreground mb-6">
-                                        {t('customer_pages.orders.reorder_modal.message')}
+                                        {t('customer.orders.reorder_modal.message')}
                                     </p>
 
                                     <div className="flex gap-2">
@@ -896,7 +896,7 @@ export default function Orders() {
                                             onClick={() => setConfirmReorderId(null)}
                                             disabled={isReordering}
                                         >
-                                            {t('customer_pages.orders.reorder_modal.cancel')}
+                                            {t('customer.orders.reorder_modal.cancel')}
                                         </Button>
                                         <Button
                                             variant="primary"
@@ -913,7 +913,7 @@ export default function Orders() {
                                                             console.error('Reorder failed', err);
                                                             setIsReordering(false);
                                                             setConfirmReorderId(null);
-                                                            alert(t('customer_pages.orders.reorder_modal.error'));
+                                                            alert(t('customer.orders.reorder_modal.error'));
                                                         });
                                                 }
                                             }}
@@ -922,12 +922,12 @@ export default function Orders() {
                                             {isReordering ? (
                                                 <>
                                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                                    {t('customer_pages.orders.reorder_modal.adding')}
+                                                    {t('customer.orders.reorder_modal.adding')}
                                                 </>
                                             ) : (
                                                 <>
                                                     <ShoppingBag className="w-4 h-4 mr-1.5" />
-                                                    {t('customer_pages.orders.reorder_modal.confirm')}
+                                                    {t('customer.orders.reorder_modal.confirm')}
                                                 </>
                                             )}
                                         </Button>

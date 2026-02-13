@@ -35,9 +35,9 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('17:00');
   const statusLabels: Record<Shift['status'], string> = {
-    scheduled: t('admin.employee_scheduler.status.scheduled'),
-    confirmed: t('admin.employee_scheduler.status.confirmed'),
-    completed: t('admin.employee_scheduler.status.completed'),
+    scheduled: t('admin.employeeScheduler.status.scheduled'),
+    confirmed: t('admin.employeeScheduler.status.confirmed'),
+    completed: t('admin.employeeScheduler.status.completed'),
   };
 
   const handleSchedule = () => {
@@ -61,7 +61,7 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            <h3 className="font-semibold">{t('admin.employee_scheduler.title')}</h3>
+            <h3 className="font-semibold">{t('admin.employeeScheduler.title')}</h3>
           </div>
           <input
             type="date"
@@ -88,7 +88,7 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
                   onChange={(e) => setSelectedEmployee(Number(e.target.value) || null)}
                   className="bg-transparent border border-white/10 rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value="">{t('admin.employee_scheduler.select_employee')}</option>
+                  <option value="">{t('admin.employeeScheduler.select_employee')}</option>
                   {employees.map(emp => (
                     <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
                   ))}
@@ -106,7 +106,7 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
                   className="bg-transparent border border-white/10 rounded-lg px-3 py-2 text-sm"
                 />
                 <Button onClick={handleSchedule} disabled={!selectedEmployee}>
-                  {t('admin.employee_scheduler.actions.schedule')}
+                  {t('admin.employeeScheduler.actions.schedule')}
                 </Button>
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function EmployeeScheduler({ employees, shifts, onScheduleShift, 
                           </div>
                         </div>
                       ) : (
-                        <div className="text-xs text-gray-500">{t('admin.employee_scheduler.not_scheduled')}</div>
+                        <div className="text-xs text-gray-500">{t('admin.employeeScheduler.not_scheduled')}</div>
                       )}
                     </div>
                   </div>

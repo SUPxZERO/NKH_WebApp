@@ -29,8 +29,8 @@ const PageHeader: React.FC<{ onRefresh: () => void; isRefreshing: boolean }> = (
           <FileText className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('analytics.audit.title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('analytics.audit.subtitle')}</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('admin.analytics.audit.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('admin.analytics.audit.subtitle')}</p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@ const PageHeader: React.FC<{ onRefresh: () => void; isRefreshing: boolean }> = (
           className="gap-2"
         >
           <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
-          {t('analytics.audit.refresh')}
+          {t('admin.analytics.audit.refresh')}
         </Button>
       </div>
     </motion.div>
@@ -61,7 +61,7 @@ const Pagination: React.FC<{
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">{t('analytics.audit.pagination.show')}</span>
+        <span className="text-sm text-muted-foreground">{t('admin.analytics.audit.pagination.show')}</span>
         <select
           value={perPage}
           onChange={(e) => onPerPageChange(Number(e.target.value))}
@@ -72,7 +72,7 @@ const Pagination: React.FC<{
           <option value={50}>50</option>
           <option value={100}>100</option>
         </select>
-        <span className="text-sm text-muted-foreground">{t('analytics.audit.pagination.per_page')}</span>
+        <span className="text-sm text-muted-foreground">{t('admin.analytics.audit.pagination.per_page')}</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -82,10 +82,10 @@ const Pagination: React.FC<{
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
         >
-          {t('analytics.audit.pagination.previous')}
+          {t('admin.analytics.audit.pagination.previous')}
         </Button>
         <span className="text-sm text-muted-foreground px-3">
-          {t('analytics.audit.pagination.page_of', { page: String(page), lastPage: String(lastPage) })}
+          {t('admin.analytics.audit.pagination.page_of', { page: String(page), lastPage: String(lastPage) })}
         </span>
         <Button
           variant="outline"
@@ -93,7 +93,7 @@ const Pagination: React.FC<{
           disabled={page === lastPage}
           onClick={() => onPageChange(page + 1)}
         >
-          {t('analytics.audit.pagination.next')}
+          {t('admin.analytics.audit.pagination.next')}
         </Button>
       </div>
     </div>
@@ -121,7 +121,7 @@ const ExportActions: React.FC<{ filters: FilterState }> = ({ filters }) => {
         className="gap-1.5"
       >
         <Download className="w-4 h-4" />
-        {t('analytics.audit.export_csv')}
+        {t('admin.analytics.audit.export_csv')}
       </Button>
     </div>
   );

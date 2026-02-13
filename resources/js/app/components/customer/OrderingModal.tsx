@@ -115,10 +115,10 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
           <Card>
             <CardHeader className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="text-lg font-semibold">Browse Menu</div>
+                <div className="text-lg font-semibold">{t('customer.ordering.browse_menu')}</div>
                 <div className="w-full sm:w-64">
                   <Input
-                    placeholder="Search menu..."
+                    placeholder={t('customer.ordering.search_placeholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -275,8 +275,8 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                 {cart.items.length === 0 ? (
                   <div className="text-center py-8">
                     <ShoppingCart className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Your cart is empty</p>
-                    <p className="text-xs text-gray-400 mt-1">Add items from the menu</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('customer.ordering.empty_cart')}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('customer.ordering.add_items')}</p>
                   </div>
                 ) : (
                   cart.items.map((it) => (
@@ -314,12 +314,12 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
               {cart.items.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-white/10 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Subtotal</span>
+                    <span className="text-gray-500">{t('customer.ordering.subtotal')}</span>
                     <span>${cart.subtotal.toFixed(2)}</span>
                   </div>
                   {mode === 'delivery' && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Delivery Fee</span>
+                      <span className="text-gray-500">{t('customer.ordering.delivery_fee')}</span>
                       <span>${cart.deliveryFee.toFixed(2)}</span>
                     </div>
                   )}
@@ -328,7 +328,7 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                     <span>${cart.tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg pt-2 border-t border-white/10">
-                    <span>Total</span>
+                    <span>{t('customer.ordering.total')}</span>
                     <span className="text-fuchsia-500">${cart.total.toFixed(2)}</span>
                   </div>
                 </div>
@@ -342,15 +342,15 @@ export function OrderingModal({ open, onClose, mode }: OrderingModalProps) {
                 leftIcon={isAuthenticated ? <ArrowRight className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
               >
                 {cart.items.length === 0
-                  ? t('cart.add_items_btn')
+                  ? t('customer.cart.add_items_btn')
                   : isAuthenticated
-                    ? t('cart.go_to_cart_btn')
-                    : t('cart.sign_in_modal_title')
+                    ? t('customer.cart.go_to_cart_btn')
+                    : t('customer.cart.sign_in_modal_title')
                 }
               </Button>
               {!isAuthenticated && cart.items.length > 0 && (
                 <p className="text-xs text-center text-gray-500">
-                  {t('cart.sign_in_required_msg')}
+                  {t('customer.cart.sign_in_required_msg')}
                 </p>
               )}
             </CardFooter>

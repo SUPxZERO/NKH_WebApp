@@ -19,6 +19,7 @@ import {
 import { apiGet, apiPut, apiPost } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 interface NotificationPreferencesData {
     preferences: Record<string, Record<string, boolean>>;
@@ -53,6 +54,7 @@ const typeColors: Record<string, string> = {
 };
 
 export default function NotificationPreferencesSettings({ className }: NotificationPreferencesSettingsProps) {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [localPreferences, setLocalPreferences] = useState<Record<string, Record<string, boolean>>>({});
 
@@ -75,11 +77,11 @@ export default function NotificationPreferencesSettings({ className }: Notificat
             return apiPut('/api/customer/notification-preferences', { preferences });
         },
         onSuccess: () => {
-            toastSuccess('Notification preferences saved!');
+            toastSuccess(t('customer.settings.notifications.messages.saved'));
             queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
         },
         onError: () => {
-            toastError('Failed to save preferences');
+            toastError(t('customer.settings.notifications.messages.failed'));
         },
     });
 
@@ -97,7 +99,7 @@ export default function NotificationPreferencesSettings({ className }: Notificat
             return apiPost('/api/customer/notification-preferences/enable-all', {});
         },
         onSuccess: () => {
-            toastSuccess('All notifications enabled');
+            toastSuccess(t('customer.settings.notifications.messages.all_enabled'));
             queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
         },
     });
@@ -107,7 +109,7 @@ export default function NotificationPreferencesSettings({ className }: Notificat
             return apiPost('/api/customer/notification-preferences/disable-all', {});
         },
         onSuccess: () => {
-            toastSuccess('All notifications disabled');
+            toastSuccess(t('customer.settings.notifications.messages.all_disabled'));
             queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
         },
     });
@@ -139,7 +141,7 @@ export default function NotificationPreferencesSettings({ className }: Notificat
         return (
             <div className="p-6 text-center text-gray-500">
                 <BellOff className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>Failed to load notification preferences</p>
+                <p>{t('customer.settings.notifications.messages.loaded_error')}</p>
             </div>
         );
     }
@@ -155,9 +157,9 @@ export default function NotificationPreferencesSettings({ className }: Notificat
                         <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-base sm:text-lg">Notification Preferences</h3>
+                        <h3 className="font-semibold text-base sm:text-lg">{t('customer.settings.notifications.title')}</h3>
                         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                            Choose how and when you want to be notified
+                            {t('customer.settings.notifications.subtitle')}
                         </p>
                     </div>
                 </div>
@@ -167,21 +169,22 @@ export default function NotificationPreferencesSettings({ className }: Notificat
                         disabled={enableAllMutation.isPending}
                         className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                     >
-                        Enable All
+                        {t('customer.settings.notifications.actions.enable_all')}
                     </button>
                     <button
                         onClick={() => disableAllMutation.mutate()}
                         disabled={disableAllMutation.isPending}
                         className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     >
-                        Disable All
+                        {t('customer.settings.notifications.actions.disable_all')}
                     </button>
                 </div>
             </div>
 
             {/* Mobile: Stacked Cards */}
             <div className="space-y-3 sm:hidden">
-                {Object.entries(types).map(([typeKey, typeLabel], index) => {
+                {Object.entries(types).map(([typeKey, _], index) => {
+                    const typeLabel = t(`customer.settings.notifications.types.${typeKey}`);
                     const TypeIcon = typeIcons[typeKey] || Bell;
                     const typeColor = typeColors[typeKey] || 'text-gray-500';
 
@@ -205,7 +208,8 @@ export default function NotificationPreferencesSettings({ className }: Notificat
 
                             {/* Channel Toggles Row */}
                             <div className="flex items-center justify-between gap-2">
-                                {Object.entries(channels).map(([channelKey, channelLabel]) => {
+                                {Object.entries(channels).map(([channelKey, _]) => {
+                                    const channelLabel = t(`customer.settings.notifications.channels.${channelKey}`);
                                     const ChannelIcon = channelIcons[channelKey] || Bell;
                                     const isEnabled = localPreferences[channelKey]?.[typeKey] ?? true;
                                     const isPending = toggleMutation.isPending;
@@ -252,9 +256,10 @@ export default function NotificationPreferencesSettings({ className }: Notificat
                 {/* Header Row */}
                 <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                     <div className="font-medium text-gray-700 dark:text-gray-300">
-                        Notification Type
+                        {t('customer.settings.notifications.headers.type')}
                     </div>
-                    {Object.entries(channels).map(([channelKey, channelLabel]) => {
+                    {Object.entries(channels).map(([channelKey, _]) => {
+                        const channelLabel = t(`customer.settings.notifications.channels.${channelKey}`);
                         const ChannelIcon = channelIcons[channelKey] || Bell;
                         return (
                             <div
@@ -269,7 +274,8 @@ export default function NotificationPreferencesSettings({ className }: Notificat
                 </div>
 
                 {/* Type Rows */}
-                {Object.entries(types).map(([typeKey, typeLabel], index) => {
+                {Object.entries(types).map(([typeKey, _], index) => {
+                    const typeLabel = t(`customer.settings.notifications.types.${typeKey}`);
                     const TypeIcon = typeIcons[typeKey] || Bell;
                     const typeColor = typeColors[typeKey] || 'text-gray-500';
 
@@ -333,7 +339,7 @@ export default function NotificationPreferencesSettings({ className }: Notificat
 
             {/* Info Note */}
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
-                💡 In-app notifications appear in your notification bell. Push notifications require browser permission.
+                💡 {t('customer.settings.notifications.info.push_permission')}
             </p>
         </div>
     );

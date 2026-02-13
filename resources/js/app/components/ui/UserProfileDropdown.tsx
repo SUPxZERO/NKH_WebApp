@@ -48,13 +48,13 @@ const getMenuConfig = (t: (key: string) => any) => {
     const configs: Record<UserRole, { items: MenuItem[]; bottomItems: MenuItem[] }> = {
         customer: {
             items: [
-                { label: t('layout.ui.user_menu.items.profile'), href: '/customer/profile', icon: User },
+                { label: t('layout.ui.user_menu.items.profile'), href: '/customer/account?section=profile', icon: User },
                 { label: t('layout.ui.user_menu.items.orders'), href: '/customer/orders', icon: ShoppingBag },
-                { label: t('layout.ui.user_menu.items.addresses'), href: '/customer/profile', icon: MapPin },
+                { label: t('layout.ui.user_menu.items.addresses'), href: '/customer/account?section=addresses', icon: MapPin },
                 { label: t('layout.ui.user_menu.items.loyalty'), href: '/customer/loyalty', icon: Gift },
             ],
             bottomItems: [
-                { label: t('layout.ui.user_menu.items.settings'), href: '/customer/settings', icon: Settings },
+                { label: t('layout.ui.user_menu.items.account'), href: '/customer/account?section=notifications', icon: Settings },
                 { label: t('layout.ui.user_menu.items.help'), href: '/customer/help', icon: HelpCircle },
             ],
         },
@@ -97,7 +97,7 @@ const dashboardPaths: Record<UserRole, string> = {
 const profilePaths: Record<UserRole, string> = {
     admin: '/admin/settings',
     employee: '/employee/settings',
-    customer: '/customer/profile',
+    customer: '/customer/account',
 };
 
 export default function UserProfileDropdown({ className, variant }: UserProfileDropdownProps) {

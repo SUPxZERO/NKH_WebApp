@@ -95,14 +95,15 @@ Route::middleware(['auth'])->get('/fix-my-profile', function () {
 
 // Customer prefixed routes
 Route::prefix('customer')->middleware([EnsureCustomerAccess::class])->group(function () {
-    Route::get('/profile', fn() => Inertia::render('Customer/Profile'))->name('customer.profile');
+    Route::get('/account', fn() => Inertia::render('Customer/Settings'))->name('customer.account');
+    Route::get('/profile', fn() => redirect()->route('customer.account'))->name('customer.profile');
     Route::get('/orders', fn() => Inertia::render('Customer/Orders'))->name('customer.orders');
     Route::get('/orders/{orderId}', fn($orderId) => Inertia::render('Customer/OrderDetails', ['orderId' => $orderId]))->name('customer.orders.show');
     Route::get('/loyalty', fn() => Inertia::render('Customer/Loyalty'))->name('customer.loyalty');
     Route::get('/reservations', fn() => Inertia::render('Customer/Reservations'))->name('customer.reservations');
     Route::get('/notifications', fn() => Inertia::render('Customer/Notifications'))->name('customer.notifications');
     Route::get('/feedback', fn() => Inertia::render('Customer/Feedback'))->name('customer.feedback');
-    Route::get('/settings', fn() => Inertia::render('Customer/Settings'))->name('customer.settings');
+    Route::get('/settings', fn() => redirect()->route('customer.account'))->name('customer.settings');
     Route::get('/help', fn() => Inertia::render('Customer/HelpSupport'))->name('customer.help');
 
     // High, End Table Ordering Routes (Sprint P17)

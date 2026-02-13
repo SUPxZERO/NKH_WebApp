@@ -137,7 +137,7 @@ export default function CustomerLayout({ children, className }: Props) {
               <nav className="space-y-2">
                 {/* User Profile Section in Mobile Menu */}
                 <Link
-                  href="/customer/profile"
+                  href="/customer/account?section=profile"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 mb-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >

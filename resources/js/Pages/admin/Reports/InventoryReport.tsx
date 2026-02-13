@@ -154,19 +154,19 @@ export default function InventoryReport() {
                     >
                         <div>
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
-                                {t('reports.inventory.title')}
+                                {t('admin.reports.inventory.title')}
                             </h1>
                             <p className="text-muted-foreground mt-1 flex items-center gap-2">
                                 <Package className="w-4 h-4 text-emerald-500" />
-                                {t('reports.inventory.subtitle')}
+                                {t('admin.reports.inventory.subtitle')}
                             </p>
                         </div>
                         <div className="flex gap-2">
                             <Button onClick={handleExportPDF} variant="secondary">
-                                <FileText className="w-4 h-4 mr-2" /> {t('reports.inventory.actions.pdf')}
+                                <FileText className="w-4 h-4 mr-2" /> {t('admin.reports.inventory.actions.pdf')}
                             </Button>
                             <Button onClick={handleExportCSV} variant="secondary">
-                                <Download className="w-4 h-4 mr-2" /> {t('reports.inventory.actions.csv')}
+                                <Download className="w-4 h-4 mr-2" /> {t('admin.reports.inventory.actions.csv')}
                             </Button>
                         </div>
                     </motion.div>
@@ -174,25 +174,25 @@ export default function InventoryReport() {
                     {/* Stats Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <StatCard
-                            title={t('reports.inventory.stats.total_value')}
+                            title={t('admin.reports.inventory.stats.total_value')}
                             value={`$${Number(valuation?.total_value || 0).toLocaleString()}`}
-                            subValue={`${valuation?.items_count || 0} ${t('reports.inventory.stats.items_in_stock')}`}
+                            subValue={`${valuation?.items_count || 0} ${t('admin.reports.inventory.stats.items_in_stock')}`}
                             icon={DollarSign}
                             color="emerald"
                             index={0}
                         />
                         <StatCard
-                            title={t('reports.inventory.stats.waste_cost')}
+                            title={t('admin.reports.inventory.stats.waste_cost')}
                             value={`$${Number(waste?.total_waste_value || 0).toLocaleString()}`}
-                            subValue={`${waste?.waste_percent || 0}${t('reports.inventory.stats.percent_revenue')}`}
+                            subValue={`${waste?.waste_percent || 0}${t('admin.reports.inventory.stats.percent_revenue')}`}
                             icon={Trash2}
                             color="rose"
                             index={1}
                         />
                         <StatCard
-                            title={t('reports.inventory.stats.avg_turnover')}
+                            title={t('admin.reports.inventory.stats.avg_turnover')}
                             value={`${turnover?.avg_turnover || 0}x`}
-                            subValue={t('reports.inventory.stats.replacement_rate')}
+                            subValue={t('admin.reports.inventory.stats.replacement_rate')}
                             icon={RefreshCw}
                             color="blue"
                             index={2}
@@ -213,8 +213,8 @@ export default function InventoryReport() {
                             onEndDateChange={(d) => setEndDate(d ?? undefined)}
                         />
                         <div className="flex gap-2">
-                            <Button size="sm" variant={range === '7days' ? 'primary' : 'secondary'} onClick={() => updateRange('7days')}>{t('reports.inventory.filters.days_7')}</Button>
-                            <Button size="sm" variant={range === '30days' ? 'primary' : 'secondary'} onClick={() => updateRange('30days')}>{t('reports.inventory.filters.days_30')}</Button>
+                            <Button size="sm" variant={range === '7days' ? 'primary' : 'secondary'} onClick={() => updateRange('7days')}>{t('admin.reports.inventory.filters.days_7')}</Button>
+                            <Button size="sm" variant={range === '30days' ? 'primary' : 'secondary'} onClick={() => updateRange('30days')}>{t('admin.reports.inventory.filters.days_30')}</Button>
                         </div>
                     </motion.div>
 
@@ -230,13 +230,13 @@ export default function InventoryReport() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Trash2 className="w-5 h-5 text-rose-500" />
-                                        {t('reports.inventory.waste.title')}
+                                        {t('admin.reports.inventory.waste.title')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
                                         {waste?.by_reason?.length === 0 ? (
-                                            <p className="text-center text-muted-foreground py-8">{t('reports.inventory.waste.empty')}</p>
+                                            <p className="text-center text-muted-foreground py-8">{t('admin.reports.inventory.waste.empty')}</p>
                                         ) : (
                                             waste?.by_reason?.map((item: any, idx: number) => (
                                                 <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-border/50">
@@ -265,7 +265,7 @@ export default function InventoryReport() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Activity className="w-5 h-5 text-blue-500" />
-                                        {t('reports.inventory.usage.title')}
+                                        {t('admin.reports.inventory.usage.title')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-0">
@@ -273,14 +273,14 @@ export default function InventoryReport() {
                                         <table className="w-full text-sm text-left">
                                             <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 sticky top-0">
                                                 <tr>
-                                                    <th className="px-4 py-3">{t('reports.inventory.usage.table.date')}</th>
-                                                    <th className="px-4 py-3 text-right">{t('reports.inventory.usage.table.used_sold')}</th>
+                                                    <th className="px-4 py-3">{t('admin.reports.inventory.usage.table.date')}</th>
+                                                    <th className="px-4 py-3 text-right">{t('admin.reports.inventory.usage.table.used_sold')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-border/50">
                                                 {usage?.data?.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={2} className="px-4 py-8 text-center text-muted-foreground">{t('reports.inventory.usage.empty')}</td>
+                                                        <td colSpan={2} className="px-4 py-8 text-center text-muted-foreground">{t('admin.reports.inventory.usage.empty')}</td>
                                                     </tr>
                                                 ) : (
                                                     usage?.data?.map((row: any, idx: number) => (
@@ -310,7 +310,7 @@ export default function InventoryReport() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <RefreshCw className="w-5 h-5 text-amber-500" />
-                                    {t('reports.inventory.turnover.title')}
+                                    {t('admin.reports.inventory.turnover.title')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -320,9 +320,9 @@ export default function InventoryReport() {
                                             <p className="text-xs text-muted-foreground uppercase">{cat.category}</p>
                                             <div className="flex items-end gap-2 mt-1">
                                                 <span className="text-xl font-bold text-foreground">{Number(cat.turnover_rate).toFixed(1)}x</span>
-                                                <span className="text-xs text-muted-foreground mb-1">{t('reports.inventory.turnover.rate')}</span>
+                                                <span className="text-xs text-muted-foreground mb-1">{t('admin.reports.inventory.turnover.rate')}</span>
                                             </div>
-                                            <p className="text-xs text-muted-foreground mt-2">{cat.items} {t('reports.inventory.turnover.items')}</p>
+                                            <p className="text-xs text-muted-foreground mt-2">{cat.items} {t('admin.reports.inventory.turnover.items')}</p>
                                         </div>
                                     ))}
                                 </div>

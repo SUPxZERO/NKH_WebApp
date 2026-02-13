@@ -434,7 +434,7 @@ export default function PayrollManagement() {
                         </div>
                         <div className="divide-y divide-border/30">
                             {payrollLoading ? (
-                                <div className="p-12 text-center text-muted-foreground">{t('layout.status.loading')}...</div>
+                                <div className="p-12 text-center text-muted-foreground">{t('layout.common.loading')}...</div>
                             ) : !(payrollData as any)?.data?.length ? (
                                 <div className="p-12 text-center">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary/50 flex items-center justify-center">
@@ -490,7 +490,7 @@ export default function PayrollManagement() {
                     {/* Records Cards - Mobile */}
                     <div className="md:hidden space-y-3">
                         {payrollLoading ? (
-                            <div className="p-8 text-center text-muted-foreground bg-card/50 rounded-xl border border-border/50">{t('layout.status.loading')}...</div>
+                            <div className="p-8 text-center text-muted-foreground bg-card/50 rounded-xl border border-border/50">{t('layout.common.loading')}...</div>
                         ) : !(payrollData as any)?.data?.length ? (
                             <div className="p-8 text-center bg-card/50 rounded-xl border border-border/50">
                                 <Wallet className="w-10 h-10 text-muted-foreground mx-auto mb-3" />

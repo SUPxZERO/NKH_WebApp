@@ -186,7 +186,7 @@ export function MenuItemCard({ item, onAddToCart, onQuickView, layout = 'grid', 
                     {item.is_popular && (
                         <div className="px-2 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold flex items-center gap-1 shadow-lg">
                             <TrendingUp className="w-3 h-3" />
-                            <span className="hidden sm:inline">{t('menu.badges.popular')}</span>
+                            <span className="hidden sm:inline">{t('customer.menu.badges.popular')}</span>
                         </div>
                     )}
                     {hasDiscount && (

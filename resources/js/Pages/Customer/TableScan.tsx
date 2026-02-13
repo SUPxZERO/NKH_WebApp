@@ -70,11 +70,11 @@ export default function TableScan({ token }: TableScanProps) {
             if (err.response?.data?.message) {
                 setError(err.response.data.message);
             } else if (err.response?.status === 400) {
-                setError(t('customer_pages.table_scan.invalid_qr'));
+                setError(t('customer.table_scan.invalid_qr'));
             } else if (err.response?.status === 404) {
-                setError(t('customer_pages.table_scan.table_not_found'));
+                setError(t('customer.table_scan.table_not_found'));
             } else {
-                setError(t('customer_pages.table_scan.connection_error'));
+                setError(t('customer.table_scan.connection_error'));
             }
         } finally {
             setLoading(false);
@@ -111,7 +111,7 @@ export default function TableScan({ token }: TableScanProps) {
     if (loading) {
         return (
             <>
-                <Head title={t('customer_pages.table_scan.scanning')} />
+                <Head title={t('customer.table_scan.scanning')} />
                 <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
                     <div className="text-center">
                         <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 backdrop-blur-lg rounded-full mb-6 animate-pulse">
@@ -119,7 +119,7 @@ export default function TableScan({ token }: TableScanProps) {
                         </div>
                         <div className="flex items-center gap-3 text-white">
                             <Loader2 className="w-5 h-5 animate-spin" />
-                            <span className="text-lg">{t('customer_pages.table_scan.validating')}</span>
+                            <span className="text-lg">{t('customer.table_scan.validating')}</span>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@ export default function TableScan({ token }: TableScanProps) {
     if (error) {
         return (
             <>
-                <Head title={t('customer_pages.table_scan.qr_error')} />
+                <Head title={t('customer.table_scan.qr_error')} />
                 <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900/30 to-slate-900 flex items-center justify-center p-4">
                     <div className="max-w-md w-full">
                         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/10">
@@ -139,7 +139,7 @@ export default function TableScan({ token }: TableScanProps) {
                                 <AlertCircle className="w-8 h-8 text-red-400" />
                             </div>
                             <h1 className="text-2xl font-bold text-white mb-3">
-                                {t('customer_pages.table_scan.error_title')}
+                                {t('customer.table_scan.error_title')}
                             </h1>
                             <p className="text-gray-300 mb-6">
                                 {error}
@@ -148,7 +148,7 @@ export default function TableScan({ token }: TableScanProps) {
                                 onClick={validateToken}
                                 className="w-full py-3 px-6 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors"
                             >
-                                {t('customer_pages.table_scan.try_again')}
+                                {t('customer.table_scan.try_again')}
                             </button>
                         </div>
                     </div>
@@ -160,7 +160,7 @@ export default function TableScan({ token }: TableScanProps) {
     // Success state
     return (
         <>
-            <Head title={`${t('customer_pages.table_scan.table_number', { code: table?.code || '' })}`} />
+            <Head title={`${t('customer.table_scan.table_number', { code: table?.code || '' })}`} />
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
                 <div className="max-w-md w-full">
                     {/* Success Card */}
@@ -171,10 +171,10 @@ export default function TableScan({ token }: TableScanProps) {
                                 <CheckCircle className="w-10 h-10 text-white" />
                             </div>
                             <h1 className="text-3xl font-bold text-white mb-2">
-                                {t('customer_pages.table_scan.welcome')}
+                                {t('customer.table_scan.welcome')}
                             </h1>
                             <p className="text-gray-300">
-                                {t('customer_pages.table_scan.ready_to_order')}
+                                {t('customer.table_scan.ready_to_order')}
                             </p>
                         </div>
 
@@ -185,9 +185,9 @@ export default function TableScan({ token }: TableScanProps) {
                                     <Utensils className="w-6 h-6 text-purple-400" />
                                 </div>
                                 <div>
-                                    <div className="text-sm text-gray-400">{t('customer_pages.table_scan.your_table')}</div>
+                                    <div className="text-sm text-gray-400">{t('customer.table_scan.your_table')}</div>
                                     <div className="text-xl font-bold text-white">
-                                        {t('customer_pages.table_scan.table_number', { code: table?.code })}
+                                        {t('customer.table_scan.table_number', { code: table?.code })}
                                     </div>
                                 </div>
                             </div>
@@ -197,7 +197,7 @@ export default function TableScan({ token }: TableScanProps) {
                                     <MapPin className="w-6 h-6 text-blue-400" />
                                 </div>
                                 <div>
-                                    <div className="text-sm text-gray-400">{t('customer_pages.table_scan.location')}</div>
+                                    <div className="text-sm text-gray-400">{t('customer.table_scan.location')}</div>
                                     <div className="text-lg font-medium text-white">
                                         {table?.floor_name}
                                     </div>
@@ -209,9 +209,9 @@ export default function TableScan({ token }: TableScanProps) {
                                     <Users className="w-6 h-6 text-amber-400" />
                                 </div>
                                 <div>
-                                    <div className="text-sm text-gray-400">{t('customer_pages.table_scan.capacity')}</div>
+                                    <div className="text-sm text-gray-400">{t('customer.table_scan.capacity')}</div>
                                     <div className="text-lg font-medium text-white">
-                                        {t('customer_pages.table_scan.capacity_guests', { count: table?.capacity })}
+                                        {t('customer.table_scan.capacity_guests', { count: table?.capacity })}
                                     </div>
                                 </div>
                             </div>
@@ -225,7 +225,7 @@ export default function TableScan({ token }: TableScanProps) {
                                         onClick={viewExistingOrder}
                                         className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white rounded-xl font-semibold text-lg transition-all shadow-lg shadow-purple-500/30"
                                     >
-                                        {t('customer_pages.table_scan.view_current_order')}
+                                        {t('customer.table_scan.view_current_order')}
                                     </button>
                                     <button
                                         onClick={startOrdering}
@@ -235,10 +235,10 @@ export default function TableScan({ token }: TableScanProps) {
                                         {starting ? (
                                             <>
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                {t('customer_pages.table_scan.loading_menu')}
+                                                {t('customer.table_scan.loading_menu')}
                                             </>
                                         ) : (
-                                            t('customer_pages.table_scan.add_more_items')
+                                            t('customer.table_scan.add_more_items')
                                         )}
                                     </button>
                                 </>
@@ -251,12 +251,12 @@ export default function TableScan({ token }: TableScanProps) {
                                     {starting ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            {t('customer_pages.table_scan.loading_menu')}
+                                            {t('customer.table_scan.loading_menu')}
                                         </>
                                     ) : (
                                         <>
                                             <Utensils className="w-5 h-5" />
-                                            {t('customer_pages.table_scan.start_ordering')}
+                                            {t('customer.table_scan.start_ordering')}
                                         </>
                                     )}
                                 </button>
@@ -266,7 +266,7 @@ export default function TableScan({ token }: TableScanProps) {
                         {/* Session Info */}
                         <div className="mt-6 pt-6 border-t border-white/10 text-center">
                             <p className="text-xs text-gray-500">
-                                {t('customer_pages.table_scan.session_active')} • {t('customer_pages.table_scan.orders_linked')}
+                                {t('customer.table_scan.session_active')} • {t('customer.table_scan.orders_linked')}
                             </p>
                         </div>
                     </div>

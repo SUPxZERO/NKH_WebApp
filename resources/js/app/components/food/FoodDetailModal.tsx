@@ -163,21 +163,21 @@ export function FoodDetailModal({
   const spiceLabel = t(`components.food_detail.spice.${spiceInfo.key}`) as string;
 
   const dietaryIcons: Record<string, { icon: React.ReactNode; label: string; color: string; bg: string }> = {
-    vegetarian: { icon: <Leaf className="w-4 h-4" />, label: t('components.food_detail.dietary.vegetarian') as string, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30' },
-    vegan: { icon: <Leaf className="w-4 h-4" />, label: t('components.food_detail.dietary.vegan') as string, color: 'text-green-700', bg: 'bg-green-200 dark:bg-green-900/50' },
-    'gluten-free': { icon: '🌾', label: t('components.food_detail.dietary.gluten_free') as string, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },
-    keto: { icon: '🥑', label: t('components.food_detail.dietary.keto_friendly') as string, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-    halal: { icon: '🕌', label: t('components.food_detail.dietary.halal') as string, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-    kosher: { icon: '✡️', label: t('components.food_detail.dietary.kosher') as string, color: 'text-indigo-600', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
-    'dairy-free': { icon: '🥛', label: t('components.food_detail.dietary.dairy_free') as string, color: 'text-sky-600', bg: 'bg-sky-100 dark:bg-sky-900/30' },
-    'nut-free': { icon: '🥜', label: t('components.food_detail.dietary.nut_free') as string, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30' },
+    vegetarian: { icon: <Leaf className="w-4 h-4" />, label: t('common.components.food_detail.dietary.vegetarian') as string, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30' },
+    vegan: { icon: <Leaf className="w-4 h-4" />, label: t('common.components.food_detail.dietary.vegan') as string, color: 'text-green-700', bg: 'bg-green-200 dark:bg-green-900/50' },
+    'gluten-free': { icon: '🌾', label: t('common.components.food_detail.dietary.gluten_free') as string, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },
+    keto: { icon: '🥑', label: t('common.components.food_detail.dietary.keto_friendly') as string, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
+    halal: { icon: '🕌', label: t('common.components.food_detail.dietary.halal') as string, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+    kosher: { icon: '✡️', label: t('common.components.food_detail.dietary.kosher') as string, color: 'text-indigo-600', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
+    'dairy-free': { icon: '🥛', label: t('common.components.food_detail.dietary.dairy_free') as string, color: 'text-sky-600', bg: 'bg-sky-100 dark:bg-sky-900/30' },
+    'nut-free': { icon: '🥜', label: t('common.components.food_detail.dietary.nut_free') as string, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30' },
   };
 
   const availabilityLabels: Record<string, string> = {
-    available: t('components.food_detail.availability.available') as string,
-    low_stock: t('components.food_detail.availability.low_stock') as string,
-    out_of_stock: t('components.food_detail.availability.out_of_stock') as string,
-    seasonal: t('components.food_detail.availability.seasonal') as string,
+    available: t('common.components.food_detail.availability.available') as string,
+    low_stock: t('common.components.food_detail.availability.low_stock') as string,
+    out_of_stock: t('common.components.food_detail.availability.out_of_stock') as string,
+    seasonal: t('common.components.food_detail.availability.seasonal') as string,
   };
 
   // Get availability status styling
@@ -237,7 +237,7 @@ export function FoodDetailModal({
             {isLoading && (
               <div className="flex flex-col items-center justify-center py-20 px-6">
                 <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
-                <p className="text-neutral-600 dark:text-neutral-400">{t('components.food_detail.loading')}</p>
+                <p className="text-neutral-600 dark:text-neutral-400">{t('common.components.food_detail.loading')}</p>
               </div>
             )}
 
@@ -246,17 +246,17 @@ export function FoodDetailModal({
               <div className="flex flex-col items-center justify-center py-20 px-6">
                 <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
                 <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">
-                  {t('components.food_detail.error_title')}
+                  {t('common.components.food_detail.error_title')}
                 </h3>
                 <p className="text-neutral-600 dark:text-neutral-400 text-center mb-4">
-                  {(error as Error)?.message || t('components.food_detail.error_fallback')}
+                  {(error as Error)?.message || t('common.components.food_detail.error_fallback')}
                 </p>
                 <RestaurantButton
                   variant="secondary"
                   onClick={() => refetch()}
                   leftIcon={<RefreshCw className="w-4 h-4" />}
                 >
-                  {t('components.food_detail.try_again')}
+                  {t('common.components.food_detail.try_again')}
                 </RestaurantButton>
               </div>
             )}
@@ -268,7 +268,7 @@ export function FoodDetailModal({
                 <button
                   onClick={onClose}
                   className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-                  aria-label={t('components.food_detail.close') as string}
+                  aria-label={t('common.components.food_detail.close') as string}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -285,7 +285,7 @@ export function FoodDetailModal({
                     )}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    aria-label={isFavorite ? t('components.food_detail.favorite_remove') as string : t('components.food_detail.favorite_add') as string}
+                    aria-label={isFavorite ? t('common.components.food_detail.favorite_remove') as string : t('common.components.food_detail.favorite_add') as string}
                   >
                     <Heart className={cn('w-5 h-5', isFavorite && 'fill-current')} />
                   </motion.button>
@@ -327,7 +327,7 @@ export function FoodDetailModal({
                       )}
                       {food.is_popular && (
                         <span className="px-3 py-1 rounded-full bg-orange-500 text-white text-sm font-medium flex items-center gap-1">
-                          <Flame className="w-3 h-3" /> {t('components.food_detail.badge_popular')}
+                          <Flame className="w-3 h-3" /> {t('common.components.food_detail.badge_popular')}
                         </span>
                       )}
                     </div>
@@ -340,7 +340,7 @@ export function FoodDetailModal({
                       {/* Category & Rating Row */}
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-primary-600 dark:text-primary-400 uppercase tracking-wide">
-                          {food.category?.name || t('components.food_detail.category_fallback')}
+                          {food.category?.name || t('common.components.food_detail.category_fallback')}
                         </span>
                         {food.rating && (
                           <div className="flex items-center gap-1">
@@ -350,7 +350,7 @@ export function FoodDetailModal({
                             </span>
                             {food.reviews_count !== undefined && (
                               <span className="text-sm text-neutral-500">
-                                {t('components.food_detail.reviews_count', { count: food.reviews_count.toString() })}
+                                {t('common.components.food_detail.reviews_count', { count: food.reviews_count.toString() })}
                               </span>
                             )}
                           </div>
@@ -373,7 +373,7 @@ export function FoodDetailModal({
                               {t('common.currency_symbol')}{food.original_price.toFixed(2)}
                             </span>
                             <span className="px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium">
-                              {t('components.food_detail.price_off', { percent: Math.round(((food.original_price - food.price) / food.original_price) * 100).toString() })}
+                              {t('common.components.food_detail.price_off', { percent: Math.round(((food.original_price - food.price) / food.original_price) * 100).toString() })}
                             </span>
                           </>
                         )}
@@ -382,7 +382,7 @@ export function FoodDetailModal({
                       {/* Availability Status */}
                       <div className={cn('inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium', availabilityStyle.bg, availabilityStyle.text)}>
                         {availabilityStyle.icon}
-                        <span className="capitalize">{availabilityLabels[food.availability_status || ''] || t('components.food_detail.availability.available')}</span>
+                        <span className="capitalize">{availabilityLabels[food.availability_status || ''] || t('common.components.food_detail.availability.available')}</span>
                         {food.availability_note && (
                           <span className="text-xs opacity-75">- {food.availability_note}</span>
                         )}
@@ -395,7 +395,7 @@ export function FoodDetailModal({
                         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800">
                           <Clock className="w-4 h-4 text-neutral-500" />
                           <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                            {food.total_time} {t('components.food_detail.units.min')}
+                            {food.total_time} {t('common.components.food_detail.units.min')}
                           </span>
                         </div>
                       )}
@@ -403,7 +403,7 @@ export function FoodDetailModal({
                         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800">
                           <Flame className="w-4 h-4 text-orange-500" />
                           <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                            {food.calories} {t('components.food_detail.units.cal')}
+                            {food.calories} {t('common.components.food_detail.units.cal')}
                           </span>
                         </div>
                       )}
@@ -480,7 +480,7 @@ export function FoodDetailModal({
                           {food.description && (
                             <div className="mb-6">
                               <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">
-                                {t('components.food_detail.section.description')}
+                                {t('common.components.food_detail.section.description')}
                               </h3>
                               <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed">
                                 {food.description}
@@ -493,7 +493,7 @@ export function FoodDetailModal({
                             <div className="mb-6">
                               <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3 flex items-center gap-2">
                                 <Utensils className="w-5 h-5 text-primary-500" />
-                                {t('components.food_detail.section.ingredients')}
+                                {t('common.components.food_detail.section.ingredients')}
                               </h3>
                               <div className="flex flex-wrap gap-2">
                                 {food.ingredients.map((ingredient, idx) => (
@@ -513,7 +513,7 @@ export function FoodDetailModal({
                             <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                               <h3 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2 flex items-center gap-2">
                                 <AlertTriangle className="w-4 h-4" />
-                                {t('components.food_detail.section.allergen_warning')}
+                                {t('common.components.food_detail.section.allergen_warning')}
                               </h3>
                               <div className="flex flex-wrap gap-2">
                                 {food.allergens.map((allergen, idx) => (
@@ -544,25 +544,25 @@ export function FoodDetailModal({
                           {food.nutrition ? (
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                               {food.nutrition.calories !== undefined && (
-                                <NutritionCard label={t('components.food_detail.nutrition.calories') as string} value={food.nutrition.calories} unit="kcal" color="orange" />
+                                <NutritionCard label={t('common.components.food_detail.nutrition.calories') as string} value={food.nutrition.calories} unit="kcal" color="orange" />
                               )}
                               {food.nutrition.protein !== undefined && (
-                                <NutritionCard label={t('components.food_detail.nutrition.protein') as string} value={food.nutrition.protein} unit="g" color="blue" />
+                                <NutritionCard label={t('common.components.food_detail.nutrition.protein') as string} value={food.nutrition.protein} unit="g" color="blue" />
                               )}
                               {food.nutrition.carbs !== undefined && (
-                                <NutritionCard label={t('components.food_detail.nutrition.carbs') as string} value={food.nutrition.carbs} unit="g" color="yellow" />
+                                <NutritionCard label={t('common.components.food_detail.nutrition.carbs') as string} value={food.nutrition.carbs} unit="g" color="yellow" />
                               )}
                               {food.nutrition.fat !== undefined && (
-                                <NutritionCard label={t('components.food_detail.nutrition.fat') as string} value={food.nutrition.fat} unit="g" color="red" />
+                                <NutritionCard label={t('common.components.food_detail.nutrition.fat') as string} value={food.nutrition.fat} unit="g" color="red" />
                               )}
                               {food.nutrition.fiber !== undefined && (
-                                <NutritionCard label={t('components.food_detail.nutrition.fiber') as string} value={food.nutrition.fiber} unit="g" color="green" />
+                                <NutritionCard label={t('common.components.food_detail.nutrition.fiber') as string} value={food.nutrition.fiber} unit="g" color="green" />
                               )}
                               {food.nutrition.sodium !== undefined && (
-                                <NutritionCard label={t('components.food_detail.nutrition.sodium') as string} value={food.nutrition.sodium} unit="mg" color="purple" />
+                                <NutritionCard label={t('common.components.food_detail.nutrition.sodium') as string} value={food.nutrition.sodium} unit="mg" color="purple" />
                               )}
                               {food.nutrition.sugar !== undefined && (
-                                <NutritionCard label={t('components.food_detail.nutrition.sugar') as string} value={food.nutrition.sugar} unit="g" color="pink" />
+                                <NutritionCard label={t('common.components.food_detail.nutrition.sugar') as string} value={food.nutrition.sugar} unit="g" color="pink" />
                               )}
                             </div>
                           ) : food.calories ? (
@@ -573,12 +573,12 @@ export function FoodDetailModal({
                               <p className="text-3xl font-bold text-neutral-900 dark:text-white">
                                 {food.calories}
                               </p>
-                              <p className="text-neutral-500">{t('components.food_detail.nutrition.per_serving')}</p>
+                              <p className="text-neutral-500">{t('common.components.food_detail.nutrition.per_serving')}</p>
                             </div>
                           ) : (
                             <div className="text-center py-8 text-neutral-500">
                               <Info className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                              <p>{t('components.food_detail.nutrition.unavailable')}</p>
+                              <p>{t('common.components.food_detail.nutrition.unavailable')}</p>
                             </div>
                           )}
                         </motion.div>
@@ -600,9 +600,9 @@ export function FoodDetailModal({
                                   <div className="flex items-center gap-2">
                                     <Timer className="w-5 h-5 text-blue-500" />
                                     <div>
-                                      <p className="text-xs text-neutral-500">{t('components.food_detail.recipe.prep_time')}</p>
+                                      <p className="text-xs text-neutral-500">{t('common.components.food_detail.recipe.prep_time')}</p>
                                       <p className="font-medium text-neutral-900 dark:text-white">
-                                        {food.recipe.prep_time_minutes} {t('components.food_detail.units.min')}
+                                        {food.recipe.prep_time_minutes} {t('common.components.food_detail.units.min')}
                                       </p>
                                     </div>
                                   </div>
@@ -611,9 +611,9 @@ export function FoodDetailModal({
                                   <div className="flex items-center gap-2">
                                     <Thermometer className="w-5 h-5 text-red-500" />
                                     <div>
-                                      <p className="text-xs text-neutral-500">{t('components.food_detail.recipe.cook_time')}</p>
+                                      <p className="text-xs text-neutral-500">{t('common.components.food_detail.recipe.cook_time')}</p>
                                       <p className="font-medium text-neutral-900 dark:text-white">
-                                        {food.recipe.cook_time_minutes} {t('components.food_detail.units.min')}
+                                        {food.recipe.cook_time_minutes} {t('common.components.food_detail.units.min')}
                                       </p>
                                     </div>
                                   </div>
@@ -622,7 +622,7 @@ export function FoodDetailModal({
                                   <div className="flex items-center gap-2">
                                     <Users className="w-5 h-5 text-green-500" />
                                     <div>
-                                      <p className="text-xs text-neutral-500">{t('components.food_detail.recipe.servings')}</p>
+                                      <p className="text-xs text-neutral-500">{t('common.components.food_detail.recipe.servings')}</p>
                                       <p className="font-medium text-neutral-900 dark:text-white">
                                         {food.recipe.servings}
                                       </p>
@@ -635,7 +635,7 @@ export function FoodDetailModal({
                               {food.recipe.instructions && (
                                 <div>
                                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">
-                                    {t('components.food_detail.section.instructions')}
+                                    {t('common.components.food_detail.section.instructions')}
                                   </h3>
                                   <div className="prose prose-sm dark:prose-invert max-w-none">
                                     <p className="whitespace-pre-wrap text-neutral-600 dark:text-neutral-400">
@@ -648,7 +648,7 @@ export function FoodDetailModal({
                           ) : (
                             <div className="text-center py-8 text-neutral-500">
                               <ChefHat className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                              <p>{t('components.food_detail.recipe.unavailable')}</p>
+                              <p>{t('common.components.food_detail.recipe.unavailable')}</p>
                             </div>
                           )}
                         </motion.div>
@@ -690,7 +690,7 @@ export function FoodDetailModal({
                         leftIcon={<ShoppingCart className="w-5 h-5" />}
                         appetiteMode
                       >
-                        {t('components.food_detail.add_to_cart', { total: `${t('common.currency_symbol')}${(food.price * quantity).toFixed(2)}` })}
+                        {t('common.components.food_detail.add_to_cart', { total: `${t('common.currency_symbol')}${(food.price * quantity).toFixed(2)}` })}
                       </RestaurantButton>
                     </div>
                   </div>
@@ -701,7 +701,7 @@ export function FoodDetailModal({
                   <div className="sticky bottom-0 p-4 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700">
                     <div className="flex items-center justify-center gap-2 text-neutral-500">
                       <XCircle className="w-5 h-5" />
-                      <span className="font-medium">{t('components.food_detail.unavailable')}</span>
+                      <span className="font-medium">{t('common.components.food_detail.unavailable')}</span>
                     </div>
                   </div>
                 )}

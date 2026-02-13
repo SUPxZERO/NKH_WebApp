@@ -69,7 +69,7 @@ const StatCard = ({ title, value, icon: Icon, color, change, index = 0 }: any) =
                             change >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
                         )}>
                             {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                            {Math.abs(change).toFixed(1)}% {t('reports.sales.stats.vs_last_period')}
+                            {Math.abs(change).toFixed(1)}% {t('admin.reports.sales.stats.vs_last_period')}
                         </div>
                     )}
                 </div>
@@ -180,19 +180,19 @@ export default function SalesReport() {
                     >
                         <div>
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                {t('reports.sales.title')}
+                                {t('admin.reports.sales.title')}
                             </h1>
                             <p className="text-muted-foreground mt-1 flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-amber-500" />
-                                {t('reports.sales.subtitle')}
+                                {t('admin.reports.sales.subtitle')}
                             </p>
                         </div>
                         <div className="flex gap-2">
                             <Button onClick={handleExportPDF} variant="secondary">
-                                <FileText className="w-4 h-4 mr-2" /> {t('reports.sales.actions.pdf')}
+                                <FileText className="w-4 h-4 mr-2" /> {t('admin.reports.sales.actions.pdf')}
                             </Button>
                             <Button onClick={handleExportCSV} variant="secondary">
-                                <Download className="w-4 h-4 mr-2" /> {t('reports.sales.actions.csv')}
+                                <Download className="w-4 h-4 mr-2" /> {t('admin.reports.sales.actions.csv')}
                             </Button>
                         </div>
                     </motion.div>
@@ -200,7 +200,7 @@ export default function SalesReport() {
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <StatCard
-                            title={t('reports.sales.stats.total_revenue')}
+                            title={t('admin.reports.sales.stats.total_revenue')}
                             value={`$${Number(overview?.total_revenue || 0).toLocaleString()}`}
                             icon={DollarSign}
                             color="emerald"
@@ -208,7 +208,7 @@ export default function SalesReport() {
                             index={0}
                         />
                         <StatCard
-                            title={t('reports.sales.stats.total_orders')}
+                            title={t('admin.reports.sales.stats.total_orders')}
                             value={overview?.total_orders || 0}
                             icon={ShoppingCart}
                             color="blue"
@@ -216,14 +216,14 @@ export default function SalesReport() {
                             index={1}
                         />
                         <StatCard
-                            title={t('reports.sales.stats.avg_order_value')}
+                            title={t('admin.reports.sales.stats.avg_order_value')}
                             value={`$${Number(overview?.avg_order_value || 0).toFixed(2)}`}
                             icon={TrendingUp}
                             color="purple"
                             index={2}
                         />
                         <StatCard
-                            title={t('reports.sales.stats.customers')}
+                            title={t('admin.reports.sales.stats.customers')}
                             value={overview?.unique_customers || 0}
                             icon={CreditCard}
                             color="amber"
@@ -249,9 +249,9 @@ export default function SalesReport() {
                             {/* Quick Presets */}
                             <div className="flex gap-2 flex-wrap">
                                 {[
-                                    { days: 7, label: t('reports.sales.filters.days_7') },
-                                    { days: 30, label: t('reports.sales.filters.days_30') },
-                                    { days: 90, label: t('reports.sales.filters.days_90') },
+                                    { days: 7, label: t('admin.reports.sales.filters.days_7') },
+                                    { days: 30, label: t('admin.reports.sales.filters.days_30') },
+                                    { days: 90, label: t('admin.reports.sales.filters.days_90') },
                                 ].map(({ days, label }) => (
                                     <button
                                         key={days}
@@ -269,7 +269,7 @@ export default function SalesReport() {
                                     onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
                                     className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none"
                                 >
-                                    <option value="all">{t('reports.sales.filters.all_categories')}</option>
+                                    <option value="all">{t('admin.reports.sales.filters.all_categories')}</option>
                                     {categories?.data?.map((cat: any) => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
@@ -279,10 +279,10 @@ export default function SalesReport() {
                                     onChange={(e) => { setPaymentFilter(e.target.value); setPage(1); }}
                                     className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:border-purple-500 outline-none"
                                 >
-                                    <option value="all">{t('reports.sales.filters.all_payment_methods')}</option>
-                                    <option value="cash">{t('reports.sales.filters.cash')}</option>
-                                    <option value="card">{t('reports.sales.filters.card')}</option>
-                                    <option value="digital">{t('reports.sales.filters.digital')}</option>
+                                    <option value="all">{t('admin.reports.sales.filters.all_payment_methods')}</option>
+                                    <option value="cash">{t('admin.reports.sales.filters.cash')}</option>
+                                    <option value="card">{t('admin.reports.sales.filters.card')}</option>
+                                    <option value="digital">{t('admin.reports.sales.filters.digital')}</option>
                                 </select>
                             </div>
                         </div>
@@ -297,12 +297,12 @@ export default function SalesReport() {
                     >
                         {/* Table Header - Hidden on mobile */}
                         <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-transparent">
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('reports.sales.table.headers.date')}</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('reports.sales.table.headers.orders')}</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('reports.sales.table.headers.revenue')}</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('reports.sales.table.headers.avg_order')}</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('reports.sales.table.headers.top_category')}</div>
-                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('reports.sales.table.headers.payment_split')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.reports.sales.table.headers.date')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.reports.sales.table.headers.orders')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.reports.sales.table.headers.revenue')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.reports.sales.table.headers.avg_order')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.reports.sales.table.headers.top_category')}</div>
+                            <div className="col-span-2 text-xs font-bold text-foreground uppercase tracking-wider text-right">{t('admin.reports.sales.table.headers.payment_split')}</div>
                         </div>
 
                         <div className="divide-y divide-border/30">
@@ -310,7 +310,7 @@ export default function SalesReport() {
                                 <div className="p-12 text-center">
                                     <div className="inline-flex items-center gap-3 text-muted-foreground">
                                         <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                                        {t('reports.sales.table.loading')}
+                                        {t('admin.reports.sales.table.loading')}
                                     </div>
                                 </div>
                             ) : salesList.length === 0 ? (
@@ -318,8 +318,8 @@ export default function SalesReport() {
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                                         <DollarSign className="w-8 h-8 text-fuchsia-600 dark:text-fuchsia-400" />
                                     </div>
-                                    <h3 className="text-foreground font-semibold">{t('reports.sales.table.empty.title')}</h3>
-                                    <p className="text-muted-foreground text-sm mt-1">{t('reports.sales.table.empty.subtitle')}</p>
+                                    <h3 className="text-foreground font-semibold">{t('admin.reports.sales.table.empty.title')}</h3>
+                                    <p className="text-muted-foreground text-sm mt-1">{t('admin.reports.sales.table.empty.subtitle')}</p>
                                 </div>
                             ) : salesList.map((sale: SaleRecord, idx: number) => (
                                 <motion.div
@@ -348,7 +348,7 @@ export default function SalesReport() {
                                     </div>
                                     <div className="hidden md:block col-span-2">
                                         <span className="px-2 py-1 text-xs rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                                            {sale.top_category || t('reports.sales.table.na')}
+                                            {sale.top_category || t('admin.reports.sales.table.na')}
                                         </span>
                                     </div>
                                     <div className="hidden md:flex col-span-2 justify-end gap-1">
@@ -370,7 +370,7 @@ export default function SalesReport() {
                         {salesData?.meta?.last_page > 1 && (
                             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border/50 bg-secondary/30">
                                 <div className="text-sm text-muted-foreground">
-                                    {t('reports.sales.pagination.page_info')
+                                    {t('admin.reports.sales.pagination.page_info')
                                         .replace('{current}', String(page))
                                         .replace('{total}', String(salesData.meta.last_page))}
                                 </div>
@@ -381,7 +381,7 @@ export default function SalesReport() {
                                         disabled={page === 1}
                                         onClick={() => setPage(p => p - 1)}
                                     >
-                                        <ChevronLeft className="w-4 h-4" /> {t('reports.sales.pagination.previous')}
+                                        <ChevronLeft className="w-4 h-4" /> {t('admin.reports.sales.pagination.previous')}
                                     </Button>
                                     <Button
                                         variant="secondary"
@@ -389,7 +389,7 @@ export default function SalesReport() {
                                         disabled={page === salesData.meta.last_page}
                                         onClick={() => setPage(p => p + 1)}
                                     >
-                                        {t('reports.sales.pagination.next')} <ChevronRight className="w-4 h-4" />
+                                        {t('admin.reports.sales.pagination.next')} <ChevronRight className="w-4 h-4" />
                                     </Button>
                                 </div>
                             </div>

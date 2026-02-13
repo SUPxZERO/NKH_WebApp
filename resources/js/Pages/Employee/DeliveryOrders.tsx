@@ -21,6 +21,8 @@ import { usePendingCollection, useCollectPayment } from '@/app/hooks/useOrderPay
 import { cn } from '@/app/utils/cn';
 import DriverMapView from './DriverMapView';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { apiGet, apiPost, apiPut } from '@/app/utils/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface CollectionModalProps {
     order: any;
@@ -197,12 +199,6 @@ function CollectionModal({ order, onClose, onSuccess }: CollectionModalProps) {
         </motion.div>
     );
 }
-
-// ... (imports remain similar, will need to ensure apiGet/apiPost/apiPut are imported)
-import { apiGet, apiPost, apiPut } from '@/app/libs/apiClient';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-// ... (Existing CollectionModal ...)
 
 // Driver Mode Component
 interface DriverModeProps {
@@ -388,8 +384,9 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                             variant="outline"
                                             onClick={() => order.delivery_address && openMap(order.delivery_address)}
                                             className="flex-1"
+                                            disabled={!order.delivery_address}
                                         >
-                                            {t('employee.delivery.map')}
+                                            {t('employee.delivery.map.navigate')}
                                         </Button>
                                         {order.status === 'ready' || order.status === 'preparing' ? (
                                             <Button
@@ -488,7 +485,7 @@ export default function DeliveryOrders() {
                             <div className="flex items-center justify-center py-12">
                                 <RefreshCw className="w-8 h-8 text-fuchsia-400 animate-spin" />
                             </div>
-                        ) : collectionOrders?.length === 0 ? (
+                        ) : !collectionOrders || collectionOrders.length === 0 ? (
                             <Card className="bg-white/5 border-dashed border-white/20">
                                 <CardContent className="py-12 text-center">
                                     <Truck className="w-12 h-12 mx-auto mb-4 text-emerald-400" />

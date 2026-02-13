@@ -41,7 +41,7 @@ class MassAssignmentTest extends TestCase
         // Should NOT have set payment_status or status from user input
         $this->assertNotEquals('paid', $order->payment_status);
         $this->assertNotEquals('completed', $order->status);
-        
+
         // Verify other safe fields were set correctly
         $this->assertEquals($this->location->id, $order->location_id);
         $this->assertEquals(100.00, $order->subtotal);
@@ -86,7 +86,7 @@ class MassAssignmentTest extends TestCase
         $order = Order::create($safeData);
 
         // All safe fields should be set correctly
-        $this->assertEquals('dine_in', $order->order_type);
+        $this->assertEquals('dine_in', $order->order_type_code);
         $this->assertEquals(75.00, $order->subtotal);
         $this->assertEquals('No onions', $order->special_instructions);
     }

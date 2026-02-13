@@ -39,10 +39,10 @@ export function CartEmpty({ onBrowseMenu }: CartEmptyProps) {
 
             {/* Text */}
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                {t('cart.empty_title')}
+                {t('customer.cart.empty_title')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
-                {t('cart.browse_menu_desc')}
+                {t('customer.cart.browse_menu_desc')}
             </p>
 
             {/* CTA Button */}
@@ -50,13 +50,13 @@ export function CartEmpty({ onBrowseMenu }: CartEmptyProps) {
                 size="lg"
                 onClick={onBrowseMenu}
             >
-                {t('cart.browse_menu_btn')}
+                {t('customer.cart.browse_menu_btn')}
             </Button>
 
             {/* Optional: Recent favorites or recommendations */}
             <div className="mt-12 w-full max-w-2xl">
                 <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-                    {t('cart.popular_now')}
+                    {t('customer.cart.popular_now')}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {['🍔', '🍕', '🍝', '🍰'].map((emoji, i) => (

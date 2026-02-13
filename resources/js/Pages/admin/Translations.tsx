@@ -82,10 +82,10 @@ const TranslationStatsRibbon = ({ stats }: { stats: any }) => {
     const { t } = useLanguage();
     return (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-            <StatCard title={t('system.translations.stats.keys')} value={stats.total} icon={Languages} color="purple" index={0} />
-            <StatCard title={t('system.translations.stats.missing_cat')} value={stats.missingCategories} icon={LayoutGrid} color="red" index={1} />
-            <StatCard title={t('system.translations.stats.missing_items')} value={stats.missingItems} icon={AlertCircle} color="amber" index={2} />
-            <StatCard title={t('system.translations.stats.progress')} value={`${stats.progress}%`} icon={CheckCircle2} color="emerald" index={3} />
+            <StatCard title={t('admin.system.translations.stats.keys')} value={stats.total} icon={Languages} color="purple" index={0} />
+            <StatCard title={t('admin.system.translations.stats.missing_cat')} value={stats.missingCategories} icon={LayoutGrid} color="red" index={1} />
+            <StatCard title={t('admin.system.translations.stats.missing_items')} value={stats.missingItems} icon={AlertCircle} color="amber" index={2} />
+            <StatCard title={t('admin.system.translations.stats.progress')} value={`${stats.progress}%`} icon={CheckCircle2} color="emerald" index={3} />
         </div>
     );
 };
@@ -143,11 +143,11 @@ export default function Translations() {
     const saveMutation = useMutation({
         mutationFn: (data: { translations: any[]; type: string }) => apiPost('/api/admin/translations/bulk-update', data),
         onSuccess: () => {
-            toastSuccess(t('system.translations.messages.saved'));
+            toastSuccess(t('admin.system.translations.messages.saved'));
             setEditedValues({});
             qc.invalidateQueries({ queryKey: ['translations'] });
         },
-        onError: () => toastError(t('system.translations.messages.failed'))
+        onError: () => toastError(t('admin.system.translations.messages.failed'))
     });
 
     const handleValueChange = (id: number, locale: 'en' | 'km', field: 'name' | 'description', value: string) => {
@@ -213,15 +213,15 @@ export default function Translations() {
                                 animate={{ opacity: 1, x: 0 }}
                                 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-fuchsia-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent truncate"
                             >
-                                {t('system.translations.title')}
+                                {t('admin.system.translations.title')}
                             </motion.h1>
-                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('system.translations.subtitle')}</p>
+                            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1 hidden sm:block">{t('admin.system.translations.subtitle')}</p>
                         </div>
                         {hasChanges && (
                             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                                 <Button onClick={handleSave} disabled={saveMutation.isPending} className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg shadow-emerald-500/20 flex-shrink-0">
                                     <Save className="w-4 h-4 sm:mr-2" />
-                                    <span className="hidden sm:inline">{saveMutation.isPending ? t('system.translations.saving') : t('system.translations.save_button')}</span>
+                                    <span className="hidden sm:inline">{saveMutation.isPending ? t('admin.system.translations.saving') : t('admin.system.translations.save_button')}</span>
                                 </Button>
                             </motion.div>
                         )}
@@ -239,21 +239,21 @@ export default function Translations() {
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                <Input placeholder={t('system.translations.filters.search')} value={search} onChange={(e) => setSearch(e.target.value)}
+                                <Input placeholder={t('admin.system.translations.filters.search')} value={search} onChange={(e) => setSearch(e.target.value)}
                                     className="pl-10 h-10 text-sm bg-background/50 border-border text-foreground placeholder:text-muted-foreground" />
                             </div>
                             <div className="flex bg-secondary/50 border border-border rounded-lg sm:rounded-xl p-1">
                                 <button onClick={() => setTranslationType('categories')}
                                     className={cn("flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all",
                                         translationType === 'categories' ? "bg-white dark:bg-slate-800 text-fuchsia-600 dark:text-fuchsia-400 shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                                    <span className="hidden sm:inline">{t('system.translations.filters.categories')}</span>
-                                    <span className="sm:hidden">{t('system.translations.filters.categories_short')}</span>
+                                    <span className="hidden sm:inline">{t('admin.system.translations.filters.categories')}</span>
+                                    <span className="sm:hidden">{t('admin.system.translations.filters.categories_short')}</span>
                                 </button>
                                 <button onClick={() => setTranslationType('menu_items')}
                                     className={cn("flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all",
                                         translationType === 'menu_items' ? "bg-white dark:bg-slate-800 text-fuchsia-600 dark:text-fuchsia-400 shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-                                    <span className="hidden sm:inline">{t('system.translations.filters.menu_items')}</span>
-                                    <span className="sm:hidden">{t('system.translations.filters.menu_items_short')}</span>
+                                    <span className="hidden sm:inline">{t('admin.system.translations.filters.menu_items')}</span>
+                                    <span className="sm:hidden">{t('admin.system.translations.filters.menu_items_short')}</span>
                                 </button>
                             </div>
                         </div>
@@ -267,22 +267,22 @@ export default function Translations() {
                         className="hidden md:block bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-lg"
                     >
                         <div className="grid grid-cols-12 gap-4 p-4 border-b border-border/50 bg-gradient-to-r from-fuchsia-500/10 via-purple-500/5 to-fuchsia-500/10">
-                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('system.translations.table.headers.id')}</div>
-                            <div className="col-span-5 text-xs font-bold text-foreground uppercase tracking-wider">{t('system.translations.table.headers.english')}</div>
-                            <div className="col-span-6 text-xs font-bold text-foreground uppercase tracking-wider">{t('system.translations.table.headers.khmer')}</div>
+                            <div className="col-span-1 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.system.translations.table.headers.id')}</div>
+                            <div className="col-span-5 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.system.translations.table.headers.english')}</div>
+                            <div className="col-span-6 text-xs font-bold text-foreground uppercase tracking-wider">{t('admin.system.translations.table.headers.khmer')}</div>
                         </div>
                         <div className="divide-y divide-border/30">
                             {isLoading ? (
                                 <div className="p-12 text-center text-muted-foreground">
                                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-600 mb-2"></div>
-                                    <p>{t('system.translations.table.loading')}</p>
+                                    <p>{t('admin.system.translations.table.loading')}</p>
                                 </div>
                             ) : filteredTranslations.length === 0 ? (
                                 <div className="p-12 text-center">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                                         <Languages className="w-8 h-8 text-fuchsia-500" />
                                     </div>
-                                    <h3 className="text-foreground font-semibold">{t('system.translations.table.empty')}</h3>
+                                    <h3 className="text-foreground font-semibold">{t('admin.system.translations.table.empty')}</h3>
                                 </div>
                             ) : filteredTranslations.map((item, idx) => {
                                 const enEdited = isEdited(item.id, 'en', 'name') || isEdited(item.id, 'en', 'description');
@@ -307,7 +307,7 @@ export default function Translations() {
                                                     value={getValue(item.id, 'en', 'name', item.translations.en?.name || '')}
                                                     onChange={(e) => handleValueChange(item.id, 'en', 'name', e.target.value)}
                                                     className={cn("pl-10 text-sm transition-all", isEdited(item.id, 'en', 'name') && "border-fuchsia-500 ring-1 ring-fuchsia-500/20")}
-                                                    placeholder={t('system.translations.placeholders.en_name')}
+                                                    placeholder={t('admin.system.translations.placeholders.en_name')}
                                                 />
                                             </div>
                                             <div className="relative group/input">
@@ -316,7 +316,7 @@ export default function Translations() {
                                                     onChange={(e) => handleValueChange(item.id, 'en', 'description', e.target.value)}
                                                     rows={2}
                                                     className={cn("w-full pl-3 bg-background/50 border border-border rounded-xl text-sm text-foreground focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/20 outline-none p-2 transition-all resize-none", isEdited(item.id, 'en', 'description') && "border-fuchsia-500")}
-                                                    placeholder={t('system.translations.placeholders.en_desc')}
+                                                    placeholder={t('admin.system.translations.placeholders.en_desc')}
                                                 />
                                             </div>
                                         </div>
@@ -329,7 +329,7 @@ export default function Translations() {
                                                     value={getValue(item.id, 'km', 'name', item.translations.km?.name || '')}
                                                     onChange={(e) => handleValueChange(item.id, 'km', 'name', e.target.value)}
                                                     className={cn("pl-10 text-sm font-khmer transition-all", isEdited(item.id, 'km', 'name') && "border-emerald-500 ring-1 ring-emerald-500/20")}
-                                                    placeholder={t('system.translations.placeholders.km_name')}
+                                                    placeholder={t('admin.system.translations.placeholders.km_name')}
                                                 />
                                             </div>
                                             <div className="relative group/input">
@@ -338,7 +338,7 @@ export default function Translations() {
                                                     onChange={(e) => handleValueChange(item.id, 'km', 'description', e.target.value)}
                                                     rows={2}
                                                     className={cn("w-full pl-3 bg-background/50 border border-border rounded-xl text-sm text-foreground focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none p-2 font-khmer transition-all resize-none", isEdited(item.id, 'km', 'description') && "border-emerald-500")}
-                                                    placeholder={t('system.translations.placeholders.km_desc')}
+                                                    placeholder={t('admin.system.translations.placeholders.km_desc')}
                                                 />
                                             </div>
                                         </div>
@@ -354,7 +354,7 @@ export default function Translations() {
                             <div className="bg-card/50 rounded-xl p-8 text-center border border-border/50 backdrop-blur-sm">
                                 <div className="inline-flex items-center gap-3 text-muted-foreground">
                                     <div className="w-5 h-5 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
-                                    <span className="text-sm">{t('system.translations.table.loading')}</span>
+                                    <span className="text-sm">{t('admin.system.translations.table.loading')}</span>
                                 </div>
                             </div>
                         ) : filteredTranslations.length === 0 ? (
@@ -362,7 +362,7 @@ export default function Translations() {
                                 <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-purple-500/20 flex items-center justify-center">
                                     <Languages className="w-7 h-7 text-fuchsia-500" />
                                 </div>
-                                <h3 className="text-foreground font-semibold text-sm">{t('system.translations.table.empty')}</h3>
+                                <h3 className="text-foreground font-semibold text-sm">{t('admin.system.translations.table.empty')}</h3>
                             </div>
                         ) : filteredTranslations.map((item, idx) => {
                             const enEdited = isEdited(item.id, 'en', 'name') || isEdited(item.id, 'en', 'description');
@@ -386,14 +386,14 @@ export default function Translations() {
                                         </div>
                                         <span className="font-mono text-xs text-muted-foreground">#{item.id}</span>
                                         <span className="text-sm text-foreground font-medium truncate flex-1">
-                                            {item.translations.en?.name || t('system.translations.table.untitled')}
+                                            {item.translations.en?.name || t('admin.system.translations.table.untitled')}
                                         </span>
                                     </div>
 
                                     {/* English Section */}
                                     <div className="mb-3">
                                         <div className="flex items-center gap-1.5 mb-1.5">
-                                            <span className="text-[10px] font-bold text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-wider">{t('system.translations.labels.english')}</span>
+                                            <span className="text-[10px] font-bold text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-wider">{t('admin.system.translations.labels.english')}</span>
                                             {enEdited && <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-500"></span>}
                                         </div>
                                         <div className="space-y-2">
@@ -401,14 +401,14 @@ export default function Translations() {
                                                 value={getValue(item.id, 'en', 'name', item.translations.en?.name || '')}
                                                 onChange={(e) => handleValueChange(item.id, 'en', 'name', e.target.value)}
                                                 className={cn("h-9 text-sm", isEdited(item.id, 'en', 'name') && "border-fuchsia-500 ring-1 ring-fuchsia-500/20")}
-                                                placeholder={t('system.translations.placeholders.en_name')}
+                                                placeholder={t('admin.system.translations.placeholders.en_name')}
                                             />
                                             <textarea
                                                 value={getValue(item.id, 'en', 'description', item.translations.en?.description || '')}
                                                 onChange={(e) => handleValueChange(item.id, 'en', 'description', e.target.value)}
                                                 rows={2}
                                                 className={cn("w-full bg-background/50 border border-border rounded-lg text-sm text-foreground focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/20 outline-none p-2 transition-all resize-none", isEdited(item.id, 'en', 'description') && "border-fuchsia-500")}
-                                                placeholder={t('system.translations.placeholders.en_desc')}
+                                                placeholder={t('admin.system.translations.placeholders.en_desc')}
                                             />
                                         </div>
                                     </div>
@@ -416,7 +416,7 @@ export default function Translations() {
                                     {/* Khmer Section */}
                                     <div>
                                         <div className="flex items-center gap-1.5 mb-1.5">
-                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{t('system.translations.labels.khmer')}</span>
+                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{t('admin.system.translations.labels.khmer')}</span>
                                             {kmEdited && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>}
                                         </div>
                                         <div className="space-y-2">
@@ -424,14 +424,14 @@ export default function Translations() {
                                                 value={getValue(item.id, 'km', 'name', item.translations.km?.name || '')}
                                                 onChange={(e) => handleValueChange(item.id, 'km', 'name', e.target.value)}
                                                 className={cn("h-9 text-sm font-khmer", isEdited(item.id, 'km', 'name') && "border-emerald-500 ring-1 ring-emerald-500/20")}
-                                                placeholder={t('system.translations.placeholders.km_name')}
+                                                placeholder={t('admin.system.translations.placeholders.km_name')}
                                             />
                                             <textarea
                                                 value={getValue(item.id, 'km', 'description', item.translations.km?.description || '')}
                                                 onChange={(e) => handleValueChange(item.id, 'km', 'description', e.target.value)}
                                                 rows={2}
                                                 className={cn("w-full bg-background/50 border border-border rounded-lg text-sm text-foreground font-khmer focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none p-2 transition-all resize-none", isEdited(item.id, 'km', 'description') && "border-emerald-500")}
-                                                placeholder={t('system.translations.placeholders.km_desc')}
+                                                placeholder={t('admin.system.translations.placeholders.km_desc')}
                                             />
                                         </div>
                                     </div>

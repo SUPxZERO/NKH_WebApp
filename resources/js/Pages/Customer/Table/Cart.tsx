@@ -6,15 +6,17 @@ import { Minus, Plus, Trash2, ChevronRight, Loader2, Utensils, Receipt } from 'l
 import axios from 'axios';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '@/app/hooks/useTranslation';
 
 export default function TableCart() {
+    const { t } = useTranslation();
     const cart = useTableStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSendToKitchen = async () => {
         if (cart.cartItems.length === 0) return;
         if (!cart.sessionToken) {
-            toastError("Session expired. Please scan QR again.");
+            toastError(t('customer.tableTray.session_expired'));
             return;
         }
 
@@ -45,7 +47,7 @@ export default function TableCart() {
 
         } catch (error: any) {
             console.error(error);
-            const msg = error.response?.data?.message || 'Failed to send order.';
+            const msg = error.response?.data?.message || t('customer.tableTray.send_failed');
             toastError(msg);
             setIsSubmitting(false);
         }
@@ -60,23 +62,23 @@ export default function TableCart() {
             <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-black/20 ring-1 ring-white/10">
                 <Utensils className="w-8 h-8 text-slate-600" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-100 mb-2">Your tray is empty</h3>
+            <h3 className="text-2xl font-bold text-slate-100 mb-2">{t('customer.tableTray.empty_title')}</h3>
             <p className="text-slate-400 text-sm max-w-xs leading-relaxed">
-                Looks like you haven't added any dishes yet. Browse the menu to get started!
+                {t('customer.tableTray.empty_desc')}
             </p>
 
             <button
                 onClick={() => router.visit('/customer/table/menu')}
                 className="px-8 py-4 bg-white text-slate-950 font-bold rounded-2xl mt-8 active:scale-95 transition-transform shadow-lg shadow-white/10"
             >
-                Browse Menu
+                {t('customer.tableTray.browse_btn')}
             </button>
         </motion.div>
     );
 
     return (
-        <TableLayout title="Your Tray" showBack={true} hideNav={true}>
-            <Head title="Tray" />
+        <TableLayout title={t('customer.tableTray.title')} showBack={true} hideNav={true}>
+            <Head title={t('customer.tableTray.title')} />
 
             {cart.cartItems.length === 0 ? (
                 <EmptyState />
@@ -138,7 +140,7 @@ export default function TableCart() {
 
                         <div className="bg-slate-900/30 border border-dotted border-white/10 rounded-xl p-4 text-center">
                             <p className="text-xs text-slate-500">
-                                Keep ordering as much as you like! We'll keep adding it to your table's bill.
+                                {t('customer.tableTray.footer_note')}
                             </p>
                         </div>
                     </div>
@@ -151,7 +153,7 @@ export default function TableCart() {
                         <div className="bg-slate-950/90 backdrop-blur-xl border-t border-white/10 p-5 pb-8">
                             <div className="max-w-md mx-auto space-y-4">
                                 <div className="flex justify-between items-center text-slate-300">
-                                    <span className="text-sm font-medium">Total (Estimated)</span>
+                                    <span className="text-sm font-medium">{t('customer.tableTray.total_est')}</span>
                                     <span className="text-2xl font-bold text-white tracking-tight">${cart.getTotalPrice().toFixed(2)}</span>
                                 </div>
 
@@ -163,11 +165,11 @@ export default function TableCart() {
                                     {isSubmitting ? (
                                         <>
                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                            Sending...
+                                            {t('customer.tableTray.sending')}
                                         </>
                                     ) : (
                                         <>
-                                            Send to Kitchen
+                                            {t('customer.tableTray.send_btn')}
                                             <ChevronRight className="w-5 h-5" />
                                         </>
                                     )}

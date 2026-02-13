@@ -178,8 +178,8 @@ const FeaturedCarousel = ({ items, onItemClick }: { items: FeaturedItem[], onIte
               <motion.h3 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-3xl font-bold text-white mb-2 font-display">{currentItem?.name}</motion.h3>
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-200 line-clamp-2 mb-4">{currentItem?.description}</motion.p>
               <div className="flex items-center gap-2">
-                <div className="px-3 py-1 rounded-lg bg-fuchsia-500 text-white text-xs font-bold uppercase tracking-wider">{t('menu.badges.featured')}</div>
-                <div className="px-3 py-1 rounded-lg bg-white/20 text-white text-xs font-medium uppercase tracking-wider backdrop-blur-md">{t('menu.badges.hot_item')}</div>
+                <div className="px-3 py-1 rounded-lg bg-fuchsia-500 text-white text-xs font-bold uppercase tracking-wider">{t('customer.menu.badges.featured')}</div>
+                <div className="px-3 py-1 rounded-lg bg-white/20 text-white text-xs font-medium uppercase tracking-wider backdrop-blur-md">{t('customer.menu.badges.hot_item')}</div>
               </div>
             </div>
           </motion.div>
@@ -235,7 +235,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
       quantity: 1,
       image_path: item.image_path || undefined,
     });
-    toastSuccess(t('menu.added_to_cart', { name: item.name }));
+    toastSuccess(t('customer.menu.added_to_cart', { name: item.name }));
     setMode(isTableOrder ? 'dine-in' : 'delivery');
     setOpen(true);
   }
@@ -251,7 +251,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
   return (
     <CustomerLayout>
       <Head>
-        <title>{t('meta.home_title') as string}</title>
+        <title>{t('common.meta.home_title') as string}</title>
       </Head>
 
       <div className="space-y-12 sm:space-y-16 lg:space-y-24 pb-12 sm:pb-16 lg:pb-20">
@@ -267,16 +267,16 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
               >
                 <div className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse" />
                 <span className="text-sm font-semibold text-white">
-                  {t('home.rating_badge', { rating: String(stats.averageRating), count: String(stats.totalCustomers) })}
+                  {t('customer.home.rating_badge', { rating: String(stats.averageRating), count: String(stats.totalCustomers) })}
                 </span>
               </motion.div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight text-white mb-4 lg:mb-6 font-display">
-                {t('hero.title')}
+                {t('customer.hero.title')}
               </h1>
 
               <p className="text-base md:text-lg lg:text-xl text-white/80 leading-relaxed mb-6 lg:mb-10 max-w-xl">
-                {t('hero.subtitle')}
+                {t('customer.hero.subtitle')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
@@ -288,7 +288,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                     className="relative flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white text-fuchsia-600 font-bold text-base sm:text-lg shadow-xl shadow-black/10 hover:bg-gray-50 transition-all w-full sm:w-auto"
                   >
                     <Utensils className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>{t('hero.cta_order')}</span>
+                    <span>{t('customer.hero.cta_order')}</span>
                   </motion.button>
                 ) : (
                   <>
@@ -299,7 +299,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                       className="relative flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white text-fuchsia-600 font-bold text-base sm:text-lg shadow-xl shadow-black/10 hover:bg-gray-50 transition-all"
                     >
                       <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>{t('hero.cta_order')}</span>
+                      <span>{t('customer.hero.cta_order')}</span>
                     </motion.button>
 
                     <motion.button
@@ -309,7 +309,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                       className="flex items-center justify-center gap-2 h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold text-base sm:text-lg hover:bg-white/20 transition-all"
                     >
                       <Store className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>{t('hero.cta_menu')}</span>
+                      <span>{t('customer.hero.cta_menu')}</span>
                     </motion.button>
                   </>
                 )}
@@ -319,15 +319,15 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
               <div className="mt-8 lg:mt-12 grid grid-cols-3 gap-2 sm:gap-4 lg:gap-8 border-t border-white/10 pt-6 lg:pt-8">
                 <div className="flex flex-col text-center sm:text-left">
                   <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{stats.averageDeliveryTime}m</span>
-                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">{t('home.stats.avg_delivery')}</span>
+                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">{t('customer.home.stats.avg_delivery')}</span>
                 </div>
                 <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4">
                   <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{stats.totalCustomers > 1000 ? '1k+' : stats.totalCustomers}</span>
-                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">{t('home.stats.happy_customers')}</span>
+                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">{t('customer.home.stats.happy_customers')}</span>
                 </div>
                 <div className="flex flex-col text-center sm:text-left border-l border-white/10 pl-2 sm:pl-4">
                   <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">4.9</span>
-                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">{t('home.stats.rating')}</span>
+                  <span className="text-[10px] sm:text-xs lg:text-sm text-white/60">{t('customer.home.stats.rating')}</span>
                 </div>
               </div>
             </motion.div>
@@ -357,15 +357,15 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
           <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 lg:mb-12 gap-3 sm:gap-4 lg:gap-6">
               <div>
-                <span className="text-fuchsia-600 font-bold uppercase tracking-widest text-sm">{t('home.delicious_choices')}</span>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-2 text-gray-900 dark:text-white font-display">{t('home.featured_dishes')}</h2>
+                <span className="text-fuchsia-600 font-bold uppercase tracking-widest text-sm">{t('customer.home.delicious_choices')}</span>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mt-2 text-gray-900 dark:text-white font-display">{t('customer.home.featured_dishes')}</h2>
               </div>
               <motion.button
                 onClick={() => navigateToMenu()}
                 whileHover={{ x: 5 }}
                 className="flex items-center gap-2 text-fuchsia-600 font-bold hover:text-fuchsia-700 transition-colors text-sm lg:text-base"
               >
-                {t('home.view_full_menu')} <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" />
+                {t('customer.home.view_full_menu')} <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" />
               </motion.button>
             </div>
           </div>
@@ -408,7 +408,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                         onClick={() => addToCartAndOpenModal(item)}
                         className="w-full py-2 bg-fuchsia-600 text-white rounded-lg font-bold text-xs shadow-md hover:bg-fuchsia-700 transition-colors flex items-center justify-center gap-2"
                       >
-                        <Plus className="w-3 h-3" /> {t('menu.add_to_cart')}
+                        <Plus className="w-3 h-3" /> {t('customer.menu.add_to_cart')}
                       </button>
                     </div>
                   </GlowCard>
@@ -443,7 +443,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                           onClick={() => addToCartAndOpenModal(item)}
                           className="w-full py-3 bg-white text-gray-900 rounded-xl font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2"
                         >
-                          <Plus className="w-4 h-4" /> {t('menu.add_to_cart')}
+                          <Plus className="w-4 h-4" /> {t('customer.menu.add_to_cart')}
                         </button>
                       </div>
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-lg">
@@ -460,7 +460,7 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                       </div>
                       <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4 flex-1">{item.description}</p>
                       <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <Clock className="w-3 h-3" /> 15-20 {t('common.minutes_short')} • <Utensils className="w-3 h-3" /> {item.category?.name || t('menu.categories.main_course')}
+                        <Clock className="w-3 h-3" /> 15-20 {t('common.minutes_short')} • <Utensils className="w-3 h-3" /> {item.category?.name || t('customer.menu.categories.main_course')}
                       </div>
                     </div>
                   </GlowCard>
@@ -484,13 +484,13 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
                 variants={itemVariants}
                 className="inline-block text-fuchsia-600 dark:text-fuchsia-400 font-bold uppercase tracking-widest text-sm bg-fuchsia-50 dark:bg-fuchsia-900/30 px-4 py-2 rounded-full border border-fuchsia-200 dark:border-fuchsia-700"
               >
-                {t('home.our_menu')}
+                {t('customer.home.our_menu')}
               </motion.span>
               <motion.h2
                 variants={itemVariants}
                 className="text-4xl md:text-5xl font-bold mt-6 mb-4 text-gray-900 dark:text-white font-display"
               >
-                {t('home.explore_categories')}
+                {t('customer.home.explore_categories')}
               </motion.h2>
               <motion.div
                 variants={itemVariants}
@@ -592,23 +592,23 @@ export default function Home({ featuredItems, categories, testimonials, stats }:
             <div className="relative z-20 px-4 sm:px-6 md:px-12 lg:px-20 py-8 sm:py-12 md:py-16 lg:py-20 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
               <div className="max-w-2xl">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4 md:mb-6 leading-tight">
-                  {t('home.cta.title', { highlight: <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">{t('home.cta.highlight')}</span> })}
+                  {t('customer.home.cta.title', { highlight: <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">{t('customer.home.cta.highlight')}</span> })}
                 </h2>
                 <p className="text-base md:text-lg lg:text-xl text-gray-300 mb-6 md:mb-8">
-                  {t('home.cta.subtitle')}
+                  {t('customer.home.cta.subtitle')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <button
                     onClick={() => openModal(isTableOrder ? 'dine-in' : 'delivery')}
                     className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-fuchsia-900 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors shadow-lg"
                   >
-                    {t('hero.cta_order')}
+                    {t('customer.hero.cta_order')}
                   </button>
                   <button
                     onClick={() => navigateToMenu()}
                     className="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border border-white/30 text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:bg-white/10 transition-colors"
                   >
-                    {t('hero.cta_menu')}
+                    {t('customer.hero.cta_menu')}
                   </button>
                 </div>
               </div>

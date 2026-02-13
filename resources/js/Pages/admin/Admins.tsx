@@ -398,7 +398,7 @@ export default function Admins() {
                             className="flex-1 h-10 sm:h-11 text-sm border-border hover:bg-secondary">{t('common.cancel')}</Button>
                         <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
                             className="flex-1 h-10 sm:h-11 text-sm bg-purple-600 hover:bg-purple-700">
-                            {createMutation.isPending || updateMutation.isPending ? t('profile.saving') : (editingAdmin ? t('common.save') : t('layout.actions.create'))}
+                            {createMutation.isPending || updateMutation.isPending ? t('customer.profile.saving') : (editingAdmin ? t('common.save') : t('layout.actions.create'))}
                         </Button>
                     </div>
                 </form>

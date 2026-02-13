@@ -14,10 +14,10 @@ export default function Feedback() {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                         <MessageSquare className="w-8 h-8 text-purple-600" />
-                        {t('customer_pages.feedback.title')}
+                        {t('customer.feedback.title')}
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 mt-2">
-                        {t('customer_pages.feedback.subtitle')}
+                        {t('customer.feedback.subtitle')}
                     </p>
                 </div>
 
@@ -25,7 +25,7 @@ export default function Feedback() {
                     <CardContent className="p-8 flex flex-col items-center text-center space-y-4">
                         <MessageSquare className="w-10 h-10 text-gray-400" />
                         <p className="text-sm text-gray-700 dark:text-gray-300">
-                            {t('customer_pages.feedback.alternative')}
+                            {t('customer.feedback.alternative')}
                         </p>
                     </CardContent>
                 </Card>

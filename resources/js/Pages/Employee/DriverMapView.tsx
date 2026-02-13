@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Map from '@/app/components/ui/Map';
 import { useDriverLocation } from '@/app/hooks/useDriverLocation';
 import { useRouteOptimization } from '@/app/hooks/useRouteOptimization';
-import { apiGet, apiPost, apiPut } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPut } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import {
     MapPin,
@@ -380,6 +380,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                                         selectedOrder.delivery_longitude
                                     )}
                                     className="flex-1"
+                                    disabled={!selectedOrder.delivery_address && (!selectedOrder.delivery_latitude || !selectedOrder.delivery_longitude)}
                                 >
                                     <Navigation className="w-4 h-4 mr-1" />
                                     {t('employee.delivery.map.navigate')}

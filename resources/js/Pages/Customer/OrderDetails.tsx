@@ -60,9 +60,9 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                 <CustomerLayout>
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                         <XCircle className="w-16 h-16 text-red-500 mb-4" />
-                        <h2 className="text-2xl font-bold mb-2">{t('customer_pages.orders.details.order_not_found')}</h2>
-                        <p className="text-gray-500 mb-6">{t('customer_pages.orders.details.order_not_found_desc')}</p>
-                        <Button onClick={() => window.location.href = '/customer/orders'}>{t('customer_pages.orders.details.back_to_orders')}</Button>
+                        <h2 className="text-2xl font-bold mb-2">{t('customer.orders.details.order_not_found')}</h2>
+                        <p className="text-gray-500 mb-6">{t('customer.orders.details.order_not_found_desc')}</p>
+                        <Button onClick={() => window.location.href = '/customer/orders'}>{t('customer.orders.details.back_to_orders')}</Button>
                     </div>
                 </CustomerLayout>
             </RequireAuth>
@@ -85,16 +85,16 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                         <div className="flex items-center justify-between w-full md:w-auto gap-4">
                             <Button variant="ghost" size="sm" onClick={() => window.location.href = '/customer/orders'}>
                                 <ArrowLeft className="w-4 h-4 mr-2" />
-                                {t('customer_pages.orders.details.back')}
+                                {t('customer.orders.details.back')}
                             </Button>
                             {/* Mobile-only Pay button could optionally go here, but let's keep it consistent at bottom/right */}
                         </div>
 
                         <div className="flex-1 w-full">
                             <h1 className="text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent break-words">
-                                {t('customer_pages.orders.details.order_number', { number: order.order_number })}
+                                {t('customer.orders.details.order_number', { number: order.order_number })}
                             </h1>
-                            <p className="text-sm text-gray-500">{t('customer_pages.orders.details.placed_on', { date: new Date(order.ordered_at).toLocaleString() })}</p>
+                            <p className="text-sm text-gray-500">{t('customer.orders.details.placed_on', { date: new Date(order.ordered_at).toLocaleString() })}</p>
                         </div>
 
                         {!order.is_paid && order.status !== 'cancelled' && (
@@ -104,7 +104,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                 className="w-full md:w-auto"
                                 leftIcon={<CreditCard className="w-4 h-4" />}
                             >
-                                {t('customer_pages.orders.details.pay_now')}
+                                {t('customer.orders.details.pay_now')}
                             </Button>
                         )}
                     </div>
@@ -123,13 +123,13 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                             <div>
                                                 <h3 className="font-semibold text-lg">{t(statusInfo.label)}</h3>
                                                 <p className="text-sm text-gray-500">
-                                                    {order.status === 'completed' ? t('customer_pages.orders.details.status_messages.completed') : t('customer_pages.orders.details.status_messages.default')}
+                                                    {order.status === 'completed' ? t('customer.orders.details.status_messages.completed') : t('customer.orders.details.status_messages.default')}
                                                 </p>
                                             </div>
                                         </div>
                                         {order.pickup_time && (
                                             <div className="text-left sm:text-right pl-[3.25rem] sm:pl-0">
-                                                <div className="text-xs text-gray-500 uppercase tracking-wider">{order.order_type === 'delivery' ? t('customer_pages.orders.details.estimated_arrival') : t('customer_pages.orders.details.estimated_pickup')}</div>
+                                                <div className="text-xs text-gray-500 uppercase tracking-wider">{order.order_type === 'delivery' ? t('customer.orders.details.estimated_arrival') : t('customer.orders.details.estimated_pickup')}</div>
                                                 <div className="font-semibold text-lg text-fuchsia-600">
                                                     {new Date(order.pickup_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
@@ -148,7 +148,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
 
                             {/* Items List */}
                             <Card>
-                                <CardHeader><div className="font-semibold text-lg">{t('customer_pages.orders.details.order_items')}</div></CardHeader>
+                                <CardHeader><div className="font-semibold text-lg">{t('customer.orders.details.order_items')}</div></CardHeader>
                                 <CardContent className="space-y-4">
                                     {order.items.map((item: any) => (
                                         <div key={item.id} className="flex gap-4 py-4 border-b border-gray-100 dark:border-gray-800 last:border-0">
@@ -167,7 +167,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                                 <p className="text-sm text-gray-500 mb-2">{item.quantity} x ${Number(item.unit_price).toFixed(2)}</p>
                                                 {item.special_instructions && (
                                                     <div className="text-xs bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 p-2 rounded-lg inline-block">
-                                                        {t('customer_pages.orders.details.note')}: {item.special_instructions}
+                                                        {t('customer.orders.details.note')}: {item.special_instructions}
                                                     </div>
                                                 )}
                                             </div>
@@ -181,40 +181,40 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                         <div className="space-y-6">
                             {/* Order Summary */}
                             <Card>
-                                <CardHeader><div className="font-semibold">{t('customer_pages.orders.details.billed_to')}</div></CardHeader>
+                                <CardHeader><div className="font-semibold">{t('customer.orders.details.billed_to')}</div></CardHeader>
                                 <CardContent className="space-y-4 text-sm">
                                     <div className="space-y-2 pb-4 border-b border-gray-100 dark:border-gray-800">
                                         <div className="flex justify-between">
-                                            <span className="text-gray-500">{t('customer_pages.orders.details.subtotal')}</span>
+                                            <span className="text-gray-500">{t('customer.orders.details.subtotal')}</span>
                                             <span>${Number(order.subtotal).toFixed(2)}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-500">{t('customer_pages.orders.details.delivery_fee')}</span>
+                                            <span className="text-gray-500">{t('customer.orders.details.delivery_fee')}</span>
                                             <span>${Number(order.delivery_fee).toFixed(2)}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-500">{t('customer_pages.orders.details.tax')}</span>
+                                            <span className="text-gray-500">{t('customer.orders.details.tax')}</span>
                                             <span>${Number(order.tax_amount).toFixed(2)}</span>
                                         </div>
                                         {Number(order.discount_amount) > 0 && (
                                             <div className="flex justify-between text-green-500">
-                                                <span>{t('customer_pages.orders.details.discount')}</span>
+                                                <span>{t('customer.orders.details.discount')}</span>
                                                 <span>-${Number(order.discount_amount).toFixed(2)}</span>
                                             </div>
                                         )}
                                     </div>
                                     <div className="flex justify-between font-bold text-lg pt-2">
-                                        <span>{t('customer_pages.orders.details.total')}</span>
+                                        <span>{t('customer.orders.details.total')}</span>
                                         <span className="text-fuchsia-600">${Number(order.total_amount).toFixed(2)}</span>
                                     </div>
                                     <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                                        <div className="flex justify-between items-center text-xs text-gray-500 uppercase tracking-wider mb-2">{t('customer_pages.orders.details.payment_status')}</div>
+                                        <div className="flex justify-between items-center text-xs text-gray-500 uppercase tracking-wider mb-2">{t('customer.orders.details.payment_status')}</div>
                                         <div className={cn("inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium w-full justify-between",
                                             order.is_paid ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400" : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
                                         )}>
                                             <span className="flex items-center gap-2">
                                                 {order.is_paid ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                                                {order.is_paid ? t('customer_pages.orders.details.paid') : t('customer_pages.orders.details.unpaid')}
+                                                {order.is_paid ? t('customer.orders.details.paid') : t('customer.orders.details.unpaid')}
                                             </span>
                                             <span className="text-xs opacity-75 capitalize">{(order.payment_mode || 'N/A').replace(/_/g, ' ')}</span>
                                         </div>
@@ -224,7 +224,7 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
 
                             {/* Delivery/Pickup Details */}
                             <Card>
-                                <CardHeader><div className="font-semibold">{order.order_type === 'delivery' ? t('customer_pages.orders.details.delivery_address') : t('customer_pages.orders.details.pickup_location')}</div></CardHeader>
+                                <CardHeader><div className="font-semibold">{order.order_type === 'delivery' ? t('customer.orders.details.delivery_address') : t('customer.orders.details.pickup_location')}</div></CardHeader>
                                 <CardContent className="text-sm space-y-3">
                                     {order.order_type === 'delivery' && order.delivery_address ? (
                                         <>
@@ -238,17 +238,17 @@ export default function OrderDetails({ orderId }: OrderDetailsProps) {
                                         </>
                                     ) : (
                                         <>
-                                            <div className="font-medium text-fuchsia-600">{order.location?.name || t('customer_pages.orders.details.local_store')}</div>
+                                            <div className="font-medium text-fuchsia-600">{order.location?.name || t('customer.orders.details.local_store')}</div>
                                             <div className="text-gray-500 flex items-start gap-2">
                                                 <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                                                <span>{order.location?.address || t('customer_pages.orders.details.address_not_available')}</span>
+                                                <span>{order.location?.address || t('customer.orders.details.address_not_available')}</span>
                                             </div>
                                         </>
                                     )}
 
                                     {order.special_instructions && (
                                         <div className="pt-3 border-t border-gray-100 dark:border-gray-800 mt-3">
-                                            <div className="text-xs text-gray-500 uppercase font-semibold mb-1">{t('customer_pages.orders.details.instructions')}</div>
+                                            <div className="text-xs text-gray-500 uppercase font-semibold mb-1">{t('customer.orders.details.instructions')}</div>
                                             <p className="text-gray-600 dark:text-gray-400 italic">"{order.special_instructions}"</p>
                                         </div>
                                     )}

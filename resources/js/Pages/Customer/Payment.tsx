@@ -73,7 +73,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
         if (statusData.status === 'completed') {
             setIsPolling(false);
             setHasRedirected(true);
-            toastSuccess(t('payment.messages.success') as string);
+            toastSuccess(t('customer.payment.messages.success') as string);
             // Redirect to orders page after showing success
             setTimeout(() => {
                 window.location.href = '/customer/orders';
@@ -81,10 +81,10 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
         } else if (statusData.status === 'failed') {
             // On failure, do not redirect anywhere. Just stop polling and show error.
             setIsPolling(false);
-            toastError(t('payment.messages.failed', { reason: statusData.failure_reason || t('payment.messages.unknown_error') }) as string);
+            toastError(t('customer.payment.messages.failed', { reason: statusData.failure_reason || t('customer.payment.messages.unknown_error') }) as string);
         } else if (statusData.status === 'cancelled') {
             setIsPolling(false);
-            toastError(t('payment.messages.cancelled') as string);
+            toastError(t('customer.payment.messages.cancelled') as string);
         }
 
         // Update local payment data with new status
@@ -114,7 +114,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
             setPaymentData(result);
             setStep('processing');
         } catch (error: any) {
-            toastError(error?.message || t('payment.messages.init_failed') as string);
+            toastError(error?.message || t('customer.payment.messages.init_failed') as string);
         }
     };
 
@@ -131,7 +131,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
             setPaymentData(result);
             setIsPolling(true);
         } catch (error: any) {
-            toastError(error?.message || t('payment.messages.retry_failed') as string);
+            toastError(error?.message || t('customer.payment.messages.retry_failed') as string);
         }
     };
 
@@ -141,7 +141,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
             await simulateSuccess.mutateAsync(paymentData.payment.id);
             refetchStatus();
         } catch (error: any) {
-            toastError(error?.message || t('payment.messages.simulation_failed') as string);
+            toastError(error?.message || t('customer.payment.messages.simulation_failed') as string);
         }
     };
 
@@ -150,17 +150,17 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
         try {
             await simulateFailure.mutateAsync({
                 paymentId: paymentData.payment.id,
-                reason: t('payment.simulated_failure_reason') as string,
+                reason: t('customer.payment.simulated_failure_reason') as string,
             });
             refetchStatus();
         } catch (error: any) {
-            toastError(error?.message || t('payment.messages.simulation_failed') as string);
+            toastError(error?.message || t('customer.payment.messages.simulation_failed') as string);
         }
     };
 
     const handleExpired = () => {
         setIsPolling(false);
-        toastError(t('payment.messages.qr_expired') as string);
+        toastError(t('customer.payment.messages.qr_expired') as string);
     };
 
     const isDev = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
@@ -170,13 +170,13 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
             <RequireAuth roles={['customer']}>
                 <CustomerLayout>
                     <Head>
-                        <title>{t('payment.page_title')}</title>
+                        <title>{t('customer.payment.page_title')}</title>
                     </Head>
                     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                         <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mb-4" />
-                        <h1 className="text-xl sm:text-2xl font-bold mb-2">{t('payment.no_order')}</h1>
-                        <p className="text-gray-400 mb-6 text-sm">{t('payment.place_order_first')}</p>
-                        <Button onClick={() => (window.location.href = '/menu')}>{t('payment.browse_menu')}</Button>
+                        <h1 className="text-xl sm:text-2xl font-bold mb-2">{t('customer.payment.no_order')}</h1>
+                        <p className="text-gray-400 mb-6 text-sm">{t('customer.payment.place_order_first')}</p>
+                        <Button onClick={() => (window.location.href = '/menu')}>{t('customer.payment.browse_menu')}</Button>
                     </div>
                 </CustomerLayout>
             </RequireAuth>
@@ -187,7 +187,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
         <RequireAuth roles={['customer']}>
             <CustomerLayout>
                 <Head>
-                    <title>{t('payment.page_title')}</title>
+                    <title>{t('customer.payment.page_title')}</title>
                 </Head>
                 <div className="flex flex-col items-center justify-center min-h-[80vh] w-full p-4 sm:p-6">
                     <div className="w-full max-w-md space-y-6">
@@ -200,10 +200,10 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                             </button>
                             <div>
                                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
-                                    {step === 'select-method' ? t('payment.choose_payment') : t('payment.complete_payment')}
+                                    {step === 'select-method' ? t('customer.payment.choose_payment') : t('customer.payment.complete_payment')}
                                 </h1>
                                 {paymentData?.order && (
-                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-200/80 font-medium">{t('payment.order_number', { number: paymentData.order?.order_number })}</p>
+                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-200/80 font-medium">{t('customer.payment.order_number', { number: paymentData.order?.order_number })}</p>
                                 )}
                             </div>
                         </div>
@@ -243,10 +243,10 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                                 className="w-full py-4 text-sm sm:text-lg bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white border-0 shadow-lg shadow-fuchsia-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] rounded-xl font-bold"
                                             >
                                                 {initPayment.isPending ? (
-                                                    t('payment.processing')
+                                                    t('customer.payment.processing')
                                                 ) : (
                                                     <>
-                                                        {t('payment.continue')}
+                                                        {t('customer.payment.continue')}
                                                         <ChevronRight className="w-5 h-5 ml-2" />
                                                     </>
                                                 )}
@@ -285,7 +285,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                     {/* Cash Payment */}
                                     {paymentData.type === 'cash' && (
                                         <CashPaymentDisplay
-                                            orderNumber={paymentData.order?.order_number || t('payment.fallbacks.order_number')}
+                                            orderNumber={paymentData.order?.order_number || t('customer.payment.fallbacks.order_number')}
                                             amount={paymentData.payment?.amount || 0}
                                             currency={paymentData.payment?.currency || 'USD'}
                                             status={statusData?.status || paymentData.payment?.status || 'pending'}
@@ -302,9 +302,9 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                                 publishableKey={(paymentData as any).stripe.publishable_key}
                                                 amount={paymentData.payment?.amount || 0}
                                                 currency={paymentData.payment?.currency || 'USD'}
-                                                orderNumber={paymentData.order?.order_number || t('payment.fallbacks.order_number')}
+                                                orderNumber={paymentData.order?.order_number || t('customer.payment.fallbacks.order_number')}
                                                 onSuccess={() => {
-                                                    toastSuccess(t('payment.messages.success') as string);
+                                                    toastSuccess(t('customer.payment.messages.success') as string);
                                                     setTimeout(() => {
                                                         window.location.href = '/customer/orders';
                                                     }, 2000);
@@ -326,7 +326,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                     {/* Order Summary */}
                                     <div className="rounded-2xl overflow-hidden bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 shadow-lg">
                                         <div className="p-4 sm:p-5 flex justify-between items-center">
-                                            <span className="text-sm sm:text-base text-gray-500 dark:text-gray-200 font-medium">{t('payment.total_amount')}</span>
+                                            <span className="text-sm sm:text-base text-gray-500 dark:text-gray-200 font-medium">{t('customer.payment.total_amount')}</span>
                                             <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">${paymentData.order?.total?.toFixed(2) || '0.00'}</span>
                                         </div>
                                     </div>
@@ -334,7 +334,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                     {/* Dev Mode Simulation for non-QR payments */}
                                     {isDev && paymentData.type !== 'qr' && paymentData.payment?.status === 'pending' && (
                                         <div className="rounded-2xl overflow-hidden bg-white/40 dark:bg-white/5 border border-white/10 p-4">
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center uppercase tracking-wider font-semibold">{t('payment.dev_mode')}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center uppercase tracking-wider font-semibold">{t('customer.payment.dev_mode')}</p>
                                             <div className="flex gap-3">
                                                 <Button
                                                     size="sm"
@@ -342,7 +342,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                                     onClick={handleSimulateSuccess}
                                                     className="flex-1 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 text-xs py-2"
                                                 >
-                                                    {t('payment.simulate_success')}
+                                                    {t('customer.payment.simulate_success')}
                                                 </Button>
                                                 <Button
                                                     size="sm"
@@ -350,7 +350,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                                     onClick={handleSimulateFailure}
                                                     className="flex-1 text-red-600 dark:text-red-400 border-red-500/30 hover:bg-red-500/10 text-xs py-2"
                                                 >
-                                                    {t('payment.simulate_failure')}
+                                                    {t('customer.payment.simulate_failure')}
                                                 </Button>
                                             </div>
                                         </div>
@@ -363,7 +363,7 @@ export default function Payment({ orderId: propOrderId }: PaymentPageProps) {
                                                 onClick={handleBack}
                                                 className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hover:underline underline-offset-4"
                                             >
-                                                {t('payment.change_method')}
+                                                {t('customer.payment.change_method')}
                                             </button>
                                         </div>
                                     )}

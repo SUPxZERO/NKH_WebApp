@@ -36,7 +36,7 @@ class DriverOrderController extends Controller
                 $q->where('code', 'delivery');
             })
             ->whereHas('orderStatus', function ($q) {
-                $q->where('code', 'ready');
+                $q->whereIn('code', ['pending', 'preparing', 'ready']);
             });
 
         // Get available deliveries

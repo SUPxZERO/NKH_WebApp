@@ -73,11 +73,11 @@ export default function Notifications() {
     const [searchQuery, setSearchQuery] = useState('');
 
     const typeLabels = {
-        all: t('customer_pages.notifications.types.all'),
-        order: t('customer_pages.notifications.types.order'),
-        promotion: t('customer_pages.notifications.types.promotion'),
-        reward: t('customer_pages.notifications.types.reward'),
-        system: t('customer_pages.notifications.types.system'),
+        all: t('customer.notifications.types.all'),
+        order: t('customer.notifications.types.order'),
+        promotion: t('customer.notifications.types.promotion'),
+        reward: t('customer.notifications.types.reward'),
+        system: t('customer.notifications.types.system'),
     };
 
     // Fetch notifications
@@ -112,7 +112,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            toastSuccess(t('customer_pages.notifications.messages.marked_read'));
+            toastSuccess(t('customer.notifications.messages.marked_read'));
         },
     });
 
@@ -123,7 +123,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            toastSuccess(t('customer_pages.notifications.messages.all_marked_read'));
+            toastSuccess(t('customer.notifications.messages.all_marked_read'));
         },
     });
 
@@ -134,7 +134,7 @@ export default function Notifications() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-            toastSuccess(t('customer_pages.notifications.messages.deleted'));
+            toastSuccess(t('customer.notifications.messages.deleted'));
         },
     });
 
@@ -155,10 +155,10 @@ export default function Notifications() {
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent">
-                                {t('customer_pages.notifications.title')}
+                                {t('customer.notifications.title')}
                             </h1>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">
-                                {unreadCount > 0 ? t('customer_pages.notifications.unread', { count: unreadCount }) : t('customer_pages.notifications.all_caught_up')}
+                                {unreadCount > 0 ? t('customer.notifications.unread', { count: unreadCount }) : t('customer.notifications.all_caught_up')}
                             </p>
                         </div>
                         {unreadCount > 0 && (
@@ -169,7 +169,7 @@ export default function Notifications() {
                                 className="flex items-center gap-2"
                             >
                                 <CheckCheck className="w-4 h-4" />
-                                {t('customer_pages.notifications.mark_all_read')}
+                                {t('customer.notifications.mark_all_read')}
                             </Button>
                         )}
                     </div>
@@ -185,7 +185,7 @@ export default function Notifications() {
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder={t('customer_pages.notifications.search_placeholder')}
+                                        placeholder={t('customer.notifications.search_placeholder')}
                                         className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-fuchsia-500/50 focus:outline-none text-gray-900 dark:text-white placeholder-gray-500"
                                     />
                                 </div>
@@ -223,10 +223,10 @@ export default function Notifications() {
                             <CardContent className="p-12 text-center">
                                 <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                                    {t('customer_pages.notifications.empty.title')}
+                                    {t('customer.notifications.empty.title')}
                                 </h3>
                                 <p className="text-gray-500 dark:text-gray-400">
-                                    {searchQuery ? t('customer_pages.notifications.empty.search') : t('customer_pages.notifications.empty.all_caught_up')}
+                                    {searchQuery ? t('customer.notifications.empty.search') : t('customer.notifications.empty.all_caught_up')}
                                 </p>
                             </CardContent>
                         </Card>
@@ -297,7 +297,7 @@ export default function Notifications() {
                                                                         markAsReadMutation.mutate(notification.id);
                                                                     }}
                                                                     className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
-                                                                    title="Mark as read"
+                                                                    title={t('customer.notifications.actions.mark_read')}
                                                                 >
                                                                     <Check className="w-4 h-4" />
                                                                 </button>
@@ -308,7 +308,7 @@ export default function Notifications() {
                                                                     deleteMutation.mutate(notification.id);
                                                                 }}
                                                                 className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-gray-500 hover:text-red-600 transition-colors"
-                                                                title="Delete"
+                                                                title={t('customer.notifications.actions.delete')}
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>

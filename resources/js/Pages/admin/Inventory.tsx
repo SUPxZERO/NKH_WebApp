@@ -188,7 +188,7 @@ export default function Inventory() {
           </div>
           <div className="divide-y divide-gray-100 dark:divide-white/5">
             {isLoading ? (
-              <div className="p-8 sm:p-12 text-center text-gray-500 text-sm">Loading...</div>
+              <div className="p-8 sm:p-12 text-center text-gray-500 text-sm">{t('admin.inventory.common.loading')}</div>
             ) : inventoryList.length === 0 ? (
               <div className="p-8 sm:p-12 text-center">
                 <Package className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3 sm:mb-4" />
@@ -300,7 +300,7 @@ function TransferForm({ locations, onClose, onSubmit }: any) {
           <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">{t('admin.inventory.modal.from')}</label>
           <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
             value={formData.from_location_id} onChange={e => setFormData({ ...formData, from_location_id: e.target.value })}>
-            <option value="">Select Location</option>
+            <option value="">{t('admin.inventory.common.select_location')}</option>
             {locations?.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </select>
         </div>
@@ -308,16 +308,16 @@ function TransferForm({ locations, onClose, onSubmit }: any) {
           <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">{t('admin.inventory.modal.to')}</label>
           <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
             value={formData.to_location_id} onChange={e => setFormData({ ...formData, to_location_id: e.target.value })}>
-            <option value="">Select Location</option>
+            <option value="">{t('admin.inventory.common.select_location')}</option>
             {locations?.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </select>
         </div>
       </div>
       <div>
-        <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">Ingredient</label>
+        <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">{t('admin.inventory.common.ingredient')}</label>
         <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
           value={formData.ingredient_id} onChange={e => setFormData({ ...formData, ingredient_id: e.target.value })}>
-          <option value="">Select Ingredient</option>
+          <option value="">{t('admin.inventory.common.select_ingredient')}</option>
           {ingredients?.data?.map((i: any) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
       </div>
@@ -344,15 +344,15 @@ function WastageForm({ locations, onClose, onSubmit }: any) {
         <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">{t('admin.inventory.modal.location')}</label>
         <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
           value={formData.location_id} onChange={e => setFormData({ ...formData, location_id: e.target.value })}>
-          <option value="">Select Location</option>
+          <option value="">{t('admin.inventory.common.select_location')}</option>
           {locations?.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
       </div>
       <div>
-        <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">Ingredient</label>
+        <label className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-1 block">{t('admin.inventory.common.ingredient')}</label>
         <select required className="w-full bg-white dark:bg-slate-950 border border-gray-300 dark:border-white/10 rounded-lg p-2 h-10 text-sm text-gray-900 dark:text-white"
           value={formData.ingredient_id} onChange={e => setFormData({ ...formData, ingredient_id: e.target.value })}>
-          <option value="">Select Ingredient</option>
+          <option value="">{t('admin.inventory.common.select_ingredient')}</option>
           {ingredients?.data?.map((i: any) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
       </div>
@@ -379,6 +379,7 @@ function WastageForm({ locations, onClose, onSubmit }: any) {
 }
 
 function MovementsList({ item }: { item: InventoryItem | null }) {
+  const { t } = useLanguage();
   const { data: movements } = useQuery({
     queryKey: ['movements', item?.ingredient_id],
     queryFn: () => apiGet(`/api/admin/inventory/movements/${item?.ingredient_id}`),
@@ -407,7 +408,7 @@ function MovementsList({ item }: { item: InventoryItem | null }) {
         </div>
       ))}
       {(!movements?.data || movements.data.length === 0) && (
-        <div className="text-gray-400 text-center py-4">No history found</div>
+        <div className="text-gray-400 text-center py-4">{t('admin.inventory.common.no_history')}</div>
       )}
     </div>
   );
