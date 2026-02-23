@@ -235,9 +235,15 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
         onError: (err: any) => toastError(err?.response?.data?.message || t('employee.common.error'))
     });
 
-    const openMap = (address: string) => {
-        const encoded = encodeURIComponent(address);
-        window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
+    const openMap = (order: any) => {
+        if (order.delivery_latitude && order.delivery_longitude) {
+            // Use Google Maps with precise coordinates
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.delivery_latitude},${order.delivery_longitude}`, '_blank');
+        } else if (order.delivery_address) {
+            // Fallback to address search
+            const encoded = encodeURIComponent(order.delivery_address);
+            window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
+        }
     };
 
     const handleClaim = (id: number) => {
@@ -352,7 +358,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                         <MapPin className="w-4 h-4 mt-0.5 text-gray-500" />
                                         <span
                                             className="underline decoration-dotted hover:text-blue-400 cursor-pointer"
-                                            onClick={() => order.delivery_address && openMap(order.delivery_address)}
+                                            onClick={() => order.delivery_address && openMap(order)}
                                         >
                                             {order.delivery_address || t('employee.delivery.no_address')}
                                         </span>
@@ -382,7 +388,7 @@ function DriverMode({ onCollectPayment }: DriverModeProps) {
                                     <div className="flex gap-2">
                                         <Button
                                             variant="outline"
-                                            onClick={() => order.delivery_address && openMap(order.delivery_address)}
+                                            onClick={() => order.delivery_address && openMap(order)}
                                             className="flex-1"
                                             disabled={!order.delivery_address}
                                         >

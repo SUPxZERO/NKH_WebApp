@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { useMutation } from '@tanstack/react-query';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { apiPost, apiPut } from '@/app/libs/apiClient';
+import { apiPost, apiPut, apiGet } from '@/app/utils/api';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';

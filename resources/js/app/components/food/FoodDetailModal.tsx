@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { MenuItem } from '@/app/types/domain';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet } from '@/app/utils/api';
 import { RestaurantButton } from '@/Components/ui/RestaurantButton';
 import { useModalHotkeys } from '@/app/hooks/useShortcuts';
 import { useLanguage } from '@/app/context/LanguageContext';

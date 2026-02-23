@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { apiGet, apiPost, apiPut } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
@@ -267,8 +267,8 @@ export default function ShiftScheduler() {
                                                             <div
                                                                 key={shift.id}
                                                                 className={`text-xs p-1 rounded truncate cursor-pointer group relative ${shift.status === 'published'
-                                                                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                                                        : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                                                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                                    : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                                                                     }`}
                                                                 title={`${shift.employee_name}: ${shift.start_time} - ${shift.end_time}`}
                                                             >

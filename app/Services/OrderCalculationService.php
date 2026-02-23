@@ -32,6 +32,7 @@ class OrderCalculationService
                 'menu_item_id' => $menuItem->id,
                 'quantity' => $qty,
                 'unit_price' => $menuItem->price,
+                'cost_price' => $menuItem->cost, // AUDIT FIX: Capture cost at sale time for P&L
                 'discount_amount' => 0,
                 'tax_amount' => 0,
                 'total_price' => $lineTotal,

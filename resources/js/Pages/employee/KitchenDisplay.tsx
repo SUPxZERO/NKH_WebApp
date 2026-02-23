@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EmployeeLayout from '@/app/layouts/EmployeeLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPut } from '@/app/libs/apiClient';
+import { apiGet, apiPut } from '@/app/utils/api';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';

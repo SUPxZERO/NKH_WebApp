@@ -142,9 +142,17 @@ export default function Checkout() {
       return;
     }
 
-    if (cart.mode === 'delivery' && !cart.selectedAddress) {
-      toastError(t('customer.checkout.select_address') as string);
-      return;
+    if (cart.mode === 'delivery') {
+      if (!cart.selectedAddress) {
+        toastError(t('customer.checkout.select_address') as string);
+        return;
+      }
+
+      // Sprint 4: Ensure address has coordinates for delivery driver map
+      if (!cart.selectedAddress.latitude || !cart.selectedAddress.longitude) {
+        toastError(t('customer.checkout.address_missing_coordinates') || 'Selected address is missing location on map. Please edit the address and pin your location.');
+        return;
+      }
     }
 
     // Build payload matching backend API expectations

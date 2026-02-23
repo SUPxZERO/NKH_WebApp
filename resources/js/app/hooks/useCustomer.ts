@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet, apiPut } from '@/app/utils/api';
 import { ApiResponse, CustomerAddress, TimeSlot } from '@/app/types/domain';
 
 export function useCustomerAddresses() {

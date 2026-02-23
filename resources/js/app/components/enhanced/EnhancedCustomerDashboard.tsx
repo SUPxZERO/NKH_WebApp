@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShoppingBag, 
-  Heart, 
-  Star, 
-  Clock, 
-  MapPin, 
+import {
+  ShoppingBag,
+  Heart,
+  Star,
+  Clock,
+  MapPin,
   Gift,
   Zap,
   TrendingUp,
@@ -17,7 +17,7 @@ import {
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import EnhancedButton from '@/app/components/ui/EnhancedButton';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet } from '@/app/utils/api';
 import { Order, MenuItem, ApiResponse } from '@/app/types/domain';
 import QuickOrderPanel from './QuickOrderPanel';
 import SmartOrderRecommendations from './SmartOrderRecommendations';
@@ -67,7 +67,7 @@ export function EnhancedCustomerDashboard() {
     }
   };
 
-  const loyaltyProgress = customerStats ? 
+  const loyaltyProgress = customerStats ?
     Math.min((customerStats.loyalty_points % 1000) / 1000 * 100, 100) : 0;
 
   const tabs = [
@@ -89,7 +89,7 @@ export function EnhancedCustomerDashboard() {
                 <h1 className="text-2xl font-bold mb-2">Welcome back! 👋</h1>
                 <p className="text-gray-300">Ready to order something delicious?</p>
               </div>
-              
+
               {customerStats && (
                 <div className="flex items-center gap-6">
                   <div className="text-center">
@@ -98,14 +98,14 @@ export function EnhancedCustomerDashboard() {
                     </div>
                     <div className="text-sm text-gray-400">Orders</div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="text-2xl font-bold text-emerald-400">
                       ${customerStats.total_spent.toFixed(0)}
                     </div>
                     <div className="text-sm text-gray-400">Spent</div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-400">
                       {customerStats.loyalty_points}
@@ -127,11 +127,10 @@ export function EnhancedCustomerDashboard() {
               <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id
                     ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -175,7 +174,7 @@ export function EnhancedCustomerDashboard() {
                       <span>Current Points</span>
                       <span className="font-medium">{customerStats.loyalty_points}</span>
                     </div>
-                    
+
                     <div className="relative h-3 bg-gray-700 rounded-full overflow-hidden">
                       <motion.div
                         className="absolute inset-y-0 left-0 bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-full"
@@ -184,7 +183,7 @@ export function EnhancedCustomerDashboard() {
                         transition={{ duration: 1, ease: "easeOut" }}
                       />
                     </div>
-                    
+
                     <div className="flex justify-between text-xs text-gray-400">
                       <span>0</span>
                       <span>1000 points</span>
@@ -221,7 +220,7 @@ export function EnhancedCustomerDashboard() {
                         <p className="text-sm text-gray-400">Your latest accomplishments</p>
                       </div>
                     </div>
-                    
+
                     <EnhancedButton
                       variant="ghost"
                       size="sm"
@@ -275,7 +274,7 @@ export function EnhancedCustomerDashboard() {
                       <p className="text-sm text-gray-400">Your recent orders</p>
                     </div>
                   </div>
-                  
+
                   <EnhancedButton
                     variant="gradient"
                     leftIcon={<Plus className="w-4 h-4" />}
@@ -302,19 +301,18 @@ export function EnhancedCustomerDashboard() {
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="text-right">
                             <div className="font-bold text-fuchsia-400">${order.total.toFixed(2)}</div>
-                            <div className={`text-xs px-2 py-1 rounded-full ${
-                              order.status === 'delivered' ? 'bg-emerald-500/20 text-emerald-400' :
-                              order.status === 'preparing' ? 'bg-orange-500/20 text-orange-400' :
-                              'bg-blue-500/20 text-blue-400'
-                            }`}>
+                            <div className={`text-xs px-2 py-1 rounded-full ${order.status === 'delivered' ? 'bg-emerald-500/20 text-emerald-400' :
+                                order.status === 'preparing' ? 'bg-orange-500/20 text-orange-400' :
+                                  'bg-blue-500/20 text-blue-400'
+                              }`}>
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex gap-2">
                           <EnhancedButton variant="secondary" size="sm" className="flex-1">
                             View Details
@@ -374,7 +372,7 @@ export function EnhancedCustomerDashboard() {
                             <div className="text-lg font-bold text-fuchsia-400">${item.price.toFixed(2)}</div>
                           </div>
                         </div>
-                        
+
                         <EnhancedButton
                           variant="gradient"
                           size="sm"

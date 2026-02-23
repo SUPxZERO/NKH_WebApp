@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import EnhancedButton from '@/app/components/ui/EnhancedButton';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet } from '@/app/utils/api';
 import { MenuItem, ApiResponse } from '@/app/types/domain';
 import { useCartStore } from '@/app/store/cart';
 
@@ -175,8 +175,8 @@ export function SmartOrderRecommendations({
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeCategory === category.id
-                    ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
-                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                  ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
+                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
                   }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

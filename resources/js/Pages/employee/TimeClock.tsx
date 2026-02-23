@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EmployeeLayout from '@/app/layouts/EmployeeLayout';
-import { apiGet, apiPost } from '@/app/libs/apiClient';
+import { apiGet, apiPost } from '@/app/utils/api';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { toastSuccess, toastError } from '@/app/utils/toast';

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MapPin, 
-  Building, 
-  TrendingUp, 
-  Users, 
-  DollarSign, 
+import {
+  MapPin,
+  Building,
+  TrendingUp,
+  Users,
+  DollarSign,
   Clock,
   Plus,
   Settings,
@@ -19,7 +19,7 @@ import EnhancedButton from '@/app/components/ui/EnhancedButton';
 import Modal from '@/app/components/ui/Modal';
 import { Input } from '@/app/components/ui/Input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiPatch } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPatch } from '@/app/utils/api';
 import { ApiResponse } from '@/app/types/domain';
 
 interface Location {
@@ -104,31 +104,29 @@ export function MultiLocationManager() {
               <h2 className="text-xl font-bold">Multi-Location Management</h2>
               <p className="text-gray-400">Monitor and manage all restaurant locations</p>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <div className="flex bg-white/10 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                    viewMode === 'grid' 
-                      ? 'bg-fuchsia-600 text-white' 
-                      : 'text-gray-400 hover:text-white'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'grid'
+                    ? 'bg-fuchsia-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   Grid View
                 </button>
                 <button
                   onClick={() => setViewMode('analytics')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                    viewMode === 'analytics' 
-                      ? 'bg-fuchsia-600 text-white' 
-                      : 'text-gray-400 hover:text-white'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === 'analytics'
+                    ? 'bg-fuchsia-600 text-white'
+                    : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   Analytics
                 </button>
               </div>
-              
+
               <EnhancedButton
                 variant="gradient"
                 onClick={() => setShowAddModal(true)}
@@ -140,7 +138,7 @@ export function MultiLocationManager() {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent>
           {/* Summary Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -155,7 +153,7 @@ export function MultiLocationManager() {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/20">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-500/20">
@@ -167,7 +165,7 @@ export function MultiLocationManager() {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-4 rounded-xl bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/20">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-fuchsia-500/20">
@@ -179,7 +177,7 @@ export function MultiLocationManager() {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-4 rounded-xl bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/20">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-orange-500/20">
@@ -224,14 +222,14 @@ export function MultiLocationManager() {
                           <p className="text-sm text-gray-400">{location.city}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         {location.is_online ? (
                           <Wifi className="w-4 h-4 text-emerald-400" />
                         ) : (
                           <WifiOff className="w-4 h-4 text-rose-400" />
                         )}
-                        
+
                         <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(location.status)}`}>
                           {location.status.charAt(0).toUpperCase() + location.status.slice(1)}
                         </div>
@@ -244,7 +242,7 @@ export function MultiLocationManager() {
                         <MapPin className="w-4 h-4 text-gray-400" />
                         <span className="truncate">{location.address}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 text-sm">
                         <Users className="w-4 h-4 text-gray-400" />
                         <span>Manager: {location.manager_name}</span>
@@ -259,21 +257,21 @@ export function MultiLocationManager() {
                         </div>
                         <div className="text-xs text-gray-400">Revenue</div>
                       </div>
-                      
+
                       <div className="text-center p-3 rounded-xl bg-white/5">
                         <div className="text-lg font-bold text-blue-400">
                           {location.today_orders}
                         </div>
                         <div className="text-xs text-gray-400">Orders</div>
                       </div>
-                      
+
                       <div className="text-center p-3 rounded-xl bg-white/5">
                         <div className="text-lg font-bold text-fuchsia-400">
                           {location.staff_count}
                         </div>
                         <div className="text-xs text-gray-400">Staff</div>
                       </div>
-                      
+
                       <div className="text-center p-3 rounded-xl bg-white/5">
                         <div className="text-lg font-bold text-orange-400">
                           {location.avg_prep_time}min
@@ -293,11 +291,11 @@ export function MultiLocationManager() {
                       >
                         Analytics
                       </EnhancedButton>
-                      
+
                       <EnhancedButton
                         variant="ghost"
                         size="sm"
-                        onClick={() => {/* Navigate to location settings */}}
+                        onClick={() => {/* Navigate to location settings */ }}
                         haptic
                       >
                         <Settings className="w-4 h-4" />
@@ -367,7 +365,7 @@ export function MultiLocationManager() {
             <Input label="Phone" placeholder="+1 (555) 123-4567" />
             <Input label="Email" placeholder="downtown@restaurant.com" />
           </div>
-          
+
           <div className="flex justify-end gap-3 pt-4">
             <EnhancedButton
               variant="secondary"

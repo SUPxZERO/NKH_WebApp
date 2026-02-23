@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  Eye, 
-  Phone, 
-  MapPin, 
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Phone,
+  MapPin,
   User,
   DollarSign,
   Filter,
@@ -18,7 +18,7 @@ import EnhancedButton from '@/app/components/ui/EnhancedButton';
 import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPatch } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPatch } from '@/app/utils/api';
 import { Order, ApiResponse } from '@/app/types/domain';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { toastSuccess, toastError } from '@/app/utils/toast';
@@ -43,9 +43,9 @@ export function AdminOrderManagement() {
   const { data: orders = [], isLoading, refetch } = useQuery({
     queryKey: ['admin.orders', statusFilter, searchTerm],
     queryFn: () => apiGet<ApiResponse<OrderWithDetails[]>>('/admin/orders', {
-      params: { 
+      params: {
         status: statusFilter !== 'all' ? statusFilter : undefined,
-        search: searchTerm || undefined 
+        search: searchTerm || undefined
       }
     }).then(r => r.data),
     refetchInterval: 30000,
@@ -91,13 +91,13 @@ export function AdminOrderManagement() {
   };
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       order.id.toString().includes(searchTerm) ||
       order.customer?.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customer?.user?.phone?.includes(searchTerm);
-    
+
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -111,7 +111,7 @@ export function AdminOrderManagement() {
               <h2 className="text-xl font-bold">Order Management</h2>
               <p className="text-gray-400">Monitor and manage all restaurant orders</p>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <EnhancedButton
                 variant="secondary"
@@ -125,7 +125,7 @@ export function AdminOrderManagement() {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
@@ -137,7 +137,7 @@ export function AdminOrderManagement() {
                 leftIcon={<Search className="w-4 h-4" />}
               />
             </div>
-            
+
             {/* Status Filter */}
             <div className="sm:w-48">
               <select
@@ -180,8 +180,8 @@ export function AdminOrderManagement() {
                         {new Date(order.created_at).toLocaleString()}
                       </p>
                     </div>
-                    
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {typeof order.status === 'string' ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : order.status}
                     </span>
                   </div>
@@ -192,12 +192,12 @@ export function AdminOrderManagement() {
                       <User className="w-4 h-4 text-gray-400" />
                       <span className="text-sm">{order.customer?.user?.name}</span>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Phone className="w-4 h-4 text-gray-400" />
                       <span className="text-sm">{order.customer?.user?.phone}</span>
                     </div>
-                    
+
                     {order.mode === 'delivery' && order.delivery_address && (
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
@@ -214,12 +214,12 @@ export function AdminOrderManagement() {
                       <span>Items:</span>
                       <span>{order.items?.length || 0} items</span>
                     </div>
-                    
+
                     <div className="flex justify-between text-sm">
                       <span>Mode:</span>
                       <span className="capitalize">{order.mode}</span>
                     </div>
-                    
+
                     <div className="flex justify-between font-bold">
                       <span>Total:</span>
                       <span className="text-fuchsia-400">${order.total.toFixed(2)}</span>
@@ -237,7 +237,7 @@ export function AdminOrderManagement() {
                     >
                       View
                     </EnhancedButton>
-                    
+
                     {getNextStatus(order.status, order.order_type) && (
                       <EnhancedButton
                         variant="gradient"
@@ -263,7 +263,7 @@ export function AdminOrderManagement() {
                         })()}
                       </EnhancedButton>
                     )}
-                    
+
                     {order.status !== 'cancelled' && order.status !== 'delivered' && (
                       <EnhancedButton
                         variant="danger"
@@ -295,7 +295,7 @@ export function AdminOrderManagement() {
             </div>
             <h3 className="text-lg font-semibold mb-2">No Orders Found</h3>
             <p className="text-gray-400">
-              {searchTerm || statusFilter !== 'all' 
+              {searchTerm || statusFilter !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'New orders will appear here when customers place them.'
               }
@@ -388,7 +388,7 @@ export function AdminOrderManagement() {
                       </div>
                     </div>
                   ))}
-                  
+
                   <div className="border-t border-white/10 pt-3 mt-3">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total:</span>
@@ -422,7 +422,7 @@ export function AdminOrderManagement() {
                   </EnhancedButton>
                 ) : null;
               })()}
-              
+
               {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered' && (
                 <EnhancedButton
                   variant="danger"

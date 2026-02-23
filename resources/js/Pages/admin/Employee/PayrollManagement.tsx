@@ -4,7 +4,7 @@ import { useTranslation } from '@/app/hooks/useTranslation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { apiGet, apiPost, apiDelete } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiDelete } from '@/app/utils/api';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import { toastSuccess, toastError } from '@/app/utils/toast';
@@ -72,9 +72,9 @@ const StatCard = ({ title, value, icon: Icon, color, index = 0, subtext }: any) 
             transition={{ delay: index * 0.1 }}
             className={cn(
                 "relative overflow-hidden rounded-xl sm:rounded-2xl border backdrop-blur-sm",
-                `bg-gradient-to-br ${styles.gradient}`,
+                `bg - gradient - to - br ${styles.gradient} `,
                 styles.border,
-                `shadow-lg ${styles.shadow}`
+                `shadow - lg ${styles.shadow} `
             )}
         >
             <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8 hidden sm:block">
@@ -137,7 +137,7 @@ export default function PayrollManagement() {
     // Fetch payroll details
     const { data: detailsData } = useQuery({
         queryKey: ['payroll.details', viewingPayrollId],
-        queryFn: () => apiGet(`admin/payroll/${viewingPayrollId}/details`),
+        queryFn: () => apiGet(`admin / payroll / ${viewingPayrollId}/details`),
         enabled: !!viewingPayrollId,
     });
 

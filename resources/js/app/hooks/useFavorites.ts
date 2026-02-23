@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiDelete } from '@/app/utils/api';
 
 export function useFavorites() {
     const queryClient = useQueryClient();

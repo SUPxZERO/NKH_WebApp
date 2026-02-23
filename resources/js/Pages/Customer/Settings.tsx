@@ -36,6 +36,7 @@ import { useTranslation } from '@/app/hooks/useTranslation';
 import Map from '@/app/components/ui/Map';
 import ProfilePictureUpload from '@/app/components/ui/ProfilePictureUpload';
 import NotificationPreferencesSettings from '@/app/components/customer/NotificationPreferencesSettings';
+import AddressManagerEnhanced from '@/app/components/customer/AddressManagerEnhanced';
 
 interface SettingSection {
     id: string;
@@ -101,7 +102,7 @@ export default function Settings() {
     const user = (props.auth as any)?.user;
     const translationContext = useTranslation();
     const t = translationContext?.t || ((key: string) => key);
-    const { locale, setLocale } = translationContext || { locale: 'en', setLocale: () => {} };
+    const { locale, setLocale } = translationContext || { locale: 'en', setLocale: () => { } };
 
     const sections: SettingSection[] = [
         { id: 'profile', title: t('customer.profile.title'), icon: User, description: t('customer.profile.subtitle') },
@@ -116,9 +117,6 @@ export default function Settings() {
     const [activeSection, setActiveSection] = useState('profile');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [showAddressModal, setShowAddressModal] = useState(false);
-    const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-    const [loadingLocation, setLoadingLocation] = useState(false);
     const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
@@ -156,21 +154,6 @@ export default function Settings() {
         marketing_consent: false,
     });
 
-    // Address form state
-    const [addressForm, setAddressForm] = useState({
-        label: '',
-        address_line_1: '',
-        address_line_2: '',
-        city: '',
-        province: '',
-        postal_code: '',
-        country: t('customer.profile.addresses.default_country'),
-        latitude: 11.5564,
-        longitude: 104.9282,
-        delivery_instructions: '',
-        is_default: false,
-    });
-
     // Password form
     const [passwordForm, setPasswordForm] = useState({
         current_password: '',
@@ -186,15 +169,8 @@ export default function Settings() {
         queryFn: () => apiGet('/api/customer/profile')
     });
 
-    // Fetch addresses
-    const { data: addressesData, isLoading: isAddressesLoading } = useQuery({
-        queryKey: ['customer', 'addresses'],
-        queryFn: () => apiGet('/api/customer/addresses')
-    });
-
     // Handle nested data structure from API - could be { data: ... } or direct object
     const profile = profileData?.data ?? profileData;
-    const addresses = addressesData?.data || addressesData || [];
 
     // Fetch settings from API
     const { data: settingsData, isLoading } = useQuery({
@@ -328,149 +304,12 @@ export default function Settings() {
         },
     });
 
-    // Address mutations
-    const createAddressMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/customer/addresses', data),
-        onSuccess: () => {
-            toastSuccess(t('customer.profile.messages.address_added'));
-            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
-            setShowAddressModal(false);
-            resetAddressForm();
-        },
-        onError: () => toastError(t('customer.profile.messages.address_add_error'))
-    });
-
-    const updateAddressMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: any }) =>
-            apiPut(`/api/customer/addresses/${id}`, data),
-        onSuccess: () => {
-            toastSuccess(t('customer.profile.messages.address_updated'));
-            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
-            setShowAddressModal(false);
-            setEditingAddress(null);
-            resetAddressForm();
-        },
-        onError: () => toastError(t('customer.profile.messages.address_update_error'))
-    });
-
-    const deleteAddressMutation = useMutation({
-        mutationFn: (id: number) => apiDelete(`/api/customer/addresses/${id}`),
-        onSuccess: () => {
-            toastSuccess(t('customer.profile.messages.address_deleted'));
-            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
-        },
-        onError: () => toastError(t('customer.profile.messages.address_delete_error'))
-    });
-
-    const setDefaultMutation = useMutation({
-        mutationFn: (id: number) => apiPost(`/api/customer/addresses/${id}/set-default`, {}),
-        onSuccess: () => {
-            toastSuccess(t('customer.profile.messages.default_updated'));
-            queryClient.invalidateQueries({ queryKey: ['customer', 'addresses'] });
-        },
-        onError: () => toastError(t('customer.profile.messages.default_error'))
-    });
-
     const handleSaveProfile = () => {
         updateProfileMutation.mutate(formData);
     };
 
-    const handleAddAddress = () => {
-        setEditingAddress(null);
-        resetAddressForm();
-        setShowAddressModal(true);
-    };
-
-    const handleEditAddress = (address: Address) => {
-        setEditingAddress(address);
-        setAddressForm({
-            label: address.label,
-            address_line_1: address.address_line_1,
-            address_line_2: address.address_line_2 || '',
-            city: address.city,
-            province: address.province,
-            postal_code: address.postal_code,
-            country: address.country || t('customer.profile.addresses.default_country'),
-            latitude: address.latitude || 11.5564,
-            longitude: address.longitude || 104.9282,
-            delivery_instructions: address.delivery_instructions || '',
-            is_default: address.is_default,
-        });
-        setShowAddressModal(true);
-    };
-
-    const handleSaveAddress = () => {
-        if (editingAddress) {
-            updateAddressMutation.mutate({ id: editingAddress.id, data: addressForm });
-        } else {
-            createAddressMutation.mutate(addressForm);
-        }
-    };
-
-    const resetAddressForm = () => {
-        setAddressForm({
-            label: '',
-            address_line_1: '',
-            address_line_2: '',
-            city: '',
-            province: '',
-            postal_code: '',
-            country: t('customer.profile.addresses.default_country'),
-            latitude: 11.5564,
-            longitude: 104.9282,
-            delivery_instructions: '',
-            is_default: false,
-        });
-    };
-
-    // Geocoding: Fetch address from coordinates
-    const fetchAddressFromCoords = async (lat: number, lng: number) => {
-        setLoadingLocation(true);
-        setAddressForm(prev => ({ ...prev, latitude: lat, longitude: lng }));
-
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-            const data = await res.json();
-
-            if (data.address) {
-                setAddressForm(prev => ({
-                    ...prev,
-                    address_line_1: data.address.road || data.address.house_number || prev.address_line_1,
-                    city: data.address.city || data.address.town || data.address.village || prev.city,
-                    province: data.address.state || prev.province,
-                    postal_code: data.address.postcode || prev.postal_code,
-                    country: data.address.country || prev.country
-                }));
-            }
-        } catch (error) {
-            console.error(t('customer.profile.messages.geocoding_failed'), error);
-        } finally {
-            setLoadingLocation(false);
-        }
-    };
-
-    // Get current location
-    const handleLocateMe = () => {
-        if (!navigator.geolocation) {
-            toastError(t('customer.profile.messages.geo_not_supported'));
-            return;
-        }
-        setLoadingLocation(true);
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                fetchAddressFromCoords(latitude, longitude);
-            },
-            (error) => {
-                console.error(error);
-                toastError(t('customer.profile.messages.geo_error'));
-                setLoadingLocation(false);
-            },
-            { enableHighAccuracy: true }
-        );
-    };
-
     // Handle delete account
+
     const handleDeleteAccount = () => {
         router.delete('/profile', {
             onSuccess: () => {
@@ -651,99 +490,13 @@ export default function Settings() {
             case 'addresses':
                 return (
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-3">
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                    {t('customer.profile.addresses.title')}
-                                </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {t('customer.profile.addresses.subtitle')}
-                                </p>
-                            </div>
-                            <Button onClick={handleAddAddress} size="sm" className="gap-2">
-                                <MapPin className="w-4 h-4" />
-                                {t('customer.profile.addresses.add')}
-                            </Button>
-                        </div>
-
-                        {isAddressesLoading ? (
-                            <div className="flex items-center justify-center py-10">
-                                <Loader2 className="w-6 h-6 animate-spin text-fuchsia-500" />
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {(addresses as Address[]).map((address) => (
-                                    <div
-                                        key={address.id}
-                                        className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                                    >
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-medium text-gray-900 dark:text-white">{address.label}</h4>
-                                                {address.is_default && (
-                                                    <span className="text-xs bg-fuchsia-100 dark:bg-fuchsia-900/20 text-fuchsia-600 px-2 py-1 rounded-full">
-                                                        {t('customer.profile.addresses.default')}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {address.address_line_1}
-                                                {address.address_line_2 && `, ${address.address_line_2}`}
-                                            </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {address.city}, {address.province} {address.postal_code}
-                                            </p>
-                                            {address.delivery_instructions && (
-                                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                                    {t('customer.profile.addresses.instructions')}: {address.delivery_instructions}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            {!address.is_default && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => setDefaultMutation.mutate(address.id)}
-                                                    title={t('customer.profile.addresses.set_default')}
-                                                >
-                                                    <Home className="w-4 h-4" />
-                                                </Button>
-                                            )}
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => handleEditAddress(address)}
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => {
-                                                    if (confirm(t('customer.profile.addresses.delete_confirm'))) {
-                                                        deleteAddressMutation.mutate(address.id);
-                                                    }
-                                                }}
-                                                className="text-red-600 hover:bg-red-50"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {(addresses as Address[]).length === 0 && (
-                                    <div className="text-center py-8">
-                                        <MapPin className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            {t('customer.profile.addresses.no_addresses')}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                        <AddressManagerEnhanced
+                            onSelect={() => { }}
+                            allowAdd={true}
+                            allowEdit={true}
+                            allowDelete={true}
+                            className="bg-transparent border-none shadow-none"
+                        />
                     </div>
                 );
 
@@ -1035,184 +788,6 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* Address Modal with Map */}
-                {showAddressModal && (
-                    <>
-                        <div
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-                            onClick={() => {
-                                setShowAddressModal(false);
-                                setEditingAddress(null);
-                            }}
-                        />
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-                            <motion.div
-                                className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                                        {editingAddress ? t('customer.profile.addresses.edit') : t('customer.profile.addresses.add')}
-                                    </h2>
-
-                                    {/* Map Section */}
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                <MapPin className="w-4 h-4 inline mr-1" />
-                                                {t('customer.profile.addresses.pin_location')}
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={handleLocateMe}
-                                                className="text-sm flex items-center gap-1 text-fuchsia-600 hover:text-fuchsia-700 font-medium"
-                                            >
-                                                {loadingLocation ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Crosshair className="w-4 h-4" />
-                                                )}
-                                                {t('customer.profile.addresses.use_my_location')}
-                                            </button>
-                                        </div>
-                                        <div className="h-[160px] sm:h-[250px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 relative">
-                                            <Map
-                                                className="h-full w-full"
-                                                center={[addressForm.latitude, addressForm.longitude]}
-                                                zoom={15}
-                                                markers={[{ lat: addressForm.latitude, lng: addressForm.longitude, isDraggable: true }]}
-                                                onMarkerDragEnd={fetchAddressFromCoords}
-                                                onMapClick={fetchAddressFromCoords}
-                                            />
-                                            {loadingLocation && (
-                                                <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center">
-                                                    <div className="bg-white dark:bg-gray-800 rounded-lg px-4 py-2 flex items-center gap-2">
-                                                        <Loader2 className="w-4 h-4 animate-spin text-fuchsia-600" />
-                                                        <span className="text-sm">{t('customer.profile.addresses.finding')}</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <p className="text-xs text-gray-500">
-                                            {t('customer.profile.addresses.drag_marker')}
-                                        </p>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                        <div className="sm:col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.label')} *</label>
-                                            <input
-                                                type="text"
-                                                value={addressForm.label}
-                                                onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })}
-                                                placeholder={t('customer.profile.addresses.label_placeholder')}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-
-                                        <div className="sm:col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.line1')} *</label>
-                                            <input
-                                                type="text"
-                                                value={addressForm.address_line_1}
-                                                onChange={(e) => setAddressForm({ ...addressForm, address_line_1: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-
-                                        <div className="sm:col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.line2')}</label>
-                                            <input
-                                                type="text"
-                                                value={addressForm.address_line_2}
-                                                onChange={(e) => setAddressForm({ ...addressForm, address_line_2: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.city')} *</label>
-                                            <input
-                                                type="text"
-                                                value={addressForm.city}
-                                                onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.province')} *</label>
-                                            <input
-                                                type="text"
-                                                value={addressForm.province}
-                                                onChange={(e) => setAddressForm({ ...addressForm, province: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.postal_code')}</label>
-                                            <input
-                                                type="text"
-                                                value={addressForm.postal_code}
-                                                onChange={(e) => setAddressForm({ ...addressForm, postal_code: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.country')}</label>
-                                            <input
-                                                type="text"
-                                                value={addressForm.country}
-                                                onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-
-                                        <div className="sm:col-span-2">
-                                            <label className="block text-sm font-medium mb-1 text-foreground">{t('customer.profile.addresses.delivery_instructions')}</label>
-                                            <textarea
-                                                value={addressForm.delivery_instructions}
-                                                onChange={(e) => setAddressForm({ ...addressForm, delivery_instructions: e.target.value })}
-                                                rows={2}
-                                                placeholder={t('customer.profile.addresses.delivery_instructions_placeholder')}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={addressForm.is_default}
-                                            onChange={(e) => setAddressForm({ ...addressForm, is_default: e.target.checked })}
-                                            className="w-5 h-5 rounded text-fuchsia-600"
-                                        />
-                                        <span className="text-sm text-muted-foreground">{t('customer.profile.addresses.set_default')}</span>
-                                    </label>
-
-                                    <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
-                                        <Button variant="outline" onClick={() => setShowAddressModal(false)} className="flex-1">
-                                            {t('customer.profile.cancel')}
-                                        </Button>
-                                        <Button
-                                            onClick={handleSaveAddress}
-                                            className="flex-1"
-                                            disabled={createAddressMutation.isPending || updateAddressMutation.isPending}
-                                        >
-                                            {(createAddressMutation.isPending || updateAddressMutation.isPending)
-                                                ? t('customer.profile.saving')
-                                                : (editingAddress ? t('customer.profile.addresses.update') : t('customer.profile.addresses.add_btn'))}{' '}
-                                            {t('customer.profile.addresses.address_suffix')}
-                                        </Button>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-                    </>
-                )}
-
                 {/* Password Change Modal */}
                 <AnimatePresence>
                     {showPasswordModal && (
@@ -1351,7 +926,7 @@ export default function Settings() {
                         </div>
                     )}
                 </AnimatePresence>
-            </CustomerLayout>
-        </RequireAuth>
+            </CustomerLayout >
+        </RequireAuth >
     );
 }

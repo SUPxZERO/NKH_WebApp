@@ -1,0 +1,22 @@
+
+  [41;1m InvalidArgumentException [49;22m
+
+[39;1m  Unexpected end of input[39;22m
+
+  at [32mvendor\psy\psysh\src\Shell.php[39m:[32m976[39m
+    972▕ 
+    973▕         if (!$this->hasValidCode()) {
+    974▕             $this->popCodeStack();
+    975▕ 
+  ➜ 976▕             throw new \InvalidArgumentException('Unexpected end of input');
+    977▕         }
+    978▕     }
+    979▕ 
+    980▕     /**
+
+  [33m1   [39m[39;1mvendor\psy\psysh\src\Shell.php[39;22m:[39;1m1510[39;22m
+  [90m    Psy\Shell::setCode("App\Models\Order::latest()-")[39m
+
+  [33m2   [39m[39;1mvendor\laravel\tinker\src\Console\TinkerCommand.php[39;22m:[39;1m76[39;22m
+  [90m    Psy\Shell::execute("App\Models\Order::latest()-")[39m
+

@@ -274,14 +274,20 @@ class PaymentService
      */
     public function processWebhook(array $payload): Payment
     {
+        \Log::info('PaymentService: Processing webhook', ['payload' => $payload]);
+
         // Example logic
         $ref = $payload['qr_reference'] ?? $payload['reference_number'] ?? null;
-        if (!$ref)
+        if (!$ref) {
+            \Log::error('PaymentService: No reference found in payload');
             throw new \Exception('No reference found in payload.');
+        }
 
         $payment = Payment::where('qr_reference', $ref)
             ->orWhere('reference_number', $ref)
             ->firstOrFail();
+
+        \Log::info('PaymentService: Payment found', ['payment_id' => $payment->id, 'current_status' => $payment->status]);
 
         // FIX Issue #9: Idempotency - Prevent double-processing completed payments
         if ($payment->isCompleted()) {
@@ -299,10 +305,25 @@ class PaymentService
             ]);
 
             $this->invoiceService->reconcileStatus($payment->invoice);
+            $invoice = $payment->invoice->fresh(); // Reload to get updated amount_due
+
+            \Log::info('PaymentService: Invoice reconciled', [
+                'invoice_id' => $invoice->id,
+                'amount_due' => $invoice->amount_due,
+                'total' => $invoice->total_amount
+            ]);
 
             // Trigger order paid logic
-            $order = $payment->invoice->order;
-            if ($order && $payment->invoice->amount_due <= 0) {
+            $order = $invoice->order;
+            if ($order && $invoice->amount_due <= 0) {
+                \Log::info('PaymentService: Updating order status to PAID', ['order_id' => $order->id]);
+
+                $order->update([
+                    'payment_status' => Order::PAYMENT_STATUS_PAID,
+                    // Ensure we track who collected it if passed, or system
+                    'payment_collected_at' => now(),
+                ]);
+
                 $this->loyaltyService->awardPoints($order);
                 $this->notificationService->sendOrderNotification($order, 'paid');
 
@@ -315,6 +336,8 @@ class PaymentService
                         'error' => $e->getMessage(),
                     ]);
                 }
+            } else {
+                \Log::info('PaymentService: Order not fully paid', ['order_id' => $order->id ?? 'null', 'invoice_due' => $invoice->amount_due]);
             }
 
         } elseif ($status === 'failed') {

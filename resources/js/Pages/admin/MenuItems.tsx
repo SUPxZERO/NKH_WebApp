@@ -3,7 +3,7 @@ import AdminLayout from '@/app/layouts/AdminLayout';
 import { useTranslation } from '@/app/hooks/useTranslation';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { MenuItem, Category } from '@/app/types/domain';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';

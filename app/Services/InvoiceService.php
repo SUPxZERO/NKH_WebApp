@@ -4,60 +4,67 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceService
 {
     /**
      * Recalculate invoice financial state from its payments and update status/amounts.
+     *
+     * AUDIT FIX: Wrapped in DB::transaction to ensure invoice and order status
+     * updates are atomic. Without this, a crash between the two saves would leave
+     * the invoice and order with inconsistent payment statuses.
      */
     public function reconcileStatus(Invoice $invoice): void
     {
-        $completedTotal = $invoice->payments()
-            ->whereHas('paymentStatus', function ($q) {
-                $q->where('code', Payment::STATUS_COMPLETED);
-            })
-            ->sum('amount');
+        DB::transaction(function () use ($invoice) {
+            $completedTotal = $invoice->payments()
+                ->whereHas('paymentStatus', function ($q) {
+                    $q->where('code', Payment::STATUS_COMPLETED);
+                })
+                ->sum('amount');
 
-        $total = (float) $invoice->total_amount;
-        $tolerance = 0.01;
+            $total = (float) $invoice->total_amount;
+            $tolerance = 0.01;
 
-        if ($total < 0) {
-            $total = 0.0;
-        }
+            if ($total < 0) {
+                $total = 0.0;
+            }
 
-        if (abs($completedTotal - $total) <= $tolerance && $total > 0) {
-            $status = 'paid';
-        } elseif ($completedTotal > $total + $tolerance) {
-            $status = 'overpaid';
-        } elseif ($completedTotal > 0 && $completedTotal < $total - $tolerance) {
-            $status = 'partial';
-        } else {
-            // Keep existing status for cases like draft/issued/cancelled with no payments
-            $status = $invoice->status ?? 'draft';
-        }
+            if (abs($completedTotal - $total) <= $tolerance && $total > 0) {
+                $status = 'paid';
+            } elseif ($completedTotal > $total + $tolerance) {
+                $status = 'overpaid';
+            } elseif ($completedTotal > 0 && $completedTotal < $total - $tolerance) {
+                $status = 'partial';
+            } else {
+                // Keep existing status for cases like draft/issued/cancelled with no payments
+                $status = $invoice->status ?? 'draft';
+            }
 
-        $invoice->forceFill([
-            'amount_paid' => $completedTotal,
-            'amount_due'  => max(0, $total - $completedTotal),
-            'status'      => $status,
-            'paid_at'     => $status === 'paid' ? now() : $invoice->paid_at,
-        ])->save();
-
-        // Optionally sync order.payment_status as a projection
-        if ($invoice->relationLoaded('order') || $invoice->order) {
-            $order = $invoice->order;
-
-            $orderPaymentStatus = match ($status) {
-                'paid'     => 'paid',
-                'partial'  => 'partial',
-                'refunded' => 'refunded',
-                default    => 'unpaid',
-            };
-
-            $order->forceFill([
-                'payment_status' => $orderPaymentStatus,
+            $invoice->forceFill([
+                'amount_paid' => $completedTotal,
+                'amount_due' => max(0, $total - $completedTotal),
+                'status' => $status,
+                'paid_at' => $status === 'paid' ? now() : $invoice->paid_at,
             ])->save();
-        }
+
+            // Sync order.payment_status as a projection (inside same transaction)
+            if ($invoice->relationLoaded('order') || $invoice->order) {
+                $order = $invoice->order;
+
+                $orderPaymentStatus = match ($status) {
+                    'paid' => 'paid',
+                    'partial' => 'partial',
+                    'refunded' => 'refunded',
+                    default => 'unpaid',
+                };
+
+                $order->forceFill([
+                    'payment_status' => $orderPaymentStatus,
+                ])->save();
+            }
+        });
     }
     /**
      * Create or update an invoice for a given order.
@@ -87,18 +94,18 @@ class InvoiceService
             // Update existing invoice amounts if order changed (assuming we want to sync)
             // But be careful not to reset paid amounts if we just want to update totals
             // For now, let's just ensure it exists or update totals if it's draft/issued
-             if ($invoice->status !== 'paid' && $invoice->status !== 'void') {
-                 $invoice->update([
+            if ($invoice->status !== 'paid' && $invoice->status !== 'void') {
+                $invoice->update([
                     'subtotal' => $order->subtotal,
                     'tax_amount' => $order->tax_amount,
                     'discount_amount' => $order->discount_amount,
                     'service_charge' => $order->service_charge,
                     'total_amount' => $order->total_amount,
                     'amount_due' => max(0, $order->total_amount - $invoice->amount_paid),
-                 ]);
-             }
+                ]);
+            }
         }
-        
+
         return $invoice;
     }
 
@@ -110,7 +117,8 @@ class InvoiceService
         for ($i = 0; $i < 5; $i++) {
             $number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(5)));
             $exists = Invoice::where('location_id', $locationId)->where('invoice_number', $number)->exists();
-            if (!$exists) return $number;
+            if (!$exists)
+                return $number;
         }
         return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
     }

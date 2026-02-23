@@ -11,7 +11,8 @@ import {
     Check,
     X,
     ChevronRight,
-    Navigation
+    Navigation,
+    AlertCircle
 } from 'lucide-react';
 import { CustomerAddress } from '@/app/types/domain';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
@@ -78,6 +79,7 @@ export default function AddressManagerEnhanced({
     const { t } = useTranslation();
     const [showModal, setShowModal] = useState(false);
     const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
+    const [showCoordinateWarning, setShowCoordinateWarning] = useState(false);
     const [formData, setFormData] = useState<AddressFormData>(defaultFormData);
 
     // Detect if running in Telegram WebApp
@@ -160,6 +162,9 @@ export default function AddressManagerEnhanced({
                 latitude: data.lat,
                 longitude: data.lng,
             }));
+            if (data.lat && data.lng) {
+                setShowCoordinateWarning(false);
+            }
         }
     };
 
@@ -168,6 +173,20 @@ export default function AddressManagerEnhanced({
             return;
         }
 
+        // Validate coordinates
+        if (!formData.latitude || !formData.longitude) {
+            setShowCoordinateWarning(true);
+            return;
+        }
+
+        if (editingAddress) {
+            updateMutation.mutate({ id: editingAddress.id, data: formData });
+        } else {
+            createMutation.mutate(formData);
+        }
+    };
+
+    const handleSaveAnyway = () => {
         if (editingAddress) {
             updateMutation.mutate({ id: editingAddress.id, data: formData });
         } else {
@@ -396,7 +415,30 @@ export default function AddressManagerEnhanced({
                                         initialLat={editingAddress?.latitude || undefined}
                                         initialLng={editingAddress?.longitude || undefined}
                                         onChange={handleAddressPickerChange}
+                                        error={showCoordinateWarning ? t('customer.address_manager.please_pin_location') as string : undefined}
                                     />
+
+                                    {/* Warning Message */}
+                                    {showCoordinateWarning && (
+                                        <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/50 flex items-start gap-3">
+                                            <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                                            <div className="flex-1">
+                                                <p className="text-sm text-yellow-500 font-medium">
+                                                    {t('customer.address_manager.missing_location_warning')}
+                                                </p>
+                                                <p className="text-xs text-yellow-400/80 mt-1">
+                                                    {t('customer.address_manager.missing_location_detail')}
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSaveAnyway}
+                                                    className="mt-2 text-xs underline text-yellow-500 hover:text-yellow-400"
+                                                >
+                                                    {t('customer.address_manager.save_without_location')}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Manual Address Fields (Auto-filled but editable) */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

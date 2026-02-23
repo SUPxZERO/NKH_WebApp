@@ -105,15 +105,16 @@ class TelegramAdminService
         $startOfDay = $date->copy()->startOfDay();
         $endOfDay = $date->copy()->endOfDay();
 
-        $orders = Order::whereBetween('created_at', [$startOfDay, $endOfDay])
+        $orders = Order::whereBetween('orders.created_at', [$startOfDay, $endOfDay])
+            ->leftJoin('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
             ->selectRaw('
                 COUNT(*) as total_orders,
-                SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_orders,
-                SUM(CASE WHEN status = "received" THEN 1 ELSE 0 END) as received_orders,
-                SUM(CASE WHEN status = "preparing" THEN 1 ELSE 0 END) as preparing_orders,
-                SUM(CASE WHEN status = "ready" THEN 1 ELSE 0 END) as ready_orders,
-                SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed_orders,
-                SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled_orders,
+                SUM(CASE WHEN order_statuses.code = "pending" THEN 1 ELSE 0 END) as pending_orders,
+                SUM(CASE WHEN order_statuses.code = "received" THEN 1 ELSE 0 END) as received_orders,
+                SUM(CASE WHEN order_statuses.code = "preparing" THEN 1 ELSE 0 END) as preparing_orders,
+                SUM(CASE WHEN order_statuses.code = "ready" THEN 1 ELSE 0 END) as ready_orders,
+                SUM(CASE WHEN order_statuses.code = "completed" THEN 1 ELSE 0 END) as completed_orders,
+                SUM(CASE WHEN order_statuses.code = "cancelled" THEN 1 ELSE 0 END) as cancelled_orders,
                 COALESCE(SUM(total_amount), 0) as revenue
             ')
             ->first();
@@ -155,14 +156,14 @@ class TelegramAdminService
         $perPage = 10;
         $offset = ($page - 1) * $perPage;
 
-        $orders = Order::whereIn('status', ['pending', 'received'])
+        $orders = Order::whereHas('orderStatus', fn($q) => $q->whereIn('code', ['pending', 'received']))
             ->with(['customer', 'location', 'items'])
             ->orderBy('created_at', 'asc')
             ->skip($offset)
             ->take($perPage)
             ->get();
 
-        $totalCount = Order::whereIn('status', ['pending', 'received'])->count();
+        $totalCount = Order::whereHas('orderStatus', fn($q) => $q->whereIn('code', ['pending', 'received']))->count();
         $totalPages = ceil($totalCount / $perPage);
 
         if ($orders->isEmpty()) {
@@ -183,7 +184,7 @@ class TelegramAdminService
 
         foreach ($orders as $index => $order) {
             $num = $offset + $index + 1;
-            $statusIcon = match($order->status) {
+            $statusIcon = match ($order->status) {
                 'pending' => '⏳',
                 'received' => '✅',
                 default => '📊',
@@ -347,7 +348,7 @@ class TelegramAdminService
      */
     private function getStatusIcon(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'pending' => '⏳',
             'received' => '✅',
             'preparing' => '👨‍🍳',
@@ -414,7 +415,7 @@ class TelegramAdminService
 
         // Order buttons
         foreach ($orders as $order) {
-            $statusIcon = match($order->status) {
+            $statusIcon = match ($order->status) {
                 'pending' => '⏳',
                 'received' => '✅',
                 default => '📊',
@@ -453,7 +454,7 @@ class TelegramAdminService
         $keyboard = [];
 
         // Status actions based on current status
-        $statusActions = match($order->status) {
+        $statusActions = match ($order->status) {
             'pending' => [
                 ['text' => '✅ Approve', 'callback_data' => "admin_order_{$order->id}_approve"],
                 ['text' => '❌ Decline', 'callback_data' => "admin_order_{$order->id}_decline"],

@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { apiPost } from '@/app/libs/apiClient';
+import { apiGet, apiPost } from '@/app/utils/api';
 import { ApiResponse, Order } from '@/app/types/domain';
 
 export interface OnlineOrderPayload {

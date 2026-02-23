@@ -187,6 +187,8 @@ export default function AddressPicker({
         setSearchQuery(result.display_name);
         setShowSuggestions(false);
         onChange(addressData);
+        // Open map to confirm precise location
+        setShowMapModal(true);
     }, [onChange]);
 
     // Clear selection

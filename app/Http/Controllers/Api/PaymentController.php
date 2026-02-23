@@ -432,9 +432,11 @@ class PaymentController extends Controller
             } else {
                 // For non-QR payments (cash, card without gateway), also go through the
                 // webhook-style processing so invoice/order logic stays consistent.
+                \Log::info('PaymentController: Simulating success for non-QR payment', ['payment_id' => $payment->id]);
+
                 $result = $this->paymentService->processWebhook([
                     'transaction_id' => $payment->transaction_id,
-                    'reference_number' => $payment->reference_number,
+                    'reference_number' => $payment->reference_number ?? $payment->transaction_id,
                     'status' => 'success',
                     'gateway_reference' => 'SIM-' . now()->format('YmdHis'),
                 ]);

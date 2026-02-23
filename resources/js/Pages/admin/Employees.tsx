@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { Employee, Position, Location } from '@/app/types/domain';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';

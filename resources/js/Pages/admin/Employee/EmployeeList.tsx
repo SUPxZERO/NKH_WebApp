@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminLayout from '@/app/layouts/AdminLayout';
-import { apiGet, apiDelete } from '@/app/libs/apiClient';
+import { apiGet, apiDelete } from '@/app/utils/api';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';

@@ -4,7 +4,7 @@ import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet } from '@/app/utils/api';
 import { ApiResponse, Order } from '@/app/types/domain';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { CheckCircle, Clock, Truck, ChefHat, Package } from 'lucide-react';
@@ -125,8 +125,8 @@ export default function OrderTracking() {
                         >
                           {/* Icon */}
                           <div className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full border-2 ${isCompleted ? 'bg-emerald-500/20 border-emerald-400' :
-                              isActive ? 'bg-fuchsia-500/20 border-fuchsia-400' :
-                                'bg-gray-500/20 border-gray-400'
+                            isActive ? 'bg-fuchsia-500/20 border-fuchsia-400' :
+                              'bg-gray-500/20 border-gray-400'
                             }`}>
                             {isCompleted ? (
                               <CheckCircle className="w-6 h-6 text-emerald-400" />

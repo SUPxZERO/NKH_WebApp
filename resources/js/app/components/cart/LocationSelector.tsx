@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet } from '@/app/utils/api';
 import { Location } from '@/app/types/domain';
 import { MapPin, Clock, Phone } from 'lucide-react';
 import { Skeleton } from '@/app/components/ui/Loading';

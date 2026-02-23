@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { RequireAuth } from '@/app/providers/AuthProvider';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet } from '@/app/utils/api';
 import { Clock, Package, CheckCircle, XCircle, MapPin, Calendar, DollarSign, ArrowLeft, Printer, CreditCard, ChevronRight } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';

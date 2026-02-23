@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPatch } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPatch } from '@/app/utils/api';
 import { ApiResponse } from '@/app/types/domain';
 import { useLanguage } from '@/app/context/LanguageContext';
 
@@ -146,9 +146,8 @@ export function NotificationCenter() {
                           key={notification.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className={`p-4 hover:bg-white/5 transition-colors cursor-pointer ${
-                            !notification.read ? 'bg-fuchsia-500/5 border-l-2 border-l-fuchsia-500' : ''
-                          }`}
+                          className={`p-4 hover:bg-white/5 transition-colors cursor-pointer ${!notification.read ? 'bg-fuchsia-500/5 border-l-2 border-l-fuchsia-500' : ''
+                            }`}
                           onClick={() => {
                             if (!notification.read) {
                               markAsReadMutation.mutate(notification.id);
@@ -161,9 +160,8 @@ export function NotificationCenter() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-1">
-                                <h4 className={`text-sm font-medium truncate ${
-                                  !notification.read ? 'text-white' : 'text-gray-300'
-                                }`}>
+                                <h4 className={`text-sm font-medium truncate ${!notification.read ? 'text-white' : 'text-gray-300'
+                                  }`}>
                                   {notification.title}
                                 </h4>
                                 {!notification.read && (

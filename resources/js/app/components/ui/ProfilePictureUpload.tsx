@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import { Camera, X, Loader2, Trash2, User } from 'lucide-react';
-import { apiPost, apiDelete } from '@/app/libs/apiClient';
+import { apiUpload, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { router } from '@inertiajs/react';
 import { useTranslation } from '@/app/hooks/useTranslation';
-
 interface ProfilePictureUploadProps {
     currentAvatar?: string | null;
     name: string;
@@ -99,7 +98,7 @@ export default function ProfilePictureUpload({
         try {
             // Don't set Content-Type header - axios sets it automatically for FormData
             // Use /customer/avatar route which supports both Auth and Telegram guests (Sprint P15)
-            const response = await apiPost('customer/avatar', formData) as any;
+            const response = await apiUpload('customer/avatar', formData) as any;
 
             toastSuccess(t('common.ui.profile_picture.messages.updated') as string);
             if (response.avatar_url) {

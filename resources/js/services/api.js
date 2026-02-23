@@ -1,4 +1,4 @@
-import { apiClient as api } from '@/app/libs/apiClient';
+import api from '@/app/utils/api';
 
 export const dashboardApi = {
     getStats: () => api.get('/admin/dashboard/stats'),

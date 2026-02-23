@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { ApiResponse } from '@/app/types/domain';
 
 export interface RevenuePoint { label: string; value: number }

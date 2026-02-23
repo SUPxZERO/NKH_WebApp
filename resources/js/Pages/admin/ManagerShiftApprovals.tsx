@@ -9,7 +9,7 @@ import { Skeleton } from '@/app/components/ui/Loading';
 import Modal from '@/app/components/ui/Modal';
 import { Input } from '@/app/components/ui/Input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPut } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPut } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import {
     CheckCircle,

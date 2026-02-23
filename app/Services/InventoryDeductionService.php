@@ -36,16 +36,17 @@ class InventoryDeductionService
             return ['success' => false, 'message' => 'Order must be completed to deduct inventory'];
         }
 
-        // Check if already processed
-        if ($order->inventoryDeductions()->where('status', 'deducted')->exists()) {
-            Log::info('Order inventory already deducted', ['order_id' => $order->id]);
-            return ['success' => true, 'message' => 'Already processed', 'deductions' => []];
-        }
-
         $deductions = [];
         $errors = [];
 
         DB::transaction(function () use ($order, $userId, &$deductions, &$errors) {
+            // AUDIT FIX: Atomic double-deduction guard inside transaction
+            // This prevents two concurrent requests from both passing the check
+            if ($order->inventoryDeductions()->where('status', 'deducted')->lockForUpdate()->exists()) {
+                Log::info('Order inventory already deducted', ['order_id' => $order->id]);
+                return;
+            }
+
             foreach ($order->items as $orderItem) {
                 try {
                     $itemDeductions = $this->deductForOrderItem($orderItem, $order->location_id, $userId);
@@ -83,7 +84,7 @@ class InventoryDeductionService
     protected function deductForOrderItem(OrderItem $orderItem, int $locationId, int $userId): array
     {
         $menuItem = $orderItem->menuItem;
-        
+
         // Load recipe with ingredients
         $recipe = Recipe::with('ingredients.ingredient')
             ->where('menu_item_id', $menuItem->id)
@@ -118,8 +119,10 @@ class InventoryDeductionService
                 'notes' => "Auto-deduction for {$menuItem->name} x{$orderItem->quantity}"
             ]);
 
-            // Actually deduct from inventory
-            $inventory = Inventory::firstOrCreate(
+            // AUDIT FIX: Pessimistic locking to prevent concurrent overselling
+            // lockForUpdate() ensures no other transaction can read/modify this row
+            // until this transaction commits, preventing lost-update anomalies.
+            $inventory = Inventory::lockForUpdate()->firstOrCreate(
                 [
                     'location_id' => $locationId,
                     'ingredient_id' => $ingredient->id
@@ -176,8 +179,8 @@ class InventoryDeductionService
 
         DB::transaction(function () use ($deductions, $userId, $reason) {
             foreach ($deductions as $deduction) {
-                // Add quantity back to inventory
-                $inventory = Inventory::firstOrCreate(
+                // AUDIT FIX: Pessimistic locking on revert as well
+                $inventory = Inventory::lockForUpdate()->firstOrCreate(
                     [
                         'location_id' => $deduction->location_id,
                         'ingredient_id' => $deduction->ingredient_id

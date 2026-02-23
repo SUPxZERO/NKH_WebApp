@@ -10,7 +10,7 @@ import AdminLayout from '@/app/layouts/AdminLayout';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { Customer, Location } from '@/app/types/domain';
 import { cn } from '@/app/utils/cn';

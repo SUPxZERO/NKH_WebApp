@@ -4,7 +4,7 @@ import { Head, usePage, router } from '@inertiajs/react'; // Sprint 3
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiDelete } from '@/app/libs/apiClient';
+import { apiGet, apiPost, apiDelete } from '@/app/utils/api';
 import { ApiResponse, Order, Reservation } from '@/app/types/domain';
 import { PageProps } from '@/types';
 import { RequireAuth } from '@/app/providers/AuthProvider';
