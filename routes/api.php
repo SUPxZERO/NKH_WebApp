@@ -121,6 +121,12 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/locations', [LocationController::class, 'index']);
 
+// AUDIT FIX: Public pricing settings (tax rate, delivery fee) for the cart/checkout flow.
+// Only whitelisted, non-sensitive keys are exposed. See PublicSettingsController.
+Route::get('/public/settings/pricing', [\App\Http\Controllers\Api\PublicSettingsController::class, 'pricing'])
+    ->middleware('throttle:60,1');
+
+
 // Menu Items CRUD routes
 Route::controller(MenuItemController::class)->group(function () {
     Route::get('/menu-items', 'index');
@@ -128,6 +134,12 @@ Route::controller(MenuItemController::class)->group(function () {
     Route::get('/menu-items/{menuItem}', 'show');
     Route::match(['put', 'patch'], '/menu-items/{menuItem}', 'update');
     Route::delete('/menu-items/{menuItem}', 'destroy');
+});
+
+// Kitchen Display System (KDS) Sprint P12 Routes
+Route::prefix('kitchen')->group(function () {
+    Route::get('/orders', [\App\Http\Controllers\Api\KitchenController::class, 'index']);
+    Route::put('/orders/{order}/status', [\App\Http\Controllers\Api\KitchenController::class, 'updateStatus']);
 });
 
 Route::get('/time-slots', [OnlineOrderController::class, 'timeSlots']);

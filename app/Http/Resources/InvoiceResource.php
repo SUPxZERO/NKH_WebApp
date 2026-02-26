@@ -28,10 +28,12 @@ class InvoiceResource extends JsonResource
             'issued_at' => optional($this->issued_at)->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
-            
-            // Payment status
-            'status' => ($this->amount_due ?? 0) <= 0 ? 'paid' : 'unpaid',
-            
+
+            // AUDIT FIX: Use the actual status column set by InvoiceService.reconcileStatus(),
+            // not a re-derivation from amount_due which can be stale.
+            'status' => $this->status ?? 'draft',
+            'paid_at' => optional($this->paid_at)->toISOString(),
+
             // Location (for display in UI)
             'location' => $this->whenLoaded('location', function () {
                 return [
@@ -61,7 +63,7 @@ class InvoiceResource extends JsonResource
                     'items' => OrderItemResource::collection($this->whenLoaded('order.items')),
                 ];
             }),
-            
+
             // Payment history
             'payments' => $this->whenLoaded('payments', function () {
                 return $this->payments->map(function ($payment) {

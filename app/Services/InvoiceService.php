@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Services\SequenceService;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceService

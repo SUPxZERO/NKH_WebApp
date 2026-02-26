@@ -72,7 +72,7 @@ class ImprovedMenuItemSeeder extends Seeder
         $this->command->info("✅ Total menu items created: {$total}");
 
         // VALIDATION: Check that no menu items are linked to main categories
-        $invalidItems = MenuItem::whereHas('category', function($q) {
+        $invalidItems = MenuItem::whereHas('category', function ($q) {
             $q->whereNull('parent_id');
         })->count();
 
@@ -482,7 +482,6 @@ class ImprovedMenuItemSeeder extends Seeder
             'cost' => $cost,
             'is_popular' => $isPopular,
             'is_featured' => rand(1, 10) <= 2, // 20% chance
-            'featured_order' => $isPopular ? $displayOrder : 999,
             'is_active' => true,
             'display_order' => $displayOrder,
             'prep_time' => $prepTime,
@@ -527,8 +526,10 @@ class ImprovedMenuItemSeeder extends Seeder
             $allergens[] = 'tree nuts';
         }
 
-        if (str_contains($slug, 'seafood') || str_contains($slug, 'prawn') || str_contains($slug, 'shrimp') ||
-            str_contains($slug, 'fish') || str_contains($slug, 'crab') || str_contains($slug, 'squid')) {
+        if (
+            str_contains($slug, 'seafood') || str_contains($slug, 'prawn') || str_contains($slug, 'shrimp') ||
+            str_contains($slug, 'fish') || str_contains($slug, 'crab') || str_contains($slug, 'squid')
+        ) {
             $allergens[] = 'shellfish';
             $allergens[] = 'fish';
         }
@@ -589,7 +590,7 @@ class ImprovedMenuItemSeeder extends Seeder
             'fish-cakes' => 'menu_images/fish-cakes.jpg',
             'crab-cakes' => 'menu_images/fish-cakes.jpg', // proxy
             'stuffed-chicken-wings' => 'menu_images/grilled-chicken-wings.jpg', // proxy
-            
+
             // COLD APPETIZERS
             'beef-salad-khmer' => 'menu_images/beef-salad.jpg',
             'seafood-salad' => 'menu_images/beef-salad.jpg', // proxy
@@ -612,12 +613,12 @@ class ImprovedMenuItemSeeder extends Seeder
             'pineapple-fried-rice' => 'menu_images/pad-thai.jpg', // proxy
             'vegetable-fried-rice' => 'menu_images/stir-fried-morning-glory.jpg', // proxy
             'special-fried-rice' => 'menu_images/grilled-pork-ribs.jpg', // proxy
-            
+
             'grilled-pork-rice' => 'menu_images/grilled-pork-ribs.jpg',
             'grilled-chicken-rice' => 'menu_images/grilled-chicken-wings.jpg',
             'crispy-pork-belly-rice' => 'menu_images/grilled-pork-ribs.jpg', // proxy
             'duck-rice' => 'menu_images/grilled-chicken-wings.jpg', // proxy
-            
+
             'chicken-clay-pot-rice' => 'menu_images/steamed-fish-ginger.jpg', // proxy
             'seafood-clay-pot-rice' => 'menu_images/steamed-fish-ginger.jpg', // proxy
 

@@ -25,8 +25,7 @@ import {
     QrCode,
     Truck,
 } from 'lucide-react';
-import { useOrderUpdates } from '@/app/hooks/useRealtime';
-
+import { useKitchenUpdates } from '@/app/hooks/useRealtime';
 
 interface OrderItem {
     id: number;
@@ -54,14 +53,11 @@ interface KitchenOrder {
     total_amount?: number;
 }
 
-import { useSmartPolling } from '@/app/hooks/useSmartPolling';
-
 export default function KitchenDisplay() {
     const { t, locale } = useLanguage();
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
-    useOrderUpdates();
-    useSmartPolling(['kitchen'], 5000); // Poll every 5s for kitchen updates
+    useKitchenUpdates();
     const qc = useQueryClient();
     const orderTypeLabels: Record<string, string> = {
         'dine-in': t('employee.kitchen.order_type.dine_in'),

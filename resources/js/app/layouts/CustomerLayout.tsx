@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -31,8 +31,27 @@ import { useCustomerNotifications } from '@/app/hooks/useCustomerNotifications';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useTelegramAuth } from '@/app/hooks/useTelegramAuth';
 import { useTableSession } from '@/app/hooks/useTableSession';
-
+import { useCartStore } from '@/app/store/cart';
+import { useLocationSettings } from '@/app/hooks/useLocationSettings';
 import { useTranslation } from '@/app/hooks/useTranslation';
+
+/**
+ * AUDIT FIX: Syncs live pricing (tax rate, delivery fee) from the API into the
+ * cart store whenever the selected location changes. Replaces hardcoded values.
+ */
+function CartPricingSync() {
+  const location_id = useCartStore((s) => s.location_id);
+  const setPricing = useCartStore((s) => s.setPricing);
+  const { data: pricing } = useLocationSettings(location_id);
+
+  useEffect(() => {
+    if (pricing) {
+      setPricing(pricing.tax_rate, pricing.delivery_fee);
+    }
+  }, [pricing, setPricing]);
+
+  return null; // Render nothing — effect only
+}
 
 type Props = {
   children: React.ReactNode;
@@ -319,8 +338,11 @@ export default function CustomerLayout({ children, className }: Props) {
         </div>
       </header >
 
+      {/* AUDIT FIX: Live pricing sync — keeps cart tax/delivery in sync with DB settings */}
+      <CartPricingSync />
+
       {/* Main Content */}
-      < main className="w-full max-w-full overflow-x-hidden" >
+      <main className="w-full max-w-full overflow-x-hidden">
         <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -330,7 +352,7 @@ export default function CustomerLayout({ children, className }: Props) {
             {children}
           </motion.div>
         </div>
-      </main >
+      </main>
 
       {/* Footer */}
       < footer className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white py-8 sm:py-12 lg:py-16 mt-12 sm:mt-16 lg:mt-20" >

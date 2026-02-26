@@ -164,6 +164,13 @@ class OrderPlacementService
         // This prevents holding DB locks during slow external API calls (Telegram, Email, Pusher)
         $this->sendNotifications($order);
 
+        // Notify Kitchen Display System (KDS) via WebSockets
+        try {
+            event(new \App\Events\KitchenOrderCreated($order));
+        } catch (\Exception $e) {
+            \Log::error('Failed to broadcast KitchenOrderCreated event: ' . $e->getMessage());
+        }
+
         return $order;
     }
 
@@ -268,13 +275,7 @@ class OrderPlacementService
 
     protected function generateOrderNumber(int $locationId, string $prefix = 'ORD'): string
     {
-        for ($i = 0; $i < 5; $i++) {
-            $number = sprintf('%s-%s-%s', $prefix, now()->format('Ymd'), Str::upper(Str::random(5)));
-            if (!Order::where('location_id', $locationId)->where('order_number', $number)->exists()) {
-                return $number;
-            }
-        }
-        return sprintf('%s-%s-%s', $prefix, now()->format('YmdHis'), random_int(100, 999));
+        return \App\Services\SequenceService::next('orders', $locationId, $prefix);
     }
 
     protected function sendNotifications(Order $order): void

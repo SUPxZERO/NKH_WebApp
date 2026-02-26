@@ -1,0 +1,181 @@
+
+  Dropping all tables [90m 882.19ms[39m [32;1mDONE[39;22m
+
+  [37;44m INFO [39;49m Preparing database.  
+
+  Creating migration table [90m 17.58ms[39m [32;1mDONE[39;22m
+
+  [37;44m INFO [39;49m Running migrations.  
+
+  0001_01_01_000001_create_cache_table [90m 12.77ms[39m [32;1mDONE[39;22m
+  0001_01_01_000002_create_cache_locks_table [90m 18.43ms[39m [32;1mDONE[39;22m
+  0001_01_01_000003_create_jobs_table [90m 33.39ms[39m [32;1mDONE[39;22m
+  0001_01_01_000004_create_job_batches_table [90m 13.85ms[39m [32;1mDONE[39;22m
+  0001_01_01_000005_create_failed_jobs_table [90m 30.60ms[39m [32;1mDONE[39;22m
+  0001_01_01_000006_create_sessions_table [90m 45.58ms[39m [32;1mDONE[39;22m
+  0001_01_01_000007_create_password_reset_tokens_table [90m 17.76ms[39m [32;1mDONE[39;22m
+  0001_01_01_000008_create_notifications_table [90m 51.81ms[39m [32;1mDONE[39;22m
+  0001_01_01_000009_create_personal_access_tokens_table [90m 73.93ms[39m [32;1mDONE[39;22m
+  2025_01_22_000001_create_geocoding_cache_table [90m 79.40ms[39m [32;1mDONE[39;22m
+  2025_09_18_080010_create_locations_table [90m 88.54ms[39m [32;1mDONE[39;22m
+  2025_09_18_080011_create_units_table [90m 100.67ms[39m [32;1mDONE[39;22m
+  2025_09_18_080012_create_roles_table [90m 41.60ms[39m [32;1mDONE[39;22m
+  2025_09_18_080013_create_permissions_table [90m 38.90ms[39m [32;1mDONE[39;22m
+  2025_09_18_080014_create_positions_table [90m 39.98ms[39m [32;1mDONE[39;22m
+  2025_09_18_080015_create_loyalty_tiers_table [90m 62.26ms[39m [32;1mDONE[39;22m
+  2025_09_18_080016_create_order_types_table [90m 62.53ms[39m [32;1mDONE[39;22m
+  2025_09_18_080017_create_order_statuses_table [90m 71.36ms[39m [32;1mDONE[39;22m
+  2025_09_18_080018_create_payment_methods_table [90m 98.85ms[39m [32;1mDONE[39;22m
+  2025_09_18_080019_create_payment_statuses_table [90m 61.98ms[39m [32;1mDONE[39;22m
+  2025_09_18_080020_create_users_table [90m 181.05ms[39m [32;1mDONE[39;22m
+  2025_09_18_080021_create_role_permission_table [90m 151.32ms[39m [32;1mDONE[39;22m
+  2025_09_18_080022_create_role_user_table [90m 106.81ms[39m [32;1mDONE[39;22m
+  2025_09_18_080023_create_settings_table [90m 111.71ms[39m [32;1mDONE[39;22m
+  2025_09_18_080024_create_floors_table [90m 87.18ms[39m [32;1mDONE[39;22m
+  2025_09_18_080025_create_suppliers_table [90m 101.93ms[39m [32;1mDONE[39;22m
+  2025_09_18_080026_create_expense_categories_table [90m 86.60ms[39m [32;1mDONE[39;22m
+  2025_09_18_080027_create_operating_hours_table [90m 119.07ms[39m [32;1mDONE[39;22m
+  2025_09_18_080028_create_categories_table [90m 149.65ms[39m [32;1mDONE[39;22m
+  2025_09_18_080029_create_telegram_users_table [90m 66.05ms[39m [32;1mDONE[39;22m
+  2025_09_18_080030_create_promotions_table [90m 120.78ms[39m [32;1mDONE[39;22m
+  2025_09_18_080031_create_employees_table [90m 242.10ms[39m [32;1mDONE[39;22m
+  2025_09_18_080032_create_customers_table [90m 318.24ms[39m [32;1mDONE[39;22m
+  2025_09_18_080033_create_tables_table [90m 189.89ms[39m [32;1mDONE[39;22m
+  2025_09_18_080034_create_ingredients_table [90m 281.19ms[39m [32;1mDONE[39;22m
+  2025_09_18_080035_create_menu_items_table [90m 220.39ms[39m [32;1mDONE[39;22m
+  2025_09_18_080036_create_audit_logs_table [90m 78.83ms[39m [32;1mDONE[39;22m
+  2025_09_18_080037_create_user_profiles_table [90m 161.62ms[39m [32;1mDONE[39;22m
+  2025_09_18_080038_create_broadcast_notifications_table [90m 71.68ms[39m [32;1mDONE[39;22m
+  2025_09_18_080039_create_category_translations_table [90m 101.28ms[39m [32;1mDONE[39;22m
+  2025_09_18_080040_create_menu_item_translations_table [90m 129.63ms[39m [32;1mDONE[39;22m
+  2025_09_18_080041_create_shifts_table [90m 233.14ms[39m [32;1mDONE[39;22m
+  2025_09_18_080042_create_attendances_table [90m 220.37ms[39m [32;1mDONE[39;22m
+  2025_09_18_080043_create_payrolls_table [90m 153.02ms[39m [32;1mDONE[39;22m
+  2025_09_18_080044_create_employment_history_table [90m 169.99ms[39m [32;1mDONE[39;22m
+  2025_09_18_080045_create_time_off_requests_table [90m 96.13ms[39m [32;1mDONE[39;22m
+  2025_09_18_080046_create_reservations_table [90m 276.50ms[39m [32;1mDONE[39;22m
+  2025_09_18_080047_create_customer_addresses_table [90m 272.01ms[39m [32;1mDONE[39;22m
+  2025_09_18_080048_create_customer_preferences_table [90m 117.62ms[39m [32;1mDONE[39;22m
+  2025_09_18_080049_create_customer_login_history_table [90m 79.36ms[39m [32;1mDONE[39;22m
+  2025_09_18_080050_create_customer_communication_log_table [90m 99.06ms[39m [32;1mDONE[39;22m
+  2025_09_18_080051_create_customer_favorites_table [90m 134.19ms[39m [32;1mDONE[39;22m
+  2025_09_18_080052_create_cart_items_table [90m 148.75ms[39m [32;1mDONE[39;22m
+  2025_09_18_080053_create_recipes_table [90m 76.14ms[39m [32;1mDONE[39;22m
+  2025_09_18_080054_create_recipe_ingredients_table [90m 146.55ms[39m [32;1mDONE[39;22m
+  2025_09_18_080055_create_inventory_table [90m 131.28ms[39m [32;1mDONE[39;22m
+  2025_09_18_080056_create_inventory_adjustments_table [90m 201.24ms[39m [32;1mDONE[39;22m
+  2025_09_18_080057_create_purchase_orders_table [90m 295.84ms[39m [32;1mDONE[39;22m
+  2025_09_18_080058_create_purchase_order_items_table [90m 147.40ms[39m [32;1mDONE[39;22m
+  2025_09_18_080059_create_expenses_table [90m 402.73ms[39m [32;1mDONE[39;22m
+  2025_09_18_080060_create_order_time_slots_table [90m 150.29ms[39m [32;1mDONE[39;22m
+  2025_09_18_080061_create_orders_table [90m 1s[39m [32;1mDONE[39;22m
+  2025_09_18_080062_create_order_items_table [90m 149.22ms[39m [32;1mDONE[39;22m
+  2025_09_18_080063_create_invoices_table [90m 175.58ms[39m [32;1mDONE[39;22m
+  2025_09_18_080064_create_payments_table [90m 388.82ms[39m [32;1mDONE[39;22m
+  2025_09_18_080065_create_refunds_table [90m 194.57ms[39m [32;1mDONE[39;22m
+  2025_09_18_080066_create_feedback_table [90m 249.19ms[39m [32;1mDONE[39;22m
+  2025_09_18_080067_create_loyalty_points_table [90m 217.38ms[39m [32;1mDONE[39;22m
+  2025_09_18_080068_create_user_notifications_table [90m 178.36ms[39m [32;1mDONE[39;22m
+  2025_09_18_080069_create_telegram_order_notifications_table [90m 44.19ms[39m [32;1mDONE[39;22m
+  2025_09_18_080070_create_inventory_transactions_table [90m 377.41ms[39m [32;1mDONE[39;22m
+  2026_01_18_041042_create_stock_alerts_table [90m 219.04ms[39m [32;1mDONE[39;22m
+  2026_01_22_000001_create_table_sessions_table [90m 333.94ms[39m [32;1mDONE[39;22m
+  2026_01_22_023443_create_shift_swaps_table [90m 239.45ms[39m [32;1mDONE[39;22m
+  2026_01_22_050415_add_denial_reason_to_shift_swaps_table [90m 35.76ms[39m [32;1mDONE[39;22m
+  2026_01_22_141700_create_employee_achievements_table [90m 70.19ms[39m [32;1mDONE[39;22m
+  2026_01_23_000000_add_performance_indexes [90m 118.77ms[39m [32;1mDONE[39;22m
+  2026_01_23_000000_fix_admin_role_permissions [90m 0.70ms[39m [32;1mDONE[39;22m
+  2026_01_23_000001_add_geocoding_to_customer_addresses [90m 208.50ms[39m [32;1mDONE[39;22m
+  2026_01_23_000001_enhance_audit_logs_table [90m 549.23ms[39m [32;1mDONE[39;22m
+  2026_01_23_152900_create_payment_audit_logs_table [90m 138.25ms[39m [32;1mDONE[39;22m
+  2026_01_26_000000_fix_category_translations_locale_default [90m 7.65ms[39m [32;1mDONE[39;22m
+  2026_01_26_101143_drop_featured_order_from_menu_items_table [90m 66.27ms[39m [32;1mDONE[39;22m
+  2026_01_27_175900_create_payroll_details_table [90m 110.48ms[39m [32;1mDONE[39;22m
+  2026_01_28_115640_add_is_system_to_roles_table [90m 57.77ms[39m [32;1mDONE[39;22m
+  2026_02_03_070533_create_payment_method_audit_logs_table [90m 183.49ms[39m [32;1mDONE[39;22m
+  2026_02_03_075108_add_configuration_to_payment_methods_table [90m 56.33ms[39m [32;1mDONE[39;22m
+  2026_02_09_120000_create_user_settings_table [90m 65.73ms[39m [32;1mDONE[39;22m
+  2026_02_10_103247_create_notification_preferences_table [90m 31.94ms[39m [32;1mDONE[39;22m
+  2026_02_23_100000_audit_fix_schema_corrections [90m 142.96ms[39m [32;1mDONE[39;22m
+  2026_02_23_100001_audit_backfill_order_items_cost_price [90m 4.47ms[39m [32;1mDONE[39;22m
+  2026_02_23_100002_create_sequences_table [90m 30.06ms[39m [32;1mDONE[39;22m
+  2026_02_23_100003_create_stock_movements_table [90m 162.31ms[39m [32;1mDONE[39;22m
+  2026_02_23_100004_create_daily_sales_summaries_table [90m 36.12ms[39m [32;1mDONE[39;22m
+
+
+  [37;44m INFO [39;49m Seeding database.  
+
+
+[32m🌱 NKH Seeder Strategy: Initializing...[39m
+
+[32m📦 Seeding Reference Data (Ref)...[39m
+  Database\Seeders\Ref\UnitSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\UnitSeeder  [90m57 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\OrderStatusSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\OrderStatusSeeder  [90m11 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\OrderTypeSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\OrderTypeSeeder  [90m15 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\PaymentStatusSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\PaymentStatusSeeder  [90m13 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\LoyaltyTierSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\LoyaltyTierSeeder  [90m12 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\RolePermissionSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\RolePermissionSeeder  [90m392 ms[39m [32;1mDONE[39;22m  
+
+[32m   ✅ Reference data secured.[39m
+
+[32m🏢 Seeding Production Environment (Prod)...[39m
+  Database\Seeders\Prod\LocationSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\LocationSeeder  [90m11 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\FloorSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\FloorSeeder  [90m33 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\TableSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\TableSeeder  [90m290 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\PaymentMethodSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\PaymentMethodSeeder  [90m9 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\SupplierSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\SupplierSeeder  [90m28 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\CategorySeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\CategorySeeder  [90m1,233 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\IngredientSeeder  [33;1mRUNNING[39;22m  
+[32mCreated/Updated 52 ingredients with varied stock levels![39m
+  Database\Seeders\Prod\IngredientSeeder  [90m162 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\InventorySeeder  [33;1mRUNNING[39;22m  
+[32mCreated inventory records with varied batches and expiration dates![39m
+  Database\Seeders\Prod\InventorySeeder  [90m1,089 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\MenuItemSeeder  [33;1mRUNNING[39;22m  
+
+  [41;1m Illuminate\Database\QueryException [49;22m
+
+[39;1m  SQLSTATE[42S22]: Column not found: 1054 Unknown column 'featured_order' in 'field list' (Connection: mysql, SQL: insert into `menu_items` (`location_id`, `slug`, `category_id`, `price`, `cost`, `is_popular`, `is_featured`, `featured_order`, `is_active`, `display_order`, `prep_time`, `cook_time`, `calories`, `rating`, `reviews_count`, `spice_level`, `serving_size`, `availability_status`, `nutrition`, `allergens`, `dietary_tags`, `image_path`, `updated_at`, `created_at`) values (1, fried-spring-rolls, 2, 6.5, 1.95, 1, 1, 1, 1, 1, 15, 20, 180, 4.5, 27, 3, 1 portion, available, {"protein":20,"carbs":49,"fat":15,"fiber":3}, [], [], menu_images/spring-rolls.jpg, 2026-02-25 09:20:50, 2026-02-25 09:20:50))[39;22m
+
+  at [32mvendor\laravel\framework\src\Illuminate\Database\Connection.php[39m:[32m825[39m
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+  [33m1   [39m[39;1mvendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php[39;22m:[39;1m47[39;22m
+  [90m    PDOException::("SQLSTATE[42S22]: Column not found: 1054 Unknown column 'featured_order' in 'field list'")[39m
+
+  [33m2   [39m[39;1mvendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php[39;22m:[39;1m47[39;22m
+  [90m    PDO::prepare("insert into `menu_items` (`location_id`, `slug`, `category_id`, `price`, `cost`, `is_popular`, `is_featured`, `featured_order`, `is_active`, `display_order`, `prep_time`, `cook_time`, `calories`, `rating`, `reviews_count`, `spice_level`, `serving_size`, `availability_status`, `nutrition`, `allergens`, `dietary_tags`, `image_path`, `updated_at`, `created_at`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")[39m
+

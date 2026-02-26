@@ -332,14 +332,21 @@ export interface Invoice {
   location_id: number;
   invoice_number: string;
   subtotal: number;
-  tax_total: number;
-  discount_total: number;
+  // Canonical backend names (set by InvoiceService, returned by InvoiceResource)
+  tax_amount: number;
+  discount_amount: number;
   service_charge: number;
-  total: number;
+  total_amount: number;
+  // Backward-compat aliases (also returned by InvoiceResource for older UI)
+  tax_total?: number;
+  discount_total?: number;
+  total?: number;
   amount_paid: number;
   amount_due: number;
   currency: string;
+  status: 'draft' | 'issued' | 'partial' | 'paid' | 'overpaid' | 'void' | 'overdue';
   issued_at?: string | null;
+  paid_at?: string | null;
   created_at: string;
   updated_at: string;
   order?: Order;

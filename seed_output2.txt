@@ -1,0 +1,132 @@
+
+  [37;44m INFO [39;49m Seeding database.  
+
+
+[32m🌱 NKH Seeder Strategy: Initializing...[39m
+
+[32m📦 Seeding Reference Data (Ref)...[39m
+  Database\Seeders\Ref\UnitSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\UnitSeeder  [90m208 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\OrderStatusSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\OrderStatusSeeder  [90m50 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\OrderTypeSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\OrderTypeSeeder  [90m14 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\PaymentStatusSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\PaymentStatusSeeder  [90m15 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\LoyaltyTierSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\LoyaltyTierSeeder  [90m12 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Ref\RolePermissionSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Ref\RolePermissionSeeder  [90m89 ms[39m [32;1mDONE[39;22m  
+
+[32m   ✅ Reference data secured.[39m
+
+[32m🏢 Seeding Production Environment (Prod)...[39m
+  Database\Seeders\Prod\LocationSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\LocationSeeder  [90m2 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\FloorSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\FloorSeeder  [90m7 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\TableSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\TableSeeder  [90m375 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\PaymentMethodSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\PaymentMethodSeeder  [90m3 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\SupplierSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\SupplierSeeder  [90m5 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\CategorySeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\CategorySeeder  [90m265 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\IngredientSeeder  [33;1mRUNNING[39;22m  
+[32mCreated/Updated 52 ingredients with varied stock levels![39m
+  Database\Seeders\Prod\IngredientSeeder  [90m32 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\InventorySeeder  [33;1mRUNNING[39;22m  
+[32mCreated inventory records with varied batches and expiration dates![39m
+  Database\Seeders\Prod\InventorySeeder  [90m1,160 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\MenuItemSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\MenuItemSeeder  [90m1,475 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\RecipeSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\RecipeSeeder  [90m2,041 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\UserSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\Prod\UserSeeder  [90m690 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\EmployeeSeeder  [33;1mRUNNING[39;22m  
+[32mCreating employee role if it doesn't exist...[39m
+[32mCreating or updating locations...[39m
+[32mCreating or updating positions...[39m
+[32mCreating employees and their user accounts...[39m
+[32mEmployee seeding completed successfully![39m
+  Database\Seeders\EmployeeSeeder  [90m3,754 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\PurchaseOrderSeeder  [33;1mRUNNING[39;22m  
+[32mCreated 20 purchase orders with varied statuses and dates![39m
+  Database\Seeders\Prod\PurchaseOrderSeeder  [90m326 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Prod\InventoryAdjustmentSeeder  [33;1mRUNNING[39;22m  
+[32mCreated 30 inventory adjustments with varied statuses and reasons![39m
+  Database\Seeders\Prod\InventoryAdjustmentSeeder  [90m104 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\InventoryTransactionSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\InventoryTransactionSeeder  [90m1,207 ms[39m [32;1mDONE[39;22m  
+
+[32m   ✅ Environment established.[39m
+
+[32m🎬 Running Operational Scenarios (Demo)...[39m
+  Database\Seeders\DemoUsersSeeder  [33;1mRUNNING[39;22m  
+[32m✅ Created Demo Admin: demo@admin.com / demo123[39m
+[32m✅ Created Demo Customer: demo@customer.com / demo123[39m
+[32m✅ Created Demo Employee: demo@employee.com / demo123[39m
+
+[32m🎉 Demo users seeded successfully![39m
+
+Login Credentials:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Admin:    demo@admin.com / demo123
+Customer: demo@customer.com / demo123
+Employee: demo@employee.com / demo123
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Database\Seeders\DemoUsersSeeder  [90m829 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\CustomerSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\CustomerSeeder  [90m3 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\ShiftSeeder  [33;1mRUNNING[39;22m  
+[32mShifts seeded successfully![39m
+  Database\Seeders\ShiftSeeder  [90m4,577 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\PromotionSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\PromotionSeeder  [90m44 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\ExpenseSeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\ExpenseCategorySeeder  [33;1mRUNNING[39;22m  
+  Database\Seeders\ExpenseCategorySeeder  [90m29 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\ExpenseSeeder  [90m55 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\DemoNotificationSeeder  [33;1mRUNNING[39;22m  
+[32mEnhanced Demo notifications seeded successfully![39m
+  Database\Seeders\DemoNotificationSeeder  [90m119 ms[39m [32;1mDONE[39;22m  
+
+  Database\Seeders\Demo\DayInLifeSeeder  [33;1mRUNNING[39;22m  
+[32m   Simulating Realistic Shop Activity...[39m
+[32m   📅 Creating Reservations...[39m
+[32m   🍳 Creating Orders for Today...[39m
+[32m   📜 Creating Historical Orders (Last 30 Days)...[39m
+  Database\Seeders\Demo\DayInLifeSeeder  [90m2,123 ms[39m [32;1mDONE[39;22m  
+
+[32m   ✅ Scenarios executed.[39m
+
+[32m🚀 Database Seeding Completed Successfully![39m
+[32m   Ready for action.[39m
+

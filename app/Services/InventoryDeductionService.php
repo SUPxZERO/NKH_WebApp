@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\InventoryOrderDeduction;
 use App\Models\Inventory;
 use App\Models\InventoryTransaction;
+use App\Models\StockMovement;
 use App\Models\Recipe;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -130,7 +131,23 @@ class InventoryDeductionService
                 ['quantity' => 0]
             );
 
-            $inventory->decrement('quantity', $totalQuantity);
+            // Calculate new balance
+            $newBalance = $inventory->quantity - $totalQuantity;
+
+            // 1. Update legacy inventory (to keep old UI working until fully migrated)
+            $inventory->update(['quantity' => $newBalance]);
+
+            // 2. AUDIT FIX: Append to immutable Stock Ledger
+            StockMovement::create([
+                'ingredient_id' => $ingredient->id,
+                'location_id' => $locationId,
+                'movement_type' => 'order_out',
+                'quantity' => -$totalQuantity,
+                'running_balance' => $newBalance,
+                'reference_type' => get_class($orderItem->order),
+                'reference_id' => $orderItem->order->id,
+                'created_by' => $userId,
+            ]);
 
             // Create inventory transaction
             $transaction = InventoryTransaction::create([
@@ -177,7 +194,7 @@ class InventoryDeductionService
             return true; // Nothing to revert
         }
 
-        DB::transaction(function () use ($deductions, $userId, $reason) {
+        DB::transaction(function () use ($order, $deductions, $userId, $reason) {
             foreach ($deductions as $deduction) {
                 // AUDIT FIX: Pessimistic locking on revert as well
                 $inventory = Inventory::lockForUpdate()->firstOrCreate(
@@ -188,7 +205,23 @@ class InventoryDeductionService
                     ['quantity' => 0]
                 );
 
-                $inventory->increment('quantity', $deduction->quantity_deducted);
+                // Calculate new balance
+                $newBalance = $inventory->quantity + $deduction->quantity_deducted;
+
+                // 1. Update legacy inventory
+                $inventory->update(['quantity' => $newBalance]);
+
+                // 2. AUDIT FIX: Append to immutable Stock Ledger
+                StockMovement::create([
+                    'ingredient_id' => $deduction->ingredient_id,
+                    'location_id' => $deduction->location_id,
+                    'movement_type' => 'reversal',
+                    'quantity' => $deduction->quantity_deducted,
+                    'running_balance' => $newBalance,
+                    'reference_type' => get_class($order),
+                    'reference_id' => $order->id,
+                    'created_by' => $userId,
+                ]);
 
                 // Create reversal transaction
                 InventoryTransaction::create([

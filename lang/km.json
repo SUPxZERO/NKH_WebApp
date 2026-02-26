@@ -1110,7 +1110,7 @@
                     "active": "សកម្ម",
                     "inactive": "អសកម្ម",
                     "leave": "ឈប់សម្រាក",
-                    "total": "សរុប"
+                    "total": "សរុបរួម"
                 },
                 "subtitle": "គ្រប់គ្រងបុគ្គលិក",
                 "table": {
@@ -1123,7 +1123,60 @@
                     "status": "ស្ថានភាព",
                     "unknown": "មិនស្គាល់"
                 },
-                "title": "បុគ្គលិក"
+                "title": "បុគ្គលិក",
+                "common": {
+                    "saving": "កំពុងរក្សាទុក..."
+                }
+            },
+            "kitchen": {
+                "title": "អេក្រង់ផ្ទះបាយ",
+                "system": "ប្រព័ន្ធផ្ទះបាយ",
+                "kds_subtitle": "ការគ្រប់គ្រងការបញ្ជាទិញ",
+                "sound_on": "បើកសំឡេង",
+                "sound_off": "បិទសំឡេង",
+                "total": "ការបញ្ជាទិញសរុប",
+                "new": "ការបញ្ជាទិញថ្មី",
+                "status_awaiting": "រង់ចាំការរៀបចំ",
+                "no_new_orders": "មិនមានការបញ្ជាទិញថ្មីនៅពេលនេះទេ",
+                "start_prep": "ចាប់ផ្តើមរៀបចំ",
+                "preparing": "កំពុងរៀបចំ",
+                "status_in_progress": "កំពុងដំណើរការ",
+                "no_cooking": "មិនមានការបញ្ជាទិញកំពុងរៀបចំនៅពេលនេះទេ",
+                "mark_ready": "ដាក់សម្គាល់ថារួចរាល់",
+                "ready": "រួចរាល់សម្រាប់ការបម្រើ",
+                "status_finished": "បានបញ្ចប់",
+                "no_ready": "មិនមានការបញ្ជាទិញរង់ចាំការបម្រើទេ",
+                "delivered": "ដាក់សម្គាល់ថាបានបញ្ជូន",
+                "order_number_short": "ការបញ្ជាទិញ #:number",
+                "table_number": "តុ :number",
+                "age_minutes": ":minutes នាទី",
+                "urgent": "បន្ទាន់",
+                "note": "ចំណាំ",
+                "more_items": "+:count មុខទៀត",
+                "customer_info": "ព័ត៌មានអតិថិជន",
+                "order_notes": "កំណត់ចំណាំការបញ្ជាទិញ",
+                "order_items": "មុខទំនិញ (:count)",
+                "special_request": "សំណើពិសេស",
+                "unit_price_each": ":price ក្នុងមួយមុខ",
+                "item_total": "សរុប: :total",
+                "total_amount": "ចំនួនទឹកប្រាក់សរុប",
+                "updating": "កំពុងធ្វើបច្ចុប្បន្នភាព...",
+                "status_labels": {
+                    "new": "ថ្មី",
+                    "preparing": "កំពុងរៀបចំ",
+                    "ready": "រួចរាល់",
+                    "completed": "បានបញ្ចប់"
+                },
+                "order_type": {
+                    "dine_in": "បរិភោគក្នុងហាង",
+                    "pickup": "មកយកផ្ទាល់",
+                    "delivery": "ដឹកជញ្ជូន"
+                },
+                "item_status": {
+                    "pending": "រង់ចាំ",
+                    "preparing": "កំពុងរៀបចំ",
+                    "served": "បានបម្រើ"
+                }
             },
             "payroll": {
                 "actions": {
@@ -5844,6 +5897,8 @@
             "customer": {
                 "phone": "លេខទូរស័ព្ទអតិថិជន"
             },
+            "view_all": "មើលទីតាំងទាំងអស់",
+            "available": "ទីតាំងមាន",
             "driver_mode": "មុខងារអ្នកដឹកជញ្ជូន",
             "map": {
                 "actions": {
@@ -5865,6 +5920,8 @@
                     "loading": "កំពុងស្វែងរកទីតាំង..."
                 },
                 "missing_coords_title": "បាត់កូអរដោនេ",
+                "my_location": "ទីតាំងខ្ញុំ",
+                "view_unmapped_list": "មើលទីតាំងដែលមិនបង្ហាញ",
                 "navigate": "នាំផ្លូវ",
                 "not_shown_one": "ការកម្មង់ 1 មិនត្រូវបានបង្ហាញលើផែនទី",
                 "not_shown_other": "ការកម្មង់ :count មិនត្រូវបានបង្ហាញលើផែនទី",

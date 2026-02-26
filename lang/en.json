@@ -606,6 +606,56 @@
                 "unknown": "បុគ្គលិកមិនស្គាល់"
             }
         },
+        "kitchen": {
+            "title": "Kitchen Display",
+            "system": "Kitchen System",
+            "kds_subtitle": "Order Management",
+            "sound_on": "Sound On",
+            "sound_off": "Sound Off",
+            "total": "Total Orders",
+            "new": "New Orders",
+            "status_awaiting": "Awaiting Preparation",
+            "no_new_orders": "No new orders right now",
+            "start_prep": "Start Prep",
+            "preparing": "Preparing",
+            "status_in_progress": "In Progress",
+            "no_cooking": "No orders currently preparing",
+            "mark_ready": "Mark Ready",
+            "ready": "Ready to Serve",
+            "status_finished": "Finished",
+            "no_ready": "No orders waiting to be served",
+            "delivered": "Mark Delivered",
+            "order_number_short": "Order #:number",
+            "table_number": "Table :number",
+            "age_minutes": ":minutes m",
+            "urgent": "Urgent",
+            "note": "Note",
+            "more_items": "+:count more items",
+            "customer_info": "Customer Info",
+            "order_notes": "Order Notes",
+            "order_items": "Items (:count)",
+            "special_request": "Special Request",
+            "unit_price_each": ":price each",
+            "item_total": "Total: :total",
+            "total_amount": "Total Amount",
+            "updating": "Updating...",
+            "status_labels": {
+                "new": "New",
+                "preparing": "Preparing",
+                "ready": "Ready",
+                "completed": "Completed"
+            },
+            "order_type": {
+                "dine_in": "Dine In",
+                "pickup": "Pickup",
+                "delivery": "Delivery"
+            },
+            "item_status": {
+                "pending": "Pending",
+                "preparing": "Preparing",
+                "served": "Served"
+            }
+        },
         "exports": {
             "financial": {
                 "generated_on": "Generated on :date",
@@ -5835,6 +5885,8 @@
             "customer": {
                 "phone": "Customer Phone"
             },
+            "view_all": "View all",
+            "available": "Available",
             "driver_mode": "Driver Mode",
             "map": {
                 "actions": {
@@ -5848,6 +5900,8 @@
                     "available": "Available",
                     "my_deliveries": "My Deliveries"
                 },
+                "my_location": "My Location",
+                "view_unmapped_list": "View Unmapped List",
                 "legend_title": "Legend",
                 "load_failed": "Failed to load map data",
                 "location": {

@@ -265,7 +265,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
 
                 {/* Orders without coordinates notification */}
                 {unmappedOrders.length > 0 && (
-                    <div className="absolute top-4 left-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 text-sm text-yellow-400 max-w-xs z-20 backdrop-blur-md">
+                    <div className="absolute top-4 left-4 bg-blue-500/20 border border-blue-500/50 rounded-lg p-3 text-sm text-blue-400 max-w-xs z-20 backdrop-blur-md">
                         <p className="font-medium">{t('employee.delivery.map.missing_coords_title')}</p>
                         <p className="text-xs mt-1 mb-2">
                             {unmappedOrders.length === 1
@@ -275,7 +275,7 @@ export default function DriverMapView({ onCollectPayment }: DriverMapViewProps) 
                         <Button
                             size="sm"
                             variant="outline"
-                            className="w-full text-xs h-8 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+                            className="w-full text-xs h-8 border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
                             onClick={() => setShowUnmapped(true)}
                         >
                             {t('employee.delivery.map.view_unmapped_list') || 'View List'}

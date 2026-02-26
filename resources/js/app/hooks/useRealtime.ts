@@ -39,7 +39,30 @@ export function useOrderUpdates() {
     };
   }, [qc]);
 }
+export function useKitchenUpdates() {
+  const qc = useQueryClient();
 
+  useEffect(() => {
+    const echo = createEcho();
+    if (!echo) return;
+
+    const channel = echo.channel('kitchen');
+
+    channel.listen('.kitchen.order.created', (e: any) => {
+      qc.invalidateQueries({ queryKey: ['kitchen.orders'] });
+      // The sound is handled in the component
+    });
+
+    channel.listen('.kitchen.order.updated', (e: any) => {
+      qc.invalidateQueries({ queryKey: ['kitchen.orders'] });
+      toastInfo(`Order #${e.order.order_number} status updated to ${e.order.status}`);
+    });
+
+    return () => {
+      echo.leaveChannel('kitchen');
+    };
+  }, [qc]);
+}
 export function useAdminNotifications() {
   const qc = useQueryClient();
 
