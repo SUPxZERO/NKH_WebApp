@@ -21,7 +21,7 @@ class InventoryController extends Controller
 
     public function index()
     {
-        return Inertia::render('Admin/Inventory/Index', [
+        return Inertia::render('admin/Inventory', [
             'ingredients' => Ingredient::with(['unit', 'supplier', 'location'])
                 ->orderBy('name')
                 ->paginate(20),

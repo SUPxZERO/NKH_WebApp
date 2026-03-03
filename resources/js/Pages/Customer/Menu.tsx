@@ -4,7 +4,7 @@ import { motion, Variants, AnimatePresence } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useCategories, useMenuItems } from '@/app/hooks/useMenu';
 import { useFavorites } from '@/app/hooks/useFavorites';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import MenuItemCard from '@/app/components/customer/MenuItemCard';
 import CategoryFilter from '@/app/components/customer/CategoryFilter';
 import MenuSkeleton from '@/app/components/customer/MenuSkeleton';
@@ -130,8 +130,8 @@ export default function Menu() {
       case 'newest':
         filtered.sort(
           (a, b) =>
-            new Date(b.created_at).getTime() -
-            new Date(a.created_at).getTime()
+            new Date(b.created_at as string || '').getTime() -
+            new Date(a.created_at as string || '').getTime()
         );
         break;
     }

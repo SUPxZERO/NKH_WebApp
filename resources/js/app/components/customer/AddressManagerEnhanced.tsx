@@ -14,7 +14,7 @@ import {
     Navigation,
     AlertCircle
 } from 'lucide-react';
-import { CustomerAddress } from '@/app/types/domain';
+import { CustomerAddress } from '@/types';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Skeleton } from '@/app/components/ui/Loading';
@@ -42,21 +42,21 @@ interface AddressManagerProps {
 
 interface AddressFormData {
     label: string;
-    address_line_1: string;
-    address_line_2: string;
+    address_line1: string;
+    address_line2: string;
     city: string;
-    province: string;
-    postal_code: string;
-    latitude: number | null;
-    longitude: number | null;
-    delivery_instructions: string;
+    province?: string;
+    postal_code?: string;
+    latitude: string | null;
+    longitude: string | null;
+    delivery_instructions?: string;
     is_default: boolean;
 }
 
 const defaultFormData: AddressFormData = {
     label: '',
-    address_line_1: '',
-    address_line_2: '',
+    address_line1: '',
+    address_line2: '',
     city: '',
     province: '',
     postal_code: '',
@@ -131,12 +131,12 @@ export default function AddressManagerEnhanced({
     const openEditModal = (address: CustomerAddress) => {
         setEditingAddress(address);
         setFormData({
-            label: address.label,
-            address_line_1: address.address_line_1,
-            address_line_2: address.address_line_2 || '',
-            city: address.city,
-            province: address.province,
-            postal_code: address.postal_code,
+            label: address.label || '',
+            address_line1: address.address_line1 || '',
+            address_line2: address.address_line2 || '',
+            city: address.city || '',
+            province: address.province || '',
+            postal_code: address.postal_code || '',
             latitude: address.latitude || null,
             longitude: address.longitude || null,
             delivery_instructions: address.delivery_instructions || '',
@@ -155,12 +155,12 @@ export default function AddressManagerEnhanced({
         if (data) {
             setFormData((prev) => ({
                 ...prev,
-                address_line_1: data.address_line_1 || data.address.split(',')[0] || '',
+                address_line1: data.address_line_1 || data.address.split(',')[0] || '',
                 city: data.city || '',
                 province: data.province || '',
                 postal_code: data.postal_code || '',
-                latitude: data.lat,
-                longitude: data.lng,
+                latitude: data.lat?.toString() || null,
+                longitude: data.lng?.toString() || null,
             }));
             if (data.lat && data.lng) {
                 setShowCoordinateWarning(false);
@@ -169,7 +169,7 @@ export default function AddressManagerEnhanced({
     };
 
     const handleSave = () => {
-        if (!formData.address_line_1 || !formData.label) {
+        if (!formData.address_line1 || !formData.label) {
             return;
         }
 
@@ -269,11 +269,11 @@ export default function AddressManagerEnhanced({
                                                         : 'bg-white/5 text-gray-400'
                                                 )}
                                             >
-                                                {getAddressIcon(address.label)}
+                                                {getAddressIcon(address.label || '')}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <span className="font-medium text-white text-sm">{address.label}</span>
+                                                    <span className="font-medium text-white text-sm">{(address.label || t('customer.address_manager.custom_label_placeholder') as string)}</span>
                                                     {!!address.latitude && !!address.longitude && (
                                                         <span className="text-[10px] px-1 py-0.5 rounded bg-green-500/20 text-green-400">
                                                             GPS
@@ -286,8 +286,8 @@ export default function AddressManagerEnhanced({
                                                     )}
                                                 </div>
                                                 <p className="text-xs sm:text-sm text-gray-400 truncate">
-                                                    {address.address_line_1}
-                                                    {address.address_line_2 && `, ${address.address_line_2}`}
+                                                    {address.address_line1}
+                                                    {address.address_line2 && `, ${address.address_line2}`}
                                                 </p>
                                                 <p className="text-[10px] sm:text-xs text-gray-500">
                                                     {address.city}, {address.province}{address.postal_code && address.postal_code !== '0' ? ` ${address.postal_code}` : ''}
@@ -411,9 +411,9 @@ export default function AddressManagerEnhanced({
                                         placeholder={t('customer.address_manager.search_placeholder') as string}
                                         showMap={true}
                                         mapHeight={250}
-                                        initialAddress={editingAddress?.address_line_1}
-                                        initialLat={editingAddress?.latitude || undefined}
-                                        initialLng={editingAddress?.longitude || undefined}
+                                        initialAddress={editingAddress?.address_line1 || undefined}
+                                        initialLat={editingAddress?.latitude ? parseFloat(editingAddress.latitude) : undefined}
+                                        initialLng={editingAddress?.longitude ? parseFloat(editingAddress.longitude) : undefined}
                                         onChange={handleAddressPickerChange}
                                         error={showCoordinateWarning ? t('customer.address_manager.please_pin_location') as string : undefined}
                                     />
@@ -448,9 +448,9 @@ export default function AddressManagerEnhanced({
                                             </label>
                                             <input
                                                 type="text"
-                                                value={formData.address_line_1}
+                                                value={formData.address_line1}
                                                 onChange={(e) =>
-                                                    setFormData({ ...formData, address_line_1: e.target.value })
+                                                    setFormData({ ...formData, address_line1: e.target.value })
                                                 }
                                                 placeholder={t('customer.address_manager.street_placeholder') as string}
                                                 className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
@@ -463,9 +463,9 @@ export default function AddressManagerEnhanced({
                                             </label>
                                             <input
                                                 type="text"
-                                                value={formData.address_line_2}
+                                                value={formData.address_line2}
                                                 onChange={(e) =>
-                                                    setFormData({ ...formData, address_line_2: e.target.value })
+                                                    setFormData({ ...formData, address_line2: e.target.value })
                                                 }
                                                 placeholder={t('customer.address_manager.suite_placeholder') as string}
                                                 className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
@@ -520,7 +520,7 @@ export default function AddressManagerEnhanced({
                                             <div className="px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm">
                                                 {formData.latitude && formData.longitude ? (
                                                     <span className="text-green-400">
-                                                        ✓ {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                                                        ✓ {parseFloat(formData.latitude).toFixed(6)}, {parseFloat(formData.longitude).toFixed(6)}
                                                     </span>
                                                 ) : (
                                                     <span className="text-gray-500">{t('customer.address_manager.select_location_on_map')}</span>
@@ -574,7 +574,7 @@ export default function AddressManagerEnhanced({
                                         onClick={handleSave}
                                         disabled={
                                             !formData.label ||
-                                            !formData.address_line_1 ||
+                                            !formData.address_line1 ||
                                             createMutation.isPending ||
                                             updateMutation.isPending
                                         }

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
 import { Button } from '@/app/components/ui/Button';
 import { Printer, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
-import { DiningTable, Floor } from '@/app/types/domain';
+import { DiningTable, Floor } from '@/types';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 export default function QrPrintView() {

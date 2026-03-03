@@ -5,7 +5,7 @@ import Button from '@/app/components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch } from '@/app/utils/api';
-import { ApiResponse } from '@/app/types/domain';
+import { ApiResponse } from '@/types';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 interface Notification {

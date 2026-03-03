@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 
 export interface TableCartItem {
     menu_item_id: number;

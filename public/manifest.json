@@ -29,20 +29,6 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshot-narrow.png",
-      "sizes": "375x812",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Place Order",
@@ -51,8 +37,8 @@
       "url": "/?action=order",
       "icons": [
         {
-          "src": "/icon-order.png",
-          "sizes": "96x96",
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]
@@ -64,8 +50,8 @@
       "url": "/admin/dashboard",
       "icons": [
         {
-          "src": "/icon-admin.png",
-          "sizes": "96x96",
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]
@@ -77,8 +63,8 @@
       "url": "/employee/pos",
       "icons": [
         {
-          "src": "/icon-pos.png",
-          "sizes": "96x96",
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]

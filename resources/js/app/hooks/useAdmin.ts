@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
-import { ApiResponse } from '@/app/types/domain';
+import { ApiResponse } from '@/types';
 
 export interface RevenuePoint { label: string; value: number }
 export interface OrderStats { pending: number; preparing: number; ready: number; delivered: number; cancelled: number }

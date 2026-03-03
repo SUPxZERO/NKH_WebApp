@@ -8,7 +8,7 @@ import { Skeleton } from '@/app/components/ui/Loading';
 import { useCartStore } from '@/app/store/cart';
 import { ShoppingCart, XCircle, Star, Grid3x3, List, Calculator, Info, Clock, Receipt, Plus, RefreshCw } from 'lucide-react';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem, Order, DiningTable, Floor } from '@/types';
 import { toastSuccess } from '@/app/utils/toast';
 import { useActivePOSOrders } from '@/app/hooks/useOrderPayment';
 import POSOrderPaymentPanel from '@/app/components/pos/POSOrderPaymentPanel';
@@ -21,20 +21,6 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { isUserInInputField } from '@/app/utils/shortcuts';
-
-interface Floor {
-  id: number;
-  name: string;
-  tables: Table[];
-}
-
-interface Table {
-  id: number;
-  code: string;
-  status: 'available' | 'occupied' | 'reserved' | 'unavailable';
-}
-
-
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 
 export default function POS() {
@@ -67,7 +53,7 @@ export default function POS() {
   const [activeTab, setActiveTab] = useState<'new' | 'orders'>('new');
   const [showNumpad, setShowNumpad] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-  const [paymentOrder, setPaymentOrder] = useState<any>(null);
+  const [paymentOrder, setPaymentOrder] = useState<Order | null>(null);
   const [quantity, setQuantity] = useState('1');
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -96,7 +82,7 @@ export default function POS() {
   // --- New Logic State ---
   const [activeFloorId, setActiveFloorId] = useState<number | undefined>();
   const [selectedTable, setSelectedTable] = useState<number | undefined>();
-  const [heldOrders, setHeldOrders] = useState<any[]>([]);
+  const [heldOrders, setHeldOrders] = useState<{ id: number; items: any[]; tableId?: number; timestamp: string; total: number }[]>([]);
 
   // Fetch Tables & Floors
   const { data: floorsData, refetch: refetchTables } = useQuery({
@@ -302,7 +288,7 @@ export default function POS() {
   };
 
   const updateTableStatusMutation = useMutation({
-    mutationFn: async (status: Table['status']) => {
+    mutationFn: async (status: DiningTable['status']) => {
       if (!selectedTable) {
         throw new Error(t('employee.pos.messages.no_table_selected') as string);
       }
@@ -681,7 +667,7 @@ export default function POS() {
                   </div>
 
                   {/* Quick Status Actions */}
-                      {selectedTableData && (
+                  {selectedTableData && (
                     <div className="space-y-2 pt-2">
                       <div className="text-xs text-muted-foreground">
                         {t('employee.pos.selected')}: <span className="font-semibold text-foreground">{selectedTableData.code}</span>

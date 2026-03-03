@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Minus, Plus, X, Trash2 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
-import { OrderItem } from '@/app/types/domain';
+import { OrderItem } from '@/types';
 
 interface QuantitySelectorProps {
     quantity: number;

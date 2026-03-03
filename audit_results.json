@@ -1,0 +1,11 @@
+{
+    "backend_namespaces": [],
+    "backend_imports": [],
+    "backend_inertia": [],
+    "backend_models": [],
+    "frontend_imports": [],
+    "anomalous_directories": [
+        "resourcesjsPagesAdminInventory",
+        "resourcesjsappcomponentsadminpayment-methods"
+    ]
+}

@@ -12,7 +12,7 @@ import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Customer, Location } from '@/app/types/domain';
+import { Customer, Location } from '@/types';
 import { cn } from '@/app/utils/cn';
 import Avatar from '@/app/components/ui/Avatar';
 
@@ -160,10 +160,10 @@ export default function Customers() {
   const handleEdit = (customer: Customer) => {
     setEditingCustomer(customer);
     setFormData({
-      name: customer.user.name, email: customer.user.email, phone: customer.user.phone || '', password: '',
-      birth_date: customer.birth_date || '', gender: customer.gender || '',
+      name: customer.user?.name || '', email: customer.user?.email || '', phone: customer.user?.phone || '', password: '',
+      birth_date: (customer.birth_date as string) || '', gender: (customer.gender as string) || '',
       preferred_location_id: customer.preferred_location_id?.toString() || '',
-      points_balance: customer.points_balance, notes: customer.notes || '', is_active: customer.user.is_active
+      points_balance: customer.points_balance || 0, notes: (customer.notes as string) || '', is_active: customer.user?.is_active ?? true
     });
     setOpenEdit(true);
   };

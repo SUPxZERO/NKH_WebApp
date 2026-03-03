@@ -13,7 +13,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { Badge } from '@/app/components/ui/Badge';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError, toastInfo } from '@/app/utils/toast';
-import { DiningTable, Floor, Location } from '@/app/types/domain';
+import { DiningTable, Floor, Location } from '@/types';
 import { cn } from '@/app/utils/cn';
 import { useLanguage } from '@/app/context/LanguageContext';
 
@@ -203,7 +203,7 @@ export default function Tables() {
       floor_id: table.floor_id.toString(),
       code: table.code,
       capacity: table.capacity.toString(),
-      status: table.status
+      status: (table.status as 'available' | 'reserved' | 'occupied' | 'unavailable') || 'available'
     });
     setOpenEdit(true);
   };

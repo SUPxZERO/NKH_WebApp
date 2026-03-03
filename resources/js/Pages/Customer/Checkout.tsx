@@ -157,7 +157,7 @@ export default function Checkout() {
 
     // Build payload matching backend API expectations
     const payload = {
-      order_type: cart.mode, // 'delivery' | 'pickup' | 'dine-in'
+      order_type: (cart.mode === 'dine-in' ? 'dine_in' : cart.mode) as any, // 'delivery' | 'pickup' | 'dine-in'
       location_id: cart.location_id,
       customer_address_id: cart.mode === 'delivery' ? cart.selectedAddress?.id : undefined,
       order_now: cart.orderNow, // ASAP order flag

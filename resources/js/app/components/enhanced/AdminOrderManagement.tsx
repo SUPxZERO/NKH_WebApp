@@ -19,7 +19,7 @@ import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch } from '@/app/utils/api';
-import { Order, ApiResponse } from '@/app/types/domain';
+import { Order, ApiResponse } from '@/types';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 
@@ -175,10 +175,8 @@ export function AdminOrderManagement() {
                   {/* Order Header */}
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-bold text-lg">#{order.id}</h3>
-                      <p className="text-sm text-gray-400">
-                        {new Date(order.created_at).toLocaleString()}
-                      </p>
+                      <div className="font-semibold text-foreground">#{order.id}</div>
+                      <div className="text-xs text-muted-foreground">{order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}</div>
                     </div>
 
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
@@ -198,7 +196,7 @@ export function AdminOrderManagement() {
                       <span className="text-sm">{order.customer?.user?.phone}</span>
                     </div>
 
-                    {order.mode === 'delivery' && order.delivery_address && (
+                    {order.order_type === 'delivery' && order.delivery_address && (
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
                         <span className="text-sm">
@@ -217,7 +215,7 @@ export function AdminOrderManagement() {
 
                     <div className="flex justify-between text-sm">
                       <span>Mode:</span>
-                      <span className="capitalize">{order.mode}</span>
+                      <span className="capitalize">{order.order_type}</span>
                     </div>
 
                     <div className="flex justify-between font-bold">
@@ -359,11 +357,11 @@ export function AdminOrderManagement() {
                   </div>
                   <div className="flex justify-between">
                     <span>Mode:</span>
-                    <span className="capitalize">{selectedOrder.mode}</span>
+                    <span className="capitalize">{selectedOrder.order_type}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Placed:</span>
-                    <span>{new Date(selectedOrder.created_at).toLocaleString()}</span>
+                    <span>{new Date(selectedOrder.created_at || '').toLocaleString()}</span>
                   </div>
                 </CardContent>
               </Card>

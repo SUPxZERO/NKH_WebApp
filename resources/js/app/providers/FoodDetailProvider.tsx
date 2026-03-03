@@ -10,7 +10,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { FoodDetailModal } from '@/app/components/food/FoodDetailModal';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import { useCartStore } from '@/app/store/cart';
 
 // ============================================================================

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardFooter } from '@/app/components/ui/C
 import { Input } from '@/app/components/ui/Input';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { useCategories, useMenuItems } from '@/app/hooks/useMenu';
-import { MenuItem, OrderItem } from '@/app/types/domain';
+import { MenuItem, OrderItem } from '@/types';
 import { useCartStore } from '@/app/store/cart';
 import { toastSuccess, toastInfo } from '@/app/utils/toast';
 import { ShoppingCart, XCircle, LogIn, ArrowRight, Star, Clock, TrendingUp, Plus } from 'lucide-react';

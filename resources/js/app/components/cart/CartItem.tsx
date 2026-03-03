@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Minus, Plus, X } from 'lucide-react';
-import { OrderItem } from '@/app/types/domain';
+import { OrderItem } from '@/types';
 import { cn } from '@/app/utils/cn';
 
 interface CartItemProps {

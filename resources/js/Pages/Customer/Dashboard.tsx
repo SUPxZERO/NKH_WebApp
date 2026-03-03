@@ -5,7 +5,7 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiDelete } from '@/app/utils/api';
-import { ApiResponse, Order, Reservation } from '@/app/types/domain';
+import { ApiResponse, Order, Reservation } from '@/types';
 import { PageProps } from '@/types';
 import { RequireAuth } from '@/app/providers/AuthProvider';
 import {
@@ -432,7 +432,7 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <h4 className="font-bold text-gray-900 dark:text-white">{t('customer.dashboard.order_number')}{order.id}</h4>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(order.created_at).toLocaleDateString()} • {order.items?.length || 0} {t('customer.dashboard.items')}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{(order.created_at ? new Date(order.created_at) : new Date()).toLocaleDateString()} • {order.items?.length || 0} {t('customer.dashboard.items')}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -478,10 +478,10 @@ export default function Dashboard() {
                       <div key={res.id} className="p-2.5 sm:p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600 flex justify-between items-center group hover:border-fuchsia-300 dark:hover:border-fuchsia-700 transition-colors">
                         <div className="flex items-center gap-2.5 sm:gap-3">
                           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold text-[10px] sm:text-xs border border-orange-200 dark:border-orange-800/50">
-                            {new Date(res.reserved_for).getDate()}
+                            {(res.reserved_for ? new Date(res.reserved_for) : new Date()).getDate()}
                           </div>
                           <div>
-                            <div className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">{new Date(res.reserved_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                            <div className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">{(res.reserved_for ? new Date(res.reserved_for) : new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                             <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{res.guest_count} {t('customer.dashboard.guests')}</div>
                           </div>
                         </div>

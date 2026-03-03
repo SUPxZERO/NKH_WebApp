@@ -4,7 +4,7 @@ import { useTranslation } from '@/app/hooks/useTranslation';
 import { Modal } from '@/app/components/ui/Modal';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
-import { Promotion } from '@/app/types/domain';
+import { Promotion } from '@/types';
 import { apiGet } from '@/app/utils/api';
 
 interface PromotionFormModalProps {

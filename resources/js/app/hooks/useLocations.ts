@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
-import { Location } from '@/app/types/domain';
+import { Location } from '@/types';
 
 export function useLocations() {
     return useQuery<Location[]>({

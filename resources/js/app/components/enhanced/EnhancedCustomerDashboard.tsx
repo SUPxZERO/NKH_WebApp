@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import EnhancedButton from '@/app/components/ui/EnhancedButton';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
-import { Order, MenuItem, ApiResponse } from '@/app/types/domain';
+import { Order, MenuItem, ApiResponse } from '@/types';
 import QuickOrderPanel from './QuickOrderPanel';
 import SmartOrderRecommendations from './SmartOrderRecommendations';
 
@@ -128,8 +128,8 @@ export function EnhancedCustomerDashboard() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id
-                    ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
-                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                  ? 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg'
+                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
                   }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -297,7 +297,7 @@ export function EnhancedCustomerDashboard() {
                             <div>
                               <div className="font-medium">{order.items?.length || 0} items</div>
                               <div className="text-sm text-gray-400">
-                                {new Date(order.created_at).toLocaleDateString()}
+                                {(order.created_at ? new Date(order.created_at) : new Date()).toLocaleDateString()}
                               </div>
                             </div>
                           </div>
@@ -305,8 +305,8 @@ export function EnhancedCustomerDashboard() {
                           <div className="text-right">
                             <div className="font-bold text-fuchsia-400">${order.total.toFixed(2)}</div>
                             <div className={`text-xs px-2 py-1 rounded-full ${order.status === 'delivered' ? 'bg-emerald-500/20 text-emerald-400' :
-                                order.status === 'preparing' ? 'bg-orange-500/20 text-orange-400' :
-                                  'bg-blue-500/20 text-blue-400'
+                              order.status === 'preparing' ? 'bg-orange-500/20 text-orange-400' :
+                                'bg-blue-500/20 text-blue-400'
                               }`}>
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </div>

@@ -12,7 +12,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
-import { Floor, Location } from '@/app/types/domain';
+import { Floor, Location } from '@/types';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 // StatCard Component with vibrant gradients - Mobile optimized
@@ -165,7 +165,7 @@ export default function Floors() {
     setFormData({
       location_id: floor.location_id.toString(),
       name: floor.name,
-      display_order: floor.display_order.toString(),
+      display_order: (floor.display_order ?? 0).toString(),
       is_active: floor.is_active
     });
     setOpenEdit(true);

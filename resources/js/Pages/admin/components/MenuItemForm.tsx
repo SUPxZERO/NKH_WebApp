@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/app/hooks/useTranslation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiPost, apiPut } from '@/app/utils/api';
-import { MenuItem, Category } from '@/app/types/domain';
+import { MenuItem, Category } from '@/types';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';

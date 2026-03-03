@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/app/layouts/AdminLayout';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
-import { Employee, Position, Location } from '@/app/types/domain';
+import { Employee, Position, Location } from '@/types';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';
@@ -187,14 +187,14 @@ export default function Employees() {
   const handleEdit = (employee: Employee) => {
     setEditingEmployee(employee);
     setFormData({
-      name: employee.user.name, email: employee.user.email, phone: employee.phone || '', password: '',
-      employee_code: employee.employee_code, hire_date: employee.hire_date || '',
-      salary_type: employee.salary_type, salary: employee.salary?.toString() || '',
+      name: employee.user?.name ? String(employee.user.name) : '', email: employee.user?.email || '', phone: employee.phone || '', password: '',
+      employee_code: employee.employee_code || '', hire_date: employee.hire_date || '',
+      salary_type: (employee.salary_type as 'monthly' | 'hourly') || 'monthly', salary: employee.salary?.toString() || '',
       address: employee.address || '',
-      latitude: employee.user.latitude ? parseFloat(String(employee.user.latitude)) : null,
-      longitude: employee.user.longitude ? parseFloat(String(employee.user.longitude)) : null,
+      latitude: employee.user?.latitude ? parseFloat(String(employee.user.latitude)) : null,
+      longitude: employee.user?.longitude ? parseFloat(String(employee.user.longitude)) : null,
       position_id: employee.position_id?.toString() || '', location_id: employee.location_id?.toString() || '',
-      status: employee.status, role: employee.user.roles?.[0] || 'employee'
+      status: (employee.status as 'active' | 'inactive' | 'terminated' | 'on_leave') || 'active', role: employee.user?.roles?.[0] || 'employee'
     });
     setOpenEdit(true);
   };

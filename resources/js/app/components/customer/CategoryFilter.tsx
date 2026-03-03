@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Category } from '@/app/types/domain';
+import { Category } from '@/types';
 import { cn } from '@/app/utils/cn';
 
 interface CategoryFilterProps {

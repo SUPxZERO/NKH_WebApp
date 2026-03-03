@@ -262,7 +262,7 @@ export default function Cart() {
                 tax={cart.tax}
                 total={cart.total}
                 itemCount={cart.items.length}
-                mode={cart.mode}
+                mode={cart.mode as 'delivery' | 'pickup' | 'dine-in'}
                 onCheckout={handleCheckout}
                 isCheckoutDisabled={cart.items.length === 0 || !cart.location_id}
               />

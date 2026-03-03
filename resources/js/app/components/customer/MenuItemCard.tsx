@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Star, Heart, Clock, TrendingUp, Flame, Leaf } from 'lucide-react';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import { cn } from '@/app/utils/cn';
 import Button from '@/app/components/ui/Button';
 import { useFoodDetailSafe } from '@/app/providers/FoodDetailProvider';

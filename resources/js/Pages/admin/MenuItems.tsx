@@ -4,7 +4,7 @@ import { useTranslation } from '@/app/hooks/useTranslation';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
-import { MenuItem, Category } from '@/app/types/domain';
+import { MenuItem, Category } from '@/types';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import Modal from '@/app/components/ui/Modal';

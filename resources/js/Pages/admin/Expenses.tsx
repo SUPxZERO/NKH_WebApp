@@ -12,7 +12,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
-import { Expense, ExpenseCategory } from '@/app/types/domain';
+import { Expense, ExpenseCategory } from '@/types';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 // StatCard Component with vibrant gradients - Mobile optimized
@@ -197,12 +197,12 @@ export default function Expenses() {
     setEditingExpense(expense);
     setFormData({
       expense_category_id: expense.expense_category_id.toString(),
-      expense_date: expense.expense_date,
+      expense_date: expense.expense_date || '',
       amount: expense.amount.toString(),
       vendor_name: expense.vendor_name || '',
       reference: expense.reference || '',
       description: expense.description || '',
-      status: expense.status
+      status: (expense.status as 'draft' | 'approved' | 'paid' | 'voided') || 'approved'
     });
     setOpenEdit(true);
   };
@@ -343,10 +343,10 @@ export default function Expenses() {
               <motion.div key={expense.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gradient-to-r hover:from-purple-500/5 hover:to-transparent transition-all group">
                 <div className="col-span-2 text-sm text-muted-foreground">
-                  {new Date(expense.expense_date).toLocaleDateString()}
+                  {expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'N/A'}
                 </div>
                 <div className="col-span-3">
-                  <div className="font-medium text-foreground">{expense.expense_category?.name || t('admin.finance.expenses.uncategorized')}</div>
+                  <div className="font-medium text-foreground">{(expense as any).expense_category?.name || t('admin.finance.expenses.uncategorized')}</div>
                   <div className="text-xs text-muted-foreground">{expense.vendor_name || '-'}</div>
                 </div>
                 <div className="col-span-2 font-bold text-foreground">
@@ -354,7 +354,7 @@ export default function Expenses() {
                 </div>
                 <div className="col-span-2 text-sm text-muted-foreground font-mono">{expense.reference || '-'}</div>
                 <div className="col-span-2">
-                  <span className={cn("px-2 py-1 rounded-md text-xs font-medium border", getStatusColor(expense.status))}>
+                  <span className={cn("px-2 py-1 rounded-md text-xs font-medium border", getStatusColor(expense.status || 'draft'))}>
                     {t(`finance.expenses.status.${expense.status || 'draft'}`)}
                   </span>
                 </div>
@@ -398,13 +398,13 @@ export default function Expenses() {
                     <DollarSign className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-sm text-foreground truncate">{expense.expense_category?.name || t('admin.finance.expenses.uncategorized')}</h3>
+                    <h3 className="font-semibold text-sm text-foreground truncate">{(expense as any).expense_category?.name || t('admin.finance.expenses.uncategorized')}</h3>
                     <p className="text-[10px] text-muted-foreground truncate">
-                      {new Date(expense.expense_date).toLocaleDateString()}
+                      {expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                 </div>
-                <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0", getStatusColor(expense.status))}>
+                <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0", getStatusColor(expense.status || 'draft'))}>
                   {t(`finance.expenses.status.${expense.status || 'draft'}`)}
                 </span>
               </div>

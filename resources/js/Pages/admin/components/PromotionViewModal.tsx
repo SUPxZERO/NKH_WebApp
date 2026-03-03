@@ -3,7 +3,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { Button } from '@/app/components/ui/Button';
 import { Badge } from '@/app/components/ui/Badge';
 import { Edit, Calendar, Users, DollarSign, Tag, Percent, Gift } from 'lucide-react';
-import { Promotion } from '@/app/types/domain';
+import { Promotion } from '@/types';
 
 interface PromotionViewModalProps {
   open: boolean;
@@ -42,8 +42,8 @@ export default function PromotionViewModal({
 
   const getStatusColor = (promotion: Promotion) => {
     const now = new Date();
-    const startDate = new Date(promotion.start_date);
-    const endDate = new Date(promotion.end_date);
+    const startDate = promotion.start_date ? new Date(promotion.start_date) : new Date();
+    const endDate = promotion.end_date ? new Date(promotion.end_date) : new Date();
 
     if (!promotion.is_active) return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     if (now < startDate) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
@@ -53,8 +53,8 @@ export default function PromotionViewModal({
 
   const getStatusText = (promotion: Promotion) => {
     const now = new Date();
-    const startDate = new Date(promotion.start_date);
-    const endDate = new Date(promotion.end_date);
+    const startDate = promotion.start_date ? new Date(promotion.start_date) : new Date();
+    const endDate = promotion.end_date ? new Date(promotion.end_date) : new Date();
 
     if (!promotion.is_active) return 'Inactive';
     if (now < startDate) return 'Scheduled';
@@ -78,7 +78,7 @@ export default function PromotionViewModal({
   };
 
   const usagePercentage = promotion.usage_limit
-    ? (promotion.usage_count / promotion.usage_limit) * 100
+    ? ((promotion.usage_count || 0) / promotion.usage_limit) * 100
     : 0;
 
   return (
@@ -101,9 +101,9 @@ export default function PromotionViewModal({
             <Badge className={getStatusColor(promotion)}>
               {getStatusText(promotion)}
             </Badge>
-            <Badge className={getTypeColor(promotion.type)}>
+            <Badge className={getTypeColor(promotion.type || 'percentage')}>
               <div className="flex items-center gap-1">
-                {getTypeIcon(promotion.type)}
+                {getTypeIcon(promotion.type || 'percentage')}
                 {(promotion.type || 'percentage').replace(/_/g, ' ')}
               </div>
             </Badge>
@@ -181,17 +181,17 @@ export default function PromotionViewModal({
 
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Start Date:</span>
-                <span className="text-foreground">{new Date(promotion.start_date).toLocaleString()}</span>
+                <span className="text-foreground">{promotion.start_date ? new Date(promotion.start_date).toLocaleString() : 'N/A'}</span>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">End Date:</span>
-                <span className="text-foreground">{new Date(promotion.end_date).toLocaleString()}</span>
+                <span className="text-foreground">{promotion.end_date ? new Date(promotion.end_date).toLocaleString() : 'N/A'}</span>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Created:</span>
-                <span className="text-foreground">{new Date(promotion.created_at).toLocaleDateString()}</span>
+                <span className="text-foreground">{promotion.created_at ? new Date(promotion.created_at).toLocaleDateString() : 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -210,18 +210,18 @@ export default function PromotionViewModal({
           <h3 className="text-lg font-semibold text-foreground mb-3">Performance Metrics</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400">{promotion.usage_count}</div>
+              <div className="text-2xl font-bold text-purple-400">{promotion.usage_count || 0}</div>
               <div className="text-sm text-muted-foreground">Times Used</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-400">
-                {promotion.usage_limit ? `${((promotion.usage_count / promotion.usage_limit) * 100).toFixed(1)}%` : '∞'}
+                {promotion.usage_limit ? `${(((promotion.usage_count || 0) / promotion.usage_limit) * 100).toFixed(1)}%` : '∞'}
               </div>
               <div className="text-sm text-muted-foreground">Usage Rate</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-400">
-                {Math.max(0, Math.ceil((new Date(promotion.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))}
+                {Math.max(0, Math.ceil(((promotion.end_date ? new Date(promotion.end_date) : new Date()).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))}
               </div>
               <div className="text-sm text-muted-foreground">Days Left</div>
             </div>

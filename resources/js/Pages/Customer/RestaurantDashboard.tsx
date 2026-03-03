@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
-import { Order, MenuItem, ApiResponse } from '@/app/types/domain';
+import { Order, MenuItem, ApiResponse } from '@/types';
 import RestaurantLayout from '@/Layouts/RestaurantLayout';
 import { RestaurantCard, CardHeader, CardContent, CardTitle, CardDescription } from '@/Components/ui/RestaurantCard';
 import { RestaurantButton } from '@/Components/ui/RestaurantButton';

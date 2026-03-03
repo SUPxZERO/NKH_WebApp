@@ -20,7 +20,7 @@ import Modal from '@/app/components/ui/Modal';
 import { Input } from '@/app/components/ui/Input';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch } from '@/app/utils/api';
-import { ApiResponse } from '@/app/types/domain';
+import { ApiResponse } from '@/types';
 
 interface Location {
   id: number;

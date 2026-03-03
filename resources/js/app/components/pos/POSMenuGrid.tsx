@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import Button from '@/app/components/ui/Button';
 import { ShoppingCart, Info } from 'lucide-react';
 import { Skeleton } from '@/app/components/ui/Loading';

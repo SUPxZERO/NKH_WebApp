@@ -13,7 +13,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
-import { Location } from '@/app/types/domain';
+import { Location } from '@/types';
 
 // StatCard Component with vibrant gradients
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {

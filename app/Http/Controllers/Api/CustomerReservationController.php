@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Floor;
 use App\Models\Location;
 use App\Services\NotificationService;
+use App\Services\ReservationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -213,7 +214,7 @@ class CustomerReservationController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, ReservationService $reservationService)
     {
         $customer = $this->resolveCustomer($request);
 
@@ -221,14 +222,12 @@ class CustomerReservationController extends Controller
             'location_id' => ['nullable', 'integer', 'exists:locations,id'],
             'floor_id' => ['nullable', 'integer', 'exists:floors,id'],
             'table_id' => ['nullable', 'integer', 'exists:tables,id'],
-            'reserved_for' => ['required', 'date_format:Y-m-d\\TH:i'],
+            'reserved_for' => ['required', 'date_format:Y-m-d\TH:i'],
             'guest_count' => ['required', 'integer', 'min:1'],
             'notes' => ['nullable', 'string'],
         ]);
 
-        $reservedAt = Carbon::createFromFormat('Y-m-d\\TH:i', $validated['reserved_for']);
-        $reservationDate = $reservedAt->toDateString();
-        $reservationTime = $reservedAt->format('H:i:s');
+        $reservedAt = Carbon::createFromFormat('Y-m-d\TH:i', $validated['reserved_for']);
 
         // Determine location from table -> floor -> location chain if table_id provided
         $locationId = null;
@@ -250,100 +249,27 @@ class CustomerReservationController extends Controller
 
         $guestCount = (int) $validated['guest_count'];
 
-        $reservation = DB::transaction(function () use ($customer, $locationId, $reservationDate, $reservationTime, $guestCount, $validated, $reservedAt) {
-            $selectedTable = null;
-
-            // If specific table_id provided, use that table
-            if (!empty($validated['table_id'])) {
-                $selectedTable = DiningTable::with('floor')->findOrFail($validated['table_id']);
-
-                // Verify table capacity
-                if ($guestCount > (int) $selectedTable->capacity) {
-                    abort(422, __('messages.api.errors.guest_limit'));
-                }
-
-                // Check if table is available at this time
-                $hasConflict = Reservation::where('location_id', $locationId)
-                    ->where('table_id', $selectedTable->id)
-                    ->where('reservation_date', $reservationDate)
-                    ->where('reservation_time', $reservationTime)
-                    ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
-                    ->lockForUpdate()
-                    ->exists();
-
-                if ($hasConflict) {
-                    abort(409, __('messages.api.errors.table_reserved'));
-                }
-            } else {
-                // Find best-fit table at this location (original behavior)
-                $tables = DiningTable::query()
-                    ->whereHas('floor', function ($q) use ($locationId) {
-                        $q->where('location_id', $locationId);
-                    })
-                    ->where('capacity', '>=', $guestCount)
-                    ->where('status', '!=', 'unavailable')
-                    ->orderBy('capacity')
-                    ->get();
-
-                foreach ($tables as $table) {
-                    $hasConflict = Reservation::where('location_id', $locationId)
-                        ->where('table_id', $table->id)
-                        ->where('reservation_date', $reservationDate)
-                        ->where('reservation_time', $reservationTime)
-                        ->where('status', '!=', 'cancelled')
-                        ->lockForUpdate()
-                        ->exists();
-
-                    if (!$hasConflict) {
-                        $selectedTable = $table;
-                        break;
-                    }
-                }
-
-                if (!$selectedTable) {
-                    abort(409, __('messages.api.errors.no_tables_available'));
-                }
-
-                if ($guestCount > (int) $selectedTable->capacity) {
-                    abort(422, __('messages.api.errors.guest_limit'));
-                }
-            }
-
-            $reservationNumber = $this->generateReservationNumber($locationId, $reservedAt);
-            $code = $this->generateReservationCode($reservationNumber);
-
-            $reservedForLabel = $customer->user->name
-                ?? $customer->customer_code
-                ?? (string) $customer->id;
-
-            return Reservation::create([
-                'location_id' => $locationId,
-                'customer_id' => $customer->id,
-                'table_id' => $selectedTable->id,
-                'code' => $code,
-                'reservation_number' => $reservationNumber,
-                'reserved_for' => $reservedForLabel,
-                'party_size' => $guestCount,
-                'reservation_date' => $reservationDate,
-                'reservation_time' => $reservationTime,
-                'duration_minutes' => 60,
-                'guest_count' => $guestCount,
-                'status' => 'pending',
-                'notes' => $validated['notes'] ?? null,
-            ]);
-        });
+        // Delegate heavy logic to the Service
+        $reservation = $reservationService->createReservation(
+            $customer,
+            $locationId,
+            $reservedAt,
+            $guestCount,
+            $validated['table_id'] ?? null,
+            $validated['notes'] ?? null
+        );
 
         // Send reservation confirmation notification
         try {
             if ($customer->user) {
                 $notificationService = app(NotificationService::class);
-                $reservedAt = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
+                $reservedAtDate = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
                 $notificationService->sendSystemNotification(
                     __('messages.api.reservations.notifications.customer_confirmed.title'),
                     __('messages.api.reservations.notifications.customer_confirmed.body', [
                         'count' => $reservation->guest_count,
-                        'date' => $reservedAt->format('M d, Y'),
-                        'time' => $reservedAt->format('g:i A'),
+                        'date' => $reservedAtDate->format('M d, Y'),
+                        'time' => $reservedAtDate->format('g:i A'),
                         'code' => $reservation->code
                     ]),
                     $customer->user,
@@ -355,56 +281,5 @@ class CustomerReservationController extends Controller
         }
 
         return new ReservationResource($reservation->load(['table', 'customer.user', 'location']));
-    }
-
-    public function destroy(Request $request, Reservation $reservation)
-    {
-        $customer = $this->resolveCustomer($request);
-
-        if ((int) $reservation->customer_id !== (int) $customer->id) {
-            abort(403, __('messages.api.errors.cancel_own_only'));
-        }
-
-        if (!$reservation->canCustomerCancel()) {
-            abort(422, __('messages.api.errors.cancel_time_limit'));
-        }
-
-        $reservation->status = 'cancelled';
-        $reservation->save();
-
-        return response()->json(['message' => __('messages.api.success.reservation_cancelled')]);
-    }
-
-    private function generateReservationNumber(int $locationId, Carbon $date): string
-    {
-        $attempts = 0;
-        $maxAttempts = 10;
-
-        do {
-            $number = 'RES-' . $locationId . '-' . $date->format('Ymd') . '-' . str_pad(random_int(1, 9999), 4, '0', STR_PAD_LEFT);
-            $exists = Reservation::where('reservation_number', $number)->exists();
-            $attempts++;
-        } while ($exists && $attempts < $maxAttempts);
-
-        return $number;
-    }
-
-    private function generateReservationCode(string $reservationNumber): string
-    {
-        $attempts = 0;
-        $codeExists = false;
-        $code = '';
-
-        do {
-            $code = substr(md5($reservationNumber . random_int(1, PHP_INT_MAX) . microtime(true)), 0, 20);
-            $codeExists = Reservation::where('code', $code)->exists();
-            $attempts++;
-        } while ($codeExists && $attempts < 5);
-
-        if ($codeExists) {
-            throw new \RuntimeException('Unable to generate unique reservation code.');
-        }
-
-        return $code;
     }
 }

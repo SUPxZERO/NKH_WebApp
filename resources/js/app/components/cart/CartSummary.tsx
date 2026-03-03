@@ -13,7 +13,7 @@ interface CartSummaryProps {
     tax: number;
     total: number;
     itemCount: number;
-    mode: 'delivery' | 'pickup' | 'dine-in';
+    mode: string;
     onCheckout: () => void;
     isCheckoutDisabled?: boolean;
     promoCode?: string;

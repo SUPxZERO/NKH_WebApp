@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/app/utils/api';
-import { ApiResponse, Order } from '@/app/types/domain';
+import { ApiResponse, Order } from '@/types';
 
 export interface OnlineOrderPayload {
   order_type: 'delivery' | 'pickup' | 'dine-in';  // Backend expects order_type, not mode

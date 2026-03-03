@@ -19,10 +19,8 @@
         <link rel="manifest" href="/manifest.json">
         
         <!-- Apple Touch Icons -->
-        <link rel="apple-touch-icon" href="/icon-192.png">
-        <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png">
-        <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
-        <link rel="apple-touch-icon" sizes="167x167" href="/icon-167.png">
+        <link rel="apple-touch-icon" href="/icons/icon-192.png">
+        <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

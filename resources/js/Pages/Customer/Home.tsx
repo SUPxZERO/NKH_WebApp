@@ -22,7 +22,7 @@ import {
   Utensils
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import {
   BrandDivider,
   GlowCard,

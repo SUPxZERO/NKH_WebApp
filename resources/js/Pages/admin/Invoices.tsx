@@ -12,7 +12,7 @@ import { Modal } from '@/app/components/ui/Modal';
 import { apiGet } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
-import { Invoice } from '@/app/types/domain';
+import { Invoice } from '@/types';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useLanguage } from '@/app/context/LanguageContext';

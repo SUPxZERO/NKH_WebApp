@@ -22,7 +22,7 @@ import {
   Eye
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import { RestaurantButton } from '@/Components/ui/RestaurantButton';
 import { animationVariants } from '@/design-system/animations';
 import { useFoodDetailSafe } from '@/app/providers/FoodDetailProvider';

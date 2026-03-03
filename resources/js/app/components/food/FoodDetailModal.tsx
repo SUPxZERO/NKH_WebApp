@@ -32,7 +32,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import { apiGet } from '@/app/utils/api';
 import { RestaurantButton } from '@/Components/ui/RestaurantButton';
 import { useModalHotkeys } from '@/app/hooks/useShortcuts';

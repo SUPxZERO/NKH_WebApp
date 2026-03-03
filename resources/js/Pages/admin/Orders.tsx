@@ -13,7 +13,7 @@ import { Button } from '@/app/components/ui/Button';
 import { Modal } from '@/app/components/ui/Modal';
 import { apiGet, apiPut, apiPatch } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Order } from '@/app/types/domain';
+import { Order } from '@/types';
 import { cn } from '@/app/utils/cn';
 import { useSmartPolling } from '@/app/hooks/useSmartPolling';
 import { useTranslation } from '@/app/hooks/useTranslation';

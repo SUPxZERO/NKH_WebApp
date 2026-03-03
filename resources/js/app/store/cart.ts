@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { OrderItem, OrderMode, CustomerAddress, TimeSlot } from '@/app/types/domain';
+import { OrderItem, OrderMode, CustomerAddress, TimeSlot } from '@/types';
 
 interface CartState {
   mode: OrderMode; // 'delivery' | 'pickup' | 'dine-in'

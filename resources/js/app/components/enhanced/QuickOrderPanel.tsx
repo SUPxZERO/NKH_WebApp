@@ -4,7 +4,7 @@ import { Plus, Minus, ShoppingCart, Clock, Star, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/app/components/ui/Card';
 import EnhancedButton from '@/app/components/ui/EnhancedButton';
 import { useCartStore } from '@/app/store/cart';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 
 interface QuickOrderPanelProps {
   popularItems: MenuItem[];

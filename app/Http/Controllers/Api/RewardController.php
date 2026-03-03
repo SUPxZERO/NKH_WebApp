@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TelegramAwareAuth;
 use App\Models\Customer;
 use App\Models\LoyaltyPoint;
-use App\Models\Reward;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;

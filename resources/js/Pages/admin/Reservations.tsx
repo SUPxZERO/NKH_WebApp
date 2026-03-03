@@ -13,7 +13,7 @@ import { Button } from '@/app/components/ui/Button';
 import { Modal } from '@/app/components/ui/Modal';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { Reservation, DiningTable, Customer } from '@/app/types/domain';
+import { Reservation, DiningTable, Customer } from '@/types';
 import { cn } from '@/app/utils/cn';
 import { useReservationUpdates } from '@/app/hooks/useRealtime';
 
@@ -129,7 +129,7 @@ export default function Reservations() {
       seated: list.filter(r => r.status === 'seated').length,
       pending: list.filter(r => r.status === 'pending').length,
       confirmed: list.filter(r => r.status === 'confirmed').length,
-      late: list.filter(r => (r.status === 'pending' || r.status === 'confirmed') && new Date(r.reserved_for) < lateThreshold).length
+      late: list.filter(r => (r.status === 'pending' || r.status === 'confirmed') && r.reserved_for && new Date(r.reserved_for as string) < lateThreshold).length
     };
   }, [reservationList, reservations]);
 
@@ -176,12 +176,12 @@ export default function Reservations() {
     setFormData({
       location_id: (reservation as any).location_id?.toString() || '',
       floor_id: (reservation as any).table?.floor_id?.toString() || '',
-      table_id: reservation.table_id.toString(),
-      customer_id: reservation.customer_id.toString(),
+      table_id: reservation.table_id?.toString() || '',
+      customer_id: reservation.customer_id?.toString() || '',
       reserved_for: dateStr,
-      duration_minutes: reservation.duration_minutes.toString(),
-      guest_count: reservation.guest_count.toString(),
-      status: reservation.status,
+      duration_minutes: (reservation.duration_minutes || 60).toString(),
+      guest_count: (reservation.guest_count || 2).toString(),
+      status: (reservation.status as any) || 'pending',
       notes: reservation.notes || ''
     });
     setEditingReservation(reservation);
@@ -320,7 +320,7 @@ export default function Reservations() {
                     onClick={() => { setSelectedReservation(res); setOpenView(true); }}>
                     {late && (
                       <div className="absolute inset-x-0 top-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium py-1.5 px-3 rounded-t-xl flex items-center gap-1.5 justify-center">
-                        <AlertCircle className="w-3.5 h-3.5" /> {t('admin.reservations.stats.late')} - {formatTimeAgo(res.reserved_for)}
+                        <AlertCircle className="w-3.5 h-3.5" /> {t('admin.reservations.stats.late')} - {formatTimeAgo(res.reserved_for as string || '')}
                       </div>
                     )}
                     <div className={cn("flex items-start gap-4", late && "mt-6")}>

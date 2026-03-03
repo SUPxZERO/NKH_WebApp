@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from '@/app/hooks/useTranslation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import Modal from '@/app/components/ui/Modal';
 import { Button } from '@/app/components/ui/Button';
 import { toastSuccess, toastError } from '@/app/utils/toast';

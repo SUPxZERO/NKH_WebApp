@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
-import { ApiResponse, Order } from '@/app/types/domain';
+import { ApiResponse, Order } from '@/types';
 import { useOrderUpdates } from '@/app/hooks/useRealtime';
 import { CheckCircle, Clock, Truck, ChefHat, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -50,13 +50,13 @@ export default function OrderTracking() {
     { key: 'pending', label: t('customer.order_tracking.status.pending.label'), description: t('customer.order_tracking.status.pending.description') },
     { key: 'received', label: t('customer.order_tracking.status.received.label'), description: t('customer.order_tracking.status.received.description') },
     { key: 'preparing', label: t('customer.order_tracking.status.preparing.label'), description: t('customer.order_tracking.status.preparing.description') },
-    { key: 'ready', label: t('customer.order_tracking.status.ready.label'), description: order?.mode === 'delivery' ? t('customer.order_tracking.status.ready.description_delivery') : t('customer.order_tracking.status.ready.description_pickup') },
+    { key: 'ready', label: t('customer.order_tracking.status.ready.label'), description: order?.order_type === 'delivery' ? t('customer.order_tracking.status.ready.description_delivery') : t('customer.order_tracking.status.ready.description_pickup') },
     { key: 'completed', label: t('customer.order_tracking.status.completed.label'), description: t('customer.order_tracking.status.completed.description') },
-    { key: 'delivered', label: order?.mode === 'delivery' ? t('customer.order_tracking.status.delivered.label_delivery') : t('customer.order_tracking.status.delivered.label_pickup'), description: t('customer.order_tracking.status.delivered.description') }
+    { key: 'delivered', label: order?.order_type === 'delivery' ? t('customer.order_tracking.status.delivered.label_delivery') : t('customer.order_tracking.status.delivered.label_pickup'), description: t('customer.order_tracking.status.delivered.description') }
   ];
 
   const currentStep = order ? getStatusStep(order.status) : 0;
-  const estimatedTime = order?.mode === 'delivery' ? '25-35 min' : '15-20 min';
+  const estimatedTime = order?.order_type === 'delivery' ? '25-35 min' : '15-20 min';
 
   return (
     <CustomerLayout>
@@ -65,7 +65,7 @@ export default function OrderTracking() {
           <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('customer.order_tracking.title')}</h1>
           {order && (
             <p className="text-gray-600 dark:text-gray-300">
-              {t('customer.order_tracking.order_info', { id: order.id })} • {order.mode === 'delivery' ? t('customer.order_tracking.delivery') : t('customer.order_tracking.pickup')}
+              {t('customer.order_tracking.order_info', { id: order.id })} • {order.order_type === 'delivery' ? t('customer.order_tracking.delivery') : t('customer.order_tracking.pickup')}
             </p>
           )}
         </div>
@@ -92,7 +92,7 @@ export default function OrderTracking() {
                   <div className="text-sm text-gray-500">
                     {order.status === 'delivered'
                       ? t('customer.order_tracking.thank_you')
-                      : t('customer.order_tracking.processing', { mode: order.mode === 'delivery' ? t('customer.order_tracking.delivery').toLowerCase() : t('customer.order_tracking.pickup').toLowerCase() })
+                      : t('customer.order_tracking.processing', { mode: order.order_type === 'delivery' ? t('customer.order_tracking.delivery').toLowerCase() : t('customer.order_tracking.pickup').toLowerCase() })
                     }
                   </div>
                 </div>

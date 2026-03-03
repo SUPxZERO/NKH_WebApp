@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
-import { ApiResponse, Category, MenuItem } from '@/app/types/domain';
+import { ApiResponse, Category, MenuItem } from '@/types';
 import { useLanguage } from '../context/LanguageContext';
 
 export function useCategories(subCategoriesOnly: boolean = false) {

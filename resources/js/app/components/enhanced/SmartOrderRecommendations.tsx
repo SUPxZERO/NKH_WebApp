@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import EnhancedButton from '@/app/components/ui/EnhancedButton';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/app/utils/api';
-import { MenuItem, ApiResponse } from '@/app/types/domain';
+import { MenuItem, ApiResponse } from '@/types';
 import { useCartStore } from '@/app/store/cart';
 
 interface MockMenuItem {
@@ -309,7 +309,7 @@ export function SmartOrderRecommendations({
                             variant="gradient"
                             size="sm"
                             className="w-full"
-                            onClick={() => handleAddToCart(item)}
+                            onClick={() => handleAddToCart(item as any)}
                             leftIcon={<Plus className="w-4 h-4" />}
                             glow
                             haptic

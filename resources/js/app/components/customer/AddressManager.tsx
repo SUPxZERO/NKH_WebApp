@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCustomerAddresses } from '@/app/hooks/useCustomer';
-import { CustomerAddress } from '@/app/types/domain';
+import { CustomerAddress } from '@/types';
 import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import { Skeleton } from '@/app/components/ui/Loading';
 import { useTranslation } from '@/app/hooks/useTranslation';
@@ -31,7 +31,7 @@ export default function AddressManager({ selected, onSelect }: Props) {
                 className={`w-full text-left px-4 py-3 rounded-xl border ${selected?.id === a.id ? 'border-fuchsia-400 bg-fuchsia-500/10' : 'border-white/10 bg-white/5'}`}
               >
                 <div className="font-medium">{a.label}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{a.line1}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{a.address_line1}</div>
               </button>
             ))}
           </div>

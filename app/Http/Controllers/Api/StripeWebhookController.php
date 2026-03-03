@@ -85,24 +85,26 @@ class StripeWebhookController extends Controller
     protected function handlePaymentIntentSucceeded(Event $event): void
     {
         $paymentIntent = $event->data->object;
-        
-        $payment = $this->findPaymentByPaymentIntent($paymentIntent->id);
-        if (!$payment) {
+
+        $initialPayment = $this->findPaymentByPaymentIntent($paymentIntent->id);
+        if (!$initialPayment) {
             Log::warning('Payment not found for PaymentIntent', [
                 'payment_intent_id' => $paymentIntent->id,
             ]);
             return;
         }
 
-        if (!$payment->isPending()) {
-            Log::info('Payment already processed', [
-                'payment_id' => $payment->id,
-                'status' => $payment->status,
-            ]);
-            return;
-        }
+        DB::transaction(function () use ($initialPayment, $paymentIntent) {
+            // Re-fetch with row-level lock inside transaction
+            $payment = Payment::where('id', $initialPayment->id)->lockForUpdate()->first();
 
-        DB::transaction(function () use ($payment, $paymentIntent) {
+            if (!$payment || !$payment->isPending()) {
+                Log::info('Payment already processed or not found during lock', [
+                    'payment_id' => $initialPayment->id,
+                ]);
+                return;
+            }
+
             $oldStatus = $payment->status;
 
             $payment->update([
@@ -128,19 +130,21 @@ class StripeWebhookController extends Controller
 
             // Update invoice
             $invoice = $payment->invoice;
-            $invoice->loadMissing('payments', 'order');
-            $this->invoiceService->reconcileStatus($invoice);
+            if ($invoice) {
+                $invoice->loadMissing('payments', 'order');
+                $this->invoiceService->reconcileStatus($invoice);
 
-            // Award loyalty points
-            if ($invoice->order) {
-                $this->loyaltyService->awardPoints($invoice->order);
+                // Award loyalty points
+                if ($invoice->order) {
+                    $this->loyaltyService->awardPoints($invoice->order);
+                }
             }
-        });
 
-        Log::info('Stripe payment completed', [
-            'payment_id' => $payment->id,
-            'payment_intent_id' => $paymentIntent->id,
-        ]);
+            Log::info('Stripe payment completed', [
+                'payment_id' => $payment->id,
+                'payment_intent_id' => $paymentIntent->id,
+            ]);
+        });
     }
 
     /**
@@ -149,40 +153,44 @@ class StripeWebhookController extends Controller
     protected function handlePaymentIntentFailed(Event $event): void
     {
         $paymentIntent = $event->data->object;
-        
-        $payment = $this->findPaymentByPaymentIntent($paymentIntent->id);
-        if (!$payment) {
+
+        $initialPayment = $this->findPaymentByPaymentIntent($paymentIntent->id);
+        if (!$initialPayment) {
             return;
         }
 
-        if (!$payment->isPending()) {
-            return;
-        }
+        DB::transaction(function () use ($initialPayment, $paymentIntent) {
+            $payment = Payment::where('id', $initialPayment->id)->lockForUpdate()->first();
 
-        $failureMessage = $paymentIntent->last_payment_error?->message ?? 'Payment failed';
+            if (!$payment || !$payment->isPending()) {
+                return;
+            }
 
-        $payment->update([
-            'status' => Payment::STATUS_FAILED,
-            'failure_reason' => $failureMessage,
-            'retry_count' => $payment->retry_count + 1,
-        ]);
+            $failureMessage = $paymentIntent->last_payment_error?->message ?? 'Payment failed';
 
-        PaymentAuditLog::logWebhook(
-            $payment,
-            'stripe_payment_failed',
-            Payment::STATUS_PENDING,
-            Payment::STATUS_FAILED,
-            [
-                'payment_intent_id' => $paymentIntent->id,
+            $payment->update([
+                'status' => Payment::STATUS_FAILED,
                 'failure_reason' => $failureMessage,
-                'failure_code' => $paymentIntent->last_payment_error?->code ?? null,
-            ]
-        );
+                'retry_count' => $payment->retry_count + 1,
+            ]);
 
-        Log::info('Stripe payment failed', [
-            'payment_id' => $payment->id,
-            'reason' => $failureMessage,
-        ]);
+            PaymentAuditLog::logWebhook(
+                $payment,
+                'stripe_payment_failed',
+                Payment::STATUS_PENDING,
+                Payment::STATUS_FAILED,
+                [
+                    'payment_intent_id' => $paymentIntent->id,
+                    'failure_reason' => $failureMessage,
+                    'failure_code' => $paymentIntent->last_payment_error?->code ?? null,
+                ]
+            );
+
+            Log::info('Stripe payment failed', [
+                'payment_id' => $payment->id,
+                'reason' => $failureMessage,
+            ]);
+        });
     }
 
     /**
@@ -191,24 +199,32 @@ class StripeWebhookController extends Controller
     protected function handlePaymentIntentCanceled(Event $event): void
     {
         $paymentIntent = $event->data->object;
-        
-        $payment = $this->findPaymentByPaymentIntent($paymentIntent->id);
-        if (!$payment) {
+
+        $initialPayment = $this->findPaymentByPaymentIntent($paymentIntent->id);
+        if (!$initialPayment) {
             return;
         }
 
-        $payment->update([
-            'status' => Payment::STATUS_CANCELLED,
-            'failure_reason' => 'Payment canceled',
-        ]);
+        DB::transaction(function () use ($initialPayment, $paymentIntent) {
+            $payment = Payment::where('id', $initialPayment->id)->lockForUpdate()->first();
 
-        PaymentAuditLog::logWebhook(
-            $payment,
-            'stripe_payment_canceled',
-            $payment->status,
-            Payment::STATUS_CANCELLED,
-            ['payment_intent_id' => $paymentIntent->id]
-        );
+            if (!$payment || !$payment->isPending()) {
+                return;
+            }
+
+            $payment->update([
+                'status' => Payment::STATUS_CANCELLED,
+                'failure_reason' => 'Payment canceled',
+            ]);
+
+            PaymentAuditLog::logWebhook(
+                $payment,
+                'stripe_payment_canceled',
+                Payment::STATUS_PENDING,
+                Payment::STATUS_CANCELLED,
+                ['payment_intent_id' => $paymentIntent->id]
+            );
+        });
     }
 
     /**
@@ -217,43 +233,50 @@ class StripeWebhookController extends Controller
     protected function handleChargeRefunded(Event $event): void
     {
         $charge = $event->data->object;
-        
+
         // Find payment by charge or payment intent
-        $payment = $this->findPaymentByPaymentIntent($charge->payment_intent);
-        if (!$payment) {
+        $initialPayment = $this->findPaymentByPaymentIntent($charge->payment_intent);
+        if (!$initialPayment) {
             return;
         }
 
-        $amountRefunded = $charge->amount_refunded / 100;
+        DB::transaction(function () use ($initialPayment, $charge) {
+            $payment = Payment::where('id', $initialPayment->id)->lockForUpdate()->first();
+            if (!$payment)
+                return;
 
-        // Update payment metadata with refund info
-        $payment->update([
-            'metadata' => array_merge($payment->metadata ?? [], [
-                'stripe_refunded_amount' => $amountRefunded,
-                'stripe_refund_id' => $charge->refunds?->data[0]?->id ?? null,
-            ]),
-        ]);
+            $amountRefunded = $charge->amount_refunded / 100;
 
-        // If fully refunded, update status
-        if ($charge->refunded) {
-            $payment->update(['status' => Payment::STATUS_REFUNDED]);
-        }
+            // Update payment metadata with refund info
+            $payment->update([
+                'metadata' => array_merge($payment->metadata ?? [], [
+                    'stripe_refunded_amount' => $amountRefunded,
+                    'stripe_refund_id' => $charge->refunds?->data[0]?->id ?? null,
+                ]),
+            ]);
 
-        PaymentAuditLog::logWebhook(
-            $payment,
-            'stripe_refund_processed',
-            $payment->status,
-            $charge->refunded ? Payment::STATUS_REFUNDED : $payment->status,
-            [
-                'refunded_amount' => $amountRefunded,
-                'fully_refunded' => $charge->refunded,
-            ]
-        );
+            // If fully refunded, update status
+            $oldStatus = $payment->status;
+            if ($charge->refunded) {
+                $payment->update(['status' => Payment::STATUS_REFUNDED]);
+            }
 
-        Log::info('Stripe refund processed', [
-            'payment_id' => $payment->id,
-            'amount_refunded' => $amountRefunded,
-        ]);
+            PaymentAuditLog::logWebhook(
+                $payment,
+                'stripe_refund_processed',
+                $oldStatus,
+                $charge->refunded ? Payment::STATUS_REFUNDED : $payment->status,
+                [
+                    'refunded_amount' => $amountRefunded,
+                    'fully_refunded' => $charge->refunded,
+                ]
+            );
+
+            Log::info('Stripe refund processed', [
+                'payment_id' => $payment->id,
+                'amount_refunded' => $amountRefunded,
+            ]);
+        });
     }
 
     /**

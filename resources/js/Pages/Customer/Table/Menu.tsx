@@ -5,7 +5,7 @@ import { useCategories, useMenuItems } from '@/app/hooks/useMenu';
 import { useTableStore } from '@/app/store/tableStore';
 import { Plus, Search, Loader2, X } from 'lucide-react';
 import { toastSuccess } from '@/app/utils/toast';
-import { MenuItem } from '@/app/types/domain';
+import { MenuItem } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TableMenu() {
