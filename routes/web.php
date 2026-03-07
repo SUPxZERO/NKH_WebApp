@@ -147,8 +147,10 @@ Route::prefix('employee')->middleware('auth', 'role:employee,admin,manager,waite
 // ADMIN WEB ROUTES
 // ============================================================================
 
-// Support multiple admin roles: super-admin, admin, and specific manager roles
-Route::prefix('admin')->middleware(['auth', 'role:super-admin,admin,manager,chief,service-manager,finance-manager,hr-manager,inventory-manager,operations-manager,viewer'])->group(function () {
+// Support any authenticated user with appropriate permissions
+// Individual page access is controlled by per-route permission middleware in admin-secure.php
+// The AdminLayout sidebar already filters navigation items by permission
+Route::prefix('admin')->middleware(['auth'])->group(function () {
     // Dashboard & Overview
     Route::get('dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('dashboard/data', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'getData'])->name('admin.dashboard.data');

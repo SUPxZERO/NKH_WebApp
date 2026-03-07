@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BranchScopable;
 
 /**
  * @property int $id
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, BranchScopable;
 
     /**
      * SECURITY: Use $guarded to protect employee financial and HR data

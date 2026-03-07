@@ -282,4 +282,48 @@ class CustomerReservationController extends Controller
 
         return new ReservationResource($reservation->load(['table', 'customer.user', 'location']));
     }
+
+    /**
+     * Cancel a reservation (customer-facing)
+     */
+    public function destroy(Request $request, Reservation $reservation)
+    {
+        $customer = $this->resolveCustomer($request);
+
+        // Verify ownership
+        if ($reservation->customer_id !== $customer->id) {
+            abort(403, __('messages.api.errors.unauthorized'));
+        }
+
+        // Check if cancellation is allowed
+        if (!$reservation->canCustomerCancel()) {
+            abort(422, __('messages.api.errors.reservation_cannot_cancel'));
+        }
+
+        $reservation->status = 'cancelled';
+        $reservation->cancelled_at = now();
+        $reservation->cancellation_reason = 'Cancelled by customer';
+        $reservation->save();
+
+        // Notify admin of cancellation
+        try {
+            if ($customer->user) {
+                $notificationService = app(NotificationService::class);
+                $reservedAt = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
+                $notificationService->sendSystemNotification(
+                    __('messages.api.reservations.notifications.cancelled.title'),
+                    __('messages.api.reservations.notifications.cancelled.body', [
+                        'date' => $reservedAt->format('M d'),
+                        'time' => $reservedAt->format('g:i A'),
+                    ]),
+                    $customer->user,
+                    '/customer/reservations'
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to send cancellation notification: ' . $e->getMessage());
+        }
+
+        return response()->json(['message' => __('messages.api.success.reservation_cancelled')]);
+    }
 }

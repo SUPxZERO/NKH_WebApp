@@ -23,6 +23,8 @@ class StoreEmployeeRequest extends FormRequest
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', 'string', 'in:admin,manager,cashier,waiter,chef,employee'],
             'location_id' => ['required', 'exists:locations,id'],
+            'location_ids' => ['sometimes', 'array'],
+            'location_ids.*' => ['exists:locations,id'],
             'position_id' => ['required', 'exists:positions,id'],
             'employee_code' => ['nullable', 'string', 'max:50', 'unique:employees,employee_code'],
             'hire_date' => ['required', 'date'],

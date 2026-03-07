@@ -152,7 +152,7 @@ class ShiftController extends Controller
             'date' => $startTime->toDateString(),
             'position_id' => $validated['position_id'] ?? $employee->position_id,
             'shift_type' => $validated['shift_type'] ?? 'morning',
-            'location_id' => $validated['location_id'] ?? null,
+            'location_id' => $validated['location_id'] ?? $request->user()?->getActiveBranchId() ?? $employee->location_id,
             'notes' => $validated['notes'] ?? null,
         ]);
 

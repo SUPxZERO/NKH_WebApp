@@ -19,8 +19,8 @@ class ExpenseController extends Controller
             $s = $request->string('search');
             $query->where(function ($q) use ($s) {
                 $q->where('vendor_name', 'like', "%{$s}%")
-                  ->orWhere('reference', 'like', "%{$s}%")
-                  ->orWhere('description', 'like', "%{$s}%");
+                    ->orWhere('reference', 'like', "%{$s}%")
+                    ->orWhere('description', 'like', "%{$s}%");
             });
         }
 
@@ -44,8 +44,8 @@ class ExpenseController extends Controller
         }
 
         $expenses = $query->orderByDesc('expense_date')
-                          ->orderByDesc('id')
-                          ->paginate($request->integer('per_page', 15));
+            ->orderByDesc('id')
+            ->paginate($request->integer('per_page', 15));
 
         return ExpenseResource::collection($expenses);
     }
@@ -71,8 +71,9 @@ class ExpenseController extends Controller
         ]);
 
         // Set default location_id if not provided
-        $locationId = $data['location_id'] 
-            ?? $request->user()?->employee?->location_id 
+        $locationId = $data['location_id']
+            ?? $request->user()?->getActiveBranchId()
+            ?? $request->user()?->employee?->location_id
             ?? \App\Models\Location::first()?->id;
 
         $expense = Expense::create([

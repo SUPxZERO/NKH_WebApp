@@ -35,16 +35,36 @@ class HandleInertiaRequests extends Middleware
         // The 'role' column (if it exists) may be stale or null
         $userRole = null;
         $permissions = [];
+        $allRoles = [];
+        $userLocations = [];
+        $activeBranchId = null;
+        $canSwitchBranch = false;
 
         if ($user) {
             $roles = $user->roles()->with('permissions')->get();
             $userRole = $roles->first()?->slug;
+            $allRoles = $roles->pluck('slug')->unique()->values()->all();
             $permissions = $roles->pluck('permissions.*.slug')->flatten()->unique()->values()->all();
 
             // Fallback to direct 'role' attribute only if no roles assigned via relationship
             if (!$userRole && isset($user->role)) {
                 $userRole = $user->role;
+                $allRoles = [$userRole];
             }
+
+            // Branch/Location data
+            $canSwitchBranch = $user->canViewAllBranches();
+            $activeBranchId = $user->getActiveBranchId();
+
+            $branchService = app(\App\Services\BranchSessionService::class);
+            $userLocations = $branchService->getUserBranches($user)
+                ->map(fn($loc) => [
+                    'id' => $loc->id,
+                    'name' => $loc->name,
+                    'code' => $loc->code ?? null,
+                ])
+                ->values()
+                ->all();
         }
 
         return [
@@ -56,8 +76,12 @@ class HandleInertiaRequests extends Middleware
                     'email' => $user->email,
                     'phone' => $user->phone,
                     'role' => $userRole,
+                    'all_roles' => $allRoles,
                     'avatar' => $user->avatar ? \Illuminate\Support\Facades\Storage::url($user->avatar) : null,
                     'permissions' => $permissions,
+                    'locations' => $userLocations,
+                    'active_branch_id' => $activeBranchId,
+                    'can_switch_branch' => $canSwitchBranch,
                 ] : null,
             ],
             'csrf_token' => csrf_token(),

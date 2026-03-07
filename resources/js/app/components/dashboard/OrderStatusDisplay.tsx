@@ -91,14 +91,27 @@ const defaultConfig = {
     label: 'Unknown',
 };
 
-export function OrderStatusDisplay({ data = [], className }: OrderStatusDisplayProps) {
+import { useQuery } from '@tanstack/react-query';
+import { apiGet } from '@/app/utils/api';
+
+export function OrderStatusDisplay({ data: initialData = [], className }: OrderStatusDisplayProps) {
     const { t } = useTranslation();
+
+    const { data: fetchedData } = useQuery({
+        queryKey: ['order-stats'],
+        queryFn: () => apiGet('/api/admin/dashboard/orders/stats'),
+        initialData: { status_counts: initialData },
+        refetchInterval: 30000,
+    });
+
+    const activeData = fetchedData?.status_counts || initialData;
+
     // Normalize data to array format (handle null/undefined)
-    const normalizedData: OrderStatusData[] = !data
+    const normalizedData: OrderStatusData[] = !activeData
         ? []
-        : Array.isArray(data)
-            ? data
-            : Object.entries(data).map(([status, count]) => ({ status, count }));
+        : Array.isArray(activeData)
+            ? activeData
+            : Object.entries(activeData).map(([status, count]) => ({ status, count: Number(count) }));
 
     const totalOrders = normalizedData.reduce((acc, item) => acc + item.count, 0);
     const maxCount = Math.max(...normalizedData.map(item => item.count), 1);

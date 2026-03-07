@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BranchScopable;
 
 /**
  * @property int $id
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Attendance extends Model
 {
-    use HasFactory;
+    use HasFactory, BranchScopable;
 
     protected $guarded = [
         'id',
@@ -24,7 +25,7 @@ class Attendance extends Model
         'clock_in_at',
         'clock_out_at',
         'notes',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

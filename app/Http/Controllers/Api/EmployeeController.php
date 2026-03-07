@@ -18,8 +18,8 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Employee::with(['user.roles', 'position', 'location']);
-        
+        $query = Employee::with(['user.roles', 'user.locations', 'position', 'location']);
+
         // Filter by location if provided
         if ($request->filled('location_id') && $request->location_id !== 'all') {
             $query->where('location_id', $request->location_id);
@@ -35,19 +35,19 @@ class EmployeeController extends Controller
             $search = $request->search;
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
-        
+
         $employees = $query->paginate($request->get('per_page', 15));
-        
+
         return EmployeeResource::collection($employees);
     }
 
     public function store(StoreEmployeeRequest $request): EmployeeResource
     {
         $data = $request->validated();
-        
+
         $employee = DB::transaction(function () use ($data) {
             // Create user account
             $user = User::create([
@@ -60,11 +60,11 @@ class EmployeeController extends Controller
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
             ]);
-            
+
             // Assign employee role
             $role = Role::where('slug', $data['role'])->firstOrFail();
             $user->roles()->attach($role->id);
-            
+
             // Create employee record
             $employee = Employee::create([
                 'user_id' => $user->id,
@@ -76,10 +76,17 @@ class EmployeeController extends Controller
                 'salary' => $data['salary'] ?? null,
                 'status' => $data['status'] ?? 'active',
             ]);
-            
-            return $employee->load(['user', 'position', 'location']);
+
+            // Sync locations (Primary location + any additional selected locations)
+            $syncLocations = isset($data['location_ids']) ? $data['location_ids'] : [];
+            if (!in_array($data['location_id'], $syncLocations)) {
+                $syncLocations[] = $data['location_id'];
+            }
+            $user->locations()->sync($syncLocations);
+
+            return $employee->load(['user.roles', 'user.locations', 'position', 'location']);
         });
-        
+
         return new EmployeeResource($employee);
     }
 
@@ -91,49 +98,76 @@ class EmployeeController extends Controller
     public function update(UpdateEmployeeRequest $request, Employee $employee): EmployeeResource
     {
         $data = $request->validated();
-        
+
         DB::transaction(function () use ($employee, $data) {
             // Update user information
             if (isset($data['name']) || isset($data['email']) || isset($data['phone']) || isset($data['address']) || isset($data['latitude']) || isset($data['longitude'])) {
                 $userUpdate = [];
-                if (isset($data['name'])) $userUpdate['name'] = $data['name'];
-                if (isset($data['email'])) $userUpdate['email'] = $data['email'];
-                if (isset($data['phone'])) $userUpdate['phone'] = $data['phone'];
-                if (isset($data['is_active'])) $userUpdate['is_active'] = $data['is_active'];
-                if (isset($data['address'])) $userUpdate['address'] = $data['address'];
-                if (isset($data['latitude'])) $userUpdate['latitude'] = $data['latitude'];
-                if (isset($data['longitude'])) $userUpdate['longitude'] = $data['longitude'];
-                
+                if (isset($data['name']))
+                    $userUpdate['name'] = $data['name'];
+                if (isset($data['email']))
+                    $userUpdate['email'] = $data['email'];
+                if (isset($data['phone']))
+                    $userUpdate['phone'] = $data['phone'];
+                if (isset($data['is_active']))
+                    $userUpdate['is_active'] = $data['is_active'];
+                if (isset($data['address']))
+                    $userUpdate['address'] = $data['address'];
+                if (isset($data['latitude']))
+                    $userUpdate['latitude'] = $data['latitude'];
+                if (isset($data['longitude']))
+                    $userUpdate['longitude'] = $data['longitude'];
+
                 $employee->user()->update($userUpdate);
             }
-            
+
             // Update password if provided
             if (isset($data['password'])) {
                 $employee->user()->update(['password' => Hash::make($data['password'])]);
             }
-            
+
             // Update role if provided
             if (isset($data['role'])) {
                 $role = Role::where('slug', $data['role'])->firstOrFail();
                 $employee->user->roles()->sync([$role->id]);
             }
-            
+
             // Update employee record
             $employeeUpdate = [];
-            if (isset($data['location_id'])) $employeeUpdate['location_id'] = $data['location_id'];
-            if (isset($data['position_id'])) $employeeUpdate['position_id'] = $data['position_id'];
-            if (isset($data['salary_type'])) $employeeUpdate['salary_type'] = $data['salary_type'];
-            if (isset($data['salary'])) $employeeUpdate['salary'] = $data['salary'];
-            if (isset($data['status'])) $employeeUpdate['status'] = $data['status'];
-            if (isset($data['address'])) $employeeUpdate['address'] = $data['address'];
-            if (isset($data['employee_code'])) $employeeUpdate['employee_code'] = $data['employee_code'];
-            if (isset($data['hire_date'])) $employeeUpdate['hire_date'] = $data['hire_date'];
+            if (isset($data['location_id']))
+                $employeeUpdate['location_id'] = $data['location_id'];
+            if (isset($data['position_id']))
+                $employeeUpdate['position_id'] = $data['position_id'];
+            if (isset($data['salary_type']))
+                $employeeUpdate['salary_type'] = $data['salary_type'];
+            if (isset($data['salary']))
+                $employeeUpdate['salary'] = $data['salary'];
+            if (isset($data['status']))
+                $employeeUpdate['status'] = $data['status'];
+            if (isset($data['address']))
+                $employeeUpdate['address'] = $data['address'];
+            if (isset($data['employee_code']))
+                $employeeUpdate['employee_code'] = $data['employee_code'];
+            if (isset($data['hire_date']))
+                $employeeUpdate['hire_date'] = $data['hire_date'];
 
             if (!empty($employeeUpdate)) {
                 $employee->update($employeeUpdate);
             }
+
+            // Sync locations if provided
+            if (isset($data['location_ids']) || isset($data['location_id'])) {
+                $currentSync = $data['location_ids'] ?? $employee->user->locations->pluck('id')->toArray();
+                $primaryId = $data['location_id'] ?? $employee->location_id;
+
+                if (!in_array($primaryId, $currentSync)) {
+                    $currentSync[] = (int) $primaryId;
+                }
+
+                $employee->user->locations()->sync($currentSync);
+            }
         });
-        
+
         return new EmployeeResource($employee->fresh(['user', 'position', 'location']));
     }
 
@@ -144,7 +178,7 @@ class EmployeeController extends Controller
             $employee->update(['status' => 'inactive']);
             $employee->user()->update(['is_active' => false]);
         });
-        
+
         return response()->json(['message' => 'Employee deactivated successfully.']);
     }
 

@@ -109,8 +109,11 @@ export interface Expense {
 
 export interface Reservation {
     id: number;
+    location_id?: number;
     customer_id?: number;
     table_id?: number;
+    code?: string;
+    reservation_number?: string;
     party_size: number;
     reservation_time: string;
     reserved_for?: string;
@@ -119,8 +122,12 @@ export interface Reservation {
     notes?: string;
     status: string;
     special_requests?: string;
+    can_cancel?: boolean;
     customer?: Customer;
     table?: DiningTable;
+    location?: Location;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface Promotion {

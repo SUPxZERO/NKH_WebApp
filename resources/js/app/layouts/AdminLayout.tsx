@@ -15,6 +15,7 @@ import { useThemeStore } from '@/app/store/theme';
 import { useAuth } from '@/app/providers/AuthProvider';
 import NotificationDropdown from '@/app/components/ui/NotificationDropdown';
 import UserProfileDropdown from '@/app/components/ui/UserProfileDropdown';
+import BranchSelector from '@/app/components/ui/BranchSelector';
 import { useLanguage } from '@/app/context/LanguageContext';
 
 // --- 1. New Hierarchical Navigation Structure ---
@@ -108,7 +109,7 @@ const navigationTree = [
     type: 'group',
     permission: 'reports.view',
     children: [
-      { name: 'layout.admin.nav.sales_analytics', href: '/admin/sales-analytics', permission: 'reports.view' },
+      { name: 'layout.admin.nav.sales_analytics', href: '/admin/reports/sales', permission: 'reports.view' },
       { name: 'layout.admin.nav.financial_dashboard', href: '/admin/financial-dashboard', permission: 'payments.view' },
       { name: 'layout.admin.nav.expenses', href: '/admin/expenses', permission: 'expenses.view' },
       { name: 'layout.admin.nav.invoices', href: '/admin/invoices', permission: 'invoices.view' },
@@ -567,6 +568,13 @@ export default function AdminLayout({ children }: Props) {
             <div className="flex items-center gap-2">
               {/* Search Button */}
               <SearchTrigger onClick={search.open} variant="admin" className="hidden md:flex" />
+
+              {/* Branch Selector */}
+              <BranchSelector
+                branches={user?.locations ?? []}
+                activeBranchId={user?.active_branch_id ?? null}
+                canSwitchBranch={user?.can_switch_branch ?? false}
+              />
 
               <LanguageSwitcher />
 

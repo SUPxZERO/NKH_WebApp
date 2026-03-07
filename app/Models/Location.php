@@ -18,7 +18,15 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Location extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BranchScopable;
+
+    /**
+     * Override branch column for Location model (it uses 'id')
+     */
+    public function getBranchColumn(): string
+    {
+        return 'id';
+    }
 
     /**
      * SECURITY: Minimal guarding for Location (business configuration)
@@ -57,7 +65,7 @@ class Location extends Model
             $this->address_line1,
             $this->address_line2,
         ]);
-        
+
         return implode(', ', $parts);
     }
 

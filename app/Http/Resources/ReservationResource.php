@@ -14,10 +14,10 @@ class ReservationResource extends JsonResource
         $reservedAt = null;
         if ($this->reservation_date && $this->reservation_time) {
             try {
-                $dateStr = $this->reservation_date instanceof \Carbon\Carbon 
-                    ? $this->reservation_date->format('Y-m-d') 
-                    : substr((string)$this->reservation_date, 0, 10);
-                    
+                $dateStr = $this->reservation_date instanceof \Carbon\Carbon
+                    ? $this->reservation_date->format('Y-m-d')
+                    : substr((string) $this->reservation_date, 0, 10);
+
                 $reservedAt = Carbon::parse($dateStr . ' ' . $this->reservation_time)->toIso8601String();
             } catch (\Exception $e) {
                 // Fallback to original concatenation if parsing fails
@@ -57,6 +57,13 @@ class ReservationResource extends JsonResource
             'can_cancel' => $canCancel,
             'table' => new DiningTableResource($this->whenLoaded('table')),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
+            'location' => $this->whenLoaded('location', function () {
+                return [
+                    'id' => $this->location->id,
+                    'name' => $this->location->name,
+                    'address' => $this->location->address_line1 ?? $this->location->address ?? null,
+                ];
+            }),
             'created_at' => optional($this->created_at)->toISOString(),
             'updated_at' => optional($this->updated_at)->toISOString(),
         ];

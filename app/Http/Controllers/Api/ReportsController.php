@@ -434,10 +434,7 @@ class ReportsController extends Controller
         }
 
         if ($paymentMethod !== 'all') {
-            // Assuming payment_method column exists or relationship to payments
-            // For now, check 'payment_method' column on orders if it exists, or 'payments' table.
-            // Based on typical schema:
-            $query->where('payment_method', $paymentMethod);
+            $query->where('payment_mode', $paymentMethod);
         }
 
         // We paginate DATES, not orders.
@@ -484,9 +481,9 @@ class ReportsController extends Controller
             // Payment Methods for this day
             $paymentMethods = Order::whereDate('created_at', $date)
                 ->whereHas('orderStatus', fn($q) => $q->where('code', 'completed'))
-                ->select('payment_method', DB::raw('COUNT(*) as count'))
-                ->groupBy('payment_method')
-                ->pluck('count', 'payment_method')
+                ->select('payment_mode', DB::raw('COUNT(*) as count'))
+                ->groupBy('payment_mode')
+                ->pluck('count', 'payment_mode')
                 ->toArray();
 
             return [

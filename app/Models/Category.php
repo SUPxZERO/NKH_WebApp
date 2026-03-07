@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class Category extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Traits\BranchScopable;
 
     /**
      * SECURITY: Minimal guarding for Category (mostly admin-editable)
@@ -26,17 +26,17 @@ class Category extends Model
     ];
 
     protected $with = ['translations'];
-    
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
-    
+
     public function scopeParents($query)
     {
         return $query->whereNull('parent_id');
     }
-    
+
     protected static function boot()
     {
         parent::boot();

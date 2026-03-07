@@ -107,6 +107,9 @@ class KitchenController extends Controller
             // Broadcast real-time update for Kitchen Display and other listeners
             event(new \App\Events\OrderStatusUpdated($order->fresh()));
 
+            // Broadcast specific Kitchen event (triggers different hooks/sounds)
+            event(new \App\Events\KitchenOrderUpdated($order->fresh()));
+
             // Log transition
             Log::info("Order #{$order->order_number} status updated from {$oldStatus} to {$newStatusCode} by Kitchen");
 

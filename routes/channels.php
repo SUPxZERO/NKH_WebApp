@@ -18,6 +18,11 @@ Broadcast::channel('orders', function () {
     return true;
 });
 
+// Public kitchen updates channel
+Broadcast::channel('kitchen', function () {
+    return true;
+});
+
 // Private channel for individual customer notifications
 Broadcast::channel('customer.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;

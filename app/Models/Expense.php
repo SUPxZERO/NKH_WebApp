@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BranchScopable;
 
 class Expense extends Model
 {
-    use HasFactory;
+    use HasFactory, BranchScopable;
 
     public const STATUS_DRAFT = 'draft';
     public const STATUS_APPROVED = 'approved';

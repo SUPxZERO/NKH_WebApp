@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader } from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { toastSuccess, toastError } from '@/app/utils/toast';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Building } from 'lucide-react';
+import MultiSelect from '@/app/components/ui/MultiSelect';
 
 interface EmployeeFormData {
     name: string;
@@ -26,6 +27,7 @@ interface EmployeeFormData {
     password?: string;
     password_confirmation?: string;
     role?: string;
+    location_ids: number[];
 }
 
 interface EmployeeFormProps {
@@ -52,6 +54,7 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                 emergency_contact_name: employee.emergency_contact_name || '',
                 emergency_contact_phone: employee.emergency_contact_phone || '',
                 department: employee.department || '',
+                location_ids: employee.location_ids || [employee.location_id],
             }
             : {
                 name: '',
@@ -59,6 +62,7 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                 phone: '',
                 position_id: 0,
                 location_id: 0,
+                location_ids: [],
                 salary_type: 'monthly',
                 department: '',
                 hire_date: new Date().toISOString().split('T')[0],
@@ -239,6 +243,22 @@ export default function EmployeeForm({ employee, positions = [], locations = [],
                                         ))}
                                     </select>
                                     {errors.location_id && <p className="text-red-500 text-xs mt-1">{errors.location_id}</p>}
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <MultiSelect
+                                        label="Permitted Branches / Access Control *"
+                                        placeholder="Select additional branches this employee can access..."
+                                        options={locations.map(loc => ({ value: loc.id, label: loc.name }))}
+                                        value={formData.location_ids}
+                                        onChange={(vals) => setFormData(prev => ({ ...prev, location_ids: vals as number[] }))}
+                                        error={errors.location_ids}
+                                        className="mt-1"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                                        <Building className="w-3 h-3" />
+                                        Primary location is automatically included in access rights.
+                                    </p>
                                 </div>
 
                                 <div>

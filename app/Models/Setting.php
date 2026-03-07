@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BranchScopable;
 
     protected $guarded = [
         'id',
         'location_id',
         'key',
         'value',
-            'created_at',
+        'created_at',
         'updated_at',
     ];
 

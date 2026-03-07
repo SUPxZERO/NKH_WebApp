@@ -353,7 +353,10 @@ class AnalyticsController extends Controller
 
     private function buildFinancialData(array $dates): array
     {
+        $locationId = request()->user()?->getActiveBranchId();
+
         $revenue = \App\Models\Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('location_id', $locationId))
             ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->sum('total_amount');
 
@@ -373,6 +376,7 @@ class AnalyticsController extends Controller
             'end' => (clone $dates['start'])->subSecond(),
         ];
         $prevRevenue = \App\Models\Order::whereBetween('created_at', [$prevDates['start'], $prevDates['end']])
+            ->when($locationId, fn($q) => $q->where('location_id', $locationId))
             ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->sum('total_amount');
         $revenueChange = $prevRevenue > 0 ? (($revenue - $prevRevenue) / $prevRevenue) * 100 : 0;
@@ -398,6 +402,7 @@ class AnalyticsController extends Controller
             })
             ->leftJoin('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('orders.location_id', $locationId))
             ->where(fn($q) => $q->where('order_statuses.code', '!=', 'cancelled')->orWhereNull('order_statuses.code'))
             ->select([
                 DB::raw("COALESCE(category_translations.name, categories.slug, 'Uncategorized') as category"),

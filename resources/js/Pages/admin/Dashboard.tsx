@@ -11,6 +11,7 @@ import { BoldStatCard } from '@/app/components/dashboard/BoldStatCard';
 import { BoldQuickActions } from '@/app/components/dashboard/BoldQuickActions';
 import { BoldRevenueChart } from '@/app/components/dashboard/BoldRevenueChart';
 import { BoldTopItemsChart } from '@/app/components/dashboard/BoldTopItemsChart';
+import { BranchOverviewWidget } from '@/app/components/dashboard/BranchOverviewWidget';
 import {
   DollarSign, ShoppingCart, TrendingUp, Users, Package, Clock,
   ReceiptText, BarChart3, Calendar, Settings, Shield, ClipboardList,
@@ -56,6 +57,7 @@ interface DashboardSummary {
   my_tasks?: { id: number; order_number: string; status: string; table?: string }[];
   my_performance?: { orders_this_week: number };
   quick_actions?: { label: string; icon: string; href: string }[];
+  branch_overview?: any[];
 }
 
 interface QuickStats {
@@ -261,6 +263,7 @@ export default function Dashboard({
               topItemsData={initialTopItems}
               teamStatus={dashboardSummary?.team_status}
               pendingApprovals={dashboardSummary?.pending_approvals}
+              branchOverview={dashboardSummary?.branch_overview}
             />
           )}
 
@@ -297,10 +300,17 @@ function AdminDashboardContent({
   orderStatusData,
   topItemsData,
   teamStatus,
-  pendingApprovals
+  pendingApprovals,
+  branchOverview
 }: any) {
   return (
     <>
+      {/* Branch Overview - Multi-branch support */}
+      {branchOverview && branchOverview.length > 0 && (
+        <div className="mb-6">
+          <BranchOverviewWidget branches={branchOverview} />
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* System Health */}
         {systemHealth && (

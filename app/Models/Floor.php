@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Floor extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BranchScopable;
 
     protected $guarded = ['id'];
 

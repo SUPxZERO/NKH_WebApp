@@ -16,6 +16,7 @@ import { toastSuccess, toastError, toastInfo } from '@/app/utils/toast';
 import { DiningTable, Floor, Location } from '@/types';
 import { cn } from '@/app/utils/cn';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 // Stats Ribbon Component - Mobile optimized
 const TableStatsRibbon = ({ stats }: { stats: any }) => {
@@ -64,6 +65,7 @@ const TableStatsRibbon = ({ stats }: { stats: any }) => {
 
 export default function Tables() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [floorFilter, setFloorFilter] = useState('all');
@@ -80,7 +82,7 @@ export default function Tables() {
 
   const qc = useQueryClient();
   const [formData, setFormData] = useState({
-    location_id: '',
+    location_id: user?.active_branch_id ? user.active_branch_id.toString() : '',
     floor_id: '',
     code: '',
     capacity: '2',
@@ -190,7 +192,13 @@ export default function Tables() {
     setOpenCreate(false);
     setOpenEdit(false);
     setEditingTable(null);
-    setFormData({ location_id: '', floor_id: '', code: '', capacity: '2', status: 'available' });
+    setFormData({
+      location_id: user?.active_branch_id ? user.active_branch_id.toString() : '',
+      floor_id: '',
+      code: '',
+      capacity: '2',
+      status: 'available'
+    });
   };
 
   const handleEdit = (table: DiningTable) => {

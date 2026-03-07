@@ -10,10 +10,11 @@ import AdminLayout from '@/app/layouts/AdminLayout';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Modal } from '@/app/components/ui/Modal';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/app/utils/api';
+import { apiGet, apiPost, apiPut, apiDelete, apiUpload } from '@/app/utils/api';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { ImageUploader } from '@/app/components/ui/ImageUploader';
 
 // StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -162,7 +163,9 @@ export default function Locations() {
         city: '', state: '', postal_code: '', country: 'Cambodia', phone: '',
         latitude: 0, longitude: 0,
         is_active: true, accepts_online_orders: true, accepts_pickup: true, accepts_delivery: true,
-        operating_hours: [] as any[]
+        operating_hours: [] as any[],
+        email: '', logo_path: null as any,
+        tax_registration_number: '', default_tax_rate: 0
     });
 
     // Helper for days
@@ -187,15 +190,33 @@ export default function Locations() {
         delivery: locationList.filter((l: any) => l.accepts_delivery).length
     }), [locationList, locations]);
 
+    // Build FormData with proper type handling
+    const buildFormData = (data: any, method?: string) => {
+        const fd = new FormData();
+        if (method) fd.append('_method', method);
+        Object.entries(data).forEach(([key, val]) => {
+            if (val === null || val === undefined) return;
+            if (key === 'logo_path') {
+                if (val instanceof File) fd.append(key, val);
+                // skip string (existing path) — backend keeps current value
+                return;
+            }
+            if (Array.isArray(val)) { fd.append(key, JSON.stringify(val)); return; }
+            if (typeof val === 'boolean') { fd.append(key, val ? '1' : '0'); return; }
+            fd.append(key, String(val));
+        });
+        return fd;
+    };
+
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiPost('/api/admin/locations', data),
+        mutationFn: (data: any) => apiUpload('/api/admin/locations', buildFormData(data)),
         onSuccess: () => { toastSuccess(t('admin.locations.messages.created') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/locations'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || t('admin.locations.messages.failed') as string)
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => apiPut(`/api/admin/locations/${id}`, data),
+        mutationFn: ({ id, data }: { id: number, data: any }) => apiUpload(`/api/admin/locations/${id}`, buildFormData(data, 'PUT')),
         onSuccess: () => { toastSuccess(t('admin.locations.messages.updated') as string); closeModal(); qc.invalidateQueries({ queryKey: ['admin/locations'] }); },
         onError: (err: any) => toastError(err.response?.data?.message || t('admin.locations.messages.failed') as string)
     });
@@ -215,7 +236,9 @@ export default function Locations() {
             city: '', state: '', postal_code: '', country: 'Cambodia', phone: '',
             latitude: 0, longitude: 0,
             is_active: true, accepts_online_orders: true, accepts_pickup: true, accepts_delivery: true,
-            operating_hours: []
+            operating_hours: [],
+            email: '', logo_path: null,
+            tax_registration_number: '', default_tax_rate: 0
         });
     };
 
@@ -228,7 +251,10 @@ export default function Locations() {
             latitude: loc.latitude ? parseFloat(loc.latitude) : 0,
             longitude: loc.longitude ? parseFloat(loc.longitude) : 0,
             accepts_online_orders: loc.accepts_online_orders, accepts_pickup: loc.accepts_pickup, accepts_delivery: loc.accepts_delivery,
-            operating_hours: loc.operating_hours || []
+            operating_hours: loc.operating_hours || [],
+            email: loc.email || '', logo_path: loc.logo_path || null,
+            tax_registration_number: loc.tax_registration_number || '',
+            default_tax_rate: loc.default_tax_rate || 0
         });
         setOpenEdit(true);
     };
@@ -487,11 +513,44 @@ export default function Locations() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <Input label={t('admin.locations.modal.phone') as string} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="h-10 text-sm" />
-                        <Input label={t('admin.locations.modal.city') as string} value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="h-10 text-sm" />
+                        <Input type="email" label={t('admin.locations.modal.email') as string} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-10 text-sm" />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                        <Input label={t('admin.locations.modal.address') as string} value={formData.address_line1} onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })} className="sm:col-span-2 h-10 text-sm" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <Input label={t('admin.locations.modal.city') as string} value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className="h-10 text-sm" />
                         <Input label={t('admin.locations.modal.postal') as string} value={formData.postal_code} onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })} className="h-10 text-sm" />
+                    </div>
+                    <Input label={t('admin.locations.modal.address') as string} value={formData.address_line1} onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })} className="h-10 text-sm" />
+
+                    {/* Branch Branding & Tax Control */}
+                    <div className="border-t border-gray-200 dark:border-white/10 pt-3 sm:pt-4">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">{t('admin.locations.modal.branch_config')}</label>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-medium text-muted-foreground">{t('admin.locations.modal.logo')}</label>
+                                    <ImageUploader
+                                        value={typeof formData.logo_path === 'string' ? formData.logo_path : null}
+                                        onChange={(file) => setFormData({ ...formData, logo_path: file })}
+                                        className="h-32"
+                                    />
+                                </div>
+                                <div className="space-y-3">
+                                    <Input
+                                        label={t('admin.locations.modal.tax_id') as string}
+                                        value={formData.tax_registration_number}
+                                        onChange={(e) => setFormData({ ...formData, tax_registration_number: e.target.value })}
+                                        className="h-10 text-sm"
+                                    />
+                                    <Input
+                                        type="number"
+                                        label={t('admin.locations.modal.tax_rate') as string}
+                                        value={formData.default_tax_rate}
+                                        onChange={(e) => setFormData({ ...formData, default_tax_rate: parseFloat(e.target.value) || 0 })}
+                                        className="h-10 text-sm"
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     {/* Operating Hours - Hidden on mobile for simplicity */}
                     <div className="border-t border-gray-200 dark:border-white/10 pt-3 sm:pt-4 hidden sm:block">

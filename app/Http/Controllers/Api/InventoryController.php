@@ -20,7 +20,7 @@ class InventoryController extends Controller
             $search = $request->search;
             $query->whereHas('ingredient', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 
@@ -49,7 +49,7 @@ class InventoryController extends Controller
         $inventory = Inventory::with('location')
             ->where('ingredient_id', $ingredient->id)
             ->get();
-        
+
         return response()->json($inventory);
     }
 
@@ -124,7 +124,7 @@ class InventoryController extends Controller
     public function recordWastage(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'location_id' => 'required|exists:locations,id',
+            'location_id' => 'nullable|exists:locations,id',
             'ingredient_id' => 'required|exists:ingredients,id',
             'quantity' => 'required|numeric|min:0.001',
             'reason' => 'required|string',
@@ -133,7 +133,15 @@ class InventoryController extends Controller
 
         try {
             $ingredient = Ingredient::findOrFail($validated['ingredient_id']);
-            
+
+            $locationId = $validated['location_id']
+                ?? $request->user()?->getActiveBranchId()
+                ?? $request->user()?->employee?->location_id;
+
+            if (!$locationId) {
+                return response()->json(['message' => 'Location ID is required'], 422);
+            }
+
             // Use InventoryService for consistent wastage tracking
             $inventoryService = app(\App\Services\Inventory\InventoryService::class);
             $inventoryService->recordWastage(
@@ -144,10 +152,10 @@ class InventoryController extends Controller
             );
 
             // Also update location-based Inventory record if it exists
-            $inventory = Inventory::where('location_id', $validated['location_id'])
+            $inventory = Inventory::where('location_id', $locationId)
                 ->where('ingredient_id', $validated['ingredient_id'])
                 ->first();
-            
+
             if ($inventory) {
                 $inventory->decrement('quantity', $validated['quantity']);
             }
@@ -186,7 +194,7 @@ class InventoryController extends Controller
             ->sum(DB::raw('inventory.quantity * ingredients.cost_per_unit'));
 
         $lowStockCount = Inventory::where('quantity', '<=', 10)->count(); // Simplified
-        
+
         $expiringSoon = Inventory::where('expiration_date', '<=', now()->addDays(7))
             ->where('expiration_date', '>=', now())
             ->count();

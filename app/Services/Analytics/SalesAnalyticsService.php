@@ -61,7 +61,10 @@ class SalesAnalyticsService
      */
     public function getSalesData(array $dates): array
     {
+        $locationId = request()->user()?->getActiveBranchId();
+
         $stats = Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('location_id', $locationId))
             ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw('COUNT(*) as total_orders'),
@@ -87,16 +90,26 @@ class SalesAnalyticsService
     public function getTrendsData(array $dates): array
     {
         $daysDiff = $dates['start']->diffInDays($dates['end']);
-        $groupBy = $daysDiff > 60 ? "DATE_FORMAT(created_at, '%Y-%m')" : "DATE(created_at)";
+        $driver = DB::connection()->getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
+        if ($daysDiff > 60) {
+            $groupBy = $isSqlite ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
+        } else {
+            $groupBy = $isSqlite ? "date(created_at)" : "DATE(created_at)";
+        }
+
+        $locationId = request()->user()?->getActiveBranchId();
 
         return Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('location_id', $locationId))
             ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw($groupBy . ' as date'),
                 DB::raw('COUNT(*) as orders'),
                 DB::raw('SUM(total_amount) as revenue'),
             ])
-            ->groupBy('date')
+            ->groupBy(DB::raw($groupBy))
             ->orderBy('date')
             ->get()
             ->map(fn($item) => [
@@ -112,6 +125,8 @@ class SalesAnalyticsService
      */
     public function getTopItemsData(array $dates): array
     {
+        $locationId = request()->user()?->getActiveBranchId();
+
         return DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
@@ -121,6 +136,7 @@ class SalesAnalyticsService
             })
             ->leftJoin('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('orders.location_id', $locationId))
             ->where(fn($q) => $q->where('order_statuses.code', '!=', 'cancelled')
                 ->orWhereNull('order_statuses.code'))
             ->select([
@@ -147,6 +163,8 @@ class SalesAnalyticsService
      */
     public function getCategoryData(array $dates): array
     {
+        $locationId = request()->user()?->getActiveBranchId();
+
         return DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
@@ -157,6 +175,7 @@ class SalesAnalyticsService
             })
             ->leftJoin('order_statuses', 'orders.order_status_id', '=', 'order_statuses.id')
             ->whereBetween('orders.created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('orders.location_id', $locationId))
             ->where(fn($q) => $q->where('order_statuses.code', '!=', 'cancelled')
                 ->orWhereNull('order_statuses.code'))
             ->select([
@@ -182,8 +201,10 @@ class SalesAnalyticsService
         $hourSql = $driver === 'sqlite'
             ? "CAST(strftime('%H', created_at) AS INTEGER)"
             : "HOUR(created_at)";
+        $locationId = request()->user()?->getActiveBranchId();
 
         return Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('location_id', $locationId))
             ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw("$hourSql as hour"),
@@ -206,17 +227,20 @@ class SalesAnalyticsService
      */
     public function getSalesByPaymentMethod(array $dates): array
     {
+        $locationId = request()->user()?->getActiveBranchId();
+
         return Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+            ->when($locationId, fn($q) => $q->where('location_id', $locationId))
             ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
-                'payment_method',
+                'payment_mode',
                 DB::raw('COUNT(*) as orders'),
                 DB::raw('SUM(total_amount) as revenue'),
             ])
-            ->groupBy('payment_method')
+            ->groupBy('payment_mode')
             ->get()
             ->map(fn($item) => [
-                'payment_method' => $item->payment_method ?? 'Unknown',
+                'payment_method' => $item->payment_mode ?? 'Unknown',
                 'orders' => (int) $item->orders,
                 'revenue' => (float) $item->revenue,
             ])
@@ -228,8 +252,11 @@ class SalesAnalyticsService
      */
     public function getCustomerMetrics(array $dates): array
     {
+        $locationId = request()->user()?->getActiveBranchId();
+
         return [
             'new_customers' => Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+                ->when($locationId, fn($q) => $q->where('location_id', $locationId))
                 ->distinct('customer_id')
                 ->whereNotNull('customer_id')
                 ->count(),
@@ -237,9 +264,11 @@ class SalesAnalyticsService
                 ->join('orders as o2', 'o1.customer_id', '=', 'o2.customer_id')
                 ->whereBetween('o1.created_at', [$dates['start'], $dates['end']])
                 ->where('o2.created_at', '<', $dates['start'])
+                ->when($locationId, fn($q) => $q->where('o1.location_id', $locationId)->where('o2.location_id', $locationId))
                 ->distinct('o1.customer_id')
                 ->count(),
             'avg_orders_per_customer' => (float) Order::whereBetween('created_at', [$dates['start'], $dates['end']])
+                ->when($locationId, fn($q) => $q->where('location_id', $locationId))
                 ->whereNotNull('customer_id')
                 ->select('customer_id', DB::raw('COUNT(*) as order_count'))
                 ->groupBy('customer_id')
@@ -253,7 +282,10 @@ class SalesAnalyticsService
      */
     public function getDailySummary(string $date): array
     {
+        $locationId = request()->user()?->getActiveBranchId();
+
         $summary = Order::whereDate('created_at', $date)
+            ->when($locationId, fn($q) => $q->where('location_id', $locationId))
             ->whereDoesntHave('orderStatus', fn($q) => $q->where('code', 'cancelled'))
             ->select([
                 DB::raw('COUNT(*) as total_orders'),

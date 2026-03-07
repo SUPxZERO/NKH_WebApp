@@ -4,11 +4,18 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useTelegramAuth } from '../hooks/useTelegramAuth';
 
+interface BranchLocation {
+  id: number;
+  name: string;
+  code: string | null;
+}
+
 interface User {
   id: number;
   name: string;
   email: string;
   role: string; // Standardized to single string role
+  all_roles?: string[];
   permissions?: string[];
   phone?: string;
   email_verified_at?: string;
@@ -21,6 +28,10 @@ interface User {
   restaurant_location?: string;
   // Telegram fields
   is_telegram_user?: boolean;
+  // Branch/Location fields
+  locations?: BranchLocation[];
+  active_branch_id?: number | null;
+  can_switch_branch?: boolean;
 }
 
 interface AuthContextType {
@@ -82,7 +93,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return false;
   };
 
-  // Redirect to appropriate dashboard based on role
+  // Redirect to appropriate dashboard based on role or permissions
   const redirectToDashboard = () => {
     if (!user) {
       router.visit('/login');
@@ -90,8 +101,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const role = user.role;
-    // Map roles to dashboard paths
-    if (role === 'admin' || role === 'super-admin' || role.includes('manager')) {
+
+    // Users with dashboard.view permission go to admin dashboard
+    if (hasPermission('dashboard.view')) {
       router.visit('/admin/dashboard');
     } else if (role === 'employee' || role === 'chef' || role === 'waiter') {
       router.visit('/employee/pos');

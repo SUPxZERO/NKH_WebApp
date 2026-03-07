@@ -153,15 +153,10 @@ class OrderPlacementService
                 ]);
             }
 
-            // ==================== NOTIFICATIONS ====================
-            // FIX Issue #7: Moved OUTSIDE transaction - see below
-            // (DB locks should not be held during external API calls)
-
             return $order;
         });
 
-        // FIX Issue #7: Send notifications AFTER transaction commits
-        // This prevents holding DB locks during slow external API calls (Telegram, Email, Pusher)
+        // Notify Customer and Admin via Jobs
         $this->sendNotifications($order);
 
         // Notify Kitchen Display System (KDS) via WebSockets

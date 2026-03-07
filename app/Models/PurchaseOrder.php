@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BranchScopable;
 
     /**
      * SECURITY: Protect purchase order amounts and tracking numbers

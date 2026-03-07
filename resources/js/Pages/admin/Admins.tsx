@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/app/utils/cn';
+import MultiSelect from '@/app/components/ui/MultiSelect';
+import { Select } from '@/app/components/ui/Input';
+import { Building } from 'lucide-react';
 
 // Stats Ribbon - Mobile optimized with horizontal scroll
 const AdminStatsRibbon = ({ stats }: { stats: any }) => {
@@ -60,7 +63,14 @@ export default function Admins() {
     const [openEdit, setOpenEdit] = useState(false);
     const [editingAdmin, setEditingAdmin] = useState<any>(null);
     const [formData, setFormData] = useState({
-        name: '', email: '', phone: '', password: '', is_active: true, role: 'admin'
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        is_active: true,
+        role: 'admin',
+        location_ids: [] as number[],
+        default_location_id: '' as string | number
     });
     const qc = useQueryClient();
 
@@ -90,6 +100,18 @@ export default function Admins() {
         queryKey: ['admin/users/stats'],
         queryFn: () => apiGet('admin/users/stats')
     });
+
+    const { data: locationsData } = useQuery({
+        queryKey: ['admin/locations'],
+        queryFn: () => apiGet('admin/locations?is_active=1')
+    });
+
+    const locations = useMemo(() => {
+        if (!locationsData) return [];
+        if (Array.isArray(locationsData)) return locationsData;
+        if ((locationsData as any).data) return (locationsData as any).data;
+        return [];
+    }, [locationsData]);
 
     const adminList = useMemo(() => {
         if (!adminsData) return [];
@@ -140,7 +162,16 @@ export default function Admins() {
     });
 
     const resetForm = () => {
-        setFormData({ name: '', email: '', phone: '', password: '', is_active: true, role: 'admin' });
+        setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            password: '',
+            is_active: true,
+            role: 'admin',
+            location_ids: [],
+            default_location_id: ''
+        });
         setEditingAdmin(null);
     };
 
@@ -158,7 +189,9 @@ export default function Admins() {
             phone: admin.phone || '',
             password: '', // Don't fill password
             is_active: !!admin.is_active,
-            role: admin.roles && admin.roles.length > 0 ? admin.roles[0].slug : (admin.role || 'admin')
+            role: admin.roles && admin.roles.length > 0 ? admin.roles[0].slug : (admin.role || 'admin'),
+            location_ids: admin.locations ? admin.locations.map((l: any) => l.id) : [],
+            default_location_id: admin.default_location_id || ''
         });
         setOpenEdit(true);
     };
@@ -361,7 +394,6 @@ export default function Admins() {
                     <Input label={t('auth.phone_label') as string} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         required={!editingAdmin}
                         className="bg-card border-border text-foreground h-10 text-sm" />
-
                     <div>
                         <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">{t('admin.people.admins.table.role')}</label>
                         <select
@@ -373,6 +405,31 @@ export default function Admins() {
                             <option value="manager">{t('admin.people.admins.roles.manager')}</option>
                             <option value="super-admin">{t('admin.people.admins.roles.super_admin')}</option>
                         </select>
+                    </div>
+                    <div className="space-y-3 p-3 bg-secondary/30 rounded-xl border border-border">
+                        <MultiSelect
+                            label="Accessible Branches"
+                            options={locations.map((loc: any) => ({ value: loc.id, label: loc.name }))}
+                            value={formData.location_ids}
+                            onChange={(vals) => setFormData(prev => ({ ...prev, location_ids: vals as number[] }))}
+                            placeholder="Select permitted branches..."
+                        />
+
+                        <Select
+                            label="Primary Branch (Context)"
+                            options={[
+                                { value: '', label: 'No Selection (Global)' },
+                                ...locations
+                                    .filter((loc: any) => formData.location_ids.includes(loc.id))
+                                    .map((loc: any) => ({ value: String(loc.id), label: loc.name }))
+                            ]}
+                            value={String(formData.default_location_id)}
+                            onChange={(e) => setFormData(prev => ({ ...prev, default_location_id: e.target.value }))}
+                        />
+                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            <Building className="w-3 h-3" />
+                            Primary branch must be one of the permitted branches.
+                        </p>
                     </div>
 
                     <Input label={editingAdmin ? t('auth.new_password_title') as string : t('auth.password_label') as string}
@@ -402,7 +459,7 @@ export default function Admins() {
                         </Button>
                     </div>
                 </form>
-            </Modal>
-        </AdminLayout>
+            </Modal >
+        </AdminLayout >
     );
 }

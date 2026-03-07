@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BranchScopable;
 use App\Models\OrderStatus;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, BranchScopable;
 
     // Payment modes
     const PAYMENT_MODE_PAY_NOW = 'pay_now';

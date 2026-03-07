@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InventoryTransaction extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BranchScopable;
 
     // Transaction Types
     const TYPE_PURCHASE = 'purchase';

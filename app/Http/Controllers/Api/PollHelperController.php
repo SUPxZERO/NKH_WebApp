@@ -26,7 +26,7 @@ class PollHelperController extends Controller
         $user = $request->user();
 
         // Scope to location if user has one (assuming employee/admin)
-        $locationId = $user->employee->location_id ?? null; // Adjust based on actual User-Employee relation
+        $locationId = $user->getActiveBranchId();
 
         // If user is a customer, logic might differ, but assuming this is mostly for staff/admin for now as per plan
         // detailed logic:

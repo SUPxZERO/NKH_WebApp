@@ -9,6 +9,7 @@ use App\Http\Resources\LocationResource;
 use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Storage;
 
 class LocationController extends Controller
 {
@@ -29,8 +30,8 @@ class LocationController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('city', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%");
             });
         }
 
@@ -60,9 +61,9 @@ class LocationController extends Controller
         $query->orderBy($sortBy, $sortOrder);
 
         $perPage = $request->get('per_page', 15);
-        $locations = $query->paginate($perPage);
+        $locations = $query->with('operatingHours')->paginate($perPage);
 
-        return response()->json($locations);
+        return LocationResource::collection($locations);
     }
 
     // POST /api/locations (role:admin,manager)
@@ -71,6 +72,10 @@ class LocationController extends Controller
         $data = $request->validated();
         $operatingHours = $data['operating_hours'] ?? [];
         unset($data['operating_hours']);
+
+        if ($request->hasFile('logo_path')) {
+            $data['logo_path'] = $request->file('logo_path')->store('branch_logos', 'public');
+        }
 
         $location = Location::create($data);
 
@@ -93,6 +98,14 @@ class LocationController extends Controller
         $data = $request->validated();
         $operatingHours = $data['operating_hours'] ?? null;
         unset($data['operating_hours']);
+
+        if ($request->hasFile('logo_path')) {
+            // Delete old logo if exists
+            if ($location->logo_path) {
+                Storage::disk('public')->delete($location->logo_path);
+            }
+            $data['logo_path'] = $request->file('logo_path')->store('branch_logos', 'public');
+        }
 
         $location->update($data);
 

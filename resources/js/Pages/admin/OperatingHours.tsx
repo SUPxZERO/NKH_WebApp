@@ -10,6 +10,7 @@ import { apiGet, apiPost } from '@/app/utils/api';
 import { cn } from '@/app/utils/cn';
 import { toastSuccess, toastError } from '@/app/utils/toast';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const SERVICE_TYPES = [
@@ -67,8 +68,9 @@ const StatCard = ({ title, value, icon: Icon, color, index }: any) => {
 
 export default function OperatingHours() {
     const { t } = useLanguage();
+    const { user } = useAuth();
     const queryClient = useQueryClient();
-    const [selectedLocation, setSelectedLocation] = useState<number | null>(null);
+    const [selectedLocation, setSelectedLocation] = useState<number | null>(user?.active_branch_id || null);
     const [selectedServiceType, setSelectedServiceType] = useState('dine-in');
     const [schedules, setSchedules] = useState<Record<number, OperatingHour>>({});
     const [hasChanges, setHasChanges] = useState(false);
@@ -91,9 +93,9 @@ export default function OperatingHours() {
     // Auto-select first location if none selected
     useEffect(() => {
         if (!selectedLocation && locations.length > 0) {
-            setSelectedLocation(locations[0].id);
+            setSelectedLocation(user?.active_branch_id || locations[0].id);
         }
-    }, [locations, selectedLocation]);
+    }, [locations, selectedLocation, user?.active_branch_id]);
     const existingHours: Record<number, any> = hoursData?.data || {};
 
     // Initialize schedules when data loads

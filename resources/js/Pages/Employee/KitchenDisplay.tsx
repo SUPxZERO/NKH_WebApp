@@ -60,14 +60,14 @@ export default function KitchenDisplay() {
     useKitchenUpdates();
     const qc = useQueryClient();
     const orderTypeLabels: Record<string, string> = {
-        'dine-in': t('employee.kitchen.order_type.dine_in'),
-        pickup: t('employee.kitchen.order_type.pickup'),
-        delivery: t('employee.kitchen.order_type.delivery'),
+        'dine-in': t('kitchen.order_type.dine_in'),
+        pickup: t('kitchen.order_type.pickup'),
+        delivery: t('kitchen.order_type.delivery'),
     };
     const itemStatusLabels: Record<string, string> = {
-        served: t('employee.kitchen.item_status.served'),
-        preparing: t('employee.kitchen.item_status.preparing'),
-        pending: t('employee.kitchen.item_status.pending'),
+        served: t('kitchen.item_status.served'),
+        preparing: t('kitchen.item_status.preparing'),
+        pending: t('kitchen.item_status.pending'),
     };
 
 
@@ -157,13 +157,13 @@ export default function KitchenDisplay() {
             switch (order.status) {
                 case 'pending':
                 case 'received':
-                    return t('employee.kitchen.status_labels.new');
+                    return t('kitchen.status_labels.new');
                 case 'preparing':
-                    return t('employee.kitchen.status_labels.preparing');
+                    return t('kitchen.status_labels.preparing');
                 case 'ready':
-                    return t('employee.kitchen.status_labels.ready');
+                    return t('kitchen.status_labels.ready');
                 case 'completed':
-                    return t('employee.kitchen.status_labels.completed');
+                    return t('kitchen.status_labels.completed');
                 default:
                     return t(`employee.kitchen.status_labels.${order.status}`);
             }
@@ -172,11 +172,11 @@ export default function KitchenDisplay() {
             switch (order.status) {
                 case 'pending':
                 case 'received':
-                    return { label: t('employee.kitchen.start_prep'), action: () => handleStartPrep(order.id) };
+                    return { label: t('kitchen.start_prep'), action: () => handleStartPrep(order.id) };
                 case 'preparing':
-                    return { label: t('employee.kitchen.mark_ready'), action: () => handleMarkReady(order.id) };
+                    return { label: t('kitchen.mark_ready'), action: () => handleMarkReady(order.id) };
                 case 'ready':
-                    return { label: t('employee.kitchen.delivered'), action: () => handleMarkCompleted(order.id) };
+                    return { label: t('kitchen.delivered'), action: () => handleMarkCompleted(order.id) };
                 default:
                     return null;
             }
@@ -205,13 +205,13 @@ export default function KitchenDisplay() {
                             <div className="flex items-center gap-3">
                                 <UtensilsCrossed className="w-8 h-8" />
                                 <div>
-                                    <h2 className="text-2xl font-bold">{t('employee.kitchen.order_number_short', { number: order.order_number })}</h2>
+                                    <h2 className="text-2xl font-bold">{t('kitchen.order_number_short', { number: order.order_number })}</h2>
                                     <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
                                         <span className="capitalize px-2 py-0.5 rounded bg-white/20 font-bold">{orderTypeLabels[order.type] || order.type}</span>
                                         {order.table_number && (
                                             <span className="flex items-center gap-1 font-bold bg-white/20 px-2 py-0.5 rounded">
                                                 <QrCode className="w-4 h-4" />
-                                                {t('employee.kitchen.table_number', { number: order.table_number })}
+                                                {t('kitchen.table_number', { number: order.table_number })}
                                             </span>
                                         )}
                                     </div>
@@ -220,7 +220,7 @@ export default function KitchenDisplay() {
                             <div className="flex items-center gap-3">
                                 <div className="text-right">
                                     <div className={`text-xl font-bold ${isUrgent ? 'animate-pulse' : ''}`}>
-                                        ⏱ {t('employee.kitchen.age_minutes', { minutes: age })}
+                                        ⏱ {t('kitchen.age_minutes', { minutes: age })}
                                     </div>
                                     <div className="text-sm font-semibold px-2 py-0.5 bg-white/20 rounded">
                                         {getStatusLabel()}
@@ -243,7 +243,7 @@ export default function KitchenDisplay() {
                             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                                 <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
                                     <User className="w-5 h-5" />
-                                    {t('employee.kitchen.customer_info')}
+                                    {t('kitchen.customer_info')}
                                 </h3>
                                 <div className="space-y-1 text-sm">
                                     {order.customer_name && (
@@ -273,7 +273,7 @@ export default function KitchenDisplay() {
                             <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
                                 <h3 className="font-bold text-yellow-800 dark:text-yellow-300 mb-2 flex items-center gap-2">
                                     <FileText className="w-5 h-5" />
-                                    {t('employee.kitchen.order_notes')}
+                                    {t('kitchen.order_notes')}
                                 </h3>
                                 <p className="text-yellow-700 dark:text-yellow-200">{order.notes}</p>
                             </div>
@@ -283,7 +283,7 @@ export default function KitchenDisplay() {
                         <div>
                             <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                                 <ChefHat className="w-5 h-5" />
-                                {t('employee.kitchen.order_items', { count: order.items.length })}
+                                {t('kitchen.order_items', { count: order.items.length })}
                             </h3>
                             <div className="space-y-3">
                                 {order.items.map((item, index) => (
@@ -310,15 +310,15 @@ export default function KitchenDisplay() {
                                             </div>
                                             {item.notes && (
                                                 <div className="mt-2 p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm text-orange-700 dark:text-orange-300">
-                                                    <strong>{t('employee.kitchen.special_request')}:</strong> {item.notes}
+                                                    <strong>{t('kitchen.special_request')}:</strong> {item.notes}
                                                 </div>
                                             )}
                                             {item.unit_price && (
                                                 <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    {t('employee.kitchen.unit_price_each', { price: t('employee.common.currency_symbol') + item.unit_price.toFixed(2) })}
+                                                    {t('kitchen.unit_price_each', { price: t('employee.common.currency_symbol') + item.unit_price.toFixed(2) })}
                                                     {item.total_price && (
                                                         <span className="ml-2 font-medium">
-                                                            • {t('employee.kitchen.item_total', { total: t('employee.common.currency_symbol') + item.total_price.toFixed(2) })}
+                                                            • {t('kitchen.item_total', { total: t('employee.common.currency_symbol') + item.total_price.toFixed(2) })}
                                                         </span>
                                                     )}
                                                 </div>
@@ -333,7 +333,7 @@ export default function KitchenDisplay() {
                         {(order.subtotal || order.total_amount) && (
                             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
                                 <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
-                                    <span>{t('employee.kitchen.total_amount')}</span>
+                                    <span>{t('kitchen.total_amount')}</span>
                                     <span>{t('employee.common.currency_symbol')}{(order.total_amount || order.subtotal || 0).toFixed(2)}</span>
                                 </div>
                             </div>
@@ -351,7 +351,7 @@ export default function KitchenDisplay() {
                                 className="w-full h-14 text-xl font-bold"
                                 disabled={updateStatusMutation.isPending}
                             >
-                                {updateStatusMutation.isPending ? t('employee.kitchen.updating') : nextAction.label}
+                                {updateStatusMutation.isPending ? t('kitchen.updating') : nextAction.label}
                             </Button>
                         </div>
                     )}
@@ -380,13 +380,13 @@ export default function KitchenDisplay() {
                 <div className="flex items-start justify-between mb-3">
                     <div>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {t('employee.kitchen.order_number_short', { number: order.order_number })}
+                            {t('kitchen.order_number_short', { number: order.order_number })}
                         </div>
                         <div className="flex flex-wrap gap-2 mt-1">
                             {order.table_number ? (
                                 <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 font-bold text-sm">
                                     <QrCode className="w-3.5 h-3.5" />
-                                    <span>{t('employee.kitchen.table_number', { number: order.table_number })}</span>
+                                    <span>{t('kitchen.table_number', { number: order.table_number })}</span>
                                 </div>
                             ) : (
                                 <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 text-sm font-medium capitalize">
@@ -398,12 +398,12 @@ export default function KitchenDisplay() {
                     </div>
                     <div className="text-right">
                         <div className={`text-lg font-bold ${isUrgent ? 'text-red-600 animate-pulse' : 'text-gray-700 dark:text-gray-300'}`}>
-                            ⏱ {t('employee.kitchen.age_minutes', { minutes: age })}
+                            ⏱ {t('kitchen.age_minutes', { minutes: age })}
                         </div>
                         {isUrgent && (
                             <div className="text-xs text-red-600 font-semibold flex items-center gap-1">
                                 <AlertCircle className="w-3 h-3" />
-                                {t('employee.kitchen.urgent')}
+                                {t('kitchen.urgent')}
                             </div>
                         )}
                     </div>
@@ -419,14 +419,14 @@ export default function KitchenDisplay() {
                             <div className="flex-1 min-w-0">
                                 <div className="font-medium text-gray-900 dark:text-white truncate">{item.name}</div>
                                 {item.notes && (
-                                    <div className="text-xs text-orange-600 dark:text-orange-400 italic truncate">{t('employee.kitchen.note')}: {item.notes}</div>
+                                    <div className="text-xs text-orange-600 dark:text-orange-400 italic truncate">{t('kitchen.note')}: {item.notes}</div>
                                 )}
                             </div>
                         </div>
                     ))}
                     {hasMoreItems && (
                         <div className="text-center py-2 text-sm text-fuchsia-600 dark:text-fuchsia-400 font-medium">
-                            {t('employee.kitchen.more_items', { count: itemCount - 3 })}
+                            {t('kitchen.more_items', { count: itemCount - 3 })}
                         </div>
                     )}
                 </div>
@@ -434,7 +434,7 @@ export default function KitchenDisplay() {
                 {/* Order Notes Preview */}
                 {order.notes && (
                     <div className="mb-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 truncate">
-                        <strong>{t('employee.kitchen.note')}:</strong> {order.notes}
+                        <strong>{t('kitchen.note')}:</strong> {order.notes}
                     </div>
                 )}
 
@@ -457,7 +457,7 @@ export default function KitchenDisplay() {
 
     return (
         <EmployeeLayout>
-            <Head title={`${t('employee.kitchen.title')} - NKH Restaurant`} />
+            <Head title={`${t('kitchen.title')} - NKH Restaurant`} />
 
             <div className="space-y-6 relative">
                 {/* Background Decoration */}
@@ -469,9 +469,9 @@ export default function KitchenDisplay() {
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-                                {t('employee.kitchen.system')}
+                                {t('kitchen.system')}
                             </h1>
-                            <p className="text-[10px] text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-[0.2em] font-black">{t('employee.kitchen.kds_subtitle')}</p>
+                            <p className="text-[10px] text-fuchsia-600 dark:text-fuchsia-400 uppercase tracking-[0.2em] font-black">{t('kitchen.kds_subtitle')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -481,10 +481,10 @@ export default function KitchenDisplay() {
                             onClick={() => setSoundEnabled(!soundEnabled)}
                             leftIcon={<Bell className="w-4 h-4" />}
                         >
-                            {soundEnabled ? t('employee.kitchen.sound_on') : t('employee.kitchen.sound_off')}
+                            {soundEnabled ? t('kitchen.sound_on') : t('kitchen.sound_off')}
                         </Button>
                         <div className="text-lg">
-                            <span className="text-gray-500">{t('employee.kitchen.total')}: </span>
+                            <span className="text-gray-500">{t('kitchen.total')}: </span>
                             <span className="font-bold">{orders?.data?.length || 0}</span>
                         </div>
                     </div>
@@ -500,8 +500,8 @@ export default function KitchenDisplay() {
                                     <AlertCircle className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold">{t('employee.kitchen.new')}</h2>
-                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('employee.kitchen.status_awaiting')}</p>
+                                    <h2 className="text-xl font-bold">{t('kitchen.new')}</h2>
+                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('kitchen.status_awaiting')}</p>
                                 </div>
                             </div>
                             <div className="text-4xl font-black tabular-nums">{groupedOrders.pending.length}</div>
@@ -516,7 +516,7 @@ export default function KitchenDisplay() {
                                         className="text-center py-12 text-gray-500"
                                     >
                                         <Package className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                        <p>{t('employee.kitchen.no_new_orders')}</p>
+                                        <p>{t('kitchen.no_new_orders')}</p>
                                     </motion.div>
                                 ) : (
                                     groupedOrders.pending.map((order) => (
@@ -524,7 +524,7 @@ export default function KitchenDisplay() {
                                             key={order.id}
                                             order={order}
                                             showAction
-                                            actionLabel={t('employee.kitchen.start_prep')}
+                                            actionLabel={t('kitchen.start_prep')}
                                             onAction={handleStartPrep}
                                             statusColor="border-rose-500"
                                         />
@@ -542,8 +542,8 @@ export default function KitchenDisplay() {
                                     <Flame className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold">{t('employee.kitchen.preparing')}</h2>
-                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('employee.kitchen.status_in_progress')}</p>
+                                    <h2 className="text-xl font-bold">{t('kitchen.preparing')}</h2>
+                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('kitchen.status_in_progress')}</p>
                                 </div>
                             </div>
                             <div className="text-4xl font-black tabular-nums">{groupedOrders.preparing.length}</div>
@@ -558,7 +558,7 @@ export default function KitchenDisplay() {
                                         className="text-center py-12 text-gray-500"
                                     >
                                         <ChefHat className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                        <p>{t('employee.kitchen.no_cooking')}</p>
+                                        <p>{t('kitchen.no_cooking')}</p>
                                     </motion.div>
                                 ) : (
                                     groupedOrders.preparing.map((order) => (
@@ -566,7 +566,7 @@ export default function KitchenDisplay() {
                                             key={order.id}
                                             order={order}
                                             showAction
-                                            actionLabel={t('employee.kitchen.mark_ready')}
+                                            actionLabel={t('kitchen.mark_ready')}
                                             onAction={handleMarkReady}
                                             statusColor="border-orange-500"
                                         />
@@ -584,8 +584,8 @@ export default function KitchenDisplay() {
                                     <CheckCircle className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold">{t('employee.kitchen.ready')}</h2>
-                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('employee.kitchen.status_finished')}</p>
+                                    <h2 className="text-xl font-bold">{t('kitchen.ready')}</h2>
+                                    <p className="text-[10px] opacity-80 uppercase tracking-widest">{t('kitchen.status_finished')}</p>
                                 </div>
                             </div>
                             <div className="text-4xl font-black tabular-nums">{groupedOrders.ready.length}</div>
@@ -600,7 +600,7 @@ export default function KitchenDisplay() {
                                         className="text-center py-12 text-gray-500"
                                     >
                                         <Clock className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                        <p>{t('employee.kitchen.no_ready')}</p>
+                                        <p>{t('kitchen.no_ready')}</p>
                                     </motion.div>
                                 ) : (
                                     groupedOrders.ready.map((order) => (
@@ -608,7 +608,7 @@ export default function KitchenDisplay() {
                                             key={order.id}
                                             order={order}
                                             showAction
-                                            actionLabel={t('employee.kitchen.delivered')}
+                                            actionLabel={t('kitchen.delivered')}
                                             onAction={handleMarkCompleted}
                                             statusColor="border-emerald-500"
                                         />

@@ -105,7 +105,7 @@ export default function Employees() {
     salary_type: 'monthly' as 'hourly' | 'monthly', salary: '', address: '',
     latitude: null as number | null, longitude: null as number | null,
     position_id: '', location_id: '', status: 'active' as 'active' | 'inactive' | 'terminated' | 'on_leave',
-    role: 'employee'
+    role: 'employee', location_ids: [] as number[]
   });
   const qc = useQueryClient();
 
@@ -166,7 +166,7 @@ export default function Employees() {
   });
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', phone: '', password: '', employee_code: '', hire_date: '', salary_type: 'monthly', salary: '', address: '', latitude: null, longitude: null, position_id: '', location_id: '', status: 'active', role: 'employee' });
+    setFormData({ name: '', email: '', phone: '', password: '', employee_code: '', hire_date: '', salary_type: 'monthly', salary: '', address: '', latitude: null, longitude: null, position_id: '', location_id: '', status: 'active', role: 'employee', location_ids: [] });
     setEditingEmployee(null);
   };
 
@@ -177,6 +177,7 @@ export default function Employees() {
       salary: formData.salary ? parseFloat(formData.salary) : null,
       position_id: formData.position_id ? parseInt(formData.position_id) : null,
       location_id: parseInt(formData.location_id),
+      location_ids: formData.location_ids,
       latitude: formData.latitude,
       longitude: formData.longitude
     };
@@ -194,6 +195,7 @@ export default function Employees() {
       latitude: employee.user?.latitude ? parseFloat(String(employee.user.latitude)) : null,
       longitude: employee.user?.longitude ? parseFloat(String(employee.user.longitude)) : null,
       position_id: employee.position_id?.toString() || '', location_id: employee.location_id?.toString() || '',
+      location_ids: (employee.user as any)?.locations?.map((loc: any) => loc.id) || [],
       status: (employee.status as 'active' | 'inactive' | 'terminated' | 'on_leave') || 'active', role: employee.user?.roles?.[0] || 'employee'
     });
     setOpenEdit(true);
@@ -658,6 +660,55 @@ export default function Employees() {
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          {/* Authorized Branches Section */}
+          <div className="pt-2 sm:pt-4 border-t border-border">
+            <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1">
+              Authorized Branches
+            </label>
+            <p className="text-xs text-muted-foreground mb-3">Select additional branches this employee can access.</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {(locations as any)?.data?.map((loc: Location) => {
+                const isPrimary = formData.location_id === String(loc.id);
+                const isSelected = isPrimary || formData.location_ids.includes(loc.id);
+                return (
+                  <label
+                    key={`auth-branch-${loc.id}`}
+                    className={cn(
+                      "flex flex-col items-start gap-2 p-3 rounded-lg border cursor-pointer border-border transition-all w-full",
+                      isSelected
+                        ? "bg-fuchsia-500/10 border-fuchsia-500 ring-1 ring-fuchsia-500/50"
+                        : "bg-secondary hover:bg-secondary/80 hover:border-fuchsia-300"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        disabled={isPrimary}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({ ...formData, location_ids: [...formData.location_ids, loc.id] });
+                          } else {
+                            setFormData({ ...formData, location_ids: formData.location_ids.filter(id => id !== loc.id) });
+                          }
+                        }}
+                        className="w-4 h-4 rounded text-fuchsia-600 border-gray-300 focus:ring-fuchsia-500 focus:ring-2 disabled:opacity-50"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm leading-tight text-foreground truncate max-w-[120px]">
+                          {loc.name}
+                        </div>
+                        {isPrimary && (
+                          <div className="text-[10px] text-fuchsia-500 font-medium mt-0.5">Primary</div>
+                        )}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
 

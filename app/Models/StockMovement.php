@@ -10,7 +10,7 @@ use App\Traits\HasLocation;
 
 class StockMovement extends Model
 {
-    use HasFactory, HasLocation;
+    use HasFactory, HasLocation, \App\Traits\BranchScopable;
 
     // The ledger is append-only, so we disable the default updated_at column
     public const UPDATED_AT = null;

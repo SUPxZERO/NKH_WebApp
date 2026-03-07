@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class DiningTable extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BranchScopable;
 
     protected $table = 'tables';
 
@@ -149,7 +149,7 @@ class DiningTable extends Model
         }
 
         [$uuid, $signature] = explode('.', $token, 2);
-        
+
         // Validate UUID format
         if (!Str::isUuid($uuid)) {
             return false;

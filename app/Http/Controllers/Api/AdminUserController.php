@@ -21,7 +21,7 @@ class AdminUserController extends Controller
             $q->whereHas('roles', function ($q2) {
                 $q2->whereIn('slug', ['super-admin', 'admin', 'manager']);
             });
-        })->with('roles');
+        })->with(['roles', 'locations']);
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -56,6 +56,9 @@ class AdminUserController extends Controller
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
             'role' => 'required|string|in:admin,manager,super-admin',
+            'location_ids' => 'nullable|array',
+            'location_ids.*' => 'exists:locations,id',
+            'default_location_id' => 'nullable|exists:locations,id',
         ]);
 
         $admin = DB::transaction(function () use ($validated) {
@@ -65,6 +68,7 @@ class AdminUserController extends Controller
                 'password' => Hash::make($validated['password']),
                 'phone' => $validated['phone'] ?? null,
                 'is_active' => $validated['is_active'] ?? true,
+                'default_location_id' => $validated['default_location_id'] ?? null,
             ]);
 
             // Ensure role exists and attach
@@ -73,7 +77,14 @@ class AdminUserController extends Controller
             $role = Role::firstOrCreate(['slug' => $roleSlug], ['name' => $roleName]);
             $user->roles()->attach($role);
 
-            return $user;
+            // Sync locations
+            if (!empty($validated['location_ids'])) {
+                $user->locations()->sync($validated['location_ids']);
+            } elseif ($user->default_location_id) {
+                $user->locations()->sync([$user->default_location_id]);
+            }
+
+            return $user->load(['roles', 'locations']);
         });
 
         return response()->json($admin, 201);
@@ -94,6 +105,9 @@ class AdminUserController extends Controller
             'phone' => 'nullable|string|max:20',
             'role' => 'sometimes|string|in:admin,manager,super-admin',
             'is_active' => 'sometimes|boolean',
+            'location_ids' => 'sometimes|array',
+            'location_ids.*' => 'exists:locations,id',
+            'default_location_id' => 'sometimes|nullable|exists:locations,id',
         ]);
 
         $user = DB::transaction(function () use ($validated, $user) {
@@ -106,6 +120,8 @@ class AdminUserController extends Controller
                 $updateData['phone'] = $validated['phone'];
             if (isset($validated['is_active']))
                 $updateData['is_active'] = $validated['is_active'];
+            if (array_key_exists('default_location_id', $validated))
+                $updateData['default_location_id'] = $validated['default_location_id'];
 
             if (!empty($validated['password'])) {
                 $updateData['password'] = Hash::make($validated['password']);
@@ -121,7 +137,22 @@ class AdminUserController extends Controller
                 $user->roles()->sync([$role->id]);
             }
 
-            return $user;
+            // Sync locations
+            if (isset($validated['location_ids'])) {
+                $syncIds = $validated['location_ids'];
+                $primaryId = $validated['default_location_id'] ?? $user->default_location_id;
+
+                if ($primaryId && !in_array($primaryId, $syncIds)) {
+                    $syncIds[] = (int) $primaryId;
+                }
+
+                $user->locations()->sync($syncIds);
+            } elseif (isset($validated['default_location_id']) && $validated['default_location_id']) {
+                // If only default changed, ensure it's in the pivot
+                $user->locations()->syncWithoutDetaching([$validated['default_location_id']]);
+            }
+
+            return $user->load(['roles', 'locations']);
         });
 
         return response()->json($user);

@@ -21,9 +21,10 @@ class EmployeeResource extends JsonResource
             'phone' => $this->user->phone, // Also at root for convenience
             'position_id' => $this->position_id,
             'location_id' => $this->location_id,
+            'location_ids' => $this->user->locations->pluck('id'),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
-            
+
             // User information
             'user' => [
                 'id' => $this->user->id,
@@ -37,7 +38,7 @@ class EmployeeResource extends JsonResource
                 'latitude' => $this->user->latitude,
                 'longitude' => $this->user->longitude,
             ],
-            
+
             // Position information
             'position' => $this->whenLoaded('position', function () {
                 return [
@@ -46,8 +47,8 @@ class EmployeeResource extends JsonResource
                     'description' => $this->position->description,
                 ];
             }),
-            
-            // Location information
+
+            // Location information (Primary)
             'location' => $this->whenLoaded('location', function () {
                 return [
                     'id' => $this->location->id,
@@ -55,6 +56,9 @@ class EmployeeResource extends JsonResource
                     'address_line1' => $this->location->address_line1,
                 ];
             }),
+
+            // All Locations
+            'locations' => LocationResource::collection($this->user->locations),
         ];
     }
 }

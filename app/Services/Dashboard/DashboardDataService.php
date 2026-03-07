@@ -50,6 +50,11 @@ class DashboardDataService
             $data['pending_approvals'] = $this->getAllPendingApprovals();
             $data['team_status'] = $this->getTeamOnDuty();
             $data['quick_actions'] = $this->getAdminQuickActions();
+
+            // Multi-branch overview for Super Admins
+            if ($user->getActiveBranchId() === null) {
+                $data['branch_overview'] = $this->getBranchOverview();
+            }
         }
         // Manager - Operations focus
         elseif ($this->hasAnyRole($roles, ['manager', 'service-manager', 'chief'])) {
@@ -257,6 +262,35 @@ class DashboardDataService
         // Sort by timestamp and limit
         usort($activities, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
         return array_slice($activities, 0, $limit);
+    }
+
+    /**
+     * Get overview of all branches for multi-branch dash context.
+     */
+    public function getBranchOverview(): array
+    {
+        $today = Carbon::today();
+
+        return \App\Models\Location::where('is_active', true)
+            ->get()
+            ->map(function ($location) use ($today) {
+                // We use withoutGlobalScope to ensure we get data for specific branches regardless of current session
+                $stats = Order::withoutGlobalScope('branch_scope')
+                    ->where('location_id', $location->id)
+                    ->whereDate('created_at', $today)
+                    ->selectRaw('COUNT(*) as count, SUM(total_amount) as revenue')
+                    ->first();
+
+                return [
+                    'id' => $location->id,
+                    'name' => $location->name,
+                    'orders_today' => (int) ($stats->count ?? 0),
+                    'revenue_today' => (float) ($stats->revenue ?? 0),
+                    'employee_count' => Employee::withoutGlobalScope('branch_scope')
+                        ->where('location_id', $location->id)
+                        ->count(),
+                ];
+            })->toArray();
     }
 
     // ==================== Private Helper Methods ====================

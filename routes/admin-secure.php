@@ -56,6 +56,13 @@ use App\Http\Controllers\Api\Admin\{
     PaymentAnalyticsController,
 };
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\BranchController;
+
+// ============================================================================
+// BRANCH MANAGEMENT (Accessible to all authenticated users)
+// ============================================================================
+Route::get('branches', [BranchController::class, 'index']);
+Route::post('branch/switch', [BranchController::class, 'switch']);
 
 /*
 |--------------------------------------------------------------------------

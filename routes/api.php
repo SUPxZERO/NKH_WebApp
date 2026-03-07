@@ -136,11 +136,7 @@ Route::controller(MenuItemController::class)->group(function () {
     Route::delete('/menu-items/{menuItem}', 'destroy');
 });
 
-// Kitchen Display System (KDS) Sprint P12 Routes
-Route::prefix('kitchen')->group(function () {
-    Route::get('/orders', [\App\Http\Controllers\Api\KitchenController::class, 'index']);
-    Route::put('/orders/{order}/status', [\App\Http\Controllers\Api\KitchenController::class, 'updateStatus']);
-});
+
 
 Route::get('/time-slots', [OnlineOrderController::class, 'timeSlots']);
 
@@ -292,8 +288,10 @@ $adminMiddleware = [
     \Illuminate\View\Middleware\ShareErrorsFromSession::class,
     \App\Http\Middleware\SetLocale::class,
     'auth:sanctum',
-    // Support multiple admin roles: super-admin, admin, and specific manager roles
-    'role:super-admin,admin,chief,service-manager,finance-manager,hr-manager,inventory-manager,operations-manager,viewer',
+    // Branch scoping — resolves active branch from request/session
+    \App\Http\Middleware\BranchScopeMiddleware::class,
+    // NOTE: Per-route permission checks are handled in admin-secure.php
+    // No blanket role gate needed — each endpoint enforces its own permission
 ];
 
 // Admin/Manager management endpoints with granular permission middleware

@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BranchScopable;
 use Carbon\Carbon;
 
 class Reservation extends Model
 {
-    use HasFactory;
+    use HasFactory, BranchScopable;
 
     /**
      * SECURITY: Use $guarded to protect reservation system fields
@@ -51,11 +52,11 @@ class Reservation extends Model
 
     public function canCustomerCancel(): bool
     {
-        if (! in_array($this->status, ['pending', 'confirmed'], true)) {
+        if (!in_array($this->status, ['pending', 'confirmed'], true)) {
             return false;
         }
 
-        if (! $this->reservation_date) {
+        if (!$this->reservation_date) {
             return false;
         }
 

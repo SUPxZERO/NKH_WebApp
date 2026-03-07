@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Log;
  */
 class MenuItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Traits\BranchScopable;
 
     protected $appends = ['name', 'description'];
     protected $with = ['translations'];

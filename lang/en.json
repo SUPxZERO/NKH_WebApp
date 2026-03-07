@@ -1822,6 +1822,11 @@
                 "pickup": "Accept Pickup",
                 "pin_location": "Pin Location on Map",
                 "postal": "Postal Code",
+                "email": "Email Address",
+                "logo": "Branch Logo",
+                "tax_id": "Tax Registration Number",
+                "tax_rate": "Default Tax Rate (%)",
+                "branch_config": "Branch Branding & Tax Control",
                 "services_status": "Services & Status"
             },
             "stats": {

@@ -56,7 +56,7 @@ class OrderController extends Controller
         // FIX Issue #14: Race Condition - Lock the table row to prevent double booking
         // Must happen inside the transaction, so we move table retrieval inside
 
-        $order = DB::transaction(function () use ($employee, $data) {
+        $order = DB::transaction(function () use ($employee, $data, $request) {
             // Lock table for update to prevent concurrent bookings
             $table = DiningTable::where('id', $data['table_id'])->lockForUpdate()->find($data['table_id']);
 
@@ -67,11 +67,13 @@ class OrderController extends Controller
             app(TableStatusService::class)->occupyForStaff($table, $employee->user_id);
             $isEmployeeOrder = !empty($employee->id);
 
+            $locationId = $request->user()->getActiveBranchId() ?? $employee->location_id;
+
             $order = Order::create([
-                'location_id' => $employee->location_id,
+                'location_id' => $locationId,
                 'table_id' => $table->id,
                 'employee_id' => $employee->id,
-                'order_number' => $this->generateOrderNumber($employee->location_id, 'DIN'),
+                'order_number' => $this->generateOrderNumber($locationId, 'DIN'),
                 'order_type' => 'dine-in',
                 // 'status' => $isEmployeeOrder ? 'received' : 'pending', // REMOVED
                 'status' => $isEmployeeOrder ? 'received' : 'pending',

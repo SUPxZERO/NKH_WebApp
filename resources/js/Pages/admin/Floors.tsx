@@ -14,6 +14,7 @@ import { toastSuccess, toastError } from '@/app/utils/toast';
 import { cn } from '@/app/utils/cn';
 import { Floor, Location } from '@/types';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 // StatCard Component with vibrant gradients - Mobile optimized
 const StatCard = ({ title, value, icon: Icon, color, index = 0 }: any) => {
@@ -94,9 +95,10 @@ const FloorStatsRibbon = ({ stats }: { stats: any }) => {
 
 export default function Floors() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [locationFilter, setLocationFilter] = useState('all');
+  const [locationFilter, setLocationFilter] = useState(user?.active_branch_id ? user.active_branch_id.toString() : 'all');
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editingFloor, setEditingFloor] = useState<Floor | null>(null);
@@ -106,7 +108,10 @@ export default function Floors() {
   const [perPage] = useState(20);
 
   const [formData, setFormData] = useState({
-    location_id: '', name: '', display_order: '0', is_active: true
+    location_id: user?.active_branch_id ? user.active_branch_id.toString() : '',
+    name: '',
+    display_order: '0',
+    is_active: true
   });
 
   // Fetch Data
@@ -157,7 +162,12 @@ export default function Floors() {
     setOpenCreate(false);
     setOpenEdit(false);
     setEditingFloor(null);
-    setFormData({ location_id: '', name: '', display_order: '0', is_active: true });
+    setFormData({
+      location_id: user?.active_branch_id ? user.active_branch_id.toString() : '',
+      name: '',
+      display_order: '0',
+      is_active: true
+    });
   };
 
   const handleEdit = (floor: Floor) => {

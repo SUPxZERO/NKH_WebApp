@@ -263,4 +263,79 @@ class User extends Authenticatable
             })
             ->exists();
     }
+
+    // ============================================
+    // BRANCH / LOCATION HELPERS
+    // ============================================
+
+    /**
+     * Get all locations (branches) assigned to this user.
+     */
+    public function locations(): BelongsToMany
+    {
+        return $this->belongsToMany(Location::class, 'user_locations')
+            ->withPivot('is_primary')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the user's primary location.
+     */
+    public function primaryLocation(): ?Location
+    {
+        return $this->locations()->wherePivot('is_primary', true)->first()
+            ?? $this->locations()->first()
+            ?? $this->defaultLocation;
+    }
+
+    /**
+     * Get the currently active branch ID (from session or fallback to primary).
+     */
+    public function getActiveBranchId(): ?int
+    {
+        $sessionBranch = app(\App\Services\BranchSessionService::class)->getActiveBranch();
+
+        if ($sessionBranch !== null) {
+            return $sessionBranch;
+        }
+
+        // For non-admin roles, default to primary location
+        if (!$this->canViewAllBranches()) {
+            return $this->primaryLocation()?->id
+                ?? $this->employee?->location_id
+                ?? $this->default_location_id;
+        }
+
+        return null; // Admin/super-admin: null = all branches
+    }
+
+    /**
+     * Check if user can access a specific branch.
+     */
+    public function canAccessBranch(int $locationId): bool
+    {
+        if ($this->canViewAllBranches()) {
+            return true;
+        }
+
+        // Check user_locations pivot
+        if ($this->locations()->where('locations.id', $locationId)->exists()) {
+            return true;
+        }
+
+        // Fallback: check employee location and default location
+        if ($this->employee?->location_id === $locationId) {
+            return true;
+        }
+
+        return $this->default_location_id === $locationId;
+    }
+
+    /**
+     * Check if user can view data from all branches (super-admin/admin only).
+     */
+    public function canViewAllBranches(): bool
+    {
+        return $this->hasAnyRole(['super-admin', 'admin']);
+    }
 }

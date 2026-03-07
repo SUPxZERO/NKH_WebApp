@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasLocation;
 
 class InventoryAdjustment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLocation, \App\Traits\BranchScopable;
 
     protected $guarded = [
         'id',

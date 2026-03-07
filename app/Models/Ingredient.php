@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ingredient extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BranchScopable;
     /**
      * SECURITY: Use $guarded to protect inventory financial data
      * 

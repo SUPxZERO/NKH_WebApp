@@ -27,6 +27,8 @@ class UpdateEmployeeRequest extends FormRequest
             'role' => ['sometimes', 'string', 'in:admin,manager,cashier,waiter,chef,employee'],
             'position_id' => ['sometimes', 'exists:positions,id'],
             'location_id' => ['sometimes', 'exists:locations,id'],
+            'location_ids' => ['sometimes', 'array'],
+            'location_ids.*' => ['exists:locations,id'],
             'salary_type' => ['sometimes', 'in:hourly,monthly'],
             'salary' => ['nullable', 'numeric', 'min:0'],
             'status' => ['sometimes', 'in:active,inactive,terminated,on_leave'],

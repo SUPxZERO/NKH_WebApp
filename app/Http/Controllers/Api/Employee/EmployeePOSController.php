@@ -24,7 +24,7 @@ class EmployeePOSController extends Controller
     {
         $user = $request->user();
         $employee = Employee::where('user_id', $user->id)->first();
-        $locationId = $employee ? $employee->location_id : 1;
+        $locationId = $user->getActiveBranchId() ?? ($employee ? $employee->location_id : 1);
 
         $floors = Floor::where('location_id', $locationId)
             ->where('is_active', true)
@@ -69,7 +69,7 @@ class EmployeePOSController extends Controller
             // Let's assume nullable or we use the user's relation if available.
         }
 
-        $locationId = $employee ? $employee->location_id : 1; // Default or fail
+        $locationId = $user->getActiveBranchId() ?? ($employee ? $employee->location_id : 1);
 
         return DB::transaction(function () use ($validated, $user, $employee, $locationId) {
             $table = null;

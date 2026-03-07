@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BranchScopable;
 
 class Invoice extends Model
 {
-    use HasFactory;
+    use HasFactory, BranchScopable;
 
     // Status constants
     const STATUS_DRAFT = 'draft';
@@ -139,14 +140,14 @@ class Invoice extends Model
     {
         $this->amount_paid = (float) $this->amount_paid + $amount;
         $this->amount_due = max(0, (float) $this->total_amount - $this->amount_paid);
-        
+
         if ($this->amount_due <= 0) {
             $this->status = self::STATUS_PAID;
             $this->paid_at = now();
         } elseif ($this->amount_paid > 0) {
             $this->status = self::STATUS_PARTIAL;
         }
-        
+
         $this->save();
     }
 
