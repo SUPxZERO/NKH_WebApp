@@ -13,13 +13,15 @@ class TelegramGuestOrderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Skip auth checks on middleware for test simplicity, we mock the user context directly
-        $this->withoutMiddleware([\App\Http\Middleware\TelegramAuth::class]);
+        // Middleware left enabled to process X-Telegram-User-ID header
     }
 
     public function test_guest_can_place_order_without_customer_account(): void
     {
         // Setup initial dummy data
+        \Illuminate\Support\Facades\DB::table('order_types')->insertOrIgnore(['code' => 'pickup', 'name' => 'Pickup', 'is_active' => true]);
+        \Illuminate\Support\Facades\DB::table('order_statuses')->insertOrIgnore(['code' => 'pending', 'name' => 'Pending', 'is_active' => true]);
+
         $location = \App\Models\Location::factory()->create();
         $menuItem = \App\Models\MenuItem::factory()->create(['price' => 10.00]);
 
@@ -57,9 +59,11 @@ class TelegramGuestOrderTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'telegram_user_id' => $telegramUser->id,
             'customer_id' => null, // ensure it's a guest order
-            'order_type' => 'pickup',
             'payment_mode' => 'pay_now',
         ]);
+
+        $order = \App\Models\Order::where('telegram_user_id', $telegramUser->id)->first();
+        $this->assertEquals('pickup', $order->order_type_code);
 
         // Assert user cart conversation data is nulled
         $telegramUser->refresh();
@@ -73,6 +77,6 @@ class TelegramGuestOrderTest extends TestCase
     {
         return $this->withHeaders([
             'X-Telegram-User-ID' => $user->telegram_id,
-        ])->actingAs($user, 'telegram'); // Assuming guard is set or handle via header mock
+        ]);
     }
 }

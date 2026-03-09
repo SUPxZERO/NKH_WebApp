@@ -71,7 +71,7 @@ class TelegramCustomerService
         CustomerAddress::where('telegram_user_id', $telegramUser->id)
             ->whereNull('customer_id')
             ->update(['customer_id' => $customer->id]);
-            
+
         // Migrate Cart (if stored in DB tables, though currently in conversation_data)
         // If we had a structural cart table, we'd migrate it here.
     }
@@ -88,7 +88,7 @@ class TelegramCustomerService
                 $customer->update(['phone' => $phoneNumber]);
             }
         }
-        
+
         $telegramUser->update(['phone_number' => $phoneNumber]);
     }
 }

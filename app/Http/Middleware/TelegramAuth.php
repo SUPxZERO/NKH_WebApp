@@ -43,6 +43,14 @@ class TelegramAuth
             ], 403);
         }
 
+        // SPRINT P16: Ensure Telegram user has an associated Customer record
+        if (!$telegramUser->customer_id) {
+            $customerService = app(\App\Services\Telegram\TelegramCustomerService::class);
+            $customerService->createForTelegramUser($telegramUser);
+            // Refresh to get the attached customer
+            $telegramUser->refresh();
+        }
+
         // Set the user on the request forControllers to use
         $request->setUserResolver(function () use ($telegramUser) {
             return $telegramUser;

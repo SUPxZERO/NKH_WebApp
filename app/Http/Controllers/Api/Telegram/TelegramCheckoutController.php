@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\TelegramUser;
 use App\Services\OrderCalculationService;
+use App\Services\Telegram\TelegramOrderNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,10 +20,12 @@ class TelegramCheckoutController extends Controller
 {
     use ApiResponse;
     protected $calculationService;
+    protected $notificationService;
 
-    public function __construct(OrderCalculationService $calculationService)
+    public function __construct(OrderCalculationService $calculationService, TelegramOrderNotificationService $notificationService)
     {
         $this->calculationService = $calculationService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -304,6 +307,13 @@ class TelegramCheckoutController extends Controller
 
                 return $order;
             });
+
+            // Send order placed notification via Telegram
+            try {
+                $this->notificationService->sendStatusNotification($order, 'pending');
+            } catch (\Exception $e) {
+                Log::error('Telegram Guest Checkout Notification Error: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success' => true,

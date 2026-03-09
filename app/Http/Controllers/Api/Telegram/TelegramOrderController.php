@@ -107,7 +107,7 @@ class TelegramOrderController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(20)
             ->get()
-            ->map(function ($order) {
+            ->map(function (Order $order) {
                 return $this->formatOrder($order);
             });
 
@@ -243,10 +243,10 @@ class TelegramOrderController extends Controller
 
             $data['delivery_address'] = $order->customerAddress ? [
                 'address' => $order->customerAddress->address_line_1,
-            ] : null;
+            ] : ($order->delivery_instructions ? ['address' => $order->delivery_instructions] : null);
 
             $data['time_slot'] = $order->timeSlot ? [
-                'date' => $order->timeSlot->slot_date->format('Y-m-d'),
+                'date' => \Carbon\Carbon::parse($order->timeSlot->slot_date)->format('Y-m-d'),
                 'time' => $order->timeSlot->slot_start_time,
             ] : null;
         }

@@ -186,9 +186,124 @@ class TelegramAccountController extends Controller
         ]);
     }
 
-    // ... updateProfile ...
+    /**
+     * Update customer profile
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'first_name' => 'nullable|string|max:100',
+            'last_name' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'language_code' => 'nullable|string|max:5',
+        ]);
 
-    // addAddress already fixed to use customer_id if available.
+        $user = $request->user('telegram');
+
+        // Update TelegramUser
+        $telegramUpdates = [];
+        if (isset($validated['first_name']))
+            $telegramUpdates['first_name'] = $validated['first_name'];
+        if (isset($validated['last_name']))
+            $telegramUpdates['last_name'] = $validated['last_name'];
+        if (isset($validated['phone']))
+            $telegramUpdates['phone_number'] = $validated['phone'];
+        if (isset($validated['language_code']))
+            $telegramUpdates['language_code'] = $validated['language_code'];
+
+        if (!empty($telegramUpdates)) {
+            $user->update($telegramUpdates);
+        }
+
+        // Update Customer
+        if ($user->customer_id) {
+            $customer = $user->customer;
+            $customerUpdates = [];
+
+            $name = trim(($validated['first_name'] ?? $user->first_name) . ' ' . ($validated['last_name'] ?? $user->last_name));
+            if (!empty($name))
+                $customerUpdates['name'] = $name;
+            if (isset($validated['phone']))
+                $customerUpdates['phone'] = $validated['phone'];
+            if (isset($validated['email']))
+                $customerUpdates['email'] = $validated['email'];
+            if (isset($validated['language_code']))
+                $customerUpdates['preferred_language'] = $validated['language_code'];
+
+            if (!empty($customerUpdates)) {
+                $customer->update($customerUpdates);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+        ]);
+    }
+
+    /**
+     * Upgrade a Telegram-only account to a full Web User account
+     */
+    public function upgradeAccount(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $telegramUser = $request->user('telegram');
+        $customer = $telegramUser->customer;
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Customer profile not found',
+            ], 404);
+        }
+
+        if ($customer->user_id) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Account is already upgraded',
+            ], 400);
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $customer) {
+                // 1. Create full User record
+                $user = \App\Models\User::create([
+                    'name' => $customer->name,
+                    'email' => $validated['email'],
+                    'phone' => $customer->phone,
+                    'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+                ]);
+
+                // 2. Assign customer role
+                $customerRole = \App\Models\Role::where('name', 'customer')->first();
+                if ($customerRole) {
+                    $user->roles()->attach($customerRole->id);
+                }
+
+                // 3. Link Customer to new User
+                $customer->update([
+                    'user_id' => $user->id,
+                    'email' => $validated['email'], // Sync email to customer record too
+                ]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Account upgraded successfully. You can now login on the main website.',
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to upgrade account', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to upgrade account',
+            ], 500);
+        }
+    }    // addAddress already fixed to use customer_id if available.
 
     /**
      * Add a new address (stored in database for both guest and linked accounts)
@@ -230,7 +345,7 @@ class TelegramAccountController extends Controller
                     // Continue without customer_id
                 }
             }
-            
+
             // Link to customer_id if available, otherwise telegram_user_id
             $ownerField = $user->customer_id ? 'customer_id' : 'telegram_user_id';
             $ownerId = $user->customer_id ? $user->customer_id : $user->id;
@@ -255,7 +370,7 @@ class TelegramAccountController extends Controller
                 'delivery_instructions' => $validated['delivery_instructions'] ?? null,
                 'is_default' => $validated['is_default'] ?? false,
             ]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Address added successfully',
@@ -323,12 +438,12 @@ class TelegramAccountController extends Controller
 
         // If setting as default, unset other defaults first
         if ($validated['is_default'] ?? false) {
-             CustomerAddress::where(function ($q) use ($user) {
-                    $q->where('telegram_user_id', $user->id);
-                    if ($user->customer_id) {
-                        $q->orWhere('customer_id', $user->customer_id);
-                    }
-                })
+            CustomerAddress::where(function ($q) use ($user) {
+                $q->where('telegram_user_id', $user->id);
+                if ($user->customer_id) {
+                    $q->orWhere('customer_id', $user->customer_id);
+                }
+            })
                 ->where('id', '!=', $id)
                 ->update(['is_default' => false]);
         }
@@ -417,11 +532,11 @@ class TelegramAccountController extends Controller
 
         // Unset all defaults
         CustomerAddress::where(function ($q) use ($user) {
-                $q->where('telegram_user_id', $user->id);
-                if ($user->customer_id) {
-                    $q->orWhere('customer_id', $user->customer_id);
-                }
-            })
+            $q->where('telegram_user_id', $user->id);
+            if ($user->customer_id) {
+                $q->orWhere('customer_id', $user->customer_id);
+            }
+        })
             ->update(['is_default' => false]);
 
         // Migrate ownership if needed
@@ -434,7 +549,7 @@ class TelegramAccountController extends Controller
 
         // Also update TelegramUser's delivery_address for convenience
         $user->update([
-            'delivery_address' => $address->address_line_1 . 
+            'delivery_address' => $address->address_line_1 .
                 ($address->address_line_2 ? ', ' . $address->address_line_2 : '') .
                 ', ' . $address->city,
         ]);

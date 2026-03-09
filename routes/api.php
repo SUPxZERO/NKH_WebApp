@@ -853,6 +853,7 @@ Route::prefix('telegram')
 
             // Profile management
             Route::put('/profile', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'updateProfile']);
+            Route::post('/account/upgrade', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'upgradeAccount']);
 
             // Loyalty
             Route::get('/loyalty/stats', [App\Http\Controllers\Api\Telegram\TelegramAccountController::class, 'loyaltyStats']);
