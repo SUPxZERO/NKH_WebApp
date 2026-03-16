@@ -438,9 +438,14 @@ class NotificationService
         string $message,
         ?string $actionUrl
     ): void {
-        // TODO: Implement email sending
-        // This could use Laravel's Mail facade or a dedicated notification class
-        Log::info("Email notification would be sent to {$user->email}: {$title}");
+        if (!empty($user->email)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\StandardNotificationMail($title, $message, $actionUrl));
+                \Illuminate\Support\Facades\Log::info("Email notification sent to {$user->email}: {$title}");
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send email to {$user->email}: " . $e->getMessage());
+            }
+        }
     }
 
     /**

@@ -66,7 +66,8 @@ class OrderCalculationService
         $taxableBase = max(0, $subtotal - $discountAmount);
         $taxAmount = round($taxableBase * $taxRate, 2);
 
-        $serviceCharge = 0; // TODO: Fetch from settings if needed
+        $serviceChargeSetting = Setting::where('location_id', $locationId)->where('key', 'service_charge')->first();
+        $serviceCharge = ($serviceChargeSetting && isset($serviceChargeSetting->value)) ? (float) $serviceChargeSetting->value : 0;
 
         $totalAmount = $taxableBase + $taxAmount + $serviceCharge + $deliveryFee;
 

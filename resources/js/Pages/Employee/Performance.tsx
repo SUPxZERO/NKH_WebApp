@@ -249,7 +249,7 @@ export default function Performance() {
                                                             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                                                             backgroundColor: 'white'
                                                         }}
-                                                        formatter={(value: number | undefined) => [`${value ?? 0}h`, t('employee.performance.labels.hours')]}
+                                                        formatter={(value) => [`${value ?? 0}h`, t('employee.performance.labels.hours')]}
                                                     />
                                                     <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
                                                         {stats.chart_data.map((entry, index) => (

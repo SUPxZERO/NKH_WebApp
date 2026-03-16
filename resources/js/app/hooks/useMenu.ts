@@ -8,10 +8,8 @@ export function useCategories(subCategoriesOnly: boolean = false) {
   return useQuery({
     queryKey: ['categories', subCategoriesOnly, locale],
     queryFn: async () => apiGet<ApiResponse<Category[]>>('/categories', {
-      params: {
-        // location_id: 1, // Let backend handle default
-        sub_categories_only: subCategoriesOnly // Get only sub-categories for menu filter
-      }
+      // location_id: 1, // Let backend handle default
+      sub_categories_only: subCategoriesOnly // Get only sub-categories for menu filter
     }).then((r) => r.data),
     staleTime: 1000 * 60,
   });
@@ -23,7 +21,7 @@ export function useMenuItems(params?: { category_id?: number; search?: string })
     queryKey: ['menu', params, locale],
     queryFn: async () =>
       apiGet<ApiResponse<MenuItem[]>>('/menu', {
-        params: { ...params } // Let backend handle default location
+        ...params // Let backend handle default location
       }).then((r) => r.data),
     staleTime: 1000 * 30,
   });

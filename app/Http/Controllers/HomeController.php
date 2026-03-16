@@ -137,11 +137,17 @@ class HomeController extends Controller
             ->avg('rating');
         $totalCustomers = Customer::count();
 
+        $avgDeliveryTime = \App\Models\Order::whereHas('orderType', function ($q) {
+            $q->where('code', 'delivery');
+        })
+            ->whereIn('status', ['delivered', 'completed'])
+            ->avg(\Illuminate\Support\Facades\DB::raw('TIMESTAMPDIFF(MINUTE, created_at, updated_at)'));
+
         return [
             'totalItems' => $totalMenuItems,
             'averageRating' => $averageRating ? round($averageRating, 1) : 4.9,
             'totalCustomers' => $totalCustomers > 0 ? $totalCustomers : 10000,
-            'averageDeliveryTime' => 30, // TODO: Calculate from order completion times
+            'averageDeliveryTime' => $avgDeliveryTime ? round((float) $avgDeliveryTime) : 30, // Calculated from recently delivered orders
         ];
     }
 

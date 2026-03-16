@@ -22,10 +22,8 @@ class OrderApprovalService
                 return false;
             }
 
-            // Send notification to customer (TODO: implement when notification system is ready)
-            // if ($order->customer && $order->customer->user) {
-            //     Notification::send($order->customer->user, new OrderApprovedNotification($order));
-            // }
+            // Send notification to customer
+            app(\App\Services\NotificationService::class)->sendOrderNotification($order, 'approved');
 
             // Log audit trail
             Log::info('Order approved via service', [
@@ -53,10 +51,8 @@ class OrderApprovalService
                 return false;
             }
 
-            // Send notification to customer (TODO: implement when notification system is ready)
-            // if ($order->customer && $order->customer->user) {
-            //     Notification::send($order->customer->user, new OrderRejectedNotification($order));
-            // }
+            // Send notification to customer
+            app(\App\Services\NotificationService::class)->sendOrderNotification($order, 'rejected', "Your order was rejected: {$reason}");
 
             // Log audit trail
             Log::info('Order rejected via service', [

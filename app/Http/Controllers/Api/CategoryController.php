@@ -25,8 +25,8 @@ class CategoryController extends Controller
         // CRITICAL FIX: Filter by location
         $locationId = $request->input('location_id');
         if (!$locationId) {
-            $defaultLocation = \App\Models\Location::where('is_active', true)->first();
-            $locationId = $defaultLocation ? $defaultLocation->id : 1;
+            $defaultLocation = \App\Models\Location::withoutGlobalScope('branch_scope')->where('is_active', true)->first();
+            $locationId = $defaultLocation ? $defaultLocation->id : null;
         }
 
         // For customer menu: show only sub-categories (parent_id IS NOT NULL)
@@ -35,12 +35,15 @@ class CategoryController extends Controller
         // Flattened list for admin dropdowns (shows both parents and children)
         $flatList = $request->boolean('flat_list', false);
 
+        // Remove branch_scope: this is a public endpoint; location is filtered explicitly
         $query = Category::query()
+            ->withoutGlobalScope('branch_scope')
             ->where('location_id', $locationId)
             ->with(['translations'])
             ->withCount([
                 'menuItems' => function ($query) use ($locationId) {
                     $query->withoutGlobalScope('active')
+                        ->withoutGlobalScope('branch_scope')
                         ->where('location_id', $locationId);
                 }
             ])

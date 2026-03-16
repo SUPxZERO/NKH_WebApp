@@ -173,11 +173,12 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
 
 
-    // Finance
+    // Finance & Analytics
     Route::get('invoices', fn() => Inertia::render('admin/Invoices'))->name('admin.invoices');
     Route::get('payments', fn() => Inertia::render('admin/PaymentsDashboard'))->name('admin.payments');
     Route::get('expenses', fn() => Inertia::render('admin/Expenses'))->name('admin.expenses');
     Route::get('financial-dashboard', fn() => Inertia::render('admin/FinancialDashboard'))->name('admin.financial-dashboard');
+    Route::get('analytics', fn() => Inertia::render('Admin/Analytics/Dashboard'))->name('admin.analytics');
 
     // Inventory & Procurement
     Route::get('inventory', fn() => Inertia::render('admin/Inventory'))->name('admin.inventory');

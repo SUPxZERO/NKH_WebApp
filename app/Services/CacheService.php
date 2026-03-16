@@ -35,14 +35,15 @@ class CacheService
         return Cache::remember("menu:{$locationId}", self::TTL_MENU, function () use ($locationId) {
             Log::debug("Cache MISS: menu:{$locationId}");
 
-            return MenuItem::with([
-                'category.translations',
-                'translations',
-                'recipe.ingredients'
-            ])
-                ->whereHas('category', fn($q) => $q->where('location_id', $locationId))
+            return MenuItem::withoutGlobalScope('branch_scope')
+                ->with([
+                    'category.translations',
+                    'translations',
+                    'recipe.ingredients'
+                ])
+                ->whereHas('category', fn($q) => $q->withoutGlobalScope('branch_scope')->where('location_id', $locationId))
                 ->where('is_active', true)
-                ->where('availability_status', 'available') // Fixed: was is_available (which is a method, not a column)
+                ->where('availability_status', 'available')
                 ->orderBy('display_order')
                 ->get();
         });
@@ -55,16 +56,23 @@ class CacheService
     {
         $cacheKey = $locationId ? "categories:{$locationId}" : "categories:all";
 
-        return Cache::remember($cacheKey, self::TTL_CATEGORIES, function () use ($locationId) {
+        return Cache::remember($cacheKey, self::TTL_CATEGORIES, function () use (&$locationId) { // Pass $locationId by reference
             Log::debug("Cache MISS: {$locationId}");
 
             $query = Category::with('translations')
                 ->where('is_active', true)
                 ->orderBy('display_order');
 
-            if ($locationId) {
-                $query->where('location_id', $locationId);
+            if (!$locationId) {
+                $defaultLocation = \App\Models\Location::withoutGlobalScope('branch_scope')->where('is_active', true)->first();
+                $locationId = $defaultLocation ? $defaultLocation->id : null;
             }
+
+            if (!$locationId) {
+                return collect(); // No active locations available
+            }
+
+            $query->where('location_id', $locationId);
 
             return $query->get();
         });

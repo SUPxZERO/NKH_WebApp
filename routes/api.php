@@ -64,13 +64,42 @@ Route::get('/health', function () {
 // DEBUG: Session and Auth diagnostic endpoint (only available in local/testing)
 if (app()->environment(['local', 'testing'])) {
     Route::get('/debug-auth', function (Request $request) {
+        $defaultWebUser = auth()->user();
+        $sanctumUser = auth('sanctum')->user();
+        $loc = \App\Models\Location::where('is_active', true)->first();
+        $locId = $loc ? $loc->id : null;
+
+        // Test query WITH branch_scope (original bugged behavior)
+        $withScope = $defaultWebUser
+            ? \App\Models\MenuItem::where('location_id', $locId)->count()
+            : 'n/a (guest)';
+
+        // Test query WITHOUT branch_scope (fixed behavior)
+        $withoutScope = \App\Models\MenuItem::withoutGlobalScope('branch_scope')
+            ->where('location_id', $locId)->count();
+
+        // Category test
+        $catsWithout = \App\Models\Category::withoutGlobalScope('branch_scope')
+            ->where('location_id', $locId)->count();
+
         return response()->json([
             'auth_check' => auth()->check(),
-            'user_id' => auth()->id(),
+            'user_email' => $defaultWebUser?->email,
+            'user_roles' => $defaultWebUser?->roles->pluck('name'),
+            'sanctum_user_email' => $sanctumUser?->email,
             'session_id' => session()->getId(),
+            'default_location_id' => $locId,
+            'menu_items_WITH_scope' => $withScope,
+            'menu_items_WITHOUT_scope' => $withoutScope,
+            'categories_without_scope' => $catsWithout,
+            'fix_applied' => str_contains(
+                file_get_contents(app_path('Http/Controllers/Api/MenuItemController.php')),
+                'branch_scope'
+            ),
         ]);
     });
 }
+
 
 // Telegram WebApp session endpoints (public, no auth required) - Sprint P15
 Route::prefix('telegram-webapp')->group(function () {

@@ -110,6 +110,7 @@ const navigationTree = [
     permission: 'reports.view',
     children: [
       { name: 'layout.admin.nav.sales_analytics', href: '/admin/reports/sales', permission: 'reports.view' },
+      { name: 'layout.admin.nav.advanced_analytics', href: '/admin/analytics', permission: 'dashboard.view' },
       { name: 'layout.admin.nav.financial_dashboard', href: '/admin/financial-dashboard', permission: 'payments.view' },
       { name: 'layout.admin.nav.expenses', href: '/admin/expenses', permission: 'expenses.view' },
       { name: 'layout.admin.nav.invoices', href: '/admin/invoices', permission: 'invoices.view' },

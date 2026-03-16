@@ -653,3 +653,10 @@ Route::middleware('permission:invoices.view')
 Route::middleware('permission:invoices.create')->post('invoices', [InvoiceController::class, 'store']);
 Route::middleware('permission:invoices.update')->match(['put', 'patch'], 'invoices/{invoice}', [InvoiceController::class, 'update']);
 Route::middleware('permission:invoices.delete')->delete('invoices/{invoice}', [InvoiceController::class, 'destroy']);
+
+// Advanced Analytics - requires analytics.* permissions (or dashboard permissions)
+Route::middleware('permission:dashboard.view')->group(function () {
+    Route::get('advanced-analytics/sales-trends', [\App\Http\Controllers\Api\Admin\AnalyticsController::class, 'salesTrends']);
+    Route::get('advanced-analytics/top-products', [\App\Http\Controllers\Api\Admin\AnalyticsController::class, 'topProducts']);
+    Route::get('advanced-analytics/customer-insights', [\App\Http\Controllers\Api\Admin\AnalyticsController::class, 'customerInsights']);
+});

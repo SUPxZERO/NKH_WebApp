@@ -6629,6 +6629,7 @@
         "admin": {
             "nav": {
                 "adjustments": "Adjustments",
+                "advanced_analytics": "Advanced Analytics",
                 "admins": "Admins",
                 "attendance_management": "Attendance Management",
                 "audit_logs": "Audit Logs",

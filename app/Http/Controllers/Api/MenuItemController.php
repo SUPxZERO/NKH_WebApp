@@ -34,8 +34,8 @@ class MenuItemController extends Controller
                 // Default to the first active location if not provided
                 $locationId = $request->input('location_id');
                 if (!$locationId) {
-                    $defaultLocation = \App\Models\Location::where('is_active', true)->first();
-                    $locationId = $defaultLocation ? $defaultLocation->id : 1;
+                    $defaultLocation = \App\Models\Location::withoutGlobalScope('branch_scope')->where('is_active', true)->first();
+                    $locationId = $defaultLocation ? $defaultLocation->id : null;
                 }
 
                 // Use cached menu for better performance
@@ -61,15 +61,17 @@ class MenuItemController extends Controller
             }
 
             // Fallback: Query with filters (non-cached)
+            // Remove branch_scope: this is a public endpoint; location is filtered explicitly below
             $query = MenuItem::query()
                 ->withoutGlobalScope('active')
+                ->withoutGlobalScope('branch_scope')
                 ->with(['translations', 'category.translations']);
 
             // CRITICAL FIX: Filter by location
             $locationId = $request->input('location_id');
             if (!$locationId) {
-                $defaultLocation = \App\Models\Location::where('is_active', true)->first();
-                $locationId = $defaultLocation ? $defaultLocation->id : 1;
+                $defaultLocation = \App\Models\Location::withoutGlobalScope('branch_scope')->where('is_active', true)->first();
+                $locationId = $defaultLocation ? $defaultLocation->id : null;
             }
 
             $query->where('location_id', $locationId);

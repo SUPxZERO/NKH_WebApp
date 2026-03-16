@@ -166,7 +166,7 @@ class PayrollController extends Controller
         ]);
 
         try {
-            $query = Payroll::with('employee.user');
+            $query = Payroll::with(['employee.user', 'details']);
 
             if ($request->filled('employee_id')) {
                 $query->where('employee_id', $validated['employee_id']);
@@ -195,6 +195,18 @@ class PayrollController extends Controller
 
             return response()->json([
                 'data' => $payrolls->map(function ($payroll) {
+                    $overtimePay = $payroll->details
+                        ->where('type', 'earning')
+                        ->filter(fn($d) => stripos($d->description, 'overtime') !== false)
+                        ->sum('amount');
+
+                    $taxes = $payroll->details
+                        ->where('type', 'deduction')
+                        ->filter(fn($d) => stripos($d->description, 'tax') !== false)
+                        ->sum('amount');
+
+                    $basePay = max(0, (float) $payroll->gross_pay - $overtimePay);
+
                     return [
                         'id' => $payroll->id,
                         'employee_id' => $payroll->employee_id,
@@ -202,9 +214,9 @@ class PayrollController extends Controller
                         'period' => $payroll->period_start->format('M Y'),
                         'period_start' => $payroll->period_start->format('Y-m-d'),
                         'period_end' => $payroll->period_end->format('Y-m-d'),
-                        'base_pay' => (float) $payroll->gross_pay, // Map gross_pay as base pay
-                        'overtime_pay' => 0, // TODO: Add overtime tracking column if needed
-                        'taxes' => 0, // TODO: Add tax calculation column if needed
+                        'base_pay' => $basePay,
+                        'overtime_pay' => (float) $overtimePay,
+                        'taxes' => (float) $taxes,
                         'gross_pay' => (float) $payroll->gross_pay,
                         'bonuses' => (float) $payroll->bonuses,
                         'deductions' => (float) $payroll->deductions,
