@@ -25,5 +25,6 @@ Thumbs.db
 .agent
 .claude
 .gemini
+
 # Archived debug/test scripts (development artifacts)
 /docs/archived-debug-scripts/
