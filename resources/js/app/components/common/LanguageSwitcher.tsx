@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 export const LanguageSwitcher = () => {
+    return null; // Temporarily disabled
+
     const { locale, setLocale } = useTranslation();
     const [isOpen, setIsOpen] = React.useState(false);
 

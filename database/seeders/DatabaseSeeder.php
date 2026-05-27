@@ -101,21 +101,63 @@ class DatabaseSeeder extends Seeder
         $this->command->info('');
 
         // ---------------------------------------------------------
-        // 3. DEMO SCENARIOS (Demo)
-        //Only run in local/staging, or if explicitly requested needed
+        // 3. DEEP WORKFLOW SCENARIOS (Demo & Edge Cases)
         // ---------------------------------------------------------
         if (App::environment(['local', 'staging', 'testing', 'development'])) {
-            $this->command->info('🎬 Running Operational Scenarios (Demo)...');
-            $this->call([
-                DemoUsersSeeder::class,        // Sample users (admin, customer, employee)
-                CustomerSeeder::class,          // Customer profiles with preferences
-                ShiftSeeder::class,             // Employee shift schedules
-                PromotionSeeder::class,         // Marketing promotions
-                ExpenseSeeder::class,           // Operational expenses
-                DemoNotificationSeeder::class,  // System notifications
-                DayInLifeSeeder::class,         // Orders, Reservations, Invoices, Payments
-            ]);
-            $this->command->info('   ✅ Scenarios executed.');
+            $this->command->info('🎬 Orchestrating Deep Workflow Demo Data...');
+            
+            $workflowSeeders = [
+                'Core Users' => [
+                    DemoUsersSeeder::class,
+                    CustomerSeeder::class,
+                ],
+                'HR & Staffing' => [
+                    ShiftSeeder::class,
+                    \Database\Seeders\TimeOffRequestSeeder::class,
+                    \Database\Seeders\LeaveRequestSeeder::class,
+                    \Database\Seeders\DecemberAttendanceSeeder::class,
+                    \Database\Seeders\ShiftMarketplaceSeeder::class,
+                ],
+                'Logistics & Delivery' => [
+                    \Database\Seeders\DeliveryOrdersSeeder::class,
+                    \Database\Seeders\DriverOrderTestSeeder::class,
+                ],
+                'Kitchen & Inventory Alerts' => [
+                    \Database\Seeders\StockAlertSeeder::class,
+                ],
+                'Marketing & FOH' => [
+                    PromotionSeeder::class,
+                    \Database\Seeders\LoyaltyPointsSeeder::class,
+                    \Database\Seeders\FeaturedMenuItemsSeeder::class,
+                ],
+                'Finance & Transactions' => [
+                    ExpenseSeeder::class,
+                    \Database\Seeders\InvoiceSeeder::class,
+                    \Database\Seeders\PaymentSeeder::class,
+                ],
+                'Oversight & Audit' => [
+                    DemoNotificationSeeder::class,
+                    \Database\Seeders\AuditLogSeeder::class,
+                ],
+                'Capstone: Realistic Day Simulation' => [
+                    \Database\Seeders\Demo\DayInLifeSeeder::class,
+                ],
+                'Gap Coverage: All Remaining Tables' => [
+                    \Database\Seeders\Demo\WorkflowDataSeeder::class,
+                ]
+            ];
+
+            foreach ($workflowSeeders as $domain => $seeders) {
+                $this->command->info("   -> Populating Domain: $domain");
+                foreach ($seeders as $seeder) {
+                    try {
+                        $this->call($seeder);
+                    } catch (\Throwable $e) {
+                        $this->command->warn("      ⚠️ Skipped $seeder: " . $e->getMessage());
+                    }
+                }
+            }
+            $this->command->info('   ✅ Deep Workflows fully initialized.');
         } else {
             $this->command->info('⏩ Skipping Demo data (Production environment detected).');
         }

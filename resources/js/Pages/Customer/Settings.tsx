@@ -110,7 +110,7 @@ export default function Settings() {
         { id: 'notifications', title: t('customer.settings.sections.notifications'), icon: Bell, description: t('customer.settings.sections.notifications_desc') },
         { id: 'privacy', title: t('customer.settings.sections.privacy'), icon: Shield, description: t('customer.settings.sections.privacy_desc') },
         { id: 'appearance', title: t('customer.settings.sections.appearance'), icon: Moon, description: t('customer.settings.sections.appearance_desc') },
-        { id: 'language', title: t('customer.settings.sections.language'), icon: Globe, description: t('customer.settings.sections.language_desc') },
+        // { id: 'language', title: t('customer.settings.sections.language'), icon: Globe, description: t('customer.settings.sections.language_desc') },
         { id: 'security', title: t('customer.settings.sections.account'), icon: Lock, description: t('customer.settings.sections.account_desc') },
     ];
 

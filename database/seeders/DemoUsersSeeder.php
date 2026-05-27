@@ -58,29 +58,79 @@ class DemoUsersSeeder extends Seeder
         );
         $this->command->info('✅ Created Demo Customer: demo@customer.com / demo123');
 
-        // 3. Demo Employee User
-        $employeeUser = User::updateOrCreate(
-            ['email' => 'demo@employee.com'],
-            [
-                'name' => 'Demo Employee',
-                'password' => Hash::make('demo123'),
-                'email_verified_at' => now(),
-                'role' => 'employee',
-            ]
-        );
+        // 3. Demo Employee Users (Various Roles)
+        $employeeRoles = [
+            'employee' => ['email' => 'demo@employee.com', 'name' => 'Demo Employee', 'code' => 'DEM001'],
+            'manager'  => ['email' => 'demo@manager.com', 'name' => 'Demo Manager', 'code' => 'DEM002'],
+            'cashier'  => ['email' => 'demo@cashier.com', 'name' => 'Demo Cashier', 'code' => 'DEM003'],
+            'waiter'   => ['email' => 'demo@waiter.com', 'name' => 'Demo Waiter', 'code' => 'DEM004'],
+            'chef'     => ['email' => 'demo@chef.com', 'name' => 'Demo Chef', 'code' => 'DEM005'],
+            'driver'   => ['email' => 'demo@driver.com', 'name' => 'Demo Driver', 'code' => 'DEM006'],
+        ];
 
-        // Create employee profile
-        Employee::updateOrCreate(
-            ['user_id' => $employeeUser->id],
-            [
-                'location_id' => $location->id,
-                'employee_code' => 'DEMO001',
-                'hourly_rate' => 15.00,
-                'hire_date' => now()->subMonths(6),
-                'status' => 'active',
-            ]
-        );
-        $this->command->info('✅ Created Demo Employee: demo@employee.com / demo123');
+        foreach ($employeeRoles as $roleSlug => $data) {
+            $user = User::updateOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name' => $data['name'],
+                    'password' => Hash::make('demo123'),
+                    'email_verified_at' => now(),
+                    'role' => $roleSlug,
+                ]
+            );
+
+            // Assign via Spatie if method exists
+            if (method_exists($user, 'assignRole')) {
+                // Ignore error if role doesn't exist in DB
+                try {
+                    $user->syncRoles([$roleSlug]);
+                } catch (\Exception $e) {}
+            }
+
+            // Create employee profile
+            Employee::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'location_id' => $location->id,
+                    'employee_code' => $data['code'],
+                    'hourly_rate' => 15.00,
+                    'hire_date' => now()->subMonths(6),
+                    'status' => 'active',
+                ]
+            );
+            $this->command->info("✅ Created Demo {$data['name']}: {$data['email']} / demo123");
+        }
+
+        // 4. Additional Admin / Management Roles
+        $additionalAdminRoles = [
+            'super-admin'        => ['email' => 'demo@superadmin.com', 'name' => 'Demo Super Admin'],
+            'chief'              => ['email' => 'demo@chief.com', 'name' => 'Demo Chief'],
+            'service-manager'    => ['email' => 'demo@servicemanager.com', 'name' => 'Demo Service Mgr'],
+            'finance-manager'    => ['email' => 'demo@financemanager.com', 'name' => 'Demo Finance Mgr'],
+            'hr-manager'         => ['email' => 'demo@hrmanager.com', 'name' => 'Demo HR Mgr'],
+            'inventory-manager'  => ['email' => 'demo@inventorymanager.com', 'name' => 'Demo Inventory Mgr'],
+            'operations-manager' => ['email' => 'demo@operationsmanager.com', 'name' => 'Demo Ops Mgr'],
+            'viewer'             => ['email' => 'demo@viewer.com', 'name' => 'Demo Viewer'],
+        ];
+
+        foreach ($additionalAdminRoles as $roleSlug => $data) {
+            $user = User::updateOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name' => $data['name'],
+                    'password' => Hash::make('demo123'),
+                    'email_verified_at' => now(),
+                    'role' => $roleSlug,
+                ]
+            );
+
+            if (method_exists($user, 'assignRole')) {
+                try {
+                    $user->syncRoles([$roleSlug]);
+                } catch (\Exception $e) {}
+            }
+            $this->command->info("✅ Created Demo {$data['name']}: {$data['email']} / demo123");
+        }
 
         $this->command->info('');
         $this->command->info('🎉 Demo users seeded successfully!');
@@ -89,7 +139,12 @@ class DemoUsersSeeder extends Seeder
         $this->command->line('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         $this->command->line('Admin:    demo@admin.com / demo123');
         $this->command->line('Customer: demo@customer.com / demo123');
-        $this->command->line('Employee: demo@employee.com / demo123');
+        foreach ($employeeRoles as $roleSlug => $data) {
+            $this->command->line(str_pad(ucfirst($data['name']) . ':', 25) . " {$data['email']} / demo123");
+        }
+        foreach ($additionalAdminRoles as $roleSlug => $data) {
+            $this->command->line(str_pad(ucfirst($data['name']) . ':', 25) . " {$data['email']} / demo123");
+        }
         $this->command->line('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
 }

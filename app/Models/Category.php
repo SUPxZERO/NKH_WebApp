@@ -43,6 +43,24 @@ class Category extends Model
         static::addGlobalScope('ordered', function ($query) {
             $query->orderBy('display_order', 'asc');
         });
+
+        static::saved(function ($category) {
+            app(\App\Services\CacheService::class)->invalidateHomepage();
+            if ($category->location_id) {
+                app(\App\Services\CacheService::class)->invalidateCategories($category->location_id);
+            } else {
+                app(\App\Services\CacheService::class)->invalidateCategories();
+            }
+        });
+
+        static::deleted(function ($category) {
+            app(\App\Services\CacheService::class)->invalidateHomepage();
+            if ($category->location_id) {
+                app(\App\Services\CacheService::class)->invalidateCategories($category->location_id);
+            } else {
+                app(\App\Services\CacheService::class)->invalidateCategories();
+            }
+        });
     }
 
     public function getNameAttribute()

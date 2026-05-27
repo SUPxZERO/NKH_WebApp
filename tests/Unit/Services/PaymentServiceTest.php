@@ -15,17 +15,19 @@ use App\Models\User;
 use App\Models\Location;
 use App\Models\Category;
 use App\Models\MenuItem;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class PaymentServiceTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected PaymentService $service;
     protected $invoiceService;
     protected $notificationService;
     protected $loyaltyService;
+    protected $inventoryDeductionService;
 
     protected function setUp(): void
     {
@@ -34,11 +36,13 @@ class PaymentServiceTest extends TestCase
         $this->invoiceService = Mockery::mock(InvoiceService::class);
         $this->notificationService = Mockery::mock(NotificationService::class);
         $this->loyaltyService = Mockery::mock(LoyaltyService::class);
+        $this->inventoryDeductionService = Mockery::mock(\App\Services\InventoryDeductionService::class);
 
         $this->service = new PaymentService(
             $this->invoiceService,
             $this->notificationService,
-            $this->loyaltyService
+            $this->loyaltyService,
+            $this->inventoryDeductionService
         );
 
         // Ensure PaymentMethod exists
@@ -48,6 +52,14 @@ class PaymentServiceTest extends TestCase
                 'code' => 'cash',
                 'type' => 'offline', // Add required field
                 'is_active' => true,
+            ]);
+        }
+        
+        // Ensure PaymentStatuses exist for foreign key constraints
+        if (\App\Models\PaymentStatus::count() === 0) {
+            \App\Models\PaymentStatus::insert([
+                ['name' => 'Pending', 'code' => 'pending', 'is_active' => true],
+                ['name' => 'Completed', 'code' => 'completed', 'is_active' => true],
             ]);
         }
     }
@@ -61,25 +73,16 @@ class PaymentServiceTest extends TestCase
     public function test_process_order_payment_successful()
     {
         // 1. Setup Data
-        $category = Category::create([
-             'name' => 'Test Cat ' . Str::random(5), 
-             'slug' => 'test-cat-' . Str::random(5), 
+        $location = Location::factory()->create();
+        
+        $category = Category::factory()->create([
              'is_active' => 1,
              'display_order' => 1
         ]);
-        $location = Location::create([
-            'code' => 'LOC-' . Str::upper(Str::random(3)), // Required
-            'name' => 'Loc ' . Str::random(5), 
-            'address_line1' => '123 Test St', // Correct field
-            'city' => 'Test City',
-            'state' => 'TS',
-            'postal_code' => '12345',
-            'country' => 'TestLand',
-            'phone' => '1234567890', 
-            'is_active' => 1
-        ]);
 
-        $order = Order::create([
+        $customer = \App\Models\Customer::factory()->create();
+
+        $order = Order::factory()->create([
             'order_number' => 'ORD-' . Str::random(5),
             'location_id' => $location->id,
             'subtotal' => 90.00,
@@ -88,12 +91,10 @@ class PaymentServiceTest extends TestCase
             'delivery_fee' => 0.00,
             'service_charge' => 0.00,
             'discount_amount' => 0.00,
-            // 'payment_status' => 'unpaid', // Guarded, stripped anyway
-            // 'status' => 'pending', // Guarded
-            'order_type' => 'pickup', 
-            'customer_name' => 'Test Customer', 
-            'customer_phone' => '1234567890', 
-            'approval_status' => 'pending', // Explicitly set
+            'customer_id' => $customer->id,
+            'currency' => 'USD',
+            // Note: approval_status was removed from the migrations and handled by order_status_id,
+            // but the test previously used it. If it fails, we will remove it.
         ]);
         
         // Force set status if needed, but defaults should imply pending/unpaid
@@ -101,16 +102,14 @@ class PaymentServiceTest extends TestCase
         $paymentMethod = PaymentMethod::first();
 
         // Create a real Invoice to be returned by mock
-        $invoice = Invoice::create([
+        $invoice = Invoice::factory()->create([
             'order_id' => $order->id,
-            'location_id' => $location->id, // Add required field
+            'location_id' => $location->id,
             'invoice_number' => 'INV-' . $order->order_number,
             'total_amount' => 100.00,
             'amount_paid' => 0.00,
             'amount_due' => 100.00,
             'status' => 'issued',
-            'issue_date' => now(), 
-            'due_date' => now()->addDays(7), 
         ]);
 
         // 2. Setup Mocks
@@ -134,9 +133,14 @@ class PaymentServiceTest extends TestCase
                  $inv->save();
             });
 
-        // Expect notifications if paid full
-        $this->loyaltyService->shouldReceive('awardPoints')->times(0); // No customer_id on order yet
-        $this->notificationService->shouldReceive('sendOrderNotification')->once()->with($order, 'paid');
+        // Expect notifications and loyalty points if paid full
+        $this->loyaltyService->shouldReceive('awardPoints')->once()->with(Mockery::on(function ($arg) use ($order) {
+            return $arg->id === $order->id;
+        })); 
+        $this->notificationService->shouldReceive('sendOrderNotification')->once()->with(Mockery::on(function ($arg) use ($order) {
+            return $arg->id === $order->id;
+        }), 'paid');
+        $this->inventoryDeductionService->shouldReceive('processOrderDeductions')->never();
 
         // 3. Execute
         $paymentData = [

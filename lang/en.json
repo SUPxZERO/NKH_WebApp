@@ -1,4 +1,62 @@
 {
+    "features": {
+        "fast_delivery": "Fast Delivery",
+        "fast_delivery_desc": "Hot food delivered in under 30 minutes",
+        "fresh_ingredients": "Fresh Ingredients",
+        "fresh_ingredients_desc": "Locally sourced and carefully selected",
+        "made_with_love": "Made With Love",
+        "made_with_love_desc": "Prepared by our master chefs daily"
+    },
+    "kitchen": {
+        "title": "Kitchen Display",
+        "system": "Kitchen Display System",
+        "kds_subtitle": "Real-time order management and tracking",
+        "sound_on": "Sound On",
+        "sound_off": "Sound Off",
+        "total": "Total",
+        "new": "New",
+        "status_awaiting": "Awaiting Prep",
+        "no_new_orders": "No new orders at the moment",
+        "start_prep": "Start Prep",
+        "preparing": "Preparing",
+        "status_in_progress": "In Progress",
+        "no_cooking": "No orders currently being prepared",
+        "mark_ready": "Mark Ready",
+        "ready": "Ready",
+        "status_finished": "Finished",
+        "no_ready": "No ready orders",
+        "delivered": "Mark Delivered",
+        "order_number_short": "Order #:number",
+        "table_number": "Table :number",
+        "age_minutes": ":minutes m",
+        "urgent": "Urgent",
+        "note": "Note",
+        "more_items": "+:count more items",
+        "customer_info": "Customer Information",
+        "order_notes": "Order Notes",
+        "order_items": "Order Items (:count)",
+        "special_request": "Special Request",
+        "unit_price_each": ":price each",
+        "item_total": "Total: :total",
+        "total_amount": "Total Amount",
+        "updating": "Updating...",
+        "order_type": {
+            "dine_in": "Dine In",
+            "pickup": "Pickup",
+            "delivery": "Delivery"
+        },
+        "item_status": {
+            "served": "Served",
+            "preparing": "Preparing",
+            "pending": "Pending"
+        },
+        "status_labels": {
+            "new": "New",
+            "preparing": "Preparing",
+            "ready": "Ready",
+            "completed": "Completed"
+        }
+    },
     "admin": {
         "alerts": {
             "actions": {
@@ -606,56 +664,7 @@
                 "unknown": "បុគ្គលិកមិនស្គាល់"
             }
         },
-        "kitchen": {
-            "title": "Kitchen Display",
-            "system": "Kitchen System",
-            "kds_subtitle": "Order Management",
-            "sound_on": "Sound On",
-            "sound_off": "Sound Off",
-            "total": "Total Orders",
-            "new": "New Orders",
-            "status_awaiting": "Awaiting Preparation",
-            "no_new_orders": "No new orders right now",
-            "start_prep": "Start Prep",
-            "preparing": "Preparing",
-            "status_in_progress": "In Progress",
-            "no_cooking": "No orders currently preparing",
-            "mark_ready": "Mark Ready",
-            "ready": "Ready to Serve",
-            "status_finished": "Finished",
-            "no_ready": "No orders waiting to be served",
-            "delivered": "Mark Delivered",
-            "order_number_short": "Order #:number",
-            "table_number": "Table :number",
-            "age_minutes": ":minutes m",
-            "urgent": "Urgent",
-            "note": "Note",
-            "more_items": "+:count more items",
-            "customer_info": "Customer Info",
-            "order_notes": "Order Notes",
-            "order_items": "Items (:count)",
-            "special_request": "Special Request",
-            "unit_price_each": ":price each",
-            "item_total": "Total: :total",
-            "total_amount": "Total Amount",
-            "updating": "Updating...",
-            "status_labels": {
-                "new": "New",
-                "preparing": "Preparing",
-                "ready": "Ready",
-                "completed": "Completed"
-            },
-            "order_type": {
-                "dine_in": "Dine In",
-                "pickup": "Pickup",
-                "delivery": "Delivery"
-            },
-            "item_status": {
-                "pending": "Pending",
-                "preparing": "Preparing",
-                "served": "Served"
-            }
-        },
+
         "exports": {
             "financial": {
                 "generated_on": "Generated on :date",
@@ -6627,6 +6636,10 @@
             "update": "Update"
         },
         "admin": {
+            "branch": {
+                "all_branches": "All Branches",
+                "select": "Select Branch"
+            },
             "nav": {
                 "adjustments": "Adjustments",
                 "advanced_analytics": "Advanced Analytics",

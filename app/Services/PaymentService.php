@@ -522,8 +522,8 @@ class PaymentService
                     if ($payment->status === 'completed') {
                         $payment->update(['payment_status_id' => $this->getPaymentStatusId(Payment::STATUS_CANCELLED)]);
 
-                        if (class_exists(PaymentAuditLog::class)) {
-                            PaymentAuditLog::log($payment, 'admin_manual_unpay', 'completed', 'cancelled', $processedByUserId, ['note' => $note]);
+                        if (class_exists(\App\Models\PaymentAuditLog::class)) {
+                            \App\Models\PaymentAuditLog::log($payment, 'admin_manual_unpay', 'completed', 'cancelled', $processedByUserId, ['note' => $note]);
                         }
                     }
                 }

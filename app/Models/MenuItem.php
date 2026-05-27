@@ -74,6 +74,22 @@ class MenuItem extends Model
         static::addGlobalScope('ordered', function ($query) {
             $query->orderBy('display_order', 'asc');
         });
+
+        static::saved(function ($item) {
+            app(\App\Services\CacheService::class)->invalidateHomepage();
+            app(\App\Services\CacheService::class)->invalidateMenuItem($item->id);
+            if ($item->location_id) {
+                app(\App\Services\CacheService::class)->invalidateMenu($item->location_id);
+            }
+        });
+
+        static::deleted(function ($item) {
+            app(\App\Services\CacheService::class)->invalidateHomepage();
+            app(\App\Services\CacheService::class)->invalidateMenuItem($item->id);
+            if ($item->location_id) {
+                app(\App\Services\CacheService::class)->invalidateMenu($item->location_id);
+            }
+        });
     }
 
     protected $casts = [

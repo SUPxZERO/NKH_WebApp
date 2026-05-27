@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Building, ChevronDown, Check, Globe } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { router } from '@inertiajs/react';
 
@@ -29,6 +30,7 @@ export default function BranchSelector({
   const [switching, setSwitching] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -48,11 +50,12 @@ export default function BranchSelector({
 
     try {
       await axios.post('/api/admin/branch/switch', { branch_id: branchId });
-      // Reload current page to reflect new branch data
-      router.reload({ only: [] });
+      // Invalidate all React Query caches so data refetches with new branch scope
+      queryClient.invalidateQueries();
+      // Full page visit to reload all Inertia props with new branch data
+      router.visit(window.location.href, { preserveState: false });
     } catch (error) {
       console.error('Failed to switch branch:', error);
-    } finally {
       setSwitching(false);
     }
   };

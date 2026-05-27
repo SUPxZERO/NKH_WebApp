@@ -34,7 +34,7 @@ class BranchSessionService
         }
 
         // Verify the location exists
-        if (!Location::where('id', $locationId)->exists()) {
+        if (!Location::withoutGlobalScope('branch_scope')->where('id', $locationId)->exists()) {
             return false;
         }
 
@@ -68,7 +68,8 @@ class BranchSessionService
     public function getUserBranches(User $user): Collection
     {
         if ($user->canViewAllBranches()) {
-            return Location::active()
+            return Location::withoutGlobalScope('branch_scope')
+                ->active()
                 ->select('id', 'name', 'code')
                 ->orderBy('name')
                 ->get();
@@ -76,6 +77,7 @@ class BranchSessionService
 
         // Get from user_locations pivot
         $locations = $user->locations()
+            ->withoutGlobalScope('branch_scope')
             ->select('locations.id', 'locations.name', 'locations.code')
             ->orderBy('locations.name')
             ->get();
@@ -84,7 +86,8 @@ class BranchSessionService
         if ($locations->isEmpty()) {
             $fallbackId = $user->employee?->location_id ?? $user->default_location_id;
             if ($fallbackId) {
-                $locations = Location::where('id', $fallbackId)
+                $locations = Location::withoutGlobalScope('branch_scope')
+                    ->where('id', $fallbackId)
                     ->select('id', 'name', 'code')
                     ->get();
             }

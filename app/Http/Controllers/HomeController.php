@@ -140,7 +140,9 @@ class HomeController extends Controller
         $avgDeliveryTime = \App\Models\Order::whereHas('orderType', function ($q) {
             $q->where('code', 'delivery');
         })
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereHas('orderStatus', function ($q) {
+                $q->whereIn('code', ['delivered', 'completed']);
+            })
             ->avg(\Illuminate\Support\Facades\DB::raw('TIMESTAMPDIFF(MINUTE, created_at, updated_at)'));
 
         return [

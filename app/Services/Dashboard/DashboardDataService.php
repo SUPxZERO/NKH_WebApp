@@ -158,6 +158,7 @@ class DashboardDataService
         // Today's revenue - prefer Payments but fallback to Order totals
         $todayPaymentRevenue = Payment::whereDate('created_at', $today)
             ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
+            ->whereHas('invoice.order')
             ->sum('amount');
 
         // If no payments, use order totals (for confirmed/completed orders)
@@ -172,6 +173,7 @@ class DashboardDataService
 
         $yesterdayPaymentRevenue = Payment::whereDate('created_at', $yesterday)
             ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
+            ->whereHas('invoice.order')
             ->sum('amount');
 
         $yesterdayRevenue = $yesterdayPaymentRevenue > 0
@@ -354,6 +356,7 @@ class DashboardDataService
         // Revenue - prefer payments, fallback to order totals
         $paymentRevenue = Payment::whereDate('created_at', $today)
             ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
+            ->whereHas('invoice.order')
             ->sum('amount');
 
         $revenue = $paymentRevenue > 0
@@ -502,6 +505,7 @@ class DashboardDataService
 
                     $revenue = Payment::whereBetween('created_at', [$weekStart, $weekEnd])
                         ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
+                        ->whereHas('invoice.order')
                         ->sum('amount');
 
                     $data[] = [
@@ -520,6 +524,7 @@ class DashboardDataService
 
                     $revenue = Payment::whereBetween('created_at', [$monthStart, $monthEnd])
                         ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
+                        ->whereHas('invoice.order')
                         ->sum('amount');
 
                     $data[] = [
@@ -538,6 +543,7 @@ class DashboardDataService
 
                     $paymentRevenue = Payment::whereDate('created_at', $date)
                         ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
+                        ->whereHas('invoice.order')
                         ->sum('amount');
 
                     // Fallback to order totals if no payments found

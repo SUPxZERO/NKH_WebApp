@@ -6079,59 +6079,6 @@
             "title": "ជំនួយ និងការគាំទ្រ",
             "track_requests": "តាមដានសំណើរបស់អ្នក"
         },
-        "kitchen": {
-            "age_minutes": ":minutes នាទី",
-            "customer_info": "ព័ត៌មានអតិថិជន",
-            "delivered": "បានប្រគល់",
-            "item_status": {
-                "pending": "កំពុងរង់ចាំ",
-                "preparing": "កំពុងរៀបចំ",
-                "served": "បានបម្រើ"
-            },
-            "item_total": "សរុប: :total",
-            "kds_subtitle": "ប្រព័ន្ធបង្ហាញផ្ទះបាយ",
-            "mark_ready": "រៀបចំរួចរាល់",
-            "more_items": "+:count មុខទៀត",
-            "new": "ថ្មី",
-            "no_cooking": "មិនមានអ្វីកំពុងចម្អិននៅពេលនេះទេ",
-            "no_new_orders": "មិនមានការកម្មង់ថ្មីទេ",
-            "no_ready": "មិនមានការកម្មង់ដែលរួចរាល់សម្រាប់មកយកទេ",
-            "note": "កំណត់សម្គាល់",
-            "order_items": "មុខម្ហូបដែលកម្មង់ (:count)",
-            "order_notes": "កំណត់សម្គាល់ការកម្មង់",
-            "order_number": "ការកម្មង់ #:number",
-            "order_number_short": "#:number",
-            "order_type": {
-                "delivery": "ដឹកជញ្ជូន",
-                "dine_in": "ញ៉ាំក្នុងហាង",
-                "pickup": "មកយកផ្ទាល់"
-            },
-            "preparing": "កំពុងរៀបចំ",
-            "ready": "រួចរាល់",
-            "sound_off": "បិទសំឡេង",
-            "sound_on": "បើកសំឡេង",
-            "special_request": "សំណើពិសេស",
-            "start_prep": "ចាប់ផ្តើមរៀបចំ",
-            "status_awaiting": "រង់ចាំការរៀបចំ",
-            "status_finished": "រួចរាល់សម្រាប់មកយក",
-            "status_in_progress": "កំពុងដំណើរការ",
-            "status_labels": {
-                "completed": "បានបញ្ចប់",
-                "default": ":status",
-                "new": "ថ្មី",
-                "preparing": "កំពុងរៀបចំ",
-                "ready": "រួចរាល់",
-                "received": "បានទទួល"
-            },
-            "system": "ប្រព័ន្ធផ្ទះបាយ",
-            "table_number": "តុ #:number",
-            "title": "ការបង្ហាញសម្រាប់ផ្ទះបាយ",
-            "total": "ការកម្មង់សរុប",
-            "total_amount": "ចំនួនទឹកប្រាក់សរុប",
-            "unit_price_each": ":price ក្នុងមួយមុខ",
-            "updating": "កំពុងធ្វើបច្ចុប្បន្នភាព...",
-            "urgent": "បន្ទាន់"
-        },
         "more": "បន្ថែម",
         "nav": {
             "dashboard": "ផ្ទាំងគ្រប់គ្រង",
@@ -6830,7 +6777,11 @@
                 "dark": "ប្តូរទៅរបៀបងងឹត",
                 "light": "ប្តូរទៅរបៀបពន្លឺ"
             },
-            "user_name": "អ្នកគ្រប់គ្រង"
+            "user_name": "អ្នកគ្រប់គ្រង",
+            "branch": {
+                "all_branches": "សាខាទាំងអស់",
+                "select": "ជ្រើសរើសសាខា"
+            }
         },
         "common": {
             "cancel": "បោះបង់",
@@ -7048,5 +6999,58 @@
             "title": "លក្ខខណ្ឌនៃសេវាកម្ម"
         }
     },
-    "validation": {}
+    "validation": {},
+    "kitchen": {
+        "title": "ការបង្ហាញសម្រាប់ផ្ទះបាយ",
+        "system": "ប្រព័ន្ធផ្ទះបាយ",
+        "kds_subtitle": "ប្រព័ន្ធបង្ហាញផ្ទះបាយ",
+        "sound_on": "បើកសំឡេង",
+        "sound_off": "បិទសំឡេង",
+        "total": "ការកម្មង់សរុប",
+        "new": "ថ្មី",
+        "status_awaiting": "រង់ចាំការរៀបចំ",
+        "no_new_orders": "មិនមានការកម្មង់ថ្មីទេ",
+        "start_prep": "ចាប់ផ្តើមរៀបចំ",
+        "preparing": "កំពុងរៀបចំ",
+        "status_in_progress": "កំពុងដំណើរការ",
+        "no_cooking": "មិនមានអ្វីកំពុងចម្អិននៅពេលនេះទេ",
+        "mark_ready": "រៀបចំរួចរាល់",
+        "ready": "រួចរាល់",
+        "status_finished": "រួចរាល់សម្រាប់មកយក",
+        "no_ready": "មិនមានការកម្មង់ដែលរួចរាល់សម្រាប់មកយកទេ",
+        "delivered": "បានប្រគល់",
+        "order_number_short": "#:number",
+        "table_number": "តុ #:number",
+        "age_minutes": ":minutes នាទី",
+        "urgent": "បន្ទាន់",
+        "note": "កំណត់សម្គាល់",
+        "more_items": "+:count មុខទៀត",
+        "customer_info": "ព័ត៌មានអតិថិជន",
+        "order_notes": "កំណត់សម្គាល់ការកម្មង់",
+        "order_items": "មុខម្ហូបដែលកម្មង់ (:count)",
+        "special_request": "សំណើពិសេស",
+        "unit_price_each": ":price ក្នុងមួយមុខ",
+        "item_total": "សរុប: :total",
+        "total_amount": "ចំនួនទឹកប្រាក់សរុប",
+        "updating": "កំពុងធ្វើបច្ចុប្បន្នភាព...",
+        "order_type": {
+            "delivery": "ដឹកជញ្ជូន",
+            "dine_in": "ញ៉ាំក្នុងហាង",
+            "pickup": "មកយកផ្ទាល់"
+        },
+        "item_status": {
+            "pending": "កំពុងរង់ចាំ",
+            "preparing": "កំពុងរៀបចំ",
+            "served": "បានបម្រើ"
+        },
+        "status_labels": {
+            "completed": "បានបញ្ចប់",
+            "default": ":status",
+            "new": "ថ្មី",
+            "preparing": "កំពុងរៀបចំ",
+            "ready": "រួចរាល់",
+            "received": "បានទទួល"
+        },
+        "order_number": "ការកម្មង់ #:number"
+    }
 }

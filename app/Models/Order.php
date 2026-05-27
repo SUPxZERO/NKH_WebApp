@@ -23,7 +23,10 @@ class Order extends Model
     const PAYMENT_STATUS_PARTIAL = 'partial';
     const PAYMENT_STATUS_REFUNDED = 'refunded';
 
-    // Removed is_customer_request accessor - no longer needed
+    // Approval statuses
+    const APPROVAL_STATUS_PENDING  = 'pending';
+    const APPROVAL_STATUS_APPROVED = 'approved';
+    const APPROVAL_STATUS_REJECTED = 'rejected';
 
     /**
      * SECURITY: Use $guarded to protect sensitive fields that should not be mass-assigned

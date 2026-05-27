@@ -383,37 +383,58 @@ export default function SignIn() {
           className="mt-4 sm:mt-6 p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl"
         >
           <p className="text-[10px] sm:text-xs text-gray-500 text-center mb-3 sm:mb-4 font-medium uppercase tracking-wider">{t('auth.quick_demo')}</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
             {[
-              { role: 'customer', email: 'demo@customer.com', color: 'emerald' },
-              { role: 'employee', email: 'demo@employee.com', color: 'blue' },
-              { role: 'admin', email: 'demo@admin.com', color: 'purple' },
-            ].map(({ role, email, color }) => (
-              <motion.button
-                key={role}
-                type="button"
-                whileHover={{ scale: 1.03, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  setValue('role', role as any);
-                  setValue('email', email);
-                  setValue('password', 'demo123');
-                }}
-                className={cn(
-                  `p-2 sm:p-3 rounded-lg sm:rounded-xl border transition-all group`,
-                  `bg-${color}-500/5 hover:bg-${color}-500/15 border-${color}-500/20 hover:border-${color}-400/40`
-                )}
-                style={{
-                  backgroundColor: color === 'emerald' ? 'rgba(16, 185, 129, 0.05)' : color === 'blue' ? 'rgba(59, 130, 246, 0.05)' : 'rgba(168, 85, 247, 0.05)',
-                  borderColor: color === 'emerald' ? 'rgba(16, 185, 129, 0.2)' : color === 'blue' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(168, 85, 247, 0.2)',
-                }}
-              >
-                <p className={cn(
-                  "font-semibold text-[11px] sm:text-sm capitalize",
-                  color === 'emerald' ? 'text-emerald-400' : color === 'blue' ? 'text-blue-400' : 'text-purple-400'
-                )}>{t(`auth.roles.${role}` as any)}</p>
-              </motion.button>
-            ))}
+              { roleForm: 'admin', displayRole: 'admin', email: 'demo@admin.com', color: 'purple' },
+              { roleForm: 'admin', displayRole: 'super admin', email: 'demo@superadmin.com', color: 'fuchsia' },
+              { roleForm: 'admin', displayRole: 'chief', email: 'demo@chief.com', color: 'rose' },
+              { roleForm: 'admin', displayRole: 'finance mgr', email: 'demo@financemanager.com', color: 'purple' },
+              { roleForm: 'admin', displayRole: 'hr mgr', email: 'demo@hrmanager.com', color: 'fuchsia' },
+              { roleForm: 'admin', displayRole: 'inventory mgr', email: 'demo@inventorymanager.com', color: 'purple' },
+              { roleForm: 'admin', displayRole: 'ops mgr', email: 'demo@operationsmanager.com', color: 'fuchsia' },
+              { roleForm: 'admin', displayRole: 'service mgr', email: 'demo@servicemanager.com', color: 'purple' },
+              { roleForm: 'admin', displayRole: 'viewer', email: 'demo@viewer.com', color: 'fuchsia' },
+              { roleForm: 'customer', displayRole: 'customer', email: 'demo@customer.com', color: 'emerald' },
+              { roleForm: 'employee', displayRole: 'employee', email: 'demo@employee.com', color: 'blue' },
+              { roleForm: 'employee', displayRole: 'manager', email: 'demo@manager.com', color: 'indigo' },
+              { roleForm: 'employee', displayRole: 'cashier', email: 'demo@cashier.com', color: 'cyan' },
+              { roleForm: 'employee', displayRole: 'waiter', email: 'demo@waiter.com', color: 'orange' },
+              { roleForm: 'employee', displayRole: 'chef', email: 'demo@chef.com', color: 'rose' },
+              { roleForm: 'employee', displayRole: 'driver', email: 'demo@driver.com', color: 'blue' },
+            ].map(({ roleForm, displayRole, email, color }) => {
+              // Map colors exactly based on tailwind classes we need to construct
+              const bgOpacity = 'rgba(255, 255, 255, 0.05)';
+              const borderOpacity = 'rgba(255, 255, 255, 0.1)';
+              
+              return (
+                <motion.button
+                  key={displayRole}
+                  type="button"
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setValue('role', roleForm as any);
+                    setValue('email', email);
+                    setValue('password', 'demo123');
+                  }}
+                  className={cn(
+                    `p-2 sm:p-3 rounded-lg sm:rounded-xl border transition-all group`,
+                    `bg-white/5 hover:bg-${color}-500/15 border-white/10 hover:border-${color}-400/40`
+                  )}
+                  style={{
+                    backgroundColor: bgOpacity,
+                    borderColor: borderOpacity,
+                  }}
+                >
+                  <p className={cn(
+                    "font-semibold text-[11px] sm:text-xs capitalize flex flex-col items-center justify-center gap-1",
+                    `text-${color}-400`
+                  )}>
+                    <span>{displayRole}</span>
+                  </p>
+                </motion.button>
+              );
+            })}
           </div>
         </motion.div>
       </motion.div>

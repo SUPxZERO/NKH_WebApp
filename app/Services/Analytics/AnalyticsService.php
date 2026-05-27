@@ -16,6 +16,7 @@ class AnalyticsService
     public function getDailyRevenue($startDate, $endDate)
     {
         return Payment::whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('invoice.order')
             ->whereNotNull('payment_status_id')
             ->whereHas('paymentStatus', function($q) {
                 // Assuming 'completed' or 'is_successful' flag. 
@@ -60,6 +61,7 @@ class AnalyticsService
     public function getTopSellingItems($startDate, $endDate, $limit = 5)
     {
         return OrderItem::whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('order')
             ->select('menu_item_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(total_price) as total_revenue'))
             ->groupBy('menu_item_id')
             ->orderByDesc('total_quantity')
@@ -81,6 +83,7 @@ class AnalyticsService
     public function getKPIs($startDate, $endDate)
     {
         $totalRevenue = Payment::whereBetween('created_at', [$startDate, $endDate])
+            ->whereHas('invoice.order')
             ->whereHas('paymentStatus', fn($q) => $q->where('is_successful', true))
             ->sum('amount');
 

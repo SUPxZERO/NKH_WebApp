@@ -319,7 +319,7 @@ class User extends Authenticatable
         }
 
         // Check user_locations pivot
-        if ($this->locations()->where('locations.id', $locationId)->exists()) {
+        if ($this->locations()->withoutGlobalScope('branch_scope')->where('locations.id', $locationId)->exists()) {
             return true;
         }
 

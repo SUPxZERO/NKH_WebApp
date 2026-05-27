@@ -44,7 +44,7 @@ const sections: SettingSection[] = [
     { id: 'notifications', title: 'employee.settings.sections.notifications.title', icon: Bell, description: 'employee.settings.sections.notifications.description' },
     { id: 'security', title: 'employee.settings.sections.security.title', icon: Shield, description: 'employee.settings.sections.security.description' },
     { id: 'appearance', title: 'employee.settings.sections.appearance.title', icon: Moon, description: 'employee.settings.sections.appearance.description' },
-    { id: 'language', title: 'employee.settings.sections.language.title', icon: Globe, description: 'employee.settings.sections.language.description' },
+    // { id: 'language', title: 'employee.settings.sections.language.title', icon: Globe, description: 'employee.settings.sections.language.description' },
 ];
 
 const workStations = [
